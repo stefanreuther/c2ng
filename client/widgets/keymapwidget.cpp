@@ -3,6 +3,7 @@
   */
 
 #include "client/widgets/keymapwidget.hpp"
+#include "client/si/userside.hpp"
 
 client::widgets::KeymapWidget::KeymapWidget(util::RequestSender<game::Session> gameSender,
                                             util::RequestDispatcher& self,
@@ -30,7 +31,10 @@ client::widgets::KeymapWidget::setKeymapName(String_t keymap)
 bool
 client::widgets::KeymapWidget::handleKey(util::Key_t key, int prefix)
 {
-    if (m_keys.find(key) != m_keys.end()) {
+    if (key == util::KeyMod_Ctrl + util::Key_Pause) {
+        m_control.interface().interruptRunningProcesses();
+        return true;
+    } else if (m_keys.find(key) != m_keys.end()) {
         m_control.executeKeyCommandWait(m_keymapName, key, prefix);
         return true;
     } else {

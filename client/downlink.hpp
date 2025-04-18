@@ -10,6 +10,7 @@
 #include "game/proxy/waitindicator.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/root.hpp"
+#include "client/si/userside.hpp"
 
 namespace client {
 
@@ -28,6 +29,11 @@ namespace client {
             \param root UI Root
             \param tx Translator */
         explicit Downlink(ui::Root& root, afl::string::Translator& tx);
+
+        /** Constructor.
+            If the Downlink is constructed using this signature, it will allow cancelling potential background scripts.
+            \param us UserSide */
+        explicit Downlink(client::si::UserSide& us);
 
         ~Downlink();
 

@@ -10,15 +10,19 @@
 #include "client/si/userside.hpp"
 #include "client/si/usertask.hpp"
 
+using interpreter::Process;
+using interpreter::ProcessList;
+
 namespace {
     const char*const LOG_NAME = "script.si";
 }
 
 // Constructor.
-client::si::ScriptSide::ScriptSide(util::RequestSender<UserSide> reply, game::Session& session)
+client::si::ScriptSide::ScriptSide(util::RequestSender<UserSide> reply, game::Session& session, afl::base::Ptr<util::StopSignal> stopSignal)
     : m_session(session),
       conn_processGroupFinish(),
       m_reply(reply),
+      m_stopSignal(stopSignal),
       m_waits()
 {
     conn_processGroupFinish = session.processList().sig_processGroupFinish.add(this, &ScriptSide::onProcessGroupFinish);
@@ -48,7 +52,7 @@ void
 client::si::ScriptSide::executeTaskWait(uint32_t waitId, std::auto_ptr<ScriptTask> task)
 {
     // Populate process group
-    interpreter::ProcessList& processList = m_session.processList();
+    ProcessList& processList = m_session.processList();
     const uint32_t pgid = processList.allocateProcessGroup();
     task->execute(pgid, m_session);
 
@@ -62,12 +66,12 @@ client::si::ScriptSide::executeTaskWait(uint32_t waitId, std::auto_ptr<ScriptTas
 void
 client::si::ScriptSide::continueProcessWait(uint32_t waitId, RequestLink2 link)
 {
-    interpreter::ProcessList& list = m_session.processList();
+    ProcessList& list = m_session.processList();
     uint32_t pid;
     if (!link.getProcessId(pid)) {
         // Null link > signal completion immediately
         onTaskComplete(waitId);
-    } else if (interpreter::Process* p = list.findProcessById(pid)) {
+    } else if (Process* p = list.findProcessById(pid)) {
         // Valid link > run it normally
         m_waits.push_back(Wait(waitId, p->getProcessGroupId()));
         if (link.isWantResult()) {
@@ -221,10 +225,10 @@ client::si::ScriptSide::callAsyncNew(util::Request<Control>* t)
 void
 client::si::ScriptSide::continueProcess(RequestLink2 link)
 {
-    interpreter::ProcessList& list = m_session.processList();
+    ProcessList& list = m_session.processList();
     uint32_t pid;
     if (link.getProcessId(pid)) {
-        if (interpreter::Process* p = list.findProcessById(pid)) {
+        if (Process* p = list.findProcessById(pid)) {
             if (link.isWantResult()) {
                 p->pushNewValue(0);
             }
@@ -239,11 +243,11 @@ void
 client::si::ScriptSide::joinProcess(RequestLink2 link, RequestLink2 other)
 {
     // FIXME: it is an error if link is invalid but other is valid.
-    interpreter::ProcessList& list = m_session.processList();
+    ProcessList& list = m_session.processList();
     uint32_t linkPid, otherPid;
     if (link.getProcessId(linkPid) && other.getProcessId(otherPid)) {
-        if (interpreter::Process* p = list.findProcessById(linkPid)) {
-            if (interpreter::Process* otherProcess = list.findProcessById(otherPid)) {
+        if (Process* p = list.findProcessById(linkPid)) {
+            if (Process* otherProcess = list.findProcessById(otherPid)) {
                 list.joinProcess(*otherProcess, p->getProcessGroupId());
                 if (other.isWantResult()) {
                     otherProcess->pushNewValue(0);
@@ -258,10 +262,10 @@ void
 client::si::ScriptSide::joinProcessGroup(RequestLink2 link, uint32_t oldGroup)
 {
     // It is an error if link is invalid
-    interpreter::ProcessList& list = m_session.processList();
+    ProcessList& list = m_session.processList();
     uint32_t linkPid;
     if (link.getProcessId(linkPid)) {
-        if (interpreter::Process* p = list.findProcessById(linkPid)) {
+        if (Process* p = list.findProcessById(linkPid)) {
             list.joinProcessGroup(oldGroup, p->getProcessGroupId());
         }
     }
@@ -271,10 +275,10 @@ client::si::ScriptSide::joinProcessGroup(RequestLink2 link, uint32_t oldGroup)
 void
 client::si::ScriptSide::continueProcessWithFailure(RequestLink2 link, String_t error)
 {
-    interpreter::ProcessList& list = m_session.processList();
+    ProcessList& list = m_session.processList();
     uint32_t pid;
     if (link.getProcessId(pid)) {
-        if (interpreter::Process* p = list.findProcessById(pid)) {
+        if (Process* p = list.findProcessById(pid)) {
             list.continueProcessWithFailure(*p, error);
             runProcesses();
         }
@@ -285,10 +289,10 @@ client::si::ScriptSide::continueProcessWithFailure(RequestLink2 link, String_t e
 void
 client::si::ScriptSide::detachProcess(RequestLink2 link)
 {
-    interpreter::ProcessList& list = m_session.processList();
+    ProcessList& list = m_session.processList();
     uint32_t pid;
     if (link.getProcessId(pid)) {
-        if (interpreter::Process* p = list.findProcessById(pid)) {
+        if (Process* p = list.findProcessById(pid)) {
             Wait w;
             while (extractWait(p->getProcessGroupId(), w)) {
                 onTaskComplete(w.waitId);
@@ -301,10 +305,10 @@ client::si::ScriptSide::detachProcess(RequestLink2 link)
 void
 client::si::ScriptSide::setVariable(RequestLink2 link, String_t name, std::auto_ptr<afl::data::Value> value)
 {
-    interpreter::ProcessList& list = m_session.processList();
+    ProcessList& list = m_session.processList();
     uint32_t pid;
     if (link.getProcessId(pid)) {
-        if (interpreter::Process* p = list.findProcessById(pid)) {
+        if (Process* p = list.findProcessById(pid)) {
             p->setVariable(name, value.get());
         }
     }
@@ -319,15 +323,38 @@ client::si::ScriptSide::setVariable(RequestLink2 link, String_t name, std::auto_
 void
 client::si::ScriptSide::runProcesses()
 {
-    interpreter::ProcessList& processList = m_session.processList();
+    ProcessList& processList = m_session.processList();
 
     // Run processes. This will execute onProcessGroupFinish() callbacks that process waits.
-    // TODO: add break handling here
-    processList.run(0);
+    processList.run(this);
     processList.removeTerminatedProcesses();
 
     // Clean up messages
     m_session.notifications().removeOrphanedMessages();
+}
+
+
+/*
+ *  Interrupt
+ */
+
+// Confirm an interrupt.
+void
+client::si::ScriptSide::confirmInterrupt()
+{
+    m_stopSignal->clear();
+    m_reply.postRequest(&UserSide::onInterruptConfirm);
+}
+
+// Terminate a process and all other processes in its group.
+void
+client::si::ScriptSide::terminateProcessAndGroup(uint32_t processId)
+{
+    ProcessList& processList = m_session.processList();
+    Process* p = processList.findProcessById(processId);
+    if (p != 0) {
+        processList.terminateProcessGroup(p->getProcessGroupId());
+    }
 }
 
 
@@ -372,4 +399,16 @@ client::si::ScriptSide::extractWait(uint32_t pgid, Wait& out)
         }
     }
     return false;
+}
+
+// Implementation of Process::Observer for break handling.
+void
+client::si::ScriptSide::checkProcess(interpreter::Process& p)
+{
+    if (m_stopSignal->get()) {
+        if (p.getState() == Process::Running) {
+            p.suspendForUI();
+            m_reply.postRequest(&UserSide::onProcessInterrupted, RequestLink2(p.getProcessId(), false), p.getName());
+        }
+    }
 }

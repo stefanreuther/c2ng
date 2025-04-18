@@ -144,7 +144,7 @@ client::dialogs::doCompletion(ui::widgets::InputLine& input, client::si::UserSid
     ui::Root& root = userSide.root();
 
     // Retrieve completions
-    Downlink link(root, tx);
+    Downlink link(userSide);
     game::interface::CompletionList result;
     game::proxy::ScriptEditorProxy(userSide.gameSender())
         .buildCompletionList(link, result,

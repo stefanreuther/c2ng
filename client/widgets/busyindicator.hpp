@@ -8,6 +8,7 @@
 #include "ui/root.hpp"
 #include "afl/string/string.hpp"
 #include "ui/simplewidget.hpp"
+#include "afl/base/signal.hpp"
 
 namespace client { namespace widgets {
 
@@ -26,6 +27,8 @@ namespace client { namespace widgets {
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
         void replayEvents();
+
+        afl::base::Signal<void()> sig_interrupt;
 
      private:
         ui::Root& m_root;

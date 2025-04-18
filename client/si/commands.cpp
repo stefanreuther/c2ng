@@ -290,7 +290,7 @@ namespace {
     void activateReference(ScreenHistory::Reference ref, Control& ctl, RequestLink2 link)
     {
         client::proxy::ScreenHistoryProxy proxy(ctl.interface().gameSender());
-        client::Downlink downLink(ctl.root(), ctl.translator());
+        client::Downlink downLink(ctl.interface());
 
         bool ok = false;
         if (proxy.activateReference(downLink, ref)) {
@@ -967,7 +967,7 @@ client::si::IFCCAddWaypoint(game::Session& session, ScriptSide& si, RequestLink1
                 client::dialogs::NavChartResult result;
                 client::dialogs::doNavigationChart(result, m_state, iface, ctl.root(), tx);
                 if (result.result == client::dialogs::NavChartResult::Location) {
-                    Downlink link(ctl.root(), tx);
+                    Downlink link(iface);
                     WaypointTask t(m_state.shipId, m_verb, m_flags, result.position);
                     link.call(iface.gameSender(), t);
                 }
@@ -1493,14 +1493,14 @@ client::si::IFCCChangeWaypoint(game::Session& session, ScriptSide& si, RequestLi
                 client::dialogs::doNavigationChart(result, m_state, iface, ctl.root(), tx);
                 switch (result.result) {
                  case client::dialogs::NavChartResult::Location: {
-                    Downlink link(ctl.root(), tx);
+                    Downlink link(iface);
                     WaypointTask t(m_state.shipId, result.position);
                     link.call(iface.gameSender(), t);
                     break;
                  }
                  case client::dialogs::NavChartResult::Chunnel: {
                     game::proxy::ChunnelProxy proxy(iface.gameSender(), ctl.root().engine().dispatcher());
-                    Downlink link(ctl.root(), tx);
+                    Downlink link(iface);
 
                     afl::data::StringList_t status = proxy.setupChunnel(link, m_state.shipId, result.shipId);
                     if (!status.empty()) {
@@ -1871,11 +1871,10 @@ client::si::IFCCEditShowCommand(game::Session& session, ScriptSide& si, RequestL
         virtual void handle(Control& ctl, RequestLink2 link)
             {
                 afl::string::Translator& tx = ctl.translator();
-                ui::Root& root = ctl.root();
 
                 // Initialize data (this could have already been done on the script side?)
                 game::proxy::PlayerProxy proxy(ctl.interface().gameSender());
-                Downlink ind(root, tx);
+                Downlink ind(ctl.interface());
 
                 game::PlayerArray<String_t> names = proxy.getPlayerNames(ind, game::Player::ShortName);
                 game::PlayerSet_t players = proxy.getAllPlayers(ind);
@@ -2458,7 +2457,7 @@ client::si::IFCCSendMessage(game::Session& session, ScriptSide& si, RequestLink1
 
                 // Initialize data (this could have already been done on the script side?)
                 game::proxy::PlayerProxy proxy(ctl.interface().gameSender());
-                Downlink ind(root, tx);
+                Downlink ind(ctl.interface());
 
                 game::PlayerArray<String_t> names = proxy.getPlayerNames(ind, game::Player::ShortName);
                 game::PlayerSet_t players = proxy.getAllPlayers(ind);
@@ -3201,7 +3200,7 @@ client::si::IFCCViewNotifications(game::Session& /*session*/, ScriptSide& si, Re
                 UserSide& iface = ctl.interface();
 
                 // ProcessListProxy to collect updates
-                Downlink ind(ctl.root(), ctl.translator());
+                Downlink ind(iface);
                 game::proxy::ProcessListProxy plProxy(iface.gameSender(), ctl.root().engine().dispatcher());
 
                 // Actual dialog
@@ -4450,7 +4449,7 @@ client::si::IFUIListShipPrediction(game::Session& session, ScriptSide& si, Reque
 
                 // Execute dialog
                 // @change In c2ng, loadNext() initializes with the current ship and updates the scanner.
-                client::Downlink downLink(ctl.root(), ctl.translator());
+                client::Downlink downLink(ctl.interface());
                 Reference resultReference;
                 if (dialog.loadNext(downLink, m_pos, m_fromShip, opts)) {
                     resultReference = dialog.run();
@@ -4567,7 +4566,7 @@ client::si::IFUIListShips(game::Session& session, ScriptSide& si, RequestLink1 l
                 }
 
                 // Execute dialog
-                client::Downlink downLink(ctl.root(), ctl.translator());
+                client::Downlink downLink(ctl.interface());
                 Reference resultReference;
                 if (dialog.loadCurrent(downLink, m_pos, opts, m_excludeShip)) {
                     resultReference = dialog.run();

@@ -17,6 +17,7 @@
 #include "interpreter/process.hpp"
 #include "util/request.hpp"
 #include "util/requestsender.hpp"
+#include "util/stopsignal.hpp"
 
 namespace client { namespace si {
 
@@ -38,12 +39,12 @@ namespace client { namespace si {
         One major pattern is
         - call executeTaskWait or continueProcessWait to start a script process and associate a waitId with it
         - receive onTaskComplete() callback with the waitId */
-    class ScriptSide : public game::Extra, public afl::base::WeakTarget {
+    class ScriptSide : public game::Extra, public afl::base::WeakTarget, private interpreter::Process::Observer {
      public:
         /** Constructor.
             @param reply RequestSender to send requests back to UserSide
             @param session Session */
-        ScriptSide(util::RequestSender<UserSide> reply, game::Session& session);
+        ScriptSide(util::RequestSender<UserSide> reply, game::Session& session, afl::base::Ptr<util::StopSignal> stopSignal);
 
         /** Destructor. */
         ~ScriptSide();
@@ -213,6 +214,21 @@ namespace client { namespace si {
             For now, this function is exported to run processes that are not managed by ScriptSide/UserSide. */
         void runProcesses();
 
+        /*
+         *  Interrupt
+         */
+
+        /** Confirm an interrupt.
+            To interrupt running scripts, call StopSignal::set(), then queue a call to this funciton.
+            The StopSignal will cause scripts to stop, making it possible for this call to execute.
+
+            This will clear the StopSignal, and queue a call to UserSide::onInterruptConfirm(). */
+        void confirmInterrupt();
+
+        /** Terminate a process and all other processes in its group.
+            If the process Id does not correspond to a process, the call is ignored.
+            \param processId Process Id */
+        void terminateProcessAndGroup(uint32_t processId);
 
      private:
         /** Containing session. */
@@ -223,6 +239,9 @@ namespace client { namespace si {
 
         /** Sender to UserSide. */
         util::RequestSender<UserSide> m_reply;
+
+        /** Stop signal for process termination. */
+        afl::base::Ptr<util::StopSignal> m_stopSignal;
 
         /** An active waitId/processGroupId association. */
         struct Wait {
@@ -253,6 +272,10 @@ namespace client { namespace si {
             @retval true  wait request found and removed
             @retval false no wait found */
         bool extractWait(uint32_t pgid, Wait& out);
+
+        /** Implementation of Process::Observer for break handling.
+            @param p Process */
+        void checkProcess(interpreter::Process& p);
     };
 
 } }

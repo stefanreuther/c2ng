@@ -8,8 +8,35 @@
 #include "client/si/control.hpp"
 #include "client/si/scriptside.hpp"
 #include "game/extraidentifier.hpp"
+#include "ui/dialogs/messagebox.hpp"
+#include "util/unicodechars.hpp"
 
-const size_t SCREEN_HISTORY_SIZE = 50;
+using afl::string::Format;
+using afl::string::Translator;
+using afl::sys::LogListener;
+using client::si::RequestLink2;
+using util::rich::StyleAttribute;
+using util::rich::Text;
+
+namespace {
+    const char*const LOG_NAME = "client.si";
+    const size_t SCREEN_HISTORY_SIZE = 50;
+
+    /* Ask permission to interrupt one or more processes */
+    bool askInterrupt(ui::Root& root, const std::vector<std::pair<RequestLink2, String_t> >& processes, Translator& tx)
+    {
+        Text text = tx("PCC2 is currently executing a script.");
+        text.append("\n\n");
+        for (size_t i = 0; i < processes.size(); ++i) {
+            text.append(Text(Format(UTF_RIGHT_TRIANGLE " %s\n", processes[i].second)).withStyle(StyleAttribute::Small));
+        }
+        text.append("\n");
+        text.append(tx("Do you want to stop (terminate) that script?"));
+
+        return ui::dialogs::MessageBox(text, tx("Script Interpreter"), root)
+            .doYesNoDialog(tx);
+    }
+}
 
 const game::ExtraIdentifier<game::Session, client::si::ScriptSide> client::si::SCRIPTSIDE_ID = {{}};
 
@@ -65,30 +92,40 @@ client::si::UserSide::UserSide(ui::Root& root,
       m_blocker(root, tx("Working...")),
       m_root(root),
       m_translator(tx),
-      m_waitIdCounter(3000)
+      m_stopSignal(new util::StopSignal()),
+      m_waitIdCounter(3000),
+      m_controls(),
+      m_interrupting(),
+      m_interruptedProcesses(),
+      m_interruptBlocker(root, tx("Stopping..."))
 {
     // TODO: remove the 'RequestDispatcher' parameter; right now, this is required by test (WidgetVerifier::run)
     // Create the ScriptSide
     class Task : public util::Request<game::Session> {
      public:
-        Task(util::RequestSender<UserSide> reply)
-            : m_reply(reply)
+        Task(util::RequestSender<UserSide> reply, const afl::base::Ptr<util::StopSignal>& stopSignal)
+            : m_reply(reply), m_stopSignal(stopSignal)
             { }
         virtual void handle(game::Session& session)
             {
                 ScriptSide* ss = session.extra().get(SCRIPTSIDE_ID);
                 if (!ss) {
-                    ss = session.extra().setNew(SCRIPTSIDE_ID, new ScriptSide(m_reply, session));
+                    ss = session.extra().setNew(SCRIPTSIDE_ID, new ScriptSide(m_reply, session, m_stopSignal));
                 }
             }
      private:
         util::RequestSender<UserSide> m_reply;
+        afl::base::Ptr<util::StopSignal> m_stopSignal;
     };
-    m_gameSender.postNewRequest(new Task(m_receiver.getSender()));
+    m_gameSender.postNewRequest(new Task(m_receiver.getSender(), m_stopSignal));
 
     // Place the Blocker
     m_blocker.setExtent(gfx::Rectangle(gfx::Point(), m_blocker.getLayoutInfo().getPreferredSize()));
+    m_blocker.sig_interrupt.add(this, &UserSide::interruptRunningProcesses);
     m_root.moveWidgetToEdge(m_blocker, gfx::CenterAlign, gfx::BottomAlign, 10);
+
+    m_interruptBlocker.setExtent(gfx::Rectangle(gfx::Point(), m_interruptBlocker.getLayoutInfo().getPreferredSize()));
+    m_root.moveWidgetToEdge(m_interruptBlocker, gfx::CenterAlign, gfx::BottomAlign, 10);
 }
 
 // Destructor.
@@ -134,6 +171,28 @@ void
 client::si::UserSide::postNewRequest(ScriptRequest* request)
 {
     m_scriptSender.postNewRequest(request);
+}
+
+// Interrupt running processes.
+void
+client::si::UserSide::interruptRunningProcesses()
+{
+    // Called when Ctrl+Break was pressed
+    if (!m_interrupting) {
+        // Trigger interrupt on game side
+        // This will produce a sequence of onProcessInterrupted(), onInterruptConfirm().
+        m_mainLog.write(LogListener::Trace, LOG_NAME, "-> interruptRunningProcesses");
+        m_interrupting = true;
+        m_stopSignal->set();
+        m_scriptSender.postRequest(&ScriptSide::confirmInterrupt);
+
+        // Block UI while collecting results
+        if (m_interruptBlocker.getParent() == 0) {
+            m_root.add(m_interruptBlocker);
+        }
+    } else {
+        m_mainLog.write(LogListener::Trace, LOG_NAME, "-> interruptRunningProcesses (ignored)");
+    }
 }
 
 
@@ -255,6 +314,63 @@ client::si::UserSide::onTaskComplete(uint32_t id)
 {
     for (size_t i = m_controls.size(); i > 0; --i) {
         m_controls[i-1]->onTaskComplete(id);
+    }
+}
+
+// Report that a process has been interrupted.
+void
+client::si::UserSide::onProcessInterrupted(RequestLink2 link, String_t processName)
+{
+    if (m_interrupting) {
+        // We're waiting for interrupts -> confirm
+        m_mainLog.write(LogListener::Trace, LOG_NAME, Format("-> onProcessInterrupted '%s' (%s)", processName, link.toString()));
+        m_interruptedProcesses.push_back(std::make_pair(link, processName));
+    } else {
+        // We're not waiting for interrupts. This should not happen.
+        // Terminate the process immediately.
+        uint32_t pid = 0;
+        if (link.getProcessId(pid)) {
+            m_mainLog.write(LogListener::Warn, LOG_NAME, Format(m_translator("Process %d \"%s\" interrupted unexpectedly"), pid, processName));
+            m_scriptSender.postRequest(&ScriptSide::terminateProcessAndGroup, pid);
+        } else {
+            // what?
+        }
+    }
+}
+
+// Confirm process interruption.
+void
+client::si::UserSide::onInterruptConfirm()
+{
+    if (m_interrupting) {
+        m_mainLog.write(LogListener::Trace, LOG_NAME, "-> onInterruptConfirm");
+
+        // Remove blocker
+        // Do NOT replay events here!
+        if (m_interruptBlocker.getParent() != 0) {
+            m_root.remove(m_interruptBlocker);
+        }
+
+        // If anything was interrupted, do UI
+        if (!m_interruptedProcesses.empty()) {
+            bool ok = askInterrupt(m_root, m_interruptedProcesses, m_translator);
+
+            // Send result to game side
+            for (size_t i = 0; i < m_interruptedProcesses.size(); ++i) {
+                uint32_t pid = 0;
+                if (m_interruptedProcesses[i].first.getProcessId(pid)) {
+                    if (ok) {
+                        m_scriptSender.postRequest(&ScriptSide::terminateProcessAndGroup, pid);
+                    } else {
+                        continueProcess(m_interruptedProcesses[i].first);
+                    }
+                }
+            }
+        }
+        m_interruptedProcesses.clear();
+        m_interrupting = false;
+    } else {
+        m_mainLog.write(LogListener::Trace, LOG_NAME, "-> onInterruptConfirm (ignored)");
     }
 }
 

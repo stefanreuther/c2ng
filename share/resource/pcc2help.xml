@@ -1498,9 +1498,9 @@
         <ki key="Shift-PgUp, Shift-PgDn">Scroll through previous output.</ki>
       </kl>
 
-      <!-- FIXME: <p><b>When PCC2 is executing a long-running script, it will not otherwise react on keypresses.
-           In this case, press <kbd>Ctrl-Pause</kbd> or, if your computer doesn't accept that,
-           <kbd>Ctrl-C</kbd>, to abort that script (PCC2 will ask for confirmation).</b></p> -->
+      <p><b>When PCC2 executes an long-running script (e.g. because you accidentally programmed an infinite loop), the user interface may get stuck waiting.
+        In this case, press <kbd>Ctrl+Break</kbd> to stop and terminate the script.
+        (PCC will ask for conformation.)</b></p>
 
       <h2>Reference</h2>
       <dl>
@@ -3224,6 +3224,12 @@
           Because PCC2ng is controlled by scripts, you will see the process that opened the Process Manager in this status.</di>
         </dl></di>
       </dl>
+
+      <h2>If PCC2 hangs...</h2>
+
+      <p>When PCC2 executes an long-running script (e.g. because you accidentally programmed an infinite loop), the user interface may get stuck waiting.
+        In this case, press <kbd>Ctrl+Break</kbd> to stop and terminate the script.
+        (PCC will ask for conformation.)</p>
 
       <h2>Reference</h2>
       <dl>

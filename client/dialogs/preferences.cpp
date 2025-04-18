@@ -616,7 +616,7 @@ client::dialogs::doPreferencesDialog(client::si::UserSide& us, const interpreter
 {
     // ex client/dialogs/prefdlg.cc:doPreferencesDialog
     // Prepare everything
-    Downlink link(us.root(), us.translator());
+    Downlink link(us);
     ConfigurationEditorProxy treeProxy(us.gameSender().makeTemporary(new ScriptAdaptorFromSession(options)), us.root().engine().dispatcher());
     ConfigurationEditorProxy wholeProxy(us.gameSender().makeTemporary(new WholeConfigAdaptorFromSession()), us.root().engine().dispatcher());
     treeProxy.loadValues(link);

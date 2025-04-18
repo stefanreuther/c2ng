@@ -1,10 +1,10 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2024-10-13 21:21+0200\n"
+"PO-Revision-Date: 2025-04-19 18:26+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: util/plugin/consoleapplication.cpp:386
+#: util/plugin/consoleapplication.cpp:388
 msgid ""
 "\n"
 "Usage:\n"
@@ -98,11 +98,11 @@ msgstr ""
 "%s\n"
 "Fehler bitte melden an <Streu@gmx.de>"
 
-#: client/dialogs/buildstructuresdialog.cpp:392
+#: client/dialogs/buildstructuresdialog.cpp:525
 msgid "  remaining"
 msgstr "  verbleibend:"
 
-#: share/resource/core_tiles.q:617
+#: share/resource/core_tiles.q:617 share/resource/core_tiles.q:897
 msgid " (%d EP)"
 msgstr " (%d EP)"
 
@@ -138,19 +138,19 @@ msgstr " (max. %d)"
 msgid " (using %d%% ESB)"
 msgstr " (mit %d%% ESB)"
 
-#: client/dialogs/buildstructuresdialog.cpp:510
+#: client/dialogs/buildstructuresdialog.cpp:618
 msgid " - Defense"
 msgstr " - Verteidigung"
 
-#: client/dialogs/buildstructuresdialog.cpp:506
+#: client/dialogs/buildstructuresdialog.cpp:614
 msgid " - Mining Industry"
 msgstr " - Bergbau"
 
-#: client/dialogs/buildstructuresdialog.cpp:502
+#: client/dialogs/buildstructuresdialog.cpp:610
 msgid " - Planetary Economy"
 msgstr " - Wirtschaft"
 
-#: util/plugin/consoleapplication.cpp:403
+#: util/plugin/consoleapplication.cpp:405
 msgid ""
 " -l\tList more details\n"
 " -b\tList fewer details\n"
@@ -219,11 +219,11 @@ msgstr "%.2f ly"
 msgid "%X - (don't give it away)"
 msgstr "%X - (nicht fortgeben)"
 
-#: game/vcr/object.cpp:282
+#: game/vcr/object.cpp:297
 msgid "%d %1{%s%|%ss%} and %d %1{fighter%|fighters%}"
 msgstr "%d %1{%s%|%ss%} und %d Raumjäger"
 
-#: game/vcr/object.cpp:259
+#: game/vcr/object.cpp:274
 msgid "%d %1{crewman%|crewmen%}"
 msgstr "%d Mann Crew"
 
@@ -243,7 +243,7 @@ msgstr "%d %s Schiff%!1{e%}"
 msgid "%d %s unit%0$!d%!1{s%}"
 msgstr "%d %s Einheit%0$!d%!1{en%}"
 
-#: game/vcr/object.cpp:318
+#: game/vcr/object.cpp:333
 msgid "%d %s%!1{s%}"
 msgstr "%d %s%!1{s%}"
 
@@ -264,7 +264,7 @@ msgid "%d bay%!1{s%}, %d fighter%!1{s%}"
 msgstr "%d Startrampe%!1{n%}, %d Raumjäger%!1{n%}"
 
 #: client/widgets/hullspecificationsheet.cpp:131 game/map/planetinfo.cpp:937
-#: game/spec/info/info.cpp:140 game/vcr/objectinfo.cpp:132
+#: game/spec/info/info.cpp:151 game/vcr/objectinfo.cpp:132
 msgid "%d beam%!1{s%}"
 msgstr "%d Geschütz%!1{e%}"
 
@@ -303,14 +303,14 @@ msgstr "%d Fabrik%!1{en%}"
 #: client/vcr/unitstatuswidget.cpp:283
 #: client/widgets/hullspecificationsheet.cpp:143
 #: client/widgets/simulationobjectinfo.cpp:364 game/map/planetinfo.cpp:983
-#: game/shipbuildorder.cpp:138 game/spec/info/info.cpp:146
+#: game/shipbuildorder.cpp:138 game/spec/info/info.cpp:157
 #: game/vcr/objectinfo.cpp:137 game/vcr/objectinfo.cpp:144
 #: share/resource/core_tiles.q:506 share/resource/core_tiles.q:541
 #: share/resource/core_tiles.q:735 share/resource/core_tiles.q:745
 msgid "%d fighter bay%!1{s%}"
 msgstr "%d Startrampe%!1{n%}"
 
-#: game/vcr/object.cpp:287
+#: game/vcr/object.cpp:302
 msgid "%d fighter bay%!1{s%} with %d fighter%!1{s%}"
 msgstr "%d Startrampe%!1{n%} mit %d Raumjäger%!1{n%}"
 
@@ -351,9 +351,9 @@ msgstr "%d grav. Triebwerk%!1{e%}"
 #: client/tiles/starchartheadertile.cpp:91
 #: client/widgets/historypositionlistbox.cpp:161
 #: client/widgets/vcrobjectinfo.cpp:148 game/map/ufotype.cpp:343
-#: game/spec/info/info.cpp:131 game/spec/info/info.cpp:132
-#: game/spec/info/info.cpp:133 game/spec/info/info.cpp:298
-#: game/spec/info/info.cpp:331 game/spec/info/info.cpp:361
+#: game/spec/info/info.cpp:142 game/spec/info/info.cpp:143
+#: game/spec/info/info.cpp:144 game/spec/info/info.cpp:310
+#: game/spec/info/info.cpp:344 game/spec/info/info.cpp:375
 #: game/vcr/objectinfo.cpp:179 game/vcr/objectinfo.cpp:181
 #: game/vcr/objectinfo.cpp:195 share/resource/core_tiles.q:863
 msgid "%d kt"
@@ -395,7 +395,7 @@ msgstr "%d kt/nur Eingang"
 msgid "%d kt/turn"
 msgstr "%d kt/Zug"
 
-#: client/widgets/hullspecificationsheet.cpp:161 game/spec/info/info.cpp:159
+#: client/widgets/hullspecificationsheet.cpp:161 game/spec/info/info.cpp:170
 msgid "%d kt/turn, %d kt/fight"
 msgstr "%d kt/Zug, %d kt/Kampf"
 
@@ -469,11 +469,11 @@ msgstr "%d Nachricht%!1{en%}"
 msgid "%d mine%!1{s%}"
 msgstr "%d Mine%!1{n%}"
 
-#: game/spec/info/info.cpp:326
+#: game/spec/info/info.cpp:339
 msgid "%d mines"
 msgstr "%d Minen"
 
-#: game/spec/info/info.cpp:328
+#: game/spec/info/info.cpp:341
 msgid "%d mines, %d webs"
 msgstr "%d Minen, %d Fangminen"
 
@@ -493,7 +493,7 @@ msgstr "%d ihrer Clans überleb%1{t%|en%}."
 msgid "%d or more"
 msgstr "%d oder mehr"
 
-#: game/spec/info/info.cpp:402
+#: game/spec/info/info.cpp:416
 msgid "%d per turn for %s each"
 msgstr "%d pro Zug für je %s"
 
@@ -501,11 +501,11 @@ msgstr "%d pro Zug für je %s"
 msgid "%d player%1{'s%|s'%} data remains."
 msgstr "Daten von %d Spieler%!1{n%} verbleiben."
 
-#: util/plugin/consoleapplication.cpp:163
+#: util/plugin/consoleapplication.cpp:165
 msgid "%d plugin%!1{s%} installed."
 msgstr "%d Plugin%!1{s%} installiert."
 
-#: client/dialogs/searchdialog.cpp:550
+#: client/dialogs/searchdialog.cpp:551
 msgid "%d result%!1{s%}"
 msgstr "%d Ergebnis%!1{se%}"
 
@@ -547,7 +547,7 @@ msgid "%d to %d of their clans survive."
 msgstr "%d bis %d ihrer Clans überleben."
 
 #: client/widgets/hullspecificationsheet.cpp:137 game/map/planetinfo.cpp:998
-#: game/spec/info/info.cpp:143 game/vcr/object.cpp:319
+#: game/spec/info/info.cpp:154 game/vcr/object.cpp:334
 #: share/resource/core_tiles.q:727
 msgid "%d torpedo launcher%!1{s%}"
 msgstr "%d Torpedorohr%!1{e%}"
@@ -561,7 +561,7 @@ msgstr "%d Torpedo%!1{s%}"
 msgid "%d torpedo%!1{es%} aboard"
 msgstr "%d Torpedo%!1{s%} geladen"
 
-#: game/vcr/object.cpp:284
+#: game/vcr/object.cpp:299
 msgid "%d torpedo%!1{es%} and %d %1{fighter%|fighters%}"
 msgstr "%d Torpedo%!1{s%} und %d Jäger"
 
@@ -616,7 +616,7 @@ msgstr "%d Einheit%!1{en%}"
 msgid "%d units (%d ly)"
 msgstr "%d Einheiten (%d ly)"
 
-#: game/vcr/object.cpp:292
+#: game/vcr/object.cpp:307
 msgid "%d × %1{%s launcher%|%s launchers%} with %d torpedo%!1{es%}"
 msgstr "%d × %1{%s Rohr%|%s Rohre%} mit %d Torpedo%!1{s%}"
 
@@ -624,7 +624,7 @@ msgstr "%d × %1{%s Rohr%|%s Rohre%} mit %d Torpedo%!1{s%}"
 msgid "%d × %s"
 msgstr "%d × %s"
 
-#: game/vcr/object.cpp:295
+#: game/vcr/object.cpp:310
 msgid "%d × torpedo launcher%!1{s%} with %d torpedo%!1{es%}"
 msgstr "%d × Torpedorohr%!1{e%} mit %d Torpedo%!1{s%}"
 
@@ -645,7 +645,7 @@ msgstr "%d%% Schaden"
 msgid "%d%% damage from enemy fighter"
 msgstr "%d%% Schaden durch Raumjäger"
 
-#: game/vcr/object.cpp:257
+#: game/vcr/object.cpp:272
 msgid "%d%% shield (%d kt), %d%% damaged"
 msgstr "%d%% Schilde (%d kt), %d%% Schaden"
 
@@ -653,7 +653,7 @@ msgstr "%d%% Schilde (%d kt), %d%% Schaden"
 msgid "%d%% shield loss from enemy fighter"
 msgstr "%d%% Schildverlust durch Raumjäger"
 
-#: game/spec/racialabilitylist.cpp:239
+#: game/spec/racialabilitylist.cpp:240
 msgid "%d%% traitors when boarded"
 msgstr "%d%% Überläufer wenn geentert"
 
@@ -685,12 +685,12 @@ msgstr "%d× planen"
 msgid "%d×Ftr"
 msgstr "%d×Jäg"
 
-#: game/proxy/simulationsetupproxy.cpp:1044
-#: game/proxy/simulationsetupproxy.cpp:1084
+#: game/proxy/simulationsetupproxy.cpp:1046
+#: game/proxy/simulationsetupproxy.cpp:1086
 msgid "%s\t(tech %d, K%d, D%d)"
 msgstr "%s\t(Tech %d, K%d, D%d)"
 
-#: game/proxy/simulationsetupproxy.cpp:356 game/sim/fleetcost.cpp:28
+#: game/proxy/simulationsetupproxy.cpp:358 game/sim/fleetcost.cpp:28
 msgid "%s %s"
 msgstr "%s %s"
 
@@ -702,7 +702,7 @@ msgstr "%s (#%d)"
 msgid "%s (%d ly)"
 msgstr "%s (%d ly)"
 
-#: game/spec/racialabilitylist.cpp:156 game/vcr/object.cpp:251
+#: game/spec/racialabilitylist.cpp:157 game/vcr/object.cpp:266
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
@@ -728,11 +728,11 @@ msgstr "%s (Schiff #%d)"
 msgid "%s (in line %d)"
 msgstr "%s (in Zeile #%d)"
 
-#: game/vcr/overview.cpp:33
+#: game/vcr/overview.cpp:40
 msgid "%s (planet #%d)"
 msgstr "%s (Planet #%d)"
 
-#: game/vcr/overview.cpp:35
+#: game/vcr/overview.cpp:42
 msgid "%s (ship #%d)"
 msgstr "%s (Schiff #%d)"
 
@@ -740,11 +740,11 @@ msgstr "%s (Schiff #%d)"
 msgid "%s + %d own ship%!1{s%}"
 msgstr "%s + %d eigen%1{es Schiff%|e Schiffe%}"
 
-#: game/spec/racialabilitylist.cpp:161 game/spec/racialabilitylist.cpp:217
+#: game/spec/racialabilitylist.cpp:162 game/spec/racialabilitylist.cpp:218
 msgid "%s = %d (instead of %d)"
 msgstr "%s = %d (statt %d)"
 
-#: game/spec/info/info.cpp:475
+#: game/spec/info/info.cpp:489
 msgid "%s Fighter"
 msgstr "%s Raumjäger"
 
@@ -764,7 +764,7 @@ msgstr "%s-Geschütze"
 msgid "%s colony"
 msgstr "%s-Kolonie"
 
-#: game/proxy/simulationsetupproxy.cpp:358 game/sim/fleetcost.cpp:30
+#: game/proxy/simulationsetupproxy.cpp:360 game/sim/fleetcost.cpp:30
 msgid "%s custom ship"
 msgstr "%s eigenes Schiff"
 
@@ -796,16 +796,16 @@ msgstr "%s-Rohre"
 msgid "%s natives"
 msgstr "%s Eingeborene"
 
-#: share/resource/core_tiles.q:1087
+#: share/resource/core_tiles.q:1093
 msgid "%s natives, %d clan%!1{s%}"
 msgstr "%s Eingeborene, %d Clan%!1{s%}"
 
 #: client/vcr/flak/playbackscreen.cpp:630
-#: game/proxy/simulationsetupproxy.cpp:350
+#: game/proxy/simulationsetupproxy.cpp:352
 msgid "%s planet"
 msgstr "%s Planet"
 
-#: game/proxy/simulationsetupproxy.cpp:348
+#: game/proxy/simulationsetupproxy.cpp:350
 msgid "%s planet+SB"
 msgstr "%s Planet+SB"
 
@@ -833,7 +833,7 @@ msgstr "%s wurde erobert%s."
 msgid "%s won%s."
 msgstr "%s siegt%s."
 
-#: share/resource/core_tiles.q:1044
+#: share/resource/core_tiles.q:1050
 msgid "%s, %d clan%!1{s%}"
 msgstr "%s, %d Clan%!1{s%}"
 
@@ -849,12 +849,12 @@ msgstr "%s: %d%% (%d mc)"
 msgid "%s: %d%% (%d mc, with %d colonist clan%!1{s%})"
 msgstr "%s: %d%% (%d mc, mit %d Kolonistenclan%!1{s%})"
 
-#: util/plugin/consoleapplication.cpp:355
+#: util/plugin/consoleapplication.cpp:357
 msgid "%s: Plugin '%s' (%s) tested successfully."
 msgstr "%s: Plugin '%s' (%s) erfolgreich getestet."
 
-#: util/plugin/consoleapplication.cpp:234
-#: util/plugin/consoleapplication.cpp:350
+#: util/plugin/consoleapplication.cpp:236
+#: util/plugin/consoleapplication.cpp:352
 msgid "%s: Unknown file type"
 msgstr "%s: unbekannter Dateityp"
 
@@ -862,15 +862,15 @@ msgstr "%s: unbekannter Dateityp"
 msgid "%s: compressed file"
 msgstr "%s: komprimierte Datei"
 
-#: game/nu/browserhandler.cpp:192 game/pcc/browserhandler.cpp:473
+#: game/nu/browserhandler.cpp:194 game/pcc/browserhandler.cpp:489
 msgid "%s: network access exceeded limit"
 msgstr "%s: Limit überschritten (network access exceeded limit)"
 
-#: game/nu/browserhandler.cpp:186 game/pcc/browserhandler.cpp:467
+#: game/nu/browserhandler.cpp:188 game/pcc/browserhandler.cpp:483
 msgid "%s: network access failed (%s)"
 msgstr "%s: Fehler (network access failed, %s)"
 
-#: game/nu/browserhandler.cpp:189 game/pcc/browserhandler.cpp:470
+#: game/nu/browserhandler.cpp:191 game/pcc/browserhandler.cpp:486
 msgid "%s: network access timed out"
 msgstr "%s: Zeitlimit überschritten (network access timed out)"
 
@@ -879,7 +879,7 @@ msgstr "%s: Zeitlimit überschritten (network access timed out)"
 msgid "%s: not found"
 msgstr "%s: nicht gefunden"
 
-#: game/nu/browserhandler.cpp:204 game/pcc/browserhandler.cpp:485
+#: game/nu/browserhandler.cpp:206 game/pcc/browserhandler.cpp:501
 msgid "%s: received invalid data from network"
 msgstr "%s: ungültige Daten vom Netzwerk empfangen"
 
@@ -943,11 +943,11 @@ msgstr "(%d EP)"
 msgid "(%d EP; in %d turn%!1{s%} at +%d/turn)"
 msgstr "(%d EP; in %d %!1{Zügen%|Zug%} bei +%d/Zug)"
 
-#: game/vcr/object.cpp:307
+#: game/vcr/object.cpp:322
 msgid "(%d fighter bay%!1{s%} %snot used)"
 msgstr "(%d Jäger-Startrampe%!1{n%} %snicht benutzt)"
 
-#: client/tiles/fleetscreenheadertile.cpp:58
+#: client/tiles/fleetscreenheadertile.cpp:56
 msgid "(%d ship%!1{s%})"
 msgstr "(%d Schiff%!1{e%})"
 
@@ -955,7 +955,7 @@ msgstr "(%d Schiff%!1{e%})"
 msgid "(%d turns from now)"
 msgstr "(in %d %1{Zug%|Zügen%})"
 
-#: game/reference.cpp:76
+#: game/reference.cpp:55
 msgid "(%d,%d)"
 msgstr "(%d,%d)"
 
@@ -1035,7 +1035,7 @@ msgstr "(alter der Information nicht bekannt)"
 msgid "(allowed by default)"
 msgstr "(standardmäßig erlaubt)"
 
-#: game/map/info/info.cpp:617
+#: game/map/info/info.cpp:620
 msgid "(available)"
 msgstr "(verfügbar)"
 
@@ -1079,7 +1079,7 @@ msgstr "(Filter aktiviert)"
 msgid "(forbidden by default)"
 msgstr "(standardmäßig verboten)"
 
-#: game/map/info/info.cpp:619
+#: game/map/info/info.cpp:622
 msgid "(ground)"
 msgstr "(Boden)"
 
@@ -1087,11 +1087,11 @@ msgstr "(Boden)"
 msgid "(here)"
 msgstr "(hier)"
 
-#: game/map/info/info.cpp:1338 game/map/info/info.cpp:1340
+#: game/map/info/info.cpp:1343 game/map/info/info.cpp:1345
 msgid "(hist.)"
 msgstr "(hist.)"
 
-#: client/dialogs/buildstructuresdialog.cpp:711 game/map/info/info.cpp:659
+#: client/dialogs/buildstructuresdialog.cpp:803 game/map/info/info.cpp:662
 msgid "(max)"
 msgstr "(max)"
 
@@ -1099,7 +1099,7 @@ msgstr "(max)"
 msgid "(mc) %d"
 msgstr "(mc) %d"
 
-#: game/map/info/info.cpp:685
+#: game/map/info/info.cpp:688
 msgid "(mined)"
 msgstr "(abgebaut)"
 
@@ -1127,7 +1127,7 @@ msgstr "(keine Informationen über Dichte und Verfügbarkeit vorhanden.)"
 msgid "(no starbase)"
 msgstr "(keine Sternenbasis)"
 
-#: game/map/info/info.cpp:1096
+#: game/map/info/info.cpp:1100
 msgid "(none)"
 msgstr "(keine)"
 
@@ -1144,7 +1144,7 @@ msgstr "(nicht angefordert)"
 msgid "(not set)"
 msgstr "(nicht gesetzt)"
 
-#: share/resource/core_tiles.q:1255
+#: share/resource/core_tiles.q:1261
 msgid "(press [F9] to add a note)"
 msgstr "(Notiz hinzufügen mit [F9])"
 
@@ -1170,7 +1170,7 @@ msgstr "(Vor) %d"
 msgid "(this turn)"
 msgstr "(dieser Zug)"
 
-#: game/map/info/info.cpp:683
+#: game/map/info/info.cpp:686
 msgid "(total)"
 msgstr "(Gesamt)"
 
@@ -1179,7 +1179,7 @@ msgstr "(Gesamt)"
 msgid "(unl)"
 msgstr "(unl)"
 
-#: game/vcr/object.cpp:316
+#: game/vcr/object.cpp:331
 msgid "(up to %s %snot used)"
 msgstr "(bis zu %s %snicht benutzt)"
 
@@ -1249,7 +1249,7 @@ msgstr ""
 "-size=B[xH]\tAuflösung von BxH benutzen\n"
 "-nomousegrab\tMauszeiger nicht im Fenster einsperren"
 
-#: share/resource/core_global.q:189 share/resource/core_ui.q:1879
+#: share/resource/core_global.q:189 share/resource/core_ui.q:1895
 #: share/resource/core_ui.q:421
 msgid "0 - none"
 msgstr "0 - keiner"
@@ -1270,11 +1270,11 @@ msgstr "10 mc + 1 Duranium"
 msgid "10 mc + 1 supply"
 msgstr "10 mc + 1 Supply"
 
-#: game/spec/info/info.cpp:358
+#: game/spec/info/info.cpp:372
 msgid "1000 mines"
 msgstr "1000 Minen"
 
-#: game/spec/racialabilitylist.cpp:312
+#: game/spec/racialabilitylist.cpp:313
 msgid "150% damage limit"
 msgstr "150% Schadenslimit"
 
@@ -1454,8 +1454,8 @@ msgstr ">%d Züge"
 msgid "A %s game"
 msgstr "Ein %s-Spiel"
 
-#: client/dialogs/buildstructuresdialog.cpp:773
-#: client/dialogs/buildstructuresdialog.cpp:900
+#: client/dialogs/buildstructuresdialog.cpp:869
+#: client/dialogs/buildstructuresdialog.cpp:995
 msgid "A - Auto"
 msgstr "A - Auto"
 
@@ -1621,8 +1621,7 @@ msgstr ""
 "Experten-Optionen:\n"
 "-f preexec-load\t\"Load\"-Anweisungen im Voraus ausführen"
 
-#: client/dialogs/pluginmanager.cpp:121
-#: client/dialogs/visualscandialog.cpp:690
+#: client/dialogs/pluginmanager.cpp:121 client/dialogs/visualscandialog.cpp:690
 msgid "Add"
 msgstr "Einf"
 
@@ -1638,7 +1637,7 @@ msgstr "Planet hinzufügen"
 msgid "Add Ship"
 msgstr "Schiff hinzufügen"
 
-#: share/resource/core_ui.q:2137
+#: share/resource/core_ui.q:2154
 msgid "Add all to fleet"
 msgstr "Alle zu Flotte hinzufügen"
 
@@ -1702,7 +1701,7 @@ msgstr "Addresse (leer für Standardwert)"
 msgid "Adjacent"
 msgstr "Angrenzend"
 
-#: game/spec/info/browser.cpp:430 share/resource/core_config.q:66
+#: game/spec/info/browser.cpp:431 share/resource/core_config.q:66
 msgid "Adjective"
 msgstr "Adjektiv"
 
@@ -1718,7 +1717,7 @@ msgstr "Nach Verfall"
 msgid "Aggressive"
 msgstr "Agressiv"
 
-#: game/map/info/info.cpp:1122
+#: game/map/info/info.cpp:1126
 msgid "Alchemy Ships"
 msgstr "Alchemie-Schiffe"
 
@@ -1726,24 +1725,24 @@ msgstr "Alchemie-Schiffe"
 msgid "Alchemy function"
 msgstr "Alchemie-Funktion"
 
-#: game/player.cpp:144
+#: game/player.cpp:137
 msgid "Alien"
 msgstr "Alien"
 
-#: game/player.cpp:139
+#: game/player.cpp:132
 msgid "Alien Marauders"
 msgstr "Alien Marauders"
 
-#: client/dialogs/buildqueuesummary.cpp:332
-#: client/dialogs/searchdialog.cpp:128 game/spec/missionlist.cpp:364
+#: client/dialogs/buildqueuesummary.cpp:332 client/dialogs/searchdialog.cpp:128
+#: game/spec/missionlist.cpp:364
 msgid "All"
 msgstr "Alle"
 
-#: client/dialogs/sellsuppliesdialog.cpp:55
+#: client/dialogs/sellsuppliesdialog.cpp:60
 msgid "All but..."
 msgstr "Alles außer..."
 
-#: share/resource/core_ui.q:1797
+#: share/resource/core_ui.q:1813
 msgid "All cargo"
 msgstr "Alle Fracht"
 
@@ -1806,7 +1805,7 @@ msgid "Amorphous worms don't pay taxes. They eat %d colonist clan%!1{s%}."
 msgstr ""
 "Amorphe zahlen keine Steuern. Sie fressen aber %d Kolonisten-Clan%!1{s%}."
 
-#: client/dialogs/buildstructuresdialog.cpp:279
+#: client/dialogs/buildstructuresdialog.cpp:441
 msgid "Amount"
 msgstr "Menge"
 
@@ -1838,7 +1837,7 @@ msgstr "Turn-Dateien anwenden?"
 msgid "Applying %d turn file command%!1{s%}..."
 msgstr "Führe %d Befehl%!1{e%} aus Turn-Datei aus..."
 
-#: game/spec/info/browser.cpp:234 game/spec/info/filter.cpp:118
+#: game/spec/info/browser.cpp:235 game/spec/info/filter.cpp:118
 #: game/spec/info/filter.cpp:120 game/spec/info/filter.cpp:122
 #: game/spec/info/utils.cpp:19
 msgid "Armed"
@@ -1856,7 +1855,7 @@ msgstr "Dem Schiff zugeordnet"
 msgid "Assigned to ship class"
 msgstr "Der Schiffsklasse zugeordnet"
 
-#: game/spec/racialabilitylist.cpp:324
+#: game/spec/racialabilitylist.cpp:325
 msgid "Assimilate natives"
 msgstr "Eingeborene assimilieren"
 
@@ -1876,7 +1875,7 @@ msgstr "Assimiliert in >%d %1{Zug%|Zügen%}"
 msgid "Assimilated in >%d turn%!1{s%} by %d clan%!1{s%}"
 msgstr "Assimiliert in >%d %1{Zug%|Zügen%} durch %d Clan%!1{s%}"
 
-#: game/spec/racialabilitylist.cpp:325
+#: game/spec/racialabilitylist.cpp:326
 msgid "Assimilation rate"
 msgstr "Assimilations-Rate"
 
@@ -1911,23 +1910,23 @@ msgstr "Angreifer"
 
 #: client/dialogs/buildship.cpp:287 client/dialogs/buildship.cpp:302
 #: client/tiles/tilefactory.cpp:128 client/tiles/tilefactory.cpp:135
-#: client/tiles/tilefactory.cpp:142 share/resource/core_ui.q:1676
+#: client/tiles/tilefactory.cpp:142 share/resource/core_ui.q:1692
 msgid "Auto Task"
 msgstr "Aufgabe"
 
-#: game/session.cpp:182
+#: game/session.cpp:339
 msgid "Auto Task Planet %d"
 msgstr "Aufgabe Planet %d"
 
-#: game/session.cpp:180
+#: game/session.cpp:337
 msgid "Auto Task Ship %d"
 msgstr "Aufgabe Schiff %d"
 
-#: game/session.cpp:183
+#: game/session.cpp:340
 msgid "Auto Task Starbase %d"
 msgstr "Aufgabe Sternenbasis %d"
 
-#: client/dialogs/buildstructuresdialog.cpp:280
+#: client/dialogs/buildstructuresdialog.cpp:442
 msgid "Auto-B. Goal"
 msgstr "Bau-Ziel"
 
@@ -1935,7 +1934,7 @@ msgstr "Bau-Ziel"
 msgid "Auto-Build Goals"
 msgstr "Bau-Ziele"
 
-#: game/spec/info/info.cpp:401
+#: game/spec/info/info.cpp:415
 msgid "Auto-build"
 msgstr "Automatisch bauen"
 
@@ -2077,11 +2076,11 @@ msgstr "Geschütz-Tech"
 msgid "Beam Type"
 msgstr "Geschütz-Typ"
 
-#: game/reference.cpp:85
+#: game/reference.cpp:64
 msgid "Beam Weapon #%d"
 msgstr "Geschütz #%d"
 
-#: client/dialogs/techupgradedialog.cpp:102 share/resource/core_tiles.q:1179
+#: client/dialogs/techupgradedialog.cpp:102 share/resource/core_tiles.q:1185
 msgid "Beam Weapons"
 msgstr "Geschütze"
 
@@ -2098,7 +2097,7 @@ msgid "Beam up multiple"
 msgstr "Heraufbeamen (Beam up multiple)"
 
 #: client/dialogs/buildshipmain.cpp:225
-#: client/dialogs/specbrowserdialog.cpp:625 game/map/info/info.cpp:1456
+#: client/dialogs/specbrowserdialog.cpp:625 game/map/info/info.cpp:1461
 #: game/spec/info/utils.cpp:23
 msgid "Beams"
 msgstr "Geschütze"
@@ -2123,7 +2122,7 @@ msgstr "Beide sind kampfunfähig."
 msgid "Both were destroyed."
 msgstr "Beide wurden zerstört."
 
-#: client/dialogs/keymapdialog.cpp:198 client/dialogs/keymapdialog.cpp:204
+#: client/dialogs/keymapdialog.cpp:200 client/dialogs/keymapdialog.cpp:206
 msgid "Bound in keymap %s."
 msgstr "In Keymap %s belegt."
 
@@ -2152,15 +2151,15 @@ msgstr "Baue ein %s"
 msgid "Build Components"
 msgstr "Komponenten bauen"
 
-#: game/spec/racialabilitylist.cpp:295
+#: game/spec/racialabilitylist.cpp:296
 msgid "Build Fighters mission"
 msgstr "Jägerbau-Mission"
 
-#: game/spec/racialabilitylist.cpp:296
+#: game/spec/racialabilitylist.cpp:297
 msgid "Build Fighters on ships"
 msgstr "Jäger auf Raumschiffen bauen"
 
-#: share/resource/core_tiles.q:1212
+#: share/resource/core_tiles.q:1218
 msgid "Build Fighters/Torpedoes..."
 msgstr "Raumjäger/Torpedos bauen"
 
@@ -2209,11 +2208,11 @@ msgstr "Torpedos bauen"
 msgid "Build Torpedoes/Fighters"
 msgstr "Raumjäger/Torpedos bauen"
 
-#: share/resource/core_tiles.q:1198
+#: share/resource/core_tiles.q:1204
 msgid "Build a new ship..."
 msgstr "Ein neues Schiff bauen..."
 
-#: share/resource/core_ui.q:1772 share/resource/core_ui.q:2105
+#: share/resource/core_ui.q:1788 share/resource/core_ui.q:2122
 msgid "Build defense posts"
 msgstr "Verteidigungsposten bauen"
 
@@ -2221,11 +2220,11 @@ msgstr "Verteidigungsposten bauen"
 msgid "Build earlier"
 msgstr "Früher bauen"
 
-#: share/resource/core_ui.q:1777 share/resource/core_ui.q:2103
+#: share/resource/core_ui.q:1793 share/resource/core_ui.q:2120
 msgid "Build factories"
 msgstr "Fabriken bauen"
 
-#: share/resource/core_ui.q:2002
+#: share/resource/core_ui.q:2019
 msgid "Build fighters"
 msgstr "Raumjäger bauen"
 
@@ -2233,7 +2232,7 @@ msgstr "Raumjäger bauen"
 msgid "Build later"
 msgstr "Später bauen"
 
-#: share/resource/core_ui.q:1782 share/resource/core_ui.q:2104
+#: share/resource/core_ui.q:1798 share/resource/core_ui.q:2121
 msgid "Build mines"
 msgstr "Minen bauen"
 
@@ -2241,7 +2240,7 @@ msgstr "Minen bauen"
 msgid "Build order rejected"
 msgstr "Bauauftrag abgelehnt"
 
-#: share/resource/core_tiles.q:960 share/resource/core_ui.q:2102
+#: share/resource/core_tiles.q:966 share/resource/core_ui.q:2119
 msgid "Build starbase"
 msgstr "Sternenbasis bauen"
 
@@ -2253,7 +2252,7 @@ msgstr "Dieses Schiff bauen?"
 msgid "Build this starbase?"
 msgstr "Diese Sternenbasis bauen?"
 
-#: share/resource/core_ui.q:2003
+#: share/resource/core_ui.q:2020
 msgid "Build torpedoes"
 msgstr "Torpedos bauen"
 
@@ -2261,7 +2260,7 @@ msgstr "Torpedos bauen"
 msgid "Building a %s"
 msgstr "Baue ein %s"
 
-#: game/map/info/info.cpp:981
+#: game/map/info/info.cpp:985
 msgid "Building a ship"
 msgstr "Baut ein Schiff"
 
@@ -2289,7 +2288,7 @@ msgstr "C - Kampfschiffe"
 msgid "C - Copy"
 msgstr "C - Kopieren"
 
-#: client/dialogs/buildstructuresdialog.cpp:894
+#: client/dialogs/buildstructuresdialog.cpp:989
 msgid "C - Gnd Combat"
 msgstr "C - Bodenkampf"
 
@@ -2332,16 +2331,16 @@ msgstr "Können getarnte Schiffe erkennen"
 #: client/dialogs/alliancedialog.cpp:150
 #: client/dialogs/buildqueuedialog.cpp:244 client/dialogs/buildship.cpp:232
 #: client/dialogs/buildship.cpp:306 client/dialogs/buildshiporder.cpp:50
-#: client/dialogs/buildstructuresdialog.cpp:563
+#: client/dialogs/buildstructuresdialog.cpp:660
 #: client/dialogs/cargotransferdialog.cpp:117
 #: client/dialogs/changepassword.cpp:57 client/dialogs/consoledialog.cpp:373
 #: client/dialogs/exitconfirmation.cpp:164
 #: client/dialogs/friendlycodedialog.cpp:85 client/dialogs/goaldialog.cpp:254
-#: client/dialogs/messageeditor.cpp:195 client/dialogs/newdrawing.cpp:83
+#: client/dialogs/messageeditor.cpp:198 client/dialogs/newdrawing.cpp:83
 #: client/dialogs/newdrawingtag.cpp:112
 #: client/dialogs/objectselectiondialog.cpp:372
 #: client/dialogs/pluginmanager.cpp:262 client/dialogs/pluginmanager.cpp:303
-#: client/dialogs/revertdialog.cpp:85 client/dialogs/sellsuppliesdialog.cpp:56
+#: client/dialogs/revertdialog.cpp:85 client/dialogs/sellsuppliesdialog.cpp:61
 #: client/dialogs/shipspeeddialog.cpp:67 client/dialogs/taxationdialog.cpp:608
 #: client/dialogs/turnlistdialog.cpp:113
 #: client/dialogs/visualscandialog.cpp:916
@@ -2351,15 +2350,15 @@ msgstr "Können getarnte Schiffe erkennen"
 msgid "Cancel"
 msgstr "Abbruch"
 
-#: share/resource/core_ui.q:2045
+#: share/resource/core_ui.q:2062
 msgid "Cancel \"fix\" order"
 msgstr "Reparatur-Auftrag stornieren"
 
-#: share/resource/core_ui.q:2013 share/resource/core_ui.q:2046
+#: share/resource/core_ui.q:2030 share/resource/core_ui.q:2063
 msgid "Cancel \"recycle\" order"
 msgstr "`Recycle'-Auftrag stornieren"
 
-#: share/resource/core_ui.q:2008
+#: share/resource/core_ui.q:2025
 msgid "Cancel \"repair\" order"
 msgstr "Reparatur-Auftrag stornieren"
 
@@ -2387,7 +2386,7 @@ msgstr "Cap."
 msgid "Capital Ships"
 msgstr "Kampfschiffe"
 
-#: game/map/info/info.cpp:605
+#: game/map/info/info.cpp:608
 msgid "Capital ships"
 msgstr "Kampfschiffe"
 
@@ -2395,7 +2394,7 @@ msgstr "Kampfschiffe"
 msgid "Captured"
 msgstr "Erobert"
 
-#: client/widgets/hullspecificationsheet.cpp:37 game/spec/info/info.cpp:132
+#: client/widgets/hullspecificationsheet.cpp:37 game/spec/info/info.cpp:143
 #: game/spec/info/utils.cpp:24 share/resource/core_tiles.q:126
 msgid "Cargo"
 msgstr "Fracht"
@@ -2418,11 +2417,11 @@ msgstr "Fracht-Zusammenfassung (Vorhersage)"
 msgid "Cargo Transfer"
 msgstr "Fracht-Transfer"
 
-#: share/resource/core_ui.q:1809 share/resource/core_ui.q:2083
+#: share/resource/core_ui.q:1825 share/resource/core_ui.q:2100
 msgid "Cargo Unload"
 msgstr "Fracht entladen"
 
-#: share/resource/core_ui.q:1819 share/resource/core_ui.q:2084
+#: share/resource/core_ui.q:1835 share/resource/core_ui.q:2101
 msgid "Cargo Upload"
 msgstr "Fracht aufladen"
 
@@ -2446,7 +2445,7 @@ msgstr "Frachtraum: %d frei"
 msgid "Cargo: %d/%d kt"
 msgstr "Fracht: %d/%d kt"
 
-#: game/map/info/info.cpp:1117 game/map/info/info.cpp:1592
+#: game/map/info/info.cpp:1121 game/map/info/info.cpp:1597
 msgid "Carriers"
 msgstr "Trägerschiffe"
 
@@ -2454,7 +2453,7 @@ msgstr "Trägerschiffe"
 msgid "Cash"
 msgstr "Geld"
 
-#: game/spec/info/browser.cpp:539 game/spec/info/filter.cpp:147
+#: game/spec/info/browser.cpp:540 game/spec/info/filter.cpp:147
 #: game/spec/info/utils.cpp:38
 msgid "Category"
 msgstr "Kategorie"
@@ -2483,7 +2482,7 @@ msgstr "Dateityp ändern"
 msgid "Change Friendly Code"
 msgstr "Kommandocode ändern"
 
-#: share/resource/core_global.q:188 share/resource/core_ui.q:1878
+#: share/resource/core_global.q:188 share/resource/core_ui.q:1894
 #: share/resource/core_ui.q:420
 msgid "Change Primary Enemy"
 msgstr "Primärziel ändern"
@@ -2622,7 +2621,7 @@ msgstr "Diese Konfiguration löschen?"
 msgid "Clear this simulation arrangement?"
 msgstr "Diese Simulationsaufstellung löschen?"
 
-#: client/dialogs/planetinfodialog.cpp:154 game/map/info/info.cpp:874
+#: client/dialogs/planetinfodialog.cpp:154 game/map/info/info.cpp:877
 msgid "Climate"
 msgstr "Klima"
 
@@ -2634,7 +2633,7 @@ msgstr "Klima-Typ: %s"
 msgid "Climate: %s"
 msgstr "Klima: %s"
 
-#: game/map/info/info.cpp:1123
+#: game/map/info/info.cpp:1127
 msgid "Cloakable Ships"
 msgstr "Tarnbare Schiffe"
 
@@ -2661,7 +2660,7 @@ msgstr "Klone %s"
 msgid "Clone Ship"
 msgstr "Schiff klonen"
 
-#: share/resource/core_ui.q:2017
+#: share/resource/core_ui.q:2034
 msgid "Clone this ship"
 msgstr "Dieses Schiff klonen"
 
@@ -2674,21 +2673,18 @@ msgid "Cloning, and building a %s"
 msgstr "Klone, und baue ein %s"
 
 #: client/dialogs/buildqueuesummary.cpp:160 client/dialogs/buildship.cpp:94
-#: client/dialogs/buildshipmain.cpp:292
-#: client/dialogs/classicvcrobject.cpp:151
+#: client/dialogs/buildshipmain.cpp:292 client/dialogs/classicvcrobject.cpp:151
 #: client/dialogs/combatoverview.cpp:69
 #: client/dialogs/commandlistdialog.cpp:170
 #: client/dialogs/flakvcrobject.cpp:177 client/dialogs/globalactions.cpp:184
 #: client/dialogs/helpdialog.cpp:166 client/dialogs/hullfunctionview.cpp:215
 #: client/dialogs/hullspecification.cpp:188
-#: client/dialogs/imperialstats.cpp:278
-#: client/dialogs/ionstormforecast.cpp:149 client/dialogs/ionstorminfo.cpp:149
-#: client/dialogs/keymapdialog.cpp:143 client/dialogs/minefieldinfo.cpp:220
-#: client/dialogs/planetinfodialog.cpp:107
+#: client/dialogs/imperialstats.cpp:278 client/dialogs/ionstormforecast.cpp:149
+#: client/dialogs/ionstorminfo.cpp:149 client/dialogs/keymapdialog.cpp:145
+#: client/dialogs/minefieldinfo.cpp:220 client/dialogs/planetinfodialog.cpp:107
 #: client/dialogs/pluginmanager.cpp:124 client/dialogs/preferences.cpp:585
-#: client/dialogs/processlistdialog.cpp:720 client/dialogs/scores.cpp:736
-#: client/dialogs/searchdialog.cpp:335
-#: client/dialogs/shipcostcalculator.cpp:73
+#: client/dialogs/processlistdialog.cpp:722 client/dialogs/scores.cpp:736
+#: client/dialogs/searchdialog.cpp:335 client/dialogs/shipcostcalculator.cpp:73
 #: client/dialogs/simpleconsole.cpp:22
 #: client/dialogs/simulationfleetcost.cpp:160
 #: client/dialogs/simulationresult.cpp:479 client/dialogs/simulator.cpp:371
@@ -2701,7 +2697,7 @@ msgstr "Schließen"
 msgid "Col"
 msgstr "Kol"
 
-#: game/map/info/info.cpp:636
+#: game/map/info/info.cpp:639
 msgid "Colonies"
 msgstr "Kolonien"
 
@@ -2718,8 +2714,8 @@ msgid "Colonist Tax"
 msgstr "Kolonisten-Steuern"
 
 #: client/dialogs/taxationdialog.cpp:669 client/tiles/shipcargotile.cpp:114
-#: client/tiles/tilefactory.cpp:60 game/element.cpp:77
-#: game/map/info/info.cpp:640 share/resource/core_ui.q:1797
+#: client/tiles/tilefactory.cpp:60 game/element.cpp:46
+#: game/map/info/info.cpp:643 share/resource/core_ui.q:1813
 msgid "Colonists"
 msgstr "Kolonisten"
 
@@ -2727,7 +2723,7 @@ msgstr "Kolonisten"
 msgid "Colonists aboard"
 msgstr "Kolonisten an Bord"
 
-#: share/resource/core_tiles.q:897
+#: share/resource/core_tiles.q:903
 msgid "Colonists are"
 msgstr "Kolonisten sind"
 
@@ -2751,12 +2747,11 @@ msgstr "Kolonie"
 msgid "Color"
 msgstr "Farbe"
 
-#: game/spec/racialabilitylist.cpp:669
+#: game/spec/racialabilitylist.cpp:683
 msgid "Combat"
 msgstr "Kampf"
 
-#: client/dialogs/classicvcrobject.cpp:125
-#: client/dialogs/flakvcrobject.cpp:156
+#: client/dialogs/classicvcrobject.cpp:125 client/dialogs/flakvcrobject.cpp:156
 msgid "Combat Information"
 msgstr "Kampf-Informationen"
 
@@ -2789,11 +2784,11 @@ msgstr "Befehl"
 msgid "Command executed successfully on %d unit%!1{s%}."
 msgstr "Der Befehl wurde auf %d Einheit%!1{en%} erfolgreich ausgeführt."
 
-#: client/dialogs/keymapdialog.cpp:218
+#: client/dialogs/keymapdialog.cpp:220
 msgid "Command provided by %s"
 msgstr "Befehl bereitgestellt von %s"
 
-#: client/dialogs/keymapdialog.cpp:205
+#: client/dialogs/keymapdialog.cpp:207
 msgid ""
 "Command:\n"
 "  %s"
@@ -2986,9 +2981,9 @@ msgstr "Scanner in Kontrollbildschirmen"
 msgid "Controlled by"
 msgstr "Gesteuert von"
 
-#: client/dialogs/buildstructuresdialog.cpp:286
-#: client/dialogs/buildstructuresdialog.cpp:389 game/spec/info/info.cpp:166
-#: game/spec/info/info.cpp:302 game/spec/info/info.cpp:333
+#: client/dialogs/buildstructuresdialog.cpp:447
+#: client/dialogs/buildstructuresdialog.cpp:522 game/spec/info/info.cpp:177
+#: game/spec/info/info.cpp:314 game/spec/info/info.cpp:346
 msgid "Cost"
 msgstr "Kosten"
 
@@ -3020,7 +3015,7 @@ msgstr "Verzeichnis \"%s\" kann nicht erstellt werden: %s"
 #: client/widgets/hullspecificationsheet.cpp:36
 #: client/widgets/simulationobjectinfo.cpp:274
 #: client/widgets/vcrobjectinfo.cpp:83 game/parser/messagevalue.cpp:185
-#: game/spec/info/info.cpp:135 game/spec/info/utils.cpp:25
+#: game/spec/info/info.cpp:146 game/spec/info/utils.cpp:25
 #: share/resource/core_tiles.q:589
 msgid "Crew"
 msgstr "Crew"
@@ -3029,7 +3024,7 @@ msgstr "Crew"
 msgid "Crew Left"
 msgstr "Crew überlebt"
 
-#: game/spec/racialabilitylist.cpp:308
+#: game/spec/racialabilitylist.cpp:309
 msgid "Crew bonus"
 msgstr "Crew-Bonus"
 
@@ -3093,7 +3088,7 @@ msgstr "D - Nicht ändern"
 #: client/dialogs/referencesortorder.cpp:42 client/dialogs/simulator.cpp:1034
 #: client/widgets/simulationobjectinfo.cpp:273
 #: client/widgets/vcrobjectinfo.cpp:86 game/parser/messagevalue.cpp:154
-#: game/sim/resultlist.cpp:294 share/resource/core_tiles.q:1179
+#: game/sim/resultlist.cpp:294 share/resource/core_tiles.q:1185
 #: share/resource/core_tiles.q:561
 msgid "Damage"
 msgstr "Schaden"
@@ -3115,7 +3110,7 @@ msgstr "Schaden"
 msgid "Damage: %d%%"
 msgstr "Schaden: %d%%"
 
-#: game/map/info/info.cpp:1120
+#: game/map/info/info.cpp:1124
 msgid "Damaged Ships"
 msgstr "Beschädigte Schiffe"
 
@@ -3123,7 +3118,7 @@ msgstr "Beschädigte Schiffe"
 msgid "Dangerous File"
 msgstr "Gefährliche Datei"
 
-#: game/spec/racialabilitylist.cpp:288
+#: game/spec/racialabilitylist.cpp:289
 msgid "Dark Sense mission"
 msgstr "Dark-Sense-Mission"
 
@@ -3151,7 +3146,7 @@ msgstr "Daten wurden empfangen"
 msgid "Data is expired"
 msgstr "Daten sind abgelaufen"
 
-#: game/spec/info/browser.cpp:238
+#: game/spec/info/browser.cpp:239
 msgid "Death Rays"
 msgstr "Todesstrahlen"
 
@@ -3172,8 +3167,8 @@ msgid "Default value"
 msgstr "Standardwert"
 
 #: client/dialogs/simulator.cpp:1040 client/dialogs/simulator.cpp:1326
-#: client/widgets/simulationobjectinfo.cpp:269
-#: share/resource/core_tiles.q:1024 share/resource/core_tiles.q:1177
+#: client/widgets/simulationobjectinfo.cpp:269 share/resource/core_tiles.q:1030
+#: share/resource/core_tiles.q:1183
 msgid "Defense"
 msgstr "Verteidigung"
 
@@ -3181,8 +3176,8 @@ msgstr "Verteidigung"
 msgid "Defense Lost"
 msgstr "Verteid. verloren"
 
-#: game/actions/buildstructures.cpp:292 game/map/info/info.cpp:645
-#: game/parser/messagevalue.cpp:215 share/resource/core_tiles.q:915
+#: game/actions/buildstructures.cpp:292 game/map/info/info.cpp:648
+#: game/parser/messagevalue.cpp:215 share/resource/core_tiles.q:921
 msgid "Defense Posts"
 msgstr "Verteidigungsposten"
 
@@ -3208,7 +3203,7 @@ msgstr "Datenbankdateien löschen?"
 msgid "Delete these players' files?"
 msgstr "Die Dateien dieser Spieler löschen?"
 
-#: share/resource/core_ui.q:1676
+#: share/resource/core_ui.q:1692
 msgid "Delete this auto task?"
 msgstr "Diese Aufgabe löschen?"
 
@@ -3220,7 +3215,7 @@ msgstr "Diesen Befehl löschen?"
 msgid "Delete this drawing (y/n)?"
 msgstr "Diese Zeichnung löschen (y/n)?"
 
-#: client/dialogs/outboxdialog.cpp:356
+#: client/dialogs/outboxdialog.cpp:355
 msgid "Delete this message?"
 msgstr "Diese Nachricht löschen?"
 
@@ -3232,8 +3227,8 @@ msgstr "Gelöschtes Minenfeld #%d"
 msgid "Derived Information"
 msgstr "Abgeleitete Informationen"
 
-#: game/spec/info/info.cpp:319 game/spec/info/info.cpp:351
-#: game/spec/info/info.cpp:392
+#: game/spec/info/info.cpp:332 game/spec/info/info.cpp:365
+#: game/spec/info/info.cpp:406
 msgid "Destroy"
 msgstr "Zerstören"
 
@@ -3266,7 +3261,7 @@ msgstr "Update-Callback \"%s\" wird aufgrund Fehler deaktiviert"
 msgid "Discard all changes"
 msgstr "Alle Änderungen verwerfen"
 
-#: client/dialogs/messageeditor.cpp:236
+#: client/dialogs/messageeditor.cpp:239
 msgid "Discard changes?"
 msgstr "Änderungen verwerfen?"
 
@@ -3308,7 +3303,7 @@ msgstr "Göttlich"
 msgid "Do you really want to exit without saving?"
 msgstr "Möchtest du wirklich beenden ohne zu speichern?"
 
-#: client/dialogs/sellsuppliesdialog.cpp:90
+#: client/dialogs/sellsuppliesdialog.cpp:95
 msgid "Do you really want to sell all supplies?"
 msgstr "Möchtest du wirklich alle Vorräte verkaufen?"
 
@@ -3396,6 +3391,10 @@ msgstr ""
 "Möchtest du dieses Minenfeld aus der Sternenkarte löschen? Beachte, dass "
 "dies das Feld nicht räumen wird, du wirst es nur nicht mehr sehen."
 
+#: client/si/userside.cpp:34
+msgid "Do you want to stop (terminate) that script?"
+msgstr "Soll dieses Script abgebrochen werden?"
+
 #: client/dialogs/pluginmanager.cpp:321 util/plugin/dialogapplication.cpp:94
 msgid "Do you want to update plugin \"%s\" (%s)?)"
 msgstr "Möchtest du das Plugin \"%s\" (%s) aktualisieren?"
@@ -3412,7 +3411,7 @@ msgstr "Zahlen keine Steuern; fressen Kolonisten"
 msgid "Don't pay taxes; extend sensor range"
 msgstr "Zahlen keine Steuern; erweitern Sensorreichweite"
 
-#: share/resource/core_ui.q:2097
+#: share/resource/core_ui.q:2114
 msgid "Don't show turn distances"
 msgstr "Keine Entfernungen anzeigen"
 
@@ -3457,17 +3456,17 @@ msgid "Duplicate definition for hull function with name \"%s\""
 msgstr "Schiffsfunktion \"%s\" ist doppelt definiert"
 
 #: client/tiles/shipcargotile.cpp:110 client/widgets/costsummarylist.cpp:153
-#: share/resource/core_tiles.q:1159 share/resource/core_tiles.q:799
-#: share/resource/core_tiles.q:996
+#: share/resource/core_tiles.q:1002 share/resource/core_tiles.q:1165
+#: share/resource/core_tiles.q:799
 msgid "Dur"
 msgstr "Dur"
 
-#: client/dialogs/buildstructuresdialog.cpp:391
-#: client/dialogs/buildstructuresdialog.cpp:834
+#: client/dialogs/buildstructuresdialog.cpp:524
+#: client/dialogs/buildstructuresdialog.cpp:931
 #: client/dialogs/planetinfodialog.cpp:147 client/widgets/costdisplay.cpp:25
 #: client/widgets/hullspecificationsheet.cpp:78
-#: client/widgets/itemcostdisplay.cpp:104 game/element.cpp:71
-#: share/resource/core_tiles.q:918 share/resource/core_ui.q:1797
+#: client/widgets/itemcostdisplay.cpp:104 game/element.cpp:40
+#: share/resource/core_tiles.q:924 share/resource/core_ui.q:1813
 msgid "Duranium"
 msgstr "Duranium"
 
@@ -3522,11 +3521,11 @@ msgstr "ESC - Ende"
 msgid "Early-Tribal"
 msgstr "Early-Tribal"
 
-#: game/map/info/info.cpp:1310
+#: game/map/info/info.cpp:1315
 msgid "East-West"
 msgstr "Ost-West"
 
-#: client/tiles/tilefactory.cpp:58 game/spec/racialabilitylist.cpp:670
+#: client/tiles/tilefactory.cpp:58 game/spec/racialabilitylist.cpp:684
 msgid "Economy"
 msgstr "Wirtschaft"
 
@@ -3581,7 +3580,7 @@ msgstr "Wirkung auf ein %d-kt-%s-Schiff"
 msgid "Elusive"
 msgstr "Ausweichend"
 
-#: game/spec/info/browser.cpp:432
+#: game/spec/info/browser.cpp:433
 msgid "Email address"
 msgstr "Email-Adresse"
 
@@ -3597,7 +3596,7 @@ msgstr "Ende-X"
 msgid "End Y"
 msgstr "Ende-Y"
 
-#: interpreter/process.cpp:1983
+#: interpreter/process.cpp:2016
 msgid "Ended"
 msgstr "Beendet"
 
@@ -3609,7 +3608,7 @@ msgstr "Feinde"
 msgid "Enemy"
 msgstr "Feind"
 
-#: game/map/info/info.cpp:1319
+#: game/map/info/info.cpp:1324
 msgid "Enemy Minefields"
 msgstr "Gegnerische Minenfelder"
 
@@ -3621,7 +3620,7 @@ msgstr "Feindschiffe"
 msgid "Engine"
 msgstr "Triebwerke"
 
-#: game/reference.cpp:84
+#: game/reference.cpp:63
 msgid "Engine #%d"
 msgstr "Triebwerk #%d"
 
@@ -3642,7 +3641,7 @@ msgstr "Triebwerk-Tech-Upgrade"
 msgid "Engine-Shield Bonus"
 msgstr "Triebwerk-Schild-Bonus"
 
-#: game/spec/racialabilitylist.cpp:523
+#: game/spec/racialabilitylist.cpp:524
 msgid "Engine/Shield bonus rate"
 msgstr "Triebwerk-Schild-Bonus-Rate"
 
@@ -3650,13 +3649,13 @@ msgstr "Triebwerk-Schild-Bonus-Rate"
 #: client/dialogs/specbrowserdialog.cpp:624
 #: client/dialogs/techupgradedialog.cpp:100
 #: client/widgets/hullspecificationsheet.cpp:34
-#: client/widgets/vcrobjectinfo.cpp:82 game/spec/info/info.cpp:134
-#: game/spec/info/utils.cpp:30 share/resource/core_tiles.q:1177
+#: client/widgets/vcrobjectinfo.cpp:82 game/spec/info/info.cpp:145
+#: game/spec/info/utils.cpp:30 share/resource/core_tiles.q:1183
 #: share/resource/core_tiles.q:452
 msgid "Engines"
 msgstr "Triebwerke"
 
-#: share/resource/core_ui.q:2114
+#: share/resource/core_ui.q:2131
 msgid "Enqueue Ship Build Order"
 msgstr "Schiffs-Bauauftrag erstellen"
 
@@ -3688,11 +3687,11 @@ msgstr "Bitte Ausdruck oder Befehl eingeben"
 msgid "Enter layer/expression to copy from"
 msgstr "Kopiere von Ebene/Ausdruck"
 
-#: share/resource/core_ui.q:1849
+#: share/resource/core_ui.q:1865
 msgid "Enter message"
 msgstr "Nachricht eingeben"
 
-#: share/resource/core_ui.q:1870
+#: share/resource/core_ui.q:1886
 msgid "Enter new comment"
 msgstr "Neue Notiz"
 
@@ -3712,12 +3711,12 @@ msgstr "Neue Notiz für diesen Planeten"
 msgid "Enter new comment for this ship"
 msgstr "Neue Notiz für dieses Schiff"
 
-#: share/resource/core_ui.q:1086 share/resource/core_ui.q:1897
+#: share/resource/core_ui.q:1086 share/resource/core_ui.q:1913
 #: share/resource/core_ui.q:409
 msgid "Enter new name"
 msgstr "Neuer Name"
 
-#: client/dialogs/processlistdialog.cpp:523
+#: client/dialogs/processlistdialog.cpp:525
 msgid "Enter new process priority"
 msgstr "Neue Priorität"
 
@@ -3760,11 +3759,11 @@ msgstr ""
 msgid "Equipment & Crew"
 msgstr "Ausrüstung & Mannschaft"
 
-#: game/maint/directorywrapper.cpp:120
+#: game/maint/directorywrapper.cpp:121
 msgid "Erased file %s."
 msgstr "Datei %s gelöscht."
 
-#: client/dialogs/labelconfig.cpp:278
+#: client/dialogs/labelconfig.cpp:279
 #: client/dialogs/scriptcommanddialog.cpp:132 client/help.cpp:103
 #: client/help.cpp:89 game/proxy/maintenanceproxy.cpp:102
 #: game/proxy/maintenanceproxy.cpp:174 game/proxy/maintenanceproxy.cpp:214
@@ -3791,11 +3790,11 @@ msgstr "Fehler beim Speichern: %s"
 msgid "Error executing this statement: %s"
 msgstr "Fehler beim Ausführen der Anweisung: %s"
 
-#: client/si/scriptside.cpp:203
+#: client/si/scriptside.cpp:208
 msgid "Error in user-interface thread"
 msgstr "Fehler im User-Interface-Thread"
 
-#: gfx/sdl/engine.cpp:216 gfx/sdl2/engine.cpp:276
+#: gfx/sdl/engine.cpp:216 gfx/sdl2/engine.cpp:337
 msgid "Error initializing SDL: %s"
 msgstr "Fehler beim Initialisieren der SDL: %s"
 
@@ -3807,7 +3806,7 @@ msgstr "Fehler beim Laden eines FLAK-Kampfes"
 msgid "Error loading plugin %s"
 msgstr "Fehler beim Laden des Plugins %s"
 
-#: client/dialogs/labelconfig.cpp:274
+#: client/dialogs/labelconfig.cpp:275
 msgid "Error message"
 msgstr "Fehlermeldung"
 
@@ -3827,8 +3826,8 @@ msgstr "Fehler beim Speichern der Konfiguration"
 msgid "Error scanning help file"
 msgstr "Fehler beim Einlesen der Hilfedatei"
 
-#: gfx/sdl2/engine.cpp:318 gfx/sdl2/engine.cpp:337 gfx/sdl2/engine.cpp:345
-#: gfx/sdl2/engine.cpp:366
+#: gfx/sdl2/engine.cpp:379 gfx/sdl2/engine.cpp:398 gfx/sdl2/engine.cpp:406
+#: gfx/sdl2/engine.cpp:427
 msgid "Error setting video mode (%s): %s"
 msgstr "Fehler beim Einstellen des Grafikmodus (%s): %s"
 
@@ -3839,10 +3838,6 @@ msgstr "Fehler beim Einstellen des Grafikmodus: %s"
 #: game/browser/accountmanager.cpp:164
 msgid "Error updating network accounts file"
 msgstr "Fehler beim Aktualisieren der Netzwerk-Konten-Datei"
-
-#: game/pcc/turnloader.cpp:344
-msgid "Error uploading turn: %s"
-msgstr "Fehler beim Hochladen des Zugs: %s"
 
 #: interpreter/filetable.cpp:117
 msgid "Error while closing files; written data may have been lost."
@@ -4022,10 +4017,9 @@ msgid "F7 - Search"
 msgstr "F7 - Suche"
 
 #: client/dialogs/buildqueuedialog.cpp:383
-#: client/dialogs/friendlycodedialog.cpp:77
-#: client/tiles/fleetmembertile.cpp:51
-#: client/widgets/simulationobjectinfo.cpp:258
-#: game/parser/messagevalue.cpp:134 share/resource/core_tiles.q:365
+#: client/dialogs/friendlycodedialog.cpp:77 client/tiles/fleetmembertile.cpp:51
+#: client/widgets/simulationobjectinfo.cpp:258 game/parser/messagevalue.cpp:134
+#: share/resource/core_tiles.q:365
 msgid "FCode"
 msgstr "Kommandocode"
 
@@ -4053,18 +4047,17 @@ msgstr "FLAK-Ratings"
 msgid "FROM: %s"
 msgstr "VON: %s"
 
-#: game/actions/buildstructures.cpp:287 game/map/info/info.cpp:644
-#: game/parser/messagevalue.cpp:214 share/resource/core_tiles.q:1023
-#: share/resource/core_tiles.q:914
+#: game/actions/buildstructures.cpp:287 game/map/info/info.cpp:647
+#: game/parser/messagevalue.cpp:214 share/resource/core_tiles.q:1029
+#: share/resource/core_tiles.q:920
 msgid "Factories"
 msgstr "Fabriken"
 
-#: interpreter/process.cpp:1985
+#: interpreter/process.cpp:2018
 msgid "Failed"
 msgstr "Fehlgeschlagen"
 
-#: game/proxy/classicvcrplayerproxy.cpp:80
-#: game/proxy/flakvcrplayerproxy.cpp:79
+#: game/proxy/classicvcrplayerproxy.cpp:80 game/proxy/flakvcrplayerproxy.cpp:79
 msgid "Failed to access game data"
 msgstr "Fehler beim Zugriff auf Spieldaten"
 
@@ -4088,7 +4081,7 @@ msgstr "Föderation Crew-Bonus"
 msgid "Feudal"
 msgstr "Feudal"
 
-#: game/proxy/buildammoproxy.cpp:154 game/spec/info/info.cpp:468
+#: game/proxy/buildammoproxy.cpp:154 game/spec/info/info.cpp:482
 msgid "Fighter"
 msgstr "Raumjäger"
 
@@ -4100,7 +4093,7 @@ msgstr "Raumjäger-Startrampe"
 msgid "Fighter Bays"
 msgstr "Startrampen"
 
-#: game/spec/info/info.cpp:396
+#: game/spec/info/info.cpp:410
 msgid "Fighter Cost"
 msgstr "Jäger-Kosten"
 
@@ -4113,18 +4106,18 @@ msgstr "Startrampen: %d"
 msgid "Fighter cost"
 msgstr "Raumjäger-Kosten"
 
-#: game/spec/racialabilitylist.cpp:338
+#: game/spec/racialabilitylist.cpp:339
 msgid "Fighter sweep range"
 msgstr "Jäger Räum-Reichweite"
 
-#: game/spec/racialabilitylist.cpp:337
+#: game/spec/racialabilitylist.cpp:338
 msgid "Fighter sweep rate"
 msgstr "Jäger Räum-Rate"
 
 #: client/dialogs/simulator.cpp:1098 client/dialogs/simulator.cpp:907
 #: client/dialogs/simulator.cpp:989 client/dialogs/specbrowserdialog.cpp:627
-#: client/widgets/simulationobjectinfo.cpp:588 game/element.cpp:75
-#: game/map/info/info.cpp:1597 share/resource/core_tiles.q:1178
+#: client/widgets/simulationobjectinfo.cpp:588 game/element.cpp:44
+#: game/map/info/info.cpp:1602 share/resource/core_tiles.q:1184
 msgid "Fighters"
 msgstr "Raumjäger"
 
@@ -4238,7 +4231,7 @@ msgstr "Datei existiert, aber ist ungültig und wurde ignoriert"
 msgid "File format error"
 msgstr "Dateiformat-Fehler"
 
-#: game/pcc/turnloader.cpp:248 game/pcc/turnloader.cpp:257
+#: game/pcc/turnloader.cpp:229 game/pcc/turnloader.cpp:238
 #: game/turnloader.cpp:78 game/turnloader.cpp:89
 #: game/v3/directoryloader.cpp:484 game/v3/resultloader.cpp:265
 #: game/v3/resultloader.cpp:275
@@ -4295,7 +4288,7 @@ msgstr "Datei..."
 msgid "Files"
 msgstr "Dateien"
 
-#: util/plugin/consoleapplication.cpp:184
+#: util/plugin/consoleapplication.cpp:186
 msgid "Files (in '%s')"
 msgstr "Dateien (in '%s')"
 
@@ -4311,11 +4304,11 @@ msgstr "Zeichnungen filtern"
 msgid "Filtered"
 msgstr "Gefiltert"
 
-#: share/resource/core_ui.q:2043
+#: share/resource/core_ui.q:2060
 msgid "Fix (repair) a ship"
 msgstr "Schiff reparieren"
 
-#: share/resource/core_ui.q:2010
+#: share/resource/core_ui.q:2027
 msgid "Fix (repair) this ship"
 msgstr "Schiff reparieren"
 
@@ -4323,9 +4316,9 @@ msgstr "Schiff reparieren"
 msgid "Fix Ship"
 msgstr "Raumschiff reparieren"
 
-#: client/dialogs/referencesortorder.cpp:43
-#: client/screens/playerscreen.cpp:154 share/resource/core_ui.q:1028
-#: share/resource/core_ui.q:1039 share/resource/core_ui.q:1073
+#: client/dialogs/referencesortorder.cpp:43 client/screens/playerscreen.cpp:154
+#: share/resource/core_ui.q:1028 share/resource/core_ui.q:1039
+#: share/resource/core_ui.q:1073
 msgid "Fleet"
 msgstr "Flotte"
 
@@ -4333,7 +4326,7 @@ msgstr "Flotte"
 msgid "Fleet #%d"
 msgstr "Flotte #%d"
 
-#: client/tiles/fleetscreenheadertile.cpp:50
+#: client/tiles/fleetscreenheadertile.cpp:48
 msgid "Fleet %d"
 msgstr "Flotte %d"
 
@@ -4354,7 +4347,7 @@ msgstr "Flottenkosten-Vergleich"
 msgid "Fleet Cost Comparison...\t[Ctrl-C]"
 msgstr "Flottenkosten-Vergleich...\t[Strg-C]"
 
-#: share/resource/core_ui.q:2121
+#: share/resource/core_ui.q:2138
 msgid "Fleet screen"
 msgstr "Flotten-Bildschirm"
 
@@ -4382,7 +4375,7 @@ msgstr "Fernsteuerung dieses Schiffs verbieten?"
 msgid "Force surrender"
 msgstr "Kapitulation erzwingen"
 
-#: game/map/info/info.cpp:1336
+#: game/map/info/info.cpp:1341
 msgid "Foreign Units"
 msgstr "Fremde Einheiten"
 
@@ -4423,8 +4416,8 @@ msgstr "Frei"
 msgid "Freighters"
 msgstr "Frachter"
 
-#: share/resource/core_tiles.q:1125 share/resource/core_tiles.q:1231
-#: share/resource/core_tiles.q:320 share/resource/core_tiles.q:944
+#: share/resource/core_tiles.q:1131 share/resource/core_tiles.q:1237
+#: share/resource/core_tiles.q:320 share/resource/core_tiles.q:950
 msgid "Friendly Code"
 msgstr "Kommandocode"
 
@@ -4461,7 +4454,7 @@ msgstr "Von"
 msgid "From storage: %s"
 msgstr "Lagerbestand: %s"
 
-#: interpreter/process.cpp:1979
+#: interpreter/process.cpp:2012
 msgid "Frozen"
 msgstr "Eingefroren"
 
@@ -4475,7 +4468,7 @@ msgstr "Jäg"
 
 #: client/widgets/hullspecificationsheet.cpp:38
 #: client/widgets/vcrobjectinfo.cpp:81 game/parser/messagevalue.cpp:170
-#: game/spec/info/info.cpp:133 game/spec/info/utils.cpp:27
+#: game/spec/info/info.cpp:144 game/spec/info/utils.cpp:27
 msgid "Fuel"
 msgstr "Treibstoff"
 
@@ -4487,7 +4480,7 @@ msgstr "Sprit-Verbrauch"
 msgid "Fuel aboard"
 msgstr "Treibstoff"
 
-#: game/spec/info/info.cpp:158
+#: game/spec/info/info.cpp:169
 msgid "Fuel burn"
 msgstr "Spritverbrauch"
 
@@ -4515,16 +4508,16 @@ msgstr "Voller Name"
 msgid "Functions"
 msgstr "Funktionen"
 
-#: share/resource/core_tiles.q:943
+#: share/resource/core_tiles.q:949
 msgid "Funds"
 msgstr "Geld"
 
-#: client/dialogs/processlistdialog.cpp:603
+#: client/dialogs/processlistdialog.cpp:605
 msgid "G - Go To"
 msgstr "G - Anzeigen"
 
-#: client/dialogs/buildstructuresdialog.cpp:774
-#: client/dialogs/buildstructuresdialog.cpp:901
+#: client/dialogs/buildstructuresdialog.cpp:870
+#: client/dialogs/buildstructuresdialog.cpp:996
 msgid "G - Goals"
 msgstr "G - Bauziele"
 
@@ -4541,7 +4534,7 @@ msgstr "Spiel-Einstellungen"
 msgid "Game configuration file"
 msgstr "Spiel-Konfigurationsdatei"
 
-#: game/nu/gamefolder.cpp:120
+#: game/nu/gamefolder.cpp:121
 msgid "Game directory lost"
 msgstr "Spielverzeichnis verloren"
 
@@ -4553,7 +4546,7 @@ msgstr "Spiel ist beendet"
 msgid "Gaseous"
 msgstr "Gaswesen"
 
-#: game/spec/racialabilitylist.cpp:323
+#: game/spec/racialabilitylist.cpp:324
 msgid "Gather debris"
 msgstr "Trümmer aufsammeln"
 
@@ -4599,7 +4592,7 @@ msgstr ""
 "--get=OPTION\tWert einer Option abfragen\n"
 "--save-hconfig=DATEI\tBinäre HConfig-Datei speichern"
 
-#: game/pcc/turnloader.cpp:289 game/v3/resultloader.cpp:342
+#: game/pcc/turnloader.cpp:273 game/v3/resultloader.cpp:342
 msgid "Generating turn commands..."
 msgstr "Erzeuge Turn-Kommandos..."
 
@@ -4746,24 +4739,23 @@ msgstr "Gehe zu X/Y"
 
 #: client/dialogs/buildqueuedialog.cpp:195
 #: client/dialogs/classicvcrobject.cpp:85
-#: client/dialogs/commandlistdialog.cpp:112
-#: client/dialogs/flakvcrobject.cpp:95 client/dialogs/helpdialog.cpp:229
-#: client/dialogs/ionstorminfo.cpp:150 client/dialogs/minefieldinfo.cpp:221
-#: client/dialogs/searchdialog.cpp:334 client/dialogs/ufoinfo.cpp:179
-#: client/widgets/messageactionpanel.cpp:204
+#: client/dialogs/commandlistdialog.cpp:112 client/dialogs/flakvcrobject.cpp:95
+#: client/dialogs/helpdialog.cpp:229 client/dialogs/ionstorminfo.cpp:150
+#: client/dialogs/minefieldinfo.cpp:221 client/dialogs/searchdialog.cpp:334
+#: client/dialogs/ufoinfo.cpp:179 client/widgets/messageactionpanel.cpp:204
 #: client/widgets/messageactionpanel.cpp:207
 msgid "Go to"
 msgstr "Gehe zu"
 
-#: share/resource/core_ui.q:2125
+#: share/resource/core_ui.q:2142
 msgid "Go to fleet leader"
 msgstr "Zum Flotten-Führer wechseln"
 
-#: share/resource/core_tiles.q:1242
+#: share/resource/core_tiles.q:1248
 msgid "Go to planet"
 msgstr "Zum Planeten wechseln"
 
-#: share/resource/core_tiles.q:956
+#: share/resource/core_tiles.q:962
 msgid "Go to starbase"
 msgstr "Zur Sternenbasis wechseln"
 
@@ -4783,7 +4775,7 @@ msgstr "Grafik"
 msgid "Grav. %s"
 msgstr "Grav. %s"
 
-#: game/map/info/info.cpp:1121
+#: game/map/info/info.cpp:1125
 msgid "Gravitonic accel"
 msgstr "Gravitonenbeschleuniger"
 
@@ -4791,7 +4783,7 @@ msgstr "Gravitonenbeschleuniger"
 msgid "Grid"
 msgstr "Raster"
 
-#: share/resource/core_tiles.q:194 share/resource/core_tiles.q:993
+#: share/resource/core_tiles.q:194 share/resource/core_tiles.q:999
 msgid "Ground"
 msgstr "Boden"
 
@@ -4800,11 +4792,11 @@ msgstr "Boden"
 msgid "Ground Combat"
 msgstr "Bodenkampf"
 
-#: game/spec/racialabilitylist.cpp:518
+#: game/spec/racialabilitylist.cpp:519
 msgid "Ground attack strength"
 msgstr "Boden-Angriffsstärke"
 
-#: game/spec/racialabilitylist.cpp:519
+#: game/spec/racialabilitylist.cpp:520
 msgid "Ground defense strength"
 msgstr "Boden-Verteidigungsstärke"
 
@@ -4836,7 +4828,7 @@ msgstr "Hat Basis"
 msgid "Have"
 msgstr "Vorh."
 
-#: game/map/info/info.cpp:984
+#: game/map/info/info.cpp:988
 msgid "Have parts in storage"
 msgstr "Teile auf Lager"
 
@@ -4851,18 +4843,18 @@ msgstr "Kurs"
 #: client/dialogs/classicvcrobject.cpp:148
 #: client/dialogs/commandlistdialog.cpp:172
 #: client/dialogs/flakvcrobject.cpp:175
-#: client/dialogs/friendlycodedialog.cpp:87 client/dialogs/helpdialog.cpp:154
-#: client/dialogs/hullfunctionview.cpp:214
+#: client/dialogs/friendlycodedialog.cpp:87 client/dialogs/goaldialog.cpp:271
+#: client/dialogs/helpdialog.cpp:154 client/dialogs/hullfunctionview.cpp:214
 #: client/dialogs/imperialstats.cpp:277 client/dialogs/inboxdialog.cpp:91
-#: client/dialogs/ionstorminfo.cpp:152 client/dialogs/keymapdialog.cpp:148
-#: client/dialogs/messageeditor.cpp:194 client/dialogs/minefieldinfo.cpp:223
+#: client/dialogs/ionstorminfo.cpp:152 client/dialogs/keymapdialog.cpp:150
+#: client/dialogs/messageeditor.cpp:197 client/dialogs/minefieldinfo.cpp:223
 #: client/dialogs/newdrawing.cpp:84 client/dialogs/newdrawingtag.cpp:98
 #: client/dialogs/objectselectiondialog.cpp:373
 #: client/dialogs/outboxdialog.cpp:78 client/dialogs/pluginmanager.cpp:123
-#: client/dialogs/preferences.cpp:586 client/dialogs/processlistdialog.cpp:721
+#: client/dialogs/preferences.cpp:586 client/dialogs/processlistdialog.cpp:723
 #: client/dialogs/revertdialog.cpp:83 client/dialogs/scores.cpp:735
 #: client/dialogs/searchdialog.cpp:338 client/dialogs/selectionmanager.cpp:371
-#: client/dialogs/sellsuppliesdialog.cpp:57
+#: client/dialogs/sellsuppliesdialog.cpp:62
 #: client/dialogs/shipcostcalculator.cpp:72
 #: client/dialogs/simulationfleetcost.cpp:163
 #: client/dialogs/simulationresult.cpp:480 client/dialogs/simulator.cpp:372
@@ -4878,15 +4870,15 @@ msgstr "Hilfe"
 msgid "Help file \"%s\" could not be opened."
 msgstr "Die Hilfedatei \"%s\" konnte nicht geöffnet werden."
 
-#: game/spec/racialabilitylist.cpp:262
+#: game/spec/racialabilitylist.cpp:263
 msgid "Hiss effect"
 msgstr "Hiss-Effekt"
 
-#: game/spec/racialabilitylist.cpp:261
+#: game/spec/racialabilitylist.cpp:262
 msgid "Hiss mission"
 msgstr "Hiss-Mission"
 
-#: game/spec/info/info.cpp:321 game/spec/info/info.cpp:353
+#: game/spec/info/info.cpp:334 game/spec/info/info.cpp:367
 msgid "Hit"
 msgstr "Trefferquote"
 
@@ -4907,7 +4899,7 @@ msgstr "Allianzen/Teams berücksichtigen"
 msgid "Host"
 msgstr "Host"
 
-#: game/spec/racialabilitylist.cpp:684
+#: game/spec/racialabilitylist.cpp:698
 msgid "Host configuration"
 msgstr "Host-Konfiguration"
 
@@ -4916,12 +4908,12 @@ msgid "Host version not known, assuming %s"
 msgstr "Unbekannte Host-Version, Annahme: %s"
 
 #: client/dialogs/hullspecification.cpp:139 game/map/shipinfo.cpp:265
-#: game/spec/info/browser.cpp:257 game/spec/info/filter.cpp:140
+#: game/spec/info/browser.cpp:258 game/spec/info/filter.cpp:140
 #: game/spec/info/utils.cpp:36
 msgid "Hull"
 msgstr "Rumpf"
 
-#: game/reference.cpp:83
+#: game/reference.cpp:62
 msgid "Hull #%d"
 msgstr "Rumpf #%d"
 
@@ -4929,7 +4921,7 @@ msgstr "Rumpf #%d"
 msgid "Hull (max)"
 msgstr "Rumpf (max)"
 
-#: game/spec/info/info.cpp:201 game/spec/info/info.cpp:250
+#: game/spec/info/info.cpp:212 game/spec/info/info.cpp:261
 msgid "Hull Function #%d"
 msgstr "Schiffsfunktion #%d"
 
@@ -4953,7 +4945,7 @@ msgstr "Rumpfmasse: %d kt"
 msgid "Hull tech upgrade"
 msgstr "Rumpf-Tech-Upgrade"
 
-#: client/dialogs/techupgradedialog.cpp:101 share/resource/core_tiles.q:1178
+#: client/dialogs/techupgradedialog.cpp:101 share/resource/core_tiles.q:1184
 msgid "Hulls"
 msgstr "Rümpfe"
 
@@ -5002,7 +4994,7 @@ msgstr "ISO 8859-2 (Latin-2)"
 msgid "Id"
 msgstr "Id"
 
-#: game/vcr/object.cpp:364
+#: game/vcr/object.cpp:379
 msgid "Id #%d, %s %s"
 msgstr "Id #%d, %s %s"
 
@@ -5027,7 +5019,7 @@ msgstr ""
 msgid "Image \"%s\" not found"
 msgstr "Bild \"%s\" nicht gefunden"
 
-#: game/spec/racialabilitylist.cpp:315
+#: game/spec/racialabilitylist.cpp:316
 msgid "Immune to planet attacks if out of fuel"
 msgstr "Immun gegen Angriff von Planeten, wenn kein Treibstoff"
 
@@ -5043,7 +5035,7 @@ msgstr "Imperiums-Statistik"
 msgid "Imperial Stats"
 msgstr "Imperiums-Statistik"
 
-#: game/map/info/info.cpp:1116
+#: game/map/info/info.cpp:1120
 msgid "In free space"
 msgstr "Im freien Raum"
 
@@ -5099,11 +5091,11 @@ msgstr "Torpedos berechnen"
 msgid "Incomplete network account \"%s\" has been ignored"
 msgstr "Unvollständiges Netzwerk-Konto \"%s\" wurde ignoriert"
 
-#: game/spec/racialabilitylist.cpp:213
+#: game/spec/racialabilitylist.cpp:214
 msgid "Increased %s"
 msgstr "Verbesserte %s"
 
-#: game/spec/racialabilitylist.cpp:157
+#: game/spec/racialabilitylist.cpp:158
 msgid "Increased %s (%s)"
 msgstr "Verbesserte %s (%s)"
 
@@ -5135,7 +5127,7 @@ msgstr "Info: verwendete CSS-Klassen"
 msgid "Info: used tags"
 msgstr "Info: verwendete Tags"
 
-#: client/application.cpp:871
+#: client/application.cpp:870
 msgid "Initialisation complete"
 msgstr "Initialisierung vollständig"
 
@@ -5171,8 +5163,7 @@ msgstr "Einfg - Konto hinzufügen"
 msgid "Ins - New directory..."
 msgstr "Einfg - Neues Verzeichnis..."
 
-#: client/dialogs/classicvcrobject.cpp:149
-#: client/dialogs/flakvcrobject.cpp:176
+#: client/dialogs/classicvcrobject.cpp:149 client/dialogs/flakvcrobject.cpp:176
 msgid "Ins - Sim"
 msgstr "Einfg - Sim"
 
@@ -5189,7 +5180,7 @@ msgstr "Befehl einfügen"
 msgid "Install Plugin"
 msgstr "Plugin installieren"
 
-#: util/plugin/consoleapplication.cpp:240
+#: util/plugin/consoleapplication.cpp:242
 msgid "Installing plugin '%s'..."
 msgstr "Installiere Plugin '%s'..."
 
@@ -5213,7 +5204,7 @@ msgstr "Interner Fehler: Abfrage unerwartet fehlgeschlagen: %s"
 msgid "Internal error: search query produced unexpected result"
 msgstr "Interner Fehler: Anfrage produzierte unerwartetes Ergebnis"
 
-#: game/pcc/browserhandler.cpp:284
+#: game/pcc/browserhandler.cpp:286
 msgid "Invalid URL"
 msgstr "Ungültige URL"
 
@@ -5229,7 +5220,7 @@ msgstr "Ungültiges Argument zu Kommandozeilenparameter \"-%s\""
 msgid "Invalid array"
 msgstr "Ungültiges Array"
 
-#: game/nu/specificationloader.cpp:216 game/nu/specificationloader.cpp:231
+#: game/nu/loader.cpp:607 game/nu/loader.cpp:622
 msgid "Invalid beam number %d, component has been ignored"
 msgstr "Ungültige Geschütz-Nummer %d, Komponente wurde ignoriert"
 
@@ -5237,7 +5228,7 @@ msgstr "Ungültige Geschütz-Nummer %d, Komponente wurde ignoriert"
 msgid "Invalid boolean setting"
 msgstr "Ungültiger boolescher Wert"
 
-#: util/plugin/consoleapplication.cpp:125
+#: util/plugin/consoleapplication.cpp:127
 msgid "Invalid command specified. Use 'c2plugin -h' for help."
 msgstr "ungültiges Kommando angegeben. Mit 'c2plugin -h' erhalten Sie Hilfe"
 
@@ -5249,7 +5240,7 @@ msgstr "Ungültige Funktions-Nummer für \"%s\""
 msgid "Invalid directory name"
 msgstr "Ungültiger Verzeichnisname"
 
-#: game/nu/specificationloader.cpp:276 game/nu/specificationloader.cpp:292
+#: game/nu/loader.cpp:677 game/nu/loader.cpp:693
 msgid "Invalid engine number %d, component has been ignored"
 msgstr "Ungültige Triebwerks-Nummer %d, Komponente wurde ignoriert<"
 
@@ -5313,7 +5304,7 @@ msgstr "Ungültige Schiffs-Funktion"
 msgid "Invalid hull number \"%s\""
 msgstr "Ungültige Schiffsrumpf-Nummer \"%s\""
 
-#: game/nu/specificationloader.cpp:147 game/nu/specificationloader.cpp:204
+#: game/nu/loader.cpp:534 game/nu/loader.cpp:596
 msgid "Invalid hull number %d, component has been ignored"
 msgstr "Ungültige Schiffsrumpf-Nummer %d, Komponente wurde ignoriert"
 
@@ -5325,7 +5316,7 @@ msgstr "Ungültige Eingabe."
 msgid "Invalid ion storm Id #%d"
 msgstr "Ungültige Ionensturm-Id #%d"
 
-#: game/v3/loader.cpp:482
+#: game/nu/loader.cpp:1172 game/v3/loader.cpp:482
 msgid "Invalid ion storm Id #%d. Storm will be ignored"
 msgstr "Ungültige Ionensturm-Id #%d. Sturm wird ignoriert."
 
@@ -5357,7 +5348,7 @@ msgstr "Inhaltsverzeichnis ungültig"
 msgid "Invalid message receiver"
 msgstr "Ungültiger Nachrichtenempfänger"
 
-#: game/nu/turnloader.cpp:469
+#: game/nu/loader.cpp:1146
 msgid "Invalid minefield Id #%d, minefield has been ignored"
 msgstr "Ungültige Minenfeld-Id #%d, Minenfeld wird ignoriert"
 
@@ -5390,8 +5381,8 @@ msgstr "Ungültiger Parameter zu \"-bpp\""
 msgid "Invalid parameter to \"-size\""
 msgstr "Ungültiger Parameter zu \"-size\""
 
-#: game/nu/turnloader.cpp:212 game/nu/turnloader.cpp:311
-#: game/v3/loader.cpp:198 game/v3/loader.cpp:231 game/v3/loader.cpp:248
+#: game/nu/loader.cpp:859 game/nu/loader.cpp:963 game/v3/loader.cpp:198
+#: game/v3/loader.cpp:231 game/v3/loader.cpp:248
 msgid "Invalid planet Id #%d"
 msgstr "Ungültige Planeten-Id #%d"
 
@@ -5399,11 +5390,11 @@ msgstr "Ungültige Planeten-Id #%d"
 msgid "Invalid player number"
 msgstr "Ungültige Spielernummer"
 
-#: game/nu/specificationloader.cpp:400
+#: game/nu/loader.cpp:522
 msgid "Invalid player number %d, entry has been ignored"
 msgstr "Ungültige Spielernummer %d, Eintrag wurde ignoriert"
 
-#: game/proxy/searchproxy.cpp:194
+#: game/proxy/searchproxy.cpp:193
 msgid "Invalid search query: %s"
 msgstr "Ungültige Suchanfrage: %s"
 
@@ -5411,7 +5402,7 @@ msgstr "Ungültige Suchanfrage: %s"
 msgid "Invalid selection expression: %s"
 msgstr "Ungültiger Auswahl-Ausdruck: %s"
 
-#: game/nu/turnloader.cpp:362 game/v3/loader.cpp:359
+#: game/nu/loader.cpp:1018 game/v3/loader.cpp:359
 msgid "Invalid ship Id #%d"
 msgstr "Ungültige Schiffs-Id #%d"
 
@@ -5428,7 +5419,7 @@ msgstr "Ungültige Größe"
 msgid "Invalid starbase Id #%d"
 msgstr "Ungültige Sternenbasis-Id #%d"
 
-#: game/nu/specificationloader.cpp:243 game/nu/specificationloader.cpp:264
+#: game/nu/loader.cpp:633 game/nu/loader.cpp:666
 msgid "Invalid torpedo number %d, component has been ignored"
 msgstr "Ungültige Torpedo-Nummer %d, Komponente wurde ignoriert"
 
@@ -5454,7 +5445,7 @@ msgstr ""
 msgid "Ion Storm"
 msgstr "Ionensturm"
 
-#: game/reference.cpp:80
+#: game/reference.cpp:59
 msgid "Ion Storm #%d"
 msgstr "Ionensturm #%d"
 
@@ -5466,7 +5457,7 @@ msgstr "Ionensturm-Vorhersage"
 msgid "Ion Storm Information"
 msgstr "Ionensturm-Informationen"
 
-#: game/map/info/info.cpp:1316
+#: game/map/info/info.cpp:1321
 msgid "Ion Storms"
 msgstr "Ionenstürme"
 
@@ -5529,7 +5520,7 @@ msgstr "Fracht über Bord werfen"
 msgid "Join Fleet"
 msgstr "Einer Flotte beitreten"
 
-#: share/resource/core_ui.q:2130
+#: share/resource/core_ui.q:2147
 msgid "Join a fleet"
 msgstr "Einer Flotte beitreten"
 
@@ -5541,7 +5532,7 @@ msgstr "KOI8-R"
 msgid "Keep"
 msgstr "Aufheben"
 
-#: client/dialogs/keymapdialog.cpp:183
+#: client/dialogs/keymapdialog.cpp:185
 msgid "Key %s"
 msgstr "Taste %s"
 
@@ -5549,7 +5540,7 @@ msgstr "Taste %s"
 msgid "Key '%s' in '%s'"
 msgstr "Taste '%s' in '%s'"
 
-#: gfx/sdl/engine.cpp:472 gfx/sdl2/engine.cpp:571
+#: gfx/sdl/engine.cpp:472 gfx/sdl2/engine.cpp:632
 msgid "Key not mapped: 0x%x"
 msgstr "Taste nicht erkannt: 0x%x"
 
@@ -5561,12 +5552,12 @@ msgstr "Tastatur-Modus"
 msgid "Keymap %s"
 msgstr "Keymap %s"
 
-#: client/dialogs/keymapdialog.cpp:132
+#: client/dialogs/keymapdialog.cpp:134
 msgid "Keymap Debugger"
 msgstr "Tastatur-Debugger"
 
-#: client/widgets/hullspecificationsheet.cpp:88 game/spec/info/info.cpp:318
-#: game/spec/info/info.cpp:350 game/spec/info/info.cpp:391
+#: client/widgets/hullspecificationsheet.cpp:88 game/spec/info/info.cpp:331
+#: game/spec/info/info.cpp:364 game/spec/info/info.cpp:405
 msgid "Kill"
 msgstr "Kill"
 
@@ -5618,11 +5609,11 @@ msgstr "Latin-1"
 msgid "Latin-2"
 msgstr "Latin-2"
 
-#: game/spec/info/info.cpp:363
+#: game/spec/info/info.cpp:377
 msgid "Launcher Cost"
 msgstr "Rohr-Kosten"
 
-#: game/spec/info/info.cpp:361
+#: game/spec/info/info.cpp:375
 msgid "Launcher Mass"
 msgstr "Rohr-Masse"
 
@@ -5630,7 +5621,7 @@ msgstr "Rohr-Masse"
 msgid "Launchers on ship: %d (max %d)"
 msgstr "Rohre auf Schiff: %d (max %d)"
 
-#: game/spec/racialabilitylist.cpp:283
+#: game/spec/racialabilitylist.cpp:284
 msgid "Lay Web Mines mission"
 msgstr "Fangminen legen"
 
@@ -5638,7 +5629,7 @@ msgstr "Fangminen legen"
 msgid "Leader of fleet #%d"
 msgstr "Führer von Flotte #%d"
 
-#: share/resource/core_ui.q:2123
+#: share/resource/core_ui.q:2140
 msgid "Leave fleet"
 msgstr "Flotte verlassen"
 
@@ -5671,7 +5662,7 @@ msgstr "Einheiten..."
 msgid "Load"
 msgstr "Laden"
 
-#: client/dialogs/messageeditor.cpp:280 client/dialogs/messageeditor.cpp:291
+#: client/dialogs/messageeditor.cpp:283 client/dialogs/messageeditor.cpp:294
 msgid "Load Message"
 msgstr "Nachricht laden"
 
@@ -5688,8 +5679,8 @@ msgstr "Einstellungen laden"
 msgid "Load Simulation"
 msgstr "Simulation laden"
 
-#: share/resource/core_ui.q:1707 share/resource/core_ui.q:1728
-#: share/resource/core_ui.q:1731
+#: share/resource/core_ui.q:1723 share/resource/core_ui.q:1744
+#: share/resource/core_ui.q:1747
 msgid "Load Task"
 msgstr "Aufgabe laden"
 
@@ -5713,7 +5704,7 @@ msgstr "\"%s\" geladen"
 msgid "Loaded %d combat recording%!1{s%} (FLAK)..."
 msgstr "%d Kampf-Aufzeichnung%!1{en%} (FLAK) geladen..."
 
-#: game/nu/turnloader.cpp:495 game/v3/loader.cpp:534
+#: game/nu/loader.cpp:1196 game/v3/loader.cpp:534
 msgid "Loaded %d combat recording%!1{s%}..."
 msgstr "%d Kampf-Aufzeichnung%!1{en%} geladen..."
 
@@ -5729,7 +5720,11 @@ msgstr "Lade %d eingehende Nachricht%!1{en%}..."
 msgid "Loading %d ion storm name%!1{s%}..."
 msgstr "Lade %d Ionensturm-Namen..."
 
-#: game/nu/turnloader.cpp:452
+#: game/nu/loader.cpp:1154
+msgid "Loading %d ion storm%!1{s%}..."
+msgstr "Lade %d Ionenst%1{urm%|ürme%}..."
+
+#: game/nu/loader.cpp:1129
 msgid "Loading %d minefield%!1{s%}..."
 msgstr "Lade %d Minenfeld%!1{er%}..."
 
@@ -5737,15 +5732,15 @@ msgstr "Lade %d Minenfeld%!1{er%}..."
 msgid "Loading %d planet name%!1{s%}..."
 msgstr "Lade %d Planetennamen..."
 
-#: game/nu/turnloader.cpp:206 game/v3/loader.cpp:189
+#: game/nu/loader.cpp:853 game/v3/loader.cpp:189
 msgid "Loading %d planet%!1{s%}..."
 msgstr "Lade %d Planet%!1{en%}..."
 
-#: game/nu/turnloader.cpp:356 game/v3/loader.cpp:350
+#: game/nu/loader.cpp:1012 game/v3/loader.cpp:350
 msgid "Loading %d ship%!1{s%}..."
 msgstr "Lade %d Schiff%!1{e%}..."
 
-#: game/nu/turnloader.cpp:303 game/v3/loader.cpp:276
+#: game/nu/loader.cpp:955 game/v3/loader.cpp:276
 msgid "Loading %d starbase%!1{s%}..."
 msgstr "Lade %d Sternbas%1{is%|en%}..."
 
@@ -5753,11 +5748,11 @@ msgstr "Lade %d Sternbas%1{is%|en%}..."
 msgid "Loading %d visual contact%!1{s%}..."
 msgstr "Lade %d visuelle%1{n Kontakt%| Kontakte%}..."
 
-#: game/pcc/turnloader.cpp:233 game/v3/resultloader.cpp:242
+#: game/pcc/turnloader.cpp:216 game/v3/resultloader.cpp:242
 msgid "Loading %s RST file..."
 msgstr "Lade %s RST-Datei..."
 
-#: game/pcc/turnloader.cpp:243 game/v3/resultloader.cpp:213
+#: game/pcc/turnloader.cpp:224 game/v3/resultloader.cpp:213
 msgid "Loading %s TRN file..."
 msgstr "Lade %s TRN-Datei..."
 
@@ -5812,22 +5807,22 @@ msgid "Location: (%d,%d) - Sector %d"
 msgstr "Position: (%d,%d) - Sektor %d"
 
 # FIXME: a good spiffy word?
-#: client/dialogs/processlistdialog.cpp:540
-#: client/dialogs/processlistdialog.cpp:550
-#: client/dialogs/processlistdialog.cpp:557
-#: client/dialogs/processlistdialog.cpp:711
+#: client/dialogs/processlistdialog.cpp:542
+#: client/dialogs/processlistdialog.cpp:552
+#: client/dialogs/processlistdialog.cpp:559
+#: client/dialogs/processlistdialog.cpp:713
 msgid "Locks"
 msgstr "Locks"
 
-#: game/nu/browserhandler.cpp:67 game/pcc/browserhandler.cpp:96
+#: game/nu/browserhandler.cpp:67 game/pcc/browserhandler.cpp:98
 msgid "Login canceled"
 msgstr "Anmeldung abgebrochen"
 
-#: game/nu/browserhandler.cpp:85 game/pcc/browserhandler.cpp:115
+#: game/nu/browserhandler.cpp:85 game/pcc/browserhandler.cpp:117
 msgid "Login did not succeed; wrong password?"
 msgstr "Anmeldung fehlgeschlagen; falsches Passwort?"
 
-#: game/nu/browserhandler.cpp:78 game/pcc/browserhandler.cpp:108
+#: game/nu/browserhandler.cpp:78 game/pcc/browserhandler.cpp:110
 msgid "Login failed"
 msgstr "Anmeldung fehlgeschlagen"
 
@@ -5887,8 +5882,8 @@ msgstr "Maketurn | Backup..."
 msgid "Maketurn | Upload target..."
 msgstr "Maketurn | Upload-Ziel..."
 
-#: game/nu/browserhandler.cpp:169 game/pcc/browserhandler.cpp:188
-#: game/pcc/browserhandler.cpp:214
+#: game/nu/browserhandler.cpp:171 game/pcc/browserhandler.cpp:190
+#: game/pcc/browserhandler.cpp:216
 msgid "Malformed URL \"%s\""
 msgstr "Fehlerhafte URL \"%s\""
 
@@ -5906,11 +5901,11 @@ msgstr "Karten-Typ"
 msgid "Mark 2nd point, end with [ESC] or [+]."
 msgstr "Zweiten Punkt festlegen, Ende mit [ESC] oder [+]."
 
-#: client/dialogs/searchdialog.cpp:646
+#: client/dialogs/searchdialog.cpp:647
 msgid "Mark found objects"
 msgstr "Markiere gefundene Objekte"
 
-#: client/dialogs/searchdialog.cpp:647
+#: client/dialogs/searchdialog.cpp:648
 msgid "Mark only found objects"
 msgstr "Markiere nur gefundene Objekte"
 
@@ -5926,8 +5921,7 @@ msgstr "Markiere einen Bereich, Ende mit [ESC], Abbruch mit [Backspace]."
 msgid "Mark these starbases"
 msgstr "Markiere diese Sternenbasen"
 
-#: client/dialogs/buildqueuesummary.cpp:138
-#: client/dialogs/searchdialog.cpp:336
+#: client/dialogs/buildqueuesummary.cpp:138 client/dialogs/searchdialog.cpp:336
 msgid "Mark..."
 msgstr "Auswahl..."
 
@@ -5955,7 +5949,7 @@ msgstr "Marker"
 #: client/tiles/historypositiontile.cpp:41
 #: client/widgets/hullspecificationsheet.cpp:33
 #: client/widgets/vcrobjectinfo.cpp:80 game/parser/messagevalue.cpp:158
-#: game/spec/info/info.cpp:131 game/spec/info/info.cpp:331
+#: game/spec/info/info.cpp:142 game/spec/info/info.cpp:344
 #: game/spec/info/utils.cpp:22
 msgid "Mass"
 msgstr "Masse"
@@ -5996,7 +5990,7 @@ msgstr "Max. Geschütze: %d"
 msgid "Max Cargo: %d kt"
 msgstr "Frachtraum: %d kt"
 
-#: game/spec/info/info.cpp:292 game/spec/info/utils.cpp:26
+#: game/spec/info/info.cpp:304 game/spec/info/utils.cpp:26
 msgid "Max Efficient Warp"
 msgstr "Max effiziente Geschw."
 
@@ -6016,7 +6010,7 @@ msgstr "Max. Torpedos: %d"
 msgid "Maximize defense"
 msgstr "Verteidigung maximieren"
 
-#: client/dialogs/buildstructuresdialog.cpp:281
+#: client/dialogs/buildstructuresdialog.cpp:443
 msgid "Maximum"
 msgstr "Maximum"
 
@@ -6117,7 +6111,7 @@ msgstr "Mineneinheiten"
 msgid "Mine Units Removed"
 msgstr "Entfernte Mineneinheiten"
 
-#: game/spec/info/info.cpp:154
+#: game/spec/info/info.cpp:165
 msgid "Mine hit damage"
 msgstr "Minen-Schaden"
 
@@ -6125,7 +6119,7 @@ msgstr "Minen-Schaden"
 msgid "Mine sweep information not available."
 msgstr "Keine Informationen über gefundene Minen verfügbar."
 
-#: share/resource/core_tiles.q:193 share/resource/core_tiles.q:993
+#: share/resource/core_tiles.q:193 share/resource/core_tiles.q:999
 msgid "Mined"
 msgstr "abgebaut"
 
@@ -6145,7 +6139,7 @@ msgstr "Neutronium abgebaut"
 msgid "Mined Tritanium"
 msgstr "Tritanium abgebaut"
 
-#: game/reference.cpp:81
+#: game/reference.cpp:60
 msgid "Minefield #%d"
 msgstr "Minenfeld #%d"
 
@@ -6163,8 +6157,8 @@ msgid "Minefield alliance"
 msgstr "Minenfeld-Allianz"
 
 #: client/widgets/chartdisplayconfig.cpp:22
-#: client/widgets/chartmouseconfig.cpp:29 game/map/info/info.cpp:1341
-#: game/spec/racialabilitylist.cpp:671
+#: client/widgets/chartmouseconfig.cpp:29 game/map/info/info.cpp:1346
+#: game/spec/racialabilitylist.cpp:685
 msgid "Minefields"
 msgstr "Minenfelder"
 
@@ -6184,13 +6178,13 @@ msgstr "Minenfelder nach Verfall"
 msgid "Minefields visible"
 msgstr "Minenfeld-Sichtbarkeit"
 
-#: game/actions/buildstructures.cpp:282 game/map/info/info.cpp:643
-#: game/parser/messagevalue.cpp:213 share/resource/core_tiles.q:913
+#: game/actions/buildstructures.cpp:282 game/map/info/info.cpp:646
+#: game/parser/messagevalue.cpp:213 share/resource/core_tiles.q:919
 msgid "Mineral Mines"
 msgstr "Bergwerke"
 
 #: client/dialogs/planetinfodialog.cpp:100 game/map/info/browser.cpp:197
-#: game/map/info/info.cpp:616 share/resource/core_tiles.q:213
+#: game/map/info/info.cpp:619 share/resource/core_tiles.q:213
 msgid "Minerals"
 msgstr "Mineralien"
 
@@ -6198,7 +6192,7 @@ msgstr "Mineralien"
 msgid "Minerals & Funds"
 msgstr "Mineralien & Geld"
 
-#: share/resource/core_tiles.q:1022
+#: share/resource/core_tiles.q:1028
 msgid "Mines"
 msgstr "Minen"
 
@@ -6218,19 +6212,19 @@ msgstr "Fehlender ':' in Nachrichten-Filterausdruck"
 msgid "Missing '=' in message match expression"
 msgstr "Fehlender '=' in Nachrichten-Filterausdruck"
 
-#: util/plugin/consoleapplication.cpp:313
+#: util/plugin/consoleapplication.cpp:315
 msgid "Missing name of plugin to uninstall. '%s -h' for help."
 msgstr ""
 "Kein Name für ein zu deinstallierendes Plugin angegeben. Nutze '%s -h' für "
 "Hilfe."
 
-#: util/plugin/consoleapplication.cpp:260
+#: util/plugin/consoleapplication.cpp:262
 msgid "Missing name plugin or file to install. '%s -h' for help."
 msgstr ""
 "Kein Name für ein zu installierendes Plugin angegeben. Nutze '%s -h' für "
 "Hilfe."
 
-#: util/plugin/consoleapplication.cpp:374
+#: util/plugin/consoleapplication.cpp:376
 msgid "Missing name plugin or file to test. '%s -h' for help."
 msgstr ""
 "Kein Name für ein zu testendes Plugin angegeben. Nutze '%s -h' für Hilfe."
@@ -6251,7 +6245,7 @@ msgstr ""
 "c2plugin benutzen."
 
 #: client/tiles/tilefactory.cpp:50 game/parser/messagevalue.cpp:181
-#: share/resource/core_tiles.q:1209 share/resource/core_tiles.q:1230
+#: share/resource/core_tiles.q:1215 share/resource/core_tiles.q:1236
 #: share/resource/core_tiles.q:266 share/resource/core_tiles.q:306
 #: share/resource/core_tiles.q:368
 msgid "Mission"
@@ -6303,21 +6297,21 @@ msgstr "Missionen, Aufträge, Namen"
 msgid "Mode"
 msgstr "Modus"
 
-#: game/spec/racialabilitylist.cpp:214
+#: game/spec/racialabilitylist.cpp:215
 msgid "Modified %s"
 msgstr "Geänderte %s"
 
 #: client/tiles/shipcargotile.cpp:111 client/widgets/costsummarylist.cpp:154
-#: share/resource/core_tiles.q:1160 share/resource/core_tiles.q:800
-#: share/resource/core_tiles.q:997
+#: share/resource/core_tiles.q:1003 share/resource/core_tiles.q:1166
+#: share/resource/core_tiles.q:800
 msgid "Mol"
 msgstr "Mol"
 
-#: client/dialogs/buildstructuresdialog.cpp:835
+#: client/dialogs/buildstructuresdialog.cpp:932
 #: client/dialogs/planetinfodialog.cpp:148 client/widgets/costdisplay.cpp:26
 #: client/widgets/hullspecificationsheet.cpp:79
-#: client/widgets/itemcostdisplay.cpp:105 game/element.cpp:73
-#: share/resource/core_tiles.q:919 share/resource/core_ui.q:1797
+#: client/widgets/itemcostdisplay.cpp:105 game/element.cpp:42
+#: share/resource/core_tiles.q:925 share/resource/core_ui.q:1813
 msgid "Molybdenum"
 msgstr "Molybdenum"
 
@@ -6339,10 +6333,10 @@ msgstr "Monarchie"
 
 #: client/tiles/shipcargotile.cpp:116 client/widgets/costdisplay.cpp:27
 #: client/widgets/hullspecificationsheet.cpp:76
-#: client/widgets/itemcostdisplay.cpp:106 game/element.cpp:81
-#: game/map/info/info.cpp:641 game/parser/messagevalue.cpp:210
-#: share/resource/core_tiles.q:1022 share/resource/core_tiles.q:1157
-#: share/resource/core_ui.q:1797
+#: client/widgets/itemcostdisplay.cpp:106 game/element.cpp:50
+#: game/map/info/info.cpp:644 game/parser/messagevalue.cpp:210
+#: share/resource/core_tiles.q:1028 share/resource/core_tiles.q:1163
+#: share/resource/core_ui.q:1813
 msgid "Money"
 msgstr "Geld"
 
@@ -6378,11 +6372,11 @@ msgstr "Maus"
 msgid "Mouse wheel does..."
 msgstr "Mausrad-Aktion..."
 
-#: share/resource/core_ui.q:1832 share/resource/core_ui.q:2076
+#: share/resource/core_ui.q:1848 share/resource/core_ui.q:2093
 msgid "Move To"
 msgstr "Bewege zu"
 
-#: share/resource/core_ui.q:1843 share/resource/core_ui.q:2077
+#: share/resource/core_ui.q:1859 share/resource/core_ui.q:2094
 msgid "Move Towards"
 msgstr "Bewege in Richtung"
 
@@ -6406,7 +6400,7 @@ msgstr "Bewegung"
 msgid "Movement (%d turn%!1{s%})"
 msgstr "Bewegung (%d %1{Zug%|Züge%})"
 
-#: client/dialogs/processlistdialog.cpp:302
+#: client/dialogs/processlistdialog.cpp:303
 msgid "Msg"
 msgstr "Meld"
 
@@ -6422,13 +6416,12 @@ msgstr "Mein Computer"
 msgid "N - Name"
 msgstr "N - Name"
 
-#: client/dialogs/chartconfig.cpp:556 client/dialogs/processlistdialog.cpp:301
+#: client/dialogs/chartconfig.cpp:556 client/dialogs/processlistdialog.cpp:302
 #: client/dialogs/referencesortorder.cpp:37 client/dialogs/simulator.cpp:1226
 #: client/dialogs/specbrowserdialog.cpp:590
-#: client/widgets/simulationobjectinfo.cpp:256
-#: game/parser/messagevalue.cpp:133 game/spec/info/browser.cpp:272
-#: game/spec/info/browser.cpp:649 game/spec/info/filter.cpp:83
-#: game/spec/info/utils.cpp:41
+#: client/widgets/simulationobjectinfo.cpp:256 game/parser/messagevalue.cpp:133
+#: game/spec/info/browser.cpp:273 game/spec/info/browser.cpp:649
+#: game/spec/info/filter.cpp:83 game/spec/info/utils.cpp:41
 msgid "Name"
 msgstr "Name"
 
@@ -6466,7 +6459,7 @@ msgstr "Eingeborenes Volk: %s"
 
 #: client/dialogs/planetinfodialog.cpp:159
 #: client/dialogs/taxationdialog.cpp:676 client/tiles/tilefactory.cpp:59
-#: game/map/info/info.cpp:825 game/map/info/info.cpp:827
+#: game/map/info/info.cpp:828 game/map/info/info.cpp:830
 msgid "Natives"
 msgstr "Eingeborene"
 
@@ -6478,18 +6471,18 @@ msgstr "Eingeborene sind"
 msgid "Natives present"
 msgstr "Eingeborene vorhanden"
 
-#: game/map/info/info.cpp:918
+#: game/map/info/info.cpp:921
 msgid "Nearly undefended"
 msgstr "Fast unverteidigt"
 
-#: client/tiles/shipcargotile.cpp:108 share/resource/core_tiles.q:1157
-#: share/resource/core_tiles.q:797 share/resource/core_tiles.q:994
+#: client/tiles/shipcargotile.cpp:108 share/resource/core_tiles.q:1000
+#: share/resource/core_tiles.q:1163 share/resource/core_tiles.q:797
 msgid "Neu"
 msgstr "Neu"
 
-#: client/dialogs/buildstructuresdialog.cpp:832
-#: client/dialogs/planetinfodialog.cpp:145 game/element.cpp:67
-#: share/resource/core_tiles.q:916 share/resource/core_ui.q:1797
+#: client/dialogs/buildstructuresdialog.cpp:929
+#: client/dialogs/planetinfodialog.cpp:145 game/element.cpp:36
+#: share/resource/core_tiles.q:922 share/resource/core_ui.q:1813
 msgid "Neutronium"
 msgstr "Neutronium"
 
@@ -6497,7 +6490,7 @@ msgstr "Neutronium"
 msgid "Neutronium Density"
 msgstr "Neutronium-Dichte"
 
-#: client/dialogs/processlistdialog.cpp:340
+#: client/dialogs/processlistdialog.cpp:341
 msgid "New"
 msgstr "Neu"
 
@@ -6522,7 +6515,7 @@ msgstr "Neuer Marker"
 msgid "Next Position"
 msgstr "Nächste Position"
 
-#: client/dialogs/buildstructuresdialog.cpp:720
+#: client/dialogs/buildstructuresdialog.cpp:812
 msgid "Next at"
 msgstr "Nächster bei"
 
@@ -6560,16 +6553,16 @@ msgstr "Keine Ufos"
 msgid "No backup file configured"
 msgstr "Keine Backup-Datei konfiguriert"
 
-#: game/proxy/simulationsetupproxy.cpp:1128
+#: game/proxy/simulationsetupproxy.cpp:1130
 msgid "No base"
 msgstr "Keine Basis"
 
 #: client/tiles/visualscanhullinfotile.cpp:87
-#: client/tiles/visualscanhullinfotile.cpp:93 game/map/info/info.cpp:1462
+#: client/tiles/visualscanhullinfotile.cpp:93 game/map/info/info.cpp:1467
 msgid "No beams"
 msgstr "Keine Geschütze"
 
-#: game/map/planetinfo.cpp:744 share/resource/core_tiles.q:1037
+#: game/map/planetinfo.cpp:744 share/resource/core_tiles.q:1043
 msgid "No colonists."
 msgstr "Keine Kolonisten."
 
@@ -6577,7 +6570,7 @@ msgstr "Keine Kolonisten."
 msgid "No command matched the filter."
 msgstr "Kein Kommando passte auf den Filter-Ausdruck."
 
-#: util/plugin/consoleapplication.cpp:120
+#: util/plugin/consoleapplication.cpp:122
 msgid "No command specified. Use 'c2plugin -h' for help."
 msgstr "kein Kommando angegeben. Mit 'c2plugin -h' erhalten Sie Hilfe"
 
@@ -6621,7 +6614,7 @@ msgstr "Keine Informationen über Mineralien verfügbar."
 msgid "No information on natives available."
 msgstr "Keine Informationen über Eingeborene."
 
-#: client/dialogs/processlistdialog.cpp:540
+#: client/dialogs/processlistdialog.cpp:542
 msgid "No locks active in system."
 msgstr "Keine Locks im System aktiv."
 
@@ -6645,7 +6638,7 @@ msgstr "Keine Nachrichten gesendet bisher"
 msgid "No native population."
 msgstr "Keine Eingeborenen."
 
-#: share/resource/core_tiles.q:1081
+#: share/resource/core_tiles.q:1087
 msgid "No natives."
 msgstr "Keine Eingeborenen."
 
@@ -6673,7 +6666,7 @@ msgstr "Verzeichnis enthält keine Registrierung!"
 msgid "No ship effects considered"
 msgstr "Keine Schiffs-Effekte berücksichtigt"
 
-#: share/resource/core_tiles.q:1136
+#: share/resource/core_tiles.q:1142
 msgid "No starbase"
 msgstr "Keine Sternenbasis"
 
@@ -6681,7 +6674,7 @@ msgstr "Keine Sternenbasis"
 msgid "No torps"
 msgstr "Keine Torpedorohre"
 
-#: game/map/info/info.cpp:1535
+#: game/map/info/info.cpp:1540
 msgid "No torps/fighters"
 msgstr "Keine Torpedos/Startrampen"
 
@@ -6694,7 +6687,7 @@ msgid "No usable registration key found, assuming unregistered player"
 msgstr ""
 "Keine verwendbare Registrierung gefunden, es wird unregistriert gespielt"
 
-#: game/msg/outbox.cpp:46 game/player.cpp:139 game/player.cpp:149
+#: game/msg/outbox.cpp:46 game/player.cpp:132 game/player.cpp:142
 msgid "Nobody"
 msgstr "Niemand"
 
@@ -6706,7 +6699,7 @@ msgstr "An dieser Stelle hat niemand %s."
 msgid "Normal (plane)"
 msgstr "Normal (Ebene)"
 
-#: game/spec/info/browser.cpp:239
+#: game/spec/info/browser.cpp:240
 msgid "Normal Weapons"
 msgstr "Normale Waffen"
 
@@ -6714,15 +6707,15 @@ msgstr "Normale Waffen"
 msgid "Normal scoreboard"
 msgstr "Normale Punktetabelle"
 
-#: game/map/info/info.cpp:1311
+#: game/map/info/info.cpp:1316
 msgid "North-South"
 msgstr "Nord-Süd"
 
-#: share/resource/core_tiles.q:1224
+#: share/resource/core_tiles.q:1230
 msgid "Not building a ship"
 msgstr "Kein Schiff in Bau"
 
-#: game/pcc/browserhandler.cpp:301
+#: game/pcc/browserhandler.cpp:303
 msgid "Not logged in"
 msgstr "Nicht angemeldet"
 
@@ -6730,7 +6723,7 @@ msgstr "Nicht angemeldet"
 msgid "Not moving"
 msgstr "bewegt sich nicht"
 
-#: share/resource/core_tiles.q:1227
+#: share/resource/core_tiles.q:1233
 msgid "Not working on a starship"
 msgstr "Kein Raumschiff im Dock"
 
@@ -6746,8 +6739,7 @@ msgstr ""
 msgid "Nothing is known about this ship's cargo."
 msgstr "Über die Fracht dieses Raumschiffs ist nichts bekannt."
 
-#: client/dialogs/processlistdialog.cpp:709
-#: client/tiles/taskmessagetile.cpp:67
+#: client/dialogs/processlistdialog.cpp:711 client/tiles/taskmessagetile.cpp:67
 msgid "Notification"
 msgstr "Meldung"
 
@@ -6755,11 +6747,11 @@ msgstr "Meldung"
 msgid "Notifications"
 msgstr "Meldungen"
 
-#: share/resource/core_ui.q:1849
+#: share/resource/core_ui.q:1865
 msgid "Notify"
 msgstr "Meldung"
 
-#: share/resource/core_ui.q:2064
+#: share/resource/core_ui.q:2081
 msgid "Notify message"
 msgstr "Meldung"
 
@@ -6783,7 +6775,7 @@ msgstr "Anzahl Startrampen"
 msgid "Number of Torpedo Launchers"
 msgstr "Anzahl Torpedorohre"
 
-#: game/spec/racialabilitylist.cpp:240
+#: game/spec/racialabilitylist.cpp:241
 msgid "Number of crewmen that defect when the ship is boarded"
 msgstr "Anzahl überlaufender Crewmitglieder, wenn das Schiff geentert wird"
 
@@ -6797,18 +6789,17 @@ msgstr "O - Optionen"
 
 #: client/dialogs/alliancedialog.cpp:149 client/dialogs/buildshiporder.cpp:49
 #: client/dialogs/buildstarbasedialog.cpp:68
-#: client/dialogs/buildstructuresdialog.cpp:556
+#: client/dialogs/buildstructuresdialog.cpp:652
 #: client/dialogs/cargohistorydialog.cpp:58
 #: client/dialogs/cargotransferdialog.cpp:116
 #: client/dialogs/changepassword.cpp:56 client/dialogs/cloneship.cpp:134
-#: client/dialogs/consoledialog.cpp:372
-#: client/dialogs/exitconfirmation.cpp:163
+#: client/dialogs/consoledialog.cpp:372 client/dialogs/exitconfirmation.cpp:163
 #: client/dialogs/friendlycodedialog.cpp:84 client/dialogs/goaldialog.cpp:249
-#: client/dialogs/inboxdialog.cpp:90 client/dialogs/labelconfig.cpp:281
+#: client/dialogs/inboxdialog.cpp:90 client/dialogs/labelconfig.cpp:282
 #: client/dialogs/navchartdialog.cpp:514 client/dialogs/newdrawingtag.cpp:102
 #: client/dialogs/objectselectiondialog.cpp:371
-#: client/dialogs/outboxdialog.cpp:77 client/dialogs/processlistdialog.cpp:343
-#: client/dialogs/revertdialog.cpp:46 client/dialogs/sellsuppliesdialog.cpp:54
+#: client/dialogs/outboxdialog.cpp:77 client/dialogs/processlistdialog.cpp:344
+#: client/dialogs/revertdialog.cpp:46 client/dialogs/sellsuppliesdialog.cpp:59
 #: client/dialogs/shipspeeddialog.cpp:66 client/dialogs/taxationdialog.cpp:607
 #: client/dialogs/turnlistdialog.cpp:112
 #: client/dialogs/visualscandialog.cpp:1080
@@ -6866,7 +6857,7 @@ msgstr "Optionen"
 msgid "Options...\t[Ctrl-O]"
 msgstr "Optionen...\t[Strg-O]"
 
-#: game/interface/scriptapplication.cpp:380
+#: game/interface/scriptapplication.cpp:379
 msgid ""
 "Options:\n"
 "--game/-G DIR\tGame directory\n"
@@ -7018,7 +7009,7 @@ msgstr "Orbit von %s (Planet #%d)"
 msgid "Orders"
 msgstr "Aufträge"
 
-#: game/spec/info/browser.cpp:540
+#: game/spec/info/browser.cpp:541
 msgid "Origin"
 msgstr "Quelle"
 
@@ -7030,7 +7021,7 @@ msgstr "Andere"
 msgid "Other end"
 msgstr "Anderes Ende"
 
-#: client/dialogs/searchdialog.cpp:92 game/map/info/info.cpp:1587
+#: client/dialogs/searchdialog.cpp:92 game/map/info/info.cpp:1592
 msgid "Others"
 msgstr "Andere"
 
@@ -7046,7 +7037,7 @@ msgstr "Treibstoff alle in Zug %d"
 msgid "Overload mode"
 msgstr "Überlast-Modus"
 
-#: game/spec/racialabilitylist.cpp:365
+#: game/spec/racialabilitylist.cpp:366
 msgid "Overpopulation will eat supplies"
 msgstr "Überbevölkerung isst Vorräte"
 
@@ -7062,7 +7053,7 @@ msgstr "Übersicht"
 msgid "Overview %d"
 msgstr "Übersicht %d"
 
-#: game/map/info/info.cpp:1317
+#: game/map/info/info.cpp:1322
 msgid "Own Minefields"
 msgstr "Eigene Minenfelder"
 
@@ -7076,8 +7067,7 @@ msgstr "Eigene Schiffe"
 
 #: client/dialogs/minefieldinfo.cpp:424
 #: client/dialogs/referencesortorder.cpp:38
-#: client/widgets/simulationobjectinfo.cpp:255
-#: game/parser/messagevalue.cpp:153
+#: client/widgets/simulationobjectinfo.cpp:255 game/parser/messagevalue.cpp:153
 msgid "Owner"
 msgstr "Besitzer"
 
@@ -7157,7 +7147,7 @@ msgstr "PCC2 Spiel-Server v%s - (c) 2019-2024 Stefan Reuther"
 msgid "PCC2 Plugin Installer"
 msgstr "PCC2-Plugin-Installer"
 
-#: util/plugin/consoleapplication.cpp:385
+#: util/plugin/consoleapplication.cpp:387
 msgid "PCC2 Plugin Manager v%s - (c) 2015-2024 Stefan Reuther"
 msgstr "PCC2 Plugin-Manager v%s - (c) 2015-2024 Stefan Reuther"
 
@@ -7177,13 +7167,17 @@ msgstr "PCC2 Result-Entpacker v%s - (c) 2010-2024 Stefan Reuther"
 msgid "PCC2 Script Compiler v%s - (c) 2017-2024 Stefan Reuther"
 msgstr "PCC2 Script-Compiler v%s - (c) 2017-2024 Stefan Reuther"
 
-#: game/interface/scriptapplication.cpp:394
+#: game/interface/scriptapplication.cpp:393
 msgid "PCC2 Script Engine v%s - (c) 2017-2024 Stefan Reuther"
 msgstr "PCC2 Script-Engine v%s - (c) 2017-2024 Stefan Reuther"
 
 #: game/v3/maketurnapplication.cpp:135
 msgid "PCC2 Turn File Compiler v%s - (c) 2010-2024 Stefan Reuther"
 msgstr "PCC2 Turn-File-Compiler v%s - (c) 2010-2024 Stefan Reuther"
+
+#: client/si/userside.cpp:28
+msgid "PCC2 is currently executing a script."
+msgstr "PCC2 führt geraden ein Script aus."
 
 #: client/dialogs/multitransfer.cpp:519
 msgid ""
@@ -7216,7 +7210,7 @@ msgstr "Parameter zu \"-bpp\" muss 8, 16 oder 32 sein"
 msgid "Parameter to \"-size\" is out of range"
 msgstr "Parameter zu \"-size\" außerhalb des gültigen Bereichs"
 
-#: game/nu/browserhandler.cpp:205 game/pcc/browserhandler.cpp:486
+#: game/nu/browserhandler.cpp:207 game/pcc/browserhandler.cpp:502
 msgid "Parse error"
 msgstr "Parse-Fehler"
 
@@ -7244,7 +7238,7 @@ msgstr "Automatisch Gebäude auf allen Planeten bauen?"
 msgid "Pillage max. %d turn%!1{s%}"
 msgstr "Pillage max. %d %1{Zug%|Züge%}"
 
-#: game/spec/racialabilitylist.cpp:270
+#: game/spec/racialabilitylist.cpp:271
 msgid "Pillage mission"
 msgstr "Plündern-Mission"
 
@@ -7264,7 +7258,8 @@ msgstr "Plane ein %s"
 msgid "Planet"
 msgstr "Planet"
 
-#: client/map/starchartoverlay.cpp:237 game/reference.cpp:78
+#: client/map/starchartoverlay.cpp:237 game/reference.cpp:57
+#: game/vcr/overview.cpp:34
 msgid "Planet #%d"
 msgstr "Planet #%d"
 
@@ -7283,7 +7278,7 @@ msgstr ""
 msgid "Planet #%d: %s"
 msgstr "Planet #%d: %s"
 
-#: game/map/shiptransporter.cpp:45
+#: game/map/shiptransporter.cpp:45 game/vcr/object.cpp:41
 msgid "Planet %d"
 msgstr "Planet %d"
 
@@ -7303,11 +7298,11 @@ msgstr "Planeten-Anweisungen #%d: %s"
 msgid "Planet alliance"
 msgstr "Planeten-Allianz"
 
-#: game/map/planetinfo.cpp:658 share/resource/core_tiles.q:1077
+#: game/map/planetinfo.cpp:658 share/resource/core_tiles.q:1083
 msgid "Planet has natives."
 msgstr "Planet hat Eingeborene."
 
-#: share/resource/core_tiles.q:1241 share/resource/core_tiles.q:954
+#: share/resource/core_tiles.q:1247 share/resource/core_tiles.q:960
 msgid "Planet overview"
 msgstr "Planeten-Überblick"
 
@@ -7321,9 +7316,9 @@ msgstr "Planeten-Kommandocode: %s"
 
 #: client/dialogs/labelconfig.cpp:147 client/dialogs/searchdialog.cpp:89
 #: client/widgets/chartmouseconfig.cpp:25 game/map/info/browser.cpp:231
-#: game/map/info/info.cpp:1308 game/map/info/info.cpp:1339
-#: game/map/info/info.cpp:600 game/map/info/info.cpp:826
-#: game/map/info/info.cpp:875 game/score/chartbuilder.cpp:113
+#: game/map/info/info.cpp:1313 game/map/info/info.cpp:1344
+#: game/map/info/info.cpp:603 game/map/info/info.cpp:829
+#: game/map/info/info.cpp:878 game/score/chartbuilder.cpp:113
 #: game/score/tablebuilder.cpp:124
 msgid "Planets"
 msgstr "Planeten"
@@ -7332,7 +7327,7 @@ msgstr "Planeten"
 msgid "Planets Command Center II (c2ng)"
 msgstr "Planets Command Center II (c2ng)"
 
-#: game/map/info/info.cpp:960
+#: game/map/info/info.cpp:964
 msgid "Planets by Experience Level"
 msgstr "Planeten nach Erfahrungsstufe"
 
@@ -7348,17 +7343,17 @@ msgstr "Wiedergabe"
 msgid "Played objects only"
 msgstr "Nur gespielte Objekte"
 
-#: game/spec/info/browser.cpp:260 game/spec/info/filter.cpp:144
+#: game/spec/info/browser.cpp:261 game/spec/info/filter.cpp:144
 #: game/spec/info/utils.cpp:37
 msgid "Player"
 msgstr "Spieler"
 
-#: game/reference.cpp:75
+#: game/reference.cpp:54
 msgid "Player #%d"
 msgstr "Spieler #%d"
 
-#: client/screens/playerscreen.cpp:450 game/player.cpp:139 game/player.cpp:144
-#: game/player.cpp:149
+#: client/screens/playerscreen.cpp:450 game/player.cpp:132 game/player.cpp:137
+#: game/player.cpp:142
 msgid "Player %d"
 msgstr "Spieler %d"
 
@@ -7414,11 +7409,11 @@ msgstr "Plugin '%s' wurde installiert."
 msgid "Plugin '%s' has been updated."
 msgstr "Plugin '%s' wurde aktualisiert."
 
-#: util/plugin/consoleapplication.cpp:307
+#: util/plugin/consoleapplication.cpp:309
 msgid "Plugin '%s' is not known."
 msgstr "Plugin '%s' ist nicht bekannt."
 
-#: util/plugin/consoleapplication.cpp:171
+#: util/plugin/consoleapplication.cpp:173
 msgid "Plugin '%s': %s"
 msgstr "Plugin '%s': %s"
 
@@ -7440,7 +7435,7 @@ msgstr "Plugins"
 msgid "Polygon: set of lines, starting here"
 msgstr "Polygon: Linien, hier beginnend"
 
-#: share/resource/core_tiles.q:880 share/resource/core_tiles.q:895
+#: share/resource/core_tiles.q:880 share/resource/core_tiles.q:901
 msgid "Population"
 msgstr "Bevölkerung"
 
@@ -7465,11 +7460,11 @@ msgstr "Vordefinierte Ausdrücke"
 msgid "Predefined queries"
 msgstr "Vordefinierte Abfragen"
 
-#: share/resource/core_ui.q:2096
+#: share/resource/core_ui.q:2113
 msgid "Predict to cursor"
 msgstr "Vorhersage bis Cursor"
 
-#: share/resource/core_ui.q:2096
+#: share/resource/core_ui.q:2113
 msgid "Predict to end"
 msgstr "Vorhersage bis Ende"
 
@@ -7517,7 +7512,7 @@ msgstr "Vorlieben | Benutzerschnittstelle | Tausender-Trennzeichen"
 msgid "Preferences | User Interface | Use clans everywhere"
 msgstr "Vorlieben | Benutzerschnittstelle | Überall Clans anzeigen"
 
-#: game/spec/racialabilitylist.cpp:367
+#: game/spec/racialabilitylist.cpp:368
 msgid "Prefers hot planets"
 msgstr "Bevorzugt heiße Planeten"
 
@@ -7525,7 +7520,7 @@ msgstr "Bevorzugt heiße Planeten"
 msgid "Prefix"
 msgstr "Präfix"
 
-#: client/dialogs/keymapdialog.cpp:225 client/dialogs/keymapdialog.cpp:235
+#: client/dialogs/keymapdialog.cpp:229 client/dialogs/keymapdialog.cpp:239
 msgid "Press Shift-ESC to close this window."
 msgstr "Drücke Umschalt-ESC, um dieses Fenster zu schließen"
 
@@ -7541,11 +7536,11 @@ msgstr "Drücke [W], um den Kurs des Schiffs zu ändern."
 msgid "Press space on a field to change it."
 msgstr "Drücke die Leertaste, um ein Feld zu ändern."
 
-#: client/dialogs/keymapdialog.cpp:155
+#: client/dialogs/keymapdialog.cpp:157
 msgid "Press the key for which you want information."
 msgstr "Drücke die Taste, für die du Information wünschst."
 
-#: client/dialogs/processlistdialog.cpp:304
+#: client/dialogs/processlistdialog.cpp:305
 msgid "Pri"
 msgstr "Pri"
 
@@ -7570,7 +7565,7 @@ msgstr "Primärziel wurde auf %d Raumschiff%!1{en%} geändert."
 msgid "Primary Enemy: %s"
 msgstr "Primärziel: %s"
 
-#: client/dialogs/processlistdialog.cpp:713
+#: client/dialogs/processlistdialog.cpp:715
 msgid "Priority"
 msgstr "Priorität"
 
@@ -7578,13 +7573,16 @@ msgstr "Priorität"
 msgid "Proceed"
 msgstr "Fortsetzen"
 
-#: client/dialogs/processlistdialog.cpp:523
-#: client/dialogs/processlistdialog.cpp:697
-#: client/screens/playerscreen.cpp:151
+#: client/si/userside.cpp:333
+msgid "Process %d \"%s\" interrupted unexpectedly"
+msgstr "Prozess %d \"%s\" wurde unerwartet unterbrochen"
+
+#: client/dialogs/processlistdialog.cpp:525
+#: client/dialogs/processlistdialog.cpp:699 client/screens/playerscreen.cpp:151
 msgid "Process Manager"
 msgstr "Prozess-Manager"
 
-#: game/map/info/info.cpp:656
+#: game/map/info/info.cpp:659
 msgid "Production"
 msgstr "Produktion"
 
@@ -7630,7 +7628,7 @@ msgstr "R - Wiederholung"
 msgid "RGA max. %d turn%!1{s%}"
 msgstr "RGA max. %d %1{Zug%|Züge%}"
 
-#: game/pcc/turnloader.cpp:83 game/v3/resultloader.cpp:67
+#: game/pcc/turnloader.cpp:66 game/v3/resultloader.cpp:67
 msgid "RST"
 msgstr "RST"
 
@@ -7653,6 +7651,10 @@ msgstr "Rassen"
 #: client/dialogs/specbrowserdialog.cpp:621
 msgid "Racial Abilities"
 msgstr "Rassen-Eigenschaften"
+
+#: game/spec/racialabilitylist.cpp:699
+msgid "Racial Advantages"
+msgstr "Rassen-Vorteile"
 
 #: client/dialogs/hullfunctionview.cpp:302
 msgid "Racial ability"
@@ -7722,7 +7724,7 @@ msgstr "Lese Konfiguration aus %s..."
 msgid "Real ID"
 msgstr "Reale ID"
 
-#: game/spec/racialabilitylist.cpp:299
+#: game/spec/racialabilitylist.cpp:300
 msgid "Rebel Ground Attack mission"
 msgstr "Bodenangriffs-Mission"
 
@@ -7734,8 +7736,8 @@ msgstr "Anhänge empfangen"
 msgid "Received attachment \"%s\"."
 msgstr "Anhang \"%s\" empfangen."
 
-#: game/spec/info/info.cpp:320 game/spec/info/info.cpp:352
-#: game/spec/info/info.cpp:393 game/spec/info/utils.cpp:32
+#: game/spec/info/info.cpp:333 game/spec/info/info.cpp:366
+#: game/spec/info/info.cpp:407 game/spec/info/utils.cpp:32
 msgid "Recharge time"
 msgstr "Aufladezeit"
 
@@ -7756,11 +7758,11 @@ msgstr "Rechteck"
 msgid "Recycle Ship"
 msgstr "Raumschiff verschrotten"
 
-#: share/resource/core_ui.q:2044
+#: share/resource/core_ui.q:2061
 msgid "Recycle a ship"
 msgstr "Raumschiff verschrotten"
 
-#: share/resource/core_ui.q:2015
+#: share/resource/core_ui.q:2032
 msgid "Recycle this ship"
 msgstr "Raumschiff verschrotten"
 
@@ -7768,15 +7770,15 @@ msgstr "Raumschiff verschrotten"
 msgid "Recycling %s"
 msgstr "Verschrotte %s"
 
-#: game/map/info/info.cpp:982
+#: game/map/info/info.cpp:986
 msgid "Recycling a ship"
 msgstr "Verschrottet ein Raumschiff"
 
-#: game/spec/racialabilitylist.cpp:211
+#: game/spec/racialabilitylist.cpp:212
 msgid "Reduced %s"
 msgstr "Verringerte %s"
 
-#: game/spec/racialabilitylist.cpp:158
+#: game/spec/racialabilitylist.cpp:159
 msgid "Reduced %s (%s)"
 msgstr "Verringerte %s (%s)"
 
@@ -7792,7 +7794,7 @@ msgstr "Registriert"
 msgid "Regular starchart"
 msgstr "Normale Sternenkarte"
 
-#: client/dialogs/buildstructuresdialog.cpp:390
+#: client/dialogs/buildstructuresdialog.cpp:523
 #: client/widgets/costsummarylist.cpp:198
 msgid "Remaining"
 msgstr "Verbleibend"
@@ -7845,7 +7847,7 @@ msgstr "Löschen"
 msgid "Remove leader from fleet?"
 msgstr "Führer aus der Flotte entfernen?"
 
-#: util/plugin/consoleapplication.cpp:301
+#: util/plugin/consoleapplication.cpp:303
 msgid "Removing plugin '%s'..."
 msgstr "Entferne Plugin '%s'..."
 
@@ -7861,7 +7863,7 @@ msgstr "Raumschiff #%d umbenennen"
 msgid "Repair base"
 msgstr "Basis reparieren"
 
-#: share/resource/core_tiles.q:1206
+#: share/resource/core_tiles.q:1212
 msgid "Repair/recycle a starship..."
 msgstr "Raumschiff reparieren/verschrotten"
 
@@ -7869,7 +7871,7 @@ msgstr "Raumschiff reparieren/verschrotten"
 msgid "Repairing %s"
 msgstr "Repariere %s"
 
-#: game/map/info/info.cpp:983
+#: game/map/info/info.cpp:987
 msgid "Repairing a ship"
 msgstr "Repariert ein Schiff"
 
@@ -7946,11 +7948,11 @@ msgstr "Ressourcen-Datei (Grafik)"
 msgid "Resources Needed"
 msgstr "Benötigte Ressourcen"
 
-#: share/resource/core_ui.q:2070
+#: share/resource/core_ui.q:2087
 msgid "Restart task from beginning"
 msgstr "Beginne Aufgabe erneut"
 
-#: game/nu/turnloader.cpp:530
+#: game/nu/turnloader.cpp:51
 msgid "Result file available"
 msgstr "Result-Datei verfügbar"
 
@@ -7966,7 +7968,7 @@ msgstr "Ergebnisse nach %d Simulation%!1{en%}"
 msgid "Return to race selection"
 msgstr "Zurück zur Spielauswahl"
 
-#: client/dialogs/outboxdialog.cpp:356 client/si/commands.cpp:2500
+#: client/dialogs/outboxdialog.cpp:355 client/si/commands.cpp:2500
 msgid "Revise Messages"
 msgstr "Nachrichten überarbeiten"
 
@@ -7986,11 +7988,11 @@ msgstr "Aufstand — Kolonisten zahlen %d mc nicht."
 msgid "Riots — Natives do not pay taxes."
 msgstr "Aufstand — Eingeborene zahlen keine Steuern."
 
-#: game/spec/racialabilitylist.cpp:276
+#: game/spec/racialabilitylist.cpp:277
 msgid "Rob failure odds"
 msgstr "Rob-Fehlschlagsrate"
 
-#: game/spec/racialabilitylist.cpp:275
+#: game/spec/racialabilitylist.cpp:276
 msgid "Rob mission"
 msgstr "Rob-Mission"
 
@@ -7998,15 +8000,15 @@ msgstr "Rob-Mission"
 msgid "Round wrap (circular, PWrap)"
 msgstr "Rund (kreisförmig, PWrap)"
 
-#: client/dialogs/processlistdialog.cpp:702
+#: client/dialogs/processlistdialog.cpp:704
 msgid "Run"
 msgstr "Ausführen"
 
-#: interpreter/process.cpp:1980
+#: interpreter/process.cpp:2013
 msgid "Runnable"
 msgstr "Auszuführen"
 
-#: interpreter/process.cpp:1981
+#: interpreter/process.cpp:2014
 msgid "Running"
 msgstr "Läuft"
 
@@ -8014,9 +8016,9 @@ msgstr "Läuft"
 msgid "S - Save"
 msgstr "S - Speichern"
 
-#: client/dialogs/buildstructuresdialog.cpp:766
-#: client/dialogs/buildstructuresdialog.cpp:821
-#: client/dialogs/buildstructuresdialog.cpp:873
+#: client/dialogs/buildstructuresdialog.cpp:862
+#: client/dialogs/buildstructuresdialog.cpp:918
+#: client/dialogs/buildstructuresdialog.cpp:968
 msgid "S - Sell Supplies"
 msgstr "S - Vorräte verk."
 
@@ -8074,7 +8076,7 @@ msgstr "Einstellungen speichern"
 msgid "Save Simulation"
 msgstr "Simulation speichern"
 
-#: share/resource/core_ui.q:1688 share/resource/core_ui.q:1698
+#: share/resource/core_ui.q:1704 share/resource/core_ui.q:1714
 msgid "Save Task"
 msgstr "Aufgabe speichern"
 
@@ -8160,6 +8162,10 @@ msgstr "Vorige Ansichten"
 msgid "Screenshot saved as \"%s\""
 msgstr "Screenshot gespeichert als \"%s\""
 
+#: client/si/userside.cpp:36
+msgid "Script Interpreter"
+msgstr "Script-Interpreter"
+
 #: share/resource/core_global.q:418
 msgid "Script command..."
 msgstr "Script-Befehl..."
@@ -8168,14 +8174,13 @@ msgstr "Script-Befehl..."
 msgid "Script file"
 msgstr "Scriptdatei"
 
-#: client/dialogs/specbrowserdialog.cpp:180
-#: client/screens/playerscreen.cpp:135
+#: client/dialogs/specbrowserdialog.cpp:180 client/screens/playerscreen.cpp:135
 msgid "Search"
 msgstr "Suche"
 
 #: client/dialogs/searchdialog.cpp:125 client/dialogs/searchdialog.cpp:387
-#: client/dialogs/searchdialog.cpp:557 client/dialogs/searchdialog.cpp:579
-#: client/dialogs/searchdialog.cpp:823
+#: client/dialogs/searchdialog.cpp:558 client/dialogs/searchdialog.cpp:580
+#: client/dialogs/searchdialog.cpp:825
 msgid "Search Object"
 msgstr "Objekt suchen"
 
@@ -8211,7 +8216,7 @@ msgstr "Suchanfrage"
 msgid "Search text not found."
 msgstr "Suchbegriff nicht gefunden."
 
-#: client/dialogs/searchdialog.cpp:392 client/dialogs/searchdialog.cpp:823
+#: client/dialogs/searchdialog.cpp:392 client/dialogs/searchdialog.cpp:825
 msgid "Search type"
 msgstr "Art der Suche"
 
@@ -8269,8 +8274,7 @@ msgstr "Sternenbasis auswählen"
 msgid "Select Waypoint"
 msgstr "Wähle Zielpunkt"
 
-#: client/screens/playerscreen.cpp:158
-#: client/widgets/chartdisplayconfig.cpp:28
+#: client/screens/playerscreen.cpp:158 client/widgets/chartdisplayconfig.cpp:28
 msgid "Selection"
 msgstr "Auswahl"
 
@@ -8286,13 +8290,13 @@ msgstr "Auswahl %c"
 msgid "Selection Manager"
 msgstr "Auswahl-Manager"
 
-#: game/spec/racialabilitylist.cpp:279
+#: game/spec/racialabilitylist.cpp:280
 msgid "Self Repair mission"
 msgstr "Selbstreparatur-Mission"
 
-#: client/dialogs/sellsuppliesdialog.cpp:122
-#: client/dialogs/sellsuppliesdialog.cpp:42
-#: client/dialogs/sellsuppliesdialog.cpp:91
+#: client/dialogs/sellsuppliesdialog.cpp:129
+#: client/dialogs/sellsuppliesdialog.cpp:48
+#: client/dialogs/sellsuppliesdialog.cpp:96
 msgid "Sell Supplies"
 msgstr "Vorräte verkaufen"
 
@@ -8304,7 +8308,7 @@ msgstr "Vorräte verkaufen"
 msgid "Semicolon-separated values"
 msgstr "Semikolon-getrennte Werte"
 
-#: client/dialogs/messageeditor.cpp:196
+#: client/dialogs/messageeditor.cpp:199
 msgid "Send"
 msgstr "Senden"
 
@@ -8321,7 +8325,7 @@ msgstr ""
 msgid "Send message to file"
 msgstr "Nachricht in Datei senden"
 
-#: client/dialogs/messageeditor.cpp:244
+#: client/dialogs/messageeditor.cpp:247
 msgid "Send this message?"
 msgstr "Diese Nachricht senden?"
 
@@ -8333,11 +8337,11 @@ msgstr "Sensoren-Reichweite"
 msgid "Sensor visibility"
 msgstr "Sensor-Sichtbarkeit"
 
-#: game/spec/racialabilitylist.cpp:672
+#: game/spec/racialabilitylist.cpp:686
 msgid "Sensors"
 msgstr "Sensoren"
 
-#: game/pcc/gamefolder.cpp:112
+#: game/pcc/gamefolder.cpp:104
 msgid "Server-side game directory"
 msgstr "Spielverzeichnis auf Server"
 
@@ -8353,7 +8357,7 @@ msgstr "Sternenbasis-Verteidigung setzen"
 msgid "Set Base Fighters"
 msgstr "Anzahl Jäger setzen"
 
-#: share/resource/core_ui.q:1870 share/resource/core_ui.q:2065
+#: share/resource/core_ui.q:1886 share/resource/core_ui.q:2082
 msgid "Set Comment"
 msgstr "Setze Notiz"
 
@@ -8369,7 +8373,7 @@ msgstr "Schaden setzen"
 msgid "Set Defense"
 msgstr "Verteidigung setzen"
 
-#: share/resource/core_ui.q:2089
+#: share/resource/core_ui.q:2106
 msgid "Set Enemy"
 msgstr "Setze Primärziel"
 
@@ -8381,8 +8385,8 @@ msgstr "Triebwerkstyp setzen"
 msgid "Set Experience Level"
 msgstr "Erfahrungsstufe setzen"
 
-#: share/resource/core_ui.q:2090 share/resource/core_ui.q:2101
-#: share/resource/core_ui.q:2116
+#: share/resource/core_ui.q:2107 share/resource/core_ui.q:2118
+#: share/resource/core_ui.q:2133
 msgid "Set FCode"
 msgstr "Setze Kommandocode"
 
@@ -8410,11 +8414,11 @@ msgstr "Setzen Verlassen Abbruch"
 msgid "Set Mass"
 msgstr "Masse setzen"
 
-#: share/resource/core_ui.q:2091 share/resource/core_ui.q:2115
+#: share/resource/core_ui.q:2108 share/resource/core_ui.q:2132
 msgid "Set Mission"
 msgstr "Setze Mission"
 
-#: share/resource/core_ui.q:1897 share/resource/core_ui.q:2067
+#: share/resource/core_ui.q:1913 share/resource/core_ui.q:2084
 msgid "Set Name"
 msgstr "Name setzen"
 
@@ -8446,8 +8450,8 @@ msgstr "Schilde setzen"
 msgid "Set Ship Name"
 msgstr "Name setzen"
 
-#: client/dialogs/shipspeeddialog.cpp:49 share/resource/core_ui.q:1920
-#: share/resource/core_ui.q:2075
+#: client/dialogs/shipspeeddialog.cpp:49 share/resource/core_ui.q:1937
+#: share/resource/core_ui.q:2092
 msgid "Set Speed"
 msgstr "Geschwindigkeit setzen"
 
@@ -8459,7 +8463,7 @@ msgstr "Setze Sternenbasis-Beam-Tech"
 msgid "Set Starbase Torpedo Tech"
 msgstr "Setze Sternenbasis-Torpedo-Tech"
 
-#: share/resource/core_ui.q:1926 share/resource/core_ui.q:2078
+#: share/resource/core_ui.q:1943 share/resource/core_ui.q:2095
 msgid "Set Waypoint"
 msgstr "Setze Kurs"
 
@@ -8509,7 +8513,7 @@ msgstr "Form"
 msgid "Shield"
 msgstr "Schilde"
 
-#: game/spec/info/info.cpp:298
+#: game/spec/info/info.cpp:310
 msgid "Shield Bonus"
 msgstr "Schild-Bonus"
 
@@ -8532,8 +8536,8 @@ msgstr "Schiff"
 
 #: client/map/starchartoverlay.cpp:234 game/actions/changebuildqueue.cpp:257
 #: game/map/ship.cpp:429 game/map/universe.cpp:41
-#: game/proxy/simulationsetupproxy.cpp:144 game/reference.cpp:77
-#: share/resource/core_game.q:465
+#: game/proxy/simulationsetupproxy.cpp:144 game/reference.cpp:56
+#: game/vcr/overview.cpp:36 share/resource/core_game.q:465
 msgid "Ship #%d"
 msgstr "Schiff #%d"
 
@@ -8547,7 +8551,7 @@ msgid "Ship #%d: %s"
 msgstr "Schiff #%d: %s"
 
 #: game/map/shiptransporter.cpp:51 game/sim/ship.cpp:340 game/sim/ship.cpp:347
-#: share/resource/core_game.q:104
+#: game/vcr/object.cpp:43 share/resource/core_game.q:104
 msgid "Ship %d"
 msgstr "Schiff %d"
 
@@ -8574,8 +8578,7 @@ msgid "Ship Functions"
 msgstr "Schiffs-Funktionen"
 
 #: client/dialogs/cargohistorydialog.cpp:22
-#: client/dialogs/cargohistorydialog.cpp:61
-#: client/screens/playerscreen.cpp:157
+#: client/dialogs/cargohistorydialog.cpp:61 client/screens/playerscreen.cpp:157
 msgid "Ship History"
 msgstr "Schiffs-Aufzeichnungen"
 
@@ -8592,7 +8595,7 @@ msgid "Ship List"
 msgstr "Schiffs-Liste"
 
 #: share/resource/core_global.q:151 share/resource/core_ui.q:1180
-#: share/resource/core_ui.q:1907 share/resource/core_ui.q:740
+#: share/resource/core_ui.q:1923 share/resource/core_ui.q:740
 #: share/resource/core_ui.q:857 share/resource/core_ui.q:861
 #: share/resource/core_ui.q:869 share/resource/core_ui.q:874
 msgid "Ship Mission"
@@ -8628,7 +8631,7 @@ msgstr "Schiffs-Allianz"
 msgid "Ship and Planet Labels"
 msgstr "Schiff- und Planeten-Beschriftung"
 
-#: game/spec/racialabilitylist.cpp:674
+#: game/spec/racialabilitylist.cpp:688
 msgid "Ship building"
 msgstr "Schiffsbau"
 
@@ -8644,7 +8647,7 @@ msgstr "Schiff kann keine Torpedorohre haben."
 msgid "Ship friendly code"
 msgstr "Schiffs-Kommandocode"
 
-#: game/spec/racialabilitylist.cpp:683
+#: game/spec/racialabilitylist.cpp:697
 msgid "Ship functions"
 msgstr "Schiffsfunktionen"
 
@@ -8661,12 +8664,12 @@ msgid "Ship trails"
 msgstr "Raumschiffs-Spuren"
 
 #: client/dialogs/labelconfig.cpp:148 client/widgets/chartmouseconfig.cpp:26
-#: game/map/info/info.cpp:1337 game/map/info/info.cpp:1457
-#: game/map/info/info.cpp:1530 game/spec/racialabilitylist.cpp:673
+#: game/map/info/info.cpp:1342 game/map/info/info.cpp:1462
+#: game/map/info/info.cpp:1535 game/spec/racialabilitylist.cpp:687
 msgid "Ships"
 msgstr "Schiffe"
 
-#: game/map/info/info.cpp:1090
+#: game/map/info/info.cpp:1094
 msgid "Ships Being Built"
 msgstr "Im Bau befindliche Schiffe"
 
@@ -8674,15 +8677,15 @@ msgstr "Im Bau befindliche Schiffe"
 msgid "Ships are dots"
 msgstr "Raumschiffe sind Punkte"
 
-#: game/map/info/info.cpp:1229
+#: game/map/info/info.cpp:1234
 msgid "Ships by Experience Level"
 msgstr "Schiffe nach Erfahrungsstufe"
 
-#: game/map/info/info.cpp:1260
+#: game/map/info/info.cpp:1265
 msgid "Ships by Hull Type"
 msgstr "Schiffe nach Rumpf-Typ"
 
-#: game/spec/racialabilitylist.cpp:296
+#: game/spec/racialabilitylist.cpp:297
 msgid "Ships can build fighters using friendly code \"lfm\""
 msgstr "Schiffe können mittels Kommandocode \"lfm\" Jäger bauen"
 
@@ -8714,15 +8717,15 @@ msgstr "Schiffe nahe %s"
 msgid "Ships start with experience"
 msgstr "Schiffe beginnen mit Erfahrung"
 
-#: game/map/info/info.cpp:1119
+#: game/map/info/info.cpp:1123
 msgid "Ships w/o fuel"
 msgstr "Schiffe ohne Sprit"
 
-#: share/resource/core_ui.q:2057
+#: share/resource/core_ui.q:2074
 msgid "Shipyard"
 msgstr "Raumdock"
 
-#: game/spec/info/browser.cpp:429 share/resource/core_config.q:64
+#: game/spec/info/browser.cpp:430 share/resource/core_config.q:64
 msgid "Short name"
 msgstr "Kurzname"
 
@@ -8815,7 +8818,7 @@ msgstr "Schiff einem Verbündeten zeigen"
 msgid "Show ship to..."
 msgstr "Zeige Schiff..."
 
-#: share/resource/core_ui.q:2097
+#: share/resource/core_ui.q:2114
 msgid "Show turn distances"
 msgstr "Entfernungen anzeigen"
 
@@ -9028,7 +9031,7 @@ msgstr "Standard-Allianz"
 msgid "Starbase"
 msgstr "Sternenbasis"
 
-#: game/reference.cpp:79
+#: game/reference.cpp:58
 msgid "Starbase #%d"
 msgstr "Sternenbasis #%d"
 
@@ -9040,7 +9043,7 @@ msgstr "Sternenbasis #%d hat keinen Planeten, wird gelöscht"
 msgid "Starbase #%d: %s"
 msgstr "Sternenbasis #%d: %s"
 
-#: share/resource/core_ui.q:2025
+#: share/resource/core_ui.q:2042
 msgid "Starbase Commands"
 msgstr "Sternenbasis-Befehle"
 
@@ -9069,19 +9072,19 @@ msgstr "Sternenbasis-Anweisungen #%d: %s"
 msgid "Starbase Torpedoes"
 msgstr "Sternenbasis-Torpedos"
 
-#: game/map/planetinfo.cpp:820 share/resource/core_tiles.q:1134
+#: game/map/planetinfo.cpp:820 share/resource/core_tiles.q:1140
 msgid "Starbase being built"
 msgstr "Sternenbasis wird gebaut"
 
-#: share/resource/core_tiles.q:958
+#: share/resource/core_tiles.q:964
 msgid "Starbase being built..."
 msgstr "Sternenbasis wird gebaut..."
 
-#: game/map/planetinfo.cpp:818 share/resource/core_tiles.q:1132
+#: game/map/planetinfo.cpp:818 share/resource/core_tiles.q:1138
 msgid "Starbase present"
 msgstr "Sternenbasis im Orbit"
 
-#: share/resource/core_ui.q:2004
+#: share/resource/core_ui.q:2021
 msgid "Starbase screen"
 msgstr "Sternenbasis-Bildschirm"
 
@@ -9090,7 +9093,7 @@ msgid "Starbase shipyard order"
 msgstr "Raumdock-Auftrag"
 
 #: client/dialogs/searchdialog.cpp:90 game/map/info/browser.cpp:287
-#: game/map/info/info.cpp:603
+#: game/map/info/info.cpp:606
 msgid "Starbases"
 msgstr "Sternenbasen"
 
@@ -9117,8 +9120,7 @@ msgstr "Sternkarten-Zeichnungen"
 msgid "Starchart borders"
 msgstr "Sternkarten-Grenzen"
 
-#: client/dialogs/shipcostcalculator.cpp:56
-#: client/screens/playerscreen.cpp:139
+#: client/dialogs/shipcostcalculator.cpp:56 client/screens/playerscreen.cpp:139
 msgid "Starship Cost Calculator"
 msgstr "Schiffskostenrechner"
 
@@ -9127,28 +9129,28 @@ msgid "Starship Hulls"
 msgstr "Schiffs-Rümpfe"
 
 #: client/dialogs/searchdialog.cpp:88 game/map/info/browser.cpp:308
-#: game/map/info/info.cpp:1313 game/map/info/info.cpp:604
+#: game/map/info/info.cpp:1318 game/map/info/info.cpp:607
 msgid "Starships"
 msgstr "Raumschiffe"
 
-#: share/resource/core_ui.q:2128
+#: share/resource/core_ui.q:2145
 msgid "Start new fleet"
 msgstr "Beginne neue Flotte"
 
-#: client/application.cpp:775
+#: client/application.cpp:774
 msgid "Starting GUI..."
 msgstr "Starte GUI..."
 
-#: client/application.cpp:812
+#: client/application.cpp:811
 msgid "Starting background thread..."
 msgstr "Starte Hintergrund-Thread..."
 
-#: client/application.cpp:801
+#: client/application.cpp:800
 msgid "Starting network..."
 msgstr "Starte Netzwerk..."
 
 #: client/dialogs/alliancedialog.cpp:137
-#: client/dialogs/processlistdialog.cpp:305
+#: client/dialogs/processlistdialog.cpp:306
 msgid "Status"
 msgstr "Status"
 
@@ -9156,11 +9158,15 @@ msgstr "Status"
 msgid "Stop"
 msgstr "Stop"
 
+#: client/si/userside.cpp:100
+msgid "Stopping..."
+msgstr "Unterbrechen..."
+
 #: game/parser/messagevalue.cpp:238
 msgid "Storm Status"
 msgstr "Sturm-Status"
 
-#: game/spec/info/info.cpp:394
+#: game/spec/info/info.cpp:408
 msgid "Strikes"
 msgstr "Schüsse"
 
@@ -9188,19 +9194,19 @@ msgstr "Zusammenfassung..."
 msgid "Sup"
 msgstr "Sup"
 
-#: game/spec/racialabilitylist.cpp:255
+#: game/spec/racialabilitylist.cpp:256
 msgid "Super Refit mission"
 msgstr "Super-Refit-Mission"
 
-#: game/spec/racialabilitylist.cpp:267
+#: game/spec/racialabilitylist.cpp:268
 msgid "Super Spy mission"
 msgstr "Super-Spy-Mission"
 
 #: client/tiles/shipcargotile.cpp:115 client/widgets/costdisplay.cpp:28
-#: client/widgets/itemcostdisplay.cpp:107 game/element.cpp:79
-#: game/map/info/info.cpp:642 game/parser/messagevalue.cpp:211
-#: share/resource/core_tiles.q:1023 share/resource/core_tiles.q:1158
-#: share/resource/core_tiles.q:920 share/resource/core_ui.q:1797
+#: client/widgets/itemcostdisplay.cpp:107 game/element.cpp:48
+#: game/map/info/info.cpp:645 game/parser/messagevalue.cpp:211
+#: share/resource/core_tiles.q:1029 share/resource/core_tiles.q:1164
+#: share/resource/core_tiles.q:926 share/resource/core_ui.q:1813
 msgid "Supplies"
 msgstr "Vorräte"
 
@@ -9220,11 +9226,11 @@ msgstr "Erlaubt bis zu %s %s."
 msgid "Survived"
 msgstr "Überlebt"
 
-#: client/dialogs/processlistdialog.cpp:706
+#: client/dialogs/processlistdialog.cpp:708
 msgid "Suspend"
 msgstr "Anhalten"
 
-#: interpreter/process.cpp:1978
+#: interpreter/process.cpp:2011
 msgid "Suspended"
 msgstr "Angehalten"
 
@@ -9232,16 +9238,16 @@ msgstr "Angehalten"
 msgid "Suspended."
 msgstr "Angehalten."
 
-#: client/screens/browserscreen.cpp:77 game/spec/info/info.cpp:326
-#: game/spec/info/info.cpp:328
+#: client/screens/browserscreen.cpp:77 game/spec/info/info.cpp:339
+#: game/spec/info/info.cpp:341
 msgid "Sweep"
 msgstr "Sweep"
 
-#: game/spec/racialabilitylist.cpp:335
+#: game/spec/racialabilitylist.cpp:336
 msgid "Sweep regular mine fields with fighters"
 msgstr "Reguläre Minenfelder mit Jägern räumen"
 
-#: game/spec/racialabilitylist.cpp:336
+#: game/spec/racialabilitylist.cpp:337
 msgid "Sweep web mine fields with fighters"
 msgstr "Fangminenfelder mit Jägern räumen"
 
@@ -9268,9 +9274,9 @@ msgstr "System-Konfigurationsdatei"
 msgid "T - Content"
 msgstr "T - Inhalt"
 
-#: client/dialogs/buildstructuresdialog.cpp:767
-#: client/dialogs/buildstructuresdialog.cpp:822
-#: client/dialogs/buildstructuresdialog.cpp:874
+#: client/dialogs/buildstructuresdialog.cpp:863
+#: client/dialogs/buildstructuresdialog.cpp:919
+#: client/dialogs/buildstructuresdialog.cpp:969
 msgid "T - Taxes"
 msgstr "T - Steuern"
 
@@ -9302,8 +9308,8 @@ msgstr "Markierung (Tag): %s"
 msgid "Targeting"
 msgstr "Zielauswahl"
 
-#: share/resource/core_tiles.q:1056 share/resource/core_tiles.q:1107
-#: share/resource/core_tiles.q:881 share/resource/core_tiles.q:896
+#: share/resource/core_tiles.q:1062 share/resource/core_tiles.q:1113
+#: share/resource/core_tiles.q:881 share/resource/core_tiles.q:902
 msgid "Tax Rate"
 msgstr "Steuersatz"
 
@@ -9340,7 +9346,7 @@ msgstr "Team %d"
 msgid "Team %d: %s"
 msgstr "Team %d: %s"
 
-#: game/map/info/info.cpp:1318
+#: game/map/info/info.cpp:1323
 msgid "Team Minefields"
 msgstr "Team-Minenfelder"
 
@@ -9364,7 +9370,7 @@ msgstr "Teams"
 msgid "Tech"
 msgstr "Tech"
 
-#: game/map/info/info.cpp:979
+#: game/map/info/info.cpp:983
 msgid "Tech 10 Beams"
 msgstr "Tech-10-Geschütze"
 
@@ -9372,7 +9378,7 @@ msgstr "Tech-10-Geschütze"
 msgid "Tech 10 Beams on starbase"
 msgstr "Tech-10-Geschütze auf Sternenbasis"
 
-#: game/map/info/info.cpp:978
+#: game/map/info/info.cpp:982
 msgid "Tech 10 Engines"
 msgstr "Tech-10-Triebwerke"
 
@@ -9380,7 +9386,7 @@ msgstr "Tech-10-Triebwerke"
 msgid "Tech 10 Engines on starbase"
 msgstr "Tech-10-Triebwerke auf Sternenbasis"
 
-#: game/map/info/info.cpp:977
+#: game/map/info/info.cpp:981
 msgid "Tech 10 Hulls"
 msgstr "Tech-10-Rümpfe"
 
@@ -9388,7 +9394,7 @@ msgstr "Tech-10-Rümpfe"
 msgid "Tech 10 Hulls on starbase"
 msgstr "Tech-10-Rümpfe auf Sternenbasis"
 
-#: game/map/info/info.cpp:980
+#: game/map/info/info.cpp:984
 msgid "Tech 10 Torpedoes"
 msgstr "Tech-10-Torpedos"
 
@@ -9408,9 +9414,9 @@ msgstr "Tech-Levels"
 msgid "Tech Upgrade"
 msgstr "Tech-Upgrade"
 
-#: client/widgets/vcrobjectinfo.cpp:79 game/spec/info/info.cpp:167
-#: game/spec/info/info.cpp:303 game/spec/info/info.cpp:334
-#: game/spec/info/info.cpp:364 game/spec/info/utils.cpp:33
+#: client/widgets/vcrobjectinfo.cpp:79 game/spec/info/info.cpp:178
+#: game/spec/info/info.cpp:315 game/spec/info/info.cpp:347
+#: game/spec/info/info.cpp:378 game/spec/info/utils.cpp:33
 msgid "Tech level"
 msgstr "Tech-Level"
 
@@ -9426,11 +9432,11 @@ msgstr "Temperatur"
 msgid "Temporary Storage #%d"
 msgstr "Zwischenspeicher #%d"
 
-#: client/dialogs/processlistdialog.cpp:704
+#: client/dialogs/processlistdialog.cpp:706
 msgid "Terminate"
 msgstr "Beenden"
 
-#: interpreter/process.cpp:1984
+#: interpreter/process.cpp:2017
 msgid "Terminated"
 msgstr "Beendet"
 
@@ -9484,7 +9490,7 @@ msgstr ""
 "Mit PCC2 ist es nicht nötig, den Zug vor dem Spielen zu entpacken, mit den "
 "meisten anderen Programmen jedoch."
 
-#: game/player.cpp:149
+#: game/player.cpp:142
 msgid "The Alien Marauder Alliance"
 msgstr "The Alien Marauder Alliance"
 
@@ -9555,7 +9561,7 @@ msgstr ""
 "Das Script wurde angehalten; es wird fortgesetzt, wenn du diese Meldung "
 "bestätigst."
 
-#: game/pcc/serverdirectory.cpp:254
+#: game/pcc/servertransport.cpp:190
 msgid "The server reported an error: %s"
 msgstr "Der Server hat einen Fehler gemeldet: %s"
 
@@ -9636,7 +9642,7 @@ msgstr "An dieser Position befindet sich kein weiteres unserer Schiffe."
 msgid "There is no other unit at this place which could carry %s."
 msgstr "Keine andere Einheit an dieser Stelle kann %s tragen."
 
-#: share/resource/core_ui.q:2057
+#: share/resource/core_ui.q:2074
 msgid "There is no ship at this starbase which could be fixed or recycled."
 msgstr ""
 "An dieser Sternenbasis halten sich keine Schiffe auf, die repariert oder "
@@ -9733,7 +9739,7 @@ msgstr ""
 msgid "This Part"
 msgstr "Teil"
 
-#: game/spec/racialabilitylist.cpp:251
+#: game/spec/racialabilitylist.cpp:252
 msgid "This ability defines the meaning of ships' mission 9."
 msgstr "Diese Fähigkeit definiert die Bedeutung der Schiffsmission 9."
 
@@ -9771,7 +9777,7 @@ msgstr "Dieser Kampf kann nicht wiedergegeben werden."
 
 #: gfx/gen/application.cpp:223 gfx/gen/application.cpp:273
 #: gfx/gen/application.cpp:345 gfx/gen/application.cpp:403
-#: gfx/gen/application.cpp:448 util/plugin/consoleapplication.cpp:142
+#: gfx/gen/application.cpp:448 util/plugin/consoleapplication.cpp:144
 msgid "This command does not take positional parameters"
 msgstr "Dieser Befehl akzeptiert keine Positionsparameter"
 
@@ -9791,7 +9797,7 @@ msgstr ""
 "Dieser Kampf kann nicht wiedergegeben werden. Mit [Umschalt+Einfg] kannst du "
 "den Status dieser Einheit vor dem Kampf für die Simulation verwenden."
 
-#: share/resource/core_ui.q:1728
+#: share/resource/core_ui.q:1744
 msgid ""
 "This file contained %d line%1{ which is%|s which are%} not permitted in Auto "
 "Tasks. %1{It has%|They have%} been skipped."
@@ -9816,15 +9822,15 @@ msgstr "Dies ist kein gültiger Befehl für eine Aufgabe."
 msgid "This is the maximum amount."
 msgstr "Dies ist die maximale Anzahl."
 
-#: client/dialogs/keymapdialog.cpp:199
+#: client/dialogs/keymapdialog.cpp:201
 msgid "This key is handled internally."
 msgstr "Diese Taste wird intern verarbeitet."
 
-#: client/dialogs/keymapdialog.cpp:188
+#: client/dialogs/keymapdialog.cpp:190
 msgid "This key is not bound."
 msgstr "Diese Taste ist nicht belegt."
 
-#: client/dialogs/keymapdialog.cpp:193
+#: client/dialogs/keymapdialog.cpp:195
 msgid "This key is unbound by %s."
 msgstr "Diese Tastenbelegung wird von %s aufgehoben."
 
@@ -9840,7 +9846,7 @@ msgstr "Diese Meldung wurde bestätigt."
 msgid "This overview covers all %d fights."
 msgstr "Diese Übersicht berücksichtigt alle %d Kämpfe."
 
-#: client/dialogs/processlistdialog.cpp:550
+#: client/dialogs/processlistdialog.cpp:552
 msgid "This process does not own any locks."
 msgstr "Dieser Prozess hält keine Locks."
 
@@ -9942,8 +9948,8 @@ msgstr ""
 "Diese Sternenbasis hat bereits einen Bauauftrag. Möchtest du diesen Auftrag "
 "ändern?\n"
 "\n"
-"<small>Um den Baubildschirm ohne Änderung zu verlassen, nutze \"Ende"
-"\" (ESC). Um den existierenden Bauauftrag mit deiner neuen Auswahl zu "
+"<small>Um den Baubildschirm ohne Änderung zu verlassen, nutze "
+"\"Ende\" (ESC). Um den existierenden Bauauftrag mit deiner neuen Auswahl zu "
 "ersetzen, nutze <kbd>J</kbd>.</small>"
 
 #: share/resource/core_ui.q:912
@@ -10114,11 +10120,11 @@ msgstr ""
 msgid "Too many objects in file"
 msgstr "Zu viele Objekte in Datei"
 
-#: game/map/info/info.cpp:682 game/map/info/info.cpp:741
+#: game/map/info/info.cpp:685 game/map/info/info.cpp:744
 msgid "Top %d %s Planets"
 msgstr "Top %d %s-Planeten"
 
-#: game/spec/info/info.cpp:354
+#: game/spec/info/info.cpp:368
 msgid "Torp Cost"
 msgstr "Torpedo-Kosten"
 
@@ -10126,7 +10132,7 @@ msgstr "Torpedo-Kosten"
 msgid "Torpedo Launchers"
 msgstr "Torpedorohre"
 
-#: game/map/info/info.cpp:1118
+#: game/map/info/info.cpp:1122
 msgid "Torpedo Ships"
 msgstr "Torpedoschiffe"
 
@@ -10138,7 +10144,7 @@ msgstr "Torpedo-Tech"
 msgid "Torpedo Type"
 msgstr "Torpedo-Typ"
 
-#: game/reference.cpp:86
+#: game/reference.cpp:65
 msgid "Torpedo Type #%d"
 msgstr "Torpedo-Typ #%d"
 
@@ -10153,8 +10159,8 @@ msgstr "Torpedo-Tech-Upgrade"
 #: client/dialogs/buildshipmain.cpp:233
 #: client/dialogs/specbrowserdialog.cpp:626
 #: client/dialogs/techupgradedialog.cpp:103
-#: client/widgets/simulationobjectinfo.cpp:591 game/map/info/info.cpp:1529
-#: game/map/info/info.cpp:1531 share/resource/core_tiles.q:1180
+#: client/widgets/simulationobjectinfo.cpp:591 game/map/info/info.cpp:1534
+#: game/map/info/info.cpp:1536 share/resource/core_tiles.q:1186
 msgid "Torpedoes"
 msgstr "Torpedos"
 
@@ -10179,9 +10185,9 @@ msgid "Torps Left"
 msgstr "Verbleibende Torpedos"
 
 #: client/widgets/costsummarylist.cpp:186
-#: client/widgets/itemcostdisplay.cpp:111 game/map/info/info.cpp:1041
-#: game/map/info/info.cpp:1186 game/map/info/info.cpp:1382
-#: game/map/info/info.cpp:778
+#: client/widgets/itemcostdisplay.cpp:111 game/map/info/info.cpp:1045
+#: game/map/info/info.cpp:1190 game/map/info/info.cpp:1387
+#: game/map/info/info.cpp:781
 msgid "Total"
 msgstr "Gesamt"
 
@@ -10205,7 +10211,7 @@ msgstr "Molybdenum gesamt"
 msgid "Total Neutronium"
 msgstr "Neutronium gesamt"
 
-#: game/map/info/info.cpp:1315
+#: game/map/info/info.cpp:1320
 msgid "Total Planets"
 msgstr "Planeten insgesamt"
 
@@ -10267,8 +10273,8 @@ msgid "Travelled this turn"
 msgstr "Bewegung diesen Zug"
 
 #: client/tiles/shipcargotile.cpp:109 client/widgets/costsummarylist.cpp:152
-#: share/resource/core_tiles.q:1158 share/resource/core_tiles.q:798
-#: share/resource/core_tiles.q:995
+#: share/resource/core_tiles.q:1001 share/resource/core_tiles.q:1164
+#: share/resource/core_tiles.q:798
 msgid "Tri"
 msgstr "Tri"
 
@@ -10276,15 +10282,15 @@ msgstr "Tri"
 msgid "Tribal"
 msgstr "Tribal"
 
-#: game/spec/racialabilitylist.cpp:319
+#: game/spec/racialabilitylist.cpp:320
 msgid "Triple Beam Kill"
 msgstr "Geschütze Dreifach-Kill"
 
-#: client/dialogs/buildstructuresdialog.cpp:833
+#: client/dialogs/buildstructuresdialog.cpp:930
 #: client/dialogs/planetinfodialog.cpp:146 client/widgets/costdisplay.cpp:24
 #: client/widgets/hullspecificationsheet.cpp:77
-#: client/widgets/itemcostdisplay.cpp:103 game/element.cpp:69
-#: share/resource/core_tiles.q:917 share/resource/core_ui.q:1797
+#: client/widgets/itemcostdisplay.cpp:103 game/element.cpp:38
+#: share/resource/core_tiles.q:923 share/resource/core_ui.q:1813
 msgid "Tritanium"
 msgstr "Tritanium"
 
@@ -10314,7 +10320,7 @@ msgstr "Turn File Decompiler v%s - (c) 2001-2024 Stefan Reuther"
 msgid "Turn History"
 msgstr "Vergangene Züge"
 
-#: game/pcc/turnloader.cpp:327
+#: game/pcc/servertransport.cpp:123
 msgid "Turn checker output"
 msgstr "Ausgabe des Turn-Checkers"
 
@@ -10358,35 +10364,35 @@ msgstr "Turn-Datei verweist auf Schiff %d, welches nicht uns gehört"
 msgid "Turn file refers to starbase %d which is not ours"
 msgstr "Turn-Datei verweist auf Sternenbasis %d, welche nicht uns gehört"
 
-#: game/pcc/turnloader.cpp:341
+#: game/pcc/servertransport.cpp:137
 msgid "Turn marked temporary."
 msgstr "Turn als vorläufig markiert."
 
-#: game/nu/turnloader.cpp:527
+#: game/nu/turnloader.cpp:48
 msgid "Turn submitted"
 msgstr "Turn eingereicht"
 
-#: game/nu/turnloader.cpp:524
+#: game/nu/turnloader.cpp:45
 msgid "Turn viewed"
 msgstr "Turn angesehen"
 
-#: game/pcc/turnloader.cpp:49
+#: game/pcc/servertransport.cpp:36
 msgid "Turn was accepted"
 msgstr "Turn wurde akzeptiert"
 
-#: game/pcc/turnloader.cpp:50
+#: game/pcc/servertransport.cpp:37
 msgid "Turn was accepted with warnings (yellow)"
 msgstr "Turn wurde mit Warnungen akzeptiert (gelb)"
 
-#: game/pcc/turnloader.cpp:52
+#: game/pcc/servertransport.cpp:39
 msgid "Turn was rejected (invalid)"
 msgstr "Turn wurde abgewiesen (ungültig)"
 
-#: game/pcc/turnloader.cpp:51
+#: game/pcc/servertransport.cpp:38
 msgid "Turn was rejected (red)"
 msgstr "Turn wurde abgewiesen (rot)"
 
-#: game/pcc/turnloader.cpp:53
+#: game/pcc/servertransport.cpp:40
 msgid "Turn was stale"
 msgstr "Turn war veraltet"
 
@@ -10395,12 +10401,11 @@ msgid "Turn: Location"
 msgstr "Zug: Position"
 
 #: client/dialogs/newaccount.cpp:54 client/dialogs/simulator.cpp:849
-#: client/dialogs/simulator.cpp:942
-#: client/widgets/simulationobjectinfo.cpp:254
+#: client/dialogs/simulator.cpp:942 client/widgets/simulationobjectinfo.cpp:254
 #: game/parser/messagevalue.cpp:157 game/spec/info/filter.cpp:127
 #: game/spec/info/filter.cpp:129 game/spec/info/filter.cpp:131
-#: game/spec/info/info.cpp:316 game/spec/info/info.cpp:348
-#: game/spec/info/info.cpp:389 game/spec/info/utils.cpp:20
+#: game/spec/info/info.cpp:329 game/spec/info/info.cpp:362
+#: game/spec/info/info.cpp:403 game/spec/info/utils.cpp:20
 msgid "Type"
 msgstr "Typ"
 
@@ -10412,7 +10417,7 @@ msgstr "U - Entladen"
 msgid "UTF-8"
 msgstr "UTF-8"
 
-#: game/reference.cpp:82
+#: game/reference.cpp:61
 msgid "Ufo #%d"
 msgstr "Ufo #%d"
 
@@ -10441,7 +10446,7 @@ msgstr "Backup-Datei kann nicht erzeugt werden"
 msgid "Unable to create file"
 msgstr "Datei kann nicht angelegt werden"
 
-#: share/resource/core_ui.q:1698
+#: share/resource/core_ui.q:1714
 msgid "Unable to create file %s: %s"
 msgstr "Datei %s kann nicht erzeugt werden: %s"
 
@@ -10449,7 +10454,7 @@ msgstr "Datei %s kann nicht erzeugt werden: %s"
 msgid "Unable to determine derived information."
 msgstr "Abgeleitete Informationen nicht ermittelbar."
 
-#: game/nu/turnloader.cpp:656
+#: game/nu/turnloader.cpp:178
 msgid "Unable to download result file"
 msgstr "Result kann nicht heruntergeladen werden"
 
@@ -10461,7 +10466,7 @@ msgstr "Kann keinen Namen für Bildschirmfoto generieren"
 msgid "Unable to install plugin."
 msgstr "Plugin kann nicht installiert werden."
 
-#: client/dialogs/messageeditor.cpp:290 share/resource/core_ui.q:1532
+#: client/dialogs/messageeditor.cpp:293 share/resource/core_ui.q:1532
 msgid "Unable to load %s: %s"
 msgstr "%s kann nicht geladen werden: %s"
 
@@ -10489,7 +10494,7 @@ msgstr ""
 "Die Aufgabe kann derzeit nicht modifiziert werden. Möglicherweise wird sie "
 "gerade in einem anderen Programmteil benutzt."
 
-#: share/resource/core_ui.q:1731
+#: share/resource/core_ui.q:1747
 msgid "Unable to open file %s: %s"
 msgstr "%s kann nicht geöffnet werden: %s"
 
@@ -10497,7 +10502,7 @@ msgstr "%s kann nicht geöffnet werden: %s"
 msgid "Unable to save %s: %s"
 msgstr "%s kann nicht gespeichert werden: %s"
 
-#: client/si/commands.cpp:429 game/pcc/turnloader.cpp:148
+#: client/si/commands.cpp:429 game/pcc/turnloader.cpp:131
 #: game/v3/directoryloader.cpp:233 game/v3/resultloader.cpp:123
 msgid "Unable to save game"
 msgstr "Spiel kann nicht gespeichert werden"
@@ -10522,7 +10527,7 @@ msgstr "Kann nicht gespeichert werden: %s"
 msgid "Unable to uninstall plugin."
 msgstr "Plugin kann nicht entfernt werden."
 
-#: share/resource/core_ui.q:1947
+#: share/resource/core_ui.q:1964
 msgid "Unable to view utility data file"
 msgstr "util.dat kann nicht angezeigt werden"
 
@@ -10534,11 +10539,11 @@ msgstr "Anhang kann nicht geschrieben werden"
 msgid "Unable to write to file %s: %s"
 msgstr "Datei %s kann nicht geschrieben werden: %s"
 
-#: game/spec/info/browser.cpp:235
+#: game/spec/info/browser.cpp:236
 msgid "Unarmed"
 msgstr "Unbewaffnet"
 
-#: game/map/info/info.cpp:1602
+#: game/map/info/info.cpp:1607
 msgid "Unarmed ships"
 msgstr "Unbewaffnete Schiffe"
 
@@ -10551,8 +10556,12 @@ msgstr "Unglaubliche Anzahl gesichteter Schiffe"
 msgid "Uncaught exception"
 msgstr "Unbehandelte Ausnahme"
 
-#: client/dialogs/buysuppliesdialog.cpp:42
-#: client/dialogs/buysuppliesdialog.cpp:91
+#: game/spec/racialabilitylist.cpp:682
+msgid "Unclassified"
+msgstr "Unklassifiziert"
+
+#: client/dialogs/buysuppliesdialog.cpp:48
+#: client/dialogs/buysuppliesdialog.cpp:98
 msgid "Undo Supply Sale"
 msgstr "Vorräte Verkaufen - Rückgängig"
 
@@ -10612,7 +10621,7 @@ msgstr "Unity"
 msgid "Universal"
 msgstr "Universal"
 
-#: game/map/info/info.cpp:1410
+#: game/map/info/info.cpp:1415
 msgid "Universal Minefield FCode"
 msgstr "Universal-Minenfeld-Code"
 
@@ -10632,7 +10641,7 @@ msgstr "Unbekannter PHost"
 msgid "Unknown command line parameter \"-%s\""
 msgstr "Unbekannter Kommandozeilenparameter \"-%s\""
 
-#: share/resource/core_tiles.q:1095
+#: share/resource/core_tiles.q:1101
 msgid "Unknown government."
 msgstr "Unbekannte Regierungsform"
 
@@ -10644,10 +10653,10 @@ msgstr "Unbekannte Schiffsfunktion \"%s\""
 msgid "Unknown native race."
 msgstr "Unbekannte Eingeborene."
 
-#: util/plugin/consoleapplication.cpp:151
-#: util/plugin/consoleapplication.cpp:227
-#: util/plugin/consoleapplication.cpp:295
-#: util/plugin/consoleapplication.cpp:339
+#: util/plugin/consoleapplication.cpp:153
+#: util/plugin/consoleapplication.cpp:229
+#: util/plugin/consoleapplication.cpp:297
+#: util/plugin/consoleapplication.cpp:341
 msgid "Unknown option \"-%s\""
 msgstr "Unbekannte Option \"-%s\""
 
@@ -10663,7 +10672,7 @@ msgstr "Unbekanntes Verweisziel in Datensatzdefinition."
 msgid "Unknown ship type"
 msgstr "Unbekannter Schiffstype"
 
-#: game/pcc/turnloader.cpp:54
+#: game/pcc/servertransport.cpp:41
 msgid "Unknown turn status (%d)"
 msgstr "Unbekannter Turn-Status (%d)"
 
@@ -10672,7 +10681,7 @@ msgstr "Unbekannter Turn-Status (%d)"
 msgid "Unknown type"
 msgstr "Unbekannter Typ"
 
-#: share/resource/core_ui.q:2110
+#: share/resource/core_ui.q:2127
 msgid "Unload All Ships"
 msgstr "Alle Schiffe entladen"
 
@@ -10696,7 +10705,7 @@ msgstr "Entladen →"
 msgid "Unloading to %s"
 msgstr "Entlade nach %s"
 
-#: client/dialogs/searchdialog.cpp:648
+#: client/dialogs/searchdialog.cpp:649
 msgid "Unmark found objects"
 msgstr "Markierung gefundener Objekte aufheben"
 
@@ -10704,7 +10713,7 @@ msgstr "Markierung gefundener Objekte aufheben"
 msgid "Unmark these starbases"
 msgstr "Markierung dieser Sternenbasen aufheben"
 
-#: game/map/info/info.cpp:1314
+#: game/map/info/info.cpp:1319
 msgid "Unowned Planets"
 msgstr "Unbesetzte Planeten"
 
@@ -10827,13 +10836,13 @@ msgstr "Bis zu %d ihrer Clans überleb%1{t%|en%}."
 msgid "Update/write back"
 msgstr "Aktual./Zurückschr."
 
-#: util/plugin/consoleapplication.cpp:238
+#: util/plugin/consoleapplication.cpp:240
 msgid "Updating plugin '%s'..."
 msgstr "Aktualisiere Plugin '%s'..."
 
-#: game/pcc/turnloader.cpp:310
-msgid "Uploading %s..."
-msgstr "Hochladen: %s..."
+#: game/pcc/turnloader.cpp:303
+msgid "Uploading data..."
+msgstr "Daten hochladen..."
 
 #: share/resource/core_tiles.q:438
 msgid "Usage"
@@ -11026,7 +11035,7 @@ msgstr ""
 "%s\n"
 "Fehler bitte melden an <Streu@gmx.de>"
 
-#: game/interface/scriptapplication.cpp:396
+#: game/interface/scriptapplication.cpp:395
 msgid ""
 "Usage:\n"
 "  %s [-h]\n"
@@ -11255,7 +11264,7 @@ msgstr ""
 msgid "Usage: c2ng [-options] gamedir [player]"
 msgstr "Aufruf: c2ng [-optionen] spielverz [spieler]"
 
-#: client/dialogs/labelconfig.cpp:277
+#: client/dialogs/labelconfig.cpp:278
 msgid "Use \"OK\" to review and correct the expression."
 msgstr "Nutze \"OK\", um den Ausdruck zu überprüfen und korrigieren."
 
@@ -11271,7 +11280,7 @@ msgstr "Nutze Relationen aus Spiel"
 msgid "Use parts from storage"
 msgstr "Vorhandene Teile nutzen"
 
-#: game/spec/racialabilitylist.cpp:561
+#: game/spec/racialabilitylist.cpp:562
 msgid "Use starbase torpedoes in combat"
 msgstr "Sternenbasis-Torpedos im Kampf benutzen"
 
@@ -11315,7 +11324,7 @@ msgstr "cc-res.cfg des Benutzers"
 msgid "User configuration file"
 msgstr "Benutzer-Konfigurationsdatei"
 
-#: client/dialogs/newaccount.cpp:52 game/spec/info/browser.cpp:431
+#: client/dialogs/newaccount.cpp:52 game/spec/info/browser.cpp:432
 msgid "User name"
 msgstr "Nutzername"
 
@@ -11359,11 +11368,11 @@ msgstr "Prüfung erfolgreich"
 msgid "Video driver: %s (%dk%s)"
 msgstr "Video-Treiber: %s (%dk%s)"
 
-#: gfx/sdl2/engine.cpp:361
+#: gfx/sdl2/engine.cpp:422
 msgid "Video driver: %s%s"
 msgstr "Video-Treiber: %s%s"
 
-#: share/resource/core_ui.q:1957 share/resource/core_ui.q:1965
+#: share/resource/core_ui.q:1974 share/resource/core_ui.q:1982
 msgid "View Mailbox"
 msgstr "Mailbox ansehen"
 
@@ -11399,7 +11408,7 @@ msgstr "Sichtbarkeitsbereich"
 msgid "Visible at"
 msgstr "Sichtbar bei"
 
-#: game/map/info/info.cpp:927
+#: game/map/info/info.cpp:930
 msgid "Visible by sensor scan"
 msgstr "Auf Sensoren sichtbar"
 
@@ -11415,7 +11424,7 @@ msgstr "Visual Combat Recorder"
 msgid "Visual Combat Recordings"
 msgstr "Kampf-Aufzeichnungen"
 
-#: game/map/info/info.cpp:1391
+#: game/map/info/info.cpp:1396
 msgid "Visual Contacts"
 msgstr "Sichtungen"
 
@@ -11434,11 +11443,11 @@ msgstr ""
 "WARNUNG: Die Option '-O' wurde ignoriert, da die Standardausgabe benutzt "
 "wird."
 
-#: share/resource/core_ui.q:2069
+#: share/resource/core_ui.q:2086
 msgid "Wait One Turn"
 msgstr "Warte einen Zug"
 
-#: interpreter/process.cpp:1982
+#: interpreter/process.cpp:2015
 msgid "Waiting"
 msgstr "Wartet"
 
@@ -11516,7 +11525,7 @@ msgstr "Warp %d"
 
 #: client/tiles/historymovementtile.cpp:83
 #: client/tiles/shipmovementtile.cpp:358 share/resource/core_tiles.q:835
-#: share/resource/core_ui.q:1920
+#: share/resource/core_ui.q:1937
 msgid "Warp Factor"
 msgstr "Warp-Faktor"
 
@@ -11554,7 +11563,7 @@ msgstr "Kurs: %s"
 msgid "We are beaming down %d clan%!1{s%}."
 msgstr "Wir entladen %d Clan%!1{s%}."
 
-#: share/resource/core_ui.q:2025
+#: share/resource/core_ui.q:2042
 msgid "We are not at one of our starbases."
 msgstr "Wir sind nicht bei einer unserer Sternenbasen."
 
@@ -11618,7 +11627,7 @@ msgstr "Wirkungen der Waffen"
 #: client/dialogs/hullspecification.cpp:187
 #: client/widgets/hullspecificationsheet.cpp:148
 #: client/widgets/simulationobjectinfo.cpp:392 game/map/info/browser.cpp:357
-#: game/map/info/info.cpp:1458 game/spec/info/info.cpp:151
+#: game/map/info/info.cpp:1463 game/spec/info/info.cpp:162
 msgid "Weapons"
 msgstr "Waffen"
 
@@ -11630,7 +11639,7 @@ msgstr "Fangminenfeld #%d"
 msgid "What do you want to draw into the starcharts?"
 msgstr "Was möchtest du in die Sternenkarte zeichnen?"
 
-#: client/dialogs/processlistdialog.cpp:303
+#: client/dialogs/processlistdialog.cpp:304
 msgid "Where"
 msgstr "Wo"
 
@@ -11661,7 +11670,7 @@ msgstr ""
 "zum Anfang des aktuellen Zuges zurück."
 
 #: client/dialogs/labelconfig.cpp:109 client/downlink.cpp:11
-#: client/si/userside.cpp:65
+#: client/downlink.cpp:19 client/si/userside.cpp:92
 msgid "Working..."
 msgstr "Arbeitet..."
 
@@ -11685,7 +11694,7 @@ msgstr "In Datei schreiben..."
 msgid "Writing %s data..."
 msgstr "Schreibe %s Daten..."
 
-#: game/v3/trn/fileset.cpp:93
+#: game/v3/trn/fileset.cpp:118 game/v3/trn/fileset.cpp:93
 msgid "Writing %s turn file (%d command%!1{s%})..."
 msgstr "Schreibe %s Turn-Datei (%d Kommando%!1{s%})..."
 
@@ -11709,7 +11718,7 @@ msgstr "Turn-Datei mit %d Kommando%!1{s%} geschrieben"
 msgid "X"
 msgstr "X"
 
-#: client/dialogs/processlistdialog.cpp:719
+#: client/dialogs/processlistdialog.cpp:721
 msgid "X - Execute"
 msgstr "X - Ausführen"
 
@@ -11744,7 +11753,7 @@ msgstr "Ja"
 #: share/resource/core_global.q:309 share/resource/core_global.q:65
 #: share/resource/core_ui.q:1028 share/resource/core_ui.q:1039
 #: share/resource/core_ui.q:1073 share/resource/core_ui.q:1120
-#: share/resource/core_ui.q:1180 share/resource/core_ui.q:1676
+#: share/resource/core_ui.q:1180 share/resource/core_ui.q:1692
 #: share/resource/core_ui.q:35 share/resource/core_ui.q:740
 #: share/resource/core_ui.q:772 share/resource/core_ui.q:774
 #: share/resource/core_ui.q:857 share/resource/core_ui.q:861
@@ -11757,7 +11766,7 @@ msgstr "Ja Nein"
 msgid "Yes No Cancel"
 msgstr "Ja Nein Abbruch"
 
-#: client/dialogs/buysuppliesdialog.cpp:43
+#: client/dialogs/buysuppliesdialog.cpp:49
 msgid ""
 "You can buy up to %d supplies. (This is the amount of supplies you already "
 "sold this turn but have not used otherwise.)\n"
@@ -11799,7 +11808,7 @@ msgstr "Wir können hier keine Sternenbasis bauen."
 msgid "You cannot build this ship."
 msgstr "Du kannst dieses Schiff nicht bauen."
 
-#: client/dialogs/buysuppliesdialog.cpp:89
+#: client/dialogs/buysuppliesdialog.cpp:96
 msgid ""
 "You cannot buy supplies. Either you have not yet sold any this turn, or you "
 "have already spent the money."
@@ -11879,7 +11888,7 @@ msgstr ""
 "<small>Um eine Sternenbasis zu bauen, verwende <kbd>F8</kbd> auf einem "
 "Planeten.</small>"
 
-#: client/dialogs/sellsuppliesdialog.cpp:121
+#: client/dialogs/sellsuppliesdialog.cpp:128
 msgid "You do not have any supplies on this planet."
 msgstr "Auf diesem Planeten hast du keine Vorräte."
 
@@ -11906,8 +11915,8 @@ msgstr ""
 "Die %d Megacredits, die du für die Verbesserung benötigst, sind nicht "
 "verfügbar."
 
-#: client/dialogs/buildstructuresdialog.cpp:388
-#: client/dialogs/buildstructuresdialog.cpp:719
+#: client/dialogs/buildstructuresdialog.cpp:521
+#: client/dialogs/buildstructuresdialog.cpp:811
 #: client/widgets/costdisplay.cpp:107
 #: client/widgets/hullspecificationsheet.cpp:90
 msgid "You have"
@@ -11917,7 +11926,7 @@ msgstr "Verfügbar"
 msgid "You have %d fighter%!1{s%}."
 msgstr "Du hast %d Raumjäger."
 
-#: client/dialogs/sellsuppliesdialog.cpp:43
+#: client/dialogs/sellsuppliesdialog.cpp:49
 msgid ""
 "You have %d kt supplies. You'll get 1 mc per kiloton. Remember that PCC "
 "automatically sells supplies when needed.\n"
@@ -11986,7 +11995,7 @@ msgstr ""
 "An diesem Planeten wird bereits eine Sternenbasis gebaut. Soll dieser "
 "Auftrag storniert werden?"
 
-#: game/map/info/info.cpp:1304
+#: game/map/info/info.cpp:1309
 msgid "Your Empire"
 msgstr "Dein Imperium"
 
@@ -12010,11 +12019,11 @@ msgstr ""
 msgid "Your order"
 msgstr "Bauauftrag"
 
-#: client/dialogs/labelconfig.cpp:227
+#: client/dialogs/labelconfig.cpp:228
 msgid "Your planet expression was not accepted."
 msgstr "Dein Planeten-Ausdruck wurde nicht akzeptiert."
 
-#: client/dialogs/searchdialog.cpp:556
+#: client/dialogs/searchdialog.cpp:557
 msgid "Your query didn't match any object."
 msgstr "Es wurde kein passendes Objekt gefunden."
 
@@ -12032,7 +12041,7 @@ msgstr ""
 "Schiffe und Planeten gleichzeitig exportieren. Bitte nutze die Knöpfe \"1\" "
 "und \"2\", um nur einen Typ zu wählen."
 
-#: client/dialogs/labelconfig.cpp:228
+#: client/dialogs/labelconfig.cpp:229
 msgid "Your ship expression was not accepted."
 msgstr "Dein Schiffs-Ausdruck wurde nicht akzeptiert."
 
@@ -12071,12 +12080,12 @@ msgstr "[Orte]"
 msgid "[keep]"
 msgstr "[n.ä.]"
 
-#: client/dialogs/buildstructuresdialog.cpp:312
+#: client/dialogs/buildstructuresdialog.cpp:481
 #: client/dialogs/goaldialog.cpp:70
 msgid "[max]"
 msgstr "[max]"
 
-#: game/vcr/object.cpp:346
+#: game/vcr/object.cpp:361
 msgid "a %s"
 msgstr "ein %s"
 
@@ -12092,7 +12101,7 @@ msgstr "reichlich"
 msgid "accept"
 msgstr "annehmen"
 
-#: game/vcr/object.cpp:263
+#: game/vcr/object.cpp:278
 msgid "aggressor"
 msgstr "Aggressor"
 
@@ -12195,7 +12204,7 @@ msgstr "aufgerufen aus Datei '%s', Zeile %d"
 msgid "calm"
 msgstr "ruhig"
 
-#: game/interface/taskeditorcontext.cpp:779
+#: game/interface/taskeditorcontext.cpp:797
 msgid "cancel hyperjump"
 msgstr "Hypersprung deaktivieren"
 
@@ -12215,7 +12224,7 @@ msgstr "Chunnel, %d kt"
 msgid "cl."
 msgstr "cl."
 
-#: game/element.cpp:106
+#: game/element.cpp:75
 msgid "clans"
 msgstr "Clans"
 
@@ -12276,7 +12285,7 @@ msgstr "selbstdefiniert: %s"
 msgid "dBASE file (*.dbf)"
 msgstr "dBASE-Datei (*.dbf)"
 
-#: game/spec/info/info.cpp:212
+#: game/spec/info/info.cpp:223
 msgid "damaged"
 msgstr "beschädigt"
 
@@ -12284,8 +12293,8 @@ msgstr "beschädigt"
 msgid "dangerous"
 msgstr "gefährlich"
 
-#: game/spec/info/filter.cpp:129 game/spec/info/info.cpp:316
-#: game/spec/info/info.cpp:348
+#: game/spec/info/filter.cpp:129 game/spec/info/info.cpp:329
+#: game/spec/info/info.cpp:362
 msgid "death ray"
 msgstr "Todesstrahl"
 
@@ -12361,7 +12370,7 @@ msgstr "Erwarte \"NAME=WERT\" für Option \"-A\""
 msgid "expecting \"KEY=VALUE\" for option \"-D\""
 msgstr "Erwarte \"NAME=WERT\" für Option \"-D\""
 
-#: game/spec/info/info.cpp:389
+#: game/spec/info/info.cpp:403
 msgid "fighter"
 msgstr "Raumjäger"
 
@@ -12422,7 +12431,7 @@ msgid "host, all players"
 msgstr "Host, alle Spieler"
 
 #: client/tiles/shipmovementtile.cpp:226
-#: game/interface/taskeditorcontext.cpp:773
+#: game/interface/taskeditorcontext.cpp:791
 msgid "hyperjump"
 msgstr "Hypersprung"
 
@@ -12482,8 +12491,8 @@ msgstr "Ungültige Anzahl Simulationen, '%s'"
 msgid "invalid number of threads, '%s'"
 msgstr "Ungültige Anzahl Threads, '%s'"
 
-#: game/interface/scriptapplication.cpp:366
-#: game/sim/consoleapplication.cpp:335 interpreter/consoleapplication.cpp:333
+#: game/interface/scriptapplication.cpp:365 game/sim/consoleapplication.cpp:335
+#: interpreter/consoleapplication.cpp:333
 #: interpreter/consoleapplication.cpp:372
 #: server/play/consoleapplication.cpp:120 util/resourcefileapplication.cpp:303
 #: util/resourcefileapplication.cpp:86
@@ -12531,8 +12540,8 @@ msgstr "Ungültige Versionsnummer \"%s\""
 msgid "keep"
 msgstr "behalten"
 
-#: client/dialogs/buildstructuresdialog.cpp:430
-#: client/dialogs/buildstructuresdialog.cpp:431
+#: client/dialogs/buildstructuresdialog.cpp:563
+#: client/dialogs/buildstructuresdialog.cpp:564
 #: client/tiles/shipcargotile.cpp:112 client/tiles/shipcargotile.cpp:118
 #: client/tiles/shipcargotile.cpp:120
 #: client/widgets/hullspecificationsheet.cpp:40
@@ -12544,21 +12553,21 @@ msgstr "behalten"
 #: client/widgets/itemcostdisplay.cpp:122
 #: client/widgets/itemcostdisplay.cpp:123
 #: client/widgets/itemcostdisplay.cpp:124
-#: client/widgets/itemcostdisplay.cpp:126 game/element.cpp:104
-#: game/map/info/info.cpp:642 game/map/shipinfo.cpp:217
+#: client/widgets/itemcostdisplay.cpp:126 game/element.cpp:73
+#: game/map/info/info.cpp:645 game/map/shipinfo.cpp:217
 #: game/map/shipinfo.cpp:265 game/map/shipinfo.cpp:276
 #: game/map/shipinfo.cpp:300 game/map/shipinfo.cpp:347
 #: game/map/shipinfo.cpp:349 game/map/shipinfo.cpp:352
 #: game/map/shipinfo.cpp:355 game/map/shipinfo.cpp:358
-#: share/resource/core_tiles.q:1023 share/resource/core_tiles.q:1155
-#: share/resource/core_tiles.q:796 share/resource/core_tiles.q:916
-#: share/resource/core_tiles.q:917 share/resource/core_tiles.q:918
-#: share/resource/core_tiles.q:919 share/resource/core_tiles.q:920
-#: share/resource/core_tiles.q:978 share/resource/core_tiles.q:983
+#: share/resource/core_tiles.q:1029 share/resource/core_tiles.q:1161
+#: share/resource/core_tiles.q:796 share/resource/core_tiles.q:922
+#: share/resource/core_tiles.q:923 share/resource/core_tiles.q:924
+#: share/resource/core_tiles.q:925 share/resource/core_tiles.q:926
+#: share/resource/core_tiles.q:984 share/resource/core_tiles.q:989
 msgid "kt"
 msgstr "kt"
 
-#: client/dialogs/buildstructuresdialog.cpp:425
+#: client/dialogs/buildstructuresdialog.cpp:558
 msgid "kt supplies"
 msgstr "kt Vorräte"
 
@@ -12604,13 +12613,13 @@ msgstr "markierte Einheiten"
 msgid "max."
 msgstr "max."
 
-#: client/dialogs/buildstructuresdialog.cpp:424
+#: client/dialogs/buildstructuresdialog.cpp:557
 #: client/tiles/shipcargotile.cpp:119 client/widgets/costsummarylist.cpp:151
 #: client/widgets/hullspecificationsheet.cpp:81
-#: client/widgets/itemcostdisplay.cpp:125 game/element.cpp:108
-#: game/map/info/info.cpp:641 game/spec/cost.cpp:16
-#: share/resource/core_tiles.q:1022 share/resource/core_tiles.q:1156
-#: share/resource/core_tiles.q:799 share/resource/core_tiles.q:943
+#: client/widgets/itemcostdisplay.cpp:125 game/element.cpp:77
+#: game/map/info/info.cpp:644 game/spec/cost.cpp:16
+#: share/resource/core_tiles.q:1028 share/resource/core_tiles.q:1162
+#: share/resource/core_tiles.q:799 share/resource/core_tiles.q:949
 msgid "mc"
 msgstr "mc"
 
@@ -12698,9 +12707,8 @@ msgstr "neues RST"
 #: client/dialogs/folderconfigdialog.cpp:93
 #: client/dialogs/folderconfigdialog.cpp:98
 #: client/dialogs/globalactions.cpp:296 client/dialogs/globalactions.cpp:319
-#: client/dialogs/searchdialog.cpp:59
-#: client/dialogs/simulationabilities.cpp:23 client/dialogs/ufoinfo.cpp:389
-#: client/dialogs/visibilityrange.cpp:157
+#: client/dialogs/searchdialog.cpp:59 client/dialogs/simulationabilities.cpp:23
+#: client/dialogs/ufoinfo.cpp:389 client/dialogs/visibilityrange.cpp:157
 #: client/vcr/cameracontrolwidget.cpp:135 client/widgets/vcrobjectinfo.cpp:160
 #: game/spec/info/filter.cpp:118
 msgid "no"
@@ -12759,8 +12767,8 @@ msgstr "kein Filter angegeben. Zum Löschen (\"-d\") wird ein Filter benötigt"
 msgid "no game data available for player %d"
 msgstr "keine Spieldaten für Spieler %d verfügbar"
 
-#: game/interface/scriptapplication.cpp:181
-#: game/sim/consoleapplication.cpp:437 server/play/consoleapplication.cpp:166
+#: game/interface/scriptapplication.cpp:181 game/sim/consoleapplication.cpp:437
+#: server/play/consoleapplication.cpp:166
 msgid "no game data found"
 msgstr "keine Spieldaten gefunden"
 
@@ -12813,19 +12821,19 @@ msgstr "unerwartete Nicht-Option. Mit \"%s -h\" erhalten Sie Hilfe"
 #: client/widgets/alliancestatuslist.cpp:19
 #: client/widgets/hullspecificationsheet.cpp:146
 #: client/widgets/simulationobjectinfo.cpp:358
-#: client/widgets/simulationobjectinfo.cpp:367 game/map/info/info.cpp:1416
-#: game/proxy/simulationsetupproxy.cpp:1040
+#: client/widgets/simulationobjectinfo.cpp:367 game/map/info/info.cpp:1421
+#: game/proxy/simulationsetupproxy.cpp:1042
 #: game/proxy/simulationsetupproxy.cpp:106
-#: game/proxy/simulationsetupproxy.cpp:1080
+#: game/proxy/simulationsetupproxy.cpp:1082
 #: game/proxy/simulationsetupproxy.cpp:140
 #: game/proxy/simulationsetupproxy.cpp:95 game/searchquery.cpp:400
 #: game/sim/ability.cpp:40 game/sim/configuration.cpp:298
-#: game/sim/consoleapplication.cpp:599 game/spec/info/info.cpp:149
+#: game/sim/consoleapplication.cpp:599 game/spec/info/info.cpp:160
 #: game/tables/basemissionname.cpp:18 game/tables/mineralmassclassname.cpp:26
 #: game/tables/nativegovernmentname.cpp:11 game/tables/nativeracename.cpp:11
 #: game/v3/udata/messagebuilder.cpp:378 game/vcr/objectinfo.cpp:127
 #: game/vcr/objectinfo.cpp:131 game/vcr/objectinfo.cpp:140
-#: game/vcr/objectinfo.cpp:147 share/resource/core_tiles.q:1179
+#: game/vcr/objectinfo.cpp:147 share/resource/core_tiles.q:1185
 #: share/resource/core_tiles.q:123 share/resource/core_tiles.q:175
 #: share/resource/core_tiles.q:185 share/resource/core_tiles.q:314
 #: share/resource/core_tiles.q:362 share/resource/core_tiles.q:472
@@ -12839,8 +12847,8 @@ msgstr "kein"
 msgid "none/not known"
 msgstr "kein/unbekannt"
 
-#: game/spec/info/filter.cpp:127 game/spec/info/info.cpp:316
-#: game/spec/info/info.cpp:348
+#: game/spec/info/filter.cpp:127 game/spec/info/info.cpp:329
+#: game/spec/info/info.cpp:362
 msgid "normal"
 msgstr "normal"
 
@@ -12912,7 +12920,7 @@ msgstr "einer"
 msgid "only one player number allowed"
 msgstr "nur eine Spielernummer zulässig"
 
-#: game/vcr/object.cpp:264
+#: game/vcr/object.cpp:279
 msgid "opponent"
 msgstr "Opponent"
 
@@ -12920,12 +12928,12 @@ msgstr "Opponent"
 msgid "option '-C' needs an argument (the character set)"
 msgstr "Option '-C' benötigt ein Argument (den Zeichensatz)"
 
-#: game/interface/scriptapplication.cpp:345
+#: game/interface/scriptapplication.cpp:344
 #: interpreter/consoleapplication.cpp:353
 msgid "option '-O' needs a number between %d and %d as parameter"
 msgstr "Option '-O' benötigt eine Zahl zwischen %d und %d als Parameter"
 
-#: game/interface/scriptapplication.cpp:328
+#: game/interface/scriptapplication.cpp:327
 msgid "option '-P' needs a player number as parameter"
 msgstr "Option '-P' benötigt eine Spielernummer als Parameter"
 
@@ -12933,7 +12941,7 @@ msgstr "Option '-P' benötigt eine Spielernummer als Parameter"
 msgid "others"
 msgstr "andere"
 
-#: game/vcr/object.cpp:345
+#: game/vcr/object.cpp:360
 msgid "our"
 msgstr "unser"
 
@@ -12992,12 +13000,12 @@ msgstr "Parameter für \"-%s\" ist ungültig"
 msgid "parameter to '--%s' must be 'yes' or 'no'"
 msgstr "Parameter zu '--%s' muss 'yes' oder 'no' sein"
 
-#: game/interface/scriptapplication.cpp:357
-#: game/sim/consoleapplication.cpp:291 interpreter/consoleapplication.cpp:365
+#: game/interface/scriptapplication.cpp:356 game/sim/consoleapplication.cpp:291
+#: interpreter/consoleapplication.cpp:365
 msgid "parameter to '--log' is not valid"
 msgstr "Parameter zu '--log' ist nicht gültig"
 
-#: game/vcr/object.cpp:357
+#: game/vcr/object.cpp:372
 msgid "planet"
 msgstr "Planet"
 
@@ -13074,7 +13082,7 @@ msgstr "aufrührerisch"
 msgid "scattered"
 msgstr "verstreut"
 
-#: client/tiles/shipscreenheadertile.cpp:88 game/spec/info/info.cpp:209
+#: client/tiles/shipscreenheadertile.cpp:88 game/spec/info/info.cpp:220
 msgid "ship"
 msgstr "Schiff"
 
@@ -13098,7 +13106,7 @@ msgstr "stabil (<15%)"
 msgid "starbases"
 msgstr "Sternenbasen"
 
-#: game/vcr/object.cpp:361
+#: game/vcr/object.cpp:376
 msgid "starship"
 msgstr "Raumschiff"
 
@@ -13127,7 +13135,7 @@ msgid "the selected format needs an output file name ('-o')"
 msgstr "für das gewählte Format muss eine Ausgabedatei angegeben werden ('-o')"
 
 #: game/interface/exportapplication.cpp:73
-#: game/interface/scriptapplication.cpp:335
+#: game/interface/scriptapplication.cpp:334
 #: game/maint/messagesearchapplication.cpp:516
 #: game/sim/consoleapplication.cpp:213 game/v3/trn/dumperapplication.cpp:71
 #: interpreter/consoleapplication.cpp:343
@@ -13202,8 +13210,8 @@ msgid "ufos"
 msgstr "Ufos"
 
 #: game/interface/exportapplication.cpp:173
-#: game/interface/scriptapplication.cpp:208
-#: game/sim/consoleapplication.cpp:445 server/play/consoleapplication.cpp:181
+#: game/interface/scriptapplication.cpp:208 game/sim/consoleapplication.cpp:445
+#: server/play/consoleapplication.cpp:181
 msgid "unable to load ship list"
 msgstr "Kann Schiffsliste nicht laden"
 
@@ -13266,7 +13274,7 @@ msgstr "Unbekannter Objekttyp '%s'"
 msgid "unknown. Wait while computing..."
 msgstr "unbekannt. Ergebnis wird berechnet..."
 
-#: client/tiles/starchartheadertile.cpp:48 game/player.cpp:144
+#: client/tiles/starchartheadertile.cpp:48 game/player.cpp:137
 msgid "unowned"
 msgstr "unbesetzt"
 
@@ -13370,11 +13378,11 @@ msgstr "wir bieten an"
 msgid "weakening"
 msgstr "abklingend"
 
-#: game/vcr/object.cpp:310
+#: game/vcr/object.cpp:325
 msgid "with %d fighter%!1{s%}"
 msgstr "mit %d Jäger%!1{n%}"
 
-#: game/vcr/object.cpp:321
+#: game/vcr/object.cpp:336
 msgid "with %d torp%!1{s%}"
 msgstr "mit %d Torp%!1{s%}"
 
@@ -13391,9 +13399,8 @@ msgstr "abgebildet auf %4d,%4d"
 #: client/dialogs/folderconfigdialog.cpp:92
 #: client/dialogs/folderconfigdialog.cpp:97
 #: client/dialogs/globalactions.cpp:295 client/dialogs/globalactions.cpp:319
-#: client/dialogs/searchdialog.cpp:60
-#: client/dialogs/simulationabilities.cpp:24 client/dialogs/ufoinfo.cpp:389
-#: client/dialogs/visibilityrange.cpp:157
+#: client/dialogs/searchdialog.cpp:60 client/dialogs/simulationabilities.cpp:24
+#: client/dialogs/ufoinfo.cpp:389 client/dialogs/visibilityrange.cpp:157
 #: client/vcr/cameracontrolwidget.cpp:135 client/widgets/vcrobjectinfo.cpp:160
 #: game/spec/info/filter.cpp:120
 msgid "yes"
@@ -13443,3 +13450,6 @@ msgstr "▶ Gesamt"
 #: client/dialogs/scores.cpp:1386
 msgid "▶▶ Totals"
 msgstr "▶▶ Gesamt"
+
+#~ msgid "Error uploading turn: %s"
+#~ msgstr "Fehler beim Hochladen des Zugs: %s"

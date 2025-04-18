@@ -120,7 +120,7 @@ namespace {
 
         bool init()
             {
-                client::Downlink link(root(), translator());
+                client::Downlink link(interface());
                 game::proxy::CommandListProxy::Infos_t list;
                 if (m_proxy.init(link, list, m_metaInfo)) {
                     m_listbox.setContent(list, 0);
@@ -213,7 +213,7 @@ namespace {
                 if (m_metaInfo.editable) {
                     if (const game::proxy::CommandListProxy::Info* p = m_listbox.getCurrentCommand()) {
                         if (ui::dialogs::MessageBox(tx("Delete this command?"), tx("Auxiliary Commands"), root()).doYesNoDialog(tx)) {
-                            client::Downlink link(root(), tx);
+                            client::Downlink link(interface());
                             game::proxy::CommandListProxy::Infos_t newList;
                             m_proxy.removeCommand(link, p->text, newList);
                             m_listbox.setContent(newList, m_listbox.getCurrentItem());
@@ -268,7 +268,7 @@ namespace {
                     input.setFlag(ui::widgets::InputLine::GameChars, true);
                     input.setFont("+");
                     if (input.doStandardDialog(tx("Auxiliary Commands"), tx("Edit command:"), tx)) {
-                        client::Downlink link(root(), tx);
+                        client::Downlink link(interface());
                         game::proxy::CommandListProxy::Infos_t newList;
                         size_t newPos;
                         if (m_proxy.addCommand(link, input.getText(), newList, newPos)) {

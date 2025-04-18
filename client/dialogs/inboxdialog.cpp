@@ -37,7 +37,7 @@ using client::widgets::MessageActionPanel;
 
 client::dialogs::InboxDialog::InboxDialog(String_t title, util::RequestSender<game::proxy::MailboxAdaptor> sender, client::si::UserSide& iface, ui::Root& root, afl::string::Translator& tx)
     : Control(iface),
-      m_link(root, tx),
+      m_link(iface),
       m_title(title),
       m_state(),
       m_data(),
@@ -380,7 +380,7 @@ client::dialogs::InboxDialog::onSearchFailure()
 void
 client::dialogs::InboxDialog::onSearchObject()
 {
-    Downlink link(root(), translator());
+    Downlink link(interface());
     game::SearchQuery q(game::proxy::SearchProxy(interface().gameSender(), root().engine().dispatcher()).getSavedQuery(link));
 
     client::si::OutputState out;

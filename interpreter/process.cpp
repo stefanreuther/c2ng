@@ -649,7 +649,6 @@ void
 interpreter::Process::run(Observer* pObserver)
 {
     // ex IntExecutionContext::run()
-    // unsigned counter = 0;
     logProcessState("run");
 
     // Notify observers.
@@ -658,7 +657,13 @@ interpreter::Process::run(Observer* pObserver)
     sig_invalidate.raise();
 
     m_state = Running;
-    while (m_state == Running) {
+    while (1) {
+        if (pObserver != 0) {
+            pObserver->checkProcess(*this);
+        }
+        if (m_state != Running) {
+            break;
+        }
         try {
             executeInstruction();
         }
@@ -674,9 +679,6 @@ interpreter::Process::run(Observer* pObserver)
             // which had different names for what() and getScriptError().
             // We no longer distinguish those.
             handleException(e.what(), String_t());
-        }
-        if (pObserver != 0) {
-            pObserver->checkProcess(*this);
         }
     }
     logProcessState("end");

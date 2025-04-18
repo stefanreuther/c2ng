@@ -318,7 +318,7 @@ namespace {
         void doListVariables()
             {
                 // ex WConsoleDialog::doListVariables
-                client::Downlink link(m_root, m_translator);
+                client::Downlink link(m_user);
                 PropertyList result;
                 game::proxy::ScriptEditorProxy(m_user.gameSender())
                     .buildPropertyList(link, result, std::auto_ptr<game::interface::ContextProvider>(m_user.createContextProvider()));

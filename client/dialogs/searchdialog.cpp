@@ -447,6 +447,7 @@ SearchDialog::run(bool immediate)
     disp.add(util::KeyMod_Alt + util::Key_Left, this, &SearchDialog::onPreviousSelectionLayer);
     disp.add(util::KeyMod_Alt + util::Key_Right, this, &SearchDialog::onNextSelectionLayer);
     disp.add(util::KeyMod_Shift + util::Key_Return, this, &SearchDialog::onGoToMap);
+    disp.add(util::KeyMod_Ctrl + util::Key_Pause, &interface(), &client::si::UserSide::interruptRunningProcesses);
     win.add(disp);
 
     ui::widgets::FocusIterator& it = del.addNew(new ui::widgets::FocusIterator(ui::widgets::FocusIterator::Tab));
@@ -697,7 +698,8 @@ SearchDialog::onHistory()
 
     String_t value = m_input.getText();
     String_t flags;
-    if (client::widgets::doExpressionListPopup(root(), m_exProxy, m_btnHistory.getExtent().getBottomLeft(), value, flags, translator())) {
+    client::Downlink link(interface());
+    if (client::widgets::doExpressionListPopup(root(), link, m_exProxy, m_btnHistory.getExtent().getBottomLeft(), value, flags)) {
         // User has selected an item. Parse it.
         SearchQuery::SearchObjects_t obj;
         SearchQuery::MatchType type = SearchQuery::MatchTrue;
@@ -847,7 +849,7 @@ SearchDialog::openControlScreen(game::Reference::Type refType,
 {
     game::Reference ref = m_refList.getCurrentReference();
     if (m_refList.hasState(ui::Widget::FocusedState) && ref.getType() == refType) {
-        client::Downlink link(root(), translator());
+        client::Downlink link(interface());
         client::proxy::ScreenHistoryProxy proxy(interface().gameSender());
         client::ScreenHistory::Reference histRef(histType, ref.getId(), 0);
         if (proxy.validateReference(link, histRef)) {
@@ -885,7 +887,7 @@ client::dialogs::doSearchDialog(const game::SearchQuery& initialQuery,
                                 client::si::UserSide& iface,
                                 client::si::OutputState& out)
 {
-    Downlink link(iface.root(), iface.translator());
+    Downlink link(iface);
     game::proxy::ConfigurationProxy config(iface.gameSender());
     game::ref::List list;
 
@@ -968,7 +970,7 @@ client::dialogs::doSearchSubDialog(game::ref::List& list,
                                    client::si::UserSide& iface,
                                    client::si::OutputState& out)
 {
-    Downlink link(iface.root(), iface.translator());
+    Downlink link(iface);
     game::proxy::ConfigurationProxy config(iface.gameSender());
 
     // Execute dialog

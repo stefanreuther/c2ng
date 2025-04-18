@@ -508,7 +508,7 @@ NavChartDialog::setPositions()
 void
 NavChartDialog::doListShips()
 {
-    client::Downlink link(m_root, m_translator);
+    client::Downlink link(m_userSide);
     client::dialogs::VisualScanDialog dlg(m_userSide, m_root, m_translator);
     dlg.setTitle(m_translator("List Ships"));
     dlg.setOkName(m_translator("OK"));
@@ -548,7 +548,7 @@ NavChartDialog::doSearchShips()
         q.setPlayedOnly(m_state.requireOwnShip);
 
         // Search and pick first result
-        client::Downlink link(m_root, m_translator);
+        client::Downlink link(m_userSide);
         SyncSearchProxy proxy(m_userSide.gameSender(), m_root.engine().dispatcher(), link);
         bool ok = false;
         if (proxy.search(q, false)) {
@@ -668,7 +668,7 @@ NavChartDialog::chooseChunnelMate()
 {
     // ex CAimChart.PickFirecloud (sort-of)
     game::ref::UserList list;
-    client::Downlink link(m_root, m_translator);
+    client::Downlink link(m_userSide);
     game::proxy::ChunnelProxy(m_userSide.gameSender(), m_root.engine().dispatcher()).getCandidates(link, m_state.shipId, m_state.target, list);
 
     if (list.empty()) {

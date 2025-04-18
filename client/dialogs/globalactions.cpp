@@ -397,7 +397,7 @@ client::dialogs::doGlobalActions(client::si::UserSide& us,
 {
     // ex doGlobalActions, globact.pas:NGlobalActions
     Dialog dlg(us, outputState, searchResult, ref);
-    Downlink link(us.root(), us.translator());
+    Downlink link(us);
     dlg.init(link);
     dlg.run();
 }

@@ -591,7 +591,7 @@ SimulatorDialog::onAddShip()
 {
     // ex WSimListWithHandler::addShip, CSimListbox.AddShip
     if (getReplicationLimit() > 0) {
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::Slot_t slot = m_proxy.addShip(link, m_list.getCurrentItem(), 1);
         m_list.setCurrentItem(slot);
 
@@ -609,7 +609,7 @@ SimulatorDialog::onAddShip()
 void
 SimulatorDialog::onAddPlanet()
 {
-    Downlink link(m_root, m_translator);
+    Downlink link(interface());
     SimulationSetupProxy::Slot_t slot = m_proxy.addPlanet(link);
     m_list.setCurrentItem(slot);
 }
@@ -645,7 +645,7 @@ void
 SimulatorDialog::onLoad()
 {
     // WSimScreen::loadFile, ccsim.pas:LoadBattleSetup
-    Downlink link(m_root, m_translator);
+    Downlink link(interface());
     client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:bsim");
     client::dialogs::SessionFileSelectionDialog dlg(m_root, m_translator, m_gameSender, m_translator("Load Simulation"));
     dlg.setPattern("*.ccb");
@@ -680,7 +680,7 @@ void
 SimulatorDialog::onSave()
 {
     // ex WSimScreen::saveFile, ccsim.pas:SaveBattleSetup
-    Downlink link(m_root, m_translator);
+    Downlink link(interface());
     client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:bsim");
     client::dialogs::SessionFileSelectionDialog dlg(m_root, m_translator, m_gameSender, m_translator("Save Simulation"));
     dlg.setPattern("*.ccb");
@@ -801,7 +801,7 @@ SimulatorDialog::onReplicate()
         } else {
             int32_t count = 0;
             if (doNumber(m_root, SimulationSetupProxy::Range_t(0, limit), count, m_translator("Replicate Ship"), m_translator("Number"), "pcc2:bsim", m_translator)) {
-                Downlink link(m_root, m_translator);
+                Downlink link(interface());
                 SimulationSetupProxy::Slot_t slot = m_proxy.addShip(link, m_list.getCurrentItem(), count);
                 m_list.setCurrentItem(slot);
             }
@@ -815,7 +815,7 @@ SimulatorDialog::onEditPrimary()
     // ex WSimListWithHandler::editPrimaryWeapon, ccsim.pas:SelectPrimary
     if (isAtShip() && m_currentObject.allowPrimaryWeapons) {
         // Determine available choices
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::PrimaryChoices info;
         m_proxy.getPrimaryChoices(link, m_currentSlot, info);
         prependDigits(info.beamTypes);
@@ -887,7 +887,7 @@ SimulatorDialog::onEditSecondary()
     // ex WSimListWithHandler::editSecondaryWeapon, ccsim.pas:SelectSecondary
     if (isAtShip() && m_currentObject.allowSecondaryWeapons) {
         // Determine available choices
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::SecondaryChoices info;
         m_proxy.getSecondaryChoices(link, m_currentSlot, info);
 
@@ -1003,7 +1003,7 @@ SimulatorDialog::onEditAggressivenessAmmo()
 {
     if (isAtShip()) {
         // ex WSimListWithHandler::editAggressiveness (part)
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::Elements_t elems;
         m_proxy.getAggressivenessChoices(link, elems);
         prependAggressivenessKeys(elems);
@@ -1014,7 +1014,7 @@ SimulatorDialog::onEditAggressivenessAmmo()
         }
     } else if (isAtBase()) {
         // ex WSimPlanetEditor::editBaseTorps
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::Elements_t list;
         m_proxy.getNumBaseTorpedoes(link, m_currentSlot, list);
         if (client::dialogs::editSimulationBaseTorpedoes(m_root, m_gameSender, m_currentObject.baseTorpedoTech-1, list, m_translator)) {
@@ -1028,7 +1028,7 @@ SimulatorDialog::onEditDamageDefense()
 {
     if (isAtShip()) {
         // ex WSimListWithHandler::editDamage
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::Range_t range = m_proxy.getDamageRange(link, m_currentSlot);
         int32_t value = m_currentObject.damage;
         if (doNumber(m_root, range, value, m_translator("Set Damage Level"), m_translator("Damage"), "pcc2:bsim", m_translator)) {
@@ -1048,7 +1048,7 @@ SimulatorDialog::onEditEngine()
 {
     // ex WSimListWithHandler::editEngine
     if (isAtShip()) {
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::Elements_t elems;
         m_proxy.getEngineTypeChoices(link, elems);
         prependDigits(elems);
@@ -1065,7 +1065,7 @@ SimulatorDialog::onEditFriendlyCode()
 {
     // ex WSimListWithHandler::editFCode, WSimPlanetEditor::editFCode
     if (isAtObject()) {
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         game::spec::FriendlyCodeList::Infos_t list;
         m_proxy.getFriendlyCodeChoices(link, m_currentSlot, list);
 
@@ -1092,7 +1092,7 @@ SimulatorDialog::onEditBaseFighters()
 {
     // ex WSimPlanetEditor::editBaseFighters
     if (isAtBase()) {
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::Range_t range = m_proxy.getNumBaseFightersRange(link, m_currentSlot);
         int32_t value = m_currentObject.numBaseFighters;
         if (doNumber(m_root, range, value, m_translator("Set Base Fighters"), m_translator("Fighters"), "pcc2:bsim", m_translator)) {
@@ -1106,7 +1106,7 @@ SimulatorDialog::onEditBaseBeamLevel()
 {
     // ex WSimPlanetEditor::editBaseBeamTech
     if (isAtPlanet()) {
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::Elements_t elems;
         m_proxy.getBaseBeamLevelChoices(link, elems);
         prependDigits(elems);
@@ -1123,7 +1123,7 @@ SimulatorDialog::onEditCrew()
 {
     // ex WSimListWithHandler::editCrew
     if (isAtShip()) {
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::Range_t range = m_proxy.getCrewRange(link, m_currentSlot);
         int32_t value = m_currentObject.crew;
         if (doNumber(m_root, range, value, m_translator("Set Crew"), m_translator("Crew"), "pcc2:bsim", m_translator)) {
@@ -1137,7 +1137,7 @@ SimulatorDialog::onEditId()
 {
     // ex WSimPlanetEditor::editId, WSimListWithHandler::editId, CSimListbox.SetId
     if (isAtObject()) {
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::Range_t range = m_proxy.getIdRange(link, m_currentSlot);
         int32_t value = m_currentObject.id;
 
@@ -1192,7 +1192,7 @@ SimulatorDialog::onEditExperienceLevel()
 {
     // ex WSimListWithHandler::editExperienceLevel, ccsim.pas:PickExperienceLevel
     if (isAtObject()) {
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::Elements_t elems;
         m_proxy.getExperienceLevelChoices(link, elems);
         prependDigits(elems);
@@ -1228,7 +1228,7 @@ SimulatorDialog::onEditName()
         }
     } else if (isAtPlanet()) {
         // ex WSimPlanetEditor::editName, ccsim.pas:ChoosePlanetNameFromList
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::Elements_t elems;
         m_proxy.getPlanetNameChoices(link, elems);
         sortAlphabetically(elems, 0);
@@ -1245,7 +1245,7 @@ SimulatorDialog::onEditOwner()
 {
     // ex WSimListWithHandler::editOwner
     if (isAtObject()) {
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::Elements_t elems;
         m_proxy.getOwnerChoices(link, elems);
         prependDigits(elems);
@@ -1262,7 +1262,7 @@ SimulatorDialog::onEditPopulation()
 {
     // ex WSimPlanetEditor::editPopulation, CPlanetWindow.EditPopulation
     if (isAtPlanet()) {
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::PopulationChoices info;
         m_proxy.getPopulationChoices(link, m_currentSlot, info);
 
@@ -1312,7 +1312,7 @@ SimulatorDialog::onEditShieldBaseDefense()
     // ex WSimPlanetEditor::editBaseFighters
     if (isAtShip()) {
         // ex WSimListWithHandler::editShield
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::Range_t range = m_proxy.getShieldRange(link, m_currentSlot);
         int32_t value = m_currentObject.shield;
         if (doNumber(m_root, range, value, m_translator("Set Shield Level"), m_translator("Shield"), "pcc2:bsim", m_translator)) {
@@ -1320,7 +1320,7 @@ SimulatorDialog::onEditShieldBaseDefense()
         }
     } else if (isAtBase()) {
         // ex WSimPlanetEditor::editBaseDefense
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::Range_t range = m_proxy.getBaseDefenseRange(link, m_currentSlot);
         int32_t value = m_currentObject.baseDefense;
         if (doNumber(m_root, range, value, m_translator("Set Base Defense"), m_translator("Defense"), "pcc2:bsim", m_translator)) {
@@ -1336,7 +1336,7 @@ SimulatorDialog::onEditTypeBaseTorpedoLevel()
         editType(false, m_currentSlot, m_currentObject.hullType.first);
     } else if (isAtBase()) {
         // ex WSimPlanetEditor::editBaseTorpTech
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::Elements_t elems;
         m_proxy.getBaseTorpedoLevelChoices(link, elems);
         prependDigits(elems);
@@ -1361,7 +1361,7 @@ SimulatorDialog::onEditIntercept()
 {
     // ex WSimListWithHandler::editInterceptId
     if (isAtShip()) {
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::Range_t range = m_proxy.getInterceptIdRange(link, m_currentSlot);
         int32_t value = m_currentObject.interceptId.first;
 
@@ -1377,7 +1377,7 @@ SimulatorDialog::onEditAbilities()
     // ex WSimListWithHandler::editAbilities, editSimulatorShipFunctions, editSimulatorPlanetFunctions
     // ex ccsim.pas:EditShipAbilities
     if (isAtObject()) {
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         SimulationSetupProxy::AbilityChoices choices;
         m_proxy.getAbilityChoices(link, m_currentSlot, choices);
 
@@ -1404,7 +1404,7 @@ SimulatorDialog::onFleetCostSummary()
 void
 SimulatorDialog::onEditConfiguration()
 {
-    Downlink link(m_root, m_translator);
+    Downlink link(interface());
     Configuration config;
     m_proxy.getConfiguration(link, config);
 
@@ -1418,7 +1418,7 @@ SimulatorDialog::onUpdateThis()
 {
     // ex WSimListWithHandler::updateFromGame
     if (isAtObject() && m_currentObject.relation >= GameInterface::ReadOnly) {
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         m_proxy.copyFromGame(link, m_currentSlot, m_currentSlot+1);
     }
 }
@@ -1428,7 +1428,7 @@ SimulatorDialog::onWriteBackThis()
 {
     // ex WSimListWithHandler::writeToGame
     if (isAtObject() && m_currentObject.relation >= GameInterface::Playable) {
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         Setup::Status st = m_proxy.copyToGame(link, m_currentSlot, m_currentSlot+1);
         if (st.succeeded == 0) {
             MessageBox(m_translator("This unit's status could not be written back."),
@@ -1444,7 +1444,7 @@ SimulatorDialog::onUpdateAll()
     // ex WSimScreen::updateFromGame
     // FIXME: check whether there is a game?
     if (isAtObject()) {
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         Setup::Status st = m_proxy.copyFromGame(link, 0, m_list.getNumItems());
 
         afl::string::Translator& tx = m_translator;
@@ -1470,7 +1470,7 @@ SimulatorDialog::onWriteBackAll()
     // ex WSimScreen::writeToGame
     // FIXME: check whether there is a game?
     if (isAtObject()) {
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
         Setup::Status st = m_proxy.copyToGame(link, 0, m_list.getNumItems());
 
         afl::string::Translator& tx = m_translator;
@@ -1629,7 +1629,7 @@ client::dialogs::doBattleSimulator(client::si::UserSide& iface,
 {
     // ex client/scr-sim.cc:doSimulator
     SimulationSetupProxy proxy(iface.gameSender(), ctl.root().engine().dispatcher());
-    Downlink link(ctl.root(), ctl.translator());
+    Downlink link(iface);
     SimulationSetupProxy::ListItems_t list;
     proxy.usePlayerRelations();
     proxy.getList(link, list);

@@ -494,7 +494,7 @@ client::dialogs::VisualScanDialog::ListPeer::ListPeer(ui::Root& root, Window& pa
 void
 client::dialogs::VisualScanDialog::ListPeer::onMenu(gfx::Point pt)
 {
-    Downlink link(m_parent.m_root, m_parent.m_translator);
+    Downlink link(m_parent.interface());
     game::ref::Configuration order = m_parent.m_listProxy.getConfig(link);
     if (client::dialogs::doReferenceSortOrderMenu(order, pt, m_parent.m_root, m_parent.m_translator)) {
         m_parent.m_listProxy.setConfig(order);
@@ -870,7 +870,7 @@ void
 client::dialogs::VisualScanDialog::Window::showCargoList()
 {
     // ex WVisualScanWindow::showCargoList, CListShipsWindow.SumCargo
-    Downlink link(m_root, m_translator);
+    Downlink link(interface());
     CostSummary sum = m_proxy.getCargoSummary(link);
 
     const String_t title =
@@ -950,7 +950,7 @@ client::dialogs::VisualScanDialog::Window::showCargo()
     // Determine status
     const Reference r = getCurrentReference();
     if (r.getType() == Reference::Ship) {
-        Downlink link(m_root, m_translator);
+        Downlink link(interface());
 
         game::map::ShipCargoInfos_t infos;
         ShipInfoProxy::CargoStatus st = ShipInfoProxy(m_gameSender).getCargo(link, r.getId(), ShipInfoProxy::GetLastKnownCargo | ShipInfoProxy::GetMassRanges, infos);

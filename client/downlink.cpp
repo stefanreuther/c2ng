@@ -13,6 +13,16 @@ client::Downlink::Downlink(ui::Root& root, afl::string::Translator& tx)
       m_loop(root)
 { }
 
+client::Downlink::Downlink(client::si::UserSide& us)
+    : WaitIndicator(us.root().engine().dispatcher()),
+      m_root(us.root()),
+      m_indicator(us.root(), us.translator()("Working...")),
+      m_busy(false),
+      m_loop(us.root())
+{
+    m_indicator.sig_interrupt.add(&us, &client::si::UserSide::interruptRunningProcesses);
+}
+
 client::Downlink::~Downlink()
 { }
 

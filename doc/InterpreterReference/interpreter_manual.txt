@@ -755,6 +755,9 @@ Functions can be executed, for example, from search queries,
 and you wouldn't want your search query to be delayed to next turn.
 
 You can examine and manipulate running processes using the <a href="pcc2:processmgr">Process Manager</a>.
+
+If a process hangs, for example, because you accidentally programmed an infinite loop, you can press <kbd>Ctrl+Break</kbd>.
+This will offer you to terminate the process.
 --------------------------------------------------------------------------------
 @page int:statement:startup, Scripts: Startup
 @in group:int:statement

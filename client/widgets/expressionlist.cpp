@@ -96,17 +96,16 @@ namespace {
 
 bool
 client::widgets::doExpressionListPopup(ui::Root& root,
+                                       game::proxy::WaitIndicator& ind,
                                        game::proxy::ExpressionListProxy& proxy,
                                        gfx::Point anchor,
                                        String_t& value,
-                                       String_t& flags,
-                                       afl::string::Translator& tx)
+                                       String_t& flags)
 {
     // ex WLRUPopup::doPopup
     // Get list of items
-    Downlink link(root, tx);
     ExpressionLists::Items_t items;
-    proxy.getList(link, items);
+    proxy.getList(ind, items);
     if (items.empty()) {
         return false;
     }

@@ -768,7 +768,7 @@ void
 ProcessListDialog::onExecute()
 {
     // Commit
-    client::Downlink link(m_root, translator());
+    client::Downlink link(interface());
     performChanges(link, m_proxy, *this);
 
     // Reload if needed
@@ -792,7 +792,7 @@ client::dialogs::doProcessListDialog(game::Reference invokingObject,
                                      client::si::OutputState& out)
 {
     client::si::OutputState out1, out2;
-    Downlink link(ctl.root(), ctl.translator());
+    Downlink link(iface);
     ProcessListProxy proxy(iface.gameSender(), ctl.root().engine().dispatcher());
     MutexListProxy mProxy(iface.gameSender());
 

@@ -113,6 +113,26 @@ interpreter::ProcessList::startProcessGroup(uint32_t pgid)
     }
 }
 
+// Terminate a process group.
+void
+interpreter::ProcessList::terminateProcessGroup(uint32_t pgid)
+{
+    // This is very simple:
+    // - unlike terminateProcess(), do not try to proceed the next process in the group.
+    //   This would make the operation nominally O(n^2).
+    // - unlike terminateAllProcesses(), do not preserve Frozen process.
+    //   A process is only in a process group if it is executing, in which case it is not Frozen.
+    for (Vector_t::iterator i = m_processes.begin(); i != m_processes.end(); ++i) {
+        if ((*i)->getProcessGroupId() == pgid) {
+            (*i)->setState(Process::Terminated);
+        }
+    }
+
+    // Tell observers that this process group is gone.
+    // Easiest way is try to start it, so it notices that it's complete.
+    startProcessGroup(pgid);
+}
+
 // Move process into a process group.
 void
 interpreter::ProcessList::joinProcess(Process& proc, uint32_t pgid)

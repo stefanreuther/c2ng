@@ -214,7 +214,8 @@ Dialog::onDropdown(Compound& comp, ExpressionLists::Area area)
     ExpressionListProxy exProxy(m_gameSender, area);
     String_t value = comp.input.getText();
     String_t flags;
-    if (client::widgets::doExpressionListPopup(m_root, exProxy, comp.button.getExtent().getBottomLeft(), value, flags, m_translator)) {
+    client::Downlink link(m_root, m_translator);
+    if (client::widgets::doExpressionListPopup(m_root, link, exProxy, comp.button.getExtent().getBottomLeft(), value, flags)) {
         comp.input.setText(value);
     }
 }

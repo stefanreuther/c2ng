@@ -47,8 +47,14 @@ client::widgets::BusyIndicator::getLayoutInfo() const
 bool
 client::widgets::BusyIndicator::handleKey(util::Key_t key, int /*prefix*/)
 {
-    // This loses the prefixes, but there shouldn't be any.
-    m_keys.push_back(key);
+    if (key == util::KeyMod_Ctrl + util::Key_Pause) {
+        // Break
+        m_keys.clear();
+        sig_interrupt.raise();
+    } else {
+        // This loses the prefixes, but there shouldn't be any.
+        m_keys.push_back(key);
+    }
     return true;
 }
 

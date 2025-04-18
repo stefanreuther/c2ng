@@ -73,6 +73,11 @@ namespace interpreter {
             \param pgid process group Id */
         void startProcessGroup(uint32_t pgid);
 
+        /** Terminate a process group.
+            Sets all processes to status Terminated, and signals the group complete.
+            \param pgid process group Id */
+        void terminateProcessGroup(uint32_t pgid);
+
         /** Move process into a process group.
             If the process is waiting, moves it into the given process group and marks it for eventual execution.
             If other processes are in the same process group, moves those into the process group as well.

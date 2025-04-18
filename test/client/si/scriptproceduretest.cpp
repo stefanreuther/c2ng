@@ -34,7 +34,7 @@ AFL_TEST("client.si.ScriptProcedure:normal", a)
     game::Session session(tx, fs);
 
     // Make a dummy ScriptSide
-    client::si::ScriptSide ss((util::RequestSender<client::si::UserSide>()), session);
+    client::si::ScriptSide ss((util::RequestSender<client::si::UserSide>()), session, new util::StopSignal());
 
     // Make a ScriptProcedure
     client::si::ScriptProcedure testee(session, &ss, theFunction);

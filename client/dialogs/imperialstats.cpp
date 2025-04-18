@@ -384,7 +384,7 @@ Dialog::onSave()
     client::dialogs::SessionFileSelectionDialog dlg(root, tx, m_userSide.gameSender(), tx("Save Page"));
     dlg.setPattern(util::FileNamePattern::getAllFilesWithExtensionPattern("html"));
     dlg.setDefaultExtension("html");
-    client::Downlink link(root, tx);
+    client::Downlink link(m_userSide);
     if (dlg.runDefault(link)) {
         String_t fileName = dlg.getResult();
         String_t errorMessage;

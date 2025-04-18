@@ -890,3 +890,47 @@ AFL_TEST("interpreter.ProcessList:findProcessByObject", a)
     // Will no longer find the process
     a.checkNull("31. findProcessByObject pkDefault", testee.findProcessByObject(&obj, Process::pkDefault));
 }
+
+/** Test terminating empty process group. */
+AFL_TEST("interpreter.ProcessList:terminateProcessGroup:empty", a)
+{
+    interpreter::ProcessList testee;
+    Counter c;
+    a.checkEqual("01. signal count", c.get(), 0);
+    testee.sig_processGroupFinish.add(&c, &Counter::increment);
+
+    testee.terminateProcessGroup(42);
+    a.checkEqual("11. signal count", c.get(), 1);
+}
+
+/** Test terminating non-empty process group. */
+AFL_TEST("interpreter.ProcessList:terminateProcessGroup:populated", a)
+{
+    // Environment
+    afl::sys::Log log;
+    afl::string::NullTranslator tx;
+    afl::io::NullFileSystem fs;
+    interpreter::World world(log, tx, fs);
+
+    interpreter::ProcessList testee;
+    Counter c;
+    a.checkEqual("01. signal count", c.get(), 0);
+    testee.sig_processGroupFinish.add(&c, &Counter::increment);
+
+    // Set up processes
+    Process& p1 = testee.create(world, "1");
+    Process& p2 = testee.create(world, "2");
+    Process& p3 = testee.create(world, "3");
+    testee.resumeProcess(p1, 42);
+    testee.resumeProcess(p2, 23);
+    testee.resumeProcess(p3, 42);
+
+    // Terminate
+    testee.terminateProcessGroup(42);
+    a.checkEqual("11. signal count", c.get(), 1);
+
+    // Verify state
+    a.checkEqual("21. state", p1.getState(), Process::Terminated);
+    a.checkEqual("22. state", p2.getState(), Process::Runnable);
+    a.checkEqual("23. state", p3.getState(), Process::Terminated);
+}

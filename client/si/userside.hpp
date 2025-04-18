@@ -20,6 +20,7 @@
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "util/stopsignal.hpp"
 
 namespace client { namespace si {
 
@@ -110,6 +111,15 @@ namespace client { namespace si {
         /** Post a request to execute on the ScriptSide (low-level version).
             @param request Newly-allocated request */
         void postNewRequest(ScriptRequest* request);
+
+        /** Interrupt running processes.
+            This performs the entire user-interface integration, if any,
+            and returns when the user has made the decision whether to cancel or not.
+            It can be called from a busy indicator (to interrupt the known running process),
+            or otherwise (to interrupt potentially running unknown background processes).
+
+            If it is already running, the call is ignored. */
+        void interruptRunningProcesses();
 
 
         /*!
@@ -271,6 +281,20 @@ namespace client { namespace si {
             @param id Wait Id */
         void onTaskComplete(uint32_t id);
 
+        /** Report that a process has been interrupted.
+            Called in response to interruptRunningProcesses().
+            An interrupt can affect any number of processes,
+            those will all be in status Waiting and expect either continueProcess(),
+            or terminateProcessAndGroup() to be called on them.
+
+            \param link         Reference to process
+            \param processName  Process name */
+        void onProcessInterrupted(RequestLink2 link, String_t processName);
+
+        /** Confirm process interruption.
+            Called in response to interruptRunningProcesses(), after all onProcessInterrupted() calls. */
+        void onInterruptConfirm();
+
         /** Get focused object of a given type.
             Examines the user-interface focus.
             @param type Desired object type
@@ -324,10 +348,15 @@ namespace client { namespace si {
         client::widgets::BusyIndicator m_blocker;
         ui::Root& m_root;
         afl::string::Translator& m_translator;
+        afl::base::Ptr<util::StopSignal> m_stopSignal;
 
         uint32_t m_waitIdCounter;
 
         std::vector<Control*> m_controls;
+
+        bool m_interrupting;
+        std::vector<std::pair<RequestLink2, String_t> > m_interruptedProcesses;
+        client::widgets::BusyIndicator m_interruptBlocker;
     };
 
 } }

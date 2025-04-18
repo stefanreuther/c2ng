@@ -301,7 +301,7 @@ void
 client::dialogs::OutboxDialog::editMessage()
 {
     // Fetch message
-    Downlink ind(root(), translator());
+    Downlink ind(interface());
     game::proxy::OutboxProxy::Info info;
     game::Id_t id = m_data.id;
     if (m_outboxProxy.getMessage(ind, id, info)) {
@@ -322,7 +322,7 @@ void
 client::dialogs::OutboxDialog::redirectMessage()
 {
     // Fetch message
-    Downlink ind(root(), translator());
+    Downlink ind(interface());
     game::proxy::OutboxProxy::Info info;
     game::Id_t id = m_data.id;
     if (m_outboxProxy.getMessage(ind, id, info)) {

@@ -515,7 +515,7 @@ MinefieldInfoDialog::showSweepInfo()
 {
     // ex showSweepInfo
     // Retrieve mine sweep information
-    client::Downlink link(m_root, m_translator);
+    client::Downlink link(interface());
     MinefieldProxy::SweepInfo info;
     m_proxy.getSweepInfo(link, interface().getFocusedObjectId(game::Reference::Ship), info);
     if (info.weapons.empty()) {
