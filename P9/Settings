@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/nu/loader.cpp game/nu/loader.hpp \
+FILES_gamelib = interpreter/coveragerecorder.cpp \
+    interpreter/coveragerecorder.hpp game/nu/loader.cpp game/nu/loader.hpp \
     game/spec/advantagelist.cpp game/spec/advantagelist.hpp \
     game/pcc/servertransport.cpp game/pcc/servertransport.hpp \
     util/serverdirectory.cpp util/serverdirectory.hpp util/translator.cpp \
@@ -1806,8 +1807,9 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/ui/widgets/numberselectortest.cpp \
-    test/game/nu/loadertest.cpp test/game/spec/advantagelisttest.cpp \
+FILES_testsuite = test/interpreter/coveragerecordertest.cpp \
+    test/ui/widgets/numberselectortest.cpp test/game/nu/loadertest.cpp \
+    test/game/spec/advantagelisttest.cpp \
     test/game/nu/registrationkeytest.cpp test/util/serverdirectorytest.cpp \
     test/server/play/shipcommandhandlertest.cpp \
     test/server/play/shippackertest.cpp \

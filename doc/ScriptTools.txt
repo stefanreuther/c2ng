@@ -33,6 +33,11 @@ brackets, the "origin" of the option (C compiler, PCC1).
 
 * `--compile`, `-c` (c2compiler): produce *.qc files [C compiler]
 
+* `--coverage FILE.info` (c2script): record code coverage
+
+* `--coverage-test-name NAME` (c2script): test name (TN:) to write to
+  coverage report
+
 * `-C CHARSET` (c2script, c2compiler): set character set used for game
   data and *.qc files [standard PCC2 option]
 

@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-04-19 18:26+0200\n"
+"PO-Revision-Date: 2025-04-19 21:27+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:388
@@ -2906,12 +2906,12 @@ msgstr ""
 msgid "Compensation"
 msgstr "Kompensation"
 
-#: game/interface/scriptapplication.cpp:110
+#: game/interface/scriptapplication.cpp:128
 #: interpreter/consoleapplication.cpp:111
 msgid "Compiled %d command%!1{s%}."
 msgstr "%d Befehl%!1{e%} übersetzt."
 
-#: game/interface/scriptapplication.cpp:154
+#: game/interface/scriptapplication.cpp:172
 #: interpreter/consoleapplication.cpp:155
 msgid "Compiled %d file%!1{s%}."
 msgstr "%d Datei%!1{en%} übersetzt."
@@ -2957,7 +2957,7 @@ msgid "Confirm"
 msgstr "Bestätigen"
 
 #: client/dialogs/consoledialog.cpp:368 client/screens/playerscreen.cpp:150
-#: game/interface/scriptapplication.cpp:222
+#: game/interface/scriptapplication.cpp:248
 msgid "Console"
 msgstr "Konsole"
 
@@ -6857,7 +6857,7 @@ msgstr "Optionen"
 msgid "Options...\t[Ctrl-O]"
 msgstr "Optionen...\t[Strg-O]"
 
-#: game/interface/scriptapplication.cpp:379
+#: game/interface/scriptapplication.cpp:416
 msgid ""
 "Options:\n"
 "--game/-G DIR\tGame directory\n"
@@ -6867,6 +6867,8 @@ msgid ""
 "--nostdlib\tDo not load standard library (core.q)\n"
 "-I DIR\tInclude (load) directory\n"
 "--charset/-C CS\tSet game character set\n"
+"--coverage FILE.info\tProduce coverage report\n"
+"--coverage-test-name NAME\tTest name to write to coverage report\n"
 "-O LVL\tOptimisation level\n"
 "-k\tExecute commands, not files\n"
 "--log CONFIG\tConfigure log output\n"
@@ -6880,6 +6882,8 @@ msgstr ""
 "--nostdlib\tStandardbibliothek (core.q) nicht laden\n"
 "-I VERZ\tInclude-Verzeichnis (für \"Load\")\n"
 "--charset/-C ZS\tSpiel-Zeichensatz setzen\n"
+"--coverage DATEI.info\tCodeabdeckungs-Bericht erzeugen\n"
+"--coverage-test-name NAME\tIn den Codeabdeckungs-Bericht zu schreibender Test-Name\n"
 "-O STUFE\tOptimierungsstufe\n"
 "-k\tKommandos (keine Dateien)\n"
 "--log KONFIG\tLog-Ausgabe konfigurieren\n"
@@ -7167,7 +7171,7 @@ msgstr "PCC2 Result-Entpacker v%s - (c) 2010-2024 Stefan Reuther"
 msgid "PCC2 Script Compiler v%s - (c) 2017-2024 Stefan Reuther"
 msgstr "PCC2 Script-Compiler v%s - (c) 2017-2024 Stefan Reuther"
 
-#: game/interface/scriptapplication.cpp:393
+#: game/interface/scriptapplication.cpp:432
 msgid "PCC2 Script Engine v%s - (c) 2017-2024 Stefan Reuther"
 msgstr "PCC2 Script-Engine v%s - (c) 2017-2024 Stefan Reuther"
 
@@ -11035,7 +11039,7 @@ msgstr ""
 "%s\n"
 "Fehler bitte melden an <Streu@gmx.de>"
 
-#: game/interface/scriptapplication.cpp:395
+#: game/interface/scriptapplication.cpp:434
 msgid ""
 "Usage:\n"
 "  %s [-h]\n"
@@ -12491,7 +12495,7 @@ msgstr "Ungültige Anzahl Simulationen, '%s'"
 msgid "invalid number of threads, '%s'"
 msgstr "Ungültige Anzahl Threads, '%s'"
 
-#: game/interface/scriptapplication.cpp:365 game/sim/consoleapplication.cpp:335
+#: game/interface/scriptapplication.cpp:402 game/sim/consoleapplication.cpp:335
 #: interpreter/consoleapplication.cpp:333
 #: interpreter/consoleapplication.cpp:372
 #: server/play/consoleapplication.cpp:120 util/resourcefileapplication.cpp:303
@@ -12591,7 +12595,7 @@ msgstr "Stufen"
 msgid "light"
 msgstr "leicht"
 
-#: game/interface/scriptapplication.cpp:144
+#: game/interface/scriptapplication.cpp:162
 #: interpreter/consoleapplication.cpp:145
 msgid "line %d: %s"
 msgstr "Zeile %d: %s"
@@ -12739,7 +12743,7 @@ msgstr "kein Befehl angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 msgid "no command specified. Use '%s -h' for help."
 msgstr "kein Befehl angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 
-#: game/interface/scriptapplication.cpp:266
+#: game/interface/scriptapplication.cpp:299
 #: interpreter/consoleapplication.cpp:284
 msgid "no commands specified. Use '%s -h' for help."
 msgstr "keine Befehle angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
@@ -12762,12 +12766,12 @@ msgid "no filter specified. Deleting (\"-d\") needs a filter"
 msgstr "kein Filter angegeben. Zum Löschen (\"-d\") wird ein Filter benötigt"
 
 #: game/interface/exportapplication.cpp:156
-#: game/interface/scriptapplication.cpp:190
+#: game/interface/scriptapplication.cpp:208
 #: server/play/consoleapplication.cpp:171
 msgid "no game data available for player %d"
 msgstr "keine Spieldaten für Spieler %d verfügbar"
 
-#: game/interface/scriptapplication.cpp:181 game/sim/consoleapplication.cpp:437
+#: game/interface/scriptapplication.cpp:199 game/sim/consoleapplication.cpp:437
 #: server/play/consoleapplication.cpp:166
 msgid "no game data found"
 msgstr "keine Spieldaten gefunden"
@@ -12780,7 +12784,7 @@ msgstr "keine Spieldaten gefunden in Verzeichnis \"%s\""
 msgid "no input files specified"
 msgstr "keine Eingabedateien angegeben"
 
-#: game/interface/scriptapplication.cpp:268
+#: game/interface/scriptapplication.cpp:301
 #: interpreter/consoleapplication.cpp:286
 msgid "no input files specified. Use '%s -h' for help."
 msgstr "keine Eingabedateien angegeben. Mit '%s -h' erhalten Sie Hilfe."
@@ -12928,12 +12932,12 @@ msgstr "Opponent"
 msgid "option '-C' needs an argument (the character set)"
 msgstr "Option '-C' benötigt ein Argument (den Zeichensatz)"
 
-#: game/interface/scriptapplication.cpp:344
+#: game/interface/scriptapplication.cpp:377
 #: interpreter/consoleapplication.cpp:353
 msgid "option '-O' needs a number between %d and %d as parameter"
 msgstr "Option '-O' benötigt eine Zahl zwischen %d und %d als Parameter"
 
-#: game/interface/scriptapplication.cpp:327
+#: game/interface/scriptapplication.cpp:360
 msgid "option '-P' needs a player number as parameter"
 msgstr "Option '-P' benötigt eine Spielernummer als Parameter"
 
@@ -13000,7 +13004,7 @@ msgstr "Parameter für \"-%s\" ist ungültig"
 msgid "parameter to '--%s' must be 'yes' or 'no'"
 msgstr "Parameter zu '--%s' muss 'yes' oder 'no' sein"
 
-#: game/interface/scriptapplication.cpp:356 game/sim/consoleapplication.cpp:291
+#: game/interface/scriptapplication.cpp:389 game/sim/consoleapplication.cpp:291
 #: interpreter/consoleapplication.cpp:365
 msgid "parameter to '--log' is not valid"
 msgstr "Parameter zu '--log' ist nicht gültig"
@@ -13042,7 +13046,7 @@ msgstr ""
 "erhalten Sie Hilfe."
 
 #: game/interface/exportapplication.cpp:161
-#: game/interface/scriptapplication.cpp:196
+#: game/interface/scriptapplication.cpp:214
 msgid "please specify the player number"
 msgstr "bitte gib eine Spielernummer an"
 
@@ -13135,7 +13139,7 @@ msgid "the selected format needs an output file name ('-o')"
 msgstr "für das gewählte Format muss eine Ausgabedatei angegeben werden ('-o')"
 
 #: game/interface/exportapplication.cpp:73
-#: game/interface/scriptapplication.cpp:334
+#: game/interface/scriptapplication.cpp:367
 #: game/maint/messagesearchapplication.cpp:516
 #: game/sim/consoleapplication.cpp:213 game/v3/trn/dumperapplication.cpp:71
 #: interpreter/consoleapplication.cpp:343
@@ -13210,13 +13214,13 @@ msgid "ufos"
 msgstr "Ufos"
 
 #: game/interface/exportapplication.cpp:173
-#: game/interface/scriptapplication.cpp:208 game/sim/consoleapplication.cpp:445
+#: game/interface/scriptapplication.cpp:226 game/sim/consoleapplication.cpp:445
 #: server/play/consoleapplication.cpp:181
 msgid "unable to load ship list"
 msgstr "Kann Schiffsliste nicht laden"
 
 #: game/interface/exportapplication.cpp:179
-#: game/interface/scriptapplication.cpp:214
+#: game/interface/scriptapplication.cpp:232
 #: server/play/consoleapplication.cpp:187
 msgid "unable to load turn"
 msgstr "Kann Zug nicht laden"

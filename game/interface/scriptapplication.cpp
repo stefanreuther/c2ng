@@ -43,6 +43,7 @@
 #include "util/profiledirectory.hpp"
 #include "util/string.hpp"
 #include "version.hpp"
+#include "interpreter/coveragerecorder.hpp"
 
 using afl::base::Optional;
 using afl::base::Ref;
@@ -66,6 +67,8 @@ struct game::interface::ScriptApplication::Parameters {
     std::vector<String_t> job;                         // list of files/commands
     int optimisationLevel;                             // -O
     int playerNumber;                                  // -P
+    Optional<String_t> coverageFile;                   // --coverage
+    String_t coverageTestName;                         // --coverage-test-name
 
     Parameters()
         : arg_gamedir(),
@@ -77,12 +80,27 @@ struct game::interface::ScriptApplication::Parameters {
           loadPath(),
           job(),
           optimisationLevel(1),
-          playerNumber(0)
+          playerNumber(0),
+          coverageFile(),
+          coverageTestName()
         { }
 };
 
 namespace {
     const char LOG_NAME[] = "script";
+
+    class CoverageRunner : public afl::base::Closure<void()> {
+     public:
+        CoverageRunner(game::Session& session, interpreter::CoverageRecorder& rec)
+            : m_session(session), m_recorder(rec)
+            { }
+
+        void call()
+            { m_session.processList().run(&m_recorder); }
+     private:
+        game::Session& m_session;
+        interpreter::CoverageRecorder& m_recorder;
+    };
 
     /* Compile the given job into a list of BCOs. */
     void doCompile(game::Session& session, const ScriptApplication::Parameters& params, std::vector<BCOPtr_t>& result)
@@ -217,6 +235,14 @@ namespace {
         session.postprocessTurn(session.getGame()->currentTurn(), game::PlayerSet_t(arg_race), game::PlayerSet_t(arg_race), game::map::Object::Playable);
         session.getGame()->setViewpointPlayer(arg_race);
 
+        // Coverage?
+        std::auto_ptr<interpreter::CoverageRecorder> pCoverage;
+        if (params.coverageFile.isValid()) {
+            pCoverage.reset(new interpreter::CoverageRecorder());
+            pCoverage->addBCO(*bco);
+            session.setNewScriptRunner(new CoverageRunner(session, *pCoverage));
+        }
+
         // Execute the process
         interpreter::ProcessList& processList = session.processList();
         interpreter::Process& proc = processList.create(session.world(), tx.translateString("Console"));
@@ -234,6 +260,13 @@ namespace {
             returnCode = 1;
         }
         processList.removeTerminatedProcesses();
+        session.setNewScriptRunner(0);
+
+        // Save coverage
+        if (pCoverage.get() != 0) {
+            afl::base::Ref<afl::io::Stream> out = session.world().fileSystem().openFile(params.coverageFile.orElse(""), afl::io::FileSystem::Create);
+            pCoverage->save(*out, params.coverageTestName);
+        }
 
         // FIXME: save stuff etc.
         // Check "readonly" option.
@@ -355,6 +388,10 @@ game::interface::ScriptApplication::parseParameters(Parameters& params)
                 catch (std::exception& e) {
                     errorExit(tx("parameter to '--log' is not valid"));
                 }
+            } else if (p == "coverage") {
+                params.coverageFile = commandLine.getRequiredParameter(p);
+            } else if (p == "coverage-test-name") {
+                params.coverageTestName = commandLine.getRequiredParameter(p);
             } else if (p == "readonly" || p == "read-only") {
                 params.opt_readonly = true;
             } else if (p == "q") {
@@ -384,6 +421,8 @@ game::interface::ScriptApplication::help()
                                "--nostdlib\tDo not load standard library (core.q)\n"
                                "-I DIR\tInclude (load) directory\n"
                                "--charset/-C CS\tSet game character set\n"
+                               "--coverage FILE.info\tProduce coverage report\n"
+                               "--coverage-test-name NAME\tTest name to write to coverage report\n"
                                "-O LVL\tOptimisation level\n"
                                "-k\tExecute commands, not files\n"
                                "--log CONFIG\tConfigure log output\n"
