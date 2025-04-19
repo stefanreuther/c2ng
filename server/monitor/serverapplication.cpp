@@ -191,7 +191,7 @@ server::monitor::ServerApplication::handleConfiguration(const String_t& key, con
 String_t
 server::monitor::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format("PCC2 Monitor Server v%s - (c) 2017-2024 Stefan Reuther", PCC2_VERSION);
+    return afl::string::Format("PCC2 Monitor Server v%s - (c) 2017-2025 Stefan Reuther", PCC2_VERSION);
 }
 
 String_t

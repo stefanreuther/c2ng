@@ -384,7 +384,7 @@ void
 util::plugin::ConsoleApplication::doHelp(afl::sys::Environment::CommandLine_t& /*cmdl*/)
 {
     afl::string::Translator& tx = translator();
-    standardOutput().writeText(Format(tx("PCC2 Plugin Manager v%s - (c) 2015-2024 Stefan Reuther\n").c_str(), PCC2_VERSION));
+    standardOutput().writeText(Format(tx("PCC2 Plugin Manager v%s - (c) 2015-2025 Stefan Reuther\n").c_str(), PCC2_VERSION));
     standardOutput().writeText(Format(tx("\n"
                                          "Usage:\n"
                                          "  %s -h|help\n"

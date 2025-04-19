@@ -117,7 +117,7 @@ gfx::codec::Application::showHelp()
 {
     Translator& tx = translator();
     afl::io::TextWriter& w = standardOutput();
-    w.writeLine(Format(tx("PCC2 Graphics Codec Application v%s - (c) 2024 Stefan Reuther"), PCC2_VERSION));
+    w.writeLine(Format(tx("PCC2 Graphics Codec Application v%s - (c) 2024-2025 Stefan Reuther"), PCC2_VERSION));
     w.writeText(Format(tx("\n"
                           "Usage:\n"
                           "  %s [-h]\n"

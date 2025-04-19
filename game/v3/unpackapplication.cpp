@@ -211,7 +211,7 @@ game::v3::UnpackApplication::help()
 {
     afl::io::TextWriter& out = standardOutput();
     afl::string::Translator& tx = translator();
-    out.writeLine(Format(tx("PCC2 Result File Unpacker v%s - (c) 2010-2024 Stefan Reuther"), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Result File Unpacker v%s - (c) 2010-2025 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-h]\n"

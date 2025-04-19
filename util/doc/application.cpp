@@ -619,7 +619,7 @@ util::doc::Application::help()
 {
     TextWriter& out = standardOutput();
     afl::string::Translator& tx = translator();
-    out.writeLine(Format(tx("PCC2 Documentation Manager v%s - (c) 2021-2024 Stefan Reuther"), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Documentation Manager v%s - (c) 2021-2025 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-h]\n"

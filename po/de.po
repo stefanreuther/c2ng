@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-04-19 21:27+0200\n"
+"PO-Revision-Date: 2025-04-19 21:50+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:388
@@ -1040,8 +1040,8 @@ msgid "(available)"
 msgstr "(verfügbar)"
 
 #: client/applicationparameters.cpp:94
-msgid "(c) copyright 2017-2024 Stefan Reuther <streu@gmx.de>"
-msgstr "(c) copyright 2017-2024 Stefan Reuther <streu@gmx.de>"
+msgid "(c) copyright 2017-2025 Stefan Reuther <streu@gmx.de>"
+msgstr "(c) copyright 2017-2025 Stefan Reuther <streu@gmx.de>"
 
 #: share/resource/core_config.q:84
 msgid "(changed)"
@@ -2933,8 +2933,8 @@ msgid "Configuration File"
 msgstr "Konfigurationsdatei"
 
 #: game/maint/configurationapplication.cpp:171
-msgid "Configuration Tool v%s - (c) 2018-2024 Stefan Reuther"
-msgstr "Konfigurationswerkzeug v%s - (c) 2018-2024 Stefan Reuther"
+msgid "Configuration Tool v%s - (c) 2018-2025 Stefan Reuther"
+msgstr "Konfigurationswerkzeug v%s - (c) 2018-2025 Stefan Reuther"
 
 #: client/screens/browserscreen.cpp:74
 msgid "Configure"
@@ -6883,7 +6883,8 @@ msgstr ""
 "-I VERZ\tInclude-Verzeichnis (für \"Load\")\n"
 "--charset/-C ZS\tSpiel-Zeichensatz setzen\n"
 "--coverage DATEI.info\tCodeabdeckungs-Bericht erzeugen\n"
-"--coverage-test-name NAME\tIn den Codeabdeckungs-Bericht zu schreibender Test-Name\n"
+"--coverage-test-name NAME\tIn den Codeabdeckungs-Bericht zu schreibender "
+"Test-Name\n"
 "-O STUFE\tOptimierungsstufe\n"
 "-k\tKommandos (keine Dateien)\n"
 "--log KONFIG\tLog-Ausgabe konfigurieren\n"
@@ -7104,80 +7105,80 @@ msgid "PCC2"
 msgstr "PCC2"
 
 #: game/sim/consoleapplication.cpp:348
-msgid "PCC2 Battle Simulation Utility v%s - (c) 2020-2024 Stefan Reuther"
-msgstr "PCC2 Schlachtsimulator v%s - (c) 2020-2024 Stefan Reuther"
+msgid "PCC2 Battle Simulation Utility v%s - (c) 2020-2025 Stefan Reuther"
+msgstr "PCC2 Schlachtsimulator v%s - (c) 2020-2025 Stefan Reuther"
 
 #: server/console/consoleapplication.cpp:288
-msgid "PCC2 Console v%s - (c) 2017-2024 Stefan Reuther"
-msgstr "PCC2 Konsole v%s - (c) 2017-2024 Stefan Reuther"
+msgid "PCC2 Console v%s - (c) 2017-2025 Stefan Reuther"
+msgstr "PCC2 Konsole v%s - (c) 2017-2025 Stefan Reuther"
 
 #: server/dbexport/exportapplication.cpp:96
-msgid "PCC2 Database Export v%s - (c) 2017-2024 Stefan Reuther"
-msgstr "PCC2 Datenbank-Export v%s - (c) 2017-2024 Stefan Reuther"
+msgid "PCC2 Database Export v%s - (c) 2017-2025 Stefan Reuther"
+msgstr "PCC2 Datenbank-Export v%s - (c) 2017-2025 Stefan Reuther"
 
 #: util/doc/application.cpp:622
-msgid "PCC2 Documentation Manager v%s - (c) 2021-2024 Stefan Reuther"
-msgstr "PCC2 Dokumentations-Manager v%s - (c) 2021-2024 Stefan Reuther"
+msgid "PCC2 Documentation Manager v%s - (c) 2021-2025 Stefan Reuther"
+msgstr "PCC2 Dokumentations-Manager v%s - (c) 2021-2025 Stefan Reuther"
 
 #: game/interface/exportapplication.cpp:214
-msgid "PCC2 Export v%s - (c) 2017-2024 Stefan Reuther"
-msgstr "PCC2 Export v%s - (c) 2017-2024 Stefan Reuther"
+msgid "PCC2 Export v%s - (c) 2017-2025 Stefan Reuther"
+msgstr "PCC2 Export v%s - (c) 2017-2025 Stefan Reuther"
 
 #: server/file/clientapplication.cpp:382
-msgid "PCC2 File Client v%s - (c) 2017-2024 Stefan Reuther"
-msgstr "PCC2 Datei-Client v%s - (c) 2017-2024 Stefan Reuther"
+msgid "PCC2 File Client v%s - (c) 2017-2025 Stefan Reuther"
+msgstr "PCC2 Datei-Client v%s - (c) 2017-2025 Stefan Reuther"
 
 #: game/maint/raterapplication.cpp:107
-msgid "PCC2 Game Difficulty Rater v%s - (c) 2012-2024 Stefan Reuther"
-msgstr "PCC2 Schwierigkeits-Bewertung v%s - (c) 2012-2024 Stefan Reuther"
+msgid "PCC2 Game Difficulty Rater v%s - (c) 2012-2025 Stefan Reuther"
+msgstr "PCC2 Schwierigkeits-Bewertung v%s - (c) 2012-2025 Stefan Reuther"
 
 #: game/maint/sweepapplication.cpp:129
-msgid "PCC2 Game Directory Cleaner v%s - (c) 2010-2024 Stefan Reuther"
-msgstr "PCC2 Spielverzeichnis-Bereiniger v%s - (c) 2010-2024 Stefan Reuther"
+msgid "PCC2 Game Directory Cleaner v%s - (c) 2010-2025 Stefan Reuther"
+msgstr "PCC2 Spielverzeichnis-Bereiniger v%s - (c) 2010-2025 Stefan Reuther"
 
 #: gfx/codec/application.cpp:120
-msgid "PCC2 Graphics Codec Application v%s - (c) 2024 Stefan Reuther"
-msgstr "PCC2 Grafik-Codecs v%s - (c) 2024 Stefan Reuther"
+msgid "PCC2 Graphics Codec Application v%s - (c) 2024-2025 Stefan Reuther"
+msgstr "PCC2 Grafik-Codecs v%s - (c) 2024-2025 Stefan Reuther"
 
 #: game/maint/messagesearchapplication.cpp:660
-msgid "PCC2 Message Search v%s - (c) 2011-2024 Stefan Reuther"
-msgstr "PCC2 Nachrichten-Suche v%s - (c) 2011-2024 Stefan Reuther"
+msgid "PCC2 Message Search v%s - (c) 2011-2025 Stefan Reuther"
+msgstr "PCC2 Nachrichten-Suche v%s - (c) 2011-2025 Stefan Reuther"
 
 #: server/play/consoleapplication.cpp:243
-msgid "PCC2 Play Server v%s - (c) 2019-2024 Stefan Reuther"
-msgstr "PCC2 Spiel-Server v%s - (c) 2019-2024 Stefan Reuther"
+msgid "PCC2 Play Server v%s - (c) 2019-2025 Stefan Reuther"
+msgstr "PCC2 Spiel-Server v%s - (c) 2019-2025 Stefan Reuther"
 
 #: util/plugin/dialogapplication.cpp:140
 msgid "PCC2 Plugin Installer"
 msgstr "PCC2-Plugin-Installer"
 
 #: util/plugin/consoleapplication.cpp:387
-msgid "PCC2 Plugin Manager v%s - (c) 2015-2024 Stefan Reuther"
-msgstr "PCC2 Plugin-Manager v%s - (c) 2015-2024 Stefan Reuther"
+msgid "PCC2 Plugin Manager v%s - (c) 2015-2025 Stefan Reuther"
+msgstr "PCC2 Plugin-Manager v%s - (c) 2015-2025 Stefan Reuther"
 
 #: gfx/gen/application.cpp:163
-msgid "PCC2 Procedural Graphics Generator v%s - (c) 2017-2024 Stefan Reuther"
-msgstr "PCC2 Prozeduraler Grafik-Generator v%s - (c) 2017-2024 Stefan Reuther"
+msgid "PCC2 Procedural Graphics Generator v%s - (c) 2017-2025 Stefan Reuther"
+msgstr "PCC2 Prozeduraler Grafik-Generator v%s - (c) 2017-2025 Stefan Reuther"
 
 #: util/resourcefileapplication.cpp:337
-msgid "PCC2 Resource File Utility v%s - (c) 2023-2024 Stefan Reuther"
-msgstr "PCC2 Ressourcendatei-Werkzeug v%s - (c) 2023-2024 Stefan Reuther"
+msgid "PCC2 Resource File Utility v%s - (c) 2023-2025 Stefan Reuther"
+msgstr "PCC2 Ressourcendatei-Werkzeug v%s - (c) 2023-2025 Stefan Reuther"
 
 #: game/v3/unpackapplication.cpp:214
-msgid "PCC2 Result File Unpacker v%s - (c) 2010-2024 Stefan Reuther"
-msgstr "PCC2 Result-Entpacker v%s - (c) 2010-2024 Stefan Reuther"
+msgid "PCC2 Result File Unpacker v%s - (c) 2010-2025 Stefan Reuther"
+msgstr "PCC2 Result-Entpacker v%s - (c) 2010-2025 Stefan Reuther"
 
 #: interpreter/consoleapplication.cpp:405
-msgid "PCC2 Script Compiler v%s - (c) 2017-2024 Stefan Reuther"
-msgstr "PCC2 Script-Compiler v%s - (c) 2017-2024 Stefan Reuther"
+msgid "PCC2 Script Compiler v%s - (c) 2017-2025 Stefan Reuther"
+msgstr "PCC2 Script-Compiler v%s - (c) 2017-2025 Stefan Reuther"
 
 #: game/interface/scriptapplication.cpp:432
-msgid "PCC2 Script Engine v%s - (c) 2017-2024 Stefan Reuther"
-msgstr "PCC2 Script-Engine v%s - (c) 2017-2024 Stefan Reuther"
+msgid "PCC2 Script Engine v%s - (c) 2017-2025 Stefan Reuther"
+msgstr "PCC2 Script-Engine v%s - (c) 2017-2025 Stefan Reuther"
 
 #: game/v3/maketurnapplication.cpp:135
-msgid "PCC2 Turn File Compiler v%s - (c) 2010-2024 Stefan Reuther"
-msgstr "PCC2 Turn-File-Compiler v%s - (c) 2010-2024 Stefan Reuther"
+msgid "PCC2 Turn File Compiler v%s - (c) 2010-2025 Stefan Reuther"
+msgstr "PCC2 Turn-File-Compiler v%s - (c) 2010-2025 Stefan Reuther"
 
 #: client/si/userside.cpp:28
 msgid "PCC2 is currently executing a script."
@@ -10316,8 +10317,8 @@ msgid "Turn %d"
 msgstr "Zug %d"
 
 #: game/v3/trn/dumperapplication.cpp:196 game/v3/trn/dumperapplication.cpp:233
-msgid "Turn File Decompiler v%s - (c) 2001-2024 Stefan Reuther"
-msgstr "Turn File Decompiler v%s - (c) 2001-2024 Stefan Reuther"
+msgid "Turn File Decompiler v%s - (c) 2001-2025 Stefan Reuther"
+msgstr "Turn File Decompiler v%s - (c) 2001-2025 Stefan Reuther"
 
 #: client/dialogs/turnlistdialog.cpp:111 client/dialogs/turnlistdialog.cpp:248
 #: client/dialogs/turnlistdialog.cpp:256

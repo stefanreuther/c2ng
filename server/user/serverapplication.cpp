@@ -163,7 +163,7 @@ server::user::ServerApplication::handleCommandLineOption(const String_t& /*optio
 String_t
 server::user::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format("PCC2 User Server v%s - (c) 2019-2024 Stefan Reuther", PCC2_VERSION);
+    return afl::string::Format("PCC2 User Server v%s - (c) 2019-2025 Stefan Reuther", PCC2_VERSION);
 }
 
 String_t

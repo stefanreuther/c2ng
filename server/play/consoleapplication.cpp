@@ -240,7 +240,7 @@ server::play::ConsoleApplication::help()
                                "--language=CODE\tLanguage to use for game\n"));
 
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format(tx("PCC2 Play Server v%s - (c) 2019-2024 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Play Server v%s - (c) 2019-2025 Stefan Reuther").c_str(), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-h]\n"

@@ -214,7 +214,7 @@ server::talk::ServerApplication::handleConfiguration(const String_t& key, const 
 String_t
 server::talk::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format("PCC2 Talk Server v%s - (c) 2017-2024 Stefan Reuther", PCC2_VERSION);
+    return afl::string::Format("PCC2 Talk Server v%s - (c) 2017-2025 Stefan Reuther", PCC2_VERSION);
 }
 
 String_t

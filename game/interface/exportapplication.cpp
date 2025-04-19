@@ -211,7 +211,7 @@ game::interface::ExportApplication::help()
 {
     afl::io::TextWriter& out = standardOutput();
     afl::string::Translator& tx = translator();
-    out.writeLine(Format(tx("PCC2 Export v%s - (c) 2017-2024 Stefan Reuther"), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Export v%s - (c) 2017-2025 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-h]\n"
