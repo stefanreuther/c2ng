@@ -1,0 +1,92 @@
+start('c2docmanager', 'PCC2 Documentation Manager');
+
+section('Synopsis',
+        paragraph_synopsis('<b>c2docmanager --help</b>'),
+        paragraph_synopsis('<b>c2docmanager</b> [<b>-</b><i>OPTIONS</i>] <i>COMMAND</i> [<i>ARGS</i>...]'));
+
+section('Description',
+        paragraph_text('<i>c2docmanager</i> is a utility to manage documentation repositories for <link>c2doc-server(6)</link>.',
+                       'It allows importing files into repositories, manipulating and verifying repositories, and rendering content for testing.'),
+        paragraph_text('<i>c2docmanager</i> can operate in <i>directory mode</i> mode or <i>single-file</i>.',
+                       'In directory mode, individual content elements (pages, asserts) are stored in a directory.',
+                       'In single-file mode, elements are stored in a single <fn>content.tar</fn> file.',
+                       'In addition, an <fn>index.xml</fn> provides a structure index.'));
+
+section('Options',
+        paragraph_text('These options must be specified before a command, if any.'),
+        paragraph_default_help(';'),
+        paragraph_detail(text_option('--dir=', 'DIR'),
+                         paragraph_text('Enable <i>directory mode</i>;')),
+        paragraph_detail(text_option('--single=', 'DIR'),
+                         paragraph_text('Enable <i>single-file mode</i>;')),
+        paragraph_default_log());
+
+section('Commands',
+        paragraph_detail('<b>add-group</b> [<i>OPTIONS</i>...]',
+                         paragraph_text('Add a group (document set, book) to the index;')),
+        paragraph_detail('<b>get</b> <i>PATH</i>...',
+                         paragraph_text('Get content of a document, given its path;')),
+        paragraph_detail('<b>import-help</b> [<i>OPTIONS</i>...] <i>FILE...</i>',
+                         paragraph_text('Import PCC2 help files (<fn>*.xml</fn>);')),
+        paragraph_detail('<b>import-file</b> [<i>OPTIONS</i>...] <i>FILE</i>',
+                         paragraph_text('Import plain-text file;')),
+        paragraph_detail('<b>ls</b> [<b>-l</b>|<b>-t</b>|<b>-f</b>|<b>-r</b>|<b>-d</b>...] [<i>PATH</i>...',
+                         paragraph_text('List content of documentation repository;')),
+        paragraph_detail('<b>render</b> [<i>OPTIONS</i>...] <i>PATH</i>...',
+                         paragraph_text('Render content of a document as HTML;')),
+        paragraph_detail('<b>verify</b> [<i>OPTIONS</i>...]',
+                         paragraph_text('Verify repository content.')));
+
+subsect('Command Options',
+        paragraph_text('Command options need to specified after the command.'),
+        paragraph_detail(text_option('--below=', 'ID'),
+                         paragraph_text('(import, add) Set parent group (default: root);')),
+        paragraph_detail('<b>--id=</b><i>ID</i>[<b>,</b><i>ID</i>...]',
+                         paragraph_text('(import, add) Set Ids for new element;')),
+        paragraph_detail('<b>--tag=</b><i>ID</i>[<b>,</b><i>ID</i>...]',
+                         paragraph_text('(import, add) Set tag for new element;')),
+        paragraph_detail(text_option('--name=', 'NAME'),
+                         paragraph_text('(import, add) Set name for new element;')),
+        paragraph_detail(text_option('--page'),
+                         paragraph_text('(import, add) Create a page;')),
+        paragraph_detail(text_option('--document'),
+                         paragraph_text('(import, add) Create a document;')),
+        paragraph_detail(text_option('--charset=', 'CS'),
+                         paragraph_text('(import-text) Set character set;')),
+        paragraph_detail(text_option('--remove-source'),
+                         paragraph_text('(import-help) Remove source file references (from PCC2 interpreter/tech help);')),
+        paragraph_detail(text_option('--image-path', 'DIR'),
+                         paragraph_text('(import-help) Path to resolve &lt;img src&gt; links;')),
+        paragraph_detail(text_option('--all'),
+                         paragraph_text('(verify) Report all individual messages (default=summarize);')),
+        paragraph_detail(text_option('-v'),
+                         paragraph_text('(verify) Do not abbreviate messages;')),
+        paragraph_detail(text_option('--warn-only'),
+                         paragraph_text('(verify) Show only warnings;')),
+        paragraph_detail(text_option('--info-only'),
+                         paragraph_text('(verify) Show only information messages;')),
+        paragraph_detail(text_option('-l', '', '--long', ''),
+                         paragraph_text('(ls) Long format;')),
+        paragraph_detail(text_option('-t', '', '--title', ''),
+                         paragraph_text('(ls) Show titles;')),
+        paragraph_detail(text_option('-f', '', '--forest', '', '--tree', ''),
+                         paragraph_text('(ls) Indent to show tree structure;')),
+        paragraph_detail(text_option('-r', '', '--recursive', ''),
+                         paragraph_text('(ls) Recurse into subgroups/documents/pages;')),
+        paragraph_detail(text_option('-d', '', '--self', '', '--directory', ''),
+                         paragraph_text('(ls) Show element itself, not content;')),
+        paragraph_detail(text_option('--site=', 'PFX'),
+                         paragraph_text('(render) Set URL prefix for "site:" links;')),
+        paragraph_detail(text_option('--assets=', 'PFX'),
+                         paragraph_text('(render) Set URL prefix for "asset:" links;')),
+        paragraph_detail(text_option('--doc=', 'PFX'),
+                         paragraph_text('(render) Set URL prefix for document links.')));
+
+section('Environment',
+        paragraph_default_environment());
+
+section('Author',
+        paragraph_default_author());
+
+section('See Also',
+        paragraph_link_list('pcc2(6)', 'c2doc-server(6)'));

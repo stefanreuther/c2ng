@@ -636,7 +636,7 @@ util::doc::Application::help()
                                                 "  add-group [OPTIONS...]\n\tAdd a group\n"
                                                 "  get URL...\n\tGet page content\n"
                                                 "  import-help [OPTIONS...] FILE...\n\tImport PCC2 Help files (*.xml)\n"
-                                                "  import-text [OPTIONS...] FILE...\n\tImport plain-text file\n"
+                                                "  import-text [OPTIONS...] FILE\n\tImport plain-text file\n"
                                                 "  ls [-l|-t|-f|-r|-d...] [URL...]\n\tList content, recursively\n"
                                                 "  render [OPTIONS...] URL...\n\tRender page content as HTML\n"
                                                 "  verify [OPTIONS...]\n\tVerify repository content\n"

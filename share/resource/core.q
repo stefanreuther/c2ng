@@ -725,6 +725,7 @@ On EnterDirectory Do TryLoad "autoexec.q"
 If System.GUI Then
   LoadHelpFile MakeFileName(C2$ResourceDirectory, "pcc2help.xml")
   LoadHelpFile MakeFileName(C2$ResourceDirectory, "pcc2interpreter.xml")
+  LoadHelpFile MakeFileName(C2$ResourceDirectory, "pcc2man.xml")
   Print "[", System.Program, " ", System.Version, ", core.q ", CC$LibraryVersion, "]"
 EndIf
 

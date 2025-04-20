@@ -359,7 +359,7 @@ util::ResourceFileApplication::help()
                             "\n"
                             "Resource scripts:\n"
                             "  NUM[=ALIAS] SOURCE  Create an entry\n"
-                            "    NUM can be number or '.next'\n"
+                            "    NUM can be number or 'next'\n"
                             "    SOURCE can be file name or '.text' or 'eq NUM'\n"
                             "\n"
                             "Report bugs to <Streu@gmx.de>\n"),

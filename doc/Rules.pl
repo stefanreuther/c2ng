@@ -99,3 +99,5 @@ if ($CGI_PATH ne '') {
 
 rule_set_phony("install-doc");
 generate("install", "install-doc");
+
+load_directory('ManualPages');
