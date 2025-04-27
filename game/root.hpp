@@ -80,6 +80,11 @@ namespace game {
                 To be used with aUnpack. */
             aSuggestUnpack,
 
+            /** Suggest user to use the "Sweep" function.
+                If this is set, gameDirectory() points at a file-system directory that contains a file conflict.
+                To be used with aSweep. */
+            aSuggestSweep,
+
             /** Allow user to use the "Receive Attachments" function.
                 If this is set, gameDirectory() points at a file-system directory.
                 The Root must be recreated after unpacking (Folder::loadGameRoot()). */

@@ -66,6 +66,10 @@ game::v3::RootLoader::load(afl::base::Ref<afl::io::Directory> gameDirectory,
         }
         if (m_scanner.getDirectoryFlags().contains(DirectoryScanner::HaveUnpacked)) {
             actions += Root::aMaketurn;
+            if (m_scanner.getDirectoryFlags().contains(DirectoryScanner::HaveConflict)) {
+                // Sweep can only resolve unpacked conflicts (but only those have actual risk of problems with planets.exe)
+                actions += Root::aSuggestSweep;
+            }
         }
 
         // Produce result

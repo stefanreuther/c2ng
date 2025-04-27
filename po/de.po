@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-04-19 21:50+0200\n"
+"PO-Revision-Date: 2025-04-27 18:49+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:388
@@ -1579,7 +1579,7 @@ msgstr ""
 "--balance=MODUS\tLinks/Rechts-Ausgleich (none, 360, master)\n"
 "--seed=N\tStartwert für Zufallsgenerator"
 
-#: client/screens/browserscreen.cpp:969
+#: client/screens/browserscreen.cpp:994
 msgid "Actions..."
 msgstr "Aktionen..."
 
@@ -1900,7 +1900,7 @@ msgid "Attachment record is truncated"
 msgstr "Dateianhang ist abgeschnitten"
 
 #: client/dialogs/attachmentselection.cpp:264
-#: client/screens/browserscreen.cpp:731 client/screens/browserscreen.cpp:740
+#: client/screens/browserscreen.cpp:750 client/screens/browserscreen.cpp:759
 msgid "Attachments"
 msgstr "Anhänge"
 
@@ -2499,7 +2499,7 @@ msgstr "Allianzprivilegien ändern"
 msgid "Change field"
 msgstr "Feld ändern"
 
-#: client/screens/browserscreen.cpp:945
+#: client/screens/browserscreen.cpp:970
 msgid "Change into this folder"
 msgstr "In diesen Ordner wechseln"
 
@@ -2916,7 +2916,7 @@ msgstr "%d Befehl%!1{e%} übersetzt."
 msgid "Compiled %d file%!1{s%}."
 msgstr "%d Datei%!1{en%} übersetzt."
 
-#: client/application.cpp:335
+#: client/application.cpp:346
 msgid "Compiling starchart..."
 msgstr "Erstelle Sternkarte..."
 
@@ -2936,7 +2936,7 @@ msgstr "Konfigurationsdatei"
 msgid "Configuration Tool v%s - (c) 2018-2025 Stefan Reuther"
 msgstr "Konfigurationswerkzeug v%s - (c) 2018-2025 Stefan Reuther"
 
-#: client/screens/browserscreen.cpp:74
+#: client/screens/browserscreen.cpp:75
 msgid "Configure"
 msgstr "Konfigurieren"
 
@@ -3877,11 +3877,11 @@ msgstr "Außer Spezial-FCodes"
 msgid "Execute"
 msgstr "Ausführen"
 
-#: game/interface/plugins.cpp:206
+#: game/interface/plugins.cpp:208
 msgid "Execution of file \"%s\" failed: %s"
 msgstr "Ausführen der Datei \"%s\" fehlgeschlagen: %s"
 
-#: client/screens/browserscreen.cpp:193
+#: client/screens/browserscreen.cpp:212
 msgid "Exit"
 msgstr "Ende"
 
@@ -4724,7 +4724,7 @@ msgstr ""
 "--assets=PFX\t(render) URL-Präfix für \"asset:\"-Links\n"
 "--doc=PFX\t(render) URL-Präfix für Dokument-Links"
 
-#: client/application.cpp:138
+#: client/application.cpp:149
 msgid "Global cc-res.cfg"
 msgstr "Globale cc-res.cfg"
 
@@ -4861,7 +4861,7 @@ msgstr "Kurs"
 #: client/dialogs/specbrowserdialog.cpp:322
 #: client/dialogs/taxationdialog.cpp:610 client/dialogs/ufoinfo.cpp:178
 #: client/dialogs/vcrselection.cpp:80 client/dialogs/visualscandialog.cpp:692
-#: client/vcr/flak/playbackscreen.cpp:140
+#: client/vcr/flak/playbackscreen.cpp:140 ui/dialogs/messagebox.cpp:99
 #: ui/widgets/standarddialogbuttons.cpp:42
 msgid "Help"
 msgstr "Hilfe"
@@ -5127,7 +5127,7 @@ msgstr "Info: verwendete CSS-Klassen"
 msgid "Info: used tags"
 msgstr "Info: verwendete Tags"
 
-#: client/application.cpp:870
+#: client/application.cpp:881
 msgid "Initialisation complete"
 msgstr "Initialisierung vollständig"
 
@@ -5155,7 +5155,7 @@ msgstr "Initiator wird abgeschleppt"
 msgid "Ins"
 msgstr "Einfg"
 
-#: client/screens/browserscreen.cpp:163
+#: client/screens/browserscreen.cpp:182
 msgid "Ins - Add Account"
 msgstr "Einfg - Konto hinzufügen"
 
@@ -5684,7 +5684,7 @@ msgstr "Simulation laden"
 msgid "Load Task"
 msgstr "Aufgabe laden"
 
-#: game/interface/plugins.cpp:196
+#: game/interface/plugins.cpp:197
 msgid "Load of file \"%s\" failed: %s"
 msgstr "Laden der Datei \"%s\" fehlgeschlagen: %s"
 
@@ -5870,7 +5870,7 @@ msgstr "Chunnel starten"
 msgid "Make this ship the leader of the fleet?"
 msgstr "Soll dieses Schiff der Führer der Flotte werden?"
 
-#: client/screens/browserscreen.cpp:659 client/screens/browserscreen.cpp:76
+#: client/screens/browserscreen.cpp:678 client/screens/browserscreen.cpp:77
 msgid "Maketurn"
 msgstr "Maketurn"
 
@@ -6528,8 +6528,8 @@ msgstr "Information des nächsten Zugs (\"show\")"
 #: client/dialogs/cloneship.cpp:130
 #: client/dialogs/simulationconfiguration.cpp:69
 #: client/dialogs/simulationfleetcostoptions.cpp:36
-#: game/config/configurationeditor.cpp:278 share/resource/core_config.q:245
-#: ui/dialogs/messagebox.cpp:137
+#: client/screens/browserscreen.cpp:161 game/config/configurationeditor.cpp:278
+#: share/resource/core_config.q:245 ui/dialogs/messagebox.cpp:148
 msgid "No"
 msgstr "Nein"
 
@@ -6658,7 +6658,7 @@ msgstr "Keine Spielernummer angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 msgid "No plugins installed."
 msgstr "Keine Plugins installiert."
 
-#: client/screens/browserscreen.cpp:913
+#: client/screens/browserscreen.cpp:938
 msgid "No registration in this directory!"
 msgstr "Verzeichnis enthält keine Registrierung!"
 
@@ -6812,7 +6812,7 @@ msgstr "O - Optionen"
 #: share/resource/core_ui.q:517 share/resource/core_ui.q:576
 #: share/resource/core_ui.q:675 share/resource/core_ui.q:946
 #: share/resource/core_ui.q:948 share/resource/core_ui.q:986
-#: ui/dialogs/messagebox.cpp:150 ui/widgets/standarddialogbuttons.cpp:50
+#: ui/dialogs/messagebox.cpp:161 ui/widgets/standarddialogbuttons.cpp:50
 msgid "OK"
 msgstr "OK"
 
@@ -7100,7 +7100,8 @@ msgstr "PCC 1.x (fast Codeseite 437)"
 msgid "PCC1"
 msgstr "PCC1"
 
-#: client/screens/browserscreen.cpp:760 share/resource/core_ui.q:35
+#: client/screens/browserscreen.cpp:159 client/screens/browserscreen.cpp:785
+#: share/resource/core_ui.q:35
 msgid "PCC2"
 msgstr "PCC2"
 
@@ -7733,7 +7734,7 @@ msgstr "Reale ID"
 msgid "Rebel Ground Attack mission"
 msgstr "Bodenangriffs-Mission"
 
-#: client/screens/browserscreen.cpp:78
+#: client/screens/browserscreen.cpp:79
 msgid "Receive attachments"
 msgstr "Anhänge empfangen"
 
@@ -7791,7 +7792,7 @@ msgstr "Verringerte %s (%s)"
 msgid "Refuel ships"
 msgstr "Schiffe auftanken"
 
-#: client/screens/browserscreen.cpp:924
+#: client/screens/browserscreen.cpp:949
 msgid "Registered"
 msgstr "Registriert"
 
@@ -8492,7 +8493,7 @@ msgstr "Fernsteuerung für neugebaute Schiffe..."
 msgid "Set result file password..."
 msgstr "Passwort für Result-Datei..."
 
-#: client/screens/browserscreen.cpp:73
+#: client/screens/browserscreen.cpp:74
 msgid "Set up for playing"
 msgstr "Einrichten für Spiel"
 
@@ -8500,11 +8501,11 @@ msgstr "Einrichten für Spiel"
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: client/screens/browserscreen.cpp:963
+#: client/screens/browserscreen.cpp:988
 msgid "Setup & Actions..."
 msgstr "Einrichten & Aktionen..."
 
-#: client/screens/browserscreen.cpp:965
+#: client/screens/browserscreen.cpp:990
 msgid "Setup..."
 msgstr "Einrichten..."
 
@@ -9142,15 +9143,15 @@ msgstr "Raumschiffe"
 msgid "Start new fleet"
 msgstr "Beginne neue Flotte"
 
-#: client/application.cpp:774
+#: client/application.cpp:785
 msgid "Starting GUI..."
 msgstr "Starte GUI..."
 
-#: client/application.cpp:811
+#: client/application.cpp:822
 msgid "Starting background thread..."
 msgstr "Starte Hintergrund-Thread..."
 
-#: client/application.cpp:800
+#: client/application.cpp:811
 msgid "Starting network..."
 msgstr "Starte Netzwerk..."
 
@@ -9243,7 +9244,7 @@ msgstr "Angehalten"
 msgid "Suspended."
 msgstr "Angehalten."
 
-#: client/screens/browserscreen.cpp:77 game/spec/info/info.cpp:339
+#: client/screens/browserscreen.cpp:78 game/spec/info/info.cpp:339
 #: game/spec/info/info.cpp:341
 msgid "Sweep"
 msgstr "Sweep"
@@ -9588,7 +9589,7 @@ msgstr ""
 msgid "Their offer"
 msgstr "ihr Angebot"
 
-#: client/screens/browserscreen.cpp:758
+#: client/screens/browserscreen.cpp:783
 msgid ""
 "There are new result files for this game. Do you want to unpack them now?"
 msgstr ""
@@ -9789,6 +9790,23 @@ msgstr "Dieser Befehl akzeptiert keine Positionsparameter"
 #: client/dialogs/commandlistdialog.cpp:277
 msgid "This command was not recognized."
 msgstr "Dieser Befehl wurde nicht erkannt."
+
+#: client/screens/browserscreen.cpp:154
+msgid ""
+"This directory contains a data conflict.\n"
+"\n"
+"<small>The files in this directory belong to different games or turns. This "
+"situation is not supported and may cause problems with some software. PCC2 "
+"provides a <b>Sweep</b> to resolve this situation by deleting conflicting "
+"files.</small>\n"
+"\n"
+"Do you want to use the Sweep function?"
+msgstr ""
+"Dieses Verzeichnis enthält einen Datenkonflikt.\n"
+"\n"
+"<small>Die Dateien in diesem Verzeichnis gehören zu verschiedenen Partien oder Zügen. Dies wird nicht unterstützt und kann zu Problemen mit manchen Programmen führen. PCC2 bietet eine Funktion <b>Sweep</b>, um diese Situation durch Löschen der störenden Dateien zu bereinigen.</small>\n"
+"\n"
+"Möchtest du die Sweep-Funktion benutzen?"
 
 #: client/dialogs/unpack.cpp:150
 msgid "This directory contains no files to unpack."
@@ -10475,7 +10493,7 @@ msgstr "Plugin kann nicht installiert werden."
 msgid "Unable to load %s: %s"
 msgstr "%s kann nicht geladen werden: %s"
 
-#: client/application.cpp:346
+#: client/application.cpp:357
 msgid "Unable to load scripts and auto-tasks"
 msgstr "Skripte und Auto-Tasks können nicht geladen werden"
 
@@ -10727,7 +10745,7 @@ msgid "Unowned Planets"
 msgstr "Unbesetzte Planeten"
 
 #: client/dialogs/unpack.cpp:150 client/dialogs/unpack.cpp:166
-#: client/dialogs/unpack.cpp:89 client/screens/browserscreen.cpp:75
+#: client/dialogs/unpack.cpp:89 client/screens/browserscreen.cpp:76
 msgid "Unpack"
 msgstr "Unpack"
 
@@ -10811,7 +10829,7 @@ msgstr "Entpacke Spieler %d: %s"
 msgid "Unrecognized proxy URL: \"%s\""
 msgstr "Nicht erkannte Proxy-URL: \"%s\""
 
-#: client/screens/browserscreen.cpp:918
+#: client/screens/browserscreen.cpp:943
 msgid "Unregistered"
 msgstr "Unregistriert"
 
@@ -11325,7 +11343,7 @@ msgstr ""
 "Hier kannst du %s-Rohre bauen und für die spätere Benutzung im Lager der "
 "Sternenbasis ablegen."
 
-#: client/application.cpp:148
+#: client/application.cpp:159
 msgid "User cc-res.cfg"
 msgstr "cc-res.cfg des Benutzers"
 
@@ -11752,8 +11770,8 @@ msgstr "Y-Bewegung"
 #: client/dialogs/cloneship.cpp:126
 #: client/dialogs/simulationconfiguration.cpp:69
 #: client/dialogs/simulationfleetcostoptions.cpp:36
-#: game/config/configurationeditor.cpp:278 share/resource/core_config.q:245
-#: ui/dialogs/messagebox.cpp:137
+#: client/screens/browserscreen.cpp:161 game/config/configurationeditor.cpp:278
+#: share/resource/core_config.q:245 ui/dialogs/messagebox.cpp:148
 msgid "Yes"
 msgstr "Ja"
 
@@ -11848,7 +11866,7 @@ msgstr ""
 "Du kannst hier keine Dateien erstellen. Bitte wähle zuerst einen Ort "
 "(Laufwerk, Partition)."
 
-#: client/screens/browserscreen.cpp:730
+#: client/screens/browserscreen.cpp:749
 msgid ""
 "You did not receive any new files with your result this turn, or these files "
 "have already been unpacked."
@@ -12075,13 +12093,13 @@ msgid "[Directory content]"
 msgstr "[Verzeichnis anzeigen]"
 
 #: client/dialogs/fileselectiondialog.cpp:59
-#: client/screens/browserscreen.cpp:870
+#: client/screens/browserscreen.cpp:895
 msgid "[Go up one level]"
 msgstr "[Eine Ebene aufwärts]"
 
 #: client/dialogs/directoryselectiondialog.cpp:57
 #: client/dialogs/fileselectiondialog.cpp:77
-#: client/screens/browserscreen.cpp:865
+#: client/screens/browserscreen.cpp:890
 msgid "[Places]"
 msgstr "[Orte]"
 

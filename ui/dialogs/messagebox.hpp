@@ -71,6 +71,11 @@ namespace ui { namespace dialogs {
             \return *this */
         MessageBox& addKey(int id, util::Key_t key);
 
+        /** Add a help button.
+            \param helper Widget to receive the button's keypress
+            \param tx Translator */
+        MessageBox& addHelp(Widget& helper, afl::string::Translator& tx);
+
         /** Ignore a key.
             By default, MessageBox auto-connects Key_Return and Key_Escape to the first and last button, respectively, unless you map them to a different action.
             Use this call to disable them entirely without mapping them to any action.

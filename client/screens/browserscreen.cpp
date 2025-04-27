@@ -40,6 +40,7 @@
 #include "ui/widgets/menuframe.hpp"
 #include "ui/widgets/stringlistbox.hpp"
 #include "ui/widgets/transparentwindow.hpp"
+#include "util/rich/parser.hpp"
 #include "util/rich/styleattribute.hpp"
 #include "util/translation.hpp"
 #include "util/unicodechars.hpp"
@@ -48,6 +49,8 @@ using afl::container::PtrVector;
 using afl::string::Format;
 using client::dialogs::SimpleConsole;
 using game::proxy::BrowserProxy;
+using ui::dialogs::MessageBox;
+using util::rich::Parser;
 using util::rich::StyleAttribute;
 using util::rich::Text;
 
@@ -145,6 +148,24 @@ namespace {
         virtual game::proxy::MaintenanceAdaptor* call(game::browser::Session& bro)
             { return new MaintenanceBrowserAdaptor(bro); }
     };
+
+
+    bool askConflict(ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx)
+    {
+        client::widgets::HelpWidget help(root, tx, gameSender, "pcc2:conflict");
+        MessageBox dlg(Parser::parseXml(tx("This directory contains a data conflict.\n\n"
+                                           "<small>The files in this directory belong to different games or turns. "
+                                           "This situation is not supported and may cause problems with some software. "
+                                           "PCC2 provides a <b>Sweep</b> to resolve this situation by deleting conflicting files.</small>\n\n"
+                                           "Do you want to use the Sweep function?")),
+                                    tx("PCC2"),
+                                    root);
+        util::KeyString y(tx("Yes")), n(tx("No"));
+        dlg.addButton(1, y.getString(), y.getKey());
+        dlg.addButton(0, n.getString(), n.getKey());
+        dlg.addHelp(help, tx);
+        return (dlg.run() != 0);
+    }
 }
 
 /***************************** BrowserScreen *****************************/
@@ -727,7 +748,7 @@ client::screens::BrowserScreen::receiveAttachments(game::PlayerSet_t players, bo
     proxy.loadDirectory(link, players, isImplicit, infos, proceed);
     if (infos.empty()) {
         if (!isImplicit) {
-            ui::dialogs::MessageBox(m_translator("You did not receive any new files with your result this turn, or these files have already been unpacked."),
+            MessageBox(m_translator("You did not receive any new files with your result this turn, or these files have already been unpacked."),
                                     m_translator("Attachments"), m_root)
                 .doOkDialog(m_translator);
         }
@@ -754,11 +775,17 @@ client::screens::BrowserScreen::preparePlayAction(int playerNumber)
             return false;
         }
     }
+    if (m_infoActions.contains(game::Root::aSweep) && m_infoActions.contains(game::Root::aSuggestSweep)) {
+        if (askConflict(m_root, m_gameSender, m_translator)) {
+            onSweepAction();
+            return false;
+        }
+    }
     if (m_infoActions.contains(game::Root::aUnpack) && m_infoActions.contains(game::Root::aSuggestUnpack)) {
-        if (ui::dialogs::MessageBox(m_translator("There are new result files for this game. "
-                                                 "Do you want to unpack them now?"),
-                                    m_translator("PCC2"),
-                                    m_root).doYesNoDialog(m_translator))
+        if (MessageBox(m_translator("There are new result files for this game. "
+                                    "Do you want to unpack them now?"),
+                       m_translator("PCC2"),
+                       m_root).doYesNoDialog(m_translator))
         {
             onUnpackAction();
             setAutoFocus(playerNumber);

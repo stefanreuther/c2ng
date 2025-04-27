@@ -92,6 +92,17 @@ ui::dialogs::MessageBox::addKey(int id, util::Key_t key)
     return *this;
 }
 
+// Add a help button.
+ui::dialogs::MessageBox&
+ui::dialogs::MessageBox::addHelp(Widget& helper, afl::string::Translator& tx)
+{
+    ui::widgets::Button& btn = m_deleter.addNew(new ui::widgets::Button(tx("Help"), 'h', m_root));
+    m_buttonGroup.add(btn);
+    btn.dispatchKeyTo(helper);
+    add(helper);
+    return *this;
+}
+
 // Ignore a key.
 ui::dialogs::MessageBox&
 ui::dialogs::MessageBox::ignoreKey(util::Key_t key)

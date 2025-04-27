@@ -291,7 +291,7 @@
         for example, when you accidentally unpacked game files, or otherwise got your files mixed up.</p>
 
       <p>Select the player slots you you want to delete.
-        When you start from a game directory containing turn conflicts, the older files will start selected.</p>
+        When you start from a game directory containing <a href="pcc2:conflict">turn conflicts</a>, the older files will start selected.</p>
 
       <kl>
         <ki key="&#x2191;, &#x2193;">Move around;</ki>
@@ -310,7 +310,30 @@
 
       <h2>Reference</h2>
       <dl>
-        <di term="Keys:"> <kbd>S</kbd> from <a href="pcc2:gamesel">Game Selection</a>, and on directory menu.</di>
+        <di term="Keys:"> <kbd>S</kbd> from <a href="pcc2:gamesel">Game Selection</a>, and on directory menu;</di>
+        <di term="See also:"> <a href="pcc2:conflict">Data Conflicts</a>.</di>
+      </dl>
+    </page>
+
+    <page id="pcc2:conflict">
+      <h1>Data Conflicts</h1>
+
+      <p>A game directory shall only contain files for one game, and one turn.
+        If you do not follow this recommendation, some software (in particular, classic DOS utilities) may cause problems.
+        For example, if a planet is owned by one player in one RST is owned by another player in another RST,
+        this might be flagged as possible cheating.</p>
+
+      <p>One way to reach such a situation by accident is if you're filling in for one player and thus have two RSTs.
+        If the replacement is over, you no longer receive your ally's RST.
+        Once you unpack your new RST, the turn numbers will no longer match, and PCC2 will detect the conflict.</p>
+
+      <p>When you try to enter a game from the <a href="pcc2:gamesel">Game Selection</a>, PCC2 will check for conflicts.
+        If one is detected, PCC2 will offer you to use the <a href="pcc2:sweep">Sweep</a> function to resolve the situation.
+        PCC2 will offer to delete the older files, so only the new (current) ones remain.</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="See also:"> <a href="pcc2:sweep">Sweep</a>, <a href="pcc2:unpack">Unpack</a>.</di>
       </dl>
     </page>
 
