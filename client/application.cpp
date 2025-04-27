@@ -93,8 +93,9 @@ namespace {
 
     class ScriptInitializer : public client::si::ScriptTask {
      public:
-        ScriptInitializer(afl::base::Ref<afl::io::Directory> resourceDirectory)
-            : m_resourceDirectory(resourceDirectory)
+        ScriptInitializer(afl::base::Ref<afl::io::Directory> resourceDirectory, util::ProfileDirectory& profile)
+            : m_resourceDirectory(resourceDirectory),
+              m_profile(profile)
             { }
         virtual void execute(uint32_t pgid, game::Session& t)
             {
@@ -106,18 +107,28 @@ namespace {
 
                 // Create process to load core.q
                 interpreter::Process& coreProcess = processList.create(t.world(), "<Core>");
-                coreProcess.pushFrame(game::interface::createFileLoader("core.q", "core.q"), false);
+                coreProcess.pushFrame(game::interface::createFileLoader("core.q", "core.q", false), false);
+                processList.resumeProcess(coreProcess, pgid);
 
                 // Create process to load plugins
                 interpreter::Process& pluginProcess = processList.create(t.world(), "<PluginLoader>");
                 pluginProcess.pushFrame(game::interface::createLoaderForUnloadedPlugins(t.plugins()), false);
-
-                // Execute both processes
-                processList.resumeProcess(coreProcess, pgid);
                 processList.resumeProcess(pluginProcess, pgid);
+
+                // Create process to load pcc2init.q
+                try {
+                    interpreter::Process& initProcess = processList.create(t.world(), "<Init>");
+                    initProcess.pushFrame(game::interface::createFileLoader(t.world().fileSystem().makePathName(m_profile.open()->getDirectoryName(), "pcc2init.q"),
+                                                                            "pcc2init.q", true), false);
+                    processList.resumeProcess(initProcess, pgid);
+                }
+                catch (std::exception& e) {
+                    t.log().write(afl::sys::LogListener::Warn, LOG_NAME, t.translator()("Unable to open profile directory"), e);
+                }
             }
      private:
         afl::base::Ref<afl::io::Directory> m_resourceDirectory;
+        util::ProfileDirectory& m_profile;
     };
 
     class PluginInitializer : public util::Request<game::Session> {
@@ -863,7 +874,7 @@ client::Application::appMain(gfx::Engine& engine)
     // (The NullControl will make us essentially responsive to UI from scripts.)
     {
         client::si::NullControl ctl(userSide);
-        std::auto_ptr<client::si::ScriptTask> t(new ScriptInitializer(resourceDirectory));
+        std::auto_ptr<client::si::ScriptTask> t(new ScriptInitializer(resourceDirectory, profile));
         ctl.executeTaskWait(t);
     }
 

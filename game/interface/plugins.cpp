@@ -173,7 +173,7 @@ game::interface::createLoaderForUnloadedPlugins(util::plugin::Manager& manager)
 
 // Create a file loader.
 interpreter::BCORef_t
-game::interface::createFileLoader(const String_t& fileName, const String_t& origin)
+game::interface::createFileLoader(const String_t& fileName, const String_t& origin, bool optional)
 {
     // Create a BCO
     interpreter::BCORef_t result(interpreter::BytecodeObject::create(true));
@@ -191,10 +191,12 @@ game::interface::createFileLoader(const String_t& fileName, const String_t& orig
     bco.addInstruction(Opcode::maSpecial, Opcode::miSpecialLoad, 0);
 
     // Error handling. TOS is either empty (ok) or an error message.
-    interpreter::BytecodeObject::Label_t successLabel = bco.makeLabel();
-    bco.addJump(Opcode::jIfEmpty, successLabel);
-    addErrorPrint(bco, N_("Load of file \"%s\" failed: %s"), fileName);
-    bco.addLabel(successLabel);
+    if (!optional) {
+        interpreter::BytecodeObject::Label_t successLabel = bco.makeLabel();
+        bco.addJump(Opcode::jIfEmpty, successLabel);
+        addErrorPrint(bco, N_("Load of file \"%s\" failed: %s"), fileName);
+        bco.addLabel(successLabel);
+    }
     bco.addInstruction(Opcode::maStack, Opcode::miStackDrop, 1);
 
     // Error protection, else part

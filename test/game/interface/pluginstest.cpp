@@ -230,7 +230,7 @@ AFL_TEST("game.interface.Plugins:createFileLoader:success", a)
 
     // Test code
     interpreter::Process proc(env.session.world(), "testUnloaded", 99);
-    proc.pushFrame(game::interface::createFileLoader("x.q", "origin"), false);
+    proc.pushFrame(game::interface::createFileLoader("x.q", "origin", false), false);
     proc.run(0);
 
     // Verify
@@ -240,21 +240,50 @@ AFL_TEST("game.interface.Plugins:createFileLoader:success", a)
 
 /** Test createFileLoader(), failure case.
     A: create a file loader but no script file
-    E: load succeeds but an error is reported */
+    E: load succeeds but an error is reported
+
+    The error message is a regular script message, not flagged as error.
+    There are additional messages (process state change), so as of 20250427, this will see getNumMessages()=3.
+    Guaranteed is that we have more than zero and, if the file is optional, fewer. */
 AFL_TEST("game.interface.Plugins:createFileLoader:failure", a)
 {
-    Environment env;
+    size_t baseline;
 
-    // Capture logs
-    afl::test::LogListener c;
-    env.session.log().addListener(c);
+    // File is required
+    {
+        Environment env;
 
-    // Test code
-    interpreter::Process proc(env.session.world(), "testUnloaded", 99);
-    proc.pushFrame(game::interface::createFileLoader("x.q", "origin"), false);
-    proc.run(0);
+        // Capture logs
+        afl::test::LogListener c;
+        env.session.log().addListener(c);
 
-    // Verify
-    a.checkEqual("01. getState", proc.getState(), interpreter::Process::Ended);
-    a.check("02. getNumMessages", c.getNumMessages() > 0);                       // Message is currently not flagged as error
+        // Test code
+        interpreter::Process proc(env.session.world(), "testUnloaded", 99);
+        proc.pushFrame(game::interface::createFileLoader("x.q", "origin", false), false);
+        proc.run(0);
+
+        // Verify
+        a.checkEqual("01. getState", proc.getState(), interpreter::Process::Ended);
+        a.check("02. getNumMessages", c.getNumMessages() > 0);
+
+        baseline = c.getNumMessages();
+    }
+
+    // File is optional. Should generate fewer messages.
+    {
+        Environment env;
+
+        // Capture logs
+        afl::test::LogListener c;
+        env.session.log().addListener(c);
+
+        // Test code
+        interpreter::Process proc(env.session.world(), "testUnloaded", 99);
+        proc.pushFrame(game::interface::createFileLoader("x.q", "origin", true), false);
+        proc.run(0);
+
+        // Verify
+        a.checkEqual("01. getState", proc.getState(), interpreter::Process::Ended);
+        a.check("02. getNumMessages", c.getNumMessages() < baseline);
+    }
 }

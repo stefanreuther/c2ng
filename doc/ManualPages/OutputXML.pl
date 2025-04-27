@@ -158,9 +158,6 @@ sub paragraph_table {
 sub xml_format_text {
     my $line = shift;
 
-#    # Quote backslashes
-#    $line =~ s|\\|\\\\|g;
-#
     # Process tags
     $line =~ s|<i>|<em>|g;
     $line =~ s|</i>|</em>|g;

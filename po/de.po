@@ -10503,6 +10503,10 @@ msgstr ""
 msgid "Unable to open file %s: %s"
 msgstr "%s kann nicht geöffnet werden: %s"
 
+#: client/application.cpp:126
+msgid "Unable to open profile directory"
+msgstr "Profil-Verzeichnis kann nicht geöffnet werden"
+
 #: share/resource/core_ui.q:1515
 msgid "Unable to save %s: %s"
 msgstr "%s kann nicht gespeichert werden: %s"
