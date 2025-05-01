@@ -108,22 +108,33 @@ If Not System.GUI Then
   EndSub
 EndIf
 
-% Create an array on-the-fly
-% @since PCC2 2.40.1
+% @q Array(args:Any):Array (Function)
+% Create an array on-the-fly.
+% When invoked with any number of parameters, returns an array containing those.
+% @since PCC2 2.0.17, PCC2 2.40.1
 Function Array(a())
   Return a
 EndFunction
 
-% Utility: append value to an array.
-% @since PCC2 2.40.1
-% (also in namer.q since 1.99.22)
+% @q Array.Push a:Array, val:Any (Global Command)
+% Append value to an array.
+% The first parameter is a one-dimensional array variable.
+% This command will extend the variable by appending one more element.
+% @since PCC2 2.0.17, PCC2 2.40.1
+% @see Array.Pop
 Sub Array.Push(a, val)
+  % (also in namer.q since 1.99.22)
   ReDim a(Dim(a)+1)
   a(Dim(a)-1) := val
 EndSub
 
-% Utility: pop value from an array.
-% @since PCC2 2.40.1
+% @q Array.Pop(a:Array):Any (Function)
+% Remove last element from an array.
+% The parameter is a one-dimensional array variable.
+% This command will remove the final element and return it, reducing the size of the array by one.
+% If the array is already empty, returns EMPTY.
+% @since PCC2 2.0.17, PCC2 2.40.1
+% @see Array.Push
 Function Array.Pop(a)
   Local result
   If Dim(a) > 0
