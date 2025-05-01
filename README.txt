@@ -174,12 +174,14 @@ Program List
     . c2compiler: script compiler
     . c2configtool: configuration handler
     . c2export: game data export
+    . c2gfxcodec: graphics codecs
     . c2gfxgen: procedural graphics generation
     . c2mgrep: message search
     . c2mkturn: maketurn utility
     . c2plugin: plugin manager
     . c2pluginw: plugin manager (simple GUI)
     . c2rater: game rating computer
+    . c2restool: resource file manager
     . c2script: scripting engine
     . c2simtool: battle simulator command-line tool
     . c2sweep: game directory cleaner
@@ -237,7 +239,7 @@ Contributing
 Contact
 ========
 
-  Web site: <http://phost.de/~stefan/pcc2ng.html>
+  Web site: <https://phost.de/~stefan/pcc2ng.html>
 
   Github: <https://github.com/stefanreuther/c2ng>
 

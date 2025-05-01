@@ -4,7 +4,7 @@ PCC2ng NEWS FILE
 2.41.3
 ------
 
-  Add translation.
+  Add German translation.
 
   Added some more attributes to script objects (e.g. InMsg().Link), to
   allow the c2play-server to publish those, and eventually allow
@@ -12,7 +12,9 @@ PCC2ng NEWS FILE
 
   Reworked network play. For PlanetsCentral, the whole game directory
   is now taken from the server, and can be accessed by scripts as
-  using file name "game:whatever.txt".
+  using file name "game:whatever.txt". For planets.nu, we now load
+  many more properties (in particular, racial advantages, which is a
+  new concept).
 
   Add ability to interrupt running scripts (Ctrl+Break).
 
