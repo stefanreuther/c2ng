@@ -79,16 +79,23 @@ interpreter::ArrayValue::toString(bool /*readable*/) const
     // ex IntArray::toString
     if (m_data->getNumDimensions() == 1) {
         String_t result = "Array(";
+        bool ok = true;
         for (size_t i = 0, n = m_data->getDimension(0); i < n; ++i) {
             if (i != 0) {
                 result += ",";
             }
+            if (dynamic_cast<ArrayValue*>(m_data->content()[i]) != 0) {
+                // Quick and dirty detection of recursive data structure
+                ok = false;
+                break;
+            }
             result += interpreter::toString(m_data->content()[i], true);
             if (result.size() > TOSTRING_MAX) {
+                ok = false;
                 break;
             }
         }
-        if (result.size() <= TOSTRING_MAX) {
+        if (ok) {
             result += ")";
             return result;
         }

@@ -223,3 +223,20 @@ AFL_TEST("interpreter.ArrayValue:toString:2d:small", a)
     a.checkEqual("21. toString", testee.toString(false).substr(0, 2), "#<");
     a.checkEqual("22. toString", testee.toString(true).substr(0, 2), "#<");
 }
+
+/** Test toString, recursive structure */
+AFL_TEST("interpreter.ArrayValue:toString:recursive", a)
+{
+    // Create data object
+    afl::base::Ref<interpreter::ArrayData> content = *new interpreter::ArrayData();
+    content->addDimension(10);
+    content->content().pushBackInteger(12);
+    content->content().pushBackNew(new interpreter::ArrayValue(content));
+
+    // Create value
+    interpreter::ArrayValue testee(content);
+
+    // String
+    a.checkEqual("21. toString", testee.toString(false).substr(0, 2), "#<");
+    a.checkEqual("22. toString", testee.toString(true).substr(0, 2), "#<");
+}
