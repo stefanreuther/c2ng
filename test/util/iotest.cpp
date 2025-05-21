@@ -359,7 +359,7 @@ AFL_TEST("util.IO:parseJSON", a)
 
 AFL_TEST("util.IO:findArrayItemById", a)
 {
-    std::auto_ptr<afl::data::Value> p(util::parseJSON(afl::string::toBytes("[{\"id\":1,\"value\":10},{\"id\":3,\"value\":11},{\"id\":2,\"value\":12}]")));
+    std::auto_ptr<afl::data::Value> p(util::parseJSON(afl::string::toBytes("[{\"id\":1,\"value\":10},{\"id\":3,\"value\":11},{\"id\":\"X\"},{\"id\":2,\"value\":12}]")));
 
     // Find by Id
     a.checkEqual("search id 1", util::findArrayItemById(p, "id", 1)("value").toInteger(), 10);

@@ -7,6 +7,7 @@
 #include "afl/base/growablememory.hpp"
 #include "afl/data/defaultvaluefactory.hpp"
 #include "afl/except/fileproblemexception.hpp"
+#include "afl/except/invaliddataexception.hpp"
 #include "afl/io/bufferedstream.hpp"
 #include "afl/io/constmemorystream.hpp"
 #include "afl/io/directory.hpp"
@@ -161,9 +162,13 @@ util::findArrayItemById(afl::data::Access array, String_t key, int value)
 {
     for (size_t i = 0, n = array.getArraySize(); i < n; ++i) {
         afl::data::Access ele = array[i], thisKey = ele(key);
-        if (thisKey.getValue() != 0 && thisKey.toInteger() == value) {
-            return ele;
+        try {
+            if (thisKey.getValue() != 0 && thisKey.toInteger() == value) {
+                return ele;
+            }
         }
+        catch (afl::except::InvalidDataException& ex)
+        { }
     }
     return afl::data::Access();
 }
@@ -171,11 +176,9 @@ util::findArrayItemById(afl::data::Access array, String_t key, int value)
 void
 util::toIntegerList(afl::data::IntegerList_t& list, afl::data::Access value)
 {
-    if (size_t n = value.getArraySize()) {
+    if (value.getArraySize() != 0) {
         // Array
-        for (size_t i = 0; i < n; ++i) {
-            list.push_back(value[i].toInteger());
-        }
+        value.toIntegerList(list);
     } else {
         // String (also handles integer case)
         StringParser p(value.toString());
