@@ -76,7 +76,7 @@ server::host::ConfigurationBuilder::addValue(const String_t& key, const String_t
         // This value cannot be exported.
     } else {
         m_buffer += key;
-        m_buffer += '=';;
+        m_buffer += '=';
         for (size_t i = 0; i < value.size(); ++i) {
             if (uint8_t(value[i]) < ' ') {
                 // embedded newline etc.

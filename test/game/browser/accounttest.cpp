@@ -97,7 +97,7 @@ AFL_TEST("game.browser.Account:getEncoded", a)
     a.check("11. getEncoded", testee.getEncoded("1").get(result));
     a.checkNonNull("12. get", p);
     a.checkEqual("13. get", *p, "");
-    a.checkEqual("14. getEncoded", result, "");;
+    a.checkEqual("14. getEncoded", result, "");
 
     p = testee.get("2");
     a.check("21. getEncoded", testee.getEncoded("2").get(result));
@@ -121,5 +121,5 @@ AFL_TEST("game.browser.Account:getEncoded", a)
     a.check("51. getEncoded", testee.getEncoded("5").get(result));
     a.checkNonNull("52. get", p);
     a.checkEqual("53. get", *p, "YWFhYQ==");
-    a.checkEqual("54. getEncoded", result, "aaaa");;
+    a.checkEqual("54. getEncoded", result, "aaaa");
 }

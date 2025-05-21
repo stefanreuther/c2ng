@@ -109,11 +109,9 @@ namespace game { namespace map {
             UsesBaseStorage
         };
         typedef afl::bits::SmallSet<Flag> Flags_t;
-        
+
         String_t name;                            ///< Name of item.
         int nextAt;                               ///< Number of additional defense posts needed for improvement. 0 if maximum reached.
-        // bool isAchievable;                        ///< true if nextAt is currently achievable.
-        // bool isDetail;                            ///< true if this is a detail to the previous item (shown indented).
         Flags_t flags;
 
         DefenseEffectInfo()
@@ -123,9 +121,6 @@ namespace game { namespace map {
         DefenseEffectInfo(const String_t& name, int nextAt, Flags_t flags)
             : name(name), nextAt(nextAt), flags(flags)
             { }
-        // DefenseEffectInfo(const String_t& name, int nextAt, bool isAchievable, bool isDetail)
-        //     : name(name), nextAt(nextAt), isAchievable(isAchievable), isDetail(isDetail)
-        //     { }
     };
     typedef std::vector<DefenseEffectInfo> DefenseEffectInfos_t;
 

@@ -13,9 +13,7 @@ namespace interpreter { namespace vmio {
 
     /** Load Context using a World: Loads Processes.
         To load an object file that can contain processes, use a WorldLoadContext with ObjectLoader.
-        This will allow
-        - loading of processes
-        - loading of mutexes
+        This will allow loading of processes.
 
         Application data (loadContext etc.) will be handled a parent LoadContext. */
     class WorldLoadContext : public LoadContext {

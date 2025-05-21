@@ -1264,7 +1264,7 @@ AFL_TEST("game.interface.TaskEditorContext:itmMove:error:type", a)
 }
 
 // Arity error
-AFL_TEST("game.interface.TaskEditorContext:itmMove:error:type", a)
+AFL_TEST("game.interface.TaskEditorContext:itmMove:error:arity", a)
 {
     Environment env;
     afl::base::Ptr<interpreter::TaskEditor> edit = prepareShipTask(a, env, 10);

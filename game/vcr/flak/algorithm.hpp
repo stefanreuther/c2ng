@@ -74,7 +74,8 @@ namespace game { namespace vcr { namespace flak {
             Either does nothing and returns false (last cycle),
             or advances time, does something and returns true.
             \param env Environment
-            \param vis Visualizer */
+            \param vis Visualizer
+            \return true if time was advanced; false if nothing was done (last cycle) */
         bool playCycle(const Environment& env, Visualizer& vis);
 
         /** Create a status token.

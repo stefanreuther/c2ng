@@ -2945,7 +2945,7 @@ AFL_TEST("interpreter.Process:run:sresizearray:error:zero", a)
     a.check("02. isError", isError(env));
 }
 
-/** Test instruction: snewarray.
+/** Test instruction: sresizearray.
     Error case: too large */
 AFL_TEST("interpreter.Process:run:sresizearray:error:too-large", a)
 {
@@ -3151,7 +3151,7 @@ AFL_TEST("interpreter.Process:run:snext:copies", a)
     env.proc.dropValue();
     a.checkEqual("05. result", toInteger(env), 10);
     env.proc.dropValue();
-    a.checkEqual("06. result", toInteger(env), 13);;
+    a.checkEqual("06. result", toInteger(env), 13);
 }
 
 /** Test instruction: snext.

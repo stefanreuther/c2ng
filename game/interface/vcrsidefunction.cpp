@@ -29,7 +29,7 @@ game::interface::VcrSideFunction::get(interpreter::Arguments& args)
         return 0;
     }
 
-    // OK, build result. Note that the user indexes are 1-based!
+    // OK, build result
     return new VcrSideContext(m_battleNumber, i, m_translator, m_root, m_battles, m_shipList);
 }
 

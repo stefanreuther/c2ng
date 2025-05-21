@@ -46,7 +46,7 @@ namespace game { namespace interface {
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
-        /** Create PlanetContext for planet in viewpoint turn.
+        /** Create PlanetContext for planet in given turn.
             @param id       Planet Id
             @param session  Session (for translator, ship list)
             @param g        Game

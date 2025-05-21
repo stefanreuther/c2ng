@@ -58,7 +58,8 @@ namespace game { namespace vcr { namespace classic {
             \param vis Visualizer */
         void setVisualizer(Visualizer& vis);
 
-        /** Get visualizer. */
+        /** Get visualizer.
+            \return Visualizer */
         Visualizer& visualizer();
 
         /** Check battle.
@@ -84,13 +85,14 @@ namespace game { namespace vcr { namespace classic {
         virtual void doneBattle(Object& left, Object& right) = 0;
 
         /** Set capabilities.
-            Returns false if capability set not supported.
-            \param cap Capability set */
+            \param cap Capability set
+            \return true on success; false if capability set is not supported */
         virtual bool setCapabilities(uint16_t cap) = 0;
 
         /** Play one cycle.
             Either does nothing and returns false (last cycle),
-            or advances time, does something and returns true. */
+            or advances time, does something and returns true.
+            \return true if time was advanced; false if nothing was done (last cycle) */
         virtual bool playCycle() = 0;
 
         /** Fast forward.
@@ -156,14 +158,17 @@ namespace game { namespace vcr { namespace classic {
 
         /** Get Fighter Status.
             \param side side
-            \param id track number */
+            \param id track number
+            \return status */
         virtual FighterStatus getFighterStatus(Side side, int id) = 0;
 
         /** Get Object Position.
+            \param side side
             \return position. Positions are [0, 640]. FIXME: range */
         virtual int getObjectX(Side side) = 0;
 
-        /** Get distance in meters. */
+        /** Get distance in meters.
+            \return distance */
         virtual int32_t getDistance() = 0;
 
         /** Get a status token.
@@ -176,14 +181,17 @@ namespace game { namespace vcr { namespace classic {
         virtual void restoreStatus(const StatusToken& token) = 0;
 
         /** Get current time in battle ticks.
-            PCC traditionally renders battle ticks as seconds. */
+            PCC traditionally renders battle ticks as seconds.
+            \return time */
         virtual Time_t getTime() = 0;
 
-        /** Get battle result. */
+        /** Get battle result.
+            \return result (combination of LeftDestroyed, RightDestroyed, LeftCaptured, RightCaptured, Timeout, Stalemate, Invalid) */
         virtual BattleResult_t getResult() = 0;
 
         /** Get battle statistic.
-            \param side side */
+            \param side side
+            \return statistic */
         virtual Statistic getStatistic(Side side) = 0;
 
      private:

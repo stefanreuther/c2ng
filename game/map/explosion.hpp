@@ -50,7 +50,7 @@ namespace game { namespace map {
         virtual afl::base::Optional<Point> getPosition() const;
 
         /** Get name.
-            Simplified version with less dependencies.
+            Simplified version with fewer dependencies.
             \param tx Translator */
         String_t getName(afl::string::Translator& tx) const;
 

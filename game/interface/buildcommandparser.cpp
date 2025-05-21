@@ -161,7 +161,7 @@ game::interface::BuildCommandParser::handleBuildStructure(interpreter::Arguments
         return;
     }
 
-    const int todo = getLimitedAmount(n);;
+    const int todo = getLimitedAmount(n);
     if (todo > 0) {
         // Action
         PlanetStorage container(m_planet, m_root.hostConfiguration());

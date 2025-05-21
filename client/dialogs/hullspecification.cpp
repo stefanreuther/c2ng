@@ -135,9 +135,9 @@ namespace {
         }
         doc.add(Format(tx(", %d crewm%1{a%|e%}n"), fmt.formatNumber(eff.crew)));
         doc.addParagraph();
-        doc.addCentered(17*em, util::rich::Text(tx("Shield")).withStyle(util::rich::StyleAttribute::Bold));;
-        doc.addCentered(25*em, util::rich::Text(tx("Hull")).withStyle(util::rich::StyleAttribute::Bold));;
-        doc.addCentered(33*em, util::rich::Text(tx("Crew")).withStyle(util::rich::StyleAttribute::Bold));;
+        doc.addCentered(17*em, util::rich::Text(tx("Shield")).withStyle(util::rich::StyleAttribute::Bold));
+        doc.addCentered(25*em, util::rich::Text(tx("Hull")).withStyle(util::rich::StyleAttribute::Bold));
+        doc.addCentered(33*em, util::rich::Text(tx("Crew")).withStyle(util::rich::StyleAttribute::Bold));
         doc.addNewline();
         renderWeaponArea(doc, eff, eff.beamEffects, fmt, em);
         doc.addNewline();

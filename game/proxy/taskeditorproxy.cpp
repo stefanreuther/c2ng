@@ -200,7 +200,7 @@ game::proxy::TaskEditorProxy::Trampoline::describeShip(ShipStatus& out) const
         out.numFuelTurns     = pred.getNumFuelTurns();
         out.startingFuel     = startFuel;
         out.movementFuel     = pred.getMovementFuel();
-        out.cloakFuel        = pred.getCloakFuel();;
+        out.cloakFuel        = pred.getCloakFuel();
         out.remainingFuel    = pred.getRemainingFuel();
         out.numberFormatter  = r->userConfiguration().getNumberFormatter();
         out.isHyperdriving   = pred.isHyperdriving();

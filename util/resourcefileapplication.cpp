@@ -314,15 +314,15 @@ util::ResourceFileApplication::appMain()
         errorExit(Format(tx("no command specified. Use '%s -h' for help."), environment().getInvocationName()));
     }
 
-    if (text == "help") {
+    if (*pCommand == "help") {
         help();
-    } else if (text == "create") {
+    } else if (*pCommand == "create") {
         doCreate(cmdl);
-    } else if (text == "list" || text == "ls") {
+    } else if (*pCommand == "list" || *pCommand == "ls") {
         doList(cmdl);
-    } else if (text == "extract" || text == "rx") {
+    } else if (*pCommand == "extract" || *pCommand == "rx") {
         doExtract(cmdl);
-    } else if (text == "extract-all" || text == "rxall") {
+    } else if (*pCommand == "extract-all" || *pCommand == "rxall") {
         doExtractAll(cmdl);
     } else {
         errorExit(Format(tx("invalid command '%s'. Use '%s -h' for help."), *pCommand, environment().getInvocationName()));

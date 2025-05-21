@@ -159,8 +159,8 @@ ShipArrayProperty::get(interpreter::Arguments& args)
            Valid parameters can be found in the PHost documentation.
            As of PHost 4.1, the following values are valid:
 
-           - Score(1): experience level (same as {Level}).
-           - Score(2): experience points (same as {Level.Points}.
+           - Score(1): experience level (same as {Level});
+           - Score(2): experience points (same as {Level.Points}).
 
            This property yields EMPTY if the respective score does not exist or is not known.
            @since PCC2 1.99.21, PCC 1.1.16 */

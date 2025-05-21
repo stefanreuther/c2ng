@@ -302,5 +302,4 @@ game::Game::isGameObject(const game::vcr::Object& obj, const game::spec::HullVec
         const game::map::Planet* pl = univ.allPlanets().getObjectByIndex(obj.getId());
         return pl != 0;
     }
-    return false;
 }

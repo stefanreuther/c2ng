@@ -686,7 +686,7 @@ interpreter::StatementCompiler::compileAmbiguousRuntimeSwitch(const String_t& na
                 && !bco.hasLocalVariable(name);
             BytecodeObject::Label_t lexpr = bco.makeLabel();
             BytecodeObject::Label_t ldone = bco.makeLabel();
-            BytecodeObject::Label_t lfail = bco.makeLabel();;
+            BytecodeObject::Label_t lfail = bco.makeLabel();
             if (protect) {
                 bco.addJump(Opcode::jCatch, lfail);
             }

@@ -118,7 +118,7 @@ AFL_TEST("game.vcr.classic.Database:load:phost4", a)
     a.checkEqual("52. getNumBeams",     b2->right().getNumBeams(), 4);
     a.checkEqual("53. getNumLaunchers", b2->right().getNumLaunchers(), 0);
     a.checkEqual("54. getNumBays",      b2->right().getNumBays(), 6);
-    a.checkEqual("55. getCapabilities()", b1->getCapabilities(), 3);
+    a.checkEqual("55. getCapabilities()", b2->getCapabilities(), 3);
 
     // Verify saved form
     afl::io::InternalStream out;

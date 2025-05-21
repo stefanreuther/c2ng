@@ -95,7 +95,7 @@ AFL_TEST("server.interface.HostRankingServer:roundtrip", a)
 {
     HostRankingMock mock(a);
     server::interface::HostRankingServer level1(mock);
-    server::interface::HostRankingClient level2(level1);;
+    server::interface::HostRankingClient level2(level1);
     server::interface::HostRankingServer level3(level2);
     server::interface::HostRankingClient level4(level3);
 

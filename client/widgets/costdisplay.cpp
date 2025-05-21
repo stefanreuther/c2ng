@@ -149,7 +149,7 @@ client::widgets::CostDisplay::render()
                 // It's the Money line.
                 if (int32_t missing = m_missingAmount.get(Cost::Money) + m_missingAmount.get(Cost::Supplies)) {
                     cell(3, r  ).setText(Format(m_translator(TEXTS[NeedFunds1]), m_formatter.formatNumber(missing))).setColor(SkinColor::Red);
-                    cell(3, r+1).setText(Format(m_translator(TEXTS[NeedFunds2]), m_formatter.formatNumber(missing))).setColor(SkinColor::Red);;
+                    cell(3, r+1).setText(Format(m_translator(TEXTS[NeedFunds2]), m_formatter.formatNumber(missing))).setColor(SkinColor::Red);
                 } else {
                     cell(3, r  ).setText(Format(m_translator(TEXTS[RemainingCash]),  m_formatter.formatNumber(m_remainingAmount.get(Cost::Money)))).setColor(SkinColor::Green);
                     cell(3, r+1).setText(Format(m_translator(TEXTS[RemainingTons]), m_formatter.formatNumber(m_remainingAmount.get(Cost::Supplies)))).setColor(SkinColor::Green);

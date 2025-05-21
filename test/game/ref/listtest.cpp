@@ -138,7 +138,7 @@ AFL_TEST("game.ref.List:addObjectsAt", a)
     t.setPosition(pos);
     t.addPlanet(30, 4, game::map::Object::NotPlayable);
     t.addShip(10, 4, game::map::Object::NotPlayable);
-    t.addShip(12, 5, game::map::Object::ReadOnly);;
+    t.addShip(12, 5, game::map::Object::ReadOnly);
     t.addShip(14, 6, game::map::Object::Playable);
     t.addShip(16, 4, game::map::Object::NotPlayable);
 

@@ -94,7 +94,7 @@ namespace {
                 win.add(fi);
                 minSel.requestFocus();
 
-                win.pack();;
+                win.pack();
                 m_root.centerWidget(win);
                 m_root.add(win);
                 return m_loop.run();

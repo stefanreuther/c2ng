@@ -27,7 +27,7 @@ AFL_TEST("game.CargoSpec:init", a)
 AFL_TEST("game.CargoSpec:parse:blank", a)
 {
     game::CargoSpec value;
-    a.check("11. parse",              value.parse("", false));;
+    a.check("11. parse",              value.parse("", false));
     a.checkEqual("12. Tritanium",     value.get(value.Tritanium), 0);
     a.checkEqual("13. Duranium",      value.get(value.Duranium), 0);
     a.checkEqual("14. Molybdenum",    value.get(value.Molybdenum), 0);
@@ -41,7 +41,7 @@ AFL_TEST("game.CargoSpec:parse:blank", a)
 AFL_TEST("game.CargoSpec:parse:zero", a)
 {
     game::CargoSpec value;
-    a.check("21. parse",              value.parse("0td", false));;
+    a.check("21. parse",              value.parse("0td", false));
     a.checkEqual("22. Tritanium",     value.get(value.Tritanium), 0);
     a.checkEqual("23. Duranium",      value.get(value.Duranium), 0);
     a.checkEqual("24. Molybdenum",    value.get(value.Molybdenum), 0);
@@ -55,7 +55,7 @@ AFL_TEST("game.CargoSpec:parse:zero", a)
 AFL_TEST("game.CargoSpec:parse:normal", a)
 {
     game::CargoSpec value;
-    a.check("31. parse",              value.parse("1tdm 20$", false));;
+    a.check("31. parse",              value.parse("1tdm 20$", false));
     a.checkEqual("32. Tritanium",     value.get(value.Tritanium), 1);
     a.checkEqual("33. Duranium",      value.get(value.Duranium), 1);
     a.checkEqual("34. Molybdenum",    value.get(value.Molybdenum), 1);
@@ -69,7 +69,7 @@ AFL_TEST("game.CargoSpec:parse:normal", a)
 AFL_TEST("game.CargoSpec:parse:run-together", a)
 {
     game::CargoSpec value;
-    a.check("41. parse",              value.parse("1tdm42$", false));;
+    a.check("41. parse",              value.parse("1tdm42$", false));
     a.checkEqual("42. Tritanium",     value.get(value.Tritanium), 1);
     a.checkEqual("43. Duranium",      value.get(value.Duranium), 1);
     a.checkEqual("44. Molybdenum",    value.get(value.Molybdenum), 1);
@@ -83,7 +83,7 @@ AFL_TEST("game.CargoSpec:parse:run-together", a)
 AFL_TEST("game.CargoSpec:parse:duplicate", a)
 {
     game::CargoSpec value;
-    a.check("51. parse",              value.parse("1ttttdm", false));;
+    a.check("51. parse",              value.parse("1ttttdm", false));
     a.checkEqual("52. Tritanium",     value.get(value.Tritanium), 4);
     a.checkEqual("53. Duranium",      value.get(value.Duranium), 1);
     a.checkEqual("54. Molybdenum",    value.get(value.Molybdenum), 1);
@@ -97,7 +97,7 @@ AFL_TEST("game.CargoSpec:parse:duplicate", a)
 AFL_TEST("game.CargoSpec:parse:add", a)
 {
     game::CargoSpec value;
-    a.check("61. parse",              value.parse("10s 20s", false));;
+    a.check("61. parse",              value.parse("10s 20s", false));
     a.checkEqual("62. Tritanium",     value.get(value.Tritanium), 0);
     a.checkEqual("63. Duranium",      value.get(value.Duranium), 0);
     a.checkEqual("64. Molybdenum",    value.get(value.Molybdenum), 0);
@@ -111,7 +111,7 @@ AFL_TEST("game.CargoSpec:parse:add", a)
 AFL_TEST("game.CargoSpec:parse:upper-case", a)
 {
     game::CargoSpec value;
-    a.check("71. parse",              value.parse("10TDM 99S", false));;
+    a.check("71. parse",              value.parse("10TDM 99S", false));
     a.checkEqual("72. Tritanium",     value.get(value.Tritanium), 10);
     a.checkEqual("73. Duranium",      value.get(value.Duranium), 10);
     a.checkEqual("74. Molybdenum",    value.get(value.Molybdenum), 10);
@@ -125,7 +125,7 @@ AFL_TEST("game.CargoSpec:parse:upper-case", a)
 AFL_TEST("game.CargoSpec:parse:phost-style", a)
 {
     game::CargoSpec value;
-    a.check("81. parse",              value.parse("T10 D20 M30 $77 S42", false));;
+    a.check("81. parse",              value.parse("T10 D20 M30 $77 S42", false));
     a.checkEqual("82. Tritanium",     value.get(value.Tritanium), 10);
     a.checkEqual("83. Duranium",      value.get(value.Duranium), 20);
     a.checkEqual("84. Molybdenum",    value.get(value.Molybdenum), 30);
@@ -139,7 +139,7 @@ AFL_TEST("game.CargoSpec:parse:phost-style", a)
 AFL_TEST("game.CargoSpec:parse:phost-style:lower-case", a)
 {
     game::CargoSpec value;
-    a.check("91. parse",              value.parse("t11 d22 m33 $44 S55", false));;
+    a.check("91. parse",              value.parse("t11 d22 m33 $44 S55", false));
     a.checkEqual("92. Tritanium",     value.get(value.Tritanium), 11);
     a.checkEqual("93. Duranium",      value.get(value.Duranium), 22);
     a.checkEqual("94. Molybdenum",    value.get(value.Molybdenum), 33);
@@ -153,7 +153,7 @@ AFL_TEST("game.CargoSpec:parse:phost-style:lower-case", a)
 AFL_TEST("game.CargoSpec:parse:phost-style:add", a)
 {
     game::CargoSpec value;
-    a.check("101. parse",              value.parse("t11 t22 t33", false));;
+    a.check("101. parse",              value.parse("t11 t22 t33", false));
     a.checkEqual("102. Tritanium",     value.get(value.Tritanium), 66);
     a.checkEqual("103. Duranium",      value.get(value.Duranium), 0);
     a.checkEqual("104. Molybdenum",    value.get(value.Molybdenum), 0);
@@ -166,7 +166,7 @@ AFL_TEST("game.CargoSpec:parse:phost-style:add", a)
 AFL_TEST("game.CargoSpec:parse:types", a)
 {
     game::CargoSpec value;
-    a.check("111. parse",              value.parse("w5 f3", false));;
+    a.check("111. parse",              value.parse("w5 f3", false));
     a.checkEqual("112. Tritanium",     value.get(value.Tritanium), 0);
     a.checkEqual("113. Duranium",      value.get(value.Duranium), 0);
     a.checkEqual("114. Molybdenum",    value.get(value.Molybdenum), 0);
@@ -181,13 +181,13 @@ AFL_TEST("game.CargoSpec:parse:types", a)
 AFL_TEST("game.CargoSpec:parse:max:disabled", a)
 {
     game::CargoSpec value;
-    a.check("121", !value.parse("tmax", false));;
+    a.check("121", !value.parse("tmax", false));
 }
 
 AFL_TEST("game.CargoSpec:parse:max:enabled", a)
 {
     game::CargoSpec value;
-    a.check("122. parse",           value.parse("tmax", true));;
+    a.check("122. parse",           value.parse("tmax", true));
     a.checkEqual("123. Tritanium",  value.get(value.Tritanium), 10000);
     a.checkEqual("124. Duranium",   value.get(value.Duranium), 0);
     a.checkEqual("125. Molybdenum", value.get(value.Molybdenum), 0);
@@ -199,7 +199,7 @@ AFL_TEST("game.CargoSpec:parse:max:enabled", a)
 AFL_TEST("game.CargoSpec:parse:max:abbr", a)
 {
     game::CargoSpec value;
-    a.check("131. parse",           value.parse("tm", true));;
+    a.check("131. parse",           value.parse("tm", true));
     a.checkEqual("132. Tritanium",  value.get(value.Tritanium), 10000);
     a.checkEqual("133. Duranium",   value.get(value.Duranium), 0);
     a.checkEqual("134. Molybdenum", value.get(value.Molybdenum), 0);
@@ -211,7 +211,7 @@ AFL_TEST("game.CargoSpec:parse:max:abbr", a)
 AFL_TEST("game.CargoSpec:parse:max+other", a)
 {
     game::CargoSpec value;
-    a.check("141. parse",           value.parse("tmax d10", true));;
+    a.check("141. parse",           value.parse("tmax d10", true));
     a.checkEqual("142. Tritanium",  value.get(value.Tritanium), 10000);
     a.checkEqual("143. Duranium",   value.get(value.Duranium), 10);
     a.checkEqual("144. Molybdenum", value.get(value.Molybdenum), 0);
@@ -223,7 +223,7 @@ AFL_TEST("game.CargoSpec:parse:max+other", a)
 AFL_TEST("game.CargoSpec:parse:max+other:abbr", a)
 {
     game::CargoSpec value;
-    a.check("151. parse",           value.parse("tm d10", true));;
+    a.check("151. parse",           value.parse("tm d10", true));
     a.checkEqual("152. Tritanium",  value.get(value.Tritanium), 10000);
     a.checkEqual("153. Duranium",   value.get(value.Duranium), 10);
     a.checkEqual("154. Molybdenum", value.get(value.Molybdenum), 0);
@@ -236,7 +236,7 @@ AFL_TEST("game.CargoSpec:parse:max+other:abbr", a)
 AFL_TEST("game.CargoSpec:parse:negative", a)
 {
     game::CargoSpec value;
-    a.check("161. parse",           value.parse("-10d", true));;
+    a.check("161. parse",           value.parse("-10d", true));
     a.checkEqual("162. Tritanium",  value.get(value.Tritanium), 0);
     a.checkEqual("163. Duranium",   value.get(value.Duranium), -10);
     a.checkEqual("164. Molybdenum", value.get(value.Molybdenum), 0);
@@ -247,7 +247,7 @@ AFL_TEST("game.CargoSpec:parse:negative", a)
 AFL_TEST("game.CargoSpec:parse:positive", a)
 {
     game::CargoSpec value;
-    a.check("168. parse",           value.parse("+33d", true));;
+    a.check("168. parse",           value.parse("+33d", true));
     a.checkEqual("169. Tritanium",  value.get(value.Tritanium), 0);
     a.checkEqual("170. Duranium",   value.get(value.Duranium), 33);
     a.checkEqual("171. Molybdenum", value.get(value.Molybdenum), 0);

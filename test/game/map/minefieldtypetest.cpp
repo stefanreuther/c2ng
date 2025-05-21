@@ -97,7 +97,7 @@ AFL_TEST("game.map.MinefieldType:addMessageInformation:full", a)
     {
         gp::MessageInformation info(gp::MessageInformation::Minefield, 30, TURN);
         info.addValue(gp::mi_X, 1666);
-        info.addValue(gp::mi_Y, 1777);;
+        info.addValue(gp::mi_Y, 1777);
         info.addValue(gp::mi_Radius, 40);
         info.addValue(gp::mi_Owner, 10);
         info.addValue(gp::mi_MineUnits, 1620);

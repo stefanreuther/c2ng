@@ -839,7 +839,7 @@ AFL_TEST("game.db.Loader:roundtrip", a)
     }
 }
 
-/** Test loading a prepared file. */
+/** Test loading a broken file. */
 AFL_TEST("game.db.Loader:error:broken", a)
 {
     Environment env(7, 900, 500);

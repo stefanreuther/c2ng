@@ -235,7 +235,7 @@ AFL_TEST("game.map.ObjectType:normal", a)
     a.check("01. isEmpty", !t.isEmpty());
     a.check("02. isUnit", !t.isUnit());
     a.checkEqual("03. countObjects", t.countObjects(), 7);
-    a.checkEqual("04. findNextIndex", t.findNextIndex(0), 1);;
+    a.checkEqual("04. findNextIndex", t.findNextIndex(0), 1);
 
     // countObjectsAt
     a.checkEqual("11. countObjects", t.countObjectsAt(A, PlayerSet_t(1)), 2);

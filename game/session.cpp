@@ -235,6 +235,7 @@ game::Session::Session(afl::string::Translator& tx, afl::io::FileSystem& fs)
       m_uiPropertyStack(),
       m_fileSystem(),
       m_world(),
+      m_pScriptRunner(),
       m_systemInformation(),
       m_processList(),
       m_rng(afl::sys::Time::getTickCounter()),

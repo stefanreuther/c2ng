@@ -7,6 +7,7 @@
 
 namespace gt = game::v3::structures;
 using game::config::HostConfiguration;
+using game::MAX_PLAYERS;
 
 namespace {
     /*
@@ -33,7 +34,7 @@ namespace {
         Elements that match race are set to ifTrue, others are set to ifFalse. */
     void importRaceArray(HostConfiguration::StandardOption_t& option, const HostConfiguration::StandardOption_t& playerRace, int race, int ifTrue, int ifFalse)
     {
-        for (int i = 1; i <= gt::NUM_PLANETS; ++i) {
+        for (int i = 1; i <= MAX_PLAYERS; ++i) {
             option.set(i, playerRace(i) == race ? ifTrue : ifFalse);
         }
     }
@@ -79,7 +80,7 @@ namespace {
         Return an element that matches the given race; ifNone if none found. */
     int16_t exportRaceArray(const HostConfiguration::StandardOption_t& option, const HostConfiguration::StandardOption_t& playerRace, int race, int16_t ifNone)
     {
-        for (int i = 1; i <= gt::NUM_PLANETS; ++i) {
+        for (int i = 1; i <= MAX_PLAYERS; ++i) {
             if (playerRace(i) == race) {
                 return static_cast<int16_t>(option(i));
             }

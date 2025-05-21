@@ -49,7 +49,7 @@ game::interface::getVcrProperty(size_t battleNumber,
            Unit type identification value.
            - 0: this is a ship/ship fight.
            - 1: this is a ship/planet fight, {Right (Combat Property)|Right} resp.
-           {Unit (Combat Property)|Unit(1)} is a planet.
+             {Unit (Combat Property)|Unit(1)} is a planet.
            Valid only for classic combat, EMPTY for others. */
         return makeOptionalIntegerValue(battle->getAuxiliaryInformation(Battle::aiType));
 

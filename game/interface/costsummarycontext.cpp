@@ -67,7 +67,7 @@ game::interface::CostSummaryContext::get(PropertyIndex_t index)
          case bpName:     return interpreter::makeStringValue(it->name);
          case bpCount:    return interpreter::makeIntegerValue(it->multiplier);
          case bpT:        return interpreter::makeIntegerValue(it->cost.get(Cost::Tritanium));
-         case bpD:        return interpreter::makeIntegerValue(it->cost.get(Cost::Duranium));;
+         case bpD:        return interpreter::makeIntegerValue(it->cost.get(Cost::Duranium));
          case bpM:        return interpreter::makeIntegerValue(it->cost.get(Cost::Molybdenum));
          case bpCash:     return interpreter::makeIntegerValue(it->cost.get(Cost::Money) + it->cost.get(Cost::Supplies));
          case bpMoney:    return interpreter::makeIntegerValue(it->cost.get(Cost::Money));

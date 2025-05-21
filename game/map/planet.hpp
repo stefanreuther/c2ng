@@ -489,7 +489,7 @@ namespace game { namespace map {
 
         /** Get starbase component storage maximum index.
             All values at this slot or higher are unknown.
-            Therefore, use `for (i = 0; i < getBaseStorage(L); ++i)` for iterating over a storage.
+            Therefore, use `for (i = 0; i < getBaseStorageLimit(L); ++i)` for iterating over a storage.
             \param area Area to query */
         int getBaseStorageLimit(TechLevel area) const;
 

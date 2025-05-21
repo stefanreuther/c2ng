@@ -458,7 +458,7 @@ AFL_TEST("game.actions.TaxationAction:setEffectors:Hiss", a)
     a.checkEqual("11. describe", testee.describe(TaxationAction::Colonists, tx, fmt), "Colonists pay 1 mc.\nNew happiness: happy (108)");
 }
 
-/** Test normal case (PHost formulas). */
+/** Test notification in case of background modifications. */
 AFL_TEST("game.actions.TaxationAction:background-modification", a)
 {
     // Configure

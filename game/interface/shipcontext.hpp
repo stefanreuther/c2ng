@@ -28,6 +28,7 @@ namespace game { namespace interface {
             @param session   Session (for translator)
             @param root      Root
             @param game      Game
+            @param turn      Turn (part of game)
             @param shipList  Ship list */
         ShipContext(Id_t id,
                     Session& session,
@@ -52,7 +53,7 @@ namespace game { namespace interface {
         virtual String_t toString(bool readable) const;
         virtual void store(interpreter::TagNode& out, afl::io::DataSink& aux, interpreter::SaveContext& ctx) const;
 
-        /** Create ShipContext for ship in viewpoint-turn.
+        /** Create ShipContext for ship in given turn.
             @param id        Ship Id
             @param session   Session
             @param g         Game

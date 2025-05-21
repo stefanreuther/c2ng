@@ -164,7 +164,7 @@ namespace {
 
     int logIt(Root& root, int n)
     {
-        root.log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format("I rolled a %d", n));;
+        root.log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format("I rolled a %d", n));
         return n;
     }
 

@@ -71,16 +71,16 @@ namespace game { namespace actions {
 
         \param t turn
         \return turn
-        \throw game.:Exception if turn is not locally editable */
+        \throw game::Exception if turn is not locally editable */
     Turn& mustBeLocallyEditable(Turn& t);
 
     /** Check whether turn is locally editable.
         Checks Turn::getCommandPlayers() for the given player.
 
         \param t turn
-        \param forPlayer player to chack for
+        \param forPlayer player to check for
         \return turn
-        \throw game.:Exception if turn is not locally editable */
+        \throw game::Exception if turn is not locally editable */
     Turn& mustAllowCommands(Turn& t, int forPlayer);
 
 } }

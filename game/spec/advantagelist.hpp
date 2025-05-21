@@ -32,7 +32,8 @@ namespace game { namespace spec {
 
         /** Add an advantage.
             If an advantage with the given Id exists, returns it; otherwise, adds a new one.
-            @param Handle to created advantage, never null */
+            @param id Advantage Id
+            @return Handle to created advantage, never null */
         Item* add(int id);
 
         /** Find an advantage.

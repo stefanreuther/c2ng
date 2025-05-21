@@ -260,8 +260,8 @@ AFL_TEST("game.actions.Preconditions:session:full", a)
 AFL_TEST("game.actions.Preconditions:mustAllowCommands:success", a)
 {
     game::Turn t;
-    t.setLocalDataPlayers(game::PlayerSet_t(1));
-    AFL_CHECK_THROWS(a, game::actions::mustAllowCommands(t, 1), game::Exception);
+    t.setCommandPlayers(game::PlayerSet_t(1));
+    AFL_CHECK_SUCCEEDS(a, game::actions::mustAllowCommands(t, 1));
 }
 
 AFL_TEST("game.actions.Preconditions:mustAllowCommands:failure:empty", a)
@@ -273,15 +273,15 @@ AFL_TEST("game.actions.Preconditions:mustAllowCommands:failure:empty", a)
 AFL_TEST("game.actions.Preconditions:mustAllowCommands:failure:mismatch", a)
 {
     game::Turn t;
-    t.setLocalDataPlayers(game::PlayerSet_t(2));
+    t.setCommandPlayers(game::PlayerSet_t(2));
     AFL_CHECK_THROWS(a, game::actions::mustAllowCommands(t, 1), game::Exception);
 }
 
 AFL_TEST("game.actions.Preconditions:mustBeLocallyEditable:success", a)
 {
     game::Turn t;
-    t.setCommandPlayers(game::PlayerSet_t(1));
-    AFL_CHECK_THROWS(a, game::actions::mustBeLocallyEditable(t), game::Exception);
+    t.setLocalDataPlayers(game::PlayerSet_t(1));
+    AFL_CHECK_SUCCEEDS(a, game::actions::mustBeLocallyEditable(t));
 }
 
 AFL_TEST("game.actions.Preconditions:mustBeLocallyEditable:failure", a)
