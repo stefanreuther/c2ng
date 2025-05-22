@@ -210,24 +210,29 @@ interpreter::CoverageRecorder::addFunction(const BytecodeObject& bco, SeenSet_t&
 {
     // Add, if it has source code
     Function* func = 0;
+    bool recurse = true;
     if (File* file = addFile(bco)) {
         // Create function
         func = file->functions[&bco];
         if (func == 0) {
             func = file->functions.insertNew(&bco, new Function(bco));
-        }
 
-        // Create all lines
-        for (size_t i = 1; i < bco.lineNumbers().size(); i += 2) {
-            file->lines.insert(std::make_pair(bco.lineNumbers()[i], false));
+            // Create all lines
+            for (size_t i = 1; i < bco.lineNumbers().size(); i += 2) {
+                file->lines.insert(std::make_pair(bco.lineNumbers()[i], false));
+            }
+        } else {
+            recurse = false;
         }
     }
 
     // Recurse into children
-    if (seen.insert(&bco).second) {
-        for (size_t i = 0; i < bco.literals().size(); ++i) {
-            if (SubroutineValue* sv = dynamic_cast<SubroutineValue*>(bco.literals()[i])) {
-                addFunction(*sv->getBytecodeObject(), seen);
+    if (recurse) {
+        if (seen.insert(&bco).second) {
+            for (size_t i = 0; i < bco.literals().size(); ++i) {
+                if (SubroutineValue* sv = dynamic_cast<SubroutineValue*>(bco.literals()[i])) {
+                    addFunction(*sv->getBytecodeObject(), seen);
+                }
             }
         }
     }
