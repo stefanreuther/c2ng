@@ -2307,11 +2307,25 @@ AFL_TEST("interpreter.Process:run:sdefsub:sub", a)
 }
 
 /** Test instruction: sdefsub.
-     Error case - no stack */
+    Error case - no stack */
 AFL_TEST("interpreter.Process:run:sdefsub:error", a)
 {
     Environment env;
     runInstruction(env, Opcode::maSpecial, Opcode::miSpecialDefSub, 0);
+    a.checkEqual("31. getState", env.proc.getState(), Process::Failed);
+    a.check("32. isError", isError(env));
+}
+
+/** Test instruction: sdefsub.
+    Error case - no name */
+AFL_TEST("interpreter.Process:run:sdefsub:error:name", a)
+{
+    Environment env;
+    env.proc.pushNewValue(new SubroutineValue(makeBCO()));
+
+    BCORef_t subjectBCO = makeBCO();
+    subjectBCO->addInstruction(Opcode::maSpecial, Opcode::miSpecialDefSub, subjectBCO->addName(""));
+    runBCO(env, subjectBCO);
     a.checkEqual("31. getState", env.proc.getState(), Process::Failed);
     a.check("32. isError", isError(env));
 }
@@ -2328,6 +2342,20 @@ AFL_TEST("interpreter.Process:run:sdefshipp", a)
     a.check("02. property", env.world.shipPropertyNames().getIndexByName("PROP") != afl::data::NameMap::nil);
 }
 
+/** Test instruction: sdefshipp.
+    Error case - no name */
+AFL_TEST("interpreter.Process:run:sdefshipp:error:name", a)
+{
+    Environment env;
+    env.proc.pushNewValue(new SubroutineValue(makeBCO()));
+
+    BCORef_t subjectBCO = makeBCO();
+    subjectBCO->addInstruction(Opcode::maSpecial, Opcode::miSpecialDefShipProperty, subjectBCO->addName(""));
+    runBCO(env, subjectBCO);
+    a.checkEqual("31. getState", env.proc.getState(), Process::Failed);
+    a.check("32. isError", isError(env));
+}
+
 /** Test instruction: sdefplanetp. */
 AFL_TEST("interpreter.Process:run:sdefplanetp", a)
 {
@@ -2338,6 +2366,20 @@ AFL_TEST("interpreter.Process:run:sdefplanetp", a)
     runBCO(env, bco);
     a.checkEqual("01. getState", env.proc.getState(), Process::Ended);
     a.check("02. property", env.world.planetPropertyNames().getIndexByName("PROP") != afl::data::NameMap::nil);
+}
+
+/** Test instruction: sdefplanetp.
+    Error case - no name */
+AFL_TEST("interpreter.Process:run:sdefplanetp:error:name", a)
+{
+    Environment env;
+    env.proc.pushNewValue(new SubroutineValue(makeBCO()));
+
+    BCORef_t subjectBCO = makeBCO();
+    subjectBCO->addInstruction(Opcode::maSpecial, Opcode::miSpecialDefPlanetProperty, subjectBCO->addName(""));
+    runBCO(env, subjectBCO);
+    a.checkEqual("31. getState", env.proc.getState(), Process::Failed);
+    a.check("32. isError", isError(env));
 }
 
 /** Test instruction: sload.

@@ -1200,9 +1200,10 @@ interpreter::Process::executeInstruction()
             /* Eval */
             handleEvalExpression();
             break;
-         case Opcode::miSpecialDefSub:
+         case Opcode::miSpecialDefSub: {
             /* Define subroutine */
-            if (const String_t* name = f.bco->getNameByIndex(op.arg)) {
+            const String_t* name = f.bco->getNameByIndex(op.arg);
+            if (name != 0 && !name->empty()) {
                 checkStack(1);
                 NameMap_t::Index_t index = m_world.globalPropertyNames().addMaybe(*name);
                 m_world.globalValues().setNew(index, valueStack.extractTop());
@@ -1210,20 +1211,25 @@ interpreter::Process::executeInstruction()
                 handleInvalidOpcode();
             }
             break;
-         case Opcode::miSpecialDefShipProperty:
-            if (const String_t* name = f.bco->getNameByIndex(op.arg)) {
+         }
+         case Opcode::miSpecialDefShipProperty: {
+            const String_t* name = f.bco->getNameByIndex(op.arg);
+            if (name != 0 && !name->empty()) {
                 m_world.shipPropertyNames().addMaybe(*name);
             } else {
                 handleInvalidOpcode();
             }
             break;
-         case Opcode::miSpecialDefPlanetProperty:
-            if (const String_t* name = f.bco->getNameByIndex(op.arg)) {
+         }
+         case Opcode::miSpecialDefPlanetProperty: {
+            const String_t* name = f.bco->getNameByIndex(op.arg);
+            if (name != 0 && !name->empty()) {
                 m_world.planetPropertyNames().addMaybe(*name);
             } else {
                 handleInvalidOpcode();
             }
             break;
+         }
          case Opcode::miSpecialLoad:
             checkStack(1);
             if (valueStack.top() != 0) {
