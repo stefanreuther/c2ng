@@ -43,7 +43,7 @@ namespace game { namespace browser {
 
             @param acc Account
             @return Newly-allocated folder; null if no handler can deal with this account */
-        virtual Folder* createAccountFolder(Account& acc);
+        virtual Folder* createAccountFolder(const afl::base::Ref<Account>& acc);
 
         /** Load game root for physical folder.
             Invokes all child handlers' methods, until one returns non-null

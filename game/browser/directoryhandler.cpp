@@ -92,7 +92,7 @@ game::browser::DirectoryHandler::handleFolderName(String_t name, afl::container:
 
 // Create account folder.
 game::browser::Folder*
-game::browser::DirectoryHandler::createAccountFolder(Account& /*acc*/)
+game::browser::DirectoryHandler::createAccountFolder(const afl::base::Ref<Account>& /*acc*/)
 {
     // No, we cannot handle accounts
     return 0;

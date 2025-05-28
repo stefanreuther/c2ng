@@ -139,7 +139,8 @@ game::browser::FileSystemFolder::isSame(const Folder& other) const
     const FileSystemFolder* p = dynamic_cast<const FileSystemFolder*>(&other);
     return p != 0
         && !m_directory->getDirectoryName().empty()
-        && p->m_directory->getDirectoryName() == m_directory->getDirectoryName();
+        && p->m_directory->getDirectoryName() == m_directory->getDirectoryName()
+        && p->m_ignoreIndex == m_ignoreIndex;
 }
 
 bool

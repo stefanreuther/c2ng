@@ -22,7 +22,7 @@ using game::config::ConfigurationOption;
 using game::config::UserConfiguration;
 
 namespace {
-    const char* LOG_NAME = "game.nu";
+    const char*const LOG_NAME = "game.nu";
 
     String_t getGameIdAsString(int32_t gameNr)
     {
@@ -36,7 +36,7 @@ namespace {
 }
 
 game::nu::GameFolder::GameFolder(BrowserHandler& handler,
-                                 game::browser::Account& acc,
+                                 const afl::base::Ref<game::browser::Account>& acc,
                                  int32_t gameNr,
                                  size_t hint)
     : m_handler(handler),
@@ -58,11 +58,11 @@ game::nu::GameFolder::loadConfiguration(game::config::UserConfiguration& config)
         Browser& b = m_handler.browser();
         config.loadGameConfiguration(*b.fileSystem().openDirectory(b.expandGameDirectoryName(*pFolderName)), b.log(), b.translator());
     }
-    config[UserConfiguration::Game_Type].set(m_account.getType());
+    config[UserConfiguration::Game_Type].set(m_account->getType());
     config[UserConfiguration::Game_Type].setSource(ConfigurationOption::Game);
-    config[UserConfiguration::Game_User].set(m_account.getUser());
+    config[UserConfiguration::Game_User].set(m_account->getUser());
     config[UserConfiguration::Game_User].setSource(ConfigurationOption::Game);
-    config[UserConfiguration::Game_Host].set(m_account.getHost());
+    config[UserConfiguration::Game_Host].set(m_account->getHost());
     config[UserConfiguration::Game_Host].setSource(ConfigurationOption::Game);
     config[UserConfiguration::Game_Id].set(getGameIdAsString());
     config[UserConfiguration::Game_Id].setSource(ConfigurationOption::Game);
@@ -83,7 +83,7 @@ game::nu::GameFolder::saveConfiguration(const game::config::UserConfiguration& c
 bool
 game::nu::GameFolder::setLocalDirectoryName(String_t directoryName)
 {
-    m_account.setGameFolderName(getGameIdAsString(), directoryName);
+    m_account->setGameFolderName(getGameIdAsString(), directoryName);
     return true;
 }
 
@@ -92,7 +92,7 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
 {
     class Task : public Task_t {
      public:
-        Task(BrowserHandler& handler, game::browser::Account& account, int32_t gameNr, afl::base::Ref<GameState> state,
+        Task(BrowserHandler& handler, const afl::base::Ref<game::browser::Account>& account, int32_t gameNr, afl::base::Ref<GameState> state,
              const UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then)
             : m_handler(handler), m_account(account), m_gameNr(gameNr), m_state(state), m_config(config), m_then(then)
             { }
@@ -110,7 +110,7 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
 
                     // Game directory
                     afl::base::Ptr<afl::io::Directory> dir;
-                    if (const String_t* pFolderName = ::getGameFolderName(m_account, m_gameNr)) {
+                    if (const String_t* pFolderName = ::getGameFolderName(*m_account, m_gameNr)) {
                         try {
                             afl::base::Ref<afl::io::Directory> p = m_handler.browser().fileSystem().openDirectory(m_handler.browser().expandGameDirectoryName(*pFolderName));
                             p->getDirectoryEntries();
@@ -119,7 +119,7 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
                         }
                         catch (std::exception& e) {
                             m_handler.log().write(LogListener::Warn, LOG_NAME, m_handler.translator()("Game directory lost"), e);
-                            m_account.setGameFolderName(::getGameIdAsString(m_gameNr), String_t());
+                            m_account->setGameFolderName(::getGameIdAsString(m_gameNr), String_t());
                         }
                     }
                     if (dir.get() == 0) {
@@ -177,7 +177,7 @@ game::nu::GameFolder::loadGameRoot(const game::config::UserConfiguration& config
             }
      private:
         BrowserHandler& m_handler;
-        game::browser::Account& m_account;
+        afl::base::Ref<game::browser::Account> m_account;
         int32_t m_gameNr;
         afl::base::Ref<GameState> m_state;
         const UserConfiguration& m_config;
@@ -204,7 +204,7 @@ game::nu::GameFolder::isSame(const Folder& other) const
 {
     const GameFolder* p = dynamic_cast<const GameFolder*>(&other);
     return p != 0
-        && &p->m_account == &m_account
+        && &*p->m_account == &*m_account
         && p->m_gameNr == m_gameNr;
 }
 
@@ -223,7 +223,7 @@ game::nu::GameFolder::getKind() const
 const String_t*
 game::nu::GameFolder::getGameFolderName() const
 {
-    return ::getGameFolderName(m_account, m_gameNr);
+    return ::getGameFolderName(*m_account, m_gameNr);
 }
 
 String_t

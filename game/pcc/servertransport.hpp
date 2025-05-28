@@ -21,8 +21,10 @@ namespace game { namespace pcc {
             @param acc     Account instance (mutable; might eventually invalidate tokens or update caches)
             @param name    Name
             @param hostGameNumber  Game number on host side (0 for none) */
-        ServerTransport(BrowserHandler& handler, game::browser::Account& acc, String_t name, int32_t hostGameNumber);
+        ServerTransport(BrowserHandler& handler, const afl::base::Ref<game::browser::Account>& acc, String_t name, int32_t hostGameNumber);
 
+        /** Set target status of turn files in this directory.
+            @param flag True to mark temporary; false to mark final. */
         void setTemporaryTurn(bool flag);
 
         /** Destructor. */
@@ -46,7 +48,7 @@ namespace game { namespace pcc {
 
      private:
         BrowserHandler& m_handler;
-        game::browser::Account& m_account;
+        const afl::base::Ref<game::browser::Account> m_account;
         const String_t m_name;
         std::map<String_t, String_t> m_urls;
         const int32_t m_hostGameNumber;
@@ -71,7 +73,7 @@ game::pcc::ServerTransport::handler()
 inline game::browser::Account&
 game::pcc::ServerTransport::account()
 {
-    return m_account;
+    return *m_account;
 }
 
 #endif

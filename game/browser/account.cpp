@@ -19,7 +19,14 @@ namespace {
     const char*const GAME_KEY_PREFIX = "game:";
 }
 
+afl::base::Ref<game::browser::Account>
+game::browser::Account::create()
+{
+    return *new Account();
+}
+
 // Default constructor.
+inline
 game::browser::Account::Account()
     : m_name(),
       m_data()
@@ -47,7 +54,7 @@ game::browser::Account::getName() const
 void
 game::browser::Account::set(String_t key, String_t value, bool persistent)
 {
-    m_data.insert(std::make_pair(key, Item_t(value, persistent)));
+    m_data[key] = Item_t(value, persistent);
 }
 
 // Get attribute.

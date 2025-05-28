@@ -29,7 +29,7 @@ namespace game { namespace nu {
             @param acc     Account
             @param gameNr  Game number
             @param hint    Position hint; the game is at this index in the game list. */
-        GameState(BrowserHandler& handler, game::browser::Account& acc, int32_t gameNr, size_t hint);
+        GameState(BrowserHandler& handler, const afl::base::Ref<game::browser::Account>& acc, int32_t gameNr, size_t hint);
 
         /** Destructor. */
         ~GameState();
@@ -66,7 +66,7 @@ namespace game { namespace nu {
 
      private:
         BrowserHandler& m_handler;
-        game::browser::Account& m_account;
+        afl::base::Ref<game::browser::Account> m_account;
         int32_t m_gameNr;
         size_t m_hint;
 

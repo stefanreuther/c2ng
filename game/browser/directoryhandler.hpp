@@ -39,7 +39,7 @@ namespace game { namespace browser {
 
             @param acc Account (mutable because it can eventually be modified through the created Folder)
             @return null */
-        virtual Folder* createAccountFolder(Account& acc);
+        virtual Folder* createAccountFolder(const afl::base::Ref<Account>& acc);
 
         /** Load game root for physical folder.
             Implementation of method from Handler:

@@ -20,7 +20,7 @@ namespace game { namespace pcc {
         /** Constructor.
             @param handler Parent BrowserHandler
             @param acc     Account */
-        AccountFolder(BrowserHandler& handler, game::browser::Account& acc);
+        AccountFolder(BrowserHandler& handler, const afl::base::Ref<game::browser::Account>& acc);
 
         // Folder:
         virtual std::auto_ptr<Task_t> loadContent(std::auto_ptr<game::browser::LoadContentTask_t> then);
@@ -36,7 +36,7 @@ namespace game { namespace pcc {
 
      private:
         BrowserHandler& m_handler;
-        game::browser::Account& m_account;
+        const afl::base::Ref<game::browser::Account> m_account;
     };
 
 } }

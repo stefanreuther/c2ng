@@ -22,7 +22,7 @@ namespace game { namespace pcc {
             @param acc     Account
             @param path    Path name; used to identify the game
             @param hint    Index into game list, used as an optimisation */
-        GameFolder(BrowserHandler& handler, game::browser::Account& acc, String_t path, size_t hint);
+        GameFolder(BrowserHandler& handler, const afl::base::Ref<game::browser::Account>& acc, String_t path, size_t hint);
 
         // Folder:
         virtual void loadContent(afl::container::PtrVector<Folder>& result);
@@ -38,7 +38,7 @@ namespace game { namespace pcc {
 
      private:
         BrowserHandler& m_handler;
-        game::browser::Account& m_account;
+        afl::base::Ref<game::browser::Account> m_account;
         String_t m_path;
         mutable size_t m_hint;
 

@@ -65,6 +65,9 @@ namespace game { namespace test {
     /** Get default planet name file (planet.nm). */
     afl::base::ConstBytes_t getDefaultPlanetNames();
 
+    /** Get default storm name file (storm.nm). */
+    afl::base::ConstBytes_t getDefaultIonStormNames();
+
     /** Get default beams (beamspec.dat). */
     afl::base::ConstBytes_t getDefaultBeams();
 

@@ -37,6 +37,7 @@ AFL_TEST("game.test.Files:file-content", a)
     a.checkEqual("16", cksum.add(game::test::getDefaultHulls(),             1), 0x824c3decU);
     a.checkEqual("17", cksum.add(game::test::getDefaultEngines(),           1), 0xc9ac6a41U);
     a.checkEqual("18", cksum.add(game::test::getDefaultHullAssignments(),   1), 0xd40525beU);
+    a.checkEqual("19", cksum.add(game::test::getDefaultIonStormNames(),     1), 0x86b8cd14U);
 }
 
 /** Test makeEmptyResult(). */

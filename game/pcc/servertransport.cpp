@@ -4,6 +4,7 @@
   */
 
 #include "game/pcc/servertransport.hpp"
+#include "afl/base/staticassert.hpp"
 #include "afl/data/access.hpp"
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/net/http/simpledownloadlistener.hpp"
@@ -29,16 +30,32 @@ using util::StringParser;
 namespace {
     const char LOG_NAME[] = "game.pcc";
 
+    /* Turn statuses.
+       These must match the ones in server::interfaces::HostTurn, but we do not want to depend on that.
+       No need to map MissingTurn, NeedlessTurn; those cannot be results of a turn submission. */
+    static const int32_t GreenTurn    = 1;
+    static const int32_t YellowTurn   = 2;
+    static const int32_t RedTurn      = 3;
+    static const int32_t BadTurn      = 4;
+    static const int32_t StaleTurn    = 5;
+    static const int32_t TemporaryTurnFlag = 16;
+
+    static_assert(GreenTurn  == HostTurn::GreenTurn,  "GreenTurn");
+    static_assert(YellowTurn == HostTurn::YellowTurn, "YellowTurn");
+    static_assert(RedTurn    == HostTurn::RedTurn,    "RedTurn");
+    static_assert(BadTurn    == HostTurn::BadTurn,    "BadTurn");
+    static_assert(StaleTurn  == HostTurn::StaleTurn,  "StaleTurn");
+    static_assert(TemporaryTurnFlag == HostTurn::TemporaryTurnFlag, "TemporaryTurnFlag");
+
     String_t formatTurnStatus(int32_t result, afl::string::Translator& tx)
     {
-        // MissingTurn, NeedlessTurn cannot be results of a turn submission.
-        switch (result & ~HostTurn::TemporaryTurnFlag) {
-         case HostTurn::GreenTurn:  return Format(tx("Turn was accepted"));
-         case HostTurn::YellowTurn: return Format(tx("Turn was accepted with warnings (yellow)"));
-         case HostTurn::RedTurn:    return Format(tx("Turn was rejected (red)"));
-         case HostTurn::BadTurn:    return Format(tx("Turn was rejected (invalid)"));
-         case HostTurn::StaleTurn:  return Format(tx("Turn was stale"));
-         default:                   return Format(tx("Unknown turn status (%d)"), result);
+        switch (result & ~TemporaryTurnFlag) {
+         case GreenTurn:  return Format(tx("Turn was accepted"));
+         case YellowTurn: return Format(tx("Turn was accepted with warnings (yellow)"));
+         case RedTurn:    return Format(tx("Turn was rejected (red)"));
+         case BadTurn:    return Format(tx("Turn was rejected (invalid)"));
+         case StaleTurn:  return Format(tx("Turn was stale"));
+         default:         return Format(tx("Unknown turn status (%d)"), result);
         }
     }
 
@@ -61,7 +78,7 @@ namespace {
 
 
 // Constructor.
-game::pcc::ServerTransport::ServerTransport(BrowserHandler& handler, game::browser::Account& acc, String_t name, int32_t hostGameNumber)
+game::pcc::ServerTransport::ServerTransport(BrowserHandler& handler, const afl::base::Ref<game::browser::Account>& acc, String_t name, int32_t hostGameNumber)
     : m_handler(handler),
       m_account(acc),
       m_name(name),
@@ -91,6 +108,9 @@ game::pcc::ServerTransport::getFile(String_t name, afl::base::GrowableBytes_t& d
 
     switch (listener.wait()) {
      case SimpleDownloadListener::Succeeded:
+        if (listener.getStatusCode() != 200) {
+            throw FileProblemException(name, Messages::fileNotFound());
+        }
         break;
      case SimpleDownloadListener::Failed:
      case SimpleDownloadListener::TimedOut:

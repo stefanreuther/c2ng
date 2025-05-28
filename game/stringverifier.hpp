@@ -52,13 +52,16 @@ namespace game {
         };
 
         /** Test validity of a string.
+            This function is expected to validate both the length and content of the string.
             \param ctx Context
-            \param text String to test */
-        virtual bool isValidString(Context ctx, const String_t& text) const = 0;
+            \param text String to test
+            \return true if string is valid */
+         virtual bool isValidString(Context ctx, const String_t& text) const = 0;
 
         /** Test validity of a character.
             \param ctx Context
-            \param ch Character to test */
+            \param ch Character to test
+            \return true if character is valid */
         virtual bool isValidCharacter(Context ctx, afl::charset::Unichar_t ch) const = 0;
 
         /** Get maximum possible string length.
@@ -67,6 +70,12 @@ namespace game {
         virtual size_t getMaxStringLength(Context ctx) const = 0;
 
      protected:
+        /** Default implementation for isValidString().
+            Validates each character individually using isValidCharacter(),
+            checking maximum size given by getMaxStringLength().
+            \param ctx Context
+            \param text String to test
+            \return true if string is valid */
         bool defaultIsValidString(Context ctx, const String_t& text) const;
     };
 

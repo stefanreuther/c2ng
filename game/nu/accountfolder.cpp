@@ -11,7 +11,7 @@ namespace {
     const char*const LOG_NAME = "game.nu";
 }
 
-game::nu::AccountFolder::AccountFolder(BrowserHandler& handler, game::browser::Account& acc)
+game::nu::AccountFolder::AccountFolder(BrowserHandler& handler, const afl::base::Ref<game::browser::Account>& acc)
     : m_handler(handler),
       m_account(acc)
 { }
@@ -21,7 +21,7 @@ game::nu::AccountFolder::loadContent(std::auto_ptr<game::browser::LoadContentTas
 {
     class Task : public Task_t {
      public:
-        Task(BrowserHandler& handler, game::browser::Account& acc, std::auto_ptr<game::browser::LoadContentTask_t>& then)
+        Task(BrowserHandler& handler, const afl::base::Ref<game::browser::Account>& acc, std::auto_ptr<game::browser::LoadContentTask_t>& then)
             : m_handler(handler), m_account(acc), m_then(then)
             { }
         virtual void call()
@@ -36,7 +36,7 @@ game::nu::AccountFolder::loadContent(std::auto_ptr<game::browser::LoadContentTas
             }
      private:
         BrowserHandler& m_handler;
-        game::browser::Account& m_account;
+        afl::base::Ref<game::browser::Account> m_account;
         std::auto_ptr<game::browser::LoadContentTask_t> m_then;
     };
     return m_handler.login(m_account, std::auto_ptr<Task_t>(new Task(m_handler, m_account, then)));
@@ -70,7 +70,7 @@ game::nu::AccountFolder::loadGameRoot(const game::config::UserConfiguration& /*c
 String_t
 game::nu::AccountFolder::getName() const
 {
-    return m_account.getName();
+    return m_account->getName();
 }
 
 util::rich::Text
@@ -83,7 +83,7 @@ bool
 game::nu::AccountFolder::isSame(const Folder& other) const
 {
     const AccountFolder* p = dynamic_cast<const AccountFolder*>(&other);
-    return p != 0 && &p->m_account == &m_account;
+    return p != 0 && &*p->m_account == &*m_account;
 }
 
 bool

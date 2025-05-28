@@ -9,7 +9,11 @@
 #include "afl/string/format.hpp"
 #include "game/nu/browserhandler.hpp"
 
+using afl::sys::LogListener;
+
 namespace {
+    const char*const LOG_NAME = "game.nu";
+
     // Race names. Nu has these built-in to its JavaScript.
     const char*const RACE_NAMES[][3] = {
         { "The Solar Federation", "The Feds", "Fed" },
@@ -29,7 +33,7 @@ namespace {
 
 
 
-game::nu::GameState::GameState(BrowserHandler& handler, game::browser::Account& acc, int32_t gameNr, size_t hint)
+game::nu::GameState::GameState(BrowserHandler& handler, const afl::base::Ref<game::browser::Account>& acc, int32_t gameNr, size_t hint)
     : m_handler(handler),
       m_account(acc),
       m_gameNr(gameNr),
@@ -46,17 +50,18 @@ game::nu::GameState::loadResultPreAuthenticated()
 {
     if (!m_resultValid) {
         // Try to load the result
-        if (const String_t* key = m_account.get("api_key")) {
+        String_t key;
+        if (m_account->getEncoded("api_key").get(key)) {
             afl::net::HeaderTable tab;
             tab.add("gameid", afl::string::Format("%d", m_gameNr));
-            tab.add("apikey", *key);
+            tab.add("apikey", key);
             tab.add("forsave", "true");
             tab.add("activity", "true");  // not sure what this is for...
             m_result = m_handler.callServer(m_account, "/game/loadturn", tab);
             m_resultValid = true;
         } else {
-            // FIXME: log this failure. Better yet: handle it.
-            // Could happen if we open a game without going through the browser first.
+            // This could happen if we open a game without going through the browser first.
+            m_handler.log().write(LogListener::Warn, LOG_NAME, m_handler.translator()("Cannot load game; you are not logged in"));
         }
     }
     return m_result;

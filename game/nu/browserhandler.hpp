@@ -36,7 +36,7 @@ namespace game { namespace nu {
 
         // Handler:
         virtual bool handleFolderName(String_t name, afl::container::PtrVector<game::browser::Folder>& result);
-        virtual game::browser::Folder* createAccountFolder(game::browser::Account& acc);
+        virtual game::browser::Folder* createAccountFolder(const afl::base::Ref<game::browser::Account>& acc);
         virtual std::auto_ptr<Task_t> loadGameRootMaybe(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then);
 
         /*
@@ -51,14 +51,14 @@ namespace game { namespace nu {
             @param acc  Account
             @param then Task to execute after logging in
             @return Task */
-        std::auto_ptr<Task_t> login(game::browser::Account& acc, std::auto_ptr<Task_t> then);
+        std::auto_ptr<Task_t> login(const afl::base::Ref<game::browser::Account>& acc, std::auto_ptr<Task_t> then);
 
         /** Call server.
             @param acc      Account (for API endpoint address)
             @param endpoint Endpoint name (must start with slash, e.g. '/account/mygames?version=2')
             @param args     Parameters to pass (including `apikey` etc.)
             @return Raw result; null on error */
-        std::auto_ptr<afl::data::Value> callServer(game::browser::Account& acc,
+        std::auto_ptr<afl::data::Value> callServer(const afl::base::Ref<game::browser::Account>& acc,
                                                    String_t endpoint,
                                                    const afl::net::HeaderTable& args);
 
@@ -67,14 +67,14 @@ namespace game { namespace nu {
             If the account is not or no longer logged in, the request will fail.
             @param acc      Account
             @return Result tree from API, hash. Null on error. Owned by BrowserHandler and valid until the next call. */
-        afl::data::Access getGameListPreAuthenticated(game::browser::Account& acc);
+        afl::data::Access getGameListPreAuthenticated(const afl::base::Ref<game::browser::Account>& acc);
 
         /** Get account info, pre-authenticated.
             The account must have been logged in already.
             If the account is not or no longer logged in, the request will fail.
             @param acc      Account
             @return Result tree from API, hash. Null on error. Owned by BrowserHandler and valid until the next call. */
-        afl::data::Access getAccountInfoPreAuthenticated(game::browser::Account& acc);
+        afl::data::Access getAccountInfoPreAuthenticated(const afl::base::Ref<game::browser::Account>& acc);
 
         /** Access translator.
             @return translator */
@@ -101,10 +101,10 @@ namespace game { namespace nu {
 
         // Cache:
         std::auto_ptr<afl::data::Value> m_gameList;
-        game::browser::Account* m_gameListAccount;
+        afl::base::Ptr<game::browser::Account> m_gameListAccount;
 
         std::auto_ptr<afl::data::Value> m_accountInfo;
-        game::browser::Account* m_accountInfoAccount;
+        afl::base::Ptr<game::browser::Account> m_accountInfoAccount;
     };
 
 } }

@@ -12,13 +12,16 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = interpreter/coveragerecorder.cpp \
-    interpreter/coveragerecorder.hpp game/nu/loader.cpp game/nu/loader.hpp \
-    game/spec/advantagelist.cpp game/spec/advantagelist.hpp \
-    game/pcc/servertransport.cpp game/pcc/servertransport.hpp \
-    util/serverdirectory.cpp util/serverdirectory.hpp util/translator.cpp \
-    util/translator.hpp game/proxy/shipinfoproxy.cpp \
-    game/proxy/shipinfoproxy.hpp game/interface/buildcommandparser.cpp \
+FILES_gamelib = util/net.cpp util/net.hpp game/test/staticpage.cpp \
+    game/test/staticpage.hpp game/test/webpage.cpp game/test/webpage.hpp \
+    game/test/webserver.hpp game/test/webserver.cpp \
+    interpreter/coveragerecorder.cpp interpreter/coveragerecorder.hpp \
+    game/nu/loader.cpp game/nu/loader.hpp game/spec/advantagelist.cpp \
+    game/spec/advantagelist.hpp game/pcc/servertransport.cpp \
+    game/pcc/servertransport.hpp util/serverdirectory.cpp \
+    util/serverdirectory.hpp util/translator.cpp util/translator.hpp \
+    game/proxy/shipinfoproxy.cpp game/proxy/shipinfoproxy.hpp \
+    game/interface/buildcommandparser.cpp \
     game/interface/buildcommandparser.hpp \
     game/interface/missionlistcontext.cpp \
     game/interface/missionlistcontext.hpp game/proxy/vcrexportadaptor.cpp \
@@ -1807,7 +1810,25 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/interpreter/coveragerecordertest.cpp \
+FILES_testsuite = test/game/nu/turnloadertest.cpp \
+    test/game/nu/specificationloadertest.cpp test/game/nu/gamestatetest.cpp \
+    test/game/nu/gamefoldertest.cpp test/game/nu/accountfoldertest.cpp \
+    test/util/nettest.cpp test/game/nu/browserhandlertest.cpp \
+    test/game/nu/stringverifiertest.cpp test/game/test/staticpagetest.cpp \
+    test/game/pcc/turnloadertest.cpp test/game/pcc/gamefoldertest.cpp \
+    test/game/pcc/accountfoldertest.cpp \
+    test/game/pcc/servertransporttest.cpp test/game/test/webpagetest.cpp \
+    test/game/test/webservertest.cpp test/game/pcc/browserhandlertest.cpp \
+    test/game/browser/sessiontest.cpp test/game/browser/browsertest.cpp \
+    test/game/browser/filesystemfoldertest.cpp \
+    test/game/browser/filesystemrootfoldertest.cpp \
+    test/game/browser/rootfoldertest.cpp \
+    test/game/browser/directoryhandlertest.cpp \
+    test/game/browser/synchronousfoldertest.cpp \
+    test/game/browser/optionalusercallbacktest.cpp \
+    test/game/browser/accountmanagertest.cpp \
+    test/game/browser/usercallbacktest.cpp \
+    test/interpreter/coveragerecordertest.cpp \
     test/ui/widgets/numberselectortest.cpp test/game/nu/loadertest.cpp \
     test/game/spec/advantagelisttest.cpp \
     test/game/nu/registrationkeytest.cpp test/util/serverdirectorytest.cpp \

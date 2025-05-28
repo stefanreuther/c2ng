@@ -622,12 +622,12 @@ game::proxy::BrowserProxy::addAccount(WaitIndicator& ind, String_t user, String_
                     m_result = false;
                 } else {
                     // New account
-                    std::auto_ptr<game::browser::Account> acc(new game::browser::Account());
+                    afl::base::Ref<game::browser::Account> acc(game::browser::Account::create());
                     acc->setName(afl::string::Format("%s @ %s", m_user, m_host));
                     acc->setUser(m_user);
                     acc->setType(m_type);
                     acc->setHost(m_host);
-                    mgr.addNewAccount(acc.release());
+                    mgr.addNewAccount(acc);
                     mgr.save();
                     m_result = true;
                 }

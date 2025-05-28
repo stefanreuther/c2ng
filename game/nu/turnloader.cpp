@@ -35,24 +35,29 @@ game::TurnLoader::PlayerStatusSet_t
 game::nu::TurnLoader::getPlayerStatus(int player, String_t& extra, afl::string::Translator& tx) const
 {
     PlayerStatusSet_t result;
-    Access entry = m_gameState->loadGameListEntryPreAuthenticated();
-    if (player == entry("player")("id").toInteger()) {
-        result += Available;
-        result += Playable;
-        result += Primary;
-        switch (entry("player")("turnstatus").toInteger()) {
-         case 1:
-            extra = tx("Turn viewed");
-            break;
-         case 2:
-            extra = tx("Turn submitted");
-            break;
-         default:
-            extra = tx("Result file available");
-            break;
-        }
-    } else {
+    try {
+        Access entry = m_gameState->loadGameListEntryPreAuthenticated();
         extra.clear();
+        if (player == entry("player")("id").toInteger()) {
+            result += Available;
+            result += Playable;
+            result += Primary;
+            switch (entry("player")("turnstatus").toInteger()) {
+             case 1:
+                extra = tx("Turn viewed");
+                break;
+             case 2:
+                extra = tx("Turn submitted");
+                break;
+             default:
+                extra = tx("Result file available");
+                break;
+            }
+        }
+    }
+    catch (std::exception&) {
+        // Ignore
+        result.clear();
     }
     return result;
 }
@@ -117,21 +122,26 @@ game::nu::TurnLoader::getHistoryStatus(int /*player*/, int turn, afl::base::Memo
 
     // Fetch the result. This should not produce a network access, we already have it.
     Access rst(m_gameState->loadResultPreAuthenticated());
-    if (rst.isNull() || rst("success").toInteger() == 0) {
-        // Bad result
-        status.fill(Negative);
-    } else {
-        // OK, fill it
-        int currentTurn = rst("rst")("game")("turn").toInteger();
-        while (HistoryStatus* p = status.eat()) {
-            if (turn >= 0 && turn < currentTurn) {
-                *p = WeaklyPositive;
-            } else {
-                *p = Negative;
+    try {
+        if (rst("success").toInteger() != 0) {
+            // OK, fill it
+            int currentTurn = rst("rst")("game")("turn").toInteger();
+            while (HistoryStatus* p = status.eat()) {
+                if (turn >= 0 && turn < currentTurn) {
+                    *p = WeaklyPositive;
+                } else {
+                    *p = Negative;
+                }
+                ++turn;
             }
-            ++turn;
         }
     }
+    catch (std::exception&) {
+        // Ignore; invalid data
+    }
+
+    // Fill remaining entries
+    status.fill(Negative);
 }
 
 std::auto_ptr<game::Task_t>

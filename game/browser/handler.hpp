@@ -9,6 +9,7 @@
 #include "afl/base/ptr.hpp"
 #include "afl/container/ptrvector.hpp"
 #include "afl/string/string.hpp"
+#include "game/browser/account.hpp"
 #include "game/browser/types.hpp"
 #include "game/config/userconfiguration.hpp"
 #include "game/root.hpp"
@@ -16,7 +17,6 @@
 namespace game { namespace browser {
 
     class Folder;
-    class Account;
 
     /** Definition of a type of supported game storage.
         A Browser's set of Handler instances defines the supported game storage types, local and server-based. */
@@ -51,7 +51,7 @@ namespace game { namespace browser {
 
             @param acc Account (mutable because it can eventually be modified through the created Folder)
             @return Folder or null */
-        virtual Folder* createAccountFolder(Account& acc) = 0;
+        virtual Folder* createAccountFolder(const afl::base::Ref<Account>& acc) = 0;
 
         /** Load game root for physical folder.
             This function is used by FileSystemFolder to load a game root.

@@ -39,7 +39,7 @@ namespace game { namespace pcc {
 
         // Handler:
         virtual bool handleFolderName(String_t name, afl::container::PtrVector<game::browser::Folder>& result);
-        virtual game::browser::Folder* createAccountFolder(game::browser::Account& acc);
+        virtual game::browser::Folder* createAccountFolder(const afl::base::Ref<game::browser::Account>& acc);
         virtual std::auto_ptr<Task_t> loadGameRootMaybe(afl::base::Ref<afl::io::Directory> dir, const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then);
 
         /*
@@ -54,7 +54,7 @@ namespace game { namespace pcc {
             @param acc  Account
             @param then Task to execute after logging in
             @return Task */
-        std::auto_ptr<Task_t> login(game::browser::Account& acc, std::auto_ptr<Task_t> then);
+        std::auto_ptr<Task_t> login(const afl::base::Ref<game::browser::Account>& acc, std::auto_ptr<Task_t> then);
 
         /** Call server.
 
@@ -63,7 +63,7 @@ namespace game { namespace pcc {
             @param args     Parameters to pass (including `api_key` etc.)
 
             @return Raw result; null on error */
-        std::auto_ptr<afl::data::Value> callServer(game::browser::Account& acc, String_t endpoint, const afl::net::HeaderTable& args);
+        std::auto_ptr<afl::data::Value> callServer(const afl::base::Ref<game::browser::Account>& acc, String_t endpoint, const afl::net::HeaderTable& args);
 
         /** Call server with a file attachment.
 
@@ -75,7 +75,7 @@ namespace game { namespace pcc {
             @param fileContent File content
 
             @return Raw result; null on error */
-        std::auto_ptr<afl::data::Value> callServerWithFile(game::browser::Account& acc, String_t endpoint, const afl::net::HeaderTable& args, String_t fileParam, String_t fileName, afl::base::ConstBytes_t fileContent);
+        std::auto_ptr<afl::data::Value> callServerWithFile(const afl::base::Ref<game::browser::Account>& acc, String_t endpoint, const afl::net::HeaderTable& args, String_t fileParam, String_t fileName, afl::base::ConstBytes_t fileContent);
 
         /** Get game list, pre-authenticated.
 
@@ -84,7 +84,7 @@ namespace game { namespace pcc {
 
             @param acc      Account
             @return Result tree from API, hash. Null on error. Owned by BrowserHandler and valid until the next call. */
-        afl::data::Access getGameListPreAuthenticated(game::browser::Account& acc);
+        afl::data::Access getGameListPreAuthenticated(const afl::base::Ref<game::browser::Account>& acc);
 
         /** Get directory content, pre-authenticated.
 
@@ -99,7 +99,7 @@ namespace game { namespace pcc {
             - reply (on success, list of items)
             - error (on failure, error message)
             If not logged in, null. */
-        std::auto_ptr<afl::data::Value> getDirectoryContentPreAuthenticated(game::browser::Account& acc, String_t dirName);
+        std::auto_ptr<afl::data::Value> getDirectoryContentPreAuthenticated(const afl::base::Ref<game::browser::Account>& acc, String_t dirName);
 
         /** Download a file, pre-authenticated.
 
@@ -109,7 +109,7 @@ namespace game { namespace pcc {
             @param acc      Account
             @param fileName Path name of file
             @param listener Receives result */
-        void getFilePreAuthenticated(game::browser::Account& acc, String_t fileName, afl::net::http::DownloadListener& listener);
+        void getFilePreAuthenticated(const afl::base::Ref<game::browser::Account>& acc, String_t fileName, afl::net::http::DownloadListener& listener);
 
         /** Upload a file, pre-authenticated.
 
@@ -124,7 +124,7 @@ namespace game { namespace pcc {
             - result (success flag)
             - error (on failure, error message)
             If not logged in, null. */
-        std::auto_ptr<afl::data::Value> putFilePreAuthenticated(game::browser::Account& acc, String_t fileName, afl::base::ConstBytes_t content);
+        std::auto_ptr<afl::data::Value> putFilePreAuthenticated(const afl::base::Ref<game::browser::Account>& acc, String_t fileName, afl::base::ConstBytes_t content);
 
         /** Erase a file, pre-authenticated.
 
@@ -138,7 +138,7 @@ namespace game { namespace pcc {
             - result (success flag)
             - error (on failure, error message)
             If not logged in, null. */
-        std::auto_ptr<afl::data::Value> eraseFilePreAuthenticated(game::browser::Account& acc, String_t fileName);
+        std::auto_ptr<afl::data::Value> eraseFilePreAuthenticated(const afl::base::Ref<game::browser::Account>& acc, String_t fileName);
 
         /** Upload a turn file, pre-authenticated.
 
@@ -157,7 +157,7 @@ namespace game { namespace pcc {
             - allowtemp (on success, permission to mark turn temporary)
             - error (on failure, error message)
             If not logged in, null. */
-        std::auto_ptr<afl::data::Value> uploadTurnPreAuthenticated(game::browser::Account& acc, int32_t hostGameNumber, int slot, afl::base::ConstBytes_t content);
+        std::auto_ptr<afl::data::Value> uploadTurnPreAuthenticated(const afl::base::Ref<game::browser::Account>& acc, int32_t hostGameNumber, int slot, afl::base::ConstBytes_t content);
 
         /** Mark turn temporary, pre-authenticated.
 
@@ -170,7 +170,7 @@ namespace game { namespace pcc {
             @param flag           "temporary" flag
 
             This call does not produce a result; on error, the call is most likely ignored by the server. */
-        void markTurnTemporaryPreAuthenticated(game::browser::Account& acc, int32_t hostGameNumber, int slot, int flag);
+        void markTurnTemporaryPreAuthenticated(const afl::base::Ref<game::browser::Account>& acc, int32_t hostGameNumber, int slot, int flag);
 
         /** Access translator.
             @return translator */
@@ -189,7 +189,7 @@ namespace game { namespace pcc {
             @param account        Account
             @param gameListEntry  Game list entry with game metadata
             @param config         Global user configuration (merged with game-specific) */
-        afl::base::Ptr<Root> loadRoot(game::browser::Account& account,
+        afl::base::Ptr<Root> loadRoot(const afl::base::Ref<game::browser::Account>& account,
                                       afl::data::Access gameListEntry,
                                       const game::config::UserConfiguration& config);
 

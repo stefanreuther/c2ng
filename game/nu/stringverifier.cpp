@@ -45,13 +45,16 @@ game::nu::StringVerifier::~StringVerifier()
 bool
 game::nu::StringVerifier::isValidString(Context ctx, const String_t& text) const
 {
-    return text.find_first_of(getBlacklist(ctx)) == String_t::npos;
+    return defaultIsValidString(ctx, text);
 }
 
 bool
 game::nu::StringVerifier::isValidCharacter(Context ctx, afl::charset::Unichar_t ch) const
 {
-    return !(ch > 0 && ch < 127 && std::strchr(getBlacklist(ctx), char(ch)) != 0);
+    // Accept all unicode characters except 0 (who knows what daemons we wake with that),
+    // and blacklisted ASCII characters.
+    return ch != 0
+        && !(ch > 0 && ch < 127 && std::strchr(getBlacklist(ctx), char(ch)) != 0);
 }
 
 size_t

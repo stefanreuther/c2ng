@@ -138,7 +138,6 @@ game::browser::Browser::openFolder(String_t name)
         clearContent();
         return true;
     } else {
-        // FIXME: Handle result
         m_log.write(LogListener::Trace, LOG_NAME, Format("Browser.openFolder('%s') failed", name));
         return false;
     }
@@ -300,7 +299,8 @@ game::browser::Browser::loadContent(std::auto_ptr<Task_t> then)
             {
                 m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Task: Browser.loadContent");
 
-                // If we have a selected element, but not a previous path element, select that element
+                // If we have a selected element, but not a previous path element, select that element.
+                // This preserves the cursor when we reload a directory.
                 size_t n;
                 if (m_parent.m_pathOrigin.get() == 0 && m_parent.m_selectedChild.get(n) && n < m_parent.m_content.size()) {
                     m_parent.m_pathOrigin.reset(m_parent.m_content.extractElement(n));
@@ -338,7 +338,6 @@ game::browser::Browser::loadChildRoot(std::auto_ptr<Task_t> then)
 
                     // Load configuration
                     try {
-                        // FIXME: can we do anything with the return value?
                         m_parent.m_content[n]->loadConfiguration(*m_parent.m_childConfig);
                     }
                     catch (std::exception& e) {
@@ -406,7 +405,7 @@ game::browser::Browser::loadGameRoot(afl::base::Ref<afl::io::Directory> dir, con
 }
 
 game::browser::Folder*
-game::browser::Browser::createAccountFolder(Account& account)
+game::browser::Browser::createAccountFolder(const afl::base::Ref<Account>& account)
 {
     Folder* result = m_handlers.createAccountFolder(account);
     if (result == 0) {

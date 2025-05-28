@@ -8,6 +8,7 @@
 #include "afl/charset/codepagecharset.hpp"
 #include "afl/string/format.hpp"
 #include "game/pcc/browserhandler.hpp"
+#include "util/string.hpp"
 
 using afl::sys::LogListener;
 using game::Task_t;
@@ -16,7 +17,7 @@ namespace {
     const char*const LOG_NAME = "game.pcc";
 }
 
-game::pcc::GameFolder::GameFolder(BrowserHandler& handler, game::browser::Account& acc, String_t path, size_t hint)
+game::pcc::GameFolder::GameFolder(BrowserHandler& handler, const afl::base::Ref<game::browser::Account>& acc, String_t path, size_t hint)
     : m_handler(handler),
       m_account(acc),
       m_path(path),
@@ -54,7 +55,7 @@ game::pcc::GameFolder::loadGameRoot(const game::config::UserConfiguration& confi
 {
     class Task : public Task_t {
      public:
-        Task(String_t pathName, size_t hint, BrowserHandler& handler, game::browser::Account& account, const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then)
+        Task(String_t pathName, size_t hint, BrowserHandler& handler, const afl::base::Ref<game::browser::Account>& account, const game::config::UserConfiguration& config, std::auto_ptr<game::browser::LoadGameRootTask_t>& then)
             : m_pathName(pathName), m_hint(hint), m_handler(handler), m_account(account), m_config(config), m_then(then)
             { }
         virtual void call()
@@ -74,7 +75,7 @@ game::pcc::GameFolder::loadGameRoot(const game::config::UserConfiguration& confi
         const String_t m_pathName;
         size_t m_hint;
         BrowserHandler& m_handler;
-        game::browser::Account& m_account;
+        afl::base::Ref<game::browser::Account> m_account;
         const game::config::UserConfiguration& m_config;
         std::auto_ptr<game::browser::LoadGameRootTask_t> m_then;
     };
@@ -90,6 +91,9 @@ game::pcc::GameFolder::getName() const
     String_t name = a("name").toString();
     if (name.empty()) {
         name = m_path;
+        if (util::strStartsWith(name, "u/")) {
+            name.erase(0, 2);
+        }
     }
     int32_t hostGameNumber = a("game").toInteger();
     if (hostGameNumber != 0) {
@@ -109,7 +113,7 @@ game::pcc::GameFolder::isSame(const Folder& other) const
 {
     const GameFolder* p = dynamic_cast<const GameFolder*>(&other);
     return p != 0
-        && &p->m_account == &m_account
+        && &*p->m_account == &*m_account
         && p->m_path == m_path;
 }
 

@@ -6,11 +6,10 @@
 #define C2NG_GAME_BROWSER_UNSUPPORTEDACCOUNTFOLDER_HPP
 
 #include "afl/string/translator.hpp"
+#include "game/browser/account.hpp"
 #include "game/browser/synchronousfolder.hpp"
 
 namespace game { namespace browser {
-
-    class Account;
 
     /** Unsupported account.
         Used to represent account entries that are not recognized by any of our Handlers. */
@@ -19,7 +18,7 @@ namespace game { namespace browser {
         /** Constructor.
             @param tx       Translator
             @param account  Account (for getName(), isSame()) */
-        UnsupportedAccountFolder(afl::string::Translator& tx, const Account& account);
+        UnsupportedAccountFolder(afl::string::Translator& tx, const afl::base::Ref<Account>& account);
 
         /** Destructor. */
         ~UnsupportedAccountFolder();
@@ -38,7 +37,7 @@ namespace game { namespace browser {
 
      private:
         afl::string::Translator& m_translator;
-        const Account& m_account;
+        afl::base::Ref<Account> m_account;
     };
 
 } }

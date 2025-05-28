@@ -16,7 +16,7 @@ namespace {
     };
 }
 
-game::pcc::AccountFolder::AccountFolder(BrowserHandler& handler, game::browser::Account& acc)
+game::pcc::AccountFolder::AccountFolder(BrowserHandler& handler, const afl::base::Ref<game::browser::Account>& acc)
     : m_handler(handler),
       m_account(acc)
 { }
@@ -28,7 +28,7 @@ game::pcc::AccountFolder::loadContent(std::auto_ptr<game::browser::LoadContentTa
     // login() is mandatory here, this is usually the first call for an account.
     class Task : public Task_t {
      public:
-        Task(BrowserHandler& handler, game::browser::Account& account, std::auto_ptr<game::browser::LoadContentTask_t>& then)
+        Task(BrowserHandler& handler, const afl::base::Ref<game::browser::Account>& account, std::auto_ptr<game::browser::LoadContentTask_t>& then)
             : m_handler(handler), m_account(account), m_then(then)
             { }
         virtual void call()
@@ -44,7 +44,7 @@ game::pcc::AccountFolder::loadContent(std::auto_ptr<game::browser::LoadContentTa
             }
      private:
         BrowserHandler& m_handler;
-        game::browser::Account& m_account;
+        afl::base::Ref<game::browser::Account> m_account;
         std::auto_ptr<game::browser::LoadContentTask_t> m_then;
     };
     return m_handler.login(m_account, std::auto_ptr<Task_t>(new Task(m_handler, m_account, then)));
@@ -78,7 +78,7 @@ game::pcc::AccountFolder::loadGameRoot(const game::config::UserConfiguration& /*
 String_t
 game::pcc::AccountFolder::getName() const
 {
-    return m_account.getName();
+    return m_account->getName();
 }
 
 util::rich::Text
@@ -91,7 +91,7 @@ bool
 game::pcc::AccountFolder::isSame(const Folder& other) const
 {
     const AccountFolder* p = dynamic_cast<const AccountFolder*>(&other);
-    return p != 0 && &p->m_account == &m_account;
+    return p != 0 && &*p->m_account == &*m_account;
 }
 
 bool

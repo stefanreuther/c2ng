@@ -15,6 +15,8 @@ namespace game { namespace browser {
     class Folder;
 
     /** Task: result of loadContent().
+        Caller must provide the PtrVector with results.
+        Callee can consume it (e.g. move it to a durable place).
         Must not throw. */
     typedef afl::base::Closure<void(afl::container::PtrVector<Folder>&)> LoadContentTask_t;
 

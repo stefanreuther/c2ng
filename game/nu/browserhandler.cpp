@@ -20,6 +20,7 @@
 #include "game/browser/usercallback.hpp"
 #include "game/nu/accountfolder.hpp"
 #include "game/nu/gamefolder.hpp"
+#include "util/net.hpp"
 
 using afl::string::Format;
 using afl::sys::LogListener;
@@ -40,14 +41,14 @@ namespace {
 
 class game::nu::BrowserHandler::LoginTask : public Task_t {
  public:
-    LoginTask(BrowserHandler& parent, game::browser::Account& acc, std::auto_ptr<Task_t>& then)
+    LoginTask(BrowserHandler& parent, const afl::base::Ref<game::browser::Account>& acc, std::auto_ptr<Task_t>& then)
         : m_parent(parent), m_account(acc), m_then(then),
           conn_passwordResult(parent.m_browser.callback().sig_passwordResult.add(this, &LoginTask::onPasswordResult))
         { }
     virtual void call()
         {
             // Nothing to do if already logged in
-            if (m_account.get("api_key") != 0) {
+            if (m_account->get("api_key") != 0) {
                 m_parent.log().write(LogListener::Trace, LOG_NAME, "Task: BrowserHandler.login: already logged in");
                 m_then->call();
                 return;
@@ -56,7 +57,7 @@ class game::nu::BrowserHandler::LoginTask : public Task_t {
 
             // Ask for password
             UserCallback::PasswordRequest req;
-            req.accountName = m_account.getName();
+            req.accountName = m_account->getName();
             req.hasFailed = false;
             m_parent.m_browser.callback().askPassword(req);
         }
@@ -71,7 +72,7 @@ class game::nu::BrowserHandler::LoginTask : public Task_t {
 
             // Try to log in
             afl::net::HeaderTable tab;
-            tab.set("username", m_account.getUser());
+            tab.set("username", m_account->getUser());
             tab.set("password", resp.password);
             std::auto_ptr<afl::data::Value> result(m_parent.callServer(m_account, "/account/login?version=2", tab));
             if (result.get() == 0) {
@@ -86,13 +87,13 @@ class game::nu::BrowserHandler::LoginTask : public Task_t {
                 m_then->call();
                 return;
             }
-            m_account.set("api_key", parsedResult("apikey").toString(), false);
+            m_account->setEncoded("api_key", parsedResult("apikey").toString(), false);
             m_then->call();
         }
 
  private:
     BrowserHandler& m_parent;
-    game::browser::Account& m_account;
+    afl::base::Ref<game::browser::Account> m_account;
     std::auto_ptr<Task_t> m_then;
     afl::base::SignalConnection conn_passwordResult;
 };
@@ -116,9 +117,9 @@ game::nu::BrowserHandler::handleFolderName(String_t /*name*/, afl::container::Pt
 }
 
 game::browser::Folder*
-game::nu::BrowserHandler::createAccountFolder(game::browser::Account& acc)
+game::nu::BrowserHandler::createAccountFolder(const afl::base::Ref<game::browser::Account>& acc)
 {
-    if (acc.isValid() && acc.getType() == "nu") {
+    if (acc->isValid() && acc->getType() == "nu") {
         return new AccountFolder(*this, acc);
     } else {
         return 0;
@@ -152,18 +153,18 @@ game::nu::BrowserHandler::loadGameRootMaybe(afl::base::Ref<afl::io::Directory> d
 }
 
 std::auto_ptr<game::Task_t>
-game::nu::BrowserHandler::login(game::browser::Account& acc, std::auto_ptr<Task_t> then)
+game::nu::BrowserHandler::login(const afl::base::Ref<game::browser::Account>& acc, std::auto_ptr<Task_t> then)
 {
     return std::auto_ptr<Task_t>(new LoginTask(*this, acc, then));
 }
 
 std::auto_ptr<afl::data::Value>
-game::nu::BrowserHandler::callServer(game::browser::Account& acc,
+game::nu::BrowserHandler::callServer(const afl::base::Ref<game::browser::Account>& acc,
                                      String_t endpoint,
                                      const afl::net::HeaderTable& args)
 {
     // Build URL
-    String_t url = buildUrl(acc);
+    String_t url = buildUrl(*acc);
     url += endpoint;
 
     afl::net::Url parsedUrl;
@@ -181,79 +182,45 @@ game::nu::BrowserHandler::callServer(game::browser::Account& acc,
     // Call it
     afl::net::http::SimpleDownloadListener listener;
     m_manager.postFile(parsedUrl, query, "application/x-www-form-urlencoded; charset=UTF-8", listener);
-    switch (listener.wait()) {
-     case afl::net::http::SimpleDownloadListener::Succeeded:
-        break;
-     case afl::net::http::SimpleDownloadListener::Failed:
-        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access failed (%s)"), url, toString(listener.getFailureReason())));
-        return std::auto_ptr<afl::data::Value>();
-     case afl::net::http::SimpleDownloadListener::TimedOut:
-        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access timed out"), url));
-        return std::auto_ptr<afl::data::Value>();
-     case afl::net::http::SimpleDownloadListener::LimitExceeded:
-        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access exceeded limit"), url));
-        return std::auto_ptr<afl::data::Value>();
-    }
-
-    // Parse JSON
-    afl::data::DefaultValueFactory factory;
-    afl::io::ConstMemoryStream cms(listener.getResponseData());
-    afl::io::BufferedStream buf(cms);
-    try {
-        return std::auto_ptr<afl::data::Value>(afl::io::json::Parser(buf, factory).parseComplete());
-    }
-    catch (std::exception& e) {
-        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: received invalid data from network"), url));
-        log().write(LogListener::Info,  LOG_NAME, translator()("Parse error"), e);
-
-        // Log failing fragment
-        afl::io::Stream::FileSize_t pos = buf.getPos();
-        if (pos > 0) {
-            --pos;
-            buf.setPos(pos);
-        }
-        uint8_t tmp[30];
-        afl::base::Bytes_t bytes(tmp);
-        bytes.trim(buf.read(bytes));
-
-        log().write(LogListener::Trace, LOG_NAME, Format("at byte %d, \"%s\"", pos, afl::string::fromBytes(bytes)));
-        return std::auto_ptr<afl::data::Value>();
-    }
+    return util::processJSONResult(url, listener, log(), LOG_NAME, translator());
 }
 
 afl::data::Access
-game::nu::BrowserHandler::getGameListPreAuthenticated(game::browser::Account& acc)
+game::nu::BrowserHandler::getGameListPreAuthenticated(const afl::base::Ref<game::browser::Account>& acc)
 {
     // Cached?
-    if (m_gameList.get() != 0 && m_gameListAccount == &acc) {
+    if (m_gameList.get() != 0 && m_gameListAccount.get() == &*acc) {
         return m_gameList;
     }
 
     // Not cached -> load it
     m_gameList.reset();
-    m_gameListAccount = &acc;
-    if (const String_t* key = acc.get("api_key")) {
+    m_gameListAccount = acc.asPtr();
+
+    String_t key;
+    if (acc->getEncoded("api_key").get(key)) {
         afl::net::HeaderTable tab;
-        tab.add("apikey", *key);
+        tab.add("apikey", key);
         m_gameList = callServer(acc, "/account/mygames?version=2", tab);
     }
     return m_gameList;
 }
 
 afl::data::Access
-game::nu::BrowserHandler::getAccountInfoPreAuthenticated(game::browser::Account& acc)
+game::nu::BrowserHandler::getAccountInfoPreAuthenticated(const afl::base::Ref<game::browser::Account>& acc)
 {
     // Cached?
-    if (m_accountInfo.get() != 0 && m_accountInfoAccount == &acc) {
+    if (m_accountInfo.get() != 0 && m_accountInfoAccount.get() == &*acc) {
         return m_accountInfo;
     }
 
     // Not cached -> load it
     m_accountInfo.reset();
-    m_accountInfoAccount = &acc;
-    if (const String_t* key = acc.get("api_key")) {
+    m_accountInfoAccount = acc.asPtr();
+    String_t key;
+    if (acc->getEncoded("api_key").get(key)) {
         afl::net::HeaderTable tab;
-        tab.add("apikey", *key);
+        tab.add("apikey", key);
         m_accountInfo = callServer(acc, "/account/load?version=2", tab);
     }
     return m_accountInfo;

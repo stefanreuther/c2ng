@@ -7,6 +7,8 @@
 
 #include <map>
 #include "afl/base/optional.hpp"
+#include "afl/base/ref.hpp"
+#include "afl/base/refcounted.hpp"
 #include "afl/io/textfile.hpp"
 #include "afl/string/string.hpp"
 
@@ -35,6 +37,8 @@ namespace game { namespace browser {
         Account logic is Handler objects known to the browser,
         in particular, its Handler::createAccountFolder() and Handler::loadGameRootMaybe().
 
+        Account objects are heap-allocated to avoid problems if an account is deleted.
+
         <b>Relation between host, url, and what actually happens:</b>
 
         \c host is the name users casually use to refer to the server ("I play at planetscentral.com").
@@ -51,12 +55,12 @@ namespace game { namespace browser {
         Note that we specify a game <b>folder</b> here.
         Whereas a <b>directory</b> would be a physical folder name and nothing else,
         this also allows "game:xxx" shortcuts to $PROFILE/.pcc2/games/xxx", and network storage ("http://planetscentral.com/file.cgi/user/games/1"). */
-    class Account {
+    class Account : public afl::base::RefCounted {
      public:
         /** Default constructor.
             Makes an empty (invalid) account.
             Call setName(), setUser(), setHost(), setType() to fill it. */
-        Account();
+        static afl::base::Ref<Account> create();
 
         /** Destructor. */
         ~Account();
@@ -154,6 +158,8 @@ namespace game { namespace browser {
         void write(afl::io::TextFile& file) const;
 
      private:
+        Account();
+
         /** Account information item.
             - first: value
             - second: persistence flag */

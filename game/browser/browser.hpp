@@ -236,7 +236,7 @@ namespace game { namespace browser {
 
             @param account Account (mutable because it can eventually be modified through the created Folder)
             @return Folder (never null) */
-        Folder* createAccountFolder(Account& account);
+        Folder* createAccountFolder(const afl::base::Ref<Account>& account);
 
         /** Expand shortcuts in directory name.
             If the directoryName starts with "game:", replaces that by the actual profile directory name.

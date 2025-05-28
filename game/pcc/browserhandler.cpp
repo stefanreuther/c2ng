@@ -29,6 +29,7 @@
 #include "game/v3/specificationloader.hpp"
 #include "game/v3/stringverifier.hpp"
 #include "game/v3/utils.hpp"
+#include "util/net.hpp"
 #include "util/serverdirectory.hpp"
 
 using afl::base::Ref;
@@ -69,7 +70,7 @@ namespace {
 
 class game::pcc::BrowserHandler::LoginTask : public Task_t {
  public:
-    LoginTask(BrowserHandler& parent, game::browser::Account& acc, std::auto_ptr<Task_t>& then)
+    LoginTask(BrowserHandler& parent, const afl::base::Ref<game::browser::Account> acc, std::auto_ptr<Task_t>& then)
         : m_parent(parent),
           m_account(acc),
           m_then(then),
@@ -78,7 +79,7 @@ class game::pcc::BrowserHandler::LoginTask : public Task_t {
     virtual void call()
         {
             // Already logged in?
-            if (m_account.get("api_token") != 0 && m_account.get("api_user") != 0) {
+            if (m_account->get("api_token") != 0 && m_account->get("api_user") != 0) {
                 m_parent.log().write(LogListener::Trace, LOG_NAME, "Task: BrowserHandler.login: already logged in");
                 m_then->call();
                 return;
@@ -87,7 +88,7 @@ class game::pcc::BrowserHandler::LoginTask : public Task_t {
 
             // Ask for password
             UserCallback::PasswordRequest req;
-            req.accountName = m_account.getName();
+            req.accountName = m_account->getName();
             req.hasFailed = false;
             m_parent.m_browser.callback().askPassword(req);
         }
@@ -102,7 +103,7 @@ class game::pcc::BrowserHandler::LoginTask : public Task_t {
 
             // Try to log in
             afl::net::HeaderTable tab;
-            tab.set("api_user", m_account.getUser());
+            tab.set("api_user", m_account->getUser());
             tab.set("api_password", resp.password);
             tab.set("action", "whoami");
             std::auto_ptr<afl::data::Value> result(m_parent.callServer(m_account, "user", tab));
@@ -119,14 +120,14 @@ class game::pcc::BrowserHandler::LoginTask : public Task_t {
                 return;
             }
 
-            m_account.setEncoded("api_token", parsedResult("api_token").toString(), false);
-            m_account.setEncoded("api_user",  parsedResult("username").toString(), false);
+            m_account->setEncoded("api_token", parsedResult("api_token").toString(), false);
+            m_account->setEncoded("api_user",  parsedResult("username").toString(), false);
             m_then->call();
         }
 
  private:
     BrowserHandler& m_parent;
-    game::browser::Account& m_account;
+    afl::base::Ref<game::browser::Account> m_account;
     std::auto_ptr<Task_t> m_then;
     afl::base::SignalConnection conn_passwordResult;
 };
@@ -152,9 +153,9 @@ game::pcc::BrowserHandler::handleFolderName(String_t /*name*/, afl::container::P
 }
 
 game::browser::Folder*
-game::pcc::BrowserHandler::createAccountFolder(game::browser::Account& acc)
+game::pcc::BrowserHandler::createAccountFolder(const afl::base::Ref<game::browser::Account>& acc)
 {
-    if (acc.isValid() && acc.getType() == "pcc") {
+    if (acc->isValid() && acc->getType() == "pcc") {
         return new AccountFolder(*this, acc);
     } else {
         return 0;
@@ -170,18 +171,18 @@ game::pcc::BrowserHandler::loadGameRootMaybe(afl::base::Ref<afl::io::Directory> 
 }
 
 std::auto_ptr<game::Task_t>
-game::pcc::BrowserHandler::login(game::browser::Account& acc, std::auto_ptr<Task_t> then)
+game::pcc::BrowserHandler::login(const afl::base::Ref<game::browser::Account>& acc, std::auto_ptr<Task_t> then)
 {
     return std::auto_ptr<Task_t>(new LoginTask(*this, acc, then));
 }
 
 std::auto_ptr<afl::data::Value>
-game::pcc::BrowserHandler::callServer(game::browser::Account& acc,
+game::pcc::BrowserHandler::callServer(const afl::base::Ref<game::browser::Account>& acc,
                                       String_t endpoint,
                                       const afl::net::HeaderTable& args)
 {
     // Build URL
-    String_t url = buildUrl(acc);
+    String_t url = buildUrl(*acc);
     url += endpoint;
     url += ".cgi";
 
@@ -204,10 +205,10 @@ game::pcc::BrowserHandler::callServer(game::browser::Account& acc,
 }
 
 std::auto_ptr<afl::data::Value>
-game::pcc::BrowserHandler::callServerWithFile(game::browser::Account& acc, String_t endpoint, const afl::net::HeaderTable& args, String_t fileParam, String_t fileName, afl::base::ConstBytes_t fileContent)
+game::pcc::BrowserHandler::callServerWithFile(const afl::base::Ref<game::browser::Account>& acc, String_t endpoint, const afl::net::HeaderTable& args, String_t fileParam, String_t fileName, afl::base::ConstBytes_t fileContent)
 {
     // Build URL
-    String_t url = buildUrl(acc);
+    String_t url = buildUrl(*acc);
     url += endpoint;
     url += ".cgi";
 
@@ -239,19 +240,19 @@ game::pcc::BrowserHandler::callServerWithFile(game::browser::Account& acc, Strin
 }
 
 afl::data::Access
-game::pcc::BrowserHandler::getGameListPreAuthenticated(game::browser::Account& acc)
+game::pcc::BrowserHandler::getGameListPreAuthenticated(const afl::base::Ref<game::browser::Account>& acc)
 {
     // Cached?
-    if (m_gameList.get() != 0 && m_gameListAccount == &acc) {
+    if (m_gameList.get() != 0 && &*m_gameListAccount == &*acc) {
         return m_gameList;
     }
 
     m_gameList.reset();
-    m_gameListAccount = &acc;
+    m_gameListAccount = &*acc;
 
     String_t token;
     String_t user;
-    if (acc.getEncoded("api_token").get(token) && acc.getEncoded("api_user").get(user)) {
+    if (acc->getEncoded("api_token").get(token) && acc->getEncoded("api_user").get(user)) {
         afl::net::HeaderTable tab;
         tab.set("api_token", token);
         tab.set("dir", "u/" + user);
@@ -262,11 +263,11 @@ game::pcc::BrowserHandler::getGameListPreAuthenticated(game::browser::Account& a
 }
 
 std::auto_ptr<afl::data::Value>
-game::pcc::BrowserHandler::getDirectoryContentPreAuthenticated(game::browser::Account& acc, String_t dirName)
+game::pcc::BrowserHandler::getDirectoryContentPreAuthenticated(const afl::base::Ref<game::browser::Account>& acc, String_t dirName)
 {
     String_t token;
     std::auto_ptr<afl::data::Value> result;
-    if (acc.getEncoded("api_token").get(token)) {
+    if (acc->getEncoded("api_token").get(token)) {
         afl::net::HeaderTable tab;
         tab.set("api_token", token);
         tab.set("dir", dirName);
@@ -277,12 +278,12 @@ game::pcc::BrowserHandler::getDirectoryContentPreAuthenticated(game::browser::Ac
 }
 
 void
-game::pcc::BrowserHandler::getFilePreAuthenticated(game::browser::Account& acc, String_t fileName, afl::net::http::DownloadListener& listener)
+game::pcc::BrowserHandler::getFilePreAuthenticated(const afl::base::Ref<game::browser::Account>& acc, String_t fileName, afl::net::http::DownloadListener& listener)
 {
     // Build URL to download
     afl::net::Url mainUrl;
     afl::net::Url fileUrl;
-    if (!mainUrl.parse(buildUrl(acc)) || !fileUrl.parse(fileName)) {
+    if (!mainUrl.parse(buildUrl(*acc)) || !fileUrl.parse(fileName)) {
         listener.handleFailure(afl::net::http::ClientRequest::UnsupportedProtocol, translator()("Invalid URL"));
         return;
     }
@@ -290,7 +291,7 @@ game::pcc::BrowserHandler::getFilePreAuthenticated(game::browser::Account& acc, 
     log().write(LogListener::Trace, LOG_NAME, Format("Downloading \"%s\"", fileUrl.toString()));
 
     String_t token;
-    if (acc.getEncoded("api_token").get(token)) {
+    if (acc->getEncoded("api_token").get(token)) {
         // Attach token to URL
         String_t filePath(fileUrl.getPath());
         afl::net::ParameterEncoder(filePath, '?').handleHeader("api_token", token);
@@ -305,10 +306,10 @@ game::pcc::BrowserHandler::getFilePreAuthenticated(game::browser::Account& acc, 
 }
 
 std::auto_ptr<afl::data::Value>
-game::pcc::BrowserHandler::putFilePreAuthenticated(game::browser::Account& acc, String_t fileName, afl::base::ConstBytes_t content)
+game::pcc::BrowserHandler::putFilePreAuthenticated(const afl::base::Ref<game::browser::Account>& acc, String_t fileName, afl::base::ConstBytes_t content)
 {
     String_t token;
-    if (acc.getEncoded("api_token").get(token)) {
+    if (acc->getEncoded("api_token").get(token)) {
         afl::net::HeaderTable tab;
         tab.set("api_token", token);
         tab.set("action", "put");
@@ -321,11 +322,11 @@ game::pcc::BrowserHandler::putFilePreAuthenticated(game::browser::Account& acc, 
 }
 
 std::auto_ptr<afl::data::Value>
-game::pcc::BrowserHandler::eraseFilePreAuthenticated(game::browser::Account& acc, String_t fileName)
+game::pcc::BrowserHandler::eraseFilePreAuthenticated(const afl::base::Ref<game::browser::Account>& acc, String_t fileName)
 {
     String_t token;
     std::auto_ptr<afl::data::Value> result;
-    if (acc.getEncoded("api_token").get(token)) {
+    if (acc->getEncoded("api_token").get(token)) {
         afl::net::HeaderTable tab;
         tab.set("api_token", token);
         tab.set("file", fileName);
@@ -336,10 +337,10 @@ game::pcc::BrowserHandler::eraseFilePreAuthenticated(game::browser::Account& acc
 }
 
 std::auto_ptr<afl::data::Value>
-game::pcc::BrowserHandler::uploadTurnPreAuthenticated(game::browser::Account& acc, int32_t hostGameNumber, int slot, afl::base::ConstBytes_t content)
+game::pcc::BrowserHandler::uploadTurnPreAuthenticated(const afl::base::Ref<game::browser::Account>& acc, int32_t hostGameNumber, int slot, afl::base::ConstBytes_t content)
 {
     String_t token;
-    if (acc.getEncoded("api_token").get(token)) {
+    if (acc->getEncoded("api_token").get(token)) {
         afl::net::HeaderTable tab;
         tab.set("api_token", token);
         tab.set("action", "trn");
@@ -353,10 +354,10 @@ game::pcc::BrowserHandler::uploadTurnPreAuthenticated(game::browser::Account& ac
 }
 
 void
-game::pcc::BrowserHandler::markTurnTemporaryPreAuthenticated(game::browser::Account& acc, int32_t hostGameNumber, int slot, int flag)
+game::pcc::BrowserHandler::markTurnTemporaryPreAuthenticated(const afl::base::Ref<game::browser::Account>& acc, int32_t hostGameNumber, int slot, int flag)
 {
     String_t token;
-    if (acc.getEncoded("api_token").get(token)) {
+    if (acc->getEncoded("api_token").get(token)) {
         afl::net::HeaderTable tab;
         tab.set("api_token", token);
         tab.set("action", "trnmarktemp");
@@ -386,7 +387,7 @@ game::pcc::BrowserHandler::callback()
 }
 
 afl::base::Ptr<game::Root>
-game::pcc::BrowserHandler::loadRoot(game::browser::Account& account, afl::data::Access gameListEntry, const game::config::UserConfiguration& config)
+game::pcc::BrowserHandler::loadRoot(const afl::base::Ref<game::browser::Account>& account, afl::data::Access gameListEntry, const game::config::UserConfiguration& config)
 {
     afl::string::Translator& tx = m_browser.translator();
     afl::sys::LogListener& log = m_browser.log();
@@ -476,42 +477,5 @@ game::pcc::BrowserHandler::loadRoot(game::browser::Account& account, afl::data::
 std::auto_ptr<afl::data::Value>
 game::pcc::BrowserHandler::processResult(const String_t& url, afl::net::http::SimpleDownloadListener& listener)
 {
-    switch (listener.wait()) {
-     case SimpleDownloadListener::Succeeded:
-        break;
-     case SimpleDownloadListener::Failed:
-        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access failed (%s)"), url, toString(listener.getFailureReason())));
-        return std::auto_ptr<afl::data::Value>();
-     case SimpleDownloadListener::TimedOut:
-        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access timed out"), url));
-        return std::auto_ptr<afl::data::Value>();
-     case SimpleDownloadListener::LimitExceeded:
-        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: network access exceeded limit"), url));
-        return std::auto_ptr<afl::data::Value>();
-    }
-
-    // Parse JSON
-    afl::data::DefaultValueFactory factory;
-    afl::io::ConstMemoryStream cms(listener.getResponseData());
-    afl::io::BufferedStream buf(cms);
-    try {
-        return std::auto_ptr<afl::data::Value>(afl::io::json::Parser(buf, factory).parseComplete());
-    }
-    catch (std::exception& e) {
-        log().write(LogListener::Error, LOG_NAME, Format(translator()("%s: received invalid data from network"), url));
-        log().write(LogListener::Info,  LOG_NAME, translator()("Parse error"), e);
-
-        // Log failing fragment
-        afl::io::Stream::FileSize_t pos = buf.getPos();
-        if (pos > 0) {
-            --pos;
-            buf.setPos(pos);
-        }
-        uint8_t tmp[30];
-        afl::base::Bytes_t bytes(tmp);
-        bytes.trim(buf.read(bytes));
-
-        log().write(LogListener::Trace, LOG_NAME, Format("at byte %d, \"%s\"", pos, afl::string::fromBytes(bytes)));
-        return std::auto_ptr<afl::data::Value>();
-    }
+    return util::processJSONResult(url, listener, log(), LOG_NAME, translator());
 }

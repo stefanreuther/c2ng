@@ -7,7 +7,7 @@
 #include "afl/test/testrunner.hpp"
 
 /** Interface test. */
-AFL_TEST_NOARG("game.browser.Folder")
+AFL_TEST_NOARG("game.browser.Folder:interface")
 {
     class Tester : public game::browser::Folder {
      public:
@@ -33,4 +33,30 @@ AFL_TEST_NOARG("game.browser.Folder")
             { return kFavorite; }
     };
     Tester t;
+}
+
+/** Test defaultLoadGameRoot. */
+AFL_TEST("game.browser.Folder:defaultLoadGameRoot", a)
+{
+    class Task : public game::browser::LoadGameRootTask_t {
+     public:
+        Task(bool& flag)
+            : m_flag(flag)
+            { }
+        void call(afl::base::Ptr<game::Root>)
+            { m_flag = true; }
+     private:
+        bool& m_flag;
+    };
+
+    // Create
+    bool flag = false;
+    std::auto_ptr<game::Task_t> task(game::browser::Folder::defaultLoadGameRoot(std::auto_ptr<game::browser::LoadGameRootTask_t>(new Task(flag))));
+
+    // Verify
+    a.checkNonNull("01. task", task.get());
+
+    a.check("11. before", !flag);
+    task->call();
+    a.check("12. after", flag);
 }

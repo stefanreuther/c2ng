@@ -25,7 +25,7 @@ namespace game { namespace nu {
             \param hint    Position hint; the game is at this index in the game list.
                            This hint is optional but is used to make constructing a list of GameFolder's an O(n) instead of O(n**2) operation. */
         GameFolder(BrowserHandler& handler,
-                   game::browser::Account& acc,
+                   const afl::base::Ref<game::browser::Account>& acc,
                    int32_t gameNr,
                    size_t hint);
 
@@ -43,7 +43,7 @@ namespace game { namespace nu {
 
      private:
         BrowserHandler& m_handler;
-        game::browser::Account& m_account;
+        afl::base::Ref<game::browser::Account> m_account;
 
         int32_t m_gameNr;
 

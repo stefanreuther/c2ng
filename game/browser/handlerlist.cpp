@@ -40,7 +40,7 @@ game::browser::HandlerList::handleFolderName(String_t name, afl::container::PtrV
 
 // Create account folder.
 game::browser::Folder*
-game::browser::HandlerList::createAccountFolder(Account& acc)
+game::browser::HandlerList::createAccountFolder(const afl::base::Ref<Account>& acc)
 {
     for (size_t i = 0, n = m_handlers.size(); i < n; ++i) {
         if (Folder* result = m_handlers[i]->createAccountFolder(acc)) {
@@ -62,4 +62,4 @@ game::browser::HandlerList::loadGameRootMaybe(afl::base::Ref<afl::io::Directory>
         }
     }
     return result;
-}    
+}

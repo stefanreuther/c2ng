@@ -46,7 +46,6 @@ game::browser::RootFolder::setLocalDirectoryName(String_t /*directoryName*/)
     return false;
 }
 
-
 std::auto_ptr<game::Task_t>
 game::browser::RootFolder::loadGameRoot(const game::config::UserConfiguration& /*config*/, std::auto_ptr<LoadGameRootTask_t> then)
 {
