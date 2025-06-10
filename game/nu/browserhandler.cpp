@@ -30,7 +30,7 @@ namespace {
 
     String_t buildUrl(const game::browser::Account& acc)
     {
-        String_t url = acc.get("url", "http://api." + acc.get("host", "planets.nu") + "/");
+        String_t url = acc.get("url", "https://api." + acc.get("host", "planets.nu") + "/");
         if (!url.empty() && url[url.size()-1] == '/') {
             url.erase(url.size()-1);
         }
