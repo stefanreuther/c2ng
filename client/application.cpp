@@ -376,7 +376,7 @@ namespace {
                                  *session.getShipList(), root,
                                  game::makeConditionalTask(
                                      root.getTurnLoader()->loadCurrentTurn(
-                                         session.getGame()->currentTurn(), *session.getGame(), player, root, session,
+                                         *session.getGame(), player, root, session,
                                          game::makeConditionalTask(std::auto_ptr<game::Task_t>(new Task(proc, session, player)),
                                                                    std::auto_ptr<game::Task_t>(new Fail(proc, session)))),
                                      std::auto_ptr<game::Task_t>(new Fail(proc, session)))));

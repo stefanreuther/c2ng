@@ -182,7 +182,7 @@ server::play::ConsoleApplication::appMain()
     }
 
     ok = false;
-    root->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), params.playerNumber, *root, session, game::makeResultTask(ok))->call();
+    root->getTurnLoader()->loadCurrentTurn(*session.getGame(), params.playerNumber, *root, session, game::makeResultTask(ok))->call();
     if (!ok) {
         errorExit(tx("unable to load turn"));
     }

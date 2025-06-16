@@ -30,11 +30,11 @@ namespace {
      public:
         virtual PlayerStatusSet_t getPlayerStatus(int /*player*/, String_t& /*extra*/, afl::string::Translator& /*tx*/) const
             { return PlayerStatusSet_t(); }
-        virtual std::auto_ptr<game::Task_t> loadCurrentTurn(game::Turn& /*turn*/, game::Game& /*game*/, int /*player*/, game::Root& /*root*/, game::Session& /*session*/, std::auto_ptr<game::StatusTask_t> /*then*/)
+        virtual std::auto_ptr<game::Task_t> loadCurrentTurn(game::Game& /*game*/, int /*player*/, game::Root& /*root*/, game::Session& /*session*/, std::auto_ptr<game::StatusTask_t> /*then*/)
             {
                 throw std::runtime_error("unexpected: loadCurrentTurn");
             }
-        virtual std::auto_ptr<game::Task_t> saveCurrentTurn(const game::Turn& /*turn*/, const game::Game& /*game*/, game::PlayerSet_t /*players*/, SaveOptions_t /*opts*/, const game::Root& /*root*/, game::Session& /*session*/, std::auto_ptr<game::StatusTask_t> /*then*/)
+        virtual std::auto_ptr<game::Task_t> saveCurrentTurn(const game::Game& /*game*/, game::PlayerSet_t /*players*/, SaveOptions_t /*opts*/, const game::Root& /*root*/, game::Session& /*session*/, std::auto_ptr<game::StatusTask_t> /*then*/)
             {
                 throw std::runtime_error("unexpected: saveCurrentTurn");
             }

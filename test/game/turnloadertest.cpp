@@ -48,9 +48,9 @@ namespace {
      public:
         virtual PlayerStatusSet_t getPlayerStatus(int /*player*/, String_t& /*extra*/, Translator& /*tx*/) const
             { return PlayerStatusSet_t(); }
-        virtual std::auto_ptr<Task_t> loadCurrentTurn(Turn& /*turn*/, Game& /*game*/, int /*player*/, Root& /*root*/, Session& /*session*/, std::auto_ptr<game::StatusTask_t> then)
+        virtual std::auto_ptr<Task_t> loadCurrentTurn(Game& /*game*/, int /*player*/, Root& /*root*/, Session& /*session*/, std::auto_ptr<game::StatusTask_t> then)
             { return game::makeConfirmationTask(false, then); }
-        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& /*turn*/, const Game& /*game*/, game::PlayerSet_t /*players*/, SaveOptions_t /*opts*/, const Root& /*root*/, Session& /*session*/, std::auto_ptr<game::StatusTask_t> then)
+        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Game& /*game*/, game::PlayerSet_t /*players*/, SaveOptions_t /*opts*/, const Root& /*root*/, Session& /*session*/, std::auto_ptr<game::StatusTask_t> then)
             { return game::makeConfirmationTask(false, then); }
         virtual void getHistoryStatus(int /*player*/, int /*turn*/, afl::base::Memory<HistoryStatus> /*status*/, const Root& /*root*/)
             { }
@@ -121,9 +121,9 @@ AFL_TEST("game.TurnLoader:getDefaultPlayer", a)
                     return PlayerStatusSet_t();
                 }
             }
-        virtual std::auto_ptr<Task_t> loadCurrentTurn(Turn& /*turn*/, Game& /*game*/, int /*player*/, Root& /*root*/, Session& /*session*/, std::auto_ptr<game::StatusTask_t> then)
+        virtual std::auto_ptr<Task_t> loadCurrentTurn(Game& /*game*/, int /*player*/, Root& /*root*/, Session& /*session*/, std::auto_ptr<game::StatusTask_t> then)
             { return game::makeConfirmationTask(false, then); }
-        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& /*turn*/, const Game& /*game*/, game::PlayerSet_t /*players*/, SaveOptions_t /*opts*/, const Root& /*root*/, Session& /*session*/, std::auto_ptr<game::StatusTask_t> then)
+        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Game& /*game*/, game::PlayerSet_t /*players*/, SaveOptions_t /*opts*/, const Root& /*root*/, Session& /*session*/, std::auto_ptr<game::StatusTask_t> then)
             { return game::makeConfirmationTask(false, then); }
         virtual void getHistoryStatus(int /*player*/, int /*turn*/, afl::base::Memory<HistoryStatus> /*status*/, const Root& /*root*/)
             { }
@@ -287,7 +287,7 @@ AFL_TEST("game.TurnLoader:loadCurrentDatabases", a)
 
     // Test
     PublicTurnLoader testee;
-    testee.loadCurrentDatabases(env.g->currentTurn(), *env.g, 8, *env.root, env.session);
+    testee.loadCurrentDatabases(*env.g, 8, *env.root, env.session);
 
     // Verify result
     a.checkEqual("01. ship comment", interpreter::toString(env.session.world().shipProperties().get(113, interpreter::World::sp_Comment), false), "my ship");
@@ -324,7 +324,7 @@ AFL_TEST("game.TurnLoader:loadCurrentDatabases:broken", a)
 
     // Test
     PublicTurnLoader testee;
-    AFL_CHECK_SUCCEEDS(a, testee.loadCurrentDatabases(env.g->currentTurn(), *env.g, 8, *env.root, env.session));
+    AFL_CHECK_SUCCEEDS(a, testee.loadCurrentDatabases(*env.g, 8, *env.root, env.session));
 }
 
 /* Test loadCurrentDatabases, old stat file. */
@@ -373,7 +373,7 @@ AFL_TEST("game.TurnLoader:loadCurrentDatabases:old", a)
 
     // Test
     PublicTurnLoader testee;
-    AFL_CHECK_SUCCEEDS(a("01. load"), testee.loadCurrentDatabases(env.g->currentTurn(), *env.g, 8, *env.root, env.session));
+    AFL_CHECK_SUCCEEDS(a("01. load"), testee.loadCurrentDatabases(*env.g, 8, *env.root, env.session));
 
     // Verify
     a.checkEqual("11. score turn", env.g->scores().getFirstTurnNumber(), 320);
@@ -388,7 +388,7 @@ AFL_TEST("game.TurnLoader:loadCurrentDatabases:empty", a)
 
     // Test
     PublicTurnLoader testee;
-    AFL_CHECK_SUCCEEDS(a, testee.loadCurrentDatabases(env.g->currentTurn(), *env.g, 8, *env.root, env.session));
+    AFL_CHECK_SUCCEEDS(a, testee.loadCurrentDatabases(*env.g, 8, *env.root, env.session));
 }
 
 /* Test saveCurrentDatabases. */
@@ -403,7 +403,7 @@ AFL_TEST("game.TurnLoader:saveCurrentDatabases", a)
 
     // Test
     PublicTurnLoader testee;
-    testee.saveCurrentDatabases(env.g->currentTurn(), *env.g, 8, *env.root, env.session, env.root->charset());
+    testee.saveCurrentDatabases(*env.g, 8, *env.root, env.session, env.root->charset());
 
     // Verify
     a.checkGreaterEqual("01. database", env.dir->openFile("chart8.cc", FileSystem::OpenRead)->getSize(), 3000U);

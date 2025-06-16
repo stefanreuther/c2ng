@@ -63,20 +63,20 @@ game::nu::TurnLoader::getPlayerStatus(int player, String_t& extra, afl::string::
 }
 
 std::auto_ptr<game::Task_t>
-game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
+game::nu::TurnLoader::loadCurrentTurn(Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
 {
     // FIXME: validate player
     class Task : public Task_t {
      public:
-        Task(TurnLoader& parent, Turn& turn, Game& game, int player, Root& root, afl::sys::LogListener& log, Translator& tx, std::auto_ptr<StatusTask_t>& then)
-            : m_parent(parent), m_turn(turn), m_game(game), m_player(player), m_root(root), m_log(log), m_translator(tx), m_then(then)
+        Task(TurnLoader& parent, Game& game, int player, Root& root, afl::sys::LogListener& log, Translator& tx, std::auto_ptr<StatusTask_t>& then)
+            : m_parent(parent), m_game(game), m_player(player), m_root(root), m_log(log), m_translator(tx), m_then(then)
             { }
 
         virtual void call()
             {
                 m_log.write(LogListener::Trace, LOG_NAME, "Task: loadCurrentTurn");
                 try {
-                    m_parent.doLoadCurrentTurn(m_turn, m_game, m_player, m_root, m_log, m_translator);
+                    m_parent.doLoadCurrentTurn(m_game, m_player, m_root, m_log, m_translator);
                     m_then->call(true);
                 }
                 catch (std::exception& e) {
@@ -86,7 +86,6 @@ game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, Root& 
             }
      private:
         TurnLoader& m_parent;
-        Turn& m_turn;
         Game& m_game;
         int m_player;
         Root& m_root;
@@ -94,14 +93,13 @@ game::nu::TurnLoader::loadCurrentTurn(Turn& turn, Game& game, int player, Root& 
         Translator& m_translator;
         std::auto_ptr<StatusTask_t> m_then;
     };
-    return m_gameState->login(std::auto_ptr<Task_t>(new Task(*this, turn, game, player, root, session.log(), session.translator(), then)));
+    return m_gameState->login(std::auto_ptr<Task_t>(new Task(*this, game, player, root, session.log(), session.translator(), then)));
 }
 
 std::auto_ptr<game::Task_t>
-game::nu::TurnLoader::saveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, SaveOptions_t opts, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
+game::nu::TurnLoader::saveCurrentTurn(const Game& game, PlayerSet_t players, SaveOptions_t opts, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
 {
     // FIXME
-    (void) turn;
     (void) players;
     (void) opts;
     (void) root;
@@ -180,7 +178,7 @@ game::nu::TurnLoader::getProperty(Property p)
 }
 
 void
-game::nu::TurnLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, Root& /*root*/, afl::sys::LogListener& log, afl::string::Translator& tx)
+game::nu::TurnLoader::doLoadCurrentTurn(Game& game, int player, Root& /*root*/, afl::sys::LogListener& log, afl::string::Translator& tx)
 {
     // Load result
     Access rst(m_gameState->loadResultPreAuthenticated());
@@ -195,5 +193,5 @@ game::nu::TurnLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, Root
     game.expressionLists().loadRecentFiles(m_profile, log, tx);
     game.expressionLists().loadPredefinedFiles(m_profile, *m_defaultSpecificationDirectory, log, tx);
 
-    Loader(tx, log).loadTurn(turn, PlayerSet_t(player), rst);
+    Loader(tx, log).loadTurn(game.currentTurn(), PlayerSet_t(player), rst);
 }

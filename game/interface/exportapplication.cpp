@@ -174,7 +174,7 @@ game::interface::ExportApplication::appMain()
     }
 
     ok = false;
-    root->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), arg_race, *root, session, makeResultTask(ok))->call();
+    root->getTurnLoader()->loadCurrentTurn(*session.getGame(), arg_race, *root, session, makeResultTask(ok))->call();
     if (!ok) {
         throw Exception(tx("unable to load turn"));
     }

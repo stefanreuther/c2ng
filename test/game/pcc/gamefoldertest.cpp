@@ -270,7 +270,7 @@ AFL_TEST("game.pcc.GameFolder:loadGameRoot", a)
 
 
         bool loadFlag = false;
-        recv.get()->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), 7, *recv.get(), session, game::makeResultTask(loadFlag))
+        recv.get()->getTurnLoader()->loadCurrentTurn(*session.getGame(), 7, *recv.get(), session, game::makeResultTask(loadFlag))
             ->call();
         a.check("21. loaded", loadFlag);
         a.checkEqual("22. msg", session.getGame()->currentTurn().inbox().getNumMessages(), 7U);

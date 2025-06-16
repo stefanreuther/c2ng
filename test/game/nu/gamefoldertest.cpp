@@ -272,7 +272,7 @@ AFL_TEST("game.nu.GameFolder:loadGameRoot", a)
         session.setRoot(recv.get());
 
         bool loadFlag = false;
-        recv.get()->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), 7, *recv.get(), session, game::makeResultTask(loadFlag))
+        recv.get()->getTurnLoader()->loadCurrentTurn(*session.getGame(), 7, *recv.get(), session, game::makeResultTask(loadFlag))
             ->call();
         a.check("21. loaded", loadFlag);
         a.checkEqual("22. turn", session.getGame()->currentTurn().getTurnNumber(), 90);
@@ -312,87 +312,7 @@ AFL_TEST("game.nu.GameFolder:loadGameRoot:local", a)
         session.setRoot(recv.get());
 
         bool loadFlag = false;
-        recv.get()->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), 7, *recv.get(), session, game::makeResultTask(loadFlag))
-            ->call();
-        a.check("21. loaded", loadFlag);
-        a.checkEqual("22. turn", session.getGame()->currentTurn().getTurnNumber(), 90);
-    }
-}
-
-// Test loadGameRoot, with local directory
-AFL_TEST("game.nu.GameFolder:loadGameRoot:local", a)
-{
-    Environment env;
-    GameFolder testee(env.handler, env.acct, 11111, 0);
-    addTurnResponse(env);
-
-    env.fs.createDirectory("/game");
-    env.acct->setGameFolderName("11111", "/game");
-
-    // Setup
-    UserConfiguration config;
-    RootReceiver recv;
-    std::auto_ptr<LoadGameRootTask_t> in(LoadGameRootTask_t::makeBound(&recv, &RootReceiver::take));
-    std::auto_ptr<Task_t> out(testee.loadGameRoot(config, in));
-    a.checkNull("01. in", in.get());
-    a.checkNonNull("02. out", out.get());
-
-    // Do it
-    out->call();
-    a.checkNonNull("11. root", recv.get().get());
-    a.check("12. actions", recv.get()->getPossibleActions().contains(Root::aLocalSetup));
-    a.check("13. actions", recv.get()->getPossibleActions().contains(Root::aLoadEditable));
-    a.checkNonNull("14. turn", recv.get()->getTurnLoader().get());
-
-    // Turn Loader
-    {
-        game::Session session(env.tx, env.fs);
-        session.setShipList(new ShipList());
-        session.setGame(new Game());
-        session.setRoot(recv.get());
-
-        bool loadFlag = false;
-        recv.get()->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), 7, *recv.get(), session, game::makeResultTask(loadFlag))
-            ->call();
-        a.check("21. loaded", loadFlag);
-        a.checkEqual("22. turn", session.getGame()->currentTurn().getTurnNumber(), 90);
-    }
-}
-
-// Test loadGameRoot, with local directory
-AFL_TEST("game.nu.GameFolder:loadGameRoot:local", a)
-{
-    Environment env;
-    GameFolder testee(env.handler, env.acct, 11111, 0);
-    addTurnResponse(env);
-
-    env.fs.createDirectory("/game");
-    env.acct->setGameFolderName("11111", "/game");
-
-    // Setup
-    UserConfiguration config;
-    RootReceiver recv;
-    std::auto_ptr<LoadGameRootTask_t> in(LoadGameRootTask_t::makeBound(&recv, &RootReceiver::take));
-    std::auto_ptr<Task_t> out(testee.loadGameRoot(config, in));
-    a.checkNull("01. in", in.get());
-    a.checkNonNull("02. out", out.get());
-
-    // Do it
-    out->call();
-    a.checkNonNull("11. root", recv.get().get());
-    a.check("12. actions", recv.get()->getPossibleActions().contains(Root::aLocalSetup));
-    a.check("13. actions", recv.get()->getPossibleActions().contains(Root::aLoadEditable));
-    a.checkNonNull("14. turn", recv.get()->getTurnLoader().get());
-
-    // Turn Loader
-    {
-        game::Session session(env.tx, env.fs);
-        session.setShipList(new ShipList());
-        session.setGame(new Game());
-        session.setRoot(recv.get());
-
-        bool loadFlag = false;
-        recv.get()->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), 7, *recv.get(), session, game::makeResultTask(loadFlag))
+        recv.get()->getTurnLoader()->loadCurrentTurn(*session.getGame(), 7, *recv.get(), session, game::makeResultTask(loadFlag))
             ->call();
         a.check("21. loaded", loadFlag);
         a.checkEqual("22. turn", session.getGame()->currentTurn().getTurnNumber(), 90);
@@ -431,7 +351,7 @@ AFL_TEST("game.nu.GameFolder:loadGameRoot:lost", a)
         session.setRoot(recv.get());
 
         bool loadFlag = false;
-        recv.get()->getTurnLoader()->loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), 7, *recv.get(), session, game::makeResultTask(loadFlag))
+        recv.get()->getTurnLoader()->loadCurrentTurn(*session.getGame(), 7, *recv.get(), session, game::makeResultTask(loadFlag))
             ->call();
         a.check("21. loaded", loadFlag);
         a.checkEqual("22. turn", session.getGame()->currentTurn().getTurnNumber(), 90);

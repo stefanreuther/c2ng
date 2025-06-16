@@ -41,8 +41,8 @@ namespace game { namespace v3 {
                      game::browser::UserCallback* pCallback);
 
         virtual PlayerStatusSet_t getPlayerStatus(int player, String_t& extra, afl::string::Translator& tx) const;
-        virtual std::auto_ptr<Task_t> loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
-        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, SaveOptions_t opts, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
+        virtual std::auto_ptr<Task_t> loadCurrentTurn(Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
+        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Game& game, PlayerSet_t players, SaveOptions_t opts, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual void getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root);
         virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual std::auto_ptr<Task_t> saveConfiguration(const Root& root, afl::sys::LogListener& log, afl::string::Translator& tx, std::auto_ptr<Task_t> then);
@@ -60,9 +60,9 @@ namespace game { namespace v3 {
 
         PlayerArray<DirectoryScanner::PlayerFlags_t> m_playerFlags;
 
-        void doLoadCurrentTurn(Turn& turn, Game& game, int player, game::Root& root, Session& session);
+        void doLoadCurrentTurn(Game& game, int player, game::Root& root, Session& session);
         void doLoadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, afl::sys::LogListener& log, afl::string::Translator& tx);
-        void doSaveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, const Root& root, Session& session);
+        void doSaveCurrentTurn(const Game& game, PlayerSet_t players, const Root& root, Session& session);
     };
 
 } }

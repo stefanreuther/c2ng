@@ -42,8 +42,8 @@ namespace game { namespace v3 {
                         game::browser::UserCallback* pCallback);
 
         virtual PlayerStatusSet_t getPlayerStatus(int player, String_t& extra, afl::string::Translator& tx) const;
-        virtual std::auto_ptr<Task_t> loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
-        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t player, SaveOptions_t opts, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
+        virtual std::auto_ptr<Task_t> loadCurrentTurn(Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
+        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Game& game, PlayerSet_t player, SaveOptions_t opts, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual void getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root);
         virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual std::auto_ptr<Task_t> saveConfiguration(const Root& root, afl::sys::LogListener& log, afl::string::Translator& tx, std::auto_ptr<Task_t> then);
@@ -76,12 +76,11 @@ namespace game { namespace v3 {
 
         /** Implementation of loadCurrentTurn.
             Can throw on error.
-            \param turn Turn
             \param game Game
             \param player Player
             \param root Root
             \param session Session */
-        void doLoadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session);
+        void doLoadCurrentTurn(Game& game, int player, Root& root, Session& session);
 
         /** Implementation of loadHistoryTurn.
             Can throw on error.
@@ -96,12 +95,11 @@ namespace game { namespace v3 {
 
         /** Implementation of saveCurrentTurn.
             Can throw on error.
-            \param turn Turn
             \param game Game
             \param players Players
             \param root Root
             \param session Session */
-        void doSaveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, const Root& root, Session& session);
+        void doSaveCurrentTurn(const Game& game, PlayerSet_t players, const Root& root, Session& session);
 
         /** Load KORE file.
             \param file File

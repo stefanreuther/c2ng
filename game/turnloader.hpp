@@ -117,23 +117,22 @@ namespace game {
 
             The resulting playability game's status will be set by the caller.
 
-            \param turn [out] Turn to load. Should be completely initialized.
             \param game [in/out] Game object. May be updated with planet/ship score definitions, turn scores.
+                                 Turn data is loaded into currentTurn() which must be completely initialized.
             \param player [in] Player number.
             \param root [in/out] Root. May be updated with configuration.
             \param session [in/out] Session.
             \param then [in] Task to execute after saving; never null.
 
             \return Newly-allocated task to perform the operation; never null. */
-        virtual std::auto_ptr<Task_t> loadCurrentTurn(Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t> then) = 0;
+        virtual std::auto_ptr<Task_t> loadCurrentTurn(Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t> then) = 0;
 
         /** Save current turn.
             This function produces a task that will save the current game, create and/or upload a turn file, etc.
             It must honor read/write mode restrictions defined by turn.getCommandPlayers(), turn.getLocalDataPlayers().
             After completion, the task must emit a callback on \c then reporting success/failure.
 
-            \param turn [in] Turn to save.
-            \param game [in] Game object.
+            \param game [in] Game object; we save its currentTurn().
             \param players [in] Players to save. Can be multiple to save multiple turns in a group.
             \param opts [in] Options.
             \param root [in] Root.
@@ -141,7 +140,7 @@ namespace game {
             \param then [in] Task to execute after saving; never null.
 
             \return Newly-allocated task to perform the operation; never null. */
-        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, SaveOptions_t opts, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then) = 0;
+        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Game& game, PlayerSet_t players, SaveOptions_t opts, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then) = 0;
 
         /** Get history status.
             This function determines whether a number of turns have history information.
@@ -207,7 +206,7 @@ namespace game {
             - scores (scoreX.cc)
             - message configuration
             - teams */
-        void loadCurrentDatabases(Turn& turn, Game& game, int player, Root& root, Session& session);
+        void loadCurrentDatabases(Game& game, int player, Root& root, Session& session);
 
         /** Load history turn databases.
             This method should be called by the loadHistoryTurn() method, with the same parameters,
@@ -223,7 +222,7 @@ namespace game {
             - scores
             - message configuration
             - teams */
-        void saveCurrentDatabases(const Turn& turn, const Game& game, int player, const Root& root, Session& session, afl::charset::Charset& charset);
+        void saveCurrentDatabases(const Game& game, int player, const Root& root, Session& session, afl::charset::Charset& charset);
 
         /** Default implementation for saveConfiguration().
             Saves to the Root's game directory, and to the user profile.

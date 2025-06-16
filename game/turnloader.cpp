@@ -48,8 +48,9 @@ game::TurnLoader::getDefaultPlayer(PlayerSet_t baseSet) const
 }
 
 void
-game::TurnLoader::loadCurrentDatabases(Turn& turn, Game& game, int player, Root& root, Session& session)
+game::TurnLoader::loadCurrentDatabases(Game& game, int player, Root& root, Session& session)
 {
+    Turn& turn = game.currentTurn();
     afl::charset::Charset& charset = root.charset();
     afl::string::Translator& tx = session.translator();
     afl::sys::LogListener& log = session.log();
@@ -104,8 +105,10 @@ game::TurnLoader::loadHistoryDatabases(Turn& turn, Game& game, int player, int t
 }
 
 void
-game::TurnLoader::saveCurrentDatabases(const Turn& turn, const Game& game, int player, const Root& root, Session& session, afl::charset::Charset& charset)
+game::TurnLoader::saveCurrentDatabases(const Game& game, int player, const Root& root, Session& session, afl::charset::Charset& charset)
 {
+    const Turn& turn = game.currentTurn();
+
     // Save starchart
     if (game::spec::ShipList* shipList = session.getShipList().get()) {
         afl::base::Ref<afl::io::Stream> out = root.gameDirectory().openFile(afl::string::Format("chart%d.cc", player), afl::io::FileSystem::Create);

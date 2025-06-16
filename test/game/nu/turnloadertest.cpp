@@ -188,7 +188,7 @@ AFL_TEST("game.nu.TurnLoader:turn", a)
 
     // loadCurrentTurn
     bool loaded = false;
-    testee.loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), 7, *session.getRoot(), session, game::makeResultTask(loaded))
+    testee.loadCurrentTurn(*session.getGame(), 7, *session.getRoot(), session, game::makeResultTask(loaded))
         ->call();
     a.check("11. loaded", loaded);
     a.checkEqual("12. turn", session.getGame()->currentTurn().getTurnNumber(), 90);
@@ -240,7 +240,7 @@ AFL_TEST("game.nu.TurnLoader:turn:error", a)
 
     // loadCurrentTurn: will fail because turn number cannot be parsed
     bool loaded = false;
-    testee.loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), 7, *session.getRoot(), session, game::makeResultTask(loaded))
+    testee.loadCurrentTurn(*session.getGame(), 7, *session.getRoot(), session, game::makeResultTask(loaded))
         ->call();
     a.check("01. loaded", !loaded);
 }
@@ -280,7 +280,7 @@ AFL_TEST("game.nu.TurnLoader:turn:unsuccessful", a)
 
     // loadCurrentTurn
     bool loaded = false;
-    testee.loadCurrentTurn(session.getGame()->currentTurn(), *session.getGame(), 7, *session.getRoot(), session, game::makeResultTask(loaded))
+    testee.loadCurrentTurn(*session.getGame(), 7, *session.getRoot(), session, game::makeResultTask(loaded))
         ->call();
     a.check("01. loaded", !loaded);
 }

@@ -652,7 +652,7 @@ game::Session::save(TurnLoader::SaveOptions_t opts, std::auto_ptr<StatusTask_t> 
         return result;
     }
 
-    return pLoader->saveCurrentTurn(pGame->currentTurn(), *pGame, PlayerSet_t(pGame->getViewpointPlayer()), opts, *pRoot, *this, then);
+    return pLoader->saveCurrentTurn(*pGame, PlayerSet_t(pGame->getViewpointPlayer()), opts, *pRoot, *this, then);
 }
 
 std::auto_ptr<game::Task_t>

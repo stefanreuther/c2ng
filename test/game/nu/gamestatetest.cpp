@@ -143,7 +143,7 @@ AFL_TEST("game.nu.GameState:setRaceName:0", a)
 }
 
 // loadResult, invalidateResult
-AFL_TEST("game.nu.GameState:getGameListEntry", a)
+AFL_TEST("game.nu.GameState:loadResult", a)
 {
     Environment env;
 

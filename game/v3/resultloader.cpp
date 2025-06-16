@@ -76,21 +76,21 @@ game::v3::ResultLoader::getPlayerStatus(int player, String_t& extra, afl::string
 }
 
 std::auto_ptr<game::Task_t>
-game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game::Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
+game::v3::ResultLoader::loadCurrentTurn(Game& game, int player, game::Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
 {
     // ex game/load.h:loadCommon
     class Task : public Task_t {
      public:
-        Task(ResultLoader& parent, Turn& turn, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t>& then)
-            : m_parent(parent), m_turn(turn), m_game(game), m_player(player), m_root(root), m_session(session), m_then(then),
-              m_checker(turn, parent.m_pCallback, session.log(), session.translator())
+        Task(ResultLoader& parent, Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t>& then)
+            : m_parent(parent), m_game(game), m_player(player), m_root(root), m_session(session), m_then(then),
+              m_checker(game.currentTurn(), parent.m_pCallback, session.log(), session.translator())
             { }
 
         virtual void call()
             {
                 m_session.log().write(LogListener::Trace, LOG_NAME, "Task: loadCurrentTurn");
                 try {
-                    m_parent.doLoadCurrentTurn(m_turn, m_game, m_player, m_root, m_session);
+                    m_parent.doLoadCurrentTurn(m_game, m_player, m_root, m_session);
                     m_checker.checkPassword(m_player, m_session.authCache(), m_then);
                 }
                 catch (std::exception& e) {
@@ -100,7 +100,6 @@ game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game
             }
      private:
         ResultLoader& m_parent;
-        Turn& m_turn;
         Game& m_game;
         int m_player;
         Root& m_root;
@@ -108,15 +107,15 @@ game::v3::ResultLoader::loadCurrentTurn(Turn& turn, Game& game, int player, game
         std::auto_ptr<StatusTask_t> m_then;
         PasswordChecker m_checker;
     };
-    return std::auto_ptr<Task_t>(new Task(*this, turn, game, player, root, session, then));
+    return std::auto_ptr<Task_t>(new Task(*this, game, player, root, session, then));
 }
 
 std::auto_ptr<game::Task_t>
-game::v3::ResultLoader::saveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, SaveOptions_t /*opts*/, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
+game::v3::ResultLoader::saveCurrentTurn(const Game& game, PlayerSet_t players, SaveOptions_t /*opts*/, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
 {
     // ex saveTurns
     try {
-        doSaveCurrentTurn(turn, game, players, root, session);
+        doSaveCurrentTurn(game, players, root, session);
         return makeConfirmationTask(true, then);
     }
     catch (std::exception& e) {
@@ -215,9 +214,10 @@ game::v3::ResultLoader::loadTurnfile(Turn& trn, const Root& root, afl::io::Strea
 }
 
 void
-game::v3::ResultLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, game::Root& root, Session& session)
+game::v3::ResultLoader::doLoadCurrentTurn(Game& game, int player, game::Root& root, Session& session)
 {
     // Initialize
+    Turn& turn = game.currentTurn();
     Translator& tx = session.translator();
     LogListener& log = session.log();
     Loader ldr(*m_charset, tx, log);
@@ -228,7 +228,7 @@ game::v3::ResultLoader::doLoadCurrentTurn(Turn& turn, Game& game, int player, ga
     ldr.loadCommonFiles(root.gameDirectory(), *m_specificationDirectory, turn.universe(), player);
 
     // load database
-    loadCurrentDatabases(turn, game, player, root, session);
+    loadCurrentDatabases(game, player, root, session);
 
     // expression lists
     if (m_pProfile != 0) {
@@ -333,8 +333,9 @@ game::v3::ResultLoader::doLoadHistoryTurn(Turn& turn, Game& game, int player, in
 }
 
 void
-game::v3::ResultLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, PlayerSet_t players, const Root& root, Session& session)
+game::v3::ResultLoader::doSaveCurrentTurn(const Game& game, PlayerSet_t players, const Root& root, Session& session)
 {
+    const Turn& turn = game.currentTurn();
     Translator& tx = session.translator();
     LogListener& log = session.log();
     if (turn.getCommandPlayers().containsAnyOf(players)) {
@@ -358,7 +359,7 @@ game::v3::ResultLoader::doSaveCurrentTurn(const Turn& turn, const Game& game, Pl
         if (players.contains(player)) {
             if (turn.getLocalDataPlayers().contains(player)) {
                 // chart.cc
-                saveCurrentDatabases(turn, game, player, root, session, *m_charset);
+                saveCurrentDatabases(game, player, root, session, *m_charset);
 
                 // Fleets
                 game::db::FleetLoader(*m_charset, tx).save(root.gameDirectory(), turn.universe(), player);

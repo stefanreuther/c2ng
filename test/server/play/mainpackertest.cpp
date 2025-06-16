@@ -40,9 +40,9 @@ namespace {
     class MyTurnLoader : public game::TurnLoader {
         virtual PlayerStatusSet_t getPlayerStatus(int /*player*/, String_t& /*extra*/, afl::string::Translator& /*tx*/) const
             { return PlayerStatusSet_t(); }
-        virtual std::auto_ptr<Task_t> loadCurrentTurn(Turn& /*turn*/, Game& /*game*/, int /*player*/, Root& /*root*/, Session& /*session*/, std::auto_ptr<StatusTask_t> then)
+        virtual std::auto_ptr<Task_t> loadCurrentTurn(Game& /*game*/, int /*player*/, Root& /*root*/, Session& /*session*/, std::auto_ptr<StatusTask_t> then)
             { return game::makeConfirmationTask(true, then); }
-        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Turn& /*turn*/, const Game& /*game*/, PlayerSet_t /*players*/, SaveOptions_t /*opts*/, const Root& /*root*/, Session& /*session*/, std::auto_ptr<StatusTask_t> then)
+        virtual std::auto_ptr<Task_t> saveCurrentTurn(const Game& /*game*/, PlayerSet_t /*players*/, SaveOptions_t /*opts*/, const Root& /*root*/, Session& /*session*/, std::auto_ptr<StatusTask_t> then)
             { return game::makeConfirmationTask(true, then); }
         virtual void getHistoryStatus(int /*player*/, int /*turn*/, afl::base::Memory<HistoryStatus> /*status*/, const Root& /*root*/)
             { }
