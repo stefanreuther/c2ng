@@ -12,9 +12,16 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = util/net.cpp util/net.hpp game/test/staticpage.cpp \
-    game/test/staticpage.hpp game/test/webpage.cpp game/test/webpage.hpp \
-    game/test/webserver.hpp game/test/webserver.cpp \
+FILES_gamelib = util/processrunnerapplet.cpp util/processrunnerapplet.hpp \
+    game/v3/scannerapplet.cpp game/v3/scannerapplet.hpp \
+    game/parser/testapplet.cpp game/parser/testapplet.hpp \
+    game/browser/testapplet.cpp game/browser/testapplet.hpp \
+    util/directorybrowserapplet.cpp util/directorybrowserapplet.hpp \
+    game/vcr/flak/testapplet.cpp game/vcr/flak/testapplet.hpp \
+    game/vcr/classic/testapplet.cpp game/vcr/classic/testapplet.hpp \
+    util/applet.cpp util/applet.hpp util/net.cpp util/net.hpp \
+    game/test/staticpage.cpp game/test/staticpage.hpp game/test/webpage.cpp \
+    game/test/webpage.hpp game/test/webserver.hpp game/test/webserver.cpp \
     interpreter/coveragerecorder.cpp interpreter/coveragerecorder.hpp \
     game/nu/loader.cpp game/nu/loader.hpp game/spec/advantagelist.cpp \
     game/spec/advantagelist.hpp game/pcc/servertransport.cpp \
@@ -795,7 +802,11 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/dialogs/missionselection.cpp \
+FILES_guilib = gfx/threed/modelapplet.cpp gfx/threed/modelapplet.hpp \
+    gfx/threed/renderapplet.cpp gfx/threed/renderapplet.hpp \
+    client/widgets/testapplet.cpp client/widgets/testapplet.hpp \
+    ui/widgets/testapplet.cpp ui/widgets/testapplet.hpp gfx/applet.cpp \
+    gfx/applet.hpp client/dialogs/missionselection.cpp \
     client/dialogs/missionselection.hpp gfx/codec/custom.cpp \
     gfx/codec/custom.hpp gfx/codec/application.cpp gfx/codec/application.hpp \
     gfx/codec/bmp.cpp gfx/codec/bmp.hpp gfx/codec/codec.hpp \
@@ -1716,10 +1727,20 @@ FILES_c2gfxcodec = main/c2gfxcodec.cpp
 TYPE_c2gfxcodec = app
 DEPEND_c2gfxcodec = guilib gamelib afl
 
+TARGETS += c2gfxtestapp
+FILES_c2gfxtestapp = main/c2gfxtestapp.cpp
+TYPE_c2gfxtestapp = app
+DEPEND_c2gfxtestapp = guilib gamelib afl
+
 TARGETS += c2docmanager
 FILES_c2docmanager = main/c2docmanager.cpp
 TYPE_c2docmanager = app
 DEPEND_c2docmanager = gamelib afl
+
+TARGETS += c2testapp
+FILES_c2testapp = main/c2testapp.cpp
+TYPE_c2testapp = app
+DEPEND_c2testapp = gamelib afl
 
 # Servers
 TARGETS += c2file-server
@@ -1810,13 +1831,18 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/game/nu/turnloadertest.cpp \
-    test/game/nu/specificationloadertest.cpp test/game/nu/gamestatetest.cpp \
-    test/game/nu/gamefoldertest.cpp test/game/nu/accountfoldertest.cpp \
-    test/util/nettest.cpp test/game/nu/browserhandlertest.cpp \
-    test/game/nu/stringverifiertest.cpp test/game/test/staticpagetest.cpp \
-    test/game/pcc/turnloadertest.cpp test/game/pcc/gamefoldertest.cpp \
-    test/game/pcc/accountfoldertest.cpp \
+FILES_testsuite = test/game/vcr/flak/testapplettest.cpp \
+    test/game/vcr/classic/testapplettest.cpp \
+    test/game/v3/scannerapplettest.cpp test/game/parser/testapplettest.cpp \
+    test/game/browser/testapplettest.cpp \
+    test/util/processrunnerapplettest.cpp \
+    test/util/directorybrowserapplettest.cpp test/util/applettest.cpp \
+    test/game/nu/turnloadertest.cpp test/game/nu/specificationloadertest.cpp \
+    test/game/nu/gamestatetest.cpp test/game/nu/gamefoldertest.cpp \
+    test/game/nu/accountfoldertest.cpp test/util/nettest.cpp \
+    test/game/nu/browserhandlertest.cpp test/game/nu/stringverifiertest.cpp \
+    test/game/test/staticpagetest.cpp test/game/pcc/turnloadertest.cpp \
+    test/game/pcc/gamefoldertest.cpp test/game/pcc/accountfoldertest.cpp \
     test/game/pcc/servertransporttest.cpp test/game/test/webpagetest.cpp \
     test/game/test/webservertest.cpp test/game/pcc/browserhandlertest.cpp \
     test/game/browser/sessiontest.cpp test/game/browser/browsertest.cpp \

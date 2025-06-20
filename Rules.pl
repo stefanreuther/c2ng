@@ -67,8 +67,12 @@ my @CONSOLE_APPS = qw(c2check c2compiler c2configtool c2docmanager c2export c2mg
 my @LIBS         = qw(guilib serverlib gamelib);
 my $settings     = load_variables("$IN/P9/Settings");
 
-if (get_variable('ENABLE_BUILD')) {
+if ($V{ENABLE_TEST_APPS}) {
+    push @CONSOLE_APPS, qw(c2testapp);
+    push @GUI_APPS,     qw(c2gfxtestapp);
+}
 
+if (get_variable('ENABLE_BUILD')) {
     # Find afl
     find_directory('AFL_DIR',
                    files => [qw(config.mk include/afl/base/types.hpp)],
@@ -272,11 +276,6 @@ if (get_variable('ENABLE_BUILD')) {
                  "genhtml -q --ignore-errors source -t c2ng -o $report \$<");
         generate("coverage", "$report/index.html");
         rule_set_phony('coverage');
-    }
-
-    # Test apps
-    if ($V{ENABLE_TEST_APPS}) {
-        load_directory('testapps');
     }
 }
 

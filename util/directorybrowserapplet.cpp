@@ -1,21 +1,29 @@
 /**
-  *  \file test_apps/dirbrowser.cpp
+  *  \file util/directorybrowserapplet.cpp
+  *  \brief Class util::DirectoryBrowserApplet
   */
 
-#include <iostream>
-#include "afl/io/filesystem.hpp"
-#include "util/directorybrowser.hpp"
+#include "util/directorybrowserapplet.hpp"
+
 #include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
+#include "util/directorybrowser.hpp"
 
-int main(int, char** /*argv*/)
+using afl::base::Ref;
+using afl::io::TextReader;
+using afl::io::TextWriter;
+using afl::string::Format;
+using afl::sys::Environment;
+
+int
+util::DirectoryBrowserApplet::run(Application& app, afl::sys::Environment::CommandLine_t& /*cmdl*/)
 {
-    using util::DirectoryBrowser;
-    afl::io::FileSystem& fs = afl::io::FileSystem::getInstance();
-    DirectoryBrowser b(fs);
+    DirectoryBrowser b(app.fileSystem());
+    Ref<TextReader> in = app.environment().attachTextReader(Environment::Input);
+    TextWriter& out = app.standardOutput();
     String_t cmd;
-    size_t n;
-    while (std::cout << b.getCurrentDirectory()->getTitle() << "> ", getline(std::cin, cmd)) {
+    while (out.writeText(b.getCurrentDirectory()->getTitle() + "> "), out.flush(), in->readLine(cmd)) {
+        size_t n;
         if (cmd == "") {
             // ok
         } else if (cmd == "pwd") {
@@ -25,16 +33,16 @@ int main(int, char** /*argv*/)
                 if (title.empty()) {
                     title = path[i]->getDirectoryName();
                 }
-                std::cout << afl::string::Format("%3d. %s", i, title) << "\n";
+                out.writeLine(Format("%3d. %s", i, title));
             }
         } else if (cmd == "ls") {
             const std::vector<DirectoryBrowser::DirectoryItem>& dirs = b.directories();
             for (size_t i = 0, n = dirs.size(); i < n; ++i) {
-                std::cout << afl::string::Format("%3d. %s <DIR>", i, dirs[i].title) << "\n";
+                out.writeLine(Format("%3d. %s <DIR>", i, dirs[i].title));
             }
             const std::vector<DirectoryBrowser::DirectoryEntryPtr_t>& files = b.files();
             for (size_t i = 0, n = files.size(); i < n; ++i) {
-                std::cout << afl::string::Format("%3d. %s <FILE>", i, files[i]->getTitle()) << "\n";
+                out.writeLine(Format("%3d. %s <FILE>", i, files[i]->getTitle()));
             }
         } else if (cmd.substr(0, 5) == "open ") {
             b.openDirectory(cmd.substr(5));
@@ -56,7 +64,9 @@ int main(int, char** /*argv*/)
             b.setAcceptHiddenEntries(true);
         } else {
             // huh?
-            std::cout << "Invalid command.\n";
+            out.writeLine("Invalid command.");
         }
     }
+
+    return 0;
 }
