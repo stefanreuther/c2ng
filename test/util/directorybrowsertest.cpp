@@ -64,6 +64,90 @@ AFL_TEST("util.DirectoryBrowser:basics", a)
     a.checkEqual("48. getCurrentDirectory", testee.getCurrentDirectory()->getDirectoryName(), "/");
 }
 
+/** Test openDirectory, go up 2 levels. */
+AFL_TEST("util.DirectoryBrowser:openDirectory:go-up-2", a)
+{
+    // Environment
+    afl::io::InternalFileSystem fs;
+    afl::string::NullTranslator tx;
+    fs.createDirectory("/dir");
+    fs.createDirectory("/dir/a");
+    fs.createDirectory("/dir/b");
+    fs.createDirectory("/dir/c");
+    fs.createDirectory("/dir/b/1");
+    fs.createDirectory("/dir/b/2");
+    fs.createDirectory("/dir/b/2/x");
+
+    // Browse /dir/b/2
+    util::DirectoryBrowser testee(fs);
+    testee.openDirectory("/dir/b/2");
+    a.checkEqual("01. dir size",  testee.directories().size(), 1U);
+    a.checkEqual("02. dir title", testee.directories()[0].title, "x");
+
+    // Go up two levels
+    testee.openDirectory("/dir");
+    a.checkEqual("11. dir size",  testee.directories().size(), 3U);
+    a.checkEqual("12. dir title", testee.directories()[0].title, "a");
+    a.checkEqual("13. dir title", testee.directories()[1].title, "b");
+    a.checkEqual("14. dir title", testee.directories()[2].title, "c");
+    a.checkEqual("15. cursor", testee.getSelectedChild().orElse(99), 1U);
+}
+
+/** Test openDirectory, go up 1 level. */
+AFL_TEST("util.DirectoryBrowser:openDirectory:go-up-1", a)
+{
+    // Environment
+    afl::io::InternalFileSystem fs;
+    afl::string::NullTranslator tx;
+    fs.createDirectory("/dir");
+    fs.createDirectory("/dir/a");
+    fs.createDirectory("/dir/b");
+    fs.createDirectory("/dir/c");
+    fs.createDirectory("/dir/b/1");
+    fs.createDirectory("/dir/b/2");
+    fs.createDirectory("/dir/b/2/x");
+
+    // Browse /dir/b/2
+    util::DirectoryBrowser testee(fs);
+    testee.openDirectory("/dir/b/2");
+    a.checkEqual("01. dir size",  testee.directories().size(), 1U);
+    a.checkEqual("02. dir title", testee.directories()[0].title, "x");
+
+    // Go up oen level
+    testee.openDirectory("/dir/b");
+    a.checkEqual("11. dir size",  testee.directories().size(), 2U);
+    a.checkEqual("12. dir title", testee.directories()[0].title, "1");
+    a.checkEqual("13. dir title", testee.directories()[1].title, "2");
+    a.checkEqual("14. cursor", testee.getSelectedChild().orElse(99), 1U);
+}
+
+/** Test openDirectory, stay. */
+AFL_TEST("util.DirectoryBrowser:openDirectory:stay", a)
+{
+    // Environment
+    afl::io::InternalFileSystem fs;
+    afl::string::NullTranslator tx;
+    fs.createDirectory("/dir");
+    fs.createDirectory("/dir/a");
+    fs.createDirectory("/dir/b");
+    fs.createDirectory("/dir/c");
+    fs.createDirectory("/dir/b/1");
+    fs.createDirectory("/dir/b/2");
+    fs.createDirectory("/dir/b/2/x");
+
+    // Browse /dir/b/2
+    util::DirectoryBrowser testee(fs);
+    testee.openDirectory("/dir/b/2");
+    a.checkEqual("01. dir size",  testee.directories().size(), 1U);
+    a.checkEqual("02. dir title", testee.directories()[0].title, "x");
+
+    // Reload; this resets the cursor
+    testee.openDirectory("/dir/b/2");
+    a.checkEqual("11. dir size",  testee.directories().size(), 1U);
+    a.checkEqual("12. dir title", testee.directories()[0].title, "x");
+    a.checkEqual("13. cursor", testee.getSelectedChild().orElse(99), 99U);
+}
+
 /** Test createDirectory(). */
 AFL_TEST("util.DirectoryBrowser:createDirectory", a)
 {

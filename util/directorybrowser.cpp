@@ -68,7 +68,7 @@ util::DirectoryBrowser::openDirectory(String_t name)
 
     // Are we going up?
     size_t i = 0;
-    while (i < m_path.size() && name != m_path.back()->getDirectoryName()) {
+    while (i < m_path.size() && name != m_path[i]->getDirectoryName()) {
         ++i;
     }
 
@@ -80,6 +80,7 @@ util::DirectoryBrowser::openDirectory(String_t name)
         } else {
             // We're going up to a parent
             m_pathOrigin = m_path[i+1];
+            m_path.resize(i+1);
         }
     } else {
         // Not found. Build a new path.
