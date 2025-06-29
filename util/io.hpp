@@ -107,6 +107,11 @@ namespace util {
         \param [in]     value Value */
     void toIntegerList(afl::data::IntegerList_t& list, afl::data::Access value);
 
+    /** Convert byte array to string, normalizing linefeeds.
+        \param in Byte array
+        \return String */
+    String_t normalizeLinefeeds(afl::base::ConstBytes_t in);
+
 }
 
 #endif

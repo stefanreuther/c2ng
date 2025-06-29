@@ -11,22 +11,12 @@
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/internalenvironment.hpp"
 #include "afl/test/testrunner.hpp"
+#include "util/io.hpp"
 #include "util/resourcefilereader.hpp"
 
 using afl::io::FileSystem;
 
 namespace {
-    String_t normalizeLinefeeds(afl::base::ConstBytes_t bytes)
-    {
-        String_t result;
-        while (const uint8_t* p = bytes.eat()) {
-            if (*p != '\r') {
-                result.append(1, char(*p));
-            }
-        }
-        return result;
-    }
-
     struct Environment {
         afl::io::InternalFileSystem fs;
         afl::sys::InternalEnvironment env;
@@ -57,7 +47,7 @@ namespace {
 
     String_t getOutput(Environment& env)
     {
-        return normalizeLinefeeds(env.output->getContent());
+        return util::normalizeLinefeeds(env.output->getContent());
     }
 
     String_t getFileContent(Environment& env, String_t fileName)

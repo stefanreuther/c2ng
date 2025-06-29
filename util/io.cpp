@@ -192,3 +192,15 @@ util::toIntegerList(afl::data::IntegerList_t& list, afl::data::Access value)
         }
     }
 }
+
+String_t
+util::normalizeLinefeeds(afl::base::ConstBytes_t in)
+{
+    String_t result;
+    while (const uint8_t* p = in.eat()) {
+        if (*p != '\r') {
+            result.append(1, static_cast<char>(*p));
+        }
+    }
+    return result;
+}

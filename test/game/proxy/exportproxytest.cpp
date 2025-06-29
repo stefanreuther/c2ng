@@ -18,6 +18,7 @@
 #include "interpreter/simplecontext.hpp"
 #include "interpreter/typehint.hpp"
 #include "interpreter/values.hpp"
+#include "util/io.hpp"
 #include "util/requestsender.hpp"
 
 using afl::base::Ref;
@@ -32,20 +33,6 @@ using interpreter::SimpleContext;
 using util::CharsetFactory;
 
 namespace {
-    /* Remove a character (used for CR-removal) */
-    String_t removeCharacter(String_t s, char ch)
-    {
-        size_t i = 0;
-        while (i < s.size()) {
-            if (s[i] == ch) {
-                s.erase(i, 1);
-            } else {
-                ++i;
-            }
-        }
-        return s;
-    }
-
     /* TestContext - same as for interpreter::exporter::Configuration */
     class TestContext : public SimpleContext, public Context::ReadOnlyAccessor {
      public:
@@ -426,7 +413,7 @@ AFL_TEST("game.proxy.ExportProxy:exportFile", a)
     {
         Ref<Stream> in = entry->openFile(FileSystem::OpenRead);
         Ref<FileMapping> map = in->createVirtualMapping();
-        a.checkEqual("11. content", removeCharacter(afl::string::fromBytes(map->get()), '\r'),
+        a.checkEqual("11. content", util::normalizeLinefeeds(map->get()),
                      "\"ID\",\"NAME\""
                      "\n42,Fred\n");
     }
@@ -591,7 +578,7 @@ AFL_TEST("game.proxy.ExportProxy:save", a)
     {
         Ref<Stream> in = entry->openFile(FileSystem::OpenRead);
         Ref<FileMapping> map = in->createVirtualMapping();
-        a.checkEqual("11. file content", removeCharacter(afl::string::fromBytes(map->get()), '\r'),
+        a.checkEqual("11. file content", util::normalizeLinefeeds(map->get()),
                      "Fields=Id@10\n"
                      "Fields=Name\n"
                      "Charset=latin1\n"

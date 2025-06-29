@@ -448,3 +448,15 @@ AFL_TEST("util.IO.toIntegerList:null", a)
 
     a.checkEqual("size", result.size(), 0U);
 }
+
+/*
+ *  normalizeLinefeeds
+ */
+
+AFL_TEST("util.IO.normalizeLinefeeds", a)
+{
+    a.checkEqual("01", util::normalizeLinefeeds(afl::string::toBytes("")),           "");
+    a.checkEqual("02", util::normalizeLinefeeds(afl::string::toBytes("foo")),        "foo");
+    a.checkEqual("03", util::normalizeLinefeeds(afl::string::toBytes("foo\nbar")),   "foo\nbar");
+    a.checkEqual("04", util::normalizeLinefeeds(afl::string::toBytes("foo\r\nbar")), "foo\nbar");
+}

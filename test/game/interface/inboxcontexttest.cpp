@@ -23,6 +23,7 @@
 #include "interpreter/process.hpp"
 #include "interpreter/test/contextverifier.hpp"
 #include "interpreter/world.hpp"
+#include "util/io.hpp"
 
 namespace {
     struct TestHarness {
@@ -125,12 +126,7 @@ AFL_TEST("game.interface.InboxContext:write", a)
     world.fileTable().closeFile(FD);
 
     // Verify file content
-    String_t content = afl::string::fromBytes(s->getContent());
-    String_t::size_type n;
-    while ((n = content.find('\r')) != String_t::npos) {
-        content.erase(n, 1);
-    }
-
+    String_t content = util::normalizeLinefeeds(s->getContent());
     a.checkEqual("31. content", content,
                  "=== Turn 11 ===\n"
                  "--- Message 3 ---\n"

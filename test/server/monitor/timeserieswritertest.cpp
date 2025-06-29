@@ -9,6 +9,7 @@
 #include "afl/string/string.hpp"
 #include "afl/test/testrunner.hpp"
 #include "server/monitor/timeseries.hpp"
+#include "util/io.hpp"
 
 using afl::sys::Time;
 
@@ -46,11 +47,7 @@ AFL_TEST("server.monitor.TimeSeriesWriter:normal", a)
     afl::io::InternalStream out;
     testee.save(out);
 
-    String_t content = afl::string::fromBytes(out.getContent());
-    String_t::size_type n;
-    while ((n = content.find('\r')) != String_t::npos) {
-        content.erase(n, 1);
-    }
+    String_t content = util::normalizeLinefeeds(out.getContent());
     a.checkEqual("01. content", content,
                  "[ONE]\n"
                  "22000\t1\t10\n"

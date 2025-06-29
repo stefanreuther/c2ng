@@ -5,6 +5,7 @@
 
 #include "interpreter/exporter/configuration.hpp"
 
+#include <memory>
 #include "afl/charset/charset.hpp"
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/io/constmemorystream.hpp"
@@ -15,7 +16,7 @@
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/simplecontext.hpp"
 #include "interpreter/values.hpp"
-#include <memory>
+#include "util/io.hpp"
 
 namespace {
     String_t removeCharacter(String_t s, char ch)
@@ -169,7 +170,7 @@ AFL_TEST("interpreter.exporter.Configuration:save", a)
     afl::io::InternalStream out;
     testee.save(out);
 
-    a.checkEqual("11. file content", removeCharacter(afl::string::fromBytes(out.getContent()), '\r'),
+    a.checkEqual("11. file content", util::normalizeLinefeeds(out.getContent()),
                  "Fields=A@10\n"
                  "Fields=B\n"
                  "Fields=X@-5\n"

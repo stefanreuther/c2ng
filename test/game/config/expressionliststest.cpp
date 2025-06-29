@@ -16,6 +16,7 @@
 #include "afl/sys/internalenvironment.hpp"
 #include "afl/sys/log.hpp"
 #include "afl/test/testrunner.hpp"
+#include "util/io.hpp"
 
 using afl::io::FileSystem;
 using game::config::ExpressionLists;
@@ -242,14 +243,7 @@ AFL_TEST("game.config.ExpressionLists:saveRecentFiles", a)
     // Verify
     afl::base::Ref<afl::io::Directory> profileDir(fs.openDirectory("/profile"));
     afl::base::Ref<afl::io::Stream> file = profileDir->openFile("lru.ini", FileSystem::OpenRead);
-    String_t content = afl::string::fromBytes(file->createVirtualMapping()->get());
-
-    // Remove \r, for Windows
-    String_t::size_type n;
-    while ((n = content.find('\r')) != String_t::npos) {
-        content.erase(n, 1);
-    }
-
+    String_t content = util::normalizeLinefeeds(file->createVirtualMapping()->get());
     a.checkEqual("content", content,
                  "[SHIPLABELS]\n"
                  "a b c  xyz\n"
