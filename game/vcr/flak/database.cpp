@@ -114,19 +114,22 @@ game::vcr::flak::Database::readOneBattle(afl::io::Stream& file, afl::charset::Ch
     const uint32_t size = rawSize;
 
     // DoS protection/avoid unbounded allocation: assume a maximum-size battle with 1000 ships, 1000 fleets
-    // - header                                             4 bytes
+    // - size                                               4 bytes
+    // - header                                            56 bytes
     // - 1000 fleets x 24 bytes                         24000 bytes
     // - 1000 ships x 56 bytes                          56000 bytes
     // - 1000 x 1000 attack list entries x 4 bytes    4000000 bytes
-    // = total                                        4080004 bytes
+    // = total                                        4080060 bytes
     const uint32_t MAX_SHIPS = 1000;
     const uint32_t MAX_SIZE
-        = sizeof(structures::Fleet) * MAX_SHIPS
+        = sizeof(structures::Header)
+        + sizeof(structures::Fleet) * MAX_SHIPS
         + sizeof(structures::Ship)  * MAX_SHIPS
         + 4 * MAX_SHIPS * MAX_SHIPS
         + 4;
-    if (size > MAX_SIZE) {
-        throw afl::except::FileFormatException(file, tx("Battle too large"));
+    if (size < 4 || size > MAX_SIZE) {
+        // Minimum size is "size" word; actual header size check is in Setup::load
+        throw afl::except::FileFormatException(file, tx("Invalid size"));
     }
 
     // Read content
