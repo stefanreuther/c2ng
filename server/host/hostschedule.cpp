@@ -198,13 +198,14 @@ server::host::HostSchedule::preview(int32_t gameId,
     // Figure out current times
     int32_t lastHostTime = game.lastHostTime().get();
     int32_t turn = game.turnNumber().get();
+    int32_t realTime = m_root.getTime();
     if (lastHostTime == 0 || turn == 0) {
         // Host never ran, so pretend we're hosting now.
-        lastHostTime = m_root.getTime();
+        lastHostTime = realTime;
         ++turn;
         result.push_back(m_root.config().getUserTimeFromTime(lastHostTime));
     }
-    int32_t currentTime = lastHostTime;
+    int32_t currentTime = std::max(lastHostTime, realTime);
 
     while ((int32_t(result.size()) < actualTurnLimit
             && (!timeLimit.isValid() || (*timeLimit.get() > lastHostTime))))

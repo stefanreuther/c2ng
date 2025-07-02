@@ -352,3 +352,61 @@ AFL_TEST("server.host.HostSchedule:preview", a)
         a.checkEqual("51. size", result.size(), 0U);
     }
 }
+
+/** Test preview(), after a break.
+    If a "Stopped" schedule was removed, SCHEDULEVIEW was giving out past dates. */
+AFL_TEST("server.host.HostSchedule:preview:after-break", a)
+{
+    TestHarness h;
+    server::host::Session session;
+    server::host::HostSchedule testee(session, h.root());
+    int32_t time = h.root().getTime();
+
+    // Create a game
+    int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Preparing);
+
+    // Configure game
+    server::host::Game gg(h.root(), gid);
+    gg.lastHostTime().set(time - 20*60*24);         // last host 20 days ago
+    gg.setConfigInt("masterHasRun", 1);
+    gg.turnNumber().set(7);
+
+    // Add daily schedule
+    {
+        HostSchedule::Schedule sch;
+        sch.type = HostSchedule::Daily;
+        sch.interval = 3;
+        testee.add(gid, sch);
+    }
+
+    // Add pause schedule
+    {
+        HostSchedule::Schedule sch;
+        sch.type = HostSchedule::Stopped;
+        testee.add(gid, sch);
+    }
+
+    // Start game; drop pause schedule
+    gg.setState(HostGame::Running, 0, h.root());
+    testee.drop(gid);
+
+    // Preview "up to 5"
+    afl::data::IntegerList_t result;
+    testee.preview(gid, afl::base::Nothing, 5, result);
+
+    a.checkEqual("01. size", result.size(), 5U);
+
+    // First must be at or after current time.
+    // Typically, will be identical but may be after if clock advances while test is running.
+    // preview() does not honor SCHEDULE_CHANGE_GRACE_PERIOD for now.
+    a.checkGreaterEqual("11. first", result[0], time);
+
+    // Second must be after first.
+    // Don't check any specific distance; might be less than 3 days due to hostLimit.
+    a.checkGreaterEqual("12. second", result[1], result[0]);
+
+    // Differences between subsequent turns must be 3 days
+    for (int i = 1; i < 3; ++i) {
+        a.checkEqual("31. result", result[i] + 3*60*24, result[i+1]);
+    }
+}
