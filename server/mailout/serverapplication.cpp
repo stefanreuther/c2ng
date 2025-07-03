@@ -27,7 +27,7 @@ namespace {
 
 
 server::mailout::ServerApplication::ServerApplication(afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net, afl::async::Interrupt& intr)
-    : Application(LOG_NAME, env, fs, net),
+    : Application(LOG_NAME, "MAILOUT", env, fs, net),
       m_listenAddress(DEFAULT_ADDRESS, MAILOUT_PORT),
       m_dbAddress(DEFAULT_ADDRESS, DB_PORT),
       m_smtpAddress(DEFAULT_ADDRESS, SMTP_PORT),
@@ -141,7 +141,7 @@ server::mailout::ServerApplication::handleConfiguration(const String_t& key, con
     } else if (key == "WWW.URL") {
         m_config.baseUrl = value;
         return true;
-    } else if (key == "MAILOUT.MAXAGE") {
+    } else if (isInstanceOption(key, "MAXAGE")) {
         /* @q Mailout.MaxAge:Int (Config)
            Maximum age of a message, in minutes.
            A message that could not been sent for this time is dropped. */
@@ -152,22 +152,22 @@ server::mailout::ServerApplication::handleConfiguration(const String_t& key, con
             throw afl::except::CommandLineException(afl::string::Format("Invalid number for '%s'", key));
         }
         return true;
-    } else if (key == "MAILOUT.HOST") {
+    } else if (isInstanceOption(key, "HOST")) {
         /* @q Mailout.Host:Str (Config)
            Listen address for the Mailout service. */
         m_listenAddress.setName(value);
         return true;
-    } else if (key == "MAILOUT.PORT") {
+    } else if (isInstanceOption(key, "PORT")) {
         /* @q Mailout.Port:Int (Config)
            Port number for the Mailout service. */
         m_listenAddress.setService(value);
         return true;
-    } else if (key == "MAILOUT.THREADS") {
+    } else if (isInstanceOption(key, "THREADS")) {
         /* @q Mailout.Threads:Int (Config)
            Ignored in c2ng/c2mailout-server for compatibility reasons; maximum number of connections is not limited.
            Number of threads (=maximum number of parallel connections). */
         return true;
-    } else if (key == "MAILOUT.TEMPLATEDIR") {
+    } else if (isInstanceOption(key, "TEMPLATEDIR")) {
         /* @q Mailout.TemplateDir:Str (Config)
            Directory containing template files for outgoing mails. */
         m_templateDirectoryName = value;

@@ -24,7 +24,7 @@ namespace {
 }
 
 server::nntp::ServerApplication::ServerApplication(afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net, afl::async::Interrupt& intr)
-    : Application(LOG_NAME, env, fs, net),
+    : Application(LOG_NAME, "NNTP", env, fs, net),
       m_listenAddress(DEFAULT_ADDRESS, NNTP_PORT),
       m_talkAddress(DEFAULT_ADDRESS, TALK_PORT),
       m_userAddress(DEFAULT_ADDRESS, USER_PORT),
@@ -90,10 +90,10 @@ bool
 server::nntp::ServerApplication::handleConfiguration(const String_t& key, const String_t& value)
 {
     // ex planetscentral/nntp/nntp.cc:processConfig
-    if (key == "NNTP.HOST") {
+    if (isInstanceOption(key, "HOST")) {
         m_listenAddress.setName(value);
         return true;
-    } else if (key == "NNTP.PORT") {
+    } else if (isInstanceOption(key, "PORT")) {
         m_listenAddress.setService(value);
         return true;
     } else if (key == "USER.HOST") {

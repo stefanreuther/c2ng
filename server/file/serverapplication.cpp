@@ -114,9 +114,8 @@ ProxyDirectoryHandler::removeDirectory(String_t name)
 /************************* ServerApplication *************************/
 
 server::file::ServerApplication::ServerApplication(afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net, afl::async::Interrupt& intr)
-    : Application(LOG_NAME, env, fs, net),
+    : Application(LOG_NAME, "FILE", env, fs, net),
       m_listenAddress(DEFAULT_ADDRESS, FILE_PORT),
-      m_instanceName("FILE"),
       m_rootDirectory("."),
       m_maxFileSize(10UL*1024*1024),
       m_interrupt(intr),
@@ -127,13 +126,9 @@ server::file::ServerApplication::~ServerApplication()
 { }
 
 bool
-server::file::ServerApplication::handleCommandLineOption(const String_t& option, afl::sys::CommandLineParser& parser)
+server::file::ServerApplication::handleCommandLineOption(const String_t& option, afl::sys::CommandLineParser& /*parser*/)
 {
-    if (option == "instance") {
-        // @change was "-I" in PCC2
-        m_instanceName = afl::string::strUCase(parser.getRequiredParameter("instance"));
-        return true;
-    } else if (option == "nogc") {
+    if (option == "nogc") {
         m_gcEnabled = false;
         return true;
     } else {
@@ -182,17 +177,17 @@ bool
 server::file::ServerApplication::handleConfiguration(const String_t& key, const String_t& value)
 {
     // ex planetscentral/file.cc:processConfig
-    if (key == m_instanceName + ".HOST") {
+    if (isInstanceOption(key, "HOST")) {
         /* @q File.Host:Str (Config), HostFile.Host:Str (Config)
            Listen address for the File/HostFile instance. */
         m_listenAddress.setName(value);
         return true;
-    } else if (key == m_instanceName + ".PORT") {
+    } else if (isInstanceOption(key, "PORT")) {
         /* @q File.Port:Int (Config), HostFile.Port:Int (Config)
            Port number for the File/HostFile instance. */
         m_listenAddress.setService(value);
         return true;
-    } else if (key == m_instanceName + ".BASEDIR") {
+    } else if (isInstanceOption(key, "BASEDIR")) {
         /* @q File.BaseDir:Str (Config), HostFile.BaseDir:Str (Config)
            Base directory where managed files are.
            Syntax:
@@ -202,14 +197,14 @@ server::file::ServerApplication::handleConfiguration(const String_t& key, const 
            - "c2file://[USER@]HOST:PORT/PATH": talk to another c2file instance (experimental/unsupported) */
         m_rootDirectory = value;
         return true;
-    } else if (key == m_instanceName + ".SIZELIMIT") {
+    } else if (isInstanceOption(key, "SIZELIMIT")) {
         /* @q File.SizeLimit:Int (Config), HostFile.SizeLimit:Int (Config)
            Maximum size of a file in this instance. */
         if (!afl::string::strToInteger(value, m_maxFileSize)) {
             throw afl::except::CommandLineException(afl::string::Format("Invalid number for '%s'", key));
         }
         return true;
-    } else if (key == m_instanceName + ".THREADS") {
+    } else if (isInstanceOption(key, "THREADS")) {
         /* @q File.Threads:Int (Config), HostFile.Threads:Int (Config)
            Ignored in c2file-ng for compatibility reasons.
            Number of threads (=maximum number of parallel connections) */
@@ -228,7 +223,6 @@ server::file::ServerApplication::getApplicationName() const
 String_t
 server::file::ServerApplication::getCommandLineOptionHelp() const
 {
-    return "--instance=NAME\tInstance name (default: \"FILE\")\n"
-        "--nogc\tDisable garbage collection\n";
+    return "--nogc\tDisable garbage collection\n";
 }
 

@@ -11,7 +11,7 @@ section('Description',
         paragraph_default_server_intro('c2nntp-server'));
 
 section('Options',
-        paragraph_default_server());
+        paragraph_default_server('NNTP'));
 
 section('Environment',
         paragraph_default_server_environment());

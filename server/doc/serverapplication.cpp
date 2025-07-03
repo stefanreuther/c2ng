@@ -49,7 +49,7 @@ namespace {
 }
 
 server::doc::ServerApplication::ServerApplication(afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net, afl::async::Interrupt& intr)
-    : Application(LOG_NAME, env, fs, net),
+    : Application(LOG_NAME, "DOC", env, fs, net),
       m_listenAddress(DEFAULT_ADDRESS, DOC_PORT),
       m_directoryName(),
       m_interrupt(intr)
@@ -113,19 +113,19 @@ server::doc::ServerApplication::serverMain()
 bool
 server::doc::ServerApplication::handleConfiguration(const String_t& key, const String_t& value)
 {
-    if (key == "DOC.HOST") {
+    if (isInstanceOption(key, "HOST")) {
         /* @q Doc.Host:Str (Config)
            Listen address
            @since PCC2 2.40.12 */
         m_listenAddress.setName(value);
         return true;
-    } else if (key == "DOC.PORT") {
+    } else if (isInstanceOption(key, "PORT")) {
         /* @q Doc.Port:Int (Config)
            Port number.
            @since PCC2 2.40.12 */
         m_listenAddress.setService(value);
         return true;
-    } else if (key == "DOC.DIR") {
+    } else if (isInstanceOption(key, "DIR")) {
         /* @q Doc.Dir:Str (Config)
            Directory name of documentation repository.
            Directory must contain a "index.xml" file and a "content/" directory or a "content.tar" file.

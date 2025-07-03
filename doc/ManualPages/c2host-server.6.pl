@@ -11,7 +11,7 @@ section('Description',
         paragraph_default_server_intro('c2host-server'));
 
 section('Options',
-        paragraph_default_server(';'),
+        paragraph_default_server('HOST', ';'),
         paragraph_detail(text_option('--nocron'),
                          paragraph_text('Disable scheduler.',
                                         '<i>c2host-server</i> will accept commands normally, but not run host.')));

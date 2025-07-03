@@ -10,7 +10,10 @@ section('Description',
                        'Otherwise, it will read and execute commands from standard input.'));
 
 section('Options',
-        paragraph_default_server(';'),
+        paragraph_default_help(';'),
+        paragraph_default_server_config(';'),
+        paragraph_default_log(';'),
+        paragraph_default_proxy($sep),
         paragraph_detail('<i>ENV</i><b>=</b><i>VALUE</i>',
                          paragraph_text('Set environment variable for script;')),
         paragraph_detail('<i>COMMAND...</i>',

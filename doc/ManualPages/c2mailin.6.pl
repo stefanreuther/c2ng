@@ -11,7 +11,7 @@ section('Description',
                        'via <link>c2mailout-server(6)</link>.'));
 
 section('Options',
-        paragraph_default_server(';'),
+        paragraph_default_server('MAILIN', ';'),
         paragraph_detail(text_option('--dump'),
                          paragraph_text('Show mail content on standard output instead of submitting it to <link>c2host-server(6)</link>.')));
 

@@ -102,7 +102,7 @@ namespace {
 
 
 server::mailin::MailInApplication::MailInApplication(afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net)
-    : Application(LOG_NAME, env, fs, net),
+    : Application(LOG_NAME, "MAILIN", env, fs, net),
       m_dump(false),
       m_hostAddress(DEFAULT_ADDRESS, HOST_PORT),
       m_mailAddress(DEFAULT_ADDRESS, MAILOUT_PORT),
@@ -155,7 +155,7 @@ server::mailin::MailInApplication::handleConfiguration(const String_t& key, cons
     } else if (key == "MAILOUT.PORT") {
         m_mailAddress.setService(value);
         return true;
-    } else if (key == "MAILIN.REJECTDIR") {
+    } else if (isInstanceOption(key, "REJECTDIR")) {
         m_rejectDirectory = value;
         return true;
     } else {

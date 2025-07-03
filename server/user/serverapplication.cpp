@@ -47,7 +47,7 @@ namespace {
 }
 
 server::user::ServerApplication::ServerApplication(afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net, afl::async::Interrupt& intr)
-    : Application(LOG_NAME, env, fs, net),
+    : Application(LOG_NAME, "USER", env, fs, net),
       m_listenAddress(DEFAULT_ADDRESS, USER_PORT),
       m_dbAddress(DEFAULT_ADDRESS, DB_PORT),
       m_interrupt(intr),
@@ -108,42 +108,42 @@ server::user::ServerApplication::handleConfiguration(const String_t& key, const 
     } else if (key == "REDIS.PORT") {
         m_dbAddress.setService(value);
         return true;
-    } else if (key == "USER.HOST") {
+    } else if (isInstanceOption(key, "HOST")) {
         /* @q User.Host:Str (Config)
            Listen address for the User instance
            @since PCC2 2.40.6 */
         m_listenAddress.setName(value);
         return true;
-    } else if (key == "USER.PORT") {
+    } else if (isInstanceOption(key, "PORT")) {
         /* @q User.Port:Int (Config)
            Port number for the User instance
            @since PCC2 2.40.6 */
         m_listenAddress.setService(value);
         return true;
-    } else if (key == "USER.KEY") {
+    } else if (isInstanceOption(key, "KEY")) {
         /* @q User.Key:Str (Config)
            Site-wide secret ("pepper") for encrypting passwords. */
         m_config.userKey = value;
         return true;
-    } else if (key == "USER.DATA.MAXKEYSIZE") {
+    } else if (isInstanceOption(key, "DATA.MAXKEYSIZE")) {
         /* @q User.Data.MaxKeySize:Int (Config)
            Maximum size of a key in {UGET}/{USET}.
            @since PCC2 2.40.6 */
         m_config.userDataMaxKeySize = parseSize(key, value);
         return true;
-    } else if (key == "USER.DATA.MAXVALUESIZE") {
+    } else if (isInstanceOption(key, "DATA.MAXVALUESIZE")) {
         /* @q User.Data.MaxValueSize:Int (Config)
            Maximum size of a value in {UGET}/{USET}.
            @since PCC2 2.40.6 */
         m_config.userDataMaxValueSize = parseSize(key, value);
         return true;
-    } else if (key == "USER.DATA.MAXTOTALSIZE") {
+    } else if (isInstanceOption(key, "DATA.MAXTOTALSIZE")) {
         /* @q User.Data.MaxTotalSize:Int (Config)
            Maximum total size of all user data ({UGET}/{USET}).
            @since PCC2 2.40.6 */
         m_config.userDataMaxTotalSize = parseSize(key, value);
         return true;
-    } else if (key == "USER.PROFILE.MAXVALUESIZE") {
+    } else if (isInstanceOption(key, "PROFILE.MAXVALUESIZE")) {
         /* @q User.Profile.MaxValueSize:Int (Config)
            Maximum size of a value in {SET (User Command)}.
            @since PCC2 2.40.7 */

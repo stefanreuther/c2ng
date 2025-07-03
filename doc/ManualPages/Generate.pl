@@ -78,9 +78,13 @@ sub paragraph_default_server_config {
 }
 
 sub paragraph_default_server {
+    my $self = shift || "?";
     my $sep = shift || ".";
     return (paragraph_default_help(';'),
             paragraph_default_server_config(';'),
+            paragraph_detail(text_option('--instance', 'INSTANCE'),
+                             paragraph_text('Set name of the server instance (default: "'.$self.'").',
+                                            'The instance name selects a set of configuration parameters from the configuration file;')),
             paragraph_default_log(';'),
             paragraph_default_proxy($sep));
 }

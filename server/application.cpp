@@ -53,8 +53,9 @@ class server::Application::ConfigurationHandler : public server::ConfigurationHa
     Application& m_app;
 };
 
-server::Application::Application(const String_t& logName, afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net)
+server::Application::Application(const String_t& logName, const String_t& instanceName, afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net)
     : m_logName(logName),
+      m_instanceName(instanceName),
       m_environment(env),
       m_fileSystem(fs),
       m_networkStack(net),
@@ -178,6 +179,17 @@ server::Application::createClient(const afl::net::Name& name, afl::base::Deleter
     }
 }
 
+bool
+server::Application::isInstanceOption(const String_t& name, const String_t& expect) const
+{
+    size_t instLen = m_instanceName.size();
+    size_t expLen = expect.size();
+    return name.size() == instLen + 1 + expLen
+        && name.compare(0, instLen, m_instanceName) == 0
+        && name[instLen] == '.'
+        && name.compare(instLen+1, expLen, expect) == 0;
+}
+
 void
 server::Application::reportError(String_t str)
 {
@@ -206,6 +218,9 @@ server::Application::parseCommandLine(ConfigurationHandler& handler)
             if (!m_clientNetworkStack.add(url)) {
                 throw std::runtime_error(Format("Unrecognized proxy URL: \"%s\"", url));
             }
+        } else if (text == "instance") {
+            // @change was "-I" in PCC2 c2file
+            m_instanceName = afl::string::strUCase(parser.getRequiredParameter("instance"));
         } else if (text == "h" || text == "help") {
             using afl::string::Format;
             afl::io::TextWriter& out = standardOutput();
@@ -221,6 +236,7 @@ server::Application::parseCommandLine(ConfigurationHandler& handler)
                                  util::formatOptions(ConfigurationHandler::getHelp()
                                                      + "--log=CONFIG\tSet logger configuration\n"
                                                        "--proxy=URL\tAdd network proxy\n"
+                                                       "--instance=NAME\tInstance name\n"
                                                      + getCommandLineOptionHelp())));
             exit(0);
         } else {

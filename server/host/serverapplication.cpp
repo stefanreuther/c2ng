@@ -37,7 +37,7 @@ namespace {
 }
 
 server::host::ServerApplication::ServerApplication(afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net, afl::async::Interrupt& intr)
-    : Application(LOG_NAME, env, fs, net),
+    : Application(LOG_NAME, "HOST", env, fs, net),
       m_listenAddress(DEFAULT_ADDRESS, HOST_PORT),
       m_dbAddress(DEFAULT_ADDRESS, DB_PORT),
       m_userFileAddress(DEFAULT_ADDRESS, FILE_PORT),
@@ -161,17 +161,17 @@ bool
 server::host::ServerApplication::handleConfiguration(const String_t& key, const String_t& value)
 {
     // ex planetscentral/host/host.cc:processConfig(string_t key, string_t value)
-    if (key == "HOST.HOST") {
+    if (isInstanceOption(key, "HOST")) {
         /* @q Host.Host:Str (Config)
            Listen address. */
         m_listenAddress.setName(value);
         return true;
-    } else if (key == "HOST.PORT") {
+    } else if (isInstanceOption(key, "PORT")) {
         /* @q Host.Port:Int (Config)
            Port number. */
         m_listenAddress.setService(value);
         return true;
-    } else if (key == "HOST.TIMESCALE") {
+    } else if (isInstanceOption(key, "TIMESCALE")) {
         /* @q Host.TimeScale:Int (Config)
            Unix-time-to-{@type Time}-conversion.
            By default, this value is 60, making a time step of 1 equal to a minute.
@@ -184,7 +184,7 @@ server::host::ServerApplication::handleConfiguration(const String_t& key, const 
             throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
         }
         return true;
-    } else if (key == "HOST.USERSSEETEMPORARYTURNS") {
+    } else if (isInstanceOption(key, "USERSSEETEMPORARYTURNS")) {
         /* @q Host.UsersSeeTemporaryTurns:Bool (Config)
            If enabled, users see each others temporary turns.
            If disabled, users only see their own temporary status (original behaviour).
@@ -194,7 +194,7 @@ server::host::ServerApplication::handleConfiguration(const String_t& key, const 
             throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
         }
         return true;
-    } else if (key == "HOST.KICKAFTERMISSED") {
+    } else if (isInstanceOption(key, "KICKAFTERMISSED")) {
         /* @q Host.KickAfterMissed:Int (Config)
            If nonzero, number of missed turns after which a player is removed from the game.
            @since PCC2 2.40.5 */
@@ -205,14 +205,14 @@ server::host::ServerApplication::handleConfiguration(const String_t& key, const 
             throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
         }
         return true;
-    } else if (key == "HOST.WORKDIR") {
+    } else if (isInstanceOption(key, "WORKDIR")) {
         /* @q Host.WorkDir:Str (Config)
            Working directory.
            Temporary files are created below this path.
            @change This option is new in c2host-ng. */
         m_config.workDirectory = value;
         return true;
-    } else if (key == "HOST.BACKUPS") {
+    } else if (isInstanceOption(key, "BACKUPS")) {
         /* @q Host.Backups:Str (Config)
            How to deal with backups.
            - keep: (default) just keep the tarballs created by the host scripts
@@ -226,12 +226,12 @@ server::host::ServerApplication::handleConfiguration(const String_t& key, const 
             throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
         }
         return true;
-    } else if (key == "HOST.THREADS") {
+    } else if (isInstanceOption(key, "THREADS")) {
         /* @q Host.Threads:Int (Config)
            Ignored in c2ng/c2host-server for compatibility reasons.
            Number of threads (=maximum number of parallel connections). */
         return true;
-    } else if (key == "HOST.INITIALSUSPEND") {
+    } else if (isInstanceOption(key, "INITIALSUSPEND")) {
         /* @q Host.InitialSuspend:Int (Config)
            Suspend scheduler for the given relative time after startup.
            No games will run until that time has passed.
@@ -246,7 +246,7 @@ server::host::ServerApplication::handleConfiguration(const String_t& key, const 
             throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
         }
         return true;
-    } else if (key == "HOST.MAXSTOREDKEYS") {
+    } else if (isInstanceOption(key, "MAXSTOREDKEYS")) {
         /* @q Host.MaxStoredKeys:Int (Config)
            Maximum number of registration keys to store per user.
            Users can later retrieve those keys if necessary.
@@ -256,14 +256,14 @@ server::host::ServerApplication::handleConfiguration(const String_t& key, const 
             throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
         }
         return true;
-    } else if (key == "HOST.KEYTITLE") {
+    } else if (isInstanceOption(key, "KEYTITLE")) {
         /* @q Host.KeyTitle:Str (Config)
            Title of registration keys issued to players.
 
            @since PCC2 2.40.12 */
         m_config.keyTitle = value;
         return true;
-    } else if (key == "HOST.KEYSECRET") {
+    } else if (isInstanceOption(key, "KEYSECRET")) {
         /* @q Host.KeySecret:Str (Config)
            Secret for registration keys issued to players.
            This is used to avoid trivial collision attacks by players using their own keygen.

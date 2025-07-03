@@ -11,7 +11,7 @@ section('Description',
         paragraph_default_server_intro('c2mailout-server'));
 
 section('Options',
-        paragraph_default_server(';'),
+        paragraph_default_server('MAILOUT', ';'),
         paragraph_detail(text_option('--notx'),
                          paragraph_text('Disable mail transmitter.',
                                         'Messages are only received and queued, but not sent.')));

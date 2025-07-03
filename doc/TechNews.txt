@@ -7,6 +7,16 @@ PCC2ng NEWS FILE - Technical Version
   manual.
 
 
+2.41.4
+------
+
+### all servers
+
+  All servers now support the "--instance" option and can therefore be
+  run in multiple parallel instances.
+
+
+
 2.41.2
 ------
 

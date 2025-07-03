@@ -10,7 +10,7 @@ section('Description',
         paragraph_default_server_intro('c2router-server'));
 
 section('Options',
-        paragraph_default_server());
+        paragraph_default_server('ROUTER'));
 
 section('Environment',
         paragraph_default_server_environment());

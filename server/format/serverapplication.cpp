@@ -33,7 +33,7 @@ namespace {
 }
 
 server::format::ServerApplication::ServerApplication(afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net, afl::async::Interrupt& intr)
-    : Application(LOG_NAME, env, fs, net),
+    : Application(LOG_NAME, "FORMAT", env, fs, net),
       m_listenAddress(DEFAULT_ADDRESS, FORMAT_PORT),
       m_interrupt(intr)
 { }
@@ -75,17 +75,17 @@ bool
 server::format::ServerApplication::handleConfiguration(const String_t& key, const String_t& value)
 {
     // ex planetscentral/format/format.cc:processConfig
-    if (key == "FORMAT.HOST") {
+    if (isInstanceOption(key, "HOST")) {
         /* @q Format.Host:Str (Config)
            Listen address for the Format instance. */
         m_listenAddress.setName(value);
         return true;
-    } else if (key == "FORMAT.PORT") {
+    } else if (isInstanceOption(key, "PORT")) {
         /* @q Format.Port:Int (Config)
            Port number for the Format instance. */
         m_listenAddress.setService(value);
         return true;
-    } else if (key == "FORMAT.THREADS") {
+    } else if (isInstanceOption(key, "THREADS")) {
         /* @q Format.Threads:Int (Config)
            Ignored in c2ng/c2format-server for compatibility reasons.
            Number of threads (=maximum number of parallel connections). */

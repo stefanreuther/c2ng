@@ -49,10 +49,11 @@ namespace server {
      public:
         /** Constructor.
             \param logName Logger name
+            \param instanceName Default instance name
             \param env Environment instance
             \param fs File system instance
             \param net Network stack instance */
-        Application(const String_t& logName, afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net);
+        Application(const String_t& logName, const String_t& instanceName, afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net);
 
         /** Run the server.
             Invokes serverMain() with exception protection.
@@ -100,6 +101,12 @@ namespace server {
             \return CommandHandler to access the microservice, allocated in the deleter. */
         afl::net::CommandHandler& createClient(const afl::net::Name& name, afl::base::Deleter& del, bool stateless);
 
+        /** Check for instance option.
+            \param name   Option given by user
+            \param expect Expected local option
+            \return true if name is "<instance>.<expect>" */
+        bool isInstanceOption(const String_t& name, const String_t& expect) const;
+
      protected:
         /** Application.
             This contains what normally would be your main() function.
@@ -133,6 +140,7 @@ namespace server {
         friend class ConfigurationHandler;
 
         String_t m_logName;
+        String_t m_instanceName;
         afl::sys::Environment& m_environment;
         afl::io::FileSystem& m_fileSystem;
         afl::net::NetworkStack& m_networkStack;

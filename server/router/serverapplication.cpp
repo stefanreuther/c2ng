@@ -72,7 +72,7 @@ namespace {
 }
 
 server::router::ServerApplication::ServerApplication(afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net, afl::async::Interrupt& intr, util::process::Factory& factory)
-    : Application(LOG_NAME, env, fs, net),
+    : Application(LOG_NAME, "ROUTER", env, fs, net),
       m_listenAddress(DEFAULT_ADDRESS, ROUTER_PORT),
       m_fileAddress(DEFAULT_ADDRESS, FILE_PORT),
       m_interrupt(intr),
@@ -130,22 +130,22 @@ bool
 server::router::ServerApplication::handleConfiguration(const String_t& key, const String_t& value)
 {
     // ex router.cc:handleRouterConfig
-    if (key == "ROUTER.HOST") {
+    if (isInstanceOption(key, "HOST")) {
         /* @q Router.Host:Str (Config)
            Listen address for Router service. */
         m_listenAddress.setName(value);
         return true;
-    } else if (key == "ROUTER.PORT") {
+    } else if (isInstanceOption(key, "PORT")) {
         /* @q Router.Port:Int (Config)
            Port number for Router service. */
         m_listenAddress.setService(value);
         return true;
-    } else if (key == "ROUTER.SERVER") {
+    } else if (isInstanceOption(key, "SERVER")) {
         /* @q Router.Server:Str (Config)
            File name of %c2server (c2play-server) binary. */
         m_config.serverPath = value;
         return true;
-    } else if (key == "ROUTER.TIMEOUT") {
+    } else if (isInstanceOption(key, "TIMEOUT")) {
         /* @q Router.Timeout:Int (Config)
            Session timeout in seconds.
            A session will be terminated if it has not been accessed within this time. */
@@ -156,7 +156,7 @@ server::router::ServerApplication::handleConfiguration(const String_t& key, cons
             throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
         }
         return true;
-    } else if (key == "ROUTER.VIRGINTIMEOUT") {
+    } else if (isInstanceOption(key, "VIRGINTIMEOUT")) {
         /* @q Router.VirginTimeout:Int (Config)
            Session timeout in seconds for virgin (unaccessed) sessions.
            A session will be terminated if it has not been accessed within this time directly after creation.
@@ -168,7 +168,7 @@ server::router::ServerApplication::handleConfiguration(const String_t& key, cons
             throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
         }
         return true;
-    } else if (key == "ROUTER.MAXSESSIONS") {
+    } else if (isInstanceOption(key, "MAXSESSIONS")) {
         /* @q Router.MaxSessions:Int (Config)
            Maximum number of concurrent sessions. */
         size_t n;
@@ -178,7 +178,7 @@ server::router::ServerApplication::handleConfiguration(const String_t& key, cons
             throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
         }
         return true;
-    } else if (key == "ROUTER.NEWSESSIONSWIN") {
+    } else if (isInstanceOption(key, "NEWSESSIONSWIN")) {
         /* @q Router.NewSessionsWin:Str (Config)
            Determines behaviour when two conflicting sessions are started ("-W" and "-R" flags).
            If "y" or "1", new sessions that conflict with old ones cause the old ones to terminate.
@@ -187,14 +187,14 @@ server::router::ServerApplication::handleConfiguration(const String_t& key, cons
             throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
         }
         return true;
-    } else if (key == "ROUTER.FILENOTIFY") {
+    } else if (isInstanceOption(key, "FILENOTIFY")) {
         /* @q Router.FileNotify:Str (Config)
            If "y" or "1", the {SAVE (Router Command)|SAVE} command will notify the {File (Service)|file server}. */
         if (!util::parseBooleanValue(value, m_enableFileNotify)) {
             throw afl::except::CommandLineException(afl::string::Format("Invalid value for '%s'", key));
         }
         return true;
-    } else if (key == "ROUTER.SESSIONID") {
+    } else if (isInstanceOption(key, "SESSIONID")) {
         /* @q Router.SessionId:Str (Config)
            Select session Id generation algorithm.
            - "numeric": simple counter (classic, default); needs outside protection against Id guessing.

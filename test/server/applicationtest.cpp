@@ -16,8 +16,8 @@ AFL_TEST("server.Application", a)
     // The application:
     class Tester : public server::Application {
      public:
-        Tester(const String_t& logName, afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net)
-            : Application(logName, env, fs, net)
+        Tester(const String_t& logName, const String_t& instName, afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net)
+            : Application(logName, instName, env, fs, net)
             { }
         virtual void serverMain()
             { exit(99); }
@@ -35,7 +35,7 @@ AFL_TEST("server.Application", a)
     afl::sys::InternalEnvironment env;
     afl::io::NullFileSystem fs;
     afl::net::NullNetworkStack net;
-    Tester t("test", env, fs, net);
+    Tester t("test", "TEST", env, fs, net);
 
     // Verify accessors
     a.checkEqual("01. fileSystem", &t.fileSystem(), &fs);
@@ -43,4 +43,10 @@ AFL_TEST("server.Application", a)
 
     // Run and verify result
     a.checkEqual("11. run", t.run(), 99);
+
+    // Command line
+    a.check("21. isInstanceOption", t.isInstanceOption("TEST.FOO", "FOO"));
+    a.check("22. isInstanceOption", !t.isInstanceOption("TESTFOO",  "FOO"));
+    a.check("23. isInstanceOption", !t.isInstanceOption("TEST.FOO", ".FOO"));
+    a.check("24. isInstanceOption", !t.isInstanceOption("X.FOO", "FOO"));
 }

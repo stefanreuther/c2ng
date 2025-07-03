@@ -46,7 +46,7 @@ namespace {
 }
 
 server::monitor::ServerApplication::ServerApplication(afl::sys::Environment& env, afl::io::FileSystem& fs, afl::net::NetworkStack& net, afl::async::Interrupt& intr)
-    : Application(LOG_NAME, env, fs, net),
+    : Application(LOG_NAME, "MONITOR", env, fs, net),
       m_listenAddress(DEFAULT_ADDRESS, MONITOR_PORT),
       m_interrupt(intr),
       m_templateFileName("share/server/monitor/monitor.html"),
@@ -139,22 +139,22 @@ server::monitor::ServerApplication::handleConfiguration(const String_t& key, con
     bool childHandled = m_status.handleConfiguration(key, value);
 
     // Check own configuration - even if a child already accepted it.
-    if (key == "MONITOR.HOST") {
+    if (isInstanceOption(key, "HOST")) {
         /* @q Monitor.Host:Str (Config)
            Listen address for the status monitor. */
         m_listenAddress.setName(value);
         return true;
-    } else if (key == "MONITOR.PORT") {
+    } else if (isInstanceOption(key, "PORT")) {
         /* @q Monitor.Port:Str (Config)
            Port number for the status monitor. */
         m_listenAddress.setService(value);
         return true;
-    } else if (key == "MONITOR.TEMPLATE") {
+    } else if (isInstanceOption(key, "TEMPLATE")) {
         /* @q Monitor.Template:Str (Config)
            Name of file containing the HTML template for the status monitor. */
         m_templateFileName = value;
         return true;
-    } else if (key == "MONITOR.INTERVAL") {
+    } else if (isInstanceOption(key, "INTERVAL")) {
         /* @q Monitor.Interval:Int (Config)
            Interval between two checks, in seconds.
            @change Note that whereas c2monitor-classic updates on user requests and thus this was a minimum interval (=maximum rate),
@@ -166,7 +166,7 @@ server::monitor::ServerApplication::handleConfiguration(const String_t& key, con
         }
         m_updateInterval = n;
         return true;
-    } else if (key == "MONITOR.SAVEINTERVAL") {
+    } else if (isInstanceOption(key, "SAVEINTERVAL")) {
         /* @q Monitor.SaveInterval:Int (Config)
            Interval for saving the history file, in seconds.
            @since PCC2 2.40.5 */
@@ -176,7 +176,7 @@ server::monitor::ServerApplication::handleConfiguration(const String_t& key, con
         }
         m_saveInterval = n;
         return true;
-    } else if (key == "MONITOR.HISTORYFILE") {
+    } else if (isInstanceOption(key, "HISTORYFILE")) {
         /* @q Monitor.HistoryFile:Str (Config)
            Name of history file.
            History is persisted across monitor restarts in this file.
