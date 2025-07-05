@@ -33,6 +33,7 @@ namespace {
         v->pushBackNew(makeStringValue("t"));
         v->pushBackNew(makeStringValue("s"));
         h->setNew("tags", new VectorValue(v));
+        h->setNew("blob", makeStringValue("ppqqrrss"));
 
         h->setNew("type", makeIntegerValue(0));
         h->setNew("children", makeIntegerValue(1));
@@ -88,6 +89,7 @@ AFL_TEST("server.interface.DocumentationClient", a)
         a.checkEqual("36. isPage",      ni.isPage, true);
         a.checkEqual("37. hasChildren", ni.hasChildren, true);
         a.checkEqual("38. infoTag",     ni.infoTag, 7);
+        a.checkEqual("39. blob",        ni.blobId, "ppqqrrss");
     }
 
     // getNodeChildren

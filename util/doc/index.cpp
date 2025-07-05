@@ -317,6 +317,13 @@ util::doc::Index::isNodePage(Handle_t node) const
     return getNode("<isNodePage>", node).type == Node::Page;
 }
 
+bool
+util::doc::Index::isNodeBlob(Handle_t node) const
+{
+    const Node& n = getNode("<isNodeBlob>", node);
+    return std::find(n.tags.begin(), n.tags.end(), "blob") != n.tags.end();
+}
+
 void
 util::doc::Index::setNodeTitle(Handle_t node, const String_t& title)
 {

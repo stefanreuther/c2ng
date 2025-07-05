@@ -41,12 +41,13 @@ namespace server { namespace interface {
         struct NodeInfo {
             String_t nodeId;                              ///< Id (=path) of node.
             String_t title;                               ///< Title (=heading). See util::doc::Index::getNodeTitle().
+            String_t blobId;                              ///< Blob Id, for use with getBlob().
             std::vector<String_t> tags;                   ///< Node tags (extra labels). See util::doc::Index::getNodeTagByIndex().
             bool isPage;                                  ///< Type flag: false if it is a document, true if page.
             bool hasChildren;                             ///< true if node has any children.
             int infoTag;                                  ///< Info tag. See util::doc::TaggedNode::tag.
             NodeInfo()
-                : nodeId(), title(), tags(), isPage(), hasChildren(), infoTag()
+                : nodeId(), title(), blobId(), tags(), isPage(), hasChildren(), infoTag()
                 { }
         };
 

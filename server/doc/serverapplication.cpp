@@ -97,7 +97,7 @@ server::doc::ServerApplication::serverMain()
     log().write(LogListener::Info, LOG_NAME, Format("Listening on %s", m_listenAddress.toString()));
 
     // Server thread
-    afl::sys::Thread serverThread("talk.server", server);
+    afl::sys::Thread serverThread("doc.server", server);
     serverThread.start();
 
     // Wait for termination request

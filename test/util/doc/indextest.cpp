@@ -110,6 +110,7 @@ AFL_TEST("util.doc.Index:build", a)
     Index::Handle_t page2a  = testee.addPage(doc2, "page2a", "Second doc, first page", "p2a");
     Index::Handle_t page2aa = testee.addPage(page2a, "page2aa", "Second doc, sub-page", "p2aa");
     Index::Handle_t page2b  = testee.addPage(doc2, "page2b", "Second doc, second page", "p2b");
+    testee.addNodeTags(page2b, "blob");
 
     // Verify properties of root
     NodeVector_t rootContext = testee.getNodeNavigationContext(testee.root());
@@ -120,6 +121,7 @@ AFL_TEST("util.doc.Index:build", a)
     a.check     ("05. NAV_NEXT_INDIRECT",      checkTag(rootContext, Index::NAV_NEXT_INDIRECT, group));
     a.check     ("06. NAV_PREVIOUS_DIRECT",   !findTag(rootContext, Index::NAV_PREVIOUS_DIRECT));
     a.check     ("07. NAV_PREVIOUS_INDIRECT", !findTag(rootContext, Index::NAV_PREVIOUS_INDIRECT));
+    a.check     ("08. isNodeBlob",            !testee.isNodeBlob(testee.root()));
 
     // Verify properties of group
     NodeVector_t groupContext =                   testee.getNodeNavigationContext(group);
@@ -134,6 +136,7 @@ AFL_TEST("util.doc.Index:build", a)
     a.check     ("19. NAV_NEXT_INDIRECT",         checkTag(groupContext, Index::NAV_NEXT_INDIRECT, doc1));
     a.check     ("20. NAV_PREVIOUS_DIRECT",      !findTag(groupContext, Index::NAV_PREVIOUS_DIRECT));
     a.check     ("21. NAV_PREVIOUS_INDIRECT",     checkTag(groupContext, Index::NAV_PREVIOUS_INDIRECT, testee.root()));
+    a.check     ("22. isNodeBlob",               !testee.isNodeBlob(group));
 
     // Verify properties of doc1
     NodeVector_t doc1Context =                    testee.getNodeNavigationContext(doc1);
@@ -161,6 +164,7 @@ AFL_TEST("util.doc.Index:build", a)
     a.check     ("49. NAV_NEXT_INDIRECT",         checkTag(doc2Context, Index::NAV_NEXT_INDIRECT, page2a));
     a.check     ("50. NAV_PREVIOUS_DIRECT",       checkTag(doc2Context, Index::NAV_PREVIOUS_DIRECT, doc1));
     a.check     ("51. NAV_PREVIOUS_INDIRECT",     checkTag(doc2Context, Index::NAV_PREVIOUS_INDIRECT, page1a));
+    a.check     ("52. isNodeBlob",               !testee.isNodeBlob(doc2));
 
     // Verify properties of page1a
     NodeVector_t page1aContext =                  testee.getNodeNavigationContext(page1a);
@@ -210,6 +214,7 @@ AFL_TEST("util.doc.Index:build", a)
     a.check     ("97. NAV_NEXT_INDIRECT",        !findTag(page2bContext, Index::NAV_NEXT_INDIRECT));
     a.check     ("98. NAV_PREVIOUS_DIRECT",       checkTag(page2bContext, Index::NAV_PREVIOUS_DIRECT, page2a));
     a.check     ("99. NAV_PREVIOUS_INDIRECT",     checkTag(page2bContext, Index::NAV_PREVIOUS_INDIRECT, page2aa));
+    a.check     ("99a. isNodeBlob",               testee.isNodeBlob(page2b));
 
     // Verify getNodeParents
     std::vector<Index::Handle_t> path = testee.getNodeParents(page2aa);

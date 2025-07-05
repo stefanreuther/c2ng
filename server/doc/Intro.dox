@@ -1,0 +1,10 @@
+/*!
+     \namespace server::doc
+     \brief c2doc server
+
+     This namespace implements the c2doc service which publishes documentation,
+     containing of XML files and assets.
+     The server is stateless.
+
+     - server::doc::DocumentationImpl
+ */

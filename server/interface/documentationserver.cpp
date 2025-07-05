@@ -196,12 +196,14 @@ server::interface::DocumentationServer::packNodeInfo(const Documentation::NodeIn
        @key id:DocNodeId (Id of node)
        @key title:Str    (Title)
        @key tags:Str[]   (Tags)
+       @key blob:Str     (Blob Id)
        @key type:Int     (0=page, 1=document)
        @key children:Int (1 if node has children)
        @key info:Int     (Info tag, e.g. depth for LS) */
     Hash::Ref_t h = Hash::create();
     h->setNew("id", makeStringValue(info.nodeId));
     h->setNew("title", makeStringValue(info.title));
+    h->setNew("blob", makeStringValue(info.blobId));
 
     Vector::Ref_t v = Vector::create();
     for (size_t i = 0, n = info.tags.size(); i < n; ++i) {

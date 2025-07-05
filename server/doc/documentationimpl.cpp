@@ -10,6 +10,9 @@
 #include "afl/io/xml/defaultentityhandler.hpp"
 #include "afl/io/xml/parser.hpp"
 #include "afl/io/xml/reader.hpp"
+#include "afl/io/xml/tagnode.hpp"
+#include "afl/io/xml/textnode.hpp"
+#include "afl/string/format.hpp"
 #include "server/doc/root.hpp"
 #include "server/errors.hpp"
 #include "util/charsetfactory.hpp"
@@ -23,6 +26,9 @@ using afl::io::xml::DefaultEntityHandler;
 using afl::io::xml::Nodes_t;
 using afl::io::xml::Parser;
 using afl::io::xml::Reader;
+using afl::io::xml::TagNode;
+using afl::io::xml::TextNode;
+using afl::string::Format;
 using server::doc::Root;
 using server::interface::Documentation;
 using util::CharsetFactory;
@@ -62,6 +68,7 @@ namespace {
         Documentation::NodeInfo result;
         result.nodeId = index.getNodeAddress(node.node, docId);
         result.title = index.getNodeTitle(node.node);
+        result.blobId = index.getNodeContentId(node.node);
         for (size_t i = 0, n = index.getNumNodeTags(node.node); i < n; ++i) {
             result.tags.push_back(index.getNodeTagByIndex(node.node, i));
         }
@@ -86,6 +93,7 @@ namespace {
         Documentation::NodeInfo result;
         result.nodeId = index.getNodeAddress(node.node, docId);
         result.title = index.getNodeTitle(node.docNode);
+        result.blobId = index.getNodeContentId(node.node);
         for (size_t i = 0, n = index.getNumNodeTags(node.node); i < n; ++i) {
             result.tags.push_back(index.getNodeTagByIndex(node.node, i));
         }
@@ -151,7 +159,27 @@ server::doc::DocumentationImpl::renderNode(String_t nodeId, const RenderOptions&
 
     // Retrieve document
     BlobStore::ObjectId_t objId = m_root.index().getNodeContentId(node);
-    if (!objId.empty()) {
+    if (m_root.index().isNodeBlob(node)) {
+        // Blob
+        String_t baseName = nodeId;
+        String_t::size_type pos = baseName.rfind('/');
+        if (pos != String_t::npos) {
+            baseName.erase(0, pos+1);
+        }
+
+        std::auto_ptr<TagNode> a(new TagNode("a"));
+        a->setAttribute("href", Format("asset:%s/%s", objId, baseName));
+        a->setAttribute("class", "download");
+        a->addNewChild(new TextNode(baseName));
+
+        std::auto_ptr<TagNode> p(new afl::io::xml::TagNode("p"));
+        p->addNewChild(a.release());
+
+        Nodes_t nodes;
+        nodes.pushBackNew(p.release());
+
+        return renderHTML(nodes, opts2);
+    } else if (!objId.empty()) {
         // Parse XML
         Ref<FileMapping> content = m_root.blobStore().getObject(objId);
         ConstMemoryStream ms(content->get());

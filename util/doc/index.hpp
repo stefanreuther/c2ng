@@ -135,6 +135,12 @@ namespace util { namespace doc {
             @return true if node is a page, false if node is root or document */
         bool isNodePage(Handle_t node) const;
 
+        /** Check whether node is a blob.
+            A node counts as blob (not text) if it has the "blob" tag.
+            @param node Node
+            @return true if node is a blob and should not be rendered */
+        bool isNodeBlob(Handle_t node) const;
+
         /** Set node title.
             @param node Node
             @param title Title */

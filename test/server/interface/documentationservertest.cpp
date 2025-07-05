@@ -92,6 +92,7 @@ namespace {
         result.tags.push_back("t1");
         result.tags.push_back("t2");
         result.tags.push_back("t3");
+        result.blobId = "bblloobb";
         result.isPage = false;
         result.hasChildren = true;
         result.infoTag = 42;
@@ -147,6 +148,7 @@ AFL_TEST("server.interface.DocumentationServer:commands", a)
         a.checkEqual("34. tags",     ap("tags")[0].toString(), "t1");
         a.checkEqual("35. tags",     ap("tags")[1].toString(), "t2");
         a.checkEqual("36. tags",     ap("tags")[2].toString(), "t3");
+        a.checkEqual("36a. blob",    ap("blob").toString(), "bblloobb");
         a.checkEqual("37. type",     ap("type").toInteger(), 1);
         a.checkEqual("38. children", ap("children").toInteger(), 1);
         a.checkEqual("39. info",     ap("info").toInteger(), 42);
@@ -295,6 +297,7 @@ AFL_TEST("server.interface.DocumentationServer:roundtrip", a)
         a.checkEqual("34. tags",        ni.tags[0], "t1");
         a.checkEqual("35. tags",        ni.tags[1], "t2");
         a.checkEqual("36. tags",        ni.tags[2], "t3");
+        a.checkEqual("36a. blob",       ni.blobId, "bblloobb");
         a.checkEqual("37. isPage",      ni.isPage, false);
         a.checkEqual("38. hasChildren", ni.hasChildren, true);
         a.checkEqual("39. infoTag",     ni.infoTag, 42);

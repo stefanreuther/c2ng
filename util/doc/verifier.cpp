@@ -33,6 +33,18 @@ using afl::string::Format;
 namespace {
     const size_t Address_Used = 1;
     const size_t Address_Defined = 2;
+
+    String_t redactTag(const String_t& tag)
+    {
+        // The "size=#", "date=#" tags are used for files; do not report each individual instance
+        if (util::strStartsWith(tag, "size=")) {
+            return "size=#";
+        } else if (util::strStartsWith(tag, "date=")) {
+            return "date=#";
+        } else {
+            return tag;
+        }
+    }
 }
 
 /*
@@ -369,7 +381,7 @@ util::doc::Verifier::verifyNode(const Index& idx, const BlobStore& blobStore, In
 {
     // Info_UsedTags
     for (size_t i = 0, n = idx.getNumNodeTags(node); i < n; ++i) {
-        addMessage(Info_UsedTags, idx, node, idx.getNodeTagByIndex(node, i));
+        addMessage(Info_UsedTags, idx, node, redactTag(idx.getNodeTagByIndex(node, i)));
     }
 
     // Warn_NodeHasNoId, Warn_NodeHasNoTitle
@@ -382,7 +394,9 @@ util::doc::Verifier::verifyNode(const Index& idx, const BlobStore& blobStore, In
         }
     }
 
-    if (idx.getNodeContentId(node).empty()) {
+    if (idx.isNodeBlob(node)) {
+        // Blob; ignore
+    } else if (idx.getNodeContentId(node).empty()) {
         // Warn_NodeIsEmpty
         if (idx.getNumNodeChildren(node) == 0) {
             addMessage(Warn_NodeIsEmpty, idx, node, String_t());

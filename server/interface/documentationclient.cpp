@@ -113,6 +113,7 @@ server::interface::DocumentationClient::unpackNodeInfo(afl::data::Access a)
     NodeInfo info;
     info.nodeId = a("id").toString();
     info.title = a("title").toString();
+    info.blobId = a("blob").toString();
     for (size_t i = 0, n = a("tags").getArraySize(); i < n; ++i) {
         info.tags.push_back(a("tags")[i].toString());
     }

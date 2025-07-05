@@ -14,6 +14,7 @@
 using server::doc::Root;
 using server::doc::DocumentationImpl;
 using server::interface::Documentation;
+using util::doc::BlobStore;
 using util::doc::InternalBlobStore;
 using util::doc::Index;
 
@@ -43,17 +44,22 @@ AFL_TEST("server.doc.DocumentationImpl:node-access", a)
     String_t p1 = "<p>First page, see <a href=\"p2\">second</a></p>";
     String_t p21 = "<p>Second page</p>";
     String_t p22 = "<p>Second page, updated</p>";
+    String_t blob = "whatever";
 
     Index& idx = r.index();
     Index::Handle_t g = idx.addDocument(idx.root(), "g", "Group", "");
     Index::Handle_t v1 = idx.addDocument(g, "v1", "Version 1", "");
     Index::Handle_t v2 = idx.addDocument(g, "v2", "Version 2", "");
-    idx.addPage(v1, "p1", "Page 1", blobs.addObject(afl::string::toBytes(p1)));
+    BlobStore::ObjectId_t o1 = blobs.addObject(afl::string::toBytes(p1));
+    idx.addPage(v1, "p1", "Page 1", o1);
     idx.addPage(v2, "p1", "Page 1", blobs.addObject(afl::string::toBytes(p1)));
     idx.addPage(v1, "p2", "Page 2", blobs.addObject(afl::string::toBytes(p21)));
     idx.addPage(v2, "p2", "Page 2", blobs.addObject(afl::string::toBytes(p22)));
     idx.addNodeTags(v1, "old");
     idx.addNodeTags(v2, "new");
+
+    Index::Handle_t blobId = idx.addPage(v2, "bb", "Blob", blobs.addObject(afl::string::toBytes(blob)));
+    idx.addNodeTags(blobId, "blob");
 
     // Test
     DocumentationImpl testee(r);
@@ -68,6 +74,15 @@ AFL_TEST("server.doc.DocumentationImpl:node-access", a)
         AFL_CHECK_THROWS(a("03. renderNode"), testee.renderNode("x/y", opts), std::exception);
     }
 
+    // renderNode(), blob - precise format is unspecified, but must contain link to assetRoot
+    {
+        Documentation::RenderOptions opts;
+        opts.assetRoot = "/asset/";
+
+        String_t result = testee.renderNode("v2/bb", opts);
+        a.checkContains("06. renderNode", result, "/asset/");
+    }
+
     // getNodeInfo
     {
         Documentation::NodeInfo i1 = testee.getNodeInfo("v1/p1");
@@ -76,6 +91,7 @@ AFL_TEST("server.doc.DocumentationImpl:node-access", a)
         a.checkEqual("13. tags",        i1.tags.size(), 0U);
         a.checkEqual("14. isPage",      i1.isPage, true);
         a.checkEqual("15. hasChildren", i1.hasChildren, false);
+        a.checkEqual("16. blob",        i1.blobId, o1);
 
         Documentation::NodeInfo i2 = testee.getNodeInfo("v1");
         a.checkEqual("21. nodeId",      i2.nodeId, "v1");
@@ -124,7 +140,7 @@ AFL_TEST("server.doc.DocumentationImpl:node-access", a)
         allOpts.acrossDocuments = true;
         allOpts.maxDepth = 10;
         std::vector<Documentation::NodeInfo> v4 = testee.getNodeChildren("", allOpts);
-        a.checkEqual("81. size", v4.size(), 7U);
+        a.checkEqual("81. size", v4.size(), 8U);
 
         AFL_CHECK_THROWS(a("91. getNodeChildren"), testee.getNodeChildren("asljk", opts), std::exception);
     }
