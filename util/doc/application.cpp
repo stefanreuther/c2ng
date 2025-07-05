@@ -134,6 +134,8 @@ util::doc::Application::appMain()
         help();
     } else if (*pc == "add-group") {
         addGroup(data, parser);
+    } else if (*pc == "import-downloads") {
+        importDownloads(data, parser);
     } else if (*pc == "import-help") {
         importHelp(data, parser);
     } else if (*pc == "import-text") {
@@ -327,6 +329,47 @@ util::doc::Application::addGroup(DataParameters& data, afl::sys::CommandLinePars
     DataReference ref;
     loadData(ref, data);
     addDocument(ref, np, false);
+    saveData(ref, data);
+}
+
+void
+util::doc::Application::importDownloads(DataParameters& data, afl::sys::CommandLineParser& parser)
+{
+    // Parse
+    NodeParameters np;
+    std::vector<String_t> fileNames;
+    Ref<MultiDirectory> imagePath = MultiDirectory::create();
+    Ref<MultiDirectory> filePath = MultiDirectory::create();
+    String_t text;
+    bool option;
+    while (parser.getNext(option, text)) {
+        if (option) {
+            if (handleNodeOption(np, text, parser) || handleDataOption(data, text, parser)) {
+                // ok
+            } else if (text == "image-path") {
+                imagePath->addDirectory(fileSystem().openDirectory(parser.getRequiredParameter(text)));
+            } else if (text == "file-path") {
+                filePath->addDirectory(fileSystem().openDirectory(parser.getRequiredParameter(text)));
+            } else {
+                errorExitBadOption();
+            }
+        } else {
+            fileNames.push_back(text);
+        }
+    }
+
+    if (fileNames.empty()) {
+        errorExit(Format(translator()("no file name specified. Use \"%s -h\" for help"), environment().getInvocationName()));
+    }
+
+    // Operate
+    DataReference ref;
+    loadData(ref, data);
+    Index::Handle_t hdl = addDocument(ref, np, false);
+    for (size_t i = 0; i < fileNames.size(); ++i) {
+        Ref<Stream> file = fileSystem().openFile(fileNames[i], FileSystem::OpenRead);
+        util::doc::importDownloads(ref.index, hdl, *ref.blobStore, *file, *imagePath, *filePath, log(), translator());
+    }
     saveData(ref, data);
 }
 
@@ -635,6 +678,7 @@ util::doc::Application::help()
                                                 "Commands:\n"
                                                 "  add-group [OPTIONS...]\n\tAdd a group\n"
                                                 "  get URL...\n\tGet page content\n"
+                                                "  import-downloads [OPTIONS...] FILE...\n\tImport downloads\n"
                                                 "  import-help [OPTIONS...] FILE...\n\tImport PCC2 Help files (*.xml)\n"
                                                 "  import-text [OPTIONS...] FILE\n\tImport plain-text file\n"
                                                 "  ls [-l|-t|-f|-r|-d...] [URL...]\n\tList content, recursively\n"
@@ -662,8 +706,7 @@ util::doc::Application::help()
                                                 "-d, --self, --directory\t(ls) Show element itself, not content\n"
                                                 "--site=PFX\t(render) Set URL prefix for \"site:\" links\n"
                                                 "--assets=PFX\t(render) Set URL prefix for \"asset:\" links\n"
-                                                "--doc=PFX\t(render) Set URL prefix for document links\n"
-))));
+                                                "--doc=PFX\t(render) Set URL prefix for document links\n"))));
     exit(0);
 }
 

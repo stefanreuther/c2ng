@@ -3,6 +3,7 @@
   *  \brief Test for util::doc::HelpImport
   */
 
+#include <algorithm>
 #include "util/doc/helpimport.hpp"
 
 #include "afl/io/constmemorystream.hpp"
@@ -16,6 +17,7 @@
 
 using afl::base::Ref;
 using afl::io::ConstMemoryStream;
+using afl::io::FileSystem;
 using afl::io::InternalDirectory;
 using afl::string::NullTranslator;
 using afl::sys::Log;
@@ -353,7 +355,7 @@ AFL_TEST("util.doc.HelpImport:import-image", a)
     NullTranslator tx;
     Index idx;
     Ref<InternalDirectory> dir = InternalDirectory::create("testImportImage");
-    dir->openFile("pixel.gif", afl::io::FileSystem::Create)->fullWrite(PIXEL);
+    dir->openFile("pixel.gif", FileSystem::Create)->fullWrite(PIXEL);
 
     // Do it
     ms.setPos(0);
@@ -412,4 +414,143 @@ AFL_TEST("util.doc.HelpImport:import-image:error", a)
 
     // Import must have created a warning
     a.checkLessEqual("21. getNumWarnings", 1U, log.getNumWarnings());
+}
+
+/** Test importDownloads(). */
+AFL_TEST("util.doc.HelpImport:importDownloads", a)
+{
+    // Environment
+    ConstMemoryStream ms(afl::string::toBytes("<fileset>\n"
+                                              " <dir id=\"pcc\" title=\"PCC\">\n"
+                                              "  <p>Info: <a href=\"/pcc/1.1.22\">link</a></p>\n"
+                                              "  <dir id=\"1.1.22\" title=\"Version 1.1.22\" date=\"2024-04-28\">\n"
+                                              "   <file src=\"test.zip\" title=\"The File\" tag=\"doc,lang=en\" />\n"
+                                              "  </dir>\n"
+                                              " </dir>\n"
+                                              " <dir id=\"other\">\n"
+                                              "  <img src=\"test.jpg\" />\n"
+                                              " </dir>\n"
+                                              "</fileset>\n"));
+
+    Ref<InternalDirectory> imageDir = InternalDirectory::create("imageDir");
+    imageDir->openFile("test.jpg", FileSystem::Create)
+        ->fullWrite(afl::string::toBytes("image"));
+    Ref<InternalDirectory> fileDir = InternalDirectory::create("fileDir");
+    fileDir->openFile("test.zip", FileSystem::Create)
+        ->fullWrite(afl::string::toBytes("zip file content"));
+
+    // Do it
+    InternalBlobStore blobStore;
+    afl::test::LogListener log;
+    NullTranslator tx;
+    Index idx;
+    Index::Handle_t root = idx.addDocument(idx.root(), "", "", "");
+    importDownloads(idx, root, blobStore, ms, *imageDir, *fileDir, log, tx);
+
+    // Verify
+    a.checkEqual("01. getNumNodeChildren", idx.getNumNodeChildren(root), 2U);
+
+    // Outer directory
+    Index::Handle_t outerDir = idx.getNodeChildByIndex(root, 0);
+    a.checkEqual("11. id",        idx.getNumNodeIds(outerDir), 1U);
+    a.checkEqual("12. id",        idx.getNodeIdByIndex(outerDir, 0), "pcc");
+    a.checkEqual("13. #children", idx.getNumNodeChildren(outerDir), 1U);
+    a.checkEqual("14. title",     idx.getNodeTitle(outerDir), "PCC");
+    a.checkEqual("15. type",      idx.isNodePage(outerDir), false);
+    a.checkEqual("16. type",      idx.isNodeBlob(outerDir), false);
+
+    // Inner directory
+    Index::Handle_t innerDir = idx.getNodeChildByIndex(outerDir, 0);
+    a.checkEqual("21. id",        idx.getNumNodeIds(innerDir), 1U);
+    a.checkEqual("22. id",        idx.getNodeIdByIndex(innerDir, 0), "pcc/1.1.22");
+    a.checkEqual("23. #children", idx.getNumNodeChildren(innerDir), 1U);
+    a.checkEqual("24. title",     idx.getNodeTitle(innerDir), "Version 1.1.22");
+    a.checkEqual("25. type",      idx.isNodePage(innerDir), false);
+    a.checkEqual("26. type",      idx.isNodeBlob(innerDir), false);
+    a.checkEqual("27. #tags",     idx.getNumNodeTags(innerDir), 1U);
+    a.checkEqual("28. tag",       idx.getNodeTagByIndex(innerDir, 0), "date=2024-04-28");
+
+    // File
+    Index::Handle_t file = idx.getNodeChildByIndex(innerDir, 0);
+    a.checkEqual("31. id",        idx.getNumNodeIds(file), 1U);
+    a.checkEqual("32. id",        idx.getNodeIdByIndex(file, 0), "test.zip");
+    a.checkEqual("33. #children", idx.getNumNodeChildren(file), 0U);
+    a.checkEqual("34. title",     idx.getNodeTitle(file), "The File");
+    a.checkEqual("35. type",      idx.isNodePage(file), true);
+    a.checkEqual("36. type",      idx.isNodeBlob(file), true);
+    a.checkEqual("37. #tags",     idx.getNumNodeTags(file), 4U);
+
+    // Verify file tags. They can come in any order.
+    std::vector<String_t> tags;
+    for (size_t i = 0; i < idx.getNumNodeTags(file); ++i) {
+        tags.push_back(idx.getNodeTagByIndex(file, i));
+    }
+    std::sort(tags.begin(), tags.end());
+    a.checkEqual("41. tag", tags[0], "blob");
+    a.checkEqual("42. tag", tags[1], "doc");
+    a.checkEqual("43. tag", tags[2], "lang=en");
+    a.checkEqual("44. tag", tags[3], "size=16");
+
+    // Second directory
+    Index::Handle_t secondDir = idx.getNodeChildByIndex(root, 1);
+    a.checkEqual("51. id",        idx.getNumNodeIds(secondDir), 1U);
+    a.checkEqual("52. id",        idx.getNodeIdByIndex(secondDir, 0), "other");
+    a.checkEqual("53. #children", idx.getNumNodeChildren(secondDir), 0U);
+    a.checkEqual("54. title",     idx.getNodeTitle(secondDir), "other");
+    a.checkEqual("55. type",      idx.isNodePage(secondDir), false);
+    a.checkEqual("56. type",      idx.isNodeBlob(secondDir), false);
+
+    // Content
+    a.checkEqual("91. info", afl::string::fromBytes(blobStore.getObject(idx.getNodeContentId(outerDir))->get()), "<p>Info: <a href=\"/pcc/1.1.22\">link</a></p>");
+    a.checkEqual("92. info", afl::string::fromBytes(blobStore.getObject(idx.getNodeContentId(file))->get()), "zip file content");
+    a.checkEqual("93. info", afl::string::fromBytes(blobStore.getObject(idx.getNodeContentId(secondDir))->get()), "<img src=\"asset:0e76292794888d4f1fa75fb3aff4ca27c58f56a6/test.jpg\"/>");
+}
+
+/** Test importDownloads(), irregular input: tag inside <file>. */
+AFL_TEST("util.doc.HelpImport:importDownloads:tag-inside-file", a)
+{
+    // Environment
+    ConstMemoryStream ms(afl::string::toBytes("<fileset>\n"
+                                              " <dir id=\"a\">\n"
+                                              "  <file src=\"test.zip\">\n"
+                                              "   <dir id=\"b\">\n"
+                                              "   </dir>\n"
+                                              "  </file>\n"
+                                              " </dir>\n"
+                                              "</fileset>\n"));
+
+    Ref<InternalDirectory> imageDir = InternalDirectory::create("imageDir");
+    Ref<InternalDirectory> fileDir = InternalDirectory::create("fileDir");
+    fileDir->openFile("test.zip", FileSystem::Create)
+        ->fullWrite(afl::string::toBytes("zip file content"));
+
+    // Do it
+    InternalBlobStore blobStore;
+    afl::test::LogListener log;
+    NullTranslator tx;
+    Index idx;
+    Index::Handle_t root = idx.addDocument(idx.root(), "", "", "");
+    importDownloads(idx, root, blobStore, ms, *imageDir, *fileDir, log, tx);
+
+    // Verify
+    a.checkEqual("01. getNumNodeChildren", idx.getNumNodeChildren(root), 1U);
+
+    // Directory
+    Index::Handle_t dir = idx.getNodeChildByIndex(root, 0);
+    a.checkEqual("11. id",        idx.getNumNodeIds(dir), 1U);
+    a.checkEqual("12. id",        idx.getNodeIdByIndex(dir, 0), "a");
+    a.checkEqual("13. #children", idx.getNumNodeChildren(dir), 1U);
+    a.checkEqual("14. type",      idx.isNodePage(dir), false);
+    a.checkEqual("15. type",      idx.isNodeBlob(dir), false);
+
+    // Inner directory
+    Index::Handle_t file = idx.getNodeChildByIndex(dir, 0);
+    a.checkEqual("21. id",        idx.getNumNodeIds(file), 1U);
+    a.checkEqual("22. id",        idx.getNodeIdByIndex(file, 0), "test.zip");
+    a.checkEqual("23. #children", idx.getNumNodeChildren(file), 0U);
+    a.checkEqual("24. type",      idx.isNodePage(file), true);
+    a.checkEqual("25. type",      idx.isNodeBlob(file), true);
+
+    // Content
+    a.checkEqual("91. info", afl::string::fromBytes(blobStore.getObject(idx.getNodeContentId(file))->get()), "zip file content");
 }

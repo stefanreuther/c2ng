@@ -44,6 +44,23 @@ namespace util { namespace doc {
         @param [in]     tx         Translator (warning messages) */
     void importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, afl::io::Stream& file, afl::io::Directory& imagePath, int flags, afl::sys::LogListener& log, afl::string::Translator& tx);
 
+    /** Import downloads.
+        Reads an XML file describing the downloads, and imports those.
+
+        - &lt;dir&gt; describes a directory; represented as a document.
+          It can contain text in the same syntax as for help.
+        - &lt;file&gt; represents a file; represented as a page blob.
+
+        @param [in,out] idx        Help index
+        @param [in]     root       Root page
+        @param [in,out] blobStore  Blob store to store transformed pages
+        @param [in]     file       XML file
+        @param [in]     imagePath  Image path (for &lt;img&gt; tags in directories)
+        @param [in]     filePath   File path (for importing files referenced by &lt;file&gt;)
+        @param [in,out] log        Log listener (warning messages)
+        @param [in]     tx         Translator (warning messages) */
+    void importDownloads(Index& idx, Index::Handle_t root, BlobStore& blobStore, afl::io::Stream& file, afl::io::Directory& imagePath, afl::io::Directory& filePath, afl::sys::LogListener& log, afl::string::Translator& tx);
+
 } }
 
 #endif

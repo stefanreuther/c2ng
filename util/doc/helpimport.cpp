@@ -7,6 +7,7 @@
 #include <map>
 #include "util/doc/helpimport.hpp"
 #include "afl/container/ptrvector.hpp"
+#include "afl/except/fileproblemexception.hpp"
 #include "afl/io/internalsink.hpp"
 #include "afl/io/xml/defaultentityhandler.hpp"
 #include "afl/io/xml/reader.hpp"
@@ -14,12 +15,15 @@
 #include "afl/io/xml/textnode.hpp"
 #include "afl/io/xml/writer.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/posixfilenames.hpp"
 #include "util/charsetfactory.hpp"
 #include "util/string.hpp"
 
 using afl::container::PtrVector;
+using afl::io::FileMapping;
 using afl::io::InternalSink;
 using afl::io::Stream;
+using afl::io::Directory;
 using afl::io::xml::DefaultEntityHandler;
 using afl::io::xml::Node;
 using afl::io::xml::Nodes_t;
@@ -29,6 +33,7 @@ using afl::io::xml::TagNode;
 using afl::io::xml::TextNode;
 using afl::io::xml::Writer;
 using afl::string::Format;
+using afl::string::PosixFileNames;
 using afl::string::Translator;
 using afl::sys::LogListener;
 using util::doc::BlobStore;
@@ -39,7 +44,7 @@ namespace {
     // Log channel name
     const char*const LOG_NAME = "util.doc.import";
 
-    // State for a single page
+    // State for a single page (or directory)
     struct State {
         // Currently-open tags, innermost last. If the last tag is closed, it is appended as a child to the previous one.
         // If the last tag is closed, it is appended to the result.
@@ -54,6 +59,24 @@ namespace {
         State(Index::Handle_t page)
             : pendingTags(), result(), page(page)
             { }
+    };
+
+    // State for a file
+    struct FileState {
+        // File name in its directory
+        String_t name;
+
+        // File source (input file)
+        String_t source;
+
+        // Title
+        String_t title;
+
+        // Tags (e.g. "lang=en")
+        std::vector<String_t> tags;
+
+        // Currently-open XML tags, innermost last. Only for error handling.
+        std::vector<String_t> pendingTagNames;
     };
 
     // Check for absolute link.
@@ -146,6 +169,7 @@ namespace {
     bool isIgnorableTag(const String_t& tagName)
     {
         return tagName == "help"
+            || tagName == "fileset"
             || tagName == "group";
     }
 
@@ -251,7 +275,8 @@ namespace {
         }
     }
 
-    String_t importFile(BlobStore& blobStore, String_t fileName, afl::io::Directory& imagePath)
+    // Import a picture
+    String_t importImage(BlobStore& blobStore, String_t fileName, Directory& imagePath)
     {
         // Open file
         afl::base::Ptr<Stream> file = imagePath.openFileNT(fileName, afl::io::FileSystem::OpenRead);
@@ -270,8 +295,122 @@ namespace {
                                    : fileName.substr(p));
         return Format("asset:%s/%s", objId, userName);
     }
-}
 
+    // Make directory name. Each <dir> specifies a name relative to its parent, so we need to merge them.
+    String_t makeDirectoryName(Index::Handle_t page, Index& idx, String_t name)
+    {
+        String_t prefix;
+        std::vector<Index::Handle_t> parents = idx.getNodeParents(page);
+        if (!parents.empty() && idx.getNumNodeIds(parents.back()) != 0) {
+            prefix = idx.getNodeIdByIndex(parents.back(), 0);
+        }
+        return PosixFileNames().makePathName(prefix, name);
+    }
+
+    // Finish a directory
+    void finishDirectory(Index& idx, BlobStore& blobStore, State& st)
+    {
+        // Finish page (=output content)
+        finishPage(idx, blobStore, st, 0);
+
+        // Give it a default title
+        if (idx.getNodeTitle(st.page).empty() && idx.getNumNodeIds(st.page) != 0) {
+            idx.setNodeTitle(st.page, PosixFileNames().getFileName(idx.getNodeIdByIndex(st.page, 0)));
+        }
+    }
+
+    // Finish a file
+    void finishFile(Index& idx, BlobStore& blobStore, State& st, FileState& file, Directory& filePath, LogListener& log, Translator& tx)
+    {
+        try {
+            // Open/import file
+            afl::base::Ref<Stream> in = filePath.openFile(file.source, afl::io::FileSystem::OpenRead);
+            afl::base::Ref<FileMapping> map = in->createVirtualMapping();
+            BlobStore::ObjectId_t objId = blobStore.addObject(map->get());
+
+            // Find Id
+            String_t fileId = file.name;
+            if (fileId.empty()) {
+                fileId = PosixFileNames().getFileName(file.source);
+            }
+
+            // Create
+            Index::Handle_t hdl = idx.addPage(st.page, fileId, file.title.empty() ? fileId : file.title, objId);
+            idx.addNodeTags(hdl, "blob");
+            idx.addNodeTags(hdl, Format("size=%d", map->get().size()));
+            for (size_t i = 0; i < file.tags.size(); ++i) {
+                idx.addNodeTags(hdl, file.tags[i]);
+            }
+        }
+        catch (afl::except::FileProblemException& e) {
+            log.write(LogListener::Error, LOG_NAME, tx("Cannot import file"), e);
+        }
+    }
+
+    // Check for matching tag; warn on mismathc
+    void checkMatchingTag(Reader& rdr, afl::io::Stream& file, String_t expect, LogListener& log, Translator& tx)
+    {
+        if (rdr.getTag() != expect) {
+            log.write(LogListener::Warn, LOG_NAME, Format(tx("%s:%d: mismatching tag names, expect \"</%s>\", found \"</%s>\""), file.getName(), rdr.getPos(), expect, rdr.getTag()));
+        }
+    }
+
+    // Common handling of tag attribute in a document
+    void handleTagAttribute(TagNode& tag, Reader& rdr, BlobStore& blobStore, Directory& imagePath, afl::io::Stream& file, LogListener& log, Translator& tx)
+    {
+        if (tag.getName() == "a" && rdr.getName() == "href") {
+            // Transform link
+            String_t target = isAbsoluteLink(rdr.getValue()) ? rdr.getValue() : transformPageName(rdr.getValue());
+            tag.setAttribute(rdr.getName(), target);
+        } else if (tag.getName() == "img" && rdr.getName() == "src") {
+            // If link is not absolute, import target as a blob
+            if (isAbsoluteLink(rdr.getValue())) {
+                tag.setAttribute(rdr.getName(), rdr.getValue());
+            } else {
+                String_t importedFile = importImage(blobStore, rdr.getValue(), imagePath);
+                if (importedFile.empty()) {
+                    log.write(LogListener::Warn, LOG_NAME, Format(tx("%s:%d: referenced image not found"), file.getName(), rdr.getPos()));
+                } else {
+                    tag.setAttribute(rdr.getName(), importedFile);
+                }
+            }
+        } else {
+            // Normal attribute, add it
+            tag.setAttribute(rdr.getName(), rdr.getValue());
+        }
+    }
+
+    // Common handling of text in a document (<page>, <dir>)
+    void handlePageText(State& me, Reader& rdr, afl::io::Stream& file, LogListener& log, Translator& tx)
+    {
+        if (me.pendingTags.empty()) {
+            // Raw text on page [irregular case]
+            const String_t text = transformText(rdr.getValue(), true, true);
+            if (!text.empty()) {
+                log.write(LogListener::Warn, LOG_NAME, Format(tx("%s:%d: raw text on page"), file.getName(), rdr.getPos()));
+                me.result.pushBackNew(new TextNode(text));
+            }
+        } else {
+            // Text within tag
+            TagNode& tag = *me.pendingTags.back();
+            if (!hasPreformattedTag(me.pendingTags)) {
+                // Normal (flow) text. Normalize whitespace.
+                const String_t text = transformText(rdr.getValue(), hasSpaceOrBreak(me.pendingTags), isBlockContext(tag));
+                if (!text.empty()) {
+                    tag.addNewChild(new TextNode(text));
+                }
+            } else {
+                // Text in a <pre>.
+                // Do not normalize. However, it commonly starts with a new line; remove that.
+                const String_t text = rdr.getValue();
+                size_t pos = (tag.getName() == "pre" && tag.getChildren().empty()) ? text.find_first_not_of("\r\n") : 0;
+                if (pos != String_t::npos) {
+                    tag.addNewChild(new TextNode(text.substr(pos)));
+                }
+            }
+        }
+    }
+}
 
 void
 util::doc::importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, afl::io::Stream& file, afl::io::Directory& imagePath, int flags, afl::sys::LogListener& log, afl::string::Translator& tx)
@@ -316,26 +455,7 @@ util::doc::importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, af
             } else {
                 // This is an attribute of some document element
                 TagNode& tag = *me.pendingTags.back();
-                if (tag.getName() == "a" && rdr.getName() == "href") {
-                    // Transform link
-                    String_t target = isAbsoluteLink(rdr.getValue()) ? rdr.getValue() : transformPageName(rdr.getValue());
-                    tag.setAttribute(rdr.getName(), target);
-                } else if (tag.getName() == "img" && rdr.getName() == "src") {
-                    // If link is not absolute, import target as a blob
-                    if (isAbsoluteLink(rdr.getValue())) {
-                        tag.setAttribute(rdr.getName(), rdr.getValue());
-                    } else {
-                        String_t importedFile = importFile(blobStore, rdr.getValue(), imagePath);
-                        if (importedFile.empty()) {
-                            log.write(LogListener::Warn, LOG_NAME, Format(tx("%s:%d: referenced image not found"), file.getName(), rdr.getPos()));
-                        } else {
-                            tag.setAttribute(rdr.getName(), importedFile);
-                        }
-                    }
-                } else {
-                    // Normal attribute, add it
-                    tag.setAttribute(rdr.getName(), rdr.getValue());
-                }
+                handleTagAttribute(tag, rdr, blobStore, imagePath, file, log, tx);
             }
             break;
 
@@ -346,7 +466,7 @@ util::doc::importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, af
                 // Closing a page
                 if (rdr.getTag() != "page") {
                     if (state.size() > 1) {
-                        log.write(LogListener::Warn, LOG_NAME, Format(tx("%s:%d: mismatching tag names, expect \"</%s>\", found \"</%s>\""), file.getName(), rdr.getPos(), "page", rdr.getTag()));
+                        checkMatchingTag(rdr, file, "page", log, tx);
                     } else {
                         log.write(LogListener::Warn, LOG_NAME, Format(tx("%s:%d: unexpected closing tag \"</%s>\""), file.getName(), rdr.getPos(), rdr.getTag()));
                     }
@@ -357,9 +477,7 @@ util::doc::importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, af
             } else {
                 // Validate
                 std::auto_ptr<TagNode> n(me.pendingTags.extractLast());
-                if (n->getName() != rdr.getTag()) {
-                    log.write(LogListener::Warn, LOG_NAME, Format(tx("%s:%d: mismatching tag names, expect \"</%s>\", found \"</%s>\""), file.getName(), rdr.getPos(), n->getName(), rdr.getTag()));
-                }
+                checkMatchingTag(rdr, file, n->getName(), log, tx);
 
                 // Process
                 trimWhitespace(*n);
@@ -379,32 +497,7 @@ util::doc::importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, af
 
          case Reader::Text:
             // Text
-            if (me.pendingTags.empty()) {
-                // Raw text on page [irregular case]
-                const String_t text = transformText(rdr.getValue(), true, true);
-                if (!text.empty()) {
-                    log.write(LogListener::Warn, LOG_NAME, Format(tx("%s:%d: raw text on page"), file.getName(), rdr.getPos()));
-                    me.result.pushBackNew(new TextNode(text));
-                }
-            } else {
-                // Text within tag
-                TagNode& tag = *me.pendingTags.back();
-                if (!hasPreformattedTag(me.pendingTags)) {
-                    // Normal (flow) text. Normalize whitespace.
-                    const String_t text = transformText(rdr.getValue(), hasSpaceOrBreak(me.pendingTags), isBlockContext(tag));
-                    if (!text.empty()) {
-                        tag.addNewChild(new TextNode(text));
-                    }
-                } else {
-                    // Text in a <pre>.
-                    // Do not normalize. However, it commonly starts with a new line; remove that.
-                    const String_t text = rdr.getValue();
-                    size_t pos = (tag.getName() == "pre" && tag.getChildren().empty()) ? text.find_first_not_of("\r\n") : 0;
-                    if (pos != String_t::npos) {
-                        tag.addNewChild(new TextNode(text.substr(pos)));
-                    }
-                }
-            }
+            handlePageText(me, rdr, file, log, tx);
             break;
 
          case Reader::Eof:
@@ -421,6 +514,153 @@ util::doc::importHelp(Index& idx, Index::Handle_t root, BlobStore& blobStore, af
     // Finish remainder
     while (!state.empty()) {
         finishPage(idx, blobStore, *state.back(), flags);
+        state.popBack();
+    }
+}
+
+void
+util::doc::importDownloads(Index& idx, Index::Handle_t root, BlobStore& blobStore, afl::io::Stream& file,
+                           afl::io::Directory& imagePath,
+                           afl::io::Directory& filePath, afl::sys::LogListener& log, afl::string::Translator& tx)
+{
+    // XML reader
+    CharsetFactory csFactory;
+    DefaultEntityHandler entityHandler;
+    Reader rdr(file, entityHandler, csFactory);
+    rdr.setWhitespaceMode(Reader::AllWS);
+
+    // State
+    PtrVector<State> state;
+    std::auto_ptr<FileState> fileState;
+    state.pushBackNew(new State(root));
+
+    // Main loop
+    Reader::Token tok;
+    while ((tok = rdr.readNext()) != Reader::Eof && !state.empty()) {
+        State& me = *state.back();
+        switch (tok) {
+         case Reader::TagStart:
+            if (isIgnorableTag(rdr.getTag())) {
+                // Ignore
+            } else if (fileState.get() != 0) {
+                // Tag inside <file>
+                if (fileState->pendingTagNames.empty()) {
+                    log.write(LogListener::Warn, LOG_NAME, Format(tx("%s:%d: tag <%s> inside <file> unexpected"), file.getName(), rdr.getPos(), rdr.getTag()));
+                }
+                fileState->pendingTagNames.push_back(rdr.getTag());
+            } else if (rdr.getTag() == "file") {
+                // New file
+                fileState.reset(new FileState());
+            } else if (rdr.getTag() == "dir") {
+                // New directory: create as template. All attributes added later on.
+                state.pushBackNew(new State(idx.addDocument(me.page, "", "", "")));
+            } else {
+                // New tag in page
+                me.pendingTags.pushBackNew(new TagNode(rdr.getTag()));
+            }
+            break;
+
+         case Reader::TagAttribute:
+            if (fileState.get() != 0) {
+                if (fileState->pendingTagNames.empty()) {
+                    // This is an attribute of the file
+                    if (rdr.getName() == "src") {
+                        fileState->source = rdr.getValue();
+                    } else if (rdr.getName() == "name") {
+                        fileState->name = rdr.getValue();
+                    } else if (rdr.getName() == "title") {
+                        fileState->title = rdr.getValue();
+                    } else if (rdr.getName() == "tag") {
+                        fileState->tags.push_back(rdr.getValue());
+                    } else if (rdr.getName() == "date") {
+                        fileState->tags.push_back(Format("date=%s", rdr.getValue()));
+                    } else {
+                        // Ignore extra attribute
+                    }
+                }
+            } else if (me.pendingTags.empty()) {
+                // This is an attribute of the directory
+                if (rdr.getName() == "id") {
+                    idx.addNodeIds(me.page, makeDirectoryName(me.page, idx, rdr.getValue()));
+                } else if (rdr.getName() == "title") {
+                    idx.setNodeTitle(me.page, rdr.getValue());
+                } else if (rdr.getName() == "tag") {
+                    idx.addNodeTags(me.page, rdr.getValue());
+                } else if (rdr.getName() == "date") {
+                    idx.addNodeTags(me.page, Format("date=%s", rdr.getValue()));
+                } else {
+                    // ignore
+                }
+            } else {
+                // This is an attribute of some document (directory) element
+                TagNode& tag = *me.pendingTags.back();
+                handleTagAttribute(tag, rdr, blobStore, imagePath, file, log, tx);
+            }
+            break;
+
+         case Reader::TagEnd:
+            if (isIgnorableTag(rdr.getTag())) {
+                // Ignore <help>; it should only contain <page>s and no content
+            } else if (fileState.get() != 0) {
+                // Tag inside <file>
+                if (!fileState->pendingTagNames.empty()) {
+                    checkMatchingTag(rdr, file, fileState->pendingTagNames.back(), log, tx);
+                    fileState->pendingTagNames.pop_back();
+                } else {
+                    checkMatchingTag(rdr, file, "file", log, tx);
+                    finishFile(idx, blobStore, me, *fileState, filePath, log, tx);
+                    fileState.reset();
+                }
+            } else if (me.pendingTags.empty()) {
+                // Closing a page
+                if (rdr.getTag() != "dir") {
+                    if (state.size() > 1) {
+                        checkMatchingTag(rdr, file, "dir", log, tx);
+                    } else {
+                        log.write(LogListener::Warn, LOG_NAME, Format(tx("%s:%d: unexpected closing tag \"</%s>\""), file.getName(), rdr.getPos(), rdr.getTag()));
+                    }
+                }
+
+                finishDirectory(idx, blobStore, me);
+                state.popBack();
+            } else {
+                // Validate
+                std::auto_ptr<TagNode> n(me.pendingTags.extractLast());
+                checkMatchingTag(rdr, file, n->getName(), log, tx);
+
+                // Process
+                trimWhitespace(*n);
+                if (me.pendingTags.empty()) {
+                    me.result.pushBackNew(n.release());
+                } else {
+                    me.pendingTags.back()->addNewChild(n.release());
+                }
+            }
+            break;
+
+         case Reader::Text:
+            // Text
+            if (fileState.get() != 0) {
+                // Ignore text in file
+            } else {
+                handlePageText(me, rdr, file, log, tx);
+            }
+            break;
+
+         case Reader::Eof:
+         case Reader::PIStart:
+         case Reader::PIAttribute:
+         case Reader::Comment:
+         case Reader::Null:
+         case Reader::Error:
+            // Ignore
+            break;
+        }
+    }
+
+    // Finish remainder
+    while (!state.empty()) {
+        finishDirectory(idx, blobStore, *state.back());
         state.popBack();
     }
 }

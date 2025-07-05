@@ -4,6 +4,7 @@
 <!ENTITY % text  "#PCDATA|a|b|em|tt|kbd|font">
 <!ENTITY % nestedBlock "ul|ol|kl|dl|img|br|table|pre">
 
+<!-- Help system entry points -->
 <!ELEMENT help (page|group)*>
 
 <!ELEMENT group (page|group)*>
@@ -12,6 +13,22 @@
 
 <!ELEMENT page (%block;|page)*>
 <!ATTLIST page id CDATA #REQUIRED>
+
+<!-- Download area entry points -->
+<!ELEMENT fileset (dir|file)*>
+
+<!ELEMENT dir (%block;|dir|file)*>
+<!ATTLIST dir id    CDATA #REQUIRED
+              title CDATA #IMPLIED
+              tag   CDATA #IMPLIED
+              date  CDATA #IMPLIED>
+
+<!ELEMENT file EMPTY>
+<!ATTLIST file src   CDATA #REQUIRED
+               name  CDATA #IMPLIED
+               title CDATA #IMPLIED
+               tag   CDATA #IMPLIED
+               date  CDATA #IMPLIED>
 
 <!-- Headings contain only #PCDATA to allow reusing them in attributes -->
 <!ELEMENT h1     (#PCDATA)>

@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-04-27 18:49+0200\n"
+"PO-Revision-Date: 2025-07-05 21:48+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:388
@@ -97,6 +97,20 @@ msgstr ""
 "\n"
 "%s\n"
 "Fehler bitte melden an <Streu@gmx.de>"
+
+#: gfx/applet.cpp:88 util/applet.cpp:86
+msgid ""
+"\n"
+"Usage: %s APPLET [ARGS]\n"
+"\n"
+"Applets:\n"
+"%s"
+msgstr ""
+"\n"
+"Aufruf: %s APPLET [ARGS]\n"
+"\n"
+"Applets:\n"
+"%s"
 
 #: client/dialogs/buildstructuresdialog.cpp:525
 msgid "  remaining"
@@ -862,24 +876,28 @@ msgstr "%s: unbekannter Dateityp"
 msgid "%s: compressed file"
 msgstr "%s: komprimierte Datei"
 
-#: game/nu/browserhandler.cpp:194 game/pcc/browserhandler.cpp:489
+#: util/net.cpp:35
 msgid "%s: network access exceeded limit"
 msgstr "%s: Limit überschritten (network access exceeded limit)"
 
-#: game/nu/browserhandler.cpp:188 game/pcc/browserhandler.cpp:483
+#: util/net.cpp:28
 msgid "%s: network access failed (%s)"
 msgstr "%s: Fehler (network access failed, %s)"
 
-#: game/nu/browserhandler.cpp:191 game/pcc/browserhandler.cpp:486
+#: util/net.cpp:23
+msgid "%s: network access failed (HTTP error %d)"
+msgstr "%s: Fehler (network access failed, HTTP-Fehler %d)"
+
+#: util/net.cpp:32
 msgid "%s: network access timed out"
 msgstr "%s: Zeitlimit überschritten (network access timed out)"
 
-#: util/doc/application.cpp:460 util/doc/application.cpp:501
-#: util/doc/application.cpp:562
+#: util/doc/application.cpp:516 util/doc/application.cpp:557
+#: util/doc/application.cpp:618
 msgid "%s: not found"
 msgstr "%s: nicht gefunden"
 
-#: game/nu/browserhandler.cpp:206 game/pcc/browserhandler.cpp:501
+#: util/net.cpp:63
 msgid "%s: received invalid data from network"
 msgstr "%s: ungültige Daten vom Netzwerk empfangen"
 
@@ -887,7 +905,7 @@ msgstr "%s: ungültige Daten vom Netzwerk empfangen"
 msgid "%s: unknown file format"
 msgstr "%s: unbekanntes Dateiformat"
 
-#: util/doc/helpimport.cpp:311
+#: util/doc/helpimport.cpp:393
 msgid "%s:%d: absolute link '%s' used as <page id>"
 msgstr "%s:%d: absoluter Link '%s' als <page id> verwendet"
 
@@ -907,7 +925,7 @@ msgstr "%s:%d: ungültige ID-Nummer"
 msgid "%s:%d: invalid number"
 msgstr "%s:%d: ungültige Zahl"
 
-#: util/doc/helpimport.cpp:349 util/doc/helpimport.cpp:361
+#: util/doc/helpimport.cpp:353
 msgid "%s:%d: mismatching tag names, expect \"</%s>\", found \"</%s>\""
 msgstr "%s:%d: Unpassende Tag-Namen, erwarte \"</%s>\", gefunden: \"</%s>\""
 
@@ -915,11 +933,11 @@ msgstr "%s:%d: Unpassende Tag-Namen, erwarte \"</%s>\", gefunden: \"</%s>\""
 msgid "%s:%d: missing delimiter"
 msgstr "%s:%d: fehlendes Trennzeichen"
 
-#: util/doc/helpimport.cpp:386
+#: util/doc/helpimport.cpp:466 util/doc/helpimport.cpp:649
 msgid "%s:%d: raw text on page"
 msgstr "%s:%d: reiner Text auf der Seite"
 
-#: util/doc/helpimport.cpp:330
+#: util/doc/helpimport.cpp:412 util/doc/helpimport.cpp:589
 msgid "%s:%d: referenced image not found"
 msgstr "%s:%d: Bild nicht gefunden"
 
@@ -927,11 +945,15 @@ msgstr "%s:%d: Bild nicht gefunden"
 msgid "%s:%d: source ID not defined yet"
 msgstr "%s:%d: Quell-ID noch nicht definiert"
 
+#: util/doc/helpimport.cpp:535
+msgid "%s:%d: tag <%s> inside <file> unexpected"
+msgstr "%s:%d: Tag <%s> in <file> unerwartet"
+
 #: util/resourcefileapplication.cpp:229
 msgid "%s:%d: unexpected EOF in .text section"
 msgstr "%s:%d: unerwartetes Dateiende in .text-Bereich"
 
-#: util/doc/helpimport.cpp:351
+#: util/doc/helpimport.cpp:433 util/doc/helpimport.cpp:620
 msgid "%s:%d: unexpected closing tag \"</%s>\""
 msgstr "%s:%d: unerwartetes Ende-Tag \"</%s>\""
 
@@ -1579,7 +1601,7 @@ msgstr ""
 "--balance=MODUS\tLinks/Rechts-Ausgleich (none, 360, master)\n"
 "--seed=N\tStartwert für Zufallsgenerator"
 
-#: client/screens/browserscreen.cpp:994
+#: client/screens/browserscreen.cpp:996
 msgid "Actions..."
 msgstr "Aktionen..."
 
@@ -1684,7 +1706,7 @@ msgstr "Neutronium gesamt"
 msgid "Added Tritanium"
 msgstr "Tritanium hinzugefügt"
 
-#: game/browser/accountmanager.cpp:114
+#: game/browser/accountmanager.cpp:68
 msgid "Adding network account \"%s\""
 msgstr "Füge Netzwerk-Konto \"%s\" hinzu"
 
@@ -1900,7 +1922,7 @@ msgid "Attachment record is truncated"
 msgstr "Dateianhang ist abgeschnitten"
 
 #: client/dialogs/attachmentselection.cpp:264
-#: client/screens/browserscreen.cpp:750 client/screens/browserscreen.cpp:759
+#: client/screens/browserscreen.cpp:752 client/screens/browserscreen.cpp:761
 msgid "Attachments"
 msgstr "Anhänge"
 
@@ -1914,15 +1936,15 @@ msgstr "Angreifer"
 msgid "Auto Task"
 msgstr "Aufgabe"
 
-#: game/session.cpp:339
+#: game/session.cpp:340
 msgid "Auto Task Planet %d"
 msgstr "Aufgabe Planet %d"
 
-#: game/session.cpp:337
+#: game/session.cpp:338
 msgid "Auto Task Ship %d"
 msgstr "Aufgabe Schiff %d"
 
-#: game/session.cpp:340
+#: game/session.cpp:341
 msgid "Auto Task Starbase %d"
 msgstr "Aufgabe Sternenbasis %d"
 
@@ -2058,10 +2080,6 @@ msgstr "Kampf kann nicht wiedergegeben werden!"
 #: game/vcr/classic/utils.cpp:39
 msgid "Battle timed out (too long)."
 msgstr "Zeitlimit überschritten."
-
-#: game/vcr/flak/database.cpp:129
-msgid "Battle too large"
-msgstr "Kampf zu groß"
 
 #: client/dialogs/simulationconfiguration.cpp:166
 msgid "Battles per simulation"
@@ -2374,6 +2392,14 @@ msgstr "Anforderung der Fernsteuerung für dieses Schiff zurücknehmen?"
 msgid "Cancel tow"
 msgstr "Abschleppen stornieren"
 
+#: util/doc/helpimport.cpp:345
+msgid "Cannot import file"
+msgstr "Datei kann nicht importiert werden"
+
+#: game/nu/gamestate.cpp:64
+msgid "Cannot load game; you are not logged in"
+msgstr "Spiel kann nicht geladen werden; du bist nicht eingeloggt"
+
 #: util/plugin/manager.cpp:99
 msgid "Cannot load plugins"
 msgstr "Kann Plugins nicht laden"
@@ -2499,7 +2525,7 @@ msgstr "Allianzprivilegien ändern"
 msgid "Change field"
 msgstr "Feld ändern"
 
-#: client/screens/browserscreen.cpp:970
+#: client/screens/browserscreen.cpp:972
 msgid "Change into this folder"
 msgstr "In diesen Ordner wechseln"
 
@@ -2936,7 +2962,7 @@ msgstr "Konfigurationsdatei"
 msgid "Configuration Tool v%s - (c) 2018-2025 Stefan Reuther"
 msgstr "Konfigurationswerkzeug v%s - (c) 2018-2025 Stefan Reuther"
 
-#: client/screens/browserscreen.cpp:75
+#: client/screens/browserscreen.cpp:77
 msgid "Configure"
 msgstr "Konfigurieren"
 
@@ -3596,7 +3622,7 @@ msgstr "Ende-X"
 msgid "End Y"
 msgstr "Ende-Y"
 
-#: interpreter/process.cpp:2016
+#: interpreter/process.cpp:2022
 msgid "Ended"
 msgstr "Beendet"
 
@@ -3774,7 +3800,7 @@ msgstr "Fehler"
 msgid "Error compiling this statement: %s"
 msgstr "Fehler beim Compilieren der Anweisung: %s"
 
-#: share/resource/core.q:253
+#: share/resource/core.q:264
 msgid "Error during execution of auto task"
 msgstr "Fehler beim Ausführen der Aufgabe"
 
@@ -3818,7 +3844,7 @@ msgstr "Fehler beim Lesen einer Datei"
 msgid "Error reading starchart database"
 msgstr "Fehler beim Lesen der Sternenkarten-Datenbank"
 
-#: game/turnloader.cpp:148
+#: game/turnloader.cpp:151
 msgid "Error saving configuration"
 msgstr "Fehler beim Speichern der Konfiguration"
 
@@ -3835,7 +3861,7 @@ msgstr "Fehler beim Einstellen des Grafikmodus (%s): %s"
 msgid "Error setting video mode: %s"
 msgstr "Fehler beim Einstellen des Grafikmodus: %s"
 
-#: game/browser/accountmanager.cpp:164
+#: game/browser/accountmanager.cpp:168
 msgid "Error updating network accounts file"
 msgstr "Fehler beim Aktualisieren der Netzwerk-Konten-Datei"
 
@@ -3881,7 +3907,7 @@ msgstr "Ausführen"
 msgid "Execution of file \"%s\" failed: %s"
 msgstr "Ausführen der Datei \"%s\" fehlgeschlagen: %s"
 
-#: client/screens/browserscreen.cpp:212
+#: client/screens/browserscreen.cpp:214
 msgid "Exit"
 msgstr "Ende"
 
@@ -4053,7 +4079,7 @@ msgstr "VON: %s"
 msgid "Factories"
 msgstr "Fabriken"
 
-#: interpreter/process.cpp:2018
+#: interpreter/process.cpp:2024
 msgid "Failed"
 msgstr "Fehlgeschlagen"
 
@@ -4138,11 +4164,11 @@ msgstr "Raumjäger: %d"
 msgid "File"
 msgstr "Datei"
 
-#: game/v3/directoryloader.cpp:668
+#: game/v3/directoryloader.cpp:669
 msgid "File \"%s\" is empty and will be ignored."
 msgstr "Datei \"%s\" ist leer und wird ignoriert."
 
-#: game/v3/directoryloader.cpp:676
+#: game/v3/directoryloader.cpp:677
 msgid "File \"%s\" is stale and will be ignored."
 msgstr "Datei \"%s\" ist veraltet und wird ignoriert."
 
@@ -4150,7 +4176,7 @@ msgstr "Datei \"%s\" ist veraltet und wird ignoriert."
 msgid "File \"%s\" is unchanged."
 msgstr "Datei \"%s\" ist unverändert."
 
-#: game/v3/directoryloader.cpp:552
+#: game/v3/directoryloader.cpp:553
 msgid ""
 "File \"fizz.bin\" not found. Game data may not be usable with other programs."
 msgstr ""
@@ -4231,8 +4257,8 @@ msgstr "Datei existiert, aber ist ungültig und wurde ignoriert"
 msgid "File format error"
 msgstr "Dateiformat-Fehler"
 
-#: game/pcc/turnloader.cpp:229 game/pcc/turnloader.cpp:238
-#: game/turnloader.cpp:78 game/turnloader.cpp:89
+#: game/pcc/turnloader.cpp:228 game/pcc/turnloader.cpp:237
+#: game/turnloader.cpp:79 game/turnloader.cpp:90
 #: game/v3/directoryloader.cpp:484 game/v3/resultloader.cpp:265
 #: game/v3/resultloader.cpp:275
 msgid "File has been ignored"
@@ -4454,7 +4480,7 @@ msgstr "Von"
 msgid "From storage: %s"
 msgstr "Lagerbestand: %s"
 
-#: interpreter/process.cpp:2012
+#: interpreter/process.cpp:2018
 msgid "Frozen"
 msgstr "Eingefroren"
 
@@ -4592,7 +4618,7 @@ msgstr ""
 "--get=OPTION\tWert einer Option abfragen\n"
 "--save-hconfig=DATEI\tBinäre HConfig-Datei speichern"
 
-#: game/pcc/turnloader.cpp:273 game/v3/resultloader.cpp:342
+#: game/pcc/turnloader.cpp:273 game/v3/resultloader.cpp:343
 msgid "Generating turn commands..."
 msgstr "Erzeuge Turn-Kommandos..."
 
@@ -4634,7 +4660,7 @@ msgstr "Raumschiff an anderes Volk übergeben"
 msgid "Global Actions"
 msgstr "Global-Aktionen"
 
-#: util/doc/application.cpp:630
+#: util/doc/application.cpp:686
 msgid ""
 "Global Options:\n"
 "--dir=DIR\tSet repository, directory mode\n"
@@ -4646,6 +4672,8 @@ msgid ""
 "\tAdd a group\n"
 "  get URL...\n"
 "\tGet page content\n"
+"  import-downloads [OPTIONS...] FILE...\n"
+"\tImport downloads\n"
 "  import-help [OPTIONS...] FILE...\n"
 "\tImport PCC2 Help files (*.xml)\n"
 "  import-text [OPTIONS...] FILE\n"
@@ -4690,6 +4718,8 @@ msgstr ""
 "\tGruppe hinzufügen\n"
 "  get URL...\n"
 "\tInhalt einer Seite abfragen\n"
+"  import-downloads [OPTIONS...] FILE...\n"
+"\tDownload-Bereich importieren\n"
 "  import-help [OPTIONEN...] DATEI...\n"
 "\tPCC2-Hilfedateien (*.xml) importieren\n"
 "  import-text [OPTIONEN...] DATEI\n"
@@ -5087,7 +5117,7 @@ msgstr "Tech-Upgrades einbeziehen"
 msgid "Include torpedoes"
 msgstr "Torpedos berechnen"
 
-#: game/browser/accountmanager.cpp:119
+#: game/browser/accountmanager.cpp:71
 msgid "Incomplete network account \"%s\" has been ignored"
 msgstr "Unvollständiges Netzwerk-Konto \"%s\" wurde ignoriert"
 
@@ -5111,19 +5141,19 @@ msgstr "Info 1"
 msgid "Info 2"
 msgstr "Info 2"
 
-#: util/doc/verifier.cpp:257
+#: util/doc/verifier.cpp:269
 msgid "Info: external links"
 msgstr "Info: externe Links"
 
-#: util/doc/verifier.cpp:258
+#: util/doc/verifier.cpp:270
 msgid "Info: site links"
 msgstr "Info: site-Links"
 
-#: util/doc/verifier.cpp:256
+#: util/doc/verifier.cpp:268
 msgid "Info: used CSS classes"
 msgstr "Info: verwendete CSS-Klassen"
 
-#: util/doc/verifier.cpp:255
+#: util/doc/verifier.cpp:267
 msgid "Info: used tags"
 msgstr "Info: verwendete Tags"
 
@@ -5155,7 +5185,7 @@ msgstr "Initiator wird abgeschleppt"
 msgid "Ins"
 msgstr "Einfg"
 
-#: client/screens/browserscreen.cpp:182
+#: client/screens/browserscreen.cpp:184
 msgid "Ins - Add Account"
 msgstr "Einfg - Konto hinzufügen"
 
@@ -5204,7 +5234,7 @@ msgstr "Interner Fehler: Abfrage unerwartet fehlgeschlagen: %s"
 msgid "Internal error: search query produced unexpected result"
 msgstr "Interner Fehler: Anfrage produzierte unerwartetes Ergebnis"
 
-#: game/pcc/browserhandler.cpp:286
+#: game/pcc/browserhandler.cpp:287
 msgid "Invalid URL"
 msgstr "Ungültige URL"
 
@@ -5236,7 +5266,7 @@ msgstr "ungültiges Kommando angegeben. Mit 'c2plugin -h' erhalten Sie Hilfe"
 msgid "Invalid device number for \"%s\""
 msgstr "Ungültige Funktions-Nummer für \"%s\""
 
-#: util/directorybrowser.cpp:145
+#: util/directorybrowser.cpp:146
 msgid "Invalid directory name"
 msgstr "Ungültiger Verzeichnisname"
 
@@ -5411,7 +5441,7 @@ msgid "Invalid ship Id #%d for visual contact. Target will be ignored"
 msgstr ""
 "Ungültige Schiffs-Id #%d für visuellen Kontakt. Sichtung wird ignoriert"
 
-#: interpreter/vmio/objectloader.cpp:200
+#: game/vcr/flak/database.cpp:132 interpreter/vmio/objectloader.cpp:200
 msgid "Invalid size"
 msgstr "Ungültige Größe"
 
@@ -5748,11 +5778,11 @@ msgstr "Lade %d Sternbas%1{is%|en%}..."
 msgid "Loading %d visual contact%!1{s%}..."
 msgstr "Lade %d visuelle%1{n Kontakt%| Kontakte%}..."
 
-#: game/pcc/turnloader.cpp:216 game/v3/resultloader.cpp:242
+#: game/pcc/turnloader.cpp:215 game/v3/resultloader.cpp:242
 msgid "Loading %s RST file..."
 msgstr "Lade %s RST-Datei..."
 
-#: game/pcc/turnloader.cpp:224 game/v3/resultloader.cpp:213
+#: game/pcc/turnloader.cpp:223 game/v3/resultloader.cpp:212
 msgid "Loading %s TRN file..."
 msgstr "Lade %s TRN-Datei..."
 
@@ -5814,15 +5844,15 @@ msgstr "Position: (%d,%d) - Sektor %d"
 msgid "Locks"
 msgstr "Locks"
 
-#: game/nu/browserhandler.cpp:67 game/pcc/browserhandler.cpp:98
+#: game/nu/browserhandler.cpp:68 game/pcc/browserhandler.cpp:99
 msgid "Login canceled"
 msgstr "Anmeldung abgebrochen"
 
-#: game/nu/browserhandler.cpp:85 game/pcc/browserhandler.cpp:117
+#: game/nu/browserhandler.cpp:86 game/pcc/browserhandler.cpp:118
 msgid "Login did not succeed; wrong password?"
 msgstr "Anmeldung fehlgeschlagen; falsches Passwort?"
 
-#: game/nu/browserhandler.cpp:78 game/pcc/browserhandler.cpp:110
+#: game/nu/browserhandler.cpp:79 game/pcc/browserhandler.cpp:111
 msgid "Login failed"
 msgstr "Anmeldung fehlgeschlagen"
 
@@ -5870,7 +5900,7 @@ msgstr "Chunnel starten"
 msgid "Make this ship the leader of the fleet?"
 msgstr "Soll dieses Schiff der Führer der Flotte werden?"
 
-#: client/screens/browserscreen.cpp:678 client/screens/browserscreen.cpp:77
+#: client/screens/browserscreen.cpp:680 client/screens/browserscreen.cpp:79
 msgid "Maketurn"
 msgstr "Maketurn"
 
@@ -5882,8 +5912,8 @@ msgstr "Maketurn | Backup..."
 msgid "Maketurn | Upload target..."
 msgstr "Maketurn | Upload-Ziel..."
 
-#: game/nu/browserhandler.cpp:171 game/pcc/browserhandler.cpp:190
-#: game/pcc/browserhandler.cpp:216
+#: game/nu/browserhandler.cpp:172 game/pcc/browserhandler.cpp:191
+#: game/pcc/browserhandler.cpp:217
 msgid "Malformed URL \"%s\""
 msgstr "Fehlerhafte URL \"%s\""
 
@@ -6528,7 +6558,7 @@ msgstr "Information des nächsten Zugs (\"show\")"
 #: client/dialogs/cloneship.cpp:130
 #: client/dialogs/simulationconfiguration.cpp:69
 #: client/dialogs/simulationfleetcostoptions.cpp:36
-#: client/screens/browserscreen.cpp:161 game/config/configurationeditor.cpp:278
+#: client/screens/browserscreen.cpp:163 game/config/configurationeditor.cpp:278
 #: share/resource/core_config.q:245 ui/dialogs/messagebox.cpp:148
 msgid "No"
 msgstr "Nein"
@@ -6658,7 +6688,7 @@ msgstr "Keine Spielernummer angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 msgid "No plugins installed."
 msgstr "Keine Plugins installiert."
 
-#: client/screens/browserscreen.cpp:938
+#: client/screens/browserscreen.cpp:940
 msgid "No registration in this directory!"
 msgstr "Verzeichnis enthält keine Registrierung!"
 
@@ -6715,7 +6745,7 @@ msgstr "Nord-Süd"
 msgid "Not building a ship"
 msgstr "Kein Schiff in Bau"
 
-#: game/pcc/browserhandler.cpp:303
+#: game/pcc/browserhandler.cpp:304
 msgid "Not logged in"
 msgstr "Nicht angemeldet"
 
@@ -7100,7 +7130,7 @@ msgstr "PCC 1.x (fast Codeseite 437)"
 msgid "PCC1"
 msgstr "PCC1"
 
-#: client/screens/browserscreen.cpp:159 client/screens/browserscreen.cpp:785
+#: client/screens/browserscreen.cpp:161 client/screens/browserscreen.cpp:787
 #: share/resource/core_ui.q:35
 msgid "PCC2"
 msgstr "PCC2"
@@ -7117,7 +7147,7 @@ msgstr "PCC2 Konsole v%s - (c) 2017-2025 Stefan Reuther"
 msgid "PCC2 Database Export v%s - (c) 2017-2025 Stefan Reuther"
 msgstr "PCC2 Datenbank-Export v%s - (c) 2017-2025 Stefan Reuther"
 
-#: util/doc/application.cpp:622
+#: util/doc/application.cpp:678
 msgid "PCC2 Documentation Manager v%s - (c) 2021-2025 Stefan Reuther"
 msgstr "PCC2 Dokumentations-Manager v%s - (c) 2021-2025 Stefan Reuther"
 
@@ -7216,7 +7246,7 @@ msgstr "Parameter zu \"-bpp\" muss 8, 16 oder 32 sein"
 msgid "Parameter to \"-size\" is out of range"
 msgstr "Parameter zu \"-size\" außerhalb des gültigen Bereichs"
 
-#: game/nu/browserhandler.cpp:207 game/pcc/browserhandler.cpp:502
+#: util/net.cpp:64
 msgid "Parse error"
 msgstr "Parse-Fehler"
 
@@ -7734,7 +7764,7 @@ msgstr "Reale ID"
 msgid "Rebel Ground Attack mission"
 msgstr "Bodenangriffs-Mission"
 
-#: client/screens/browserscreen.cpp:79
+#: client/screens/browserscreen.cpp:81
 msgid "Receive attachments"
 msgstr "Anhänge empfangen"
 
@@ -7792,7 +7822,7 @@ msgstr "Verringerte %s (%s)"
 msgid "Refuel ships"
 msgstr "Schiffe auftanken"
 
-#: client/screens/browserscreen.cpp:949
+#: client/screens/browserscreen.cpp:951
 msgid "Registered"
 msgstr "Registriert"
 
@@ -7958,7 +7988,7 @@ msgstr "Benötigte Ressourcen"
 msgid "Restart task from beginning"
 msgstr "Beginne Aufgabe erneut"
 
-#: game/nu/turnloader.cpp:51
+#: game/nu/turnloader.cpp:53
 msgid "Result file available"
 msgstr "Result-Datei verfügbar"
 
@@ -8010,11 +8040,11 @@ msgstr "Rund (kreisförmig, PWrap)"
 msgid "Run"
 msgstr "Ausführen"
 
-#: interpreter/process.cpp:2013
+#: interpreter/process.cpp:2019
 msgid "Runnable"
 msgstr "Auszuführen"
 
-#: interpreter/process.cpp:2014
+#: interpreter/process.cpp:2020
 msgid "Running"
 msgstr "Läuft"
 
@@ -8347,7 +8377,7 @@ msgstr "Sensor-Sichtbarkeit"
 msgid "Sensors"
 msgstr "Sensoren"
 
-#: game/pcc/gamefolder.cpp:104
+#: game/pcc/gamefolder.cpp:108
 msgid "Server-side game directory"
 msgstr "Spielverzeichnis auf Server"
 
@@ -8493,7 +8523,7 @@ msgstr "Fernsteuerung für neugebaute Schiffe..."
 msgid "Set result file password..."
 msgstr "Passwort für Result-Datei..."
 
-#: client/screens/browserscreen.cpp:74
+#: client/screens/browserscreen.cpp:76
 msgid "Set up for playing"
 msgstr "Einrichten für Spiel"
 
@@ -8501,11 +8531,11 @@ msgstr "Einrichten für Spiel"
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: client/screens/browserscreen.cpp:988
+#: client/screens/browserscreen.cpp:990
 msgid "Setup & Actions..."
 msgstr "Einrichten & Aktionen..."
 
-#: client/screens/browserscreen.cpp:990
+#: client/screens/browserscreen.cpp:992
 msgid "Setup..."
 msgstr "Einrichten..."
 
@@ -9236,7 +9266,7 @@ msgstr "Überlebt"
 msgid "Suspend"
 msgstr "Anhalten"
 
-#: interpreter/process.cpp:2011
+#: interpreter/process.cpp:2017
 msgid "Suspended"
 msgstr "Angehalten"
 
@@ -9244,7 +9274,7 @@ msgstr "Angehalten"
 msgid "Suspended."
 msgstr "Angehalten."
 
-#: client/screens/browserscreen.cpp:78 game/spec/info/info.cpp:339
+#: client/screens/browserscreen.cpp:80 game/spec/info/info.cpp:339
 #: game/spec/info/info.cpp:341
 msgid "Sweep"
 msgstr "Sweep"
@@ -9267,7 +9297,7 @@ msgstr "Symmetrische Relationen"
 msgid "Syntax error"
 msgstr "Syntax-Fehler"
 
-#: game/browser/accountmanager.cpp:100
+#: game/browser/accountmanager.cpp:55
 #: game/spec/standardcomponentnameprovider.cpp:96
 msgid "Syntax error, line has been ignored"
 msgstr "Syntaxfehler, Zeile wurde ignoriert"
@@ -9442,7 +9472,7 @@ msgstr "Zwischenspeicher #%d"
 msgid "Terminate"
 msgstr "Beenden"
 
-#: interpreter/process.cpp:2017
+#: interpreter/process.cpp:2023
 msgid "Terminated"
 msgstr "Beendet"
 
@@ -9567,7 +9597,7 @@ msgstr ""
 "Das Script wurde angehalten; es wird fortgesetzt, wenn du diese Meldung "
 "bestätigst."
 
-#: game/pcc/servertransport.cpp:190
+#: game/pcc/servertransport.cpp:210
 msgid "The server reported an error: %s"
 msgstr "Der Server hat einen Fehler gemeldet: %s"
 
@@ -9577,7 +9607,7 @@ msgstr ""
 "Diese Simulation enthält bereits ein Schiff mit Id #%d. Soll es ersetzt "
 "werden?"
 
-#: game/turnloader.cpp:121
+#: game/turnloader.cpp:124
 msgid ""
 "The statistics file in game directory was written by a newer version of "
 "PCC2; changes not written."
@@ -9589,7 +9619,7 @@ msgstr ""
 msgid "Their offer"
 msgstr "ihr Angebot"
 
-#: client/screens/browserscreen.cpp:783
+#: client/screens/browserscreen.cpp:785
 msgid ""
 "There are new result files for this game. Do you want to unpack them now?"
 msgstr ""
@@ -9725,7 +9755,7 @@ msgstr "Sie müssen %d mc und %d kt Vorräte zahlen."
 msgid "They need to pay %d mc."
 msgstr "Sie müssen %d mc zahlen."
 
-#: share/resource/core.q:236
+#: share/resource/core.q:247
 msgid ""
 "This Auto Task performed a \"Restart\" loop without intervening delays. You "
 "should probably use \"WaitOneTurn\"."
@@ -9791,7 +9821,7 @@ msgstr "Dieser Befehl akzeptiert keine Positionsparameter"
 msgid "This command was not recognized."
 msgstr "Dieser Befehl wurde nicht erkannt."
 
-#: client/screens/browserscreen.cpp:154
+#: client/screens/browserscreen.cpp:156
 msgid ""
 "This directory contains a data conflict.\n"
 "\n"
@@ -9804,7 +9834,10 @@ msgid ""
 msgstr ""
 "Dieses Verzeichnis enthält einen Datenkonflikt.\n"
 "\n"
-"<small>Die Dateien in diesem Verzeichnis gehören zu verschiedenen Partien oder Zügen. Dies wird nicht unterstützt und kann zu Problemen mit manchen Programmen führen. PCC2 bietet eine Funktion <b>Sweep</b>, um diese Situation durch Löschen der störenden Dateien zu bereinigen.</small>\n"
+"<small>Die Dateien in diesem Verzeichnis gehören zu verschiedenen Partien "
+"oder Zügen. Dies wird nicht unterstützt und kann zu Problemen mit manchen "
+"Programmen führen. PCC2 bietet eine Funktion <b>Sweep</b>, um diese "
+"Situation durch Löschen der störenden Dateien zu bereinigen.</small>\n"
 "\n"
 "Möchtest du die Sweep-Funktion benutzen?"
 
@@ -10031,7 +10064,7 @@ msgstr ""
 msgid "This unit's status could not be written back."
 msgstr "Der Status dieser Einheit konnte nicht zurück übertragen werden."
 
-#: game/browser/unsupportedaccountfolder.cpp:57
+#: game/browser/unsupportedaccountfolder.cpp:56
 msgid "This version of PCC2 does not support this account of type \"%s\"."
 msgstr "Diese Version von PCC unterstützt keine Konten vom Typ \"%s\"."
 
@@ -10343,7 +10376,7 @@ msgstr "Turn File Decompiler v%s - (c) 2001-2025 Stefan Reuther"
 msgid "Turn History"
 msgstr "Vergangene Züge"
 
-#: game/pcc/servertransport.cpp:123
+#: game/pcc/servertransport.cpp:143
 msgid "Turn checker output"
 msgstr "Ausgabe des Turn-Checkers"
 
@@ -10387,35 +10420,35 @@ msgstr "Turn-Datei verweist auf Schiff %d, welches nicht uns gehört"
 msgid "Turn file refers to starbase %d which is not ours"
 msgstr "Turn-Datei verweist auf Sternenbasis %d, welche nicht uns gehört"
 
-#: game/pcc/servertransport.cpp:137
+#: game/pcc/servertransport.cpp:157
 msgid "Turn marked temporary."
 msgstr "Turn als vorläufig markiert."
 
-#: game/nu/turnloader.cpp:48
+#: game/nu/turnloader.cpp:50
 msgid "Turn submitted"
 msgstr "Turn eingereicht"
 
-#: game/nu/turnloader.cpp:45
+#: game/nu/turnloader.cpp:47
 msgid "Turn viewed"
 msgstr "Turn angesehen"
 
-#: game/pcc/servertransport.cpp:36
+#: game/pcc/servertransport.cpp:53
 msgid "Turn was accepted"
 msgstr "Turn wurde akzeptiert"
 
-#: game/pcc/servertransport.cpp:37
+#: game/pcc/servertransport.cpp:54
 msgid "Turn was accepted with warnings (yellow)"
 msgstr "Turn wurde mit Warnungen akzeptiert (gelb)"
 
-#: game/pcc/servertransport.cpp:39
+#: game/pcc/servertransport.cpp:56
 msgid "Turn was rejected (invalid)"
 msgstr "Turn wurde abgewiesen (ungültig)"
 
-#: game/pcc/servertransport.cpp:38
+#: game/pcc/servertransport.cpp:55
 msgid "Turn was rejected (red)"
 msgstr "Turn wurde abgewiesen (rot)"
 
-#: game/pcc/servertransport.cpp:40
+#: game/pcc/servertransport.cpp:57
 msgid "Turn was stale"
 msgstr "Turn war veraltet"
 
@@ -10477,7 +10510,7 @@ msgstr "Datei %s kann nicht erzeugt werden: %s"
 msgid "Unable to determine derived information."
 msgstr "Abgeleitete Informationen nicht ermittelbar."
 
-#: game/nu/turnloader.cpp:178
+#: game/nu/turnloader.cpp:186
 msgid "Unable to download result file"
 msgstr "Result kann nicht heruntergeladen werden"
 
@@ -10529,8 +10562,8 @@ msgstr "Profil-Verzeichnis kann nicht geöffnet werden"
 msgid "Unable to save %s: %s"
 msgstr "%s kann nicht gespeichert werden: %s"
 
-#: client/si/commands.cpp:429 game/pcc/turnloader.cpp:131
-#: game/v3/directoryloader.cpp:233 game/v3/resultloader.cpp:123
+#: client/si/commands.cpp:429 game/pcc/turnloader.cpp:130
+#: game/v3/directoryloader.cpp:232 game/v3/resultloader.cpp:122
 msgid "Unable to save game"
 msgstr "Spiel kann nicht gespeichert werden"
 
@@ -10574,7 +10607,7 @@ msgstr "Unbewaffnet"
 msgid "Unarmed ships"
 msgstr "Unbewaffnete Schiffe"
 
-#: game/v3/directoryloader.cpp:700 game/v3/loader.cpp:782
+#: game/v3/directoryloader.cpp:701 game/v3/loader.cpp:782
 #: game/v3/unpacker.cpp:841
 msgid "Unbelievable number of visual contacts"
 msgstr "Unglaubliche Anzahl gesichteter Schiffe"
@@ -10699,7 +10732,7 @@ msgstr "Unbekanntes Verweisziel in Datensatzdefinition."
 msgid "Unknown ship type"
 msgstr "Unbekannter Schiffstype"
 
-#: game/pcc/servertransport.cpp:41
+#: game/pcc/servertransport.cpp:58
 msgid "Unknown turn status (%d)"
 msgstr "Unbekannter Turn-Status (%d)"
 
@@ -10745,7 +10778,7 @@ msgid "Unowned Planets"
 msgstr "Unbesetzte Planeten"
 
 #: client/dialogs/unpack.cpp:150 client/dialogs/unpack.cpp:166
-#: client/dialogs/unpack.cpp:89 client/screens/browserscreen.cpp:76
+#: client/dialogs/unpack.cpp:89 client/screens/browserscreen.cpp:78
 msgid "Unpack"
 msgstr "Unpack"
 
@@ -10829,7 +10862,7 @@ msgstr "Entpacke Spieler %d: %s"
 msgid "Unrecognized proxy URL: \"%s\""
 msgstr "Nicht erkannte Proxy-URL: \"%s\""
 
-#: client/screens/browserscreen.cpp:943
+#: client/screens/browserscreen.cpp:945
 msgid "Unregistered"
 msgstr "Unregistriert"
 
@@ -11046,7 +11079,7 @@ msgstr ""
 "%s\n"
 "Fehler bitte melden an <Streu@gmx.de>"
 
-#: util/doc/application.cpp:624
+#: util/doc/application.cpp:680
 msgid ""
 "Usage:\n"
 "  %s [-h]\n"
@@ -11359,7 +11392,7 @@ msgstr "Nutzername"
 msgid "User name or password not accepted!"
 msgstr "Nutzername oder Passwort nicht akzeptiert!"
 
-#: game/browser/browser.cpp:520
+#: game/browser/browser.cpp:519
 msgid "Using directory \"%s\""
 msgstr "Nutze Verzeichnis \"%s\""
 
@@ -11474,40 +11507,40 @@ msgstr ""
 msgid "Wait One Turn"
 msgstr "Warte einen Zug"
 
-#: interpreter/process.cpp:2015
+#: interpreter/process.cpp:2021
 msgid "Waiting"
 msgstr "Wartet"
 
-#: util/doc/verifier.cpp:252
+#: util/doc/verifier.cpp:264
 msgid "Warning: 'asset:' content cannot be resolved (blob does not exist)"
 msgstr "Warnung: 'asset:' kann nicht aufgelöst werden (Blob existiert nicht)"
 
-#: util/doc/verifier.cpp:250
+#: util/doc/verifier.cpp:262
 msgid "Warning: 'asset:' used in <a href> link"
 msgstr "Warnung: 'asset:' in <a href> verwendet"
 
-#: util/doc/verifier.cpp:254
+#: util/doc/verifier.cpp:266
 msgid "Warning: bad anchor ('#link')"
 msgstr "Warnung: ungültiger Anker ('#link')"
 
-#: util/doc/verifier.cpp:249
+#: util/doc/verifier.cpp:261
 msgid "Warning: comment in renderer output (invalid tag in input)"
 msgstr ""
 "Warnung: Renderer-Ausgabe enthält Kommentare (ungültiges Tag in Eingabe)"
 
-#: util/doc/verifier.cpp:248
+#: util/doc/verifier.cpp:260
 msgid "Warning: content error (cannot be parsed)"
 msgstr "Warnung: Fehler in Inhalt (kann nicht geparsed werden)"
 
-#: util/doc/verifier.cpp:253
+#: util/doc/verifier.cpp:265
 msgid "Warning: dead link"
 msgstr "Warnung: toter Link"
 
-#: util/doc/verifier.cpp:251
+#: util/doc/verifier.cpp:263
 msgid "Warning: document name used in <img src> link"
 msgstr "Warnung: Dokument-Name in <img src> verwendet"
 
-#: util/doc/verifier.cpp:247
+#: util/doc/verifier.cpp:259
 msgid "Warning: duplicate address"
 msgstr "Warnung: doppelte Adresse"
 
@@ -11519,29 +11552,29 @@ msgstr ""
 "Warnung: Ausführen dieser Aktion erzeugte %d Fehler, der letzte war \"%s\". "
 "Das sollte nicht passieren und deutet auf einen Fehler in PCC2 hin."
 
-#: util/doc/verifier.cpp:246
+#: util/doc/verifier.cpp:258
 msgid "Warning: nesting error (child node of page is not a page)"
 msgstr ""
 "Warnung: Verschachtelungsfehler (Unterknoten einer Seite ist keine Seite)"
 
-#: util/doc/verifier.cpp:244
+#: util/doc/verifier.cpp:256
 msgid "Warning: node content cannot be resolved (blob does not exist)"
 msgstr ""
 "Warnung: Knoten-Inhalt kann nicht aufgelöst werden (Blob existiert nicht)"
 
-#: util/doc/verifier.cpp:241
+#: util/doc/verifier.cpp:253
 msgid "Warning: node has no Id"
 msgstr "Warnung: Knoten hat keine Id"
 
-#: util/doc/verifier.cpp:242
+#: util/doc/verifier.cpp:254
 msgid "Warning: node has no title"
 msgstr "Warnung: Knoten hat keinen Titel"
 
-#: util/doc/verifier.cpp:245
+#: util/doc/verifier.cpp:257
 msgid "Warning: node has unique secondary Id"
 msgstr "Warnung: Knoten hat einmalige Sekundär-Id"
 
-#: util/doc/verifier.cpp:243
+#: util/doc/verifier.cpp:255
 msgid "Warning: node is empty (no children and no content)"
 msgstr "Warnung: Knoten ist leer (keine Unterknoten und kein Inhalt)"
 
@@ -11717,7 +11750,7 @@ msgstr "Schreiben"
 msgid "Write to file..."
 msgstr "In Datei schreiben..."
 
-#: game/v3/directoryloader.cpp:557
+#: game/v3/directoryloader.cpp:558
 msgid "Writing %s data..."
 msgstr "Schreibe %s Daten..."
 
@@ -11770,7 +11803,7 @@ msgstr "Y-Bewegung"
 #: client/dialogs/cloneship.cpp:126
 #: client/dialogs/simulationconfiguration.cpp:69
 #: client/dialogs/simulationfleetcostoptions.cpp:36
-#: client/screens/browserscreen.cpp:161 game/config/configurationeditor.cpp:278
+#: client/screens/browserscreen.cpp:163 game/config/configurationeditor.cpp:278
 #: share/resource/core_config.q:245 ui/dialogs/messagebox.cpp:148
 msgid "Yes"
 msgstr "Ja"
@@ -11866,7 +11899,7 @@ msgstr ""
 "Du kannst hier keine Dateien erstellen. Bitte wähle zuerst einen Ort "
 "(Laufwerk, Partition)."
 
-#: client/screens/browserscreen.cpp:749
+#: client/screens/browserscreen.cpp:751
 msgid ""
 "You did not receive any new files with your result this turn, or these files "
 "have already been unpacked."
@@ -11874,7 +11907,7 @@ msgstr ""
 "Du hast diesen Zug keine neuen Dateien erhalten, oder alle Dateien wurden "
 "bereits empfangen."
 
-#: share/resource/core.q:263
+#: share/resource/core.q:274
 msgid ""
 "You do no longer play the unit that this Auto Task was controlling. Auto "
 "Task terminates."
@@ -12093,13 +12126,13 @@ msgid "[Directory content]"
 msgstr "[Verzeichnis anzeigen]"
 
 #: client/dialogs/fileselectiondialog.cpp:59
-#: client/screens/browserscreen.cpp:895
+#: client/screens/browserscreen.cpp:897
 msgid "[Go up one level]"
 msgstr "[Eine Ebene aufwärts]"
 
 #: client/dialogs/directoryselectiondialog.cpp:57
 #: client/dialogs/fileselectiondialog.cpp:77
-#: client/screens/browserscreen.cpp:890
+#: client/screens/browserscreen.cpp:892
 msgid "[Places]"
 msgstr "[Orte]"
 
@@ -12482,7 +12515,8 @@ msgstr "in Datei '%s', Zeile %d"
 msgid "invalid argument to \"-value=\""
 msgstr "Ungültiges Argument zu \"-value=\""
 
-#: gfx/codec/application.cpp:111 gfx/gen/application.cpp:154
+#: gfx/applet.cpp:56 gfx/codec/application.cpp:111 gfx/gen/application.cpp:154
+#: util/applet.cpp:53
 msgid "invalid command \"%s\" specified. Use \"%s -h\" for help"
 msgstr "Ungültiger Befehl \"%s\" angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 
@@ -12536,7 +12570,7 @@ msgstr "Ungültige Option angegeben."
 #: game/v3/unpackapplication.cpp:96 gfx/gen/application.cpp:240
 #: gfx/gen/application.cpp:306 gfx/gen/application.cpp:366
 #: gfx/gen/application.cpp:416 gfx/gen/application.cpp:461
-#: gfx/gen/application.cpp:497 util/doc/application.cpp:674
+#: gfx/gen/application.cpp:497 util/doc/application.cpp:730
 msgid "invalid option specified. Use \"%s -h\" for help"
 msgstr "Ungültige Option angegeben. Mit '%s -h' erhalten Sie Hilfe."
 
@@ -12685,7 +12719,7 @@ msgstr ""
 msgid "missing input file name"
 msgstr "fehlender Eingabedateiname"
 
-#: util/doc/application.cpp:285
+#: util/doc/application.cpp:287
 msgid "missing node Id"
 msgstr "fehlende Knoten-Id"
 
@@ -12757,8 +12791,8 @@ msgstr "Keine Geschütze"
 msgid "no command specified"
 msgstr "kein Befehl angegeben"
 
-#: gfx/codec/application.cpp:96 gfx/gen/application.cpp:133
-#: util/doc/application.cpp:129
+#: gfx/applet.cpp:47 gfx/codec/application.cpp:96 gfx/gen/application.cpp:133
+#: util/applet.cpp:45 util/doc/application.cpp:129
 msgid "no command specified. Use \"%s -h\" for help"
 msgstr "kein Befehl angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 
@@ -12775,8 +12809,8 @@ msgstr "keine Befehle angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 msgid "no fighters aboard"
 msgstr "keine Raumjäger geladen"
 
-#: game/v3/trn/dumperapplication.cpp:110 util/doc/application.cpp:360
-#: util/doc/application.cpp:406
+#: game/v3/trn/dumperapplication.cpp:110 util/doc/application.cpp:364
+#: util/doc/application.cpp:416 util/doc/application.cpp:462
 msgid "no file name specified. Use \"%s -h\" for help"
 msgstr "kein Dateiname angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 
@@ -12816,7 +12850,7 @@ msgstr "keine Eingabedateien angegeben. Mit '%s -h' erhalten Sie Hilfe."
 msgid "no level"
 msgstr "keine Stufen"
 
-#: util/doc/application.cpp:486 util/doc/application.cpp:533
+#: util/doc/application.cpp:542 util/doc/application.cpp:589
 msgid "no node name specified. Use \"%s -h\" for help"
 msgstr "kein Knotenname angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 
@@ -12840,7 +12874,7 @@ msgstr "keine Torpedos geladen"
 msgid "nobody"
 msgstr "niemand"
 
-#: util/doc/application.cpp:681
+#: util/doc/application.cpp:737
 msgid "non-option unexpected. Use \"%s -h\" for help"
 msgstr "unerwartete Nicht-Option. Mit \"%s -h\" erhalten Sie Hilfe"
 
@@ -13085,7 +13119,7 @@ msgstr "wenig"
 msgid "reject"
 msgstr "abweisen"
 
-#: util/doc/application.cpp:187 util/doc/application.cpp:219
+#: util/doc/application.cpp:189 util/doc/application.cpp:221
 msgid "repository location not specified. Use \"%s -h\" for help"
 msgstr "Ablageort nicht angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 
@@ -13167,7 +13201,7 @@ msgstr "für das gewählte Format muss eine Ausgabedatei angegeben werden ('-o')
 #: game/sim/consoleapplication.cpp:213 game/v3/trn/dumperapplication.cpp:71
 #: interpreter/consoleapplication.cpp:343
 #: interpreter/exporter/configuration.cpp:84
-#: server/play/consoleapplication.cpp:102 util/doc/application.cpp:390
+#: server/play/consoleapplication.cpp:102 util/doc/application.cpp:446
 msgid "the specified character set is not known"
 msgstr "der angegebene Zeichensatz ist nicht bekannt"
 
@@ -13199,8 +13233,8 @@ msgstr "zu lange"
 #: game/interface/exportapplication.cpp:118 game/maint/sweepapplication.cpp:78
 #: game/v3/maketurnapplication.cpp:79 game/v3/trn/dumperapplication.cpp:104
 #: game/v3/unpackapplication.cpp:111 gfx/codec/application.cpp:160
-#: server/play/consoleapplication.cpp:134 util/doc/application.cpp:398
-#: util/doc/application.cpp:592
+#: server/play/consoleapplication.cpp:134 util/doc/application.cpp:454
+#: util/doc/application.cpp:648
 msgid "too many arguments"
 msgstr "zu viele Parameter"
 
@@ -13248,7 +13282,7 @@ msgstr "Kann Schiffsliste nicht laden"
 msgid "unable to load turn"
 msgstr "Kann Zug nicht laden"
 
-#: util/doc/application.cpp:266
+#: util/doc/application.cpp:268 util/doc/application.cpp:378
 msgid "unable to resolve node: \"%s\""
 msgstr "Knoten kann nicht gefunden werden: \"%s\""
 
@@ -13271,7 +13305,7 @@ msgstr "unzufrieden"
 msgid "unknown"
 msgstr "unbekannt"
 
-#: util/doc/application.cpp:150
+#: util/doc/application.cpp:152
 msgid "unknown command specified. Use \"%s -h\" for help"
 msgstr "Unbekannter Befehl angegeben. Nutze \"%s -h\" für Hilfe"
 
@@ -13477,6 +13511,9 @@ msgstr "▶ Gesamt"
 #: client/dialogs/scores.cpp:1386
 msgid "▶▶ Totals"
 msgstr "▶▶ Gesamt"
+
+#~ msgid "Battle too large"
+#~ msgstr "Kampf zu groß"
 
 #~ msgid "Error uploading turn: %s"
 #~ msgstr "Fehler beim Hochladen des Zugs: %s"

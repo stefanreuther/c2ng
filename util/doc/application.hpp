@@ -40,6 +40,7 @@ namespace util { namespace doc {
         // Commands:
         struct ListParameters;
         void addGroup(DataParameters& data, afl::sys::CommandLineParser& parser);
+        void importDownloads(DataParameters& data, afl::sys::CommandLineParser& parser);
         void importHelp(DataParameters& data, afl::sys::CommandLineParser& parser);
         void importText(DataParameters& data, afl::sys::CommandLineParser& parser);
         void listContent(DataParameters& data, afl::sys::CommandLineParser& parser);

@@ -377,3 +377,40 @@ Tag List
     Help: list; less spacing if class="compact"
     Rich: -
 
+
+
+Download Server
+----------------
+
+  c2doc-server is also used to serve downloads.
+
+  In this case, each `<doc>` represents a directory, each `<page>`
+  represents a file. The file content is binary, marked by the
+  presence of a tag "blob".
+
+  This way, building of path names or finding equally-named files
+  works naturally.
+
+  The "import-downloads" command takes a file of the following form:
+
+    <fileset>
+      <dir id="n1" title="t" tag="t,t" date="d">
+        <dir id="n2" title="t" tag="t,t" date="d">
+          <p>Description...</p>
+          <file src="s" name="n3" title="t" tag="t,t" date="d" />
+          <file src="s" name="n4" title="t" tag="t,t" date="d" />
+        </dir>
+      </dir>
+    </fileset>
+
+  Each `<dir>` turns into a document, with the names producing nested
+  path names, i.e. the second `<dir>` element would produce
+  `<doc id="n1/n2">`.
+
+  Each `<file>` imports a file. The mandatory `src` attribute refers
+  to the source file. The `name` attribute provides the file name as
+  visible to users (the page Id); it is derived from `src` if omitted.
+
+  The `date="yyyy-mm-dd"` attribute is a shortcut for
+  `tag="date=yyyy-mm-dd"`.
+
