@@ -65,6 +65,7 @@ server::monitor::ServerApplication::ServerApplication(afl::sys::Environment& env
     m_status.addNewObserver(new NetworkObserver("User Manager",     "USER",     NetworkObserver::Service, clientNetworkStack(), afl::net::Name(DEFAULT_ADDRESS, USER_PORT)));
     m_status.addNewObserver(new NetworkObserver("Forum",            "TALK",     NetworkObserver::Service, clientNetworkStack(), afl::net::Name(DEFAULT_ADDRESS, TALK_PORT)));
     m_status.addNewObserver(new NetworkObserver("Documentation",    "DOC",      NetworkObserver::Service, clientNetworkStack(), afl::net::Name(DEFAULT_ADDRESS, DOC_PORT)));
+    m_status.addNewObserver(new NetworkObserver("Downloads",        "DOWNLOAD", NetworkObserver::Service, clientNetworkStack(), afl::net::Name(DEFAULT_ADDRESS, DOWNLOAD_PORT)));
     m_status.addNewObserver(new NetworkObserver("Binary File I/O",  "FORMAT",   NetworkObserver::Service, clientNetworkStack(), afl::net::Name(DEFAULT_ADDRESS, FORMAT_PORT)));
     m_status.addNewObserver(new BadnessFileObserver("Mail Fetch", "POP3.ERROR", fileSystem()));
     m_status.addNewObserver(new LoadAverageObserver(fileSystem(), "/proc/loadavg"));

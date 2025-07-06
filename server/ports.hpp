@@ -31,6 +31,7 @@ namespace server {
     const uint16_t NNTP_PORT     = 1119;
     const uint16_t USER_PORT     = 6526;
     const uint16_t DOC_PORT      = 6664;
+    const uint16_t DOWNLOAD_PORT = 6662;
 
     const uint16_t SMTP_PORT     = 25;
 
