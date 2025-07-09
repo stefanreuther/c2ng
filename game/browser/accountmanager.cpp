@@ -97,7 +97,7 @@ game::browser::AccountManager::~AccountManager()
 void
 game::browser::AccountManager::addNewAccount(const afl::base::Ref<Account>& p)
 {
-    m_accounts.push_back(p);
+    m_accounts.push_back(p.asPtr());
 }
 
 game::browser::Account*

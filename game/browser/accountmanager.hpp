@@ -69,7 +69,7 @@ namespace game { namespace browser {
         void save();
 
      private:
-        std::vector<afl::base::Ref<Account> > m_accounts;
+        std::vector<afl::base::Ptr<Account> > m_accounts;
         util::ProfileDirectory& m_profile;
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
