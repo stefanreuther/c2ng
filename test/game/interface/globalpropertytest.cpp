@@ -101,6 +101,8 @@ AFL_TEST("game.interface.GlobalProperty:full", a)
             { return "/home/gamedir"; }                                          // igpGameDirectory
         virtual String_t getTitle()
             { return "gamedir"; }
+        virtual void flush()
+            { }
     };
 
     afl::string::NullTranslator tx;

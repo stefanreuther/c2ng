@@ -53,6 +53,7 @@ namespace server { namespace host { namespace spec {
         virtual afl::base::Ptr<afl::io::Directory> getParentDirectory();
         virtual String_t getDirectoryName();
         virtual String_t getTitle();
+        virtual void flush();
 
      private:
         Directory(server::interface::FileBase& filer, String_t dirName);

@@ -261,6 +261,10 @@ server::host::spec::Directory::getTitle()
     return PosixFileNames().getFileName(m_dirName);
 }
 
+void
+server::host::spec::Directory::flush()
+{ }
+
 String_t
 server::host::spec::Directory::makePathName(const String_t& fileName) const
 {

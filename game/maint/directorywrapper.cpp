@@ -226,6 +226,12 @@ game::maint::DirectoryWrapper::getTitle()
 }
 
 void
+game::maint::DirectoryWrapper::flush()
+{
+    m_parent->flush();
+}
+
+void
 game::maint::DirectoryWrapper::setWriteMode(WriteMode mode)
 {
     m_writeMode = mode;

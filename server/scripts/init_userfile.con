@@ -11,7 +11,7 @@ silent noerror file mkdir u
 noerror file mkdir r
 noerror file mkdir r/unreg
 silent file put r/unreg/fizz.bin <init/r/unreg/fizz.bin
-silent file setperm r/unreg * r
+silent file setperm r/unreg * rl
 silent file setperm r * r
 
 # Demo games
@@ -19,7 +19,7 @@ noerror file mkdir d
 silent file setperm d * r
 
 noerror file mkdir d/tim
-silent file setperm d/tim * r
+silent file setperm d/tim * rl
 silent file propset d/tim name "Tim's demo RST"
 silent file put d/tim/player11.rst <init/d/tim/player11.rst
 silent file put d/tim/fizz.bin     <init/r/unreg/fizz.bin

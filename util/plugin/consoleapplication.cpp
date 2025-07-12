@@ -35,6 +35,8 @@ namespace {
             { return String_t(); }
         virtual String_t getTitle()
             { return String_t(); }
+        virtual void flush()
+            { }
      private:
         class Entry : public afl::io::DirectoryEntry {
          public:

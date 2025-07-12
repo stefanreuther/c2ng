@@ -638,6 +638,31 @@ game::Session::postprocessTurn(Turn& t, PlayerSet_t playingSet, PlayerSet_t avai
 std::auto_ptr<game::Task_t>
 game::Session::save(TurnLoader::SaveOptions_t opts, std::auto_ptr<StatusTask_t> then)
 {
+    // Things to do after saving:
+    // We need to call gameDirectory().flush() to upload data to a possible remote directory.
+    class Flusher : public StatusTask_t {
+     public:
+        Flusher(Session& me, std::auto_ptr<StatusTask_t>& then)
+            : m_session(me), m_then(then)
+            { }
+        void call(bool status)
+            {
+                try {
+                    if (Root* r = m_session.getRoot().get()) {
+                        r->gameDirectory().flush();
+                    }
+                }
+                catch (afl::except::FileProblemException& e) {
+                    m_session.log().write(afl::sys::LogListener::Error, "game.session", String_t(), e);
+                }
+
+                m_then->call(status);
+            }
+     private:
+        Session& m_session;
+        std::auto_ptr<StatusTask_t> m_then;
+    };
+
     std::auto_ptr<Task_t> result;
 
     // Check environment
@@ -652,7 +677,8 @@ game::Session::save(TurnLoader::SaveOptions_t opts, std::auto_ptr<StatusTask_t> 
         return result;
     }
 
-    return pLoader->saveCurrentTurn(*pGame, PlayerSet_t(pGame->getViewpointPlayer()), opts, *pRoot, *this, then);
+    std::auto_ptr<StatusTask_t> then2(new Flusher(*this, then));
+    return pLoader->saveCurrentTurn(*pGame, PlayerSet_t(pGame->getViewpointPlayer()), opts, *pRoot, *this, then2);
 }
 
 std::auto_ptr<game::Task_t>

@@ -45,7 +45,7 @@ server::play::fs::Session::createRoot(String_t pathName, afl::string::Translator
      *  but for now we can do without that. We actually don't yet have an
      *  interface to pass the result of HostTurn::submit() out of GameAccess::save().
      */
-    afl::base::Ref<Directory> gameDirectory(Directory::create(*this, pathName));
+    afl::base::Ref<afl::io::Directory> gameDirectory(Directory::create(*this, pathName));
     game::v3::RootLoader loader(*rootDir, 0 /* profile */, 0 /* callback */, tx, log, fs);
     const game::config::UserConfiguration uc;
     return loader.load(gameDirectory, gameCharset, uc, false);

@@ -33,6 +33,7 @@ namespace game { namespace maint {
         virtual afl::base::Ptr<Directory> getParentDirectory();
         virtual String_t getDirectoryName();
         virtual String_t getTitle();
+        virtual void flush();
 
         void setWriteMode(WriteMode mode);
         void setEraseMode(EraseMode mode);

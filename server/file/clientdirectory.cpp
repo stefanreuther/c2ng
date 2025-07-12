@@ -232,3 +232,7 @@ server::file::ClientDirectory::getTitle()
 {
     return m_basePath;
 }
+
+void
+server::file::ClientDirectory::flush()
+{ }

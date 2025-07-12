@@ -1831,7 +1831,9 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/game/vcr/flak/testapplettest.cpp \
+FILES_testsuite = test/server/play/fs/sessiontest.cpp \
+    test/server/play/fs/directorytest.cpp \
+    test/game/vcr/flak/testapplettest.cpp \
     test/game/vcr/classic/testapplettest.cpp \
     test/game/v3/scannerapplettest.cpp test/game/parser/testapplettest.cpp \
     test/game/browser/testapplettest.cpp \

@@ -115,8 +115,10 @@ namespace util {
             If an operation throws an exception, tries to complete remaining operations and re-throws the exception.
 
             When trying to upload a, b, c, and b fails, c will still be uploaded and b's exception be thrown.
-            When b and c fail, you'll also receive b's exception. */
-        void flush();
+            When b and c fail, you'll also receive b's exception.
+
+            This used to be a local method of ServerDirectory, but has now been promoted to a Directory interface method. */
+        virtual void flush();
 
         // Directory
         virtual afl::base::Ref<afl::io::DirectoryEntry> getDirectoryEntryByName(String_t name);
