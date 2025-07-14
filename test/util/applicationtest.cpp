@@ -209,7 +209,7 @@ namespace {
             { return CanWrite; }
         virtual String_t getName()
             { return "FailStream"; }
-        virtual afl::base::Ref<afl::io::Stream> createChild()
+        virtual afl::base::Ref<afl::io::Stream> createChild(uint32_t /*mode*/)
             { return *this; }
         virtual afl::base::Ptr<afl::io::FileMapping> createFileMapping(FileSize_t /*limit*/)
             { throw afl::except::FileProblemException(*this, "createFileMapping"); }

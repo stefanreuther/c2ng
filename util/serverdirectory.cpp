@@ -292,7 +292,7 @@ util::ServerDirectory::Entry::create(File* p, bool createNew)
 
     p->data = new InternalStream();
     p->data->setName(m_name);
-    return p->data->createChild();
+    return p->data->createChild(0);
 }
 
 afl::base::Ref<Stream>
@@ -335,7 +335,7 @@ util::ServerDirectory::Entry::open(File* p, bool forWriting)
             // OK
             throw FileProblemException(m_name, Messages::fileNotFound());
         }
-        return p->data->createChild();
+        return p->data->createChild(forWriting ? 0 : Stream::DisableWrite);
     }
 }
 

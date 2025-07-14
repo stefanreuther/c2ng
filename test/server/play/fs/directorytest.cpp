@@ -98,7 +98,7 @@ AFL_TEST("server.play.fs.Directory:basics", a)
         a.checkEqual("13. content", afl::string::fromBytes(f->createVirtualMapping()->get()), "content");
         // a.checkEqual("14. name",    f->getName(), "/dir/test.txt"); -- ServerDirectory diff
         a.checkEqual("15. read",    f->getCapabilities() & Stream::CanRead, Stream::CanRead);
-        // a.checkEqual("16. write",   f->getCapabilities() & Stream::CanWrite, 0U); -- ServerDirectory diff
+        a.checkEqual("16. write",   f->getCapabilities() & Stream::CanWrite, 0U);
     }
 
     // Enumeration

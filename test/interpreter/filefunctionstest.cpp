@@ -85,7 +85,7 @@ namespace {
             { return CanRead|CanWrite|CanSeek; }
         virtual String_t getName()
             { return String_t(); }
-        virtual afl::base::Ref<Stream> createChild()
+        virtual afl::base::Ref<Stream> createChild(uint32_t /*mode*/)
             { throw "geht ned"; }
         virtual afl::base::Ptr<afl::io::FileMapping> createFileMapping(FileSize_t /*limit*/)
             { return 0; }

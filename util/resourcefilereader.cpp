@@ -39,7 +39,7 @@ afl::base::Ptr<afl::io::Stream>
 util::ResourceFileReader::openMemberByIndex(size_t index)
 {
     if (index < m_index.size()) {
-        return new afl::io::LimitedStream(m_file->createChild(), m_index[index].position, m_index[index].length);
+        return new afl::io::LimitedStream(m_file->createChild(afl::io::Stream::DisableWrite), m_index[index].position, m_index[index].length);
     } else {
         return 0;
     }

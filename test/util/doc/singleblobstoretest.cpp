@@ -54,11 +54,11 @@ AFL_TEST("util.doc.SingleBlobStore:portability", a)
     Ref<InternalStream> str(*new InternalStream());
     BlobStore::ObjectId_t objId;
     {
-        SingleBlobStore testee(str->createChild());
+        SingleBlobStore testee(str->createChild(0));
         objId = testee.addObject(afl::string::toBytes("hello there"));
     }
     {
-        SingleBlobStore testee(str->createChild());
+        SingleBlobStore testee(str->createChild(0));
         String_t objContent = afl::string::fromBytes(testee.getObject(objId)->get());
         a.checkEqual("01. content", objContent, "hello there");
     }
@@ -74,7 +74,7 @@ AFL_TEST("util.doc.SingleBlobStore:reuse", a)
     Ref<InternalStream> str(*new InternalStream());
     BlobStore::ObjectId_t objId;
     {
-        SingleBlobStore testee(str->createChild());
+        SingleBlobStore testee(str->createChild(0));
         objId = testee.addObject(afl::string::toBytes("hello there"));
     }
 

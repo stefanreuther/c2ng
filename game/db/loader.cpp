@@ -28,6 +28,7 @@ namespace {
     namespace gp = game::parser;
     namespace dt = game::db::structures;
 
+    using afl::io::Stream;
     using afl::string::Format;
     using afl::sys::LogListener;
 
@@ -70,7 +71,7 @@ namespace {
      *  Unit scores
      */
 
-    bool readUnitScoreHeader(afl::io::Stream& s, game::db::structures::UnitScoreHeader& ush)
+    bool readUnitScoreHeader(Stream& s, game::db::structures::UnitScoreHeader& ush)
     {
         /* Read size field */
         game::db::structures::UInt16_t size;
@@ -97,9 +98,7 @@ namespace {
     }
 
     template<typename T>
-    void saveTypeUnitScores(afl::io::Stream& out,
-                            const game::map::ObjectVector<T>& vec,
-                            size_t index)
+    void saveTypeUnitScores(Stream& out, const game::map::ObjectVector<T>& vec, size_t index)
     {
         for (int oid = 1, n = vec.size(); oid <= n; ++oid) {
             if (const T* p = vec.get(oid)) {
@@ -121,10 +120,10 @@ namespace {
 
     struct RecordState {
         game::db::structures::BlockHeader header;
-        afl::io::Stream::FileSize_t headerPos;
+        Stream::FileSize_t headerPos;
     };
 
-    void startRecord(afl::io::Stream& out, uint16_t type, RecordState& state)
+    void startRecord(Stream& out, uint16_t type, RecordState& state)
     {
         state.headerPos = out.getPos();
         state.header.blockType = type;
@@ -132,9 +131,9 @@ namespace {
         out.fullWrite(afl::base::fromObject(state.header));
     }
 
-    void endRecord(afl::io::Stream& out, RecordState& state)
+    void endRecord(Stream& out, RecordState& state)
     {
-        afl::io::Stream::FileSize_t endPos = out.getPos();
+        Stream::FileSize_t endPos = out.getPos();
 
         // Write updated header.
         state.header.size = static_cast<uint32_t>(endPos - state.headerPos - sizeof(state.header));
@@ -206,8 +205,8 @@ game::db::Loader::load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptP
         dt::BlockHeader blockHeader;
         while (in.read(afl::base::fromObject(blockHeader)) == sizeof(blockHeader)) {
             uint32_t size = blockHeader.size;        /* not const to allow count-down loops */
-            const afl::io::Stream::FileSize_t startPos = in.getPos();
-            const afl::io::Stream::FileSize_t endPos = startPos + blockHeader.size;
+            const Stream::FileSize_t startPos = in.getPos();
+            const Stream::FileSize_t endPos = startPos + blockHeader.size;
 
             switch (blockHeader.blockType) {
              case dt::rPlanetHistory: {
@@ -278,7 +277,7 @@ game::db::Loader::load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptP
              }
 
              case dt::rPainting: {
-                afl::io::LimitedStream ss(in.createChild(), startPos, size);
+                afl::io::LimitedStream ss(in.createChild(Stream::DisableWrite), startPos, size);
                 loadDrawings(ss, turn.universe().drawings(), atom_translation);
                 atom_translation.clear();
                 break;
@@ -309,26 +308,26 @@ game::db::Loader::load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptP
 
              case dt::rShipProperty:
                 if (acceptProperties) {
-                    afl::io::LimitedStream ss(in.createChild(), startPos, size);
+                    afl::io::LimitedStream ss(in.createChild(Stream::DisableWrite), startPos, size);
                     loadPropertyRecord(ss, ShipScope, turn.universe(), shipPropertyNames, m_world.shipPropertyNames(), valueLoader);
                 }
                 break;
 
              case dt::rPlanetProperty:
                 if (acceptProperties) {
-                    afl::io::LimitedStream ss(in.createChild(), startPos, size);
+                    afl::io::LimitedStream ss(in.createChild(Stream::DisableWrite), startPos, size);
                     loadPropertyRecord(ss, PlanetScope, turn.universe(), planetPropertyNames, m_world.planetPropertyNames(), valueLoader);
                 }
                 break;
 
              case dt::rShipScore: {
-                afl::io::LimitedStream ss(in.createChild(), startPos, size);
+                afl::io::LimitedStream ss(in.createChild(Stream::DisableWrite), startPos, size);
                 loadUnitScoreRecord(ss, ShipScope, turn.universe(), game.shipScores());
                 break;
              }
 
              case dt::rPlanetScore: {
-                afl::io::LimitedStream ss(in.createChild(), startPos, size);
+                afl::io::LimitedStream ss(in.createChild(Stream::DisableWrite), startPos, size);
                 loadUnitScoreRecord(ss, PlanetScope, turn.universe(), game.planetScores());
                 break;
              }
@@ -337,7 +336,7 @@ game::db::Loader::load(afl::io::Stream& in, Turn& turn, Game& game, bool acceptP
                 if (!atom_translation.isEmpty()) {
                     log().write(LogListener::Warn, LOG_NAME, m_translator("Text record appears at unexpected place"));
                 }
-                afl::io::LimitedStream ss(in.createChild(), startPos, size);
+                afl::io::LimitedStream ss(in.createChild(Stream::DisableWrite), startPos, size);
                 atom_translation.clear();
                 atom_translation.load(ss, m_charset, m_world.atomTable());
                 break;
@@ -374,7 +373,7 @@ game::db::Loader::save(afl::io::Stream& out, const Turn& turn, const Game& game,
 {
     // ex saveChartDatabase
     // Prepare initial header
-    const afl::io::Stream::FileSize_t pos = out.getPos();
+    const Stream::FileSize_t pos = out.getPos();
     structures::Header header;
     afl::base::fromObject(header).fill(0);
 
