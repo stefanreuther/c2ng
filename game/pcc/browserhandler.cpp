@@ -465,7 +465,6 @@ game::pcc::BrowserHandler::loadRoot(const afl::base::Ref<game::browser::Account>
         // Turn loader
         result->setTurnLoader(new TurnLoader(transport,
                                              m_defaultSpecificationDirectory,
-                                             serverDirectory,
                                              std::auto_ptr<afl::charset::Charset>(charset.clone()),
                                              log,
                                              availablePlayers,

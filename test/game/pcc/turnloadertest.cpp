@@ -38,7 +38,6 @@ using game::pcc::ServerTransport;
 using game::pcc::TurnLoader;
 using game::test::WebServer;
 using util::ProfileDirectory;
-using util::ServerDirectory;
 
 namespace {
     InternalEnvironment& prepareEnvironment(InternalEnvironment& env)
@@ -106,7 +105,6 @@ AFL_TEST("game.pcc.TurnLoader", a)
 
     Ref<TurnLoader> testee = *new TurnLoader(transport,
                                              env.specDir,
-                                             ServerDirectory::create(transport, "Title", 0),
                                              std::auto_ptr<Charset>(new CodepageCharset(afl::charset::g_codepage437)),
                                              env.log,
                                              PlayerSet_t(7),

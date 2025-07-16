@@ -43,14 +43,12 @@ namespace {
 
 game::pcc::TurnLoader::TurnLoader(afl::base::Ref<ServerTransport> serverTransport,
                                   afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
-                                  afl::base::Ref<util::ServerDirectory> serverDirectory,
                                   std::auto_ptr<afl::charset::Charset> charset,
                                   afl::sys::LogListener& log,
                                   PlayerSet_t availablePlayers,
                                   util::ProfileDirectory& profile)
     : m_serverTransport(serverTransport),
       m_defaultSpecificationDirectory(defaultSpecificationDirectory),
-      m_serverDirectory(serverDirectory),
       m_charset(charset),
       m_log(log),
       m_profile(profile),
@@ -196,11 +194,11 @@ game::pcc::TurnLoader::doLoadCurrentTurn(Game& game, int player, game::Root& roo
 
     // Merged spec directory
     Ref<afl::io::MultiDirectory> specDir = afl::io::MultiDirectory::create();
-    specDir->addDirectory(m_serverDirectory);
+    specDir->addDirectory(root.gameDirectory());
     specDir->addDirectory(m_defaultSpecificationDirectory);
 
     // Load common files
-    ldr.loadCommonFiles(*m_serverDirectory, *specDir, turn.universe(), player);
+    ldr.loadCommonFiles(root.gameDirectory(), *specDir, turn.universe(), player);
 
     // Load database
     loadCurrentDatabases(game, player, root, session);
@@ -211,14 +209,14 @@ game::pcc::TurnLoader::doLoadCurrentTurn(Game& game, int player, game::Root& roo
 
     // Load result file from remote
     {
-        Ref<Stream> file = m_serverDirectory->openFile(Format("player%d.rst", player), afl::io::FileSystem::OpenRead);
+        Ref<Stream> file = root.gameDirectory().openFile(Format("player%d.rst", player), afl::io::FileSystem::OpenRead);
         m_log.write(LogListener::Info, LOG_NAME, Format(tx("Loading %s RST file..."), root.playerList().getPlayerName(player, Player::AdjectiveName, tx)));
         ldr.loadResult(turn, root, game, *file, player);
     }
 
     // Try to load turn from remote
     try {
-        Ptr<Stream> file = m_serverDirectory->openFileNT(Format("player%d.trn", player), afl::io::FileSystem::OpenRead);
+        Ptr<Stream> file = root.gameDirectory().openFileNT(Format("player%d.trn", player), afl::io::FileSystem::OpenRead);
         if (file.get() != 0) {
             m_log.write(LogListener::Info, LOG_NAME, Format(tx("Loading %s TRN file..."), root.playerList().getPlayerName(player, Player::AdjectiveName, tx)));
             Loader(*m_charset, tx, m_log).loadTurnfile(turn, root, *file, player);
@@ -238,12 +236,12 @@ game::pcc::TurnLoader::doLoadCurrentTurn(Game& game, int player, game::Root& roo
     }
 
     // Load FLAK from remote
-    ldr.loadFlakBattles(turn, *m_serverDirectory, player);
+    ldr.loadFlakBattles(turn, root.gameDirectory(), player);
 
     // Load util from remote
     Parser mp(tx, m_log, game, player, root, game::actions::mustHaveShipList(session), session.world().atomTable());
     {
-        Ptr<Stream> file = m_serverDirectory->openFileNT(Format("util%d.dat", player), afl::io::FileSystem::OpenRead);
+        Ptr<Stream> file = root.gameDirectory().openFileNT(Format("util%d.dat", player), afl::io::FileSystem::OpenRead);
         if (file.get() != 0) {
             mp.loadUtilData(*file, *m_charset);
         } else {
@@ -271,7 +269,7 @@ game::pcc::TurnLoader::doSaveCurrentTurn(const Game& game, PlayerSet_t players, 
 
         // Build all the turns
         m_log.write(LogListener::Info, LOG_NAME, tx("Generating turn commands..."));
-        game::v3::trn::FileSet turns(*m_serverDirectory, *m_charset);
+        game::v3::trn::FileSet turns(root.gameDirectory(), *m_charset);
         for (int player = 1; player <= MAX_PLAYERS; ++player) {
             if (players.contains(player)) {
                 TurnFile& thisTurn = turns.create(player, turn.getTimestamp(), turn.getTurnNumber());
@@ -301,5 +299,5 @@ game::pcc::TurnLoader::doSaveCurrentTurn(const Game& game, PlayerSet_t players, 
     game.expressionLists().saveRecentFiles(m_profile, m_log, tx);
 
     m_log.write(LogListener::Info, LOG_NAME, tx("Uploading data..."));
-    m_serverDirectory->flush();
+    root.gameDirectory().flush();
 }

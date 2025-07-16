@@ -33,14 +33,12 @@ namespace game { namespace pcc {
         /** Constructor.
             @param serverTransport                 ServerTransport matching serverDirectory. Also provides access to BrowserHandler/Account.
             @param defaultSpecificationDirectory   Default specification directory (share/specs)
-            @param serverDirectory                 Server directory (RST, TRN, specs).
             @param charset                         Game character set
             @param log                             Logger
             @param availablePlayers                Available players
             @param profile                         Profile directory (default configs) */
         TurnLoader(afl::base::Ref<ServerTransport> serverTransport,
                    afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory,
-                   afl::base::Ref<util::ServerDirectory> serverDirectory,
                    std::auto_ptr<afl::charset::Charset> charset,
                    afl::sys::LogListener& log,
                    PlayerSet_t availablePlayers,
@@ -58,7 +56,6 @@ namespace game { namespace pcc {
      private:
         afl::base::Ref<ServerTransport> m_serverTransport;
         afl::base::Ref<afl::io::Directory> m_defaultSpecificationDirectory;
-        afl::base::Ref<util::ServerDirectory> m_serverDirectory;
         std::auto_ptr<afl::charset::Charset> m_charset;
         afl::sys::LogListener& m_log;
         util::ProfileDirectory& m_profile;
