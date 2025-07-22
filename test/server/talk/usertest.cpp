@@ -48,12 +48,14 @@ AFL_TEST("server.talk.User:basics", a)
 
     userTree.hashKey("profile").stringField("userfield").set("uservalue");
     userTree.hashKey("profile").intField("userint").set(0);
+    userTree.hashKey("profile").intField("allowxpost").set(1);
 
     afl::net::redis::HashKey defaultKey = root.defaultProfile();
     defaultKey.stringField("userfield").set("defaultuservalue");
     defaultKey.intField("userint").set(1);
     defaultKey.stringField("defaultfield").set("defaultvalue");
     defaultKey.intField("defaultint").set(2);
+    defaultKey.intField("allowgpost").set(1);
 
     // Test accessors
     server::talk::User testee(root, UID);
@@ -67,6 +69,8 @@ AFL_TEST("server.talk.User:basics", a)
     a.check     ("14. watchedTopics",  testee.watchedTopics().contains(77));
     a.check     ("15. notifiedForums", testee.notifiedForums().contains(98));
     a.check     ("16. notifiedTopics", testee.notifiedTopics().contains(76));
+    a.check     ("17. allow cross",    testee.isAllowedToCrosspost());
+    a.check     ("18. allow game",     testee.isAllowedToCrosspostToGames());
 
     std::auto_ptr<afl::data::Value> p;
     p.reset(testee.getProfileRaw("userfield"));
@@ -407,4 +411,141 @@ AFL_TEST("server.talk.User:isWatchIndividual:disabled-in-profile-enabled-in-defa
     env.root.defaultProfile().intField("talkwatchindividual").set(1);
     server::talk::User testee(env.root, "1001");
     a.check("", !testee.isWatchIndividual());
+}
+
+/*
+ *  Test isAllowedToCrosspost().
+ */
+
+// Not set; default means no
+AFL_TEST("server.talk.User:isAllowedToCrosspost:not-set", a)
+{
+    Environment env;
+    server::talk::User testee(env.root, "1001");
+    a.check("", !testee.isAllowedToCrosspost());
+}
+
+// Enabled in user profile
+AFL_TEST("server.talk.User:isAllowedToCrosspost:enabled-in-profile", a)
+{
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("allowxpost").set(1);
+    server::talk::User testee(env.root, "1001");
+    a.check("", testee.isAllowedToCrosspost());
+}
+
+// Disabled in user profile
+AFL_TEST("server.talk.User:isAllowedToCrosspost:disabled-in-profile", a)
+{
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("allowxpost").set(0);
+    server::talk::User testee(env.root, "1001");
+    a.check("", !testee.isAllowedToCrosspost());
+}
+
+// Enabled in default profile
+AFL_TEST("server.talk.User:isAllowedToCrosspost:enabled-in-default", a)
+{
+    Environment env;
+    env.root.defaultProfile().intField("allowxpost").set(1);
+    server::talk::User testee(env.root, "1001");
+    a.check("", testee.isAllowedToCrosspost());
+}
+
+// Disabled in default profile
+AFL_TEST("server.talk.User:isAllowedToCrosspost:disabled-in-default", a)
+{
+    Environment env;
+    env.root.defaultProfile().intField("allowxpost").set(0);
+    server::talk::User testee(env.root, "1001");
+    a.check("", !testee.isAllowedToCrosspost());
+}
+
+// Enabled in user, disabled in default
+AFL_TEST("server.talk.User:isAllowedToCrosspost:enabled-in-profile-disabled-in-default", a)
+{
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("allowxpost").set(1);
+    env.root.defaultProfile().intField("allowxpost").set(0);
+    server::talk::User testee(env.root, "1001");
+    a.check("", testee.isAllowedToCrosspost());
+}
+
+// Disabled in user, enabled in default
+AFL_TEST("server.talk.User:isAllowedToCrosspost:disabled-in-profile-enabled-in-default", a)
+{
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("allowxpost").set(0);
+    env.root.defaultProfile().intField("allowxpost").set(1);
+    server::talk::User testee(env.root, "1001");
+    a.check("", !testee.isAllowedToCrosspost());
+}
+
+
+/*
+ *  Test isAllowedToCrosspostToGames().
+ */
+
+// Not set; default means no
+AFL_TEST("server.talk.User:isAllowedToCrosspostToGames:not-set", a)
+{
+    Environment env;
+    server::talk::User testee(env.root, "1001");
+    a.check("", !testee.isAllowedToCrosspostToGames());
+}
+
+// Enabled in user profile
+AFL_TEST("server.talk.User:isAllowedToCrosspostToGames:enabled-in-profile", a)
+{
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("allowgpost").set(1);
+    server::talk::User testee(env.root, "1001");
+    a.check("", testee.isAllowedToCrosspostToGames());
+}
+
+// Disabled in user profile
+AFL_TEST("server.talk.User:isAllowedToCrosspostToGames:disabled-in-profile", a)
+{
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("allowgpost").set(0);
+    server::talk::User testee(env.root, "1001");
+    a.check("", !testee.isAllowedToCrosspostToGames());
+}
+
+// Enabled in default profile
+AFL_TEST("server.talk.User:isAllowedToCrosspostToGames:enabled-in-default", a)
+{
+    Environment env;
+    env.root.defaultProfile().intField("allowgpost").set(1);
+    server::talk::User testee(env.root, "1001");
+    a.check("", testee.isAllowedToCrosspostToGames());
+}
+
+// Disabled in default profile
+AFL_TEST("server.talk.User:isAllowedToCrosspostToGames:disabled-in-default", a)
+{
+    Environment env;
+    env.root.defaultProfile().intField("allowgpost").set(0);
+    server::talk::User testee(env.root, "1001");
+    a.check("", !testee.isAllowedToCrosspostToGames());
+}
+
+// Enabled in user, disabled in default
+AFL_TEST("server.talk.User:isAllowedToCrosspostToGames:enabled-in-profile-disabled-in-default", a)
+{
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("allowgpost").set(1);
+    env.root.defaultProfile().intField("allowgpost").set(0);
+    server::talk::User testee(env.root, "1001");
+    a.check("", testee.isAllowedToCrosspostToGames());
+}
+
+// Disabled in user, enabled in default
+AFL_TEST("server.talk.User:isAllowedToCrosspostToGames:disabled-in-profile-enabled-in-default", a)
+{
+    Environment env;
+    env.root.userRoot().subtree("1001").hashKey("profile").intField("allowgpost").set(0);
+    env.root.defaultProfile().intField("allowgpost").set(1);
+    server::talk::User testee(env.root, "1001");
+    a.check("", !testee.isAllowedToCrosspostToGames());
 }

@@ -203,6 +203,95 @@ AFL_TEST("server.talk.Notify:notifyMessage:reply", a)
     a.check("99. empty", mq.empty());
 }
 
+/** Notify message, cross-post. */
+AFL_TEST("server.talk.Notify:notifyMessage:cross", a)
+{
+    InternalDatabase db;
+    MailMock mq(a);
+    Root root(db, Configuration());
+
+    // IDs
+    const int32_t forumId = 99;
+    const int32_t otherId = 77;
+    const int32_t topicId = 42;
+    const int32_t postId = 123;
+
+    // Users
+    User postUser(root, "a");
+    postUser.profile().intField("talkwatchindividual").set(0);
+    postUser.watchedForums().add(forumId);
+    postUser.watchedForums().add(otherId);
+    root.userRoot().stringSetKey("all").add("p");
+
+    User thisUser(root, "b");
+    thisUser.profile().intField("talkwatchindividual").set(0);
+    thisUser.watchedForums().add(forumId);
+    root.userRoot().stringSetKey("all").add("b");
+
+    User otherUser(root, "c");
+    otherUser.profile().intField("talkwatchindividual").set(0);
+    otherUser.watchedForums().add(otherId);
+    root.userRoot().stringSetKey("all").add("c");
+
+    // Create forums
+    Forum forum(root, forumId);
+    root.allForums().add(forumId);
+    forum.creationTime().set(1);
+    forum.header().stringField("name").set("Forum");
+    forum.watchers().add("a");
+    forum.watchers().add("b");
+    forum.readPermissions().set("all");
+
+    Forum other(root, otherId);
+    root.allForums().add(otherId);
+    other.creationTime().set(1);
+    other.header().stringField("name").set("Other");
+    other.watchers().add("a");
+    other.watchers().add("c");
+    other.readPermissions().set("all");
+
+    // Topic
+    Topic topic(root, topicId);
+    forum.topics().add(topicId);
+    other.topics().add(topicId);
+    topic.subject().set("topic sub");
+    topic.forumId().set(forumId);
+    topic.firstPostingId().set(postId);
+    topic.alsoPostedTo().add(otherId);
+
+    // Post
+    Message post(root, postId);
+    topic.messages().add(postId);
+    forum.messages().add(postId);
+    other.messages().add(postId);
+    post.topicId().set(topicId);
+    post.author().set("a");
+    post.text().set("forum:text");
+    post.subject().set("post sub");
+
+    // Test it
+    notifyMessage(post, root, mq);
+
+    // Verify
+    MailMock::Message* msg;
+
+    // - user 'a' must not have got a message
+    msg = mq.extract("user:a");
+    a.checkNull("01. p", msg);
+
+    // - user 'b' must have got a message
+    msg = mq.extract("user:b");
+    a.checkNonNull("11. b", msg);
+    a.checkEqual("12. b template", msg->templateName, "talk-forum");
+
+    // - user 'c' must have got a message
+    msg = mq.extract("user:c");
+    a.checkNonNull("21. s", msg);
+    a.checkEqual("22. s template", msg->templateName, "talk-forum");
+
+    a.check("99. empty", mq.empty());
+}
+
 AFL_TEST("server.talk.Notify:already-notified", a)
 {
     // Infrastructure

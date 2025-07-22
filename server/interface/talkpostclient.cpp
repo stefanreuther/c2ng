@@ -1,5 +1,6 @@
 /**
   *  \file server/interface/talkpostclient.cpp
+  *  \brief Class server::interface::TalkPostClient
   */
 
 #include "server/interface/talkpostclient.hpp"
@@ -10,9 +11,6 @@ using afl::data::Segment;
 
 server::interface::TalkPostClient::TalkPostClient(afl::net::CommandHandler& commandHandler)
     : m_commandHandler(commandHandler)
-{ }
-
-server::interface::TalkPostClient::~TalkPostClient()
 { }
 
 // POSTNEW forum:FID subj:Str text:TalkText [USER user:UID] [READPERM rp:Str] [ANSWERPERM ap:Str]
@@ -36,6 +34,10 @@ server::interface::TalkPostClient::create(int32_t forumId, String_t subject, Str
     if (const String_t* p = options.answerPermissions.get()) {
         cmd.pushBackString("ANSWERPERM");
         cmd.pushBackString(*p);
+    }
+    for (size_t i = 0; i < options.alsoPostTo.size(); ++i) {
+        cmd.pushBackString("ALSO");
+        cmd.pushBackInteger(options.alsoPostTo[i]);
     }
     return m_commandHandler.callInt(cmd);
 }

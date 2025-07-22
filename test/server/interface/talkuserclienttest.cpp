@@ -157,6 +157,23 @@ AFL_TEST("server.interface.TalkUserClient", a)
         testee.getPostedMessages("wilma", params);
     }
 
+    // USERLSCROSS
+    mock.expectCall("USERLSCROSS");
+    mock.provideNewResult(0);
+    testee.getCrosspostToGameCandidates(TalkUser::ListParameters());
+
+    {
+        TalkUser::ListParameters params;
+        params.mode = TalkUser::ListParameters::WantRange;
+        params.start = 20;
+        params.count = 10;
+        params.sortKey = "key";
+
+        mock.expectCall("USERLSCROSS, LIMIT, 20, 10, SORT, key");
+        mock.provideNewResult(0);
+        testee.getCrosspostToGameCandidates(params);
+    }
+
     // Return value passing
     {
         mock.expectCall("USERNEWSRC, GET, POST, 5, 7, 9");

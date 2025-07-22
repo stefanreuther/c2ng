@@ -24,7 +24,9 @@ namespace {
             { }
         virtual int32_t create(int32_t forumId, String_t subject, String_t text, const CreateOptions& options)
             {
-                checkCall(Format("create(%d,%s,%s,%s,%s,%s)") << forumId << subject << text << options.userId.orElse("no-user") << options.readPermissions.orElse("no-read") << options.answerPermissions.orElse("no-answer"));
+                checkCall(Format("create(%d,%s,%s,%s,%s,%s,#%d)") << forumId << subject << text << options.userId.orElse("no-user")
+                          << options.readPermissions.orElse("no-read") << options.answerPermissions.orElse("no-answer")
+                          << options.alsoPostTo.size());
                 return consumeReturnValue<int32_t>();
             }
         virtual int32_t reply(int32_t parentPostId, String_t subject, String_t text, const ReplyOptions& options)
@@ -99,11 +101,19 @@ AFL_TEST("server.interface.TalkPostServer:commands", a)
     server::interface::TalkPostServer testee(mock);
 
     // POSTNEW
-    mock.expectCall("create(5,subj,text,no-user,no-read,no-answer)");
+    mock.expectCall("create(5,subj,text,no-user,no-read,no-answer,#0)");
     mock.provideReturnValue<int32_t>(99);
     a.checkEqual("01. postnew", testee.callInt(Segment().pushBackString("POSTNEW").pushBackInteger(5).pushBackString("subj").pushBackString("text")), 99);
 
-    mock.expectCall("create(15,SUBJ,TEXT,1005,u:1004,all)");
+    mock.expectCall("create(5,subj,text,fred,no-read,no-answer,#3)");
+    mock.provideReturnValue<int32_t>(88);
+    a.checkEqual("02. postnew", testee.callInt(Segment().pushBackString("POSTNEW").pushBackInteger(5).pushBackString("subj").pushBackString("text")
+                                               .pushBackString("ALSO").pushBackInteger(9)
+                                               .pushBackString("USER").pushBackString("fred")
+                                               .pushBackString("ALSO").pushBackString("11")
+                                               .pushBackString("ALSO").pushBackInteger(22)), 88);
+
+    mock.expectCall("create(15,SUBJ,TEXT,1005,u:1004,all,#0)");
     mock.provideReturnValue<int32_t>(77);
     a.checkEqual("11. postnew", testee.callInt(Segment().pushBackString("POSTNEW").pushBackInteger(15).pushBackString("SUBJ").pushBackString("TEXT")
                                                .pushBackString("ANSWERPERM").pushBackString("all")
@@ -197,6 +207,8 @@ AFL_TEST("server.interface.TalkPostServer:errors", a)
     AFL_CHECK_THROWS(a("04. bad type"),       testee.callVoid(Segment().pushBackString("POSTRM").pushBackString("NOT-A-NUMBER")), std::exception);
     AFL_CHECK_THROWS(a("05. missing option"), testee.callInt(Segment().pushBackString("POSTNEW").pushBackInteger(15).pushBackString("SUBJ").pushBackString("TEXT").pushBackString("ANSWERPERM")), std::exception);
     AFL_CHECK_THROWS(a("06. bad option"),     testee.callInt(Segment().pushBackString("POSTNEW").pushBackInteger(15).pushBackString("SUBJ").pushBackString("TEXT").pushBackString("whatever")), std::exception);
+    AFL_CHECK_THROWS(a("07. bad opt type"),   testee.callInt(Segment().pushBackString("POSTNEW").pushBackInteger(15).pushBackString("SUBJ").pushBackString("TEXT").pushBackString("ALSO").pushBackString("X")), std::exception);
+    AFL_CHECK_THROWS(a("08. bad option"),     testee.callInt(Segment().pushBackString("POSTREPLY").pushBackInteger(15).pushBackString("SUBJ").pushBackString("TEXT").pushBackString("whatever")), std::exception);
 
     Segment empty;
     interpreter::Arguments args(empty, 0, 0);
@@ -214,16 +226,26 @@ AFL_TEST("server.interface.TalkPostServer:roundtrip", a)
     server::interface::TalkPostClient level4(level3);
 
     // create
-    mock.expectCall("create(9,s,t,no-user,no-read,no-answer)");
+    mock.expectCall("create(9,s,t,no-user,no-read,no-answer,#0)");
     mock.provideReturnValue<int32_t>(33);
     a.checkEqual("01. create", level4.create(9, "s", "t", server::interface::TalkPost::CreateOptions()), 33);
 
     {
         server::interface::TalkPost::CreateOptions opts;
         opts.userId = "u";
+        opts.alsoPostTo.push_back(11);
+        opts.alsoPostTo.push_back(99);
+        mock.expectCall("create(10,s,t,u,no-read,no-answer,#2)");
+        mock.provideReturnValue<int32_t>(43);
+        a.checkEqual("02. create", level4.create(10, "s", "t", opts), 43);
+    }
+
+    {
+        server::interface::TalkPost::CreateOptions opts;
+        opts.userId = "u";
         opts.readPermissions = "r";
         opts.answerPermissions = "a";
-        mock.expectCall("create(10,s,t,u,r,a)");
+        mock.expectCall("create(10,s,t,u,r,a,#0)");
         mock.provideReturnValue<int32_t>(34);
         a.checkEqual("11. create", level4.create(10, "s", "t", opts), 34);
     }

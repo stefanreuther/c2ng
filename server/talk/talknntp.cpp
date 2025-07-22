@@ -94,9 +94,7 @@ server::talk::TalkNNTP::listMessages(int32_t forumId, afl::data::IntegerList_t& 
     }
 
     // Get result
-    afl::net::redis::SortOperation op(f.messages().sort());
-    Message::applySortBySequenceMap(m_root, op);
-    op.getResult(result);
+    Message::getMessageSequenceNumbers(m_root, f.messages(), forumId, result);
 }
 
 afl::data::Hash::Ref_t

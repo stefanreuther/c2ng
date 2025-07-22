@@ -17,4 +17,5 @@ silent redis setnx uid:moderator 0
 # Default profile
 silent redis hmset default:profile limitfiles 1000 limitkbytes 20000 allowupload 1 allowadmin 0
 silent redis hmset default:profile talkautolink 1 talkautosmiley 1 talkautowatch 1 joinautowatch 1
+silent redis hmset default:profile allowgpost 1
 silent redis hmset default:profilecopy termsversion 1

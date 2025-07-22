@@ -4,6 +4,7 @@
   */
 
 #include "server/talk/forum.hpp"
+#include "afl/string/parse.hpp"
 #include "server/errors.hpp"
 #include "server/talk/group.hpp"
 #include "server/talk/render/render.hpp"
@@ -250,6 +251,31 @@ server::talk::Forum::describeAsNewsgroup(const server::talk::render::Context& ct
     return result;
 }
 
+int32_t
+server::talk::Forum::getGameNumber()
+{
+    // This reverses the operation of TalkAdapter::handleGameStart.
+    // We just parse the original BBCode. The front-end parses the HTML.
+    // If we change the code to store different BBCode, maybe store a game number directly as well.
+    String_t desc = description().get();
+    String_t::size_type start = desc.find("[game]");
+    if (start == String_t::npos) {
+        return 0;
+    }
+    desc.erase(0, start + 6);
+
+    String_t::size_type end = desc.find("[/game]");
+    if (end == String_t::npos) {
+        return 0;
+    }
+    desc.erase(end);
+
+    int32_t result = 0;
+    if (!afl::string::strToInteger(desc, result)) {
+        return 0;
+    }
+    return result;
+}
 
 server::talk::Forum::ForumSorter::ForumSorter(Root& root)
     : Sorter(),

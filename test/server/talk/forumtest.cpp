@@ -252,3 +252,56 @@ AFL_TEST("server.talk.Forum:sort", a)
         AFL_CHECK_THROWS(a("19. bad key"), server::talk::Forum::ForumSorter(root).applySortKey(op, ""), std::runtime_error);
     }
 }
+
+/**
+ * Test getGameNumber.
+ */
+
+// Base case
+AFL_TEST("server.talk.Forum:getGameNumber:base", a)
+{
+    afl::net::redis::InternalDatabase db;
+    server::talk::Root root(db, server::talk::Configuration());
+    server::talk::Forum f(root, 1);
+    a.checkEqual("getGameNumber", f.getGameNumber(), 0);
+}
+
+// Good case
+AFL_TEST("server.talk.Forum:getGameNumber:good", a)
+{
+    afl::net::redis::InternalDatabase db;
+    server::talk::Root root(db, server::talk::Configuration());
+    server::talk::Forum f(root, 2);
+    f.description().set("talk:Forum for [game]42[/game] (#42)");
+    a.checkEqual("getGameNumber", f.getGameNumber(), 42);
+}
+
+// Missing [game]
+AFL_TEST("server.talk.Forum:getGameNumber:error:missing-open", a)
+{
+    afl::net::redis::InternalDatabase db;
+    server::talk::Root root(db, server::talk::Configuration());
+    server::talk::Forum f(root, 3);
+    f.description().set("talk:Forum for 42[/game] (#42)");
+    a.checkEqual("getGameNumber", f.getGameNumber(), 0);
+}
+
+// Missing [/game]
+AFL_TEST("server.talk.Forum:getGameNumber:error:missing-close", a)
+{
+    afl::net::redis::InternalDatabase db;
+    server::talk::Root root(db, server::talk::Configuration());
+    server::talk::Forum f(root, 4);
+    f.description().set("talk:Forum for [game]42[/] (#42)");
+    a.checkEqual("getGameNumber", f.getGameNumber(), 0);
+}
+
+// Bad number
+AFL_TEST("server.talk.Forum:getGameNumber:error:bad-number", a)
+{
+    afl::net::redis::InternalDatabase db;
+    server::talk::Root root(db, server::talk::Configuration());
+    server::talk::Forum f(root, 5);
+    f.description().set("talk:Forum for [game]X[/game] (#42)");
+    a.checkEqual("getGameNumber", f.getGameNumber(), 0);
+}

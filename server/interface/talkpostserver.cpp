@@ -1,31 +1,29 @@
 /**
   *  \file server/interface/talkpostserver.cpp
+  *  \brief Class server::interface::TalkPostServer
   */
 
 #include <stdexcept>
 #include "server/interface/talkpostserver.hpp"
-#include "interpreter/arguments.hpp"
-#include "server/types.hpp"
-#include "server/interface/talkpost.hpp"
-#include "server/interface/talkrenderserver.hpp"
-#include "afl/data/vectorvalue.hpp"
-#include "afl/data/vector.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
+#include "afl/data/vector.hpp"
+#include "afl/data/vectorvalue.hpp"
+#include "interpreter/arguments.hpp"
 #include "server/errors.hpp"
+#include "server/interface/talkpost.hpp"
+#include "server/interface/talkrenderserver.hpp"
+#include "server/types.hpp"
 
 server::interface::TalkPostServer::TalkPostServer(TalkPost& impl)
     : m_implementation(impl)
-{ }
-
-server::interface::TalkPostServer::~TalkPostServer()
 { }
 
 bool
 server::interface::TalkPostServer::handleCommand(const String_t& upcasedCommand, interpreter::Arguments& args, std::auto_ptr<Value_t>& result)
 {
     if (upcasedCommand == "POSTNEW") {
-        /* @q POSTNEW forum:FID subj:Str text:TalkText [USER user:UID] [READPERM rp:Str] [ANSWERPERM ap:Str] (Talk Command)
+        /* @q POSTNEW forum:FID subj:Str text:TalkText [USER user:UID] [READPERM rp:Str] [ANSWERPERM ap:Str] [ALSO forum:FID] (Talk Command)
            Create a new thread and add a posting.
 
            New message attributes:
@@ -40,7 +38,11 @@ server::interface::TalkPostServer::handleCommand(const String_t& upcasedCommand,
            - subject, forum, readperm, answerperm: as given
            - firstpost: MID of new posting
 
+           The ALSO clause can be repeated as needed to crosspost to multiple forums.
+
            Permissions: write-permission for forum.
+           Crossposting is allowed if user has allowxpost permission,
+           or if all affected forums belong to games played by the user and user has allowgpost permission.
 
            @err 400 Need USER (in admin context, USER must be specified)
            @err 403 USER not allowed (in user context, USER must be identical to current user or omitted)
@@ -67,6 +69,9 @@ server::interface::TalkPostServer::handleCommand(const String_t& upcasedCommand,
             } else if (key == "ANSWERPERM") {
                 args.checkArgumentCountAtLeast(1);
                 opts.answerPermissions = toString(args.getNext());
+            } else if (key == "ALSO") {
+                args.checkArgumentCountAtLeast(1);
+                opts.alsoPostTo.push_back(toInteger(args.getNext()));
             } else {
                 throw std::runtime_error(INVALID_OPTION);
             }

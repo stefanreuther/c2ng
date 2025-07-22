@@ -28,6 +28,7 @@ namespace server { namespace talk {
         virtual afl::data::Value* getWatchedThreads(const ListParameters& params);
         virtual afl::data::Value* getWatchedForums(const ListParameters& params);
         virtual afl::data::Value* getPostedMessages(String_t user, const ListParameters& params);
+        virtual afl::data::Value* getCrosspostToGameCandidates(const ListParameters& params);
 
      private:
         Session& m_session;

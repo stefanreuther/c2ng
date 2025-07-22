@@ -172,7 +172,7 @@ server::talk::CommandHandler::getHelp(String_t topic)
             "POSTLSNEW <count>\n"
             "POSTMRENDER <mid>...\n"
             "POSTMSTAT <mid>...\n"
-            "POSTNEW <fid> <subj> <text> [USER|READPERM|ANSWERPERM <arg>]\n"
+            "POSTNEW <fid> <subj> <text> [USER|READPERM|ANSWERPERM <arg>] [ALSO <fid>]\n"
             "POSTRENDER <mid> <renderoptions>\n"
             "POSTREPLY <mid> <subj> <text> [USER <arg>]\n"
             "POSTRM <mid>\n"
@@ -188,6 +188,7 @@ server::talk::CommandHandler::getHelp(String_t topic)
             "THREADSTICKY <tid> <value>\n";
     } else if (topic == "USER") {
         return "User commands:\n"
+            "USERLSCROSS <listoptions>\n"
             "USERLSPOSTED <uid> []\n"
             "USERLSWATCHEDFORUMS <listoptions>\n"
             "USERLSWATCHEDTHREADS <listoptions>\n"

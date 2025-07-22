@@ -38,7 +38,7 @@ server::interface::TalkUserServer::handleCommand(const String_t& upcasedCommand,
 
            The %range is one or more keyword parameters that specify the items (postings) to check:
            - POST n:{@type MID}... (followed by any number of posting Ids until the end of the command; checks these postings)
-           - RANGE a:{@type MID} b:{@type MID} (checks the postings from a (inclusive) to b (not inclusive))
+           - RANGE a:{@type MID} b:{@type MID} (checks the postings from a (inclusive) to b (inclusive))
            - THREAD n:{@type TID} (checks all postings in the specified thread)
            - FORUM n:{@type FID} (checks all postings in the specified forum)
 
@@ -235,6 +235,25 @@ server::interface::TalkUserServer::handleCommand(const String_t& upcasedCommand,
         TalkUser::ListParameters params;
         TalkForumServer::parseListParameters(params, args);
         result.reset(m_implementation.getPostedMessages(user, params));
+        return true;
+    } else if (upcasedCommand == "USERLSCROSS") {
+        /* @q USERLSCROSS [listParameters...] (Talk Command)
+           List forums that a user can cross-post to using "allowgpost" permission.
+
+           The list can be accessed in different ways, see {pcc:talk:listparams|listParameters}.
+           Valid sort keys for forums are:
+           - key
+           - lastpost
+           - lasttime
+           - name
+
+           Permissions: user context required, accesses user's profile
+
+           @rettype Any
+           @rettype FID */
+        TalkUser::ListParameters params;
+        TalkForumServer::parseListParameters(params, args);
+        result.reset(m_implementation.getCrosspostToGameCandidates(params));
         return true;
     } else {
         return false;

@@ -71,6 +71,11 @@ namespace {
                 checkCall(Format("getPostedMessages(%s,%s)", user, formatListParameters(params)));
                 return consumeReturnValue<afl::data::Value*>();
             }
+        virtual afl::data::Value* getCrosspostToGameCandidates(const ListParameters& params)
+            {
+                checkCall(Format("getCrosspostToGameCandidates(%s)", formatListParameters(params)));
+                return consumeReturnValue<afl::data::Value*>();
+            }
 
         // Maks this function as we only have one return type
         void provideReturnValue(afl::data::Value* p)
@@ -288,6 +293,22 @@ AFL_TEST("server.interface.TalkUserServer:commands", a)
         a.checkEqual("31. userlsposted", server::toInteger(p.get()), 97);
     }
 
+    // getCrosspostToGameCandidates
+    mock.expectCall("getCrosspostToGameCandidates(all)");
+    mock.provideReturnValue(0);
+    testee.callVoid(Segment().pushBackString("USERLSCROSS"));
+
+    {
+        mock.expectCall("getCrosspostToGameCandidates(size)");
+        mock.provideReturnValue(server::makeIntegerValue(27));
+        std::auto_ptr<afl::data::Value> p(testee.call(Segment().pushBackString("USERLSCROSS").pushBackString("SIZE")));
+        a.checkEqual("41. userlswatchedthreads", server::toInteger(p.get()), 27);
+    }
+
+    mock.expectCall("getCrosspostToGameCandidates(range(5,3))");
+    mock.provideReturnValue(0);
+    testee.callVoid(Segment().pushBackString("USERLSCROSS").pushBackString("LIMIT").pushBackInteger(5).pushBackInteger(3));
+
     mock.checkFinish();
 }
 
@@ -466,5 +487,15 @@ AFL_TEST("server.interface.TalkUserServer:roundtrip", a)
         a.checkEqual("31. getPostedMessages", server::toInteger(p.get()), 99);
     }
 
+    mock.expectCall("getCrosspostToGameCandidates(range(5,3))");
+    mock.provideReturnValue(0);
+    level4.getCrosspostToGameCandidates(lpLimit);
+
+    {
+        mock.expectCall("getCrosspostToGameCandidates(size)");
+        mock.provideReturnValue(server::makeIntegerValue(42));
+        std::auto_ptr<afl::data::Value> p(level4.getCrosspostToGameCandidates(lpSize));
+        a.checkEqual("41. getCrosspostToGameCandidates", server::toInteger(p.get()), 42);
+    }
     mock.checkFinish();
 }

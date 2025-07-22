@@ -3,6 +3,7 @@
   *  \brief Class server::talk::Topic
   */
 
+#include <algorithm>
 #include "server/talk/topic.hpp"
 #include "afl/data/stringlist.hpp"
 #include "server/errors.hpp"
@@ -41,6 +42,13 @@ server::talk::Topic::forumId()
 {
     // ex Topic::forumId
     return header().intField("forum");
+}
+
+// Access crossposted forum Ids.
+afl::net::redis::IntegerSetKey
+server::talk::Topic::alsoPostedTo()
+{
+    return m_topic.intSetKey("also");
 }
 
 // Access topic's first posting Id.
@@ -128,11 +136,15 @@ void
 server::talk::Topic::removeEmpty(Root& root)
 {
     // ex Topic::removeEmpty
-    Forum f(forum(root));
-
-    // Remove from lists
-    f.topics().remove(m_topicId);
-    f.stickyTopics().remove(m_topicId);
+    // Remove from forum lists
+    afl::data::IntegerList_t forumList;
+    alsoPostedTo().getAll(forumList);
+    forumList.push_back(forumId().get());
+    for (size_t i = 0; i < forumList.size(); ++i) {
+        Forum f(root, forumList[i]);
+        f.topics().remove(m_topicId);
+        f.stickyTopics().remove(m_topicId);
+    }
 
     // Remove watchers
     afl::data::StringList_t w;
@@ -147,6 +159,7 @@ server::talk::Topic::removeEmpty(Root& root)
     header().remove();
     messages().remove();
     watchers().remove();
+    alsoPostedTo().remove();
 }
 
 // Check existence.
@@ -172,6 +185,8 @@ server::talk::Topic::describe()
     result.lastPostId = lastPostId().get();
     result.lastTime = lastTime().get();
     result.isSticky = isSticky();
+    alsoPostedTo().getAll(result.alsoPostedTo);
+    std::sort(result.alsoPostedTo.begin(), result.alsoPostedTo.end());
     return result;
 }
 
@@ -190,14 +205,22 @@ server::talk::Topic::setSticky(Root& root, bool enable)
     // ex Topic::setSticky
     bool isSticky = header().intField("sticky").get();
     if (isSticky != enable) {
+        // List of forums
+        afl::data::IntegerList_t forumList;
+        alsoPostedTo().getAll(forumList);
+        forumList.push_back(forumId().get());
+
+        // Update
         header().intField("sticky").set(enable);
-        Forum f(root, forumId().get());
-        if (enable) {
-            // normal -> sticky
-            f.topics().moveTo(m_topicId, f.stickyTopics());
-        } else {
-            // sticky -> normal
-            f.stickyTopics().moveTo(m_topicId, f.topics());
+        for (size_t i = 0; i < forumList.size(); ++i) {
+            Forum f(root, forumList[i]);
+            if (enable) {
+                // normal -> sticky
+                f.topics().moveTo(m_topicId, f.stickyTopics());
+            } else {
+                // sticky -> normal
+                f.stickyTopics().moveTo(m_topicId, f.topics());
+            }
         }
     }
 }

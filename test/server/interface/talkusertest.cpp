@@ -25,6 +25,8 @@ AFL_TEST_NOARG("server.interface.TalkUser")
             { return 0; }
         virtual afl::data::Value* getPostedMessages(String_t /*user*/, const ListParameters& /*params*/)
             { return 0; }
+        virtual afl::data::Value* getCrosspostToGameCandidates(const ListParameters& /*params*/)
+            { return 0; }
     };
     Tester t;
 }

@@ -1,5 +1,6 @@
 /**
   *  \file server/interface/talkuser.hpp
+  *  \brief Class server::interface::TalkUser
   */
 #ifndef C2NG_SERVER_INTERFACE_TALKUSER_HPP
 #define C2NG_SERVER_INTERFACE_TALKUSER_HPP
@@ -11,56 +12,86 @@
 
 namespace server { namespace interface {
 
+    /** Talk User interface.
+        This interface allows access of user-specific information from the forum.
+        In particular, it contains the list of read postings (newsrc). */
     class TalkUser : public afl::base::Deletable {
      public:
+        /** Newsrc modification operation. */
         enum Modification {
-            NoModification,     // no modification (default)
-            MarkRead,           // mark read (SET)
-            MarkUnread          // mark unread (CLEAR)
-        };
-        enum Result {
-            NoResult,           // no result ("OK")
-            GetAll,             // get all "read" bits (GET)
-            CheckIfAnyRead,     // produce "1" if anything was read, "0" if everything was unread (ANY)
-            CheckIfAllRead,     // produce "1" if everything was read, "0" if anything was unread (ALL)
-            GetFirstRead,       // return Id of first read item, 0 if none (FIRSTSET)
-            GetFirstUnread      // return Id of first unread item, 0 if none (FIRSTCLEAR)
+            NoModification,     ///< No modification (default).
+            MarkRead,           ///< Mark read (SET).
+            MarkUnread          ///< Mark unread (CLEAR).
         };
 
-        enum Scope {
-            ForumScope,
-            ThreadScope,
-            RangeScope
+        /** Desired result of newsrc operation. */
+        enum Result {
+            NoResult,           ///< No result ("OK").
+            GetAll,             ///< Get all "read" bits (GET).
+            CheckIfAnyRead,     ///< Produce "1" if anything was read, "0" if everything was unread (ANY).
+            CheckIfAllRead,     ///< Produce "1" if everything was read, "0" if anything was unread (ALL).
+            GetFirstRead,       ///< Return Id of first read item, 0 if none (FIRSTSET).
+            GetFirstUnread      ///< Return Id of first unread item, 0 if none (FIRSTCLEAR).
         };
+
+        /** Scope of a Selection. */
+        enum Scope {
+            ForumScope,         ///< Process a forum given by Id.
+            ThreadScope,        ///< Process a topic given by Id.
+            RangeScope          ///< Process a message range.
+        };
+
+        /** Selection of messages for an operation. */
         struct Selection {
-            Scope scope;
-            int32_t id;
-            int32_t lastId;
+            Scope scope;        ///< Scope.
+            int32_t id;         ///< Forum or topic Id, first message Id.
+            int32_t lastId;     ///< Last message Id.
         };
 
         typedef TalkForum::ListParameters ListParameters;
 
-        // USERNEWSRC action:Str [range...] (Talk Command)
+        /** Access newsrc (USERNEWSRC).
+            @param modif       Desired modification
+            @param res         Desired result
+            @param selections  Selection of messages to process
+            @param posts       Individual messages to process
+            @return Result; newly-allocated object, type depending on @c res. */
         virtual afl::data::Value* accessNewsrc(Modification modif, Result res, afl::base::Memory<const Selection> selections, afl::base::Memory<const int32_t> posts) = 0;
 
-        // USERWATCH [THREAD n:TID] [FORUM n:FID]... (Talk Command)
-        // using the 'Selection' type allows to send an illegal "USERWATCH RANGE ..." command
+        /** Watch threads/forums for modifications (USERWATCH).
+            @param selections  Selection of forums/threads to process. A selection scope of RangeScope is not permitted. */
         virtual void watch(afl::base::Memory<const Selection> selections) = 0;
 
-        // USERUNWATCH [THREAD n:TID] [FORUM n:FID]... (Talk Command)
+        /** Stop watching threads/forums for modifications (USERUNWATCH).
+            @param selections  Selection of forums/threads to process. A selection scope of RangeScope is not permitted. */
         virtual void unwatch(afl::base::Memory<const Selection> selections) = 0;
 
-        // USERMARKSEEN [THREAD n:TID] [FORUM n:FID]... (Talk Command)
+        /** Mark messages seen (USERMARKSEEN).
+            @param selections  Selection of messages to process */
         virtual void markSeen(afl::base::Memory<const Selection> selections) = 0;
 
-        // USERLSWATCHEDTHREADS [listParameters...] (Talk Command)
+        /** Get list of watched threads (USERLSWATCHEDTHREADS).
+            @param params  List operation parameters (e.g. sort order)
+            @return Result; newly-allocated object, type depending on operation. */
         virtual afl::data::Value* getWatchedThreads(const ListParameters& params) = 0;
 
-        // USERLSWATCHEDFORUMS [listParameters...] (Talk Command)
+        /** Get list of watched forums (USERLSWATCHEDFORUMS).
+            @param params  List operation parameters (e.g. sort order)
+            @return Result; newly-allocated object, type depending on operation. */
         virtual afl::data::Value* getWatchedForums(const ListParameters& params) = 0;
 
-        // USERLSPOSTED user:UID [listParameters...] (Talk Command)
+        /** List posted messages (USERLSPOSTED).
+            @param user    User whose messages to list
+            @param params  List operation parameters (e.g. sort order)
+            @return Result; newly-allocated object, type depending on operation. */
         virtual afl::data::Value* getPostedMessages(String_t user, const ListParameters& params) = 0;
+
+        /** List forums user is allowed to cross-post to (USERLSCROSS).
+            This checks the condition of the User::isAllowedToCrosspostToGames() permission.
+            No specific command is provided for User::isAllowedToCrosspost(); a user with that permission can cross-post anywhere.
+            @param params  List operation parameters (e.g. sort order)
+            @return Result; newly-allocated object, type depending on operation. */
+        virtual afl::data::Value* getCrosspostToGameCandidates(const ListParameters& params) = 0;
     };
 
 } }

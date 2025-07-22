@@ -42,6 +42,7 @@ namespace server {
     const char*const MUST_HAVE_USER_CONTEXT      = "403 Must have user context";
     const char*const USER_NOT_ALLOWED            = "403 USER not allowed";
     const char*const CANNOT_START_SESSION        = "403 Forbidden";              // used by c2router if exec fails
+    const char*const CROSSPOST_DENIED            = "403 Permission denied";
 
     // 404 Not found. We reserve the possibility to distinguish the type in the error message, but don't do that yet.
     const char*const FORUM_NOT_FOUND             = "404 Not found";

@@ -82,15 +82,28 @@ namespace server { namespace talk {
         afl::net::redis::StringField rfcHeaders();
 
         /** Access sequence number.
-            The sequence number increases whenever a message is created or modified in a forum,
+            The sequence number increases whenever a message is created or modified in its primary forum,
             see Forum::lastMessageSequenceNumber().
             \return Sequence number */
         afl::net::redis::IntegerField sequenceNumber();
+
+        /** Access sequence number for secondary (cross-post) forum.
+            The sequence number increases whenever a message is created or modified in a secondary (cross-posted) forum,
+            see Forum::lastMessageSequenceNumber().
+            \param forumId Forum Id
+            \return Sequence number */
+        afl::net::redis::IntegerField sequenceNumberIn(int32_t forumId);
 
         /** Access previous sequence number.
             If this post is edited, the previous sequence number is stored here.
             \return Previous sequence number */
         afl::net::redis::IntegerField previousSequenceNumber();
+
+        /** Access previous sequence number in secondary (cross-posted) forum.
+            If this post is edited, the previous sequence number is stored here.
+            \param forumId Forum Id
+            \return Previous sequence number */
+        afl::net::redis::IntegerField previousSequenceNumberIn(int32_t forumId);
 
         /** Access previous RfC Message Id, if present.
             If this post is edited, the previous RfC Message Id is stored here.
@@ -144,10 +157,24 @@ namespace server { namespace talk {
         /** Get RfC header.
             Creates the message headers in a hash.
             In addition to the actual headers, this will contain pseudo-headers:
-            - :Seq (sequence number)
+            - :Seq (sequence number in primary forum)
             - :Bytes (estimated message size in bytes)
             - :Lines (estimated message size in lines)
             - :Id (message Id [the integer])
+
+            RfC requires a message published with a certain RfC Message-Id to remain unchanged.
+            To implement this requirement, we track message sequence numbers and update them when a message is edited.
+            The RfC Message-Id contains the sequence number.
+            Therefore, an edited or moved message will receive a new position in its forum,
+            and a new RfC Message-Id (but not a new internal message-Id [the integer]).
+            This should ensure that clients always have the most recent message content.
+
+            However, the following changes do NOT cause a new sequence number to be assigned,
+            and therefore strictly speaking violate RfC Message-Id guarantees:
+            - the author changing his email settings (updates the From header)
+            - a parent message being modified (changes its RfC Message-Id and therefore this message's References) or deleted
+            - server configuration (host or newsgroup names) change
+
             \param root Service root
             \return Hash containing header information */
         afl::data::Hash::Ref_t getRfcHeader(Root& root);
@@ -176,18 +203,12 @@ namespace server { namespace talk {
         static int32_t lookupRfcMessageId(Root& root, String_t rfcMsgId);
 
 
-        /** Apply sort-by-sequence.
-            Given a SortOperation on a set-of-Message-Ids, requests that set to be sorted by sequence numbers.
-            \param root [in] Service root
-            \param op [in/out] Sort Operation */
-        static void applySortBySequence(Root& root, afl::net::redis::SortOperation& op);
-
-        /** Apply sort-by-sequence and return sequence numbers.
-            Given a SortOperation on a set-of-Message-Ids, requests that set to be sorted by sequence numbers,
-            and to return sequence numbers and Message Ids.
-            \param root [in] Service root
-            \param op [in/out] Sort Operation */
-        static void applySortBySequenceMap(Root& root, afl::net::redis::SortOperation& op);
+        /** Get list of messages, sorted by sequence number.
+            \param root     [in]   Service root
+            \param msgIds   [in]   Database key containing set of message Ids
+            \param forumId  [in]   Use this forum's sequence numbers
+            \param out      [out]  Receives result as interleaved list of sequence number, message Id. */
+        static void getMessageSequenceNumbers(Root& root, afl::net::redis::IntegerSetKey msgIds, int32_t forumId, afl::data::IntegerList_t& out);
 
         /** Message sorter.
             Pass this object to executeListOperation() if the list contains a list of forum messages. */

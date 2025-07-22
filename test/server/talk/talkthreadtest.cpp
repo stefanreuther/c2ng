@@ -5,42 +5,70 @@
 
 #include "server/talk/talkthread.hpp"
 
+#include <memory>
 #include "afl/data/access.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/test/testrunner.hpp"
 #include "server/talk/configuration.hpp"
+#include "server/talk/forum.hpp"
+#include "server/talk/message.hpp"
 #include "server/talk/root.hpp"
 #include "server/talk/session.hpp"
+#include "server/talk/topic.hpp"
 #include "server/talk/talkforum.hpp"
 #include "server/talk/talkpost.hpp"
-#include <memory>
+#include "util/string.hpp"
+
+using afl::data::Access;
+using afl::net::redis::InternalDatabase;
+using server::talk::Configuration;
+using server::talk::Forum;
+using server::talk::Message;
+using server::talk::Root;
+using server::talk::Session;
+using server::talk::Topic;
+using server::talk::TalkForum;
+using server::talk::TalkPost;
+using server::talk::TalkThread;
+
+namespace {
+    String_t getSet(afl::net::redis::IntegerSetKey k)
+    {
+        afl::data::IntegerList_t values;
+        k.sort().getResult(values);
+
+        String_t result;
+        for (size_t i = 0; i < values.size(); ++i) {
+            if (i != 0) {
+                result += ',';
+            }
+            result += afl::string::Format("%d", values[i]);
+        }
+        return result;
+    }
+}
 
 /** Simple tests. */
 AFL_TEST("server.talk.TalkThread", a)
 {
-    using server::talk::TalkPost;
-    using server::talk::TalkForum;
-    using server::talk::TalkThread;
-    using afl::data::Access;
-
     // Infrastructure
-    afl::net::redis::InternalDatabase db;
-    server::talk::Configuration config;
+    InternalDatabase db;
+    Configuration config;
     config.rateCostPerPost = 0;
-    server::talk::Root root(db, config);
+    Root root(db, config);
 
     // Create some forums
     {
         const String_t f1[] = {"name", "forum1", "readperm", "all", "deleteperm", "u:b", "writeperm", "all"};
         const String_t f2[] = {"name", "forum2", "readperm", "all"};
-        server::talk::Session s;
+        Session s;
         a.checkEqual("01. add", TalkForum(s, root).add(f1), 1);
         a.checkEqual("02. add", TalkForum(s, root).add(f2), 2);
     }
 
     // Create messages by posting stuff
     {
-        server::talk::Session s;
+        Session s;
         s.setUser("a");
 
         // One thread
@@ -60,9 +88,9 @@ AFL_TEST("server.talk.TalkThread", a)
      *  Test as user
      */
 
-    server::talk::Session rootSession;
-    server::talk::Session userSession; userSession.setUser("a");
-    server::talk::Session otherSession; otherSession.setUser("b");
+    Session rootSession;
+    Session userSession; userSession.setUser("a");
+    Session otherSession; otherSession.setUser("b");
 
     // getInfo
     {
@@ -193,4 +221,199 @@ AFL_TEST("server.talk.TalkThread", a)
         a.checkEqual("251. remove", TalkThread(otherSession, root).remove(2), true);
         a.checkEqual("252. remove", TalkThread(otherSession, root).remove(2), false);
     }
+}
+
+/** Test moving a cross-posted thread.
+    Also tests sequence numbers in cross-post in general. */
+AFL_TEST("server.talk.TalkThread:move-crossposted", a)
+{
+    // Infrastructure
+    InternalDatabase db;
+    Configuration config;
+    config.rateCostPerPost = 0;
+    Root root(db, config);
+    Session s;
+
+    // Create some forums
+    const String_t forumParams[] = {"name", "forum1", "readperm", "all", "writeperm", "all", "deleteperm", "all"};
+    for (int i = 1; i <= 10; ++i) {
+        a.checkEqual("01. add", TalkForum(s, root).add(forumParams), i);
+    }
+
+    // Post
+    TalkPost::CreateOptions opts;
+    opts.alsoPostTo.push_back(5);
+    opts.alsoPostTo.push_back(1);
+    opts.userId = "u";
+    a.checkEqual("11. post", TalkPost(s, root).create(3, "sub", "forum:text", opts), 1);
+
+    TalkPost::CreateOptions opts2;
+    opts2.userId = "u";
+    a.checkEqual("12. post", TalkPost(s, root).create(5, "other sub", "forum:text", opts2), 2);
+
+    //            forum 1    forum 3   forum 5
+    // Message 1   seq 1     *seq 1     seq 1
+    // Message 2                       *seq 2
+
+    // Reply
+    TalkPost::ReplyOptions ropts;
+    ropts.userId = "v";
+    a.checkEqual("21. reply", TalkPost(s, root).reply(1, "reply 1", "forum:text", ropts), 3);
+    a.checkEqual("22. reply", TalkPost(s, root).reply(1, "reply 2", "forum:text", ropts), 4);
+
+    //            forum 1    forum 3   forum 5
+    // Message 3             *seq 2
+    // Message 4             *seq 3
+
+    a.checkEqual("31. seq", Message(root, 1).sequenceNumber().get(), 1);
+    a.checkEqual("32. seq", Message(root, 2).sequenceNumber().get(), 2);
+    a.checkEqual("33. seq", Message(root, 3).sequenceNumber().get(), 2);
+    a.checkEqual("34. seq", Message(root, 4).sequenceNumber().get(), 3);
+
+    // Edit, to exercise sequence numbers
+    TalkPost(s, root).edit(4, "new reply 2", "forum:text");
+    TalkPost(s, root).edit(1, "new sub",     "forum:text");
+    TalkPost(s, root).edit(2, "new other",   "forum:text");
+    TalkPost(s, root).edit(3, "new reply 1", "forum:text");
+
+    //            forum 1    forum 3   forum 5
+    // Message 1   seq 2     *seq 5     seq 3
+    // Message 2                       *seq 4
+    // Message 3             *seq 6
+    // Message 4             *seq 4
+
+    // Verify
+    a.checkEqual("41. seq", Message(root, 1).sequenceNumber().get(), 5);
+    a.checkEqual("42. seq", Message(root, 2).sequenceNumber().get(), 4);
+    a.checkEqual("43. seq", Message(root, 3).sequenceNumber().get(), 6);
+    a.checkEqual("44. seq", Message(root, 4).sequenceNumber().get(), 4);
+    a.checkEqual("45. seq", Message(root, 1).sequenceNumberIn(1).get(), 2);
+    a.checkEqual("46. seq", Message(root, 1).sequenceNumberIn(3).get(), 0);   // Main sequence number, not in "in" branch
+    a.checkEqual("47. seq", Message(root, 1).sequenceNumberIn(5).get(), 3);
+    a.checkEqual("48. seq", Message(root, 2).sequenceNumberIn(5).get(), 0);   // Not cross-posted
+    a.checkEqual("49. seq", Message(root, 3).sequenceNumberIn(1).get(), 0);   // Not cross-posted
+    a.checkEqual("4a. seq", Message(root, 3).sequenceNumberIn(3).get(), 0);   // Not cross-posted
+
+    // Placement in sets
+    a.checkEqual("51. messages", getSet(Forum(root, 1).messages()), "1");
+    a.checkEqual("52. messages", getSet(Forum(root, 3).messages()), "1,3,4");
+    a.checkEqual("53. messages", getSet(Forum(root, 5).messages()), "1,2");
+    a.checkEqual("54. crosspost", getSet(Topic(root, 1).alsoPostedTo()), "1,5");
+    a.checkEqual("55. topics",    getSet(Forum(root, 1).topics()), "1");
+    a.checkEqual("56. topics",    getSet(Forum(root, 3).topics()), "1");
+    a.checkEqual("57. topics",    getSet(Forum(root, 5).topics()), "1,2");
+
+    // - move the cross-posted thread -
+    TalkThread(s, root).moveToForum(1, 1);
+
+    //            forum 1    forum 3   forum 5
+    // Message 1  *seq 3                seq 5
+    // Message 2                       *seq 4
+    // Message 3  *seq 4
+    // Message 4  *seq 5
+
+    // Verify
+    a.checkEqual("61. forum", Topic(root, 1).forumId().get(), 1);
+    a.checkEqual("62. seq", Message(root, 1).sequenceNumber().get(), 3);
+    a.checkEqual("63. seq", Message(root, 2).sequenceNumber().get(), 4);
+    a.checkEqual("64. seq", Message(root, 3).sequenceNumber().get(), 4);
+    a.checkEqual("65. seq", Message(root, 4).sequenceNumber().get(), 5);
+    a.checkEqual("65. seq", Message(root, 1).sequenceNumberIn(1).get(), 0);   // Main sequence number, no in "in" branch
+    a.checkEqual("66. seq", Message(root, 1).sequenceNumberIn(3).get(), 0);   // Removed
+    a.checkEqual("67. seq", Message(root, 1).sequenceNumberIn(5).get(), 5);
+    a.checkEqual("68. seq", Message(root, 2).sequenceNumberIn(5).get(), 0);   // Not cross-posted
+    a.checkEqual("69. seq", Message(root, 3).sequenceNumberIn(1).get(), 0);   // Not cross-posted
+    a.checkEqual("6a. seq", Message(root, 3).sequenceNumberIn(3).get(), 0);   // Not cross-posted
+
+    // Placement in sets
+    a.checkEqual("71. messages",  getSet(Forum(root, 1).messages()), "1,3,4");
+    a.checkEqual("72. messages",  getSet(Forum(root, 3).messages()), "");
+    a.checkEqual("73. messages",  getSet(Forum(root, 5).messages()), "1,2");
+    a.checkEqual("74. crosspost", getSet(Topic(root, 1).alsoPostedTo()), "5");
+    a.checkEqual("75. topics",    getSet(Forum(root, 1).topics()), "1");
+    a.checkEqual("76. topics",    getSet(Forum(root, 3).topics()), "");
+    a.checkEqual("77. topics",    getSet(Forum(root, 5).topics()), "1,2");
+}
+
+/** Test moving a cross-posted thread.
+    Move the thread into one it is not cross-posted in. */
+AFL_TEST("server.talk.TalkThread:move-crossposted-to-new", a)
+{
+    // Infrastructure
+    InternalDatabase db;
+    Configuration config;
+    config.rateCostPerPost = 0;
+    Root root(db, config);
+    Session s;
+
+    // Create some forums
+    const String_t forumParams[] = {"name", "forum1", "readperm", "all", "writeperm", "all", "deleteperm", "all"};
+    for (int i = 1; i <= 10; ++i) {
+        a.checkEqual("01. add", TalkForum(s, root).add(forumParams), i);
+    }
+
+    // Post
+    TalkPost::CreateOptions opts;
+    opts.alsoPostTo.push_back(5);
+    opts.alsoPostTo.push_back(1);
+    opts.userId = "u";
+    a.checkEqual("11. post", TalkPost(s, root).create(3, "sub", "forum:text", opts), 1);
+
+    TalkPost::CreateOptions opts2;
+    opts2.userId = "u";
+    a.checkEqual("12. post", TalkPost(s, root).create(5, "other sub", "forum:text", opts2), 2);
+
+    // Reply
+    TalkPost::ReplyOptions ropts;
+    ropts.userId = "v";
+    a.checkEqual("21. reply", TalkPost(s, root).reply(1, "reply 1", "forum:text", ropts), 3);
+    a.checkEqual("22. reply", TalkPost(s, root).reply(1, "reply 2", "forum:text", ropts), 4);
+
+    // Edit, to exercise sequence numbers
+    TalkPost(s, root).edit(4, "new reply 2", "forum:text");
+    TalkPost(s, root).edit(1, "new sub",     "forum:text");
+    TalkPost(s, root).edit(2, "new other",   "forum:text");
+    TalkPost(s, root).edit(3, "new reply 1", "forum:text");
+
+    // Up to here, same sequence as in previous test.
+
+    //            forum 1    forum 3   forum 5
+    // Message 1   seq 2     *seq 5     seq 3
+    // Message 2                       *seq 4
+    // Message 3             *seq 6
+    // Message 4             *seq 4
+
+    // - move the cross-posted thread -
+    TalkThread(s, root).moveToForum(1, 7);
+
+    //            forum 1    forum 3   forum 5   forum 7
+    // Message 1   seq 3                seq 5    *seq 2 -- not 1, that is its previousSequenceNumber()
+    // Message 2                       *seq 4
+    // Message 3                                 *seq 3
+    // Message 4                                 *seq 5 -- not 4, that is its sequenceNumber()
+
+    // Verify
+    a.checkEqual("61. forum", Topic(root, 1).forumId().get(), 7);
+    a.checkEqual("62. seq", Message(root, 1).sequenceNumber().get(), 2);
+    a.checkEqual("63. seq", Message(root, 2).sequenceNumber().get(), 4);
+    a.checkEqual("64. seq", Message(root, 3).sequenceNumber().get(), 3);
+    a.checkEqual("65. seq", Message(root, 4).sequenceNumber().get(), 5);
+    a.checkEqual("65. seq", Message(root, 1).sequenceNumberIn(1).get(), 3);
+    a.checkEqual("66. seq", Message(root, 1).sequenceNumberIn(3).get(), 0);   // Removed
+    a.checkEqual("67. seq", Message(root, 1).sequenceNumberIn(5).get(), 5);
+    a.checkEqual("67a. seq", Message(root, 1).sequenceNumberIn(7).get(), 0);  // Main sequence number, no in "in" branch
+    a.checkEqual("68. seq", Message(root, 2).sequenceNumberIn(5).get(), 0);   // Not cross-posted
+    a.checkEqual("69. seq", Message(root, 3).sequenceNumberIn(1).get(), 0);   // Not cross-posted
+    a.checkEqual("6a. seq", Message(root, 3).sequenceNumberIn(3).get(), 0);   // Not cross-posted
+
+    // Placement in sets
+    a.checkEqual("71. messages", getSet(Forum(root, 1).messages()), "1");
+    a.checkEqual("72. messages", getSet(Forum(root, 3).messages()), "");
+    a.checkEqual("73. messages", getSet(Forum(root, 5).messages()), "1,2");
+    a.checkEqual("74. messages", getSet(Forum(root, 7).messages()), "1,3,4");
+    a.checkEqual("75. crosspost", getSet(Topic(root, 1).alsoPostedTo()), "1,5");
+    a.checkEqual("75. topics",    getSet(Forum(root, 1).topics()), "1");
+    a.checkEqual("76. topics",    getSet(Forum(root, 3).topics()), "");
+    a.checkEqual("77. topics",    getSet(Forum(root, 5).topics()), "1,2");
+    a.checkEqual("78. topics",    getSet(Forum(root, 7).topics()), "1");
 }

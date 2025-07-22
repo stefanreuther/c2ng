@@ -52,16 +52,31 @@ server::talk::TalkPost::create(int32_t forumId, String_t subject, String_t text,
         user = m_session.getUser();
     }
 
-    // Do it
+    // Verify forum post permission
     Forum f(m_root, forumId);
     if (!f.exists(m_root)) {
         throw std::runtime_error(FORUM_NOT_FOUND);
     }
     m_session.checkPermission(f.writePermissions().get(), m_root);
 
+    // Verify cross-post permission
+    User u(m_root, user);
+    const bool allowCrosspost = m_session.isAdmin() || u.isAllowedToCrosspost();
+    const bool allowCrosspostToGame = allowCrosspost || m_root.isUserOnActiveGame(u.getUserId(), f.getGameNumber());
+    for (size_t i = 0; i < options.alsoPostTo.size(); ++i) {
+        Forum xf(m_root, options.alsoPostTo[i]);
+        if (!xf.exists(m_root)) {
+            throw std::runtime_error(FORUM_NOT_FOUND);
+        }
+        if (!(allowCrosspost || (allowCrosspostToGame && m_root.isUserOnActiveGame(u.getUserId(), xf.getGameNumber())))) {
+            throw std::runtime_error(CROSSPOST_DENIED);
+        }
+        m_session.checkPermission(xf.writePermissions().get(), m_root);
+    }
+
+    // Do it
     const Time_t time = m_root.getTime();
     bool isSpam = false;
-    User u(m_root, user);
 
     // Spam check
     if (!u.isAllowedToPost()) {
@@ -74,7 +89,8 @@ server::talk::TalkPost::create(int32_t forumId, String_t subject, String_t text,
 
     // Rate limiting
     const Configuration& config = m_root.config();
-    if (!checkRateLimit(config.rateCostPerPost, time, config, u, m_root.log())) {
+    const int rateCostFactor = 1 + std::min(static_cast<int>(options.alsoPostTo.size() / 2), 20);
+    if (!checkRateLimit(config.rateCostPerPost * rateCostFactor, time, config, u, m_root.log())) {
         throw std::runtime_error(PERMISSION_DENIED);
     }
 
@@ -110,6 +126,10 @@ server::talk::TalkPost::create(int32_t forumId, String_t subject, String_t text,
     }
     topic.lastPostId().set(mid);
     topic.lastTime().set(time);
+    topic.alsoPostedTo().remove();
+    for (size_t i = 0; i < options.alsoPostTo.size(); ++i) {
+        topic.alsoPostedTo().add(options.alsoPostTo[i]);
+    }
 
     // Update forum
     f.lastPostId().set(mid);
@@ -120,6 +140,16 @@ server::talk::TalkPost::create(int32_t forumId, String_t subject, String_t text,
     f.messages().add(mid);
     f.topics().add(tid);
     u.postedMessages().add(mid);
+
+    // Cross-post
+    for (size_t i = 0; i < options.alsoPostTo.size(); ++i) {
+        Forum xf(m_root, options.alsoPostTo[i]);
+        xf.lastPostId().set(mid);
+        xf.lastTime().set(time);
+        xf.messages().add(mid);
+        xf.topics().add(tid);
+        msg.sequenceNumberIn(xf.getId()).set(++xf.lastMessageSequenceNumber());
+    }
 
     // Notify
     if (!isSpam) {
@@ -259,7 +289,8 @@ server::talk::TalkPost::edit(int32_t postId, String_t subject, String_t text)
     // Update topic
     Topic topic(m_root, msg.topicId().get());
     topic.lastTime().set(time);
-    if (postId == topic.firstPostingId().get()) {
+    const bool isFirstInTopic = postId == topic.firstPostingId().get();
+    if (isFirstInTopic) {
         topic.subject().set(subject);
     }
 
@@ -273,6 +304,18 @@ server::talk::TalkPost::edit(int32_t postId, String_t subject, String_t text)
     msg.sequenceNumber().set(++f.lastMessageSequenceNumber());
     msg.rfcMessageId().remove();
     msg.rfcHeaders().remove();
+
+    // If this is the first of a cross-posted topic, update secondary sequence numbers
+    if (isFirstInTopic) {
+        afl::data::IntegerList_t alsoPostedTo;
+        topic.alsoPostedTo().getAll(alsoPostedTo);
+        for (size_t i = 0; i < alsoPostedTo.size(); ++i) {
+            const int32_t forumId = alsoPostedTo[i];
+            Forum xf(m_root, forumId);
+            msg.previousSequenceNumberIn(forumId).set(msg.sequenceNumberIn(forumId).get());
+            msg.sequenceNumberIn(forumId).set(++xf.lastMessageSequenceNumber());
+        }
+    }
 }
 
 String_t

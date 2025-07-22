@@ -4,15 +4,18 @@
   */
 
 #include "server/talk/talkuser.hpp"
+
+#include "afl/data/vector.hpp"
+#include "afl/data/vectorvalue.hpp"
+#include "server/errors.hpp"
 #include "server/talk/forum.hpp"
 #include "server/talk/message.hpp"
+#include "server/talk/newsrc.hpp"
 #include "server/talk/root.hpp"
 #include "server/talk/session.hpp"
 #include "server/talk/talkforum.hpp"
 #include "server/talk/topic.hpp"
 #include "server/talk/user.hpp"
-#include "server/talk/newsrc.hpp"
-#include "server/errors.hpp"
 
 namespace {
     class NewsrcAction {
@@ -42,6 +45,57 @@ namespace {
         String_t result;
         int32_t firstId;
     };
+
+    void listCrosspostableGameForums(server::talk::Root& root,
+                                const String_t& userId,
+                                const server::talk::TalkUser::ListParameters& params,
+                                afl::data::IntegerList_t& out)
+    {
+        if (server::talk::User(root, userId).isAllowedToCrosspostToGames()) {
+            // Prepare sort operation
+            afl::net::redis::SortOperation op = root.allForums().sort();
+            if (const String_t* sortKey = params.sortKey.get()) {
+                server::talk::Forum::ForumSorter(root).applySortKey(op, *sortKey);
+            }
+
+            // Retrieve list of all forums, sorted
+            afl::data::IntegerList_t tmp;
+            op.getResult(tmp);
+
+            // Filter
+            for (size_t i = 0; i < tmp.size(); ++i) {
+                int32_t fid = tmp[i];
+                int32_t gid = server::talk::Forum(root, fid).getGameNumber();
+                if (root.isUserOnActiveGame(userId, gid)) {
+                    out.push_back(fid);
+                }
+            }
+        }
+    }
+
+    void applyRange(afl::data::IntegerList_t& list, size_t start, size_t count)
+    {
+        if (start > 0) {
+            if (start > list.size()) {
+                list.clear();
+            } else {
+                list.erase(list.begin(), list.begin() + start);
+            }
+        }
+
+        if (count < list.size()) {
+            list.erase(list.begin() + count, list.end());
+        }
+    }
+
+    server::Value_t* makeIntegerList(const afl::data::IntegerList_t& list)
+    {
+        afl::data::Vector::Ref_t vec = afl::data::Vector::create();
+        for (size_t i = 0; i < list.size(); ++i) {
+            vec->pushBackNew(server::makeIntegerValue(list[i]));
+        }
+        return new afl::data::VectorValue(vec);
+    }
 }
 
 NewsrcAction::NewsrcAction(afl::net::redis::Subtree n)
@@ -261,6 +315,33 @@ server::talk::TalkUser::getPostedMessages(String_t user, const ListParameters& p
 {
     // ex doUserListPosted
     return TalkForum::executeListOperation(params, User(m_root, user).postedMessages(), Message::MessageSorter(m_root));
+}
+
+afl::data::Value*
+server::talk::TalkUser::getCrosspostToGameCandidates(const ListParameters& params)
+{
+    m_session.checkUser();
+
+    afl::data::IntegerList_t tmp;
+    switch (params.mode) {
+     case ListParameters::WantAll:
+        listCrosspostableGameForums(m_root, m_session.getUser(), params, tmp);
+        return makeIntegerList(tmp);
+
+     case ListParameters::WantRange:
+        listCrosspostableGameForums(m_root, m_session.getUser(), params, tmp);
+        applyRange(tmp, static_cast<size_t>(params.start), static_cast<size_t>(params.count));
+        return makeIntegerList(tmp);
+
+     case ListParameters::WantMemberCheck:
+        return makeIntegerValue(User(m_root, m_session.getUser()).isAllowedToCrosspostToGames()
+                                && m_root.isUserOnActiveGame(m_session.getUser(), params.item));
+
+     case ListParameters::WantSize:
+        listCrosspostableGameForums(m_root, m_session.getUser(), params, tmp);
+        return makeIntegerValue(static_cast<int32_t>(tmp.size()));
+    }
+    return 0;
 }
 
 void

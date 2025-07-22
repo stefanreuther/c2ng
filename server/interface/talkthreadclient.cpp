@@ -1,20 +1,18 @@
 /**
   *  \file server/interface/talkthreadclient.cpp
+  *  \brief Class server::interface::TalkThreadClient
   */
 
 #include <memory>
 #include "server/interface/talkthreadclient.hpp"
-#include "afl/data/segment.hpp"
 #include "afl/data/access.hpp"
+#include "afl/data/segment.hpp"
 #include "server/interface/talkforumclient.hpp"
 
 using afl::data::Segment;
 
 server::interface::TalkThreadClient::TalkThreadClient(afl::net::CommandHandler& commandHandler)
     : m_commandHandler(commandHandler)
-{ }
-
-server::interface::TalkThreadClient::~TalkThreadClient()
 { }
 
 server::interface::TalkThread::Info
@@ -96,5 +94,11 @@ server::interface::TalkThreadClient::unpackInfo(const afl::data::Value* p)
     result.lastPostId = a("lastpost").toInteger();
     result.lastTime = a("lasttime").toInteger();
     result.isSticky = a("sticky").toInteger() != 0;
+
+    afl::data::Access apt = a("also");
+    for (size_t i = 0, n = apt.getArraySize(); i < n; ++i) {
+        result.alsoPostedTo.push_back(apt[i].toInteger());
+    }
+
     return result;
 }

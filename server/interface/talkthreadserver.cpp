@@ -1,19 +1,20 @@
 /**
   *  \file server/interface/talkthreadserver.cpp
+  *  \brief Class server::interface::TalkThreadServer
   */
 
 #include <stdexcept>
 #include "server/interface/talkthreadserver.hpp"
-#include "interpreter/arguments.hpp"
 #include "afl/data/hash.hpp"
 #include "afl/data/hashvalue.hpp"
-#include "afl/data/vector.hpp"
-#include "afl/data/vectorvalue.hpp"
-#include "server/types.hpp"
 #include "afl/data/integerlist.hpp"
 #include "afl/data/stringlist.hpp"
-#include "server/interface/talkforumserver.hpp"
+#include "afl/data/vector.hpp"
+#include "afl/data/vectorvalue.hpp"
+#include "interpreter/arguments.hpp"
 #include "server/errors.hpp"
+#include "server/interface/talkforumserver.hpp"
+#include "server/types.hpp"
 
 using afl::data::Hash;
 using afl::data::HashValue;
@@ -22,9 +23,6 @@ using afl::data::VectorValue;
 
 server::interface::TalkThreadServer::TalkThreadServer(TalkThread& implementation)
     : m_implementation(implementation)
-{ }
-
-server::interface::TalkThreadServer::~TalkThreadServer()
 { }
 
 bool
@@ -190,7 +188,8 @@ server::interface::TalkThreadServer::packInfo(const TalkThread::Info& info)
        @key firstpost:MID (MID of first posting)
        @key lastpost:MID (MID of last posting)
        @key lasttime:Time (time of last posting)
-       @key sticky:Int (1 if thread is sticky) */
+       @key sticky:Int (1 if thread is sticky)
+       @key also:FID[] (MIDs of forums this thread is cross-posted to) */
     Hash::Ref_t result = Hash::create();
     result->setNew("subject",   makeStringValue(info.subject));
     result->setNew("forum",     makeIntegerValue(info.forumId));
@@ -198,5 +197,12 @@ server::interface::TalkThreadServer::packInfo(const TalkThread::Info& info)
     result->setNew("lastpost",  makeIntegerValue(info.lastPostId));
     result->setNew("lasttime",  makeIntegerValue(info.lastTime));
     result->setNew("sticky",    makeIntegerValue(info.isSticky));
+
+    Vector::Ref_t apt = Vector::create();
+    for (size_t i = 0; i < info.alsoPostedTo.size(); ++i) {
+        apt->pushBackNew(makeIntegerValue(info.alsoPostedTo[i]));
+    }
+    result->setNew("also", new VectorValue(apt));
+
     return new HashValue(result);
 }

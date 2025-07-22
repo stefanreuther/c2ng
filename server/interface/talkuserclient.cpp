@@ -104,6 +104,15 @@ server::interface::TalkUserClient::getPostedMessages(String_t user, const ListPa
     return m_commandHandler.call(cmd);
 }
 
+afl::data::Value*
+server::interface::TalkUserClient::getCrosspostToGameCandidates(const ListParameters& params)
+{
+    Segment cmd;
+    cmd.pushBackString("USERLSCROSS");
+    TalkForumClient::packListParameters(cmd, params);
+    return m_commandHandler.call(cmd);
+}
+
 void
 server::interface::TalkUserClient::packSelections(afl::data::Segment& cmd, afl::base::Memory<const Selection> selections)
 {

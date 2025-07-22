@@ -113,6 +113,8 @@ AFL_TEST("server.interface.TalkThreadServer:commands", a)
         info.lastPostId = 20;
         info.lastTime = 777777;
         info.isSticky = true;
+        info.alsoPostedTo.push_back(32);
+        info.alsoPostedTo.push_back(27);
         mock.expectCall("getInfo(1221)");
         mock.provideReturnValue(info);
 
@@ -126,6 +128,9 @@ AFL_TEST("server.interface.TalkThreadServer:commands", a)
         a.checkEqual("14. lastpost",  ap("lastpost").toInteger(), 20);
         a.checkEqual("15. lasttime",  ap("lasttime").toInteger(), 777777);
         a.checkEqual("16. sticky",    ap("sticky").toInteger(), 1);
+        a.checkEqual("17. also",      ap("also").getArraySize(), 2U);
+        a.checkEqual("17a. also",     ap("also")[0].toInteger(), 32);
+        a.checkEqual("17b. also",     ap("also")[1].toInteger(), 27);
     }
 
     // getInfo
@@ -248,6 +253,8 @@ AFL_TEST("server.interface.TalkThreadServer:roundtrip", a)
         info.lastPostId = 20;
         info.lastTime = 777777;
         info.isSticky = true;
+        info.alsoPostedTo.push_back(47);
+        info.alsoPostedTo.push_back(11);
         mock.expectCall("getInfo(1221)");
         mock.provideReturnValue(info);
 
@@ -259,6 +266,9 @@ AFL_TEST("server.interface.TalkThreadServer:roundtrip", a)
         a.checkEqual("04. lastPostId",  out.lastPostId, 20);
         a.checkEqual("05. lastTime",    out.lastTime, 777777);
         a.checkEqual("06. isSticky",    out.isSticky, 1);
+        a.checkEqual("07. also",        out.alsoPostedTo.size(), 2U);
+        a.checkEqual("07a. also",       out.alsoPostedTo[0], 47);
+        a.checkEqual("07b. also",       out.alsoPostedTo[1], 11);
     }
 
     // getInfo

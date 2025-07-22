@@ -44,6 +44,18 @@ AFL_TEST("server.interface.TalkPostClient", a)
         a.checkEqual("11. create", testee.create(4, "title", "body", opts), 100);
     }
 
+    {
+        server::interface::TalkPost::CreateOptions opts;
+        opts.userId = "1001";
+        opts.readPermissions = "g:9";
+        opts.alsoPostTo.push_back(3);
+        opts.alsoPostTo.push_back(8);
+        opts.alsoPostTo.push_back(13);
+        mock.expectCall("POSTNEW, 4, title, body, USER, 1001, READPERM, g:9, ALSO, 3, ALSO, 8, ALSO, 13");
+        mock.provideNewResult(makeIntegerValue(100));
+        a.checkEqual("12. create", testee.create(4, "title", "body", opts), 100);
+    }
+
     // POSTREPLY
     mock.expectCall("POSTREPLY, 100, reply-title, reply-body");
     mock.provideNewResult(makeIntegerValue(105));

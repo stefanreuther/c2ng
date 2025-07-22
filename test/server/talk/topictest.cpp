@@ -35,6 +35,8 @@ AFL_TEST("server.talk.Topic:basics", a)
     testee.messages().add(120);
     testee.messages().add(121);
     testee.watchers().add("x");
+    testee.alsoPostedTo().add(33);
+    testee.alsoPostedTo().add(44);
 
     a.check     ("11. exists",            testee.exists());
     a.checkEqual("12. subject",           testee.subject().get(), "subj");
@@ -47,6 +49,7 @@ AFL_TEST("server.talk.Topic:basics", a)
     a.check     ("19. messages",          testee.messages().contains(120));
     a.check     ("20. messages",          testee.messages().contains(121));
     a.check     ("21. watchers",          testee.watchers().contains("x"));
+    a.checkEqual("22. alsoPostedTo",      testee.alsoPostedTo().size(), 2);
 
     // Forum
     server::talk::Forum f(testee.forum(root));
@@ -220,4 +223,49 @@ AFL_TEST("server.talk.Topic:sort", a)
         AFL_CHECK_THROWS(a("12. bad key"), server::talk::Topic::TopicSorter(root).applySortKey(op, ""), std::exception);
         AFL_CHECK_THROWS(a("13. bad key"), server::talk::Topic::TopicSorter(root).applySortKey(op, "WHATEVER"), std::exception);
     }
+}
+
+/** Test crossposting. */
+AFL_TEST("server.talk.Topic:crosspost", a)
+{
+    // Infrastructure
+    afl::net::redis::InternalDatabase db;
+    server::talk::Root root(db, server::talk::Configuration());
+
+    // Topic
+    server::talk::Topic testee(root, 38);
+    testee.subject().set("subj");
+    testee.forumId().set(9);
+    testee.firstPostingId().set(120);
+    testee.messages().add(120);
+    testee.alsoPostedTo().add(33);
+
+    // Message
+    server::talk::Message msg(root, 120);
+    msg.topicId().set(38);
+
+    // Forums
+    server::talk::Forum f1(root, 9);
+    f1.topics().add(38);
+
+    server::talk::Forum f2(root, 33);
+    f2.topics().add(38);
+
+    // Change stickyness
+    testee.setSticky(root, true);
+
+    // Verify stickyness
+    a.check("01. main sticky",   f1.stickyTopics().contains(38));
+    a.check("02. main normal",  !f1.topics().contains(38));
+    a.check("03. cross sticky",  f2.stickyTopics().contains(38));
+    a.check("04. cross normal", !f2.topics().contains(38));
+
+    // Remove
+    testee.remove(root);
+
+    // Verify gone
+    a.check("11. main sticky",  !f1.stickyTopics().contains(38));
+    a.check("12. main normal",  !f1.topics().contains(38));
+    a.check("13. cross sticky", !f2.stickyTopics().contains(38));
+    a.check("14. cross normal", !f2.topics().contains(38));
 }

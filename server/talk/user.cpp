@@ -44,6 +44,24 @@ server::talk::User::isAllowedToPost()
     return value.get() == 0 || toInteger(value.get()) != 0;
 }
 
+// Get generic crosspost permission (profile access).
+bool
+server::talk::User::isAllowedToCrosspost()
+{
+    // Unset means no
+    std::auto_ptr<afl::data::Value> value(getProfileRaw("allowxpost"));
+    return toInteger(value.get()) > 0;
+}
+
+// Get game crosspost permission (profile access).
+bool
+server::talk::User::isAllowedToCrosspostToGames()
+{
+    // Unset means no
+    std::auto_ptr<afl::data::Value> value(getProfileRaw("allowgpost"));
+    return toInteger(value.get()) > 0;
+}
+
 // Get autowatch flag (profile access).
 bool
 server::talk::User::isAutoWatch()

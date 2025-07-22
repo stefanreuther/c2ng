@@ -248,3 +248,21 @@ server::talk::Root::checkUserPermission(String_t privString, String_t user)
     } while (afl::string::strRemove(privString, ","));
     return false;
 }
+
+bool
+server::talk::Root::isUserOnActiveGame(String_t userId, int32_t gameNumber)
+{
+    // Reject if game number not valid (e.g. not a game forum)
+    if (gameNumber <= 0 || userId.empty()) {
+        return false;
+    }
+
+    // Verify game state, must be joining or running
+    String_t gameState = gameRoot().subtree(gameNumber).stringKey("state").get();
+    if (gameState != "joining" && gameState != "running") {
+        return false;
+    }
+
+    // Accept if user is or was active on the game
+    return gameRoot().subtree(gameNumber).hashKey("users").field(userId).exists();
+}

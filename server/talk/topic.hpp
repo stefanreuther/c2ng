@@ -52,6 +52,10 @@ namespace server { namespace talk {
             \return forum Id */
         afl::net::redis::IntegerField forumId();
 
+        /** Access crossposted forum Ids.
+            \return set of forum Ids */
+        afl::net::redis::IntegerSetKey alsoPostedTo();
+
         /** Access topic's first posting Id.
             Note that this message may not exist anymore if it has been deleted.
             \return first posting Id (a Message Id) */

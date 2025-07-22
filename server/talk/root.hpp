@@ -179,6 +179,11 @@ namespace server { namespace talk {
             \return true if user has requested permissions */
         bool checkUserPermission(String_t privString, String_t user);
 
+        /** Check whether user is on an active game.
+            \param userId User Id
+            \param gameNumber Game number */
+        bool isUserOnActiveGame(String_t userId, int32_t gameNumber);
+
      private:
         afl::sys::Mutex m_mutex;
         afl::sys::Log m_log;

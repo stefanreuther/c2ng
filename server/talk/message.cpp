@@ -17,6 +17,18 @@
 
 using afl::string::Format;
 
+namespace {
+    void addReference(String_t& refs, server::talk::Message& msg, server::talk::Root& root)
+    {
+        if (msg.exists()) {
+            if (!refs.empty()) {
+                refs.insert(0, "\r\n ");
+            }
+            refs.insert(0, Format("<%s>", msg.getRfcMessageId(root)));
+        }
+    }
+}
+
 // Constructor.
 server::talk::Message::Message(Root& root, int32_t messageId)
     : m_message(root.messageRoot().subtree(messageId)),
@@ -105,12 +117,26 @@ server::talk::Message::sequenceNumber()
     return header().intField("seq");
 }
 
+// Access sequence number for secondary (cross-post) forum.
+afl::net::redis::IntegerField
+server::talk::Message::sequenceNumberIn(int32_t forumId)
+{
+    return header().intField(Format("seq:%d", forumId));
+}
+
 // Access previous sequence number.
 afl::net::redis::IntegerField
 server::talk::Message::previousSequenceNumber()
 {
     // ex Message::previousSequenceNumber
     return header().intField("prevseq");
+}
+
+// Access previous sequence number in secondary (cross-posted) forum.
+afl::net::redis::IntegerField
+server::talk::Message::previousSequenceNumberIn(int32_t forumId)
+{
+    return header().intField(Format("prevseq:%d", forumId));
 }
 
 // Access previous RfC Message Id, if present.
@@ -150,6 +176,15 @@ server::talk::Message::remove(Root& root)
     t.messages().remove(m_messageId);
     f.messages().remove(m_messageId);
     User(root, author().get()).postedMessages().remove(m_messageId);
+
+    // If message is first of a thread, remove crossposted copies
+    if (getId() == t.firstPostingId().get()) {
+        afl::data::IntegerList_t alsoPostedTo;
+        t.alsoPostedTo().getAll(alsoPostedTo);
+        for (size_t i = 0; i < alsoPostedTo.size(); ++i) {
+            Forum(root, alsoPostedTo[i]).messages().remove(m_messageId);
+        }
+    }
 
     // Remove from NNTP side
     removeRfcMessageId(root, rfcMessageId().get());
@@ -237,17 +272,28 @@ server::talk::Message::getRfcHeader(Root& root)
     const String_t userId(author().get());
     User u(root, userId);
 
+    // Check cross-post
+    afl::data::IntegerList_t alsoPostedTo;
+    if (m_messageId == t.firstPostingId().get()) {
+        t.alsoPostedTo().sort().getResult(alsoPostedTo);
+    }
+
     afl::data::Hash::Ref_t head = afl::data::Hash::create();
 
     // Id pseudo-header
     head->setNew(":Id", makeIntegerValue(m_messageId));
 
     // Sequence pseudo-header
+    // (Previously used by c2nntp; no longer relevant since cross-posting support.)
     int32_t seq = sequenceNumber().get();
     head->setNew(":Seq", makeIntegerValue(seq));
 
     // Xref
-    head->setNew("Xref", makeStringValue(Format("%s %s:%d", root.config().pathHost, f.getNewsgroup(), seq)));
+    String_t xref = Format("%s %s:%d", root.config().pathHost, f.getNewsgroup(), seq);
+    for (size_t i = 0; i < alsoPostedTo.size(); ++i) {
+        xref += Format(" %s:%d", Forum(root, alsoPostedTo[i]).getNewsgroup(), sequenceNumberIn(alsoPostedTo[i]).get());
+    }
+    head->setNew("Xref", makeStringValue(xref));
 
     // Path
     head->setNew("Path", makeStringValue(Format("%s!not-for-mail", root.config().pathHost)));
@@ -282,7 +328,17 @@ server::talk::Message::getRfcHeader(Root& root)
     head->setNew("From", makeStringValue(Format("%s <%s>", encodeMimeHeader(realName, "UTF-8"), encodeMimeHeader(email, "UTF-8"))));
 
     // Newsgroups
-    head->setNew("Newsgroups", makeStringValue(f.getNewsgroup()));
+    String_t ng = f.getNewsgroup();
+    for (size_t i = 0; i < alsoPostedTo.size(); ++i) {
+        ng += ",";
+        ng += Forum(root, alsoPostedTo[i]).getNewsgroup();
+    }
+    head->setNew("Newsgroups", makeStringValue(ng));
+
+    // Followup-To
+    if (!alsoPostedTo.empty()) {
+        head->setNew("Followup-To", makeStringValue(f.getNewsgroup()));
+    }
 
     // Subject
     head->setNew("Subject", makeStringValue(encodeMimeHeader(subject().get(), "UTF-8")));
@@ -300,24 +356,25 @@ server::talk::Message::getRfcHeader(Root& root)
         String_t refs;
 
         // Fetch 5 message Ids
+        int32_t firstPost = t.firstPostingId().get();
+        bool seenFirst = false;
         for (int i = 0; i < 5 && parent != 0; ++i) {
             Message m(root, parent);
-            if (!refs.empty()) {
-                refs.insert(0, "\r\n ");
+            addReference(refs, m, root);
+            if (parent == firstPost) {
+                seenFirst = true;
             }
-            refs.insert(0, Format("<%s>", m.getRfcMessageId(root)));
-            parent = m.parentMessageId().get();
+            parent = m.parentMessageId().get();   // reads as 0 if message does not exist
         }
 
         // Still more to do? Get thread starter
-        if (parent != 0) {
+        if (!seenFirst) {
             Message m(root, t.firstPostingId().get());
-            if (!refs.empty()) {
-                refs.insert(0, "\r\n ");
-            }
-            refs.insert(0, Format("<%s>", m.getRfcMessageId(root)));
+            addReference(refs, m, root);
         }
-        head->setNew("References", makeStringValue(refs));
+        if (!refs.empty()) {
+            head->setNew("References", makeStringValue(refs));
+        }
     }
 
     // Fake a bytes/lines size. For a precise value, we'd have to render the posting.
@@ -392,21 +449,41 @@ server::talk::Message::lookupRfcMessageId(Root& root, String_t rfcMsgId)
     }
 }
 
-// Apply sort-by-sequence.
+// Get list of messages, sorted by sequence number.
 void
-server::talk::Message::applySortBySequence(Root& root, afl::net::redis::SortOperation& op)
+server::talk::Message::getMessageSequenceNumbers(Root& root, afl::net::redis::IntegerSetKey msgIds, int32_t forumId, afl::data::IntegerList_t& out)
 {
-    op.by(root.messageRoot().subtree("*").hashKey("header").field("seq"));
+    // This function is in class Message because it refers to field names.
+    // Get list of (seq, seq-in-forum, forumId).
+    // seq-in-forum is only set for cross-posted messages outside their primary forum,
+    // but we cannot express that in a simple sort() order.
+    // We therefore retrieve everything and sort locally.
+    afl::data::IntegerList_t triplets;
+    msgIds
+        .sort()
+        .get(root.messageRoot().subtree("*").hashKey("header").field("seq"))
+        .get(root.messageRoot().subtree("*").hashKey("header").field(Format("seq:%d", forumId)))
+        .get()
+        .getResult(triplets);
+
+    // Build sort job
+    std::vector<std::pair<int32_t, int32_t> > pairs;
+    for (size_t i = 0; i+2 < triplets.size(); i += 3) {
+        int32_t seq = triplets[i+1] != 0 ? triplets[i+1] : triplets[i];
+        int32_t msgNr = triplets[i+2];
+        pairs.push_back(std::make_pair(seq, msgNr));
+    }
+
+    // Sort
+    std::sort(pairs.begin(), pairs.end());
+
+    // Build output
+    for (size_t i = 0; i != pairs.size(); ++i) {
+        out.push_back(pairs[i].first);
+        out.push_back(pairs[i].second);
+    }
 }
 
-// Apply sort-by-sequence and return sequence numbers.
-void
-server::talk::Message::applySortBySequenceMap(Root& root, afl::net::redis::SortOperation& op)
-{
-    op.by(root.messageRoot().subtree("*").hashKey("header").field("seq"));
-    op.get(root.messageRoot().subtree("*").hashKey("header").field("seq"));
-    op.get();
-}
 
 server::talk::Message::MessageSorter::MessageSorter(Root& root)
     : Sorter(),

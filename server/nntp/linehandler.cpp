@@ -975,10 +975,11 @@ server::nntp::LineHandler::handleOver(String_t args, afl::net::line::LineSink& r
     }
 
     // Build the request
-    afl::data::IntegerList_t req;
+    afl::data::IntegerList_t req, seqNrs;
     std::map<int32_t, int32_t>::iterator i = m_session.current_seq_map.lower_bound(min), e = m_session.current_seq_map.end();
     while (i != e && i->first <= max) {
         req.push_back(i->second);
+        seqNrs.push_back(i->first);
         ++i;
     }
 
@@ -986,41 +987,40 @@ server::nntp::LineHandler::handleOver(String_t args, afl::net::line::LineSink& r
     afl::data::Segment results;
     TalkNNTPClient(m_root.talk()).getMessageHeader(req, results);
     response.handleLine("224 Overview follows");
-    for (size_t i = 0; i < results.size(); ++i) {
+    for (size_t i = 0; i < results.size() && i < seqNrs.size(); ++i) {
         afl::data::Access a(results[i]);
         if (a.getValue() != 0) {
             // Values
             String_t values[countof(OVERVIEW_FIELDS)];
-            int32_t articleNumber = 0;
+
+            // This used to extract the :Seq header field for the article number.
+            // This is no longer reliable in the presence of cross-posting;
+            // thus, we always use the article number we obtained from the current_seq_map.
+            const int32_t articleNumber = seqNrs[i];
 
             // Iterate over keys
             afl::data::StringList_t keys;
             a.getHashKeys(keys);
             for (size_t j = 0; j < keys.size(); ++j) {
-                String_t fieldName = keys[j];
-                if (afl::string::strCaseCompare(fieldName, ":seq") == 0) {
-                    articleNumber = a(fieldName).toInteger();
-                } else {
-                    for (size_t fieldIndex = 0; fieldIndex < countof(OVERVIEW_FIELDS); ++fieldIndex) {
-                        if (afl::string::strCaseCompare(fieldName, OVERVIEW_FIELDS[fieldIndex]) == 0) {
-                            values[fieldIndex] = sanitizeFieldValue(a(fieldName).toString());
-                            break;
-                        }
+                const String_t& fieldName = keys[j];
+                for (size_t fieldIndex = 0; fieldIndex < countof(OVERVIEW_FIELDS); ++fieldIndex) {
+                    if (afl::string::strCaseCompare(fieldName, OVERVIEW_FIELDS[fieldIndex]) == 0) {
+                        values[fieldIndex] = sanitizeFieldValue(a(fieldName).toString());
+                        break;
                     }
                 }
             }
-            if (articleNumber != 0) {
-                String_t line = Format("%d", articleNumber);
-                for (size_t fieldIndex = 0; fieldIndex < countof(OVERVIEW_FIELDS); ++fieldIndex) {
-                    line += "\t";
-                    if (fieldIndex >= OVERVIEW_FIELDS_FIRST_FULL) {
-                        line += OVERVIEW_FIELDS[fieldIndex];
-                        line += ": ";
-                        }
-                    line += values[fieldIndex];
+
+            String_t line = Format("%d", articleNumber);
+            for (size_t fieldIndex = 0; fieldIndex < countof(OVERVIEW_FIELDS); ++fieldIndex) {
+                line += "\t";
+                if (fieldIndex >= OVERVIEW_FIELDS_FIRST_FULL) {
+                    line += OVERVIEW_FIELDS[fieldIndex];
+                    line += ": ";
                 }
-                response.handleLine(line);
+                line += values[fieldIndex];
             }
+            response.handleLine(line);
         }
     }
     response.handleLine(".");

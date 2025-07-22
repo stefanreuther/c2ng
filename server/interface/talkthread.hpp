@@ -8,6 +8,7 @@
 #include "afl/base/deletable.hpp"
 #include "afl/base/memory.hpp"
 #include "afl/base/types.hpp"
+#include "afl/data/integerlist.hpp"
 #include "afl/data/value.hpp"
 #include "afl/string/string.hpp"
 #include "server/interface/talkforum.hpp"
@@ -33,6 +34,7 @@ namespace server { namespace interface {
             int32_t lastPostId;     ///< Last (newest) posting in this thread.
             Time_t lastTime;        ///< Time of last posting in this thread.
             bool isSticky;          ///< True if thread is sticky.
+            afl::data::IntegerList_t alsoPostedTo;  ///< List of forums this thread is cross-posted to.
         };
 
         /** Get information about a forum thread (THREADSTAT).

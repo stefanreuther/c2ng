@@ -177,6 +177,11 @@ namespace server { namespace talk {
             \return information */
         server::interface::TalkNNTP::Info describeAsNewsgroup(const server::talk::render::Context& ctx, const server::talk::render::Options& opts, Root& root, Session& session);
 
+        /** Get associated game number.
+            Parses the link from the description.
+            \return Game number; 0 if none */
+        int32_t getGameNumber();
+
         /** Forum sorter.
             Pass this object to executeListOperation() if the list contains a list of forums. */
         class ForumSorter : public Sorter {

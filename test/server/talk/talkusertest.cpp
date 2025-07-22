@@ -5,9 +5,12 @@
 
 #include "server/talk/talkuser.hpp"
 
+#include <memory>
+#include <stdexcept>
 #include "afl/data/access.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/net/redis/stringfield.hpp"
+#include "afl/string/format.hpp"
 #include "afl/test/testrunner.hpp"
 #include "server/talk/forum.hpp"
 #include "server/talk/root.hpp"
@@ -15,25 +18,32 @@
 #include "server/talk/topic.hpp"
 #include "server/talk/user.hpp"
 #include "server/types.hpp"
-#include <memory>
-#include <stdexcept>
+
+using afl::data::Access;
+using afl::net::redis::InternalDatabase;
+using afl::string::Format;
+using server::talk::Configuration;
+using server::talk::Forum;
+using server::talk::Root;
+using server::talk::Session;
+using server::talk::TalkUser;
+using server::talk::Topic;
+using server::talk::User;
 
 /** Test accessNewsrc. */
 AFL_TEST("server.talk.TalkUser:accessNewsrc", a)
 {
-    using server::talk::TalkUser;
-
     // Infrastructure
-    afl::net::redis::InternalDatabase db;
-    server::talk::Session session;
-    server::talk::Root root(db, server::talk::Configuration());
+    InternalDatabase db;
+    Session session;
+    Root root(db, Configuration());
     session.setUser("1004");
 
     // Prepare database. We only need the message counter to pass limit checks.
     root.lastMessageId().set(200);
 
     // Messages [0,7] read, [8,15] unread, [16,23] read
-    server::talk::User(root, session.getUser()).newsrc().hashKey("data").stringField("0").set(String_t("\xFF\0\xFF", 3));
+    User(root, session.getUser()).newsrc().hashKey("data").stringField("0").set(String_t("\xFF\0\xFF", 3));
 
     // Testee
     TalkUser testee(session, root);
@@ -179,19 +189,17 @@ AFL_TEST("server.talk.TalkUser:accessNewsrc", a)
 /** Test accessNewsrc errors. */
 AFL_TEST("server.talk.TalkUser:accessNewsrc:error", a)
 {
-    using server::talk::TalkUser;
-
     // Infrastructure
-    afl::net::redis::InternalDatabase db;
-    server::talk::Session session;
-    server::talk::Root root(db, server::talk::Configuration());
+    InternalDatabase db;
+    Session session;
+    Root root(db, Configuration());
     session.setUser("1004");
 
     // Prepare database. We only need the message counter to pass limit checks.
     root.lastMessageId().set(200);
 
     // Do it
-    server::talk::TalkUser testee(session, root);
+    TalkUser testee(session, root);
     {
         static const TalkUser::Selection ss[] = {
             TalkUser::RangeScope, 201, 210
@@ -207,14 +215,12 @@ AFL_TEST("server.talk.TalkUser:accessNewsrc:error", a)
 /** Test accessNewsrc for single elements. */
 AFL_TEST("server.talk.TalkUser:accessNewsrc:single", a)
 {
-    using server::talk::TalkUser;
-
     // Infrastructure
-    afl::net::redis::InternalDatabase db;
-    server::talk::Session session;
-    server::talk::Root root(db, server::talk::Configuration());
+    InternalDatabase db;
+    Session session;
+    Root root(db, Configuration());
     session.setUser("1004");
-    server::talk::TalkUser testee(session, root);
+    TalkUser testee(session, root);
 
     // Prepare database. We only need the message counter to pass limit checks.
     root.lastMessageId().set(200);
@@ -244,25 +250,23 @@ AFL_TEST("server.talk.TalkUser:accessNewsrc:single", a)
 /** Test accessNewsrc for sets. */
 AFL_TEST("server.talk.TalkUser:accessNewsrc:set", a)
 {
-    using server::talk::TalkUser;
-
     // Infrastructure
-    afl::net::redis::InternalDatabase db;
-    server::talk::Session session;
-    server::talk::Root root(db, server::talk::Configuration());
+    InternalDatabase db;
+    Session session;
+    Root root(db, Configuration());
     session.setUser("1004");
-    server::talk::TalkUser testee(session, root);
+    TalkUser testee(session, root);
 
     // Preload database
     // - a forum
     const int FORUM_ID = 3;
-    server::talk::Forum f(root, FORUM_ID);
+    Forum f(root, FORUM_ID);
     f.name().set("f");
     root.allForums().add(FORUM_ID);
 
     // - topic
     const int TOPIC_ID = 42;
-    server::talk::Topic t(root, TOPIC_ID);
+    Topic t(root, TOPIC_ID);
     t.subject().set("s");
     f.topics().add(TOPIC_ID);
 
@@ -310,13 +314,11 @@ AFL_TEST("server.talk.TalkUser:accessNewsrc:set", a)
 /** Test commands as root. */
 AFL_TEST("server.talk.TalkUser:admin", a)
 {
-    using server::talk::TalkUser;
-
     // Infrastructure
-    afl::net::redis::InternalDatabase db;
-    server::talk::Session session;
-    server::talk::Root root(db, server::talk::Configuration());
-    server::talk::TalkUser testee(session, root);
+    InternalDatabase db;
+    Session session;
+    Root root(db, Configuration());
+    TalkUser testee(session, root);
 
     // Test must fail
     AFL_CHECK_THROWS(a("01. accessNewsrc"),      testee.accessNewsrc(TalkUser::NoModification, TalkUser::NoResult, afl::base::Nothing, afl::base::Nothing), std::exception);
@@ -330,16 +332,10 @@ AFL_TEST("server.talk.TalkUser:admin", a)
 /** Test watch/unwatch/getWatchedForums/getWatchedThreads. */
 AFL_TEST("server.talk.TalkUser:watch", a)
 {
-    using server::talk::TalkUser;
-    using afl::data::Access;
-    using server::talk::Topic;
-    using server::talk::Forum;
-    using server::talk::User;
-
     // Infrastructure
-    afl::net::redis::InternalDatabase db;
-    server::talk::Session session;
-    server::talk::Root root(db, server::talk::Configuration());
+    InternalDatabase db;
+    Session session;
+    Root root(db, Configuration());
     session.setUser("1004");
 
     // Populate database
@@ -356,7 +352,7 @@ AFL_TEST("server.talk.TalkUser:watch", a)
     }
 
     // Test
-    server::talk::TalkUser testee(session, root);
+    TalkUser testee(session, root);
     std::auto_ptr<afl::data::Value> p;
 
     // Verify initial state
@@ -432,13 +428,9 @@ AFL_TEST("server.talk.TalkUser:watch", a)
 /** Test getPostedMessages. */
 AFL_TEST("server.talk.TalkUser:getPostedMessages", a)
 {
-    using server::talk::TalkUser;
-    using afl::data::Access;
-    using server::talk::User;
-
     // Infrastructure
-    afl::net::redis::InternalDatabase db;
-    server::talk::Root root(db, server::talk::Configuration());
+    InternalDatabase db;
+    Root root(db, Configuration());
 
     // Preload DB
     User(root, "1002").postedMessages().add(9);
@@ -448,7 +440,7 @@ AFL_TEST("server.talk.TalkUser:getPostedMessages", a)
     // Access as root
     std::auto_ptr<afl::data::Value> p;
     {
-        server::talk::Session s;
+        Session s;
         TalkUser testee(s, root);
         AFL_CHECK_SUCCEEDS(a("01. getPostedMessages"), p.reset(TalkUser(s, root).getPostedMessages("1002", TalkUser::ListParameters())));
         a.checkEqual("02. count", Access(p).getArraySize(), 3U);
@@ -459,7 +451,7 @@ AFL_TEST("server.talk.TalkUser:getPostedMessages", a)
 
     // Access as 1002
     {
-        server::talk::Session s;
+        Session s;
         s.setUser("1002");
         TalkUser testee(s, root);
         AFL_CHECK_SUCCEEDS(a("11. getPostedMessages"), p.reset(TalkUser(s, root).getPostedMessages("1002", TalkUser::ListParameters())));
@@ -468,10 +460,276 @@ AFL_TEST("server.talk.TalkUser:getPostedMessages", a)
 
     // Access as 1009
     {
-        server::talk::Session s;
+        Session s;
         s.setUser("1009");
         TalkUser testee(s, root);
         AFL_CHECK_SUCCEEDS(a("21. getPostedMessages"), p.reset(TalkUser(s, root).getPostedMessages("1002", TalkUser::ListParameters())));
         a.checkEqual("22. count", Access(p).getArraySize(), 3U);
     }
+}
+
+/*
+ *  Test getCrosspostToGameCandidates().
+ */
+
+namespace {
+    struct CrossEnvironment {
+        InternalDatabase db;
+        Root root;
+        Session session;
+
+        CrossEnvironment(String_t user)
+            : db(), root(db, Configuration()), session()
+            {
+                // Two users, one who can crosspost, one who can't
+                User(root, "yes").profile().intField("allowgpost").set(1);    // User 'yes': on games, and allowed to cross-post
+                User(root, "not").profile().intField("allowgpost").set(0);    // User 'not': on games but not allowed to cross-post
+                User(root, "adm").profile().intField("allowgpost").set(1);    // User 'adm': not on games, but allowed
+                // No profile for user 'und' - undefined user
+
+                // Games
+                for (int i = 1; i <= 5; ++i) {
+                    // Game data
+                    root.gameRoot().intSetKey("all").add(i);
+                    root.gameRoot().subtree(i).stringKey("state").set("running");
+                    root.gameRoot().subtree("state").intSetKey("running").add(i);
+                    root.gameRoot().subtree("pubstate").intSetKey("running").add(i);
+
+                    // Users on odd games
+                    if ((i % 2) != 0) {
+                        root.gameRoot().subtree(i).hashKey("users").intField("yes").set(1);
+                        root.gameRoot().subtree(i).hashKey("users").intField("not").set(1);
+                        root.gameRoot().subtree(i).hashKey("users").intField("und").set(1);
+                    }
+
+                    // Related forums
+                    Forum f(root, i+10);
+                    f.description().set(Format("forum:for [game]%d[/game]", i));
+                    root.allForums().add(i+10);
+                }
+
+                // Session
+                session.setUser(user);
+            }
+    };
+}
+
+// User 'yes', test all branches
+AFL_TEST("server.talk.TalkUser:getCrosspostToGameCandidates:yes:all", a)
+{
+    CrossEnvironment env("yes");
+    TalkUser t(env.session, env.root);
+
+    TalkUser::ListParameters p;
+    std::auto_ptr<afl::data::Value> result(t.getCrosspostToGameCandidates(p));
+    a.checkEqual("01", Access(result).getArraySize(), 3U);
+    a.checkEqual("02", Access(result)[0].toInteger(), 11);
+    a.checkEqual("03", Access(result)[1].toInteger(), 13);
+    a.checkEqual("04", Access(result)[2].toInteger(), 15);
+}
+
+AFL_TEST("server.talk.TalkUser:getCrosspostToGameCandidates:yes:all:sort", a)
+{
+    CrossEnvironment env("yes");
+    Forum(env.root, 11).key().set("31");
+    Forum(env.root, 12).key().set("45");
+    Forum(env.root, 13).key().set("92");
+    Forum(env.root, 14).key().set("65");
+    Forum(env.root, 15).key().set("35");
+
+    TalkUser t(env.session, env.root);
+
+    TalkUser::ListParameters p;
+    p.sortKey = "KEY";
+    std::auto_ptr<afl::data::Value> result(t.getCrosspostToGameCandidates(p));
+    a.checkEqual("01", Access(result).getArraySize(), 3U);
+    a.checkEqual("02", Access(result)[0].toInteger(), 11);
+    a.checkEqual("03", Access(result)[1].toInteger(), 15);
+    a.checkEqual("04", Access(result)[2].toInteger(), 13);
+}
+
+AFL_TEST("server.talk.TalkUser:getCrosspostToGameCandidates:yes:range", a)
+{
+    CrossEnvironment env("yes");
+    TalkUser t(env.session, env.root);
+
+    TalkUser::ListParameters p;
+    p.mode = TalkUser::ListParameters::WantRange;
+    p.start = 2;
+    p.count = 5;
+    std::auto_ptr<afl::data::Value> result(t.getCrosspostToGameCandidates(p));
+    a.checkEqual("01", Access(result).getArraySize(), 1U);
+    a.checkEqual("02", Access(result)[0].toInteger(), 15);
+}
+
+AFL_TEST("server.talk.TalkUser:getCrosspostToGameCandidates:yes:beyond-range", a)
+{
+    CrossEnvironment env("yes");
+    TalkUser t(env.session, env.root);
+
+    TalkUser::ListParameters p;
+    p.mode = TalkUser::ListParameters::WantRange;
+    p.start = 20;
+    std::auto_ptr<afl::data::Value> result(t.getCrosspostToGameCandidates(p));
+    a.checkEqual("01", Access(result).getArraySize(), 0U);
+}
+
+AFL_TEST("server.talk.TalkUser:getCrosspostToGameCandidates:yes:short-size", a)
+{
+    CrossEnvironment env("yes");
+    TalkUser t(env.session, env.root);
+
+    TalkUser::ListParameters p;
+    p.mode = TalkUser::ListParameters::WantRange;
+    p.count = 2;
+    std::auto_ptr<afl::data::Value> result(t.getCrosspostToGameCandidates(p));
+    a.checkEqual("01", Access(result).getArraySize(), 2U);
+    a.checkEqual("02", Access(result)[0].toInteger(), 11);
+    a.checkEqual("03", Access(result)[1].toInteger(), 13);
+}
+
+AFL_TEST("server.talk.TalkUser:getCrosspostToGameCandidates:yes:size", a)
+{
+    CrossEnvironment env("yes");
+    TalkUser t(env.session, env.root);
+
+    TalkUser::ListParameters p;
+    p.mode = TalkUser::ListParameters::WantSize;
+    std::auto_ptr<afl::data::Value> result(t.getCrosspostToGameCandidates(p));
+    Access r(result);
+    a.checkEqual("01", Access(result).toInteger(), 3);
+}
+
+AFL_TEST("server.talk.TalkUser:getCrosspostToGameCandidates:yes:check", a)
+{
+    CrossEnvironment env("yes");
+    TalkUser t(env.session, env.root);
+
+    TalkUser::ListParameters p;
+    p.mode = TalkUser::ListParameters::WantMemberCheck;
+    p.item = 3;
+    std::auto_ptr<afl::data::Value> result(t.getCrosspostToGameCandidates(p));
+    Access r(result);
+    a.checkEqual("01", Access(result).toInteger(), 1);
+}
+
+AFL_TEST("server.talk.TalkUser:getCrosspostToGameCandidates:yes:check-fail", a)
+{
+    CrossEnvironment env("yes");
+    TalkUser t(env.session, env.root);
+
+    TalkUser::ListParameters p;
+    p.mode = TalkUser::ListParameters::WantMemberCheck;
+    p.item = 2;
+    std::auto_ptr<afl::data::Value> result(t.getCrosspostToGameCandidates(p));
+    Access r(result);
+    a.checkEqual("01", Access(result).toInteger(), 0);
+}
+
+// User 'adm', quick test
+AFL_TEST("server.talk.TalkUser:getCrosspostToGameCandidates:adm:all", a)
+{
+    CrossEnvironment env("adm");
+    TalkUser t(env.session, env.root);
+
+    TalkUser::ListParameters p;
+    std::auto_ptr<afl::data::Value> result(t.getCrosspostToGameCandidates(p));
+    a.checkEqual("01", Access(result).getArraySize(), 0U);
+}
+
+AFL_TEST("server.talk.TalkUser:getCrosspostToGameCandidates:adm:size", a)
+{
+    CrossEnvironment env("adm");
+    TalkUser t(env.session, env.root);
+
+    TalkUser::ListParameters p;
+    p.mode = TalkUser::ListParameters::WantSize;
+    std::auto_ptr<afl::data::Value> result(t.getCrosspostToGameCandidates(p));
+    Access r(result);
+    a.checkEqual("01", Access(result).toInteger(), 0);
+}
+
+AFL_TEST("server.talk.TalkUser:getCrosspostToGameCandidates:adm:check", a)
+{
+    CrossEnvironment env("adm");
+    TalkUser t(env.session, env.root);
+
+    TalkUser::ListParameters p;
+    p.mode = TalkUser::ListParameters::WantMemberCheck;
+    p.item = 3;
+    std::auto_ptr<afl::data::Value> result(t.getCrosspostToGameCandidates(p));
+    Access r(result);
+    a.checkEqual("01", Access(result).toInteger(), 0);
+}
+
+// User 'not', quick test
+AFL_TEST("server.talk.TalkUser:getCrosspostToGameCandidates:not:all", a)
+{
+    CrossEnvironment env("not");
+    TalkUser t(env.session, env.root);
+
+    TalkUser::ListParameters p;
+    std::auto_ptr<afl::data::Value> result(t.getCrosspostToGameCandidates(p));
+    a.checkEqual("01", Access(result).getArraySize(), 0U);
+}
+
+AFL_TEST("server.talk.TalkUser:getCrosspostToGameCandidates:not:size", a)
+{
+    CrossEnvironment env("not");
+    TalkUser t(env.session, env.root);
+
+    TalkUser::ListParameters p;
+    p.mode = TalkUser::ListParameters::WantSize;
+    std::auto_ptr<afl::data::Value> result(t.getCrosspostToGameCandidates(p));
+    Access r(result);
+    a.checkEqual("01", Access(result).toInteger(), 0);
+}
+
+AFL_TEST("server.talk.TalkUser:getCrosspostToGameCandidates:not:check", a)
+{
+    CrossEnvironment env("not");
+    TalkUser t(env.session, env.root);
+
+    TalkUser::ListParameters p;
+    p.mode = TalkUser::ListParameters::WantMemberCheck;
+    p.item = 3;
+    std::auto_ptr<afl::data::Value> result(t.getCrosspostToGameCandidates(p));
+    Access r(result);
+    a.checkEqual("01", Access(result).toInteger(), 0);
+}
+
+// User 'und', quick test
+AFL_TEST("server.talk.TalkUser:getCrosspostToGameCandidates:und:all", a)
+{
+    CrossEnvironment env("und");
+    TalkUser t(env.session, env.root);
+
+    TalkUser::ListParameters p;
+    std::auto_ptr<afl::data::Value> result(t.getCrosspostToGameCandidates(p));
+    a.checkEqual("01", Access(result).getArraySize(), 0U);
+}
+
+AFL_TEST("server.talk.TalkUser:getCrosspostToGameCandidates:und:size", a)
+{
+    CrossEnvironment env("und");
+    TalkUser t(env.session, env.root);
+
+    TalkUser::ListParameters p;
+    p.mode = TalkUser::ListParameters::WantSize;
+    std::auto_ptr<afl::data::Value> result(t.getCrosspostToGameCandidates(p));
+    Access r(result);
+    a.checkEqual("01", Access(result).toInteger(), 0);
+}
+
+AFL_TEST("server.talk.TalkUser:getCrosspostToGameCandidates:und:check", a)
+{
+    CrossEnvironment env("und");
+    TalkUser t(env.session, env.root);
+
+    TalkUser::ListParameters p;
+    p.mode = TalkUser::ListParameters::WantMemberCheck;
+    p.item = 3;
+    std::auto_ptr<afl::data::Value> result(t.getCrosspostToGameCandidates(p));
+    Access r(result);
+    a.checkEqual("01", Access(result).toInteger(), 0);
 }

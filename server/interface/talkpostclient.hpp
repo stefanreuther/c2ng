@@ -1,5 +1,6 @@
 /**
   *  \file server/interface/talkpostclient.hpp
+  *  \brief Class server::interface::TalkPostClient
   */
 #ifndef C2NG_SERVER_INTERFACE_TALKPOSTCLIENT_HPP
 #define C2NG_SERVER_INTERFACE_TALKPOSTCLIENT_HPP
@@ -9,11 +10,15 @@
 
 namespace server { namespace interface {
 
+    /** Client for TalkPost interface.
+        Uses a CommandHandler to send commands to a server, and receives the results. */
     class TalkPostClient : public TalkPost {
      public:
-        TalkPostClient(afl::net::CommandHandler& commandHandler);
-        ~TalkPostClient();
+        /** Constructor.
+            @param commandHandler Server connection. Lifetime must exceed that of the TalkPostClient. */
+        explicit TalkPostClient(afl::net::CommandHandler& commandHandler);
 
+        // TalkPost:
         virtual int32_t create(int32_t forumId, String_t subject, String_t text, const CreateOptions& options);
         virtual int32_t reply(int32_t parentPostId, String_t subject, String_t text, const ReplyOptions& options);
         virtual void edit(int32_t postId, String_t subject, String_t text);
@@ -25,6 +30,9 @@ namespace server { namespace interface {
         virtual bool remove(int32_t postId);
         virtual void getNewest(int count, afl::data::IntegerList_t& postIds);
 
+        /** Deserialize a TalkPost::Info.
+            @param value Data received from server
+            @return deserialized information */
         static Info unpackInfo(const afl::data::Value* value);
 
      private:

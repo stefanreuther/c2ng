@@ -44,6 +44,19 @@ namespace {
      private:
         CallReceiver& m_receiver;
     };
+
+    void createTenForums(Root& root, int32_t base)
+    {
+        for (int32_t i = 0; i < 10; ++i) {
+            const int32_t me = base + i;
+            root.allForums().add(me);
+            Forum f(root, me);
+            f.name().set("F");
+            f.writePermissions().set("all");
+            f.readPermissions().set("all");
+            f.lastMessageSequenceNumber().set(100+i);
+        }
+    }
 }
 
 
@@ -219,6 +232,282 @@ AFL_TEST("server.talk.TalkPost:create:spam", a)
     int32_t topicId = server::talk::Message(root, id).topicId().get();
     a.checkEqual("02. spam", User(root, "a").profile().intField("spam").get(), 1);
     a.checkEqual("03. perm", Topic(root, topicId).readPermissions().get(), "p:spam");
+}
+
+/** Test create(), cross-post. */
+AFL_TEST("server.talk.TalkPost:create:crosspost", a)
+{
+    // Infrastructure
+    InternalDatabase db;
+    Root root(db, Configuration());
+    Session session;
+
+    // Create some forums
+    const int32_t FORUM_ID = 42;
+    createTenForums(root, FORUM_ID);
+
+    // User
+    User user(root, "b");
+    user.profile().intField("allowxpost").set(1);
+    session.setUser("b");
+
+    // Do it
+    TalkPost testee(session, root);
+    TalkPost::CreateOptions opts;
+    opts.alsoPostTo.push_back(FORUM_ID+1);
+    opts.alsoPostTo.push_back(FORUM_ID+7);
+    int32_t i = testee.create(FORUM_ID+2, "subj", "forum:text", opts);
+
+    // Verify
+    a.checkDifferent("01. create", i, 0);
+    server::talk::Message msg(root, i);
+    a.checkEqual("02. subj", msg.subject().get(), "subj");
+    a.checkEqual("03. text", msg.text().get(), "forum:text");
+
+    // Sequence number: previous last-sequence-number in forum X is 100+X, so we now expect 101+X
+    a.checkEqual("11. seq", msg.sequenceNumber().get(), 103);
+    a.checkEqual("12. seq", msg.sequenceNumberIn(FORUM_ID+1).get(), 102);
+    a.checkEqual("13. seq", msg.sequenceNumberIn(FORUM_ID+7).get(), 108);
+
+    // Message in all forums
+    a.check("21. msg", Forum(root, FORUM_ID+1).messages().contains(i));
+    a.check("22. msg", Forum(root, FORUM_ID+2).messages().contains(i));
+    a.check("23. msg", Forum(root, FORUM_ID+7).messages().contains(i));
+
+    // Topic in all forums
+    int32_t topicId = msg.topicId().get();
+    a.check("31. topic", Forum(root, FORUM_ID+1).topics().contains(topicId));
+    a.check("32. topic", Forum(root, FORUM_ID+2).topics().contains(topicId));
+    a.check("33. topic", Forum(root, FORUM_ID+7).topics().contains(topicId));
+
+    // Edit; verify content and sequence numbers
+    testee.edit(i, "nsub", "forum:ntext");
+    a.checkEqual("101. subj", msg.subject().get(), "nsub");
+    a.checkEqual("102. text", msg.text().get(), "forum:ntext");
+
+    a.checkEqual("111. seq", msg.previousSequenceNumber().get(), 103);
+    a.checkEqual("112. seq", msg.previousSequenceNumberIn(FORUM_ID+1).get(), 102);
+    a.checkEqual("113. seq", msg.previousSequenceNumberIn(FORUM_ID+7).get(), 108);
+
+    a.checkEqual("121. seq", msg.sequenceNumber().get(), 104);
+    a.checkEqual("122. seq", msg.sequenceNumberIn(FORUM_ID+1).get(), 103);
+    a.checkEqual("123. seq", msg.sequenceNumberIn(FORUM_ID+7).get(), 109);
+
+    // Remove
+    session.setUser("");
+    testee.remove(i);
+    a.check("201. exists", !msg.exists());
+
+    a.check("211. msg", !Forum(root, FORUM_ID+1).messages().contains(i));
+    a.check("212. msg", !Forum(root, FORUM_ID+2).messages().contains(i));
+    a.check("213. msg", !Forum(root, FORUM_ID+7).messages().contains(i));
+
+    a.check("221. topic", !Forum(root, FORUM_ID+1).topics().contains(topicId));
+    a.check("222. topic", !Forum(root, FORUM_ID+2).topics().contains(topicId));
+    a.check("223. topic", !Forum(root, FORUM_ID+7).topics().contains(topicId));
+}
+
+/** Test create(), cross-post to game. */
+AFL_TEST("server.talk.TalkPost:create:crosspost:game", a)
+{
+    // Infrastructure
+    InternalDatabase db;
+    Root root(db, Configuration());
+    Session session;
+
+    // Create some forums
+    const int32_t FORUM_ID = 42;
+    createTenForums(root, FORUM_ID);
+
+    // Games; link forums
+    root.gameRoot().subtree(50).stringKey("state").set("running");
+    root.gameRoot().subtree(50).hashKey("users").intField("b").set(1);
+    root.gameRoot().subtree(60).stringKey("state").set("running");
+    root.gameRoot().subtree(60).hashKey("users").intField("b").set(1);
+    Forum(root, FORUM_ID+2).description().set("forum:[game]50[/game]");
+    Forum(root, FORUM_ID+7).description().set("forum:[game]60[/game]");
+
+    // User
+    User user(root, "b");
+    user.profile().intField("allowxpost").set(0);
+    user.profile().intField("allowgpost").set(0);
+    session.setUser("b");
+
+    // Do it
+    TalkPost testee(session, root);
+    TalkPost::CreateOptions opts;
+    opts.alsoPostTo.push_back(FORUM_ID+7);
+    int32_t i = testee.create(FORUM_ID+2, "subj", "forum:text", opts);
+
+    // Verify
+    a.checkDifferent("01. create", i, 0);
+    server::talk::Message msg(root, i);
+    a.checkEqual("02. subj", msg.subject().get(), "subj");
+    a.checkEqual("03. text", msg.text().get(), "forum:text");
+
+    // Message in all forums
+    a.check("21. msg", Forum(root, FORUM_ID+2).messages().contains(i));
+    a.check("22. msg", Forum(root, FORUM_ID+7).messages().contains(i));
+
+    // Topic in all forums
+    int32_t topicId = msg.topicId().get();
+    a.check("31. topic", Forum(root, FORUM_ID+2).topics().contains(topicId));
+    a.check("32. topic", Forum(root, FORUM_ID+7).topics().contains(topicId));
+}
+
+/** Test create(), cross-post, forbidden. */
+AFL_TEST("server.talk.TalkPost:create:error:crosspost", a)
+{
+    // Infrastructure
+    InternalDatabase db;
+    Root root(db, Configuration());
+    Session session;
+
+    // Create some forums
+    const int32_t FORUM_ID = 42;
+    createTenForums(root, FORUM_ID);
+
+    // Do not configure user; default is crosspost disabled
+    session.setUser("b");
+
+    // Do it
+    TalkPost testee(session, root);
+    TalkPost::CreateOptions opts;
+    opts.alsoPostTo.push_back(FORUM_ID+1);
+    opts.alsoPostTo.push_back(FORUM_ID+7);
+    AFL_CHECK_THROWS(a, testee.create(FORUM_ID+2, "subj", "forum:text", opts), std::exception);
+}
+
+/** Test create(), cross-post to game, error: game is not active. */
+AFL_TEST("server.talk.TalkPost:create:crosspost:game:error:bad-status", a)
+{
+    // Infrastructure
+    InternalDatabase db;
+    Root root(db, Configuration());
+    Session session;
+
+    // Create some forums
+    const int32_t FORUM_ID = 42;
+    createTenForums(root, FORUM_ID);
+
+    // Games; link forums
+    root.gameRoot().subtree(50).stringKey("state").set("running");
+    root.gameRoot().subtree(50).hashKey("users").intField("b").set(1);
+    root.gameRoot().subtree(60).stringKey("state").set("finished");
+    root.gameRoot().subtree(60).hashKey("users").intField("b").set(1);
+    Forum(root, FORUM_ID+2).description().set("forum:[game]50[/game]");
+    Forum(root, FORUM_ID+7).description().set("forum:[game]60[/game]");
+
+    // User
+    User user(root, "b");
+    user.profile().intField("allowxpost").set(0);
+    user.profile().intField("allowgpost").set(0);
+    session.setUser("b");
+
+    // Do it
+    TalkPost testee(session, root);
+    TalkPost::CreateOptions opts;
+    opts.alsoPostTo.push_back(FORUM_ID+7);
+    AFL_CHECK_THROWS(a, testee.create(FORUM_ID+2, "subj", "forum:text", opts), std::runtime_error);
+}
+
+/** Test create(), cross-post to game, error: user not on game. */
+AFL_TEST("server.talk.TalkPost:create:crosspost:game:error:not-playing", a)
+{
+    // Infrastructure
+    InternalDatabase db;
+    Root root(db, Configuration());
+    Session session;
+
+    // Create some forums
+    const int32_t FORUM_ID = 42;
+    createTenForums(root, FORUM_ID);
+
+    // Games; link forums
+    root.gameRoot().subtree(50).stringKey("state").set("running");
+    root.gameRoot().subtree(50).hashKey("users").intField("b").set(1);
+    root.gameRoot().subtree(60).stringKey("state").set("running");
+    // Not on game 60 = FORUM_ID+7 = primary
+    Forum(root, FORUM_ID+2).description().set("forum:[game]50[/game]");
+    Forum(root, FORUM_ID+7).description().set("forum:[game]60[/game]");
+
+    // User
+    User user(root, "b");
+    user.profile().intField("allowxpost").set(0);
+    user.profile().intField("allowgpost").set(0);
+    session.setUser("b");
+
+    // Do it
+    TalkPost testee(session, root);
+    TalkPost::CreateOptions opts;
+    opts.alsoPostTo.push_back(FORUM_ID+7);
+    AFL_CHECK_THROWS(a, testee.create(FORUM_ID+2, "subj", "forum:text", opts), std::runtime_error);
+}
+
+/** Test create(), cross-post to game, error: user not on game. */
+AFL_TEST("server.talk.TalkPost:create:crosspost:game:error:not-playing2", a)
+{
+    // Infrastructure
+    InternalDatabase db;
+    Root root(db, Configuration());
+    Session session;
+
+    // Create some forums
+    const int32_t FORUM_ID = 42;
+    createTenForums(root, FORUM_ID);
+
+    // Games; link forums
+    root.gameRoot().subtree(50).stringKey("state").set("running");
+    // Not on game 50 = FORUM_ID+2 = secondary
+    root.gameRoot().subtree(60).stringKey("state").set("running");
+    root.gameRoot().subtree(60).hashKey("users").intField("b").set(1);
+    Forum(root, FORUM_ID+2).description().set("forum:[game]50[/game]");
+    Forum(root, FORUM_ID+7).description().set("forum:[game]60[/game]");
+
+    // User
+    User user(root, "b");
+    user.profile().intField("allowxpost").set(0);
+    user.profile().intField("allowgpost").set(0);
+    session.setUser("b");
+
+    // Do it
+    TalkPost testee(session, root);
+    TalkPost::CreateOptions opts;
+    opts.alsoPostTo.push_back(FORUM_ID+7);
+    AFL_CHECK_THROWS(a, testee.create(FORUM_ID+2, "subj", "forum:text", opts), std::runtime_error);
+}
+
+/** Test create(), cross-post to game, error: not a game forum. */
+AFL_TEST("server.talk.TalkPost:create:crosspost:game:error:not-game", a)
+{
+    // Infrastructure
+    InternalDatabase db;
+    Root root(db, Configuration());
+    Session session;
+
+    // Create some forums
+    const int32_t FORUM_ID = 42;
+    createTenForums(root, FORUM_ID);
+
+    // Games; link forums
+    root.gameRoot().subtree(50).stringKey("state").set("running");
+    root.gameRoot().subtree(50).hashKey("users").intField("b").set(1);
+    root.gameRoot().subtree(60).stringKey("state").set("running");
+    root.gameRoot().subtree(60).hashKey("users").intField("b").set(1);
+    Forum(root, FORUM_ID+2).description().set("forum:[game]50[/game]");
+    Forum(root, FORUM_ID+7).description().set("forum:not a game forum");
+
+    // User
+    User user(root, "b");
+    user.profile().intField("allowxpost").set(0);
+    user.profile().intField("allowgpost").set(0);
+    session.setUser("b");
+
+    // Do it
+    TalkPost testee(session, root);
+    TalkPost::CreateOptions opts;
+    opts.alsoPostTo.push_back(FORUM_ID+7);
+    AFL_CHECK_THROWS(a, testee.create(FORUM_ID+2, "subj", "forum:text", opts), std::runtime_error);
 }
 
 /** Test reply(), forbidden. */

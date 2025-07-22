@@ -29,9 +29,15 @@ AFL_TEST("server.interface.TalkThreadClient", a)
 
     // getInfo
     {
+        Vector::Ref_t vec = Vector::create();
+        vec->pushBackNew(server::makeIntegerValue(42));
+        vec->pushBackNew(server::makeIntegerValue(69));
+        vec->pushBackNew(server::makeIntegerValue(23));
         Hash::Ref_t in = Hash::create();
         in->setNew("subject", server::makeStringValue("Subj"));
         in->setNew("forum", server::makeIntegerValue(3));
+        in->setNew("also", new VectorValue(vec));
+
         mock.expectCall("THREADSTAT, 92");
         mock.provideNewResult(new HashValue(in));
 
@@ -42,6 +48,10 @@ AFL_TEST("server.interface.TalkThreadClient", a)
         a.checkEqual("04. lastPostId",  out.lastPostId, 0);
         a.checkEqual("05. lastTime",    out.lastTime, 0);
         a.check("06. isSticky",        !out.isSticky);
+        a.checkEqual("07. also",        out.alsoPostedTo.size(), 3U);
+        a.checkEqual("07a. also",       out.alsoPostedTo[0], 42);
+        a.checkEqual("07b. also",       out.alsoPostedTo[1], 69);
+        a.checkEqual("07c. also",       out.alsoPostedTo[2], 23);
     }
 
     // getInfos

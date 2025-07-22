@@ -41,6 +41,16 @@ namespace server { namespace talk {
             \return Value */
         bool isAllowedToPost();
 
+        /** Get generic crosspost permission (profile access).
+            If set, the user is allowed to crosspost everywhere.
+            \return Value */
+        bool isAllowedToCrosspost();
+
+        /** Get game crosspost permission (profile access).
+            If set, the user is allowed to between forums of games they're playing in.
+            \return Value */
+        bool isAllowedToCrosspostToGames();
+
         /** Get autowatch flag (profile access).
             If set, the user automatically watches topic he posts in.
             \return Value */

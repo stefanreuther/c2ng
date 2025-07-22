@@ -6,6 +6,8 @@
 #include <algorithm>
 #include "server/talk/notify.hpp"
 #include "afl/data/stringlist.hpp"
+#include "afl/net/redis/stringsetoperation.hpp"
+#include "afl/string/format.hpp"
 #include "server/talk/forum.hpp"
 #include "server/talk/message.hpp"
 #include "server/talk/render/context.hpp"
@@ -15,7 +17,6 @@
 #include "server/talk/topic.hpp"
 #include "server/talk/user.hpp"
 #include "server/talk/userpm.hpp"
-#include "afl/string/format.hpp"
 
 using afl::data::StringList_t;
 
@@ -88,9 +89,23 @@ server::talk::notifyMessage(Message& msg, Root& root, server::interface::MailQue
     }
 
     // -- Forum --
+    // Crosspost?
+    afl::data::IntegerList_t alsoPostedTo;
+    if (msg.getId() == topic.firstPostingId().get()) {
+        topic.alsoPostedTo().getAll(alsoPostedTo);
+    }
+
     // Get forum watchers
     StringList_t forumWatchers;
-    forum.watchers().getAll(forumWatchers);
+    if (alsoPostedTo.empty()) {
+        forum.watchers().getAll(forumWatchers);
+    } else {
+        afl::net::redis::StringSetOperation op(forum.watchers().merge(Forum(root, alsoPostedTo[0]).watchers()));
+        for (size_t i = 1; i < alsoPostedTo.size(); ++i) {
+            op.andAlso(Forum(root, alsoPostedTo[i]).watchers());
+        }
+        op.getAll(forumWatchers);
+    }
     std::sort(forumWatchers.begin(), forumWatchers.end());
 
     // Find forum watchers that have not been notified and mark them.

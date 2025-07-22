@@ -134,11 +134,8 @@ server::talk::TalkThread::moveToForum(int32_t threadId, int32_t forumId)
     // Do it. Actual forum move is trivial, but we must update all sequence numbers and change
     // all message Ids for the NNTP side.
     afl::data::IntegerList_t posts;
-    {
-        afl::net::redis::SortOperation op(t.messages().sort());
-        Message::applySortBySequence(m_root, op);
-        op.getResult(posts);
-    }
+    t.messages().sort().getResult(posts);
+    int32_t firstPost = t.firstPostingId().get();
     for (size_t i = 0; i < posts.size(); ++i) {
         Message msg(m_root, posts[i]);
 
@@ -162,13 +159,40 @@ server::talk::TalkThread::moveToForum(int32_t threadId, int32_t forumId)
         msg.previousSequenceNumber().set(oldSeq1);
         msg.sequenceNumber().set(newSeq);
         msg.rfcMessageId().remove();
+
+        // If this is first post in a cross-posted thread, adjust message numbers
+        if (firstPost == posts[i]) {
+            afl::data::IntegerList_t alsoPostedTo;
+            t.alsoPostedTo().getAll(alsoPostedTo);
+            for (size_t i = 0; i < alsoPostedTo.size(); ++i) {
+                int32_t thisForumId = alsoPostedTo[i];
+                if (dst.getId() == thisForumId) {
+                    // Moving into a forum that we already cross-posted to
+                    msg.previousSequenceNumberIn(thisForumId).remove();
+                    msg.sequenceNumberIn(thisForumId).remove();
+                } else {
+                    // Update sequence number
+                    int32_t oldSeq1 = msg.sequenceNumberIn(thisForumId).get();
+                    int32_t oldSeq2 = msg.previousSequenceNumberIn(thisForumId).get();
+                    int32_t newSeq;
+                    do {
+                        newSeq = ++Forum(m_root, thisForumId).lastMessageSequenceNumber();
+                    } while (newSeq == oldSeq1 || newSeq == oldSeq2);
+                    msg.previousSequenceNumberIn(thisForumId).set(oldSeq1);
+                    msg.sequenceNumberIn(thisForumId).set(newSeq);
+                }
+            }
+        }
     }
+
+    // Target forum is no longer a cross-post target (no-op if it never was)
+    t.alsoPostedTo().remove(dst.getId());
 
     // Move the postings into the new forum
     src.messages().remove(t.messages()).storeTo(src.messages());
     dst.messages().merge(t.messages()).storeTo(dst.messages());
 
-    // Move the thread
+    // Move the thread (no-op if target is cross-post target)
     if (t.isSticky()) {
         src.stickyTopics().moveTo(threadId, dst.stickyTopics());
     } else {
