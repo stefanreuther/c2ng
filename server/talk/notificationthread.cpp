@@ -58,8 +58,13 @@ void
 server::talk::NotificationThread::run()
 {
     while (!m_shutdown) {
-        uint32_t time = tick();
-        m_semaphore.wait(time);
+        try {
+            uint32_t time = tick();
+            m_semaphore.wait(time);
+        }
+        catch (std::exception& e) {
+            m_root.log().write(LogListener::Warn, LOG_NAME, "", e);
+        }
     }
 }
 
