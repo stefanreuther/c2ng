@@ -37,20 +37,7 @@ server::talk::TalkPost::create(int32_t forumId, String_t subject, String_t text,
 {
     // ex planetscentral/talk/cmdpost.cc:doPostNew
     // Check user permissions and find effective user
-    String_t user;
-    if (m_session.isAdmin()) {
-        const String_t* p = options.userId.get();
-        if (p == 0) {
-            throw std::runtime_error(MUST_HAVE_USER_CONTEXT); // @change was 400 Need user in PCC2
-        }
-        user = *p;
-    } else {
-        const String_t* p = options.userId.get();
-        if (p != 0 && *p != m_session.getUser()) {
-            throw std::runtime_error(USER_NOT_ALLOWED);
-        }
-        user = m_session.getUser();
-    }
+    const String_t user = m_session.checkUserOption(options.userId);
 
     // Verify forum post permission
     Forum f(m_root, forumId);
@@ -172,20 +159,7 @@ server::talk::TalkPost::reply(int32_t parentPostId, String_t subject, String_t t
 {
     // ex planetscentral/talk/cmdpost.cc:doPostReply
     // Check user permissions and find effective user
-    String_t user;
-    if (m_session.isAdmin()) {
-        const String_t* p = options.userId.get();
-        if (p == 0) {
-            throw std::runtime_error(MUST_HAVE_USER_CONTEXT); // @change was 400 Need user in PCC2
-        }
-        user = *p;
-    } else {
-        const String_t* p = options.userId.get();
-        if (p != 0 && *p != m_session.getUser()) {
-            throw std::runtime_error(USER_NOT_ALLOWED);
-        }
-        user = m_session.getUser();
-    }
+    const String_t user = m_session.checkUserOption(options.userId);
 
     // Do it
     Message parent(m_root, parentPostId);

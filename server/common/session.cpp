@@ -73,6 +73,25 @@ server::common::Session::checkUser() const
     }
 }
 
+// Check for user context, provided by user or implicitly.
+String_t
+server::common::Session::checkUserOption(const afl::base::Optional<String_t>& opt) const
+{
+    if (isAdmin()) {
+        const String_t* p = opt.get();
+        if (p == 0 || p->empty()) {
+            throw std::runtime_error(MUST_HAVE_USER_CONTEXT);
+        }
+        return *p;
+    } else {
+        const String_t* p = opt.get();
+        if (p != 0 && *p != m_user) {
+            throw std::runtime_error(USER_NOT_ALLOWED);
+        }
+        return m_user;
+    }
+}
+
 // Log a command.
 void
 server::common::Session::logCommand(afl::sys::LogListener& log, String_t logChannel, const String_t& verb, interpreter::Arguments args, size_t censor)

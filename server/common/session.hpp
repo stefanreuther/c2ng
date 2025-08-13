@@ -5,9 +5,10 @@
 #ifndef C2NG_SERVER_COMMON_SESSION_HPP
 #define C2NG_SERVER_COMMON_SESSION_HPP
 
+#include "afl/base/optional.hpp"
 #include "afl/string/string.hpp"
-#include "interpreter/arguments.hpp"
 #include "afl/sys/log.hpp"
+#include "interpreter/arguments.hpp"
 
 namespace server { namespace common {
 
@@ -48,6 +49,15 @@ namespace server { namespace common {
         /** Check for user context.
             \throw std::runtime_error if session does not have a user context */
         void checkUser() const;
+
+        /** Check for user context, provided by user or implicitly.
+            Some commands require a user context, and allow specification of a user Id.
+            If this session has a user context, the command may repeat it (but does not have to).
+            If this session has no user context, the command must specify one (and can be any one).
+            \param opt User name option given in command
+            \return resolved user Id
+            \throw std::runtime_error if user context cannot be determined */
+        String_t checkUserOption(const afl::base::Optional<String_t>& opt) const;
 
         /** Log a command.
             This function is part of Session because it includes session information (user name) in the message.

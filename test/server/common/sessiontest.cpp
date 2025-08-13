@@ -25,6 +25,10 @@ AFL_TEST("server.common.Session:basics", a)
     a.checkEqual      ("12. getUser",       testee.getUser(), "1003");
     AFL_CHECK_SUCCEEDS(a("13. checkUser"),  testee.checkUser());
     AFL_CHECK_THROWS  (a("14. checkAdmin"), testee.checkAdmin(), std::exception);
+    a.checkEqual      ("15. option",        testee.checkUserOption(String_t("1003")), "1003");
+    a.checkEqual      ("16. option",        testee.checkUserOption(afl::base::Nothing), "1003");
+    AFL_CHECK_THROWS  (a("17. option"),     testee.checkUserOption(String_t("1004")), std::exception);
+    AFL_CHECK_THROWS  (a("18. option"),     testee.checkUserOption(String_t("")), std::exception);
 
     // Reset to admin
     testee.setUser("");
@@ -32,6 +36,10 @@ AFL_TEST("server.common.Session:basics", a)
     a.checkEqual      ("22. getUser",       testee.getUser(), "");
     AFL_CHECK_THROWS  (a("23. checkUser"),  testee.checkUser(), std::exception);
     AFL_CHECK_SUCCEEDS(a("24. checkAdmin"), testee.checkAdmin());
+    a.checkEqual      ("25. option",        testee.checkUserOption(String_t("1003")), "1003");
+    AFL_CHECK_THROWS  (a("26. option"),     testee.checkUserOption(afl::base::Nothing), std::exception);
+    a.checkEqual      ("27. option",        testee.checkUserOption(String_t("1004")), "1004");
+    AFL_CHECK_THROWS  (a("28. option"),     testee.checkUserOption(String_t("")), std::exception);
 }
 
 /** Test formatWord(). */
