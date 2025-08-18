@@ -293,22 +293,6 @@ namespace {
             // || sym == SDLK_COMPOSE
             || sym == 0 /* SDL does not know to map it either */;
     }
-
-    // /** QUIT handler.
-    //     When SDL itself sees a QUIT event, it will think we handle it, and close our window.
-    //     This does not fit our model.
-    //     We want a QUIT event to generate an event but not disrupt the normal event stream.
-    //     Hence, we post the event manually and lie to SDL. */
-    // extern "C" int quitHandler(const SDL_Event* event)
-    // {
-    //     if (event->type == SDL_QUIT) {
-    //         /* SDL_PushEvent is SDL_PeepEvents in disguise, but doesn't modify *event */
-    //         SDL_PushEvent(const_cast<SDL_Event*>(event));
-    //         return 0;
-    //     }
-    //     return 1;
-    // }
-
 }
 
 
@@ -337,27 +321,18 @@ gfx::sdl2::Engine::Engine(afl::sys::LogListener& log, afl::string::Translator& t
         throw GraphicsException(afl::string::Format(m_translator("Error initializing SDL: %s").c_str(), SDL_GetError()));
     }
 
-    // SDL_SetEventFilter(quitHandler);
-    // SDL_EnableUNICODE(1);
-    // SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-
     SDL_EventState(SDL_ENABLE, SDL_KEYDOWN);
     SDL_EventState(SDL_ENABLE, SDL_MOUSEBUTTONUP);
     SDL_EventState(SDL_ENABLE, SDL_MOUSEBUTTONDOWN);
     SDL_EventState(SDL_ENABLE, SDL_MOUSEMOTION);
     SDL_EventState(SDL_ENABLE, SDL_MOUSEWHEEL);
     SDL_EventState(SDL_DISABLE, SDL_TEXTINPUT);
-
-    // m_grabEnabled = false;
-
-    // std::atexit(SDL_Quit);
 }
 
 gfx::sdl2::Engine::~Engine()
 {
     // ex ui/event.cc:doneEvents
     clearWindowStuff();
-    // SDL_SetEventFilter(0);
     SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_TIMER);
 }
 
@@ -468,16 +443,12 @@ gfx::sdl2::Engine::handleEvent(EventConsumer& consumer, bool relativeMouseMoveme
     bool hasRunnable = false;
     if (m_lastWasRunnable) {
         hasRunnable = m_runnableSemaphore.wait(5);
-        m_lastWasRunnable = false;
-    }
-
-    if (!hasRunnable) {
-        // Flush output
-        if (Surface* sfc = m_window.get()) {
-            if (m_sdlTexture != 0 && m_sdlRenderer != 0) {
-                sfc->presentUpdate(m_sdlTexture, m_sdlRenderer);
-            }
+        if (hasRunnable) {
+            m_runnableSemaphore.post();
         }
+    }
+    if (!hasRunnable) {
+        presentUpdate();
     }
 
     // Update mouse grab
@@ -489,27 +460,21 @@ gfx::sdl2::Engine::handleEvent(EventConsumer& consumer, bool relativeMouseMoveme
         afl::sys::Timeout_t t = m_timerQueue.getNextTimeout();
         if (t == afl::sys::INFINITE_TIMEOUT) {
             // Easy case: wait for event
-            SDL_WaitEvent(&ev);
-            if (convertEvent(ev, consumer, relativeMouseMovement)) {
-                break;
+            if (SDL_WaitEvent(&ev) == 1) {
+                if (convertEvent(ev, consumer, relativeMouseMovement)) {
+                    break;
+                }
             }
         } else {
             // Not-so-easy case: wait until we have an event.
-            // FIXME: SDL2 has SDL_WaitEventTimeout
-            uint32_t start = afl::sys::Time::getTickCounter();
-            uint32_t elapsed = 0;
-            bool eventStatus = false;
-            while (!eventStatus && elapsed < t) {
-                eventStatus = (SDL_PollEvent(&ev) == 1);
-                if (!eventStatus) {
-                    SDL_Delay(10);
-                }
-                elapsed = afl::sys::Time::getTickCounter() - start;
-            }
+            const uint32_t   start = afl::sys::Time::getTickCounter();
+            const int         effT = std::max(5, static_cast<int>(std::min(afl::sys::Timeout_t(0x7FFF), t)));
+            const bool eventStatus = (SDL_WaitEventTimeout(&ev, effT) == 1);
+            const uint32_t elapsed = afl::sys::Time::getTickCounter() - start;
 
             // Evaluate result
-            bool timerResult = m_timerQueue.handleElapsedTime(elapsed);
-            bool eventResult = eventStatus && convertEvent(ev, consumer, relativeMouseMovement);
+            const bool timerResult = m_timerQueue.handleElapsedTime(elapsed);
+            const bool eventResult = eventStatus && convertEvent(ev, consumer, relativeMouseMovement);
             if (timerResult || eventResult) {
                 break;
             }
@@ -567,8 +532,8 @@ gfx::sdl2::Engine::clearWindowStuff()
     }
 }
 
-// /** Set mouse mode.
-//     \param enable true: grab mouse pointer and start reporting infinite movement; false: normal mouse behaviour */
+/** Set mouse mode.
+    \param enable true: grab mouse pointer and start reporting infinite movement; false: normal mouse behaviour */
 void
 gfx::sdl2::Engine::setMouseGrab(bool enable)
 {
@@ -757,6 +722,18 @@ gfx::sdl2::Engine::handleTextInput(EventConsumer& consumer, const char* text, ut
 }
 
 void
+gfx::sdl2::Engine::presentUpdate()
+{
+    // Flush output
+    // The surface tracks its dirty region; presentUpdate() is a no-op if there were no changes.
+    if (Surface* sfc = m_window.get()) {
+        if (m_sdlTexture != 0 && m_sdlRenderer != 0) {
+            sfc->presentUpdate(m_sdlTexture, m_sdlRenderer);
+        }
+    }
+}
+
+void
 gfx::sdl2::Engine::postNewRunnable(afl::base::Runnable* p)
 {
     // Make sure to post only non-null runnables.
@@ -764,6 +741,7 @@ gfx::sdl2::Engine::postNewRunnable(afl::base::Runnable* p)
     if (p != 0) {
         afl::sys::MutexGuard g(m_taskMutex);
         m_taskQueue.pushBackNew(p);
+        m_runnableSemaphore.post();
 
         SDL_Event event;
         event.type = SDL_WAKE_EVENT;
@@ -771,7 +749,6 @@ gfx::sdl2::Engine::postNewRunnable(afl::base::Runnable* p)
         event.user.data1 = 0;
         event.user.data2 = 0;
         SDL_PushEvent(&event);
-        m_runnableSemaphore.post();
     }
 }
 
