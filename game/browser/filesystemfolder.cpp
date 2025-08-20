@@ -136,11 +136,13 @@ game::browser::FileSystemFolder::getDescription() const
 bool
 game::browser::FileSystemFolder::isSame(const Folder& other) const
 {
+    // Do NOT compare m_ignoreIndex here; paths loaded with DirectoryHandler::handleFolderName()
+    // will have this set intentionally while paths loaded by loading a directory will not;
+    // if we insist on equality, "c2ng <dirname>" will not work properly.
     const FileSystemFolder* p = dynamic_cast<const FileSystemFolder*>(&other);
     return p != 0
         && !m_directory->getDirectoryName().empty()
-        && p->m_directory->getDirectoryName() == m_directory->getDirectoryName()
-        && p->m_ignoreIndex == m_ignoreIndex;
+        && p->m_directory->getDirectoryName() == m_directory->getDirectoryName();
 }
 
 bool

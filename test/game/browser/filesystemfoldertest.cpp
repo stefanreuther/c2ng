@@ -293,10 +293,14 @@ AFL_TEST("game.browser.FileSystemFolder:gamestat", a)
     PtrVector<Folder> list;
     testee.loadContent(list);
     a.checkEqual("31. list", list.size(), 9U);    // 8 games in gamestat.dat + "this directory"
+    int num = 0;
     for (size_t i = 0; i < list.size(); ++i) {
         a.checkNonNull("32. content", list[i]);
-        a.check("33. content", !testee.isSame(*list[i]));
+        if (testee.isSame(*list[i])) {
+            ++num;
+        }
     }
+    a.checkEqual("33. content", num, 1);  // 1 instance of "this directory"
     a.checkEqual("34. item", list[0]->getName(), "Game  1");
     a.checkEqual("35. item", list[1]->getName(), "Game  2");
     a.checkEqual("36. item", list[2]->getName(), "Game  3");
