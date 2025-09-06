@@ -33,7 +33,7 @@ server::talk::TalkNNTP::listNewsgroups(afl::container::PtrVector<Info>& result)
     m_root.newsgroupMap().getAll(list);
 
     // Build result
-    render::Context ctx(m_session.getUser());
+    render::Context ctx(m_root, m_session.getUser());
     render::Options opts;
     opts.setFormat("text");
     for (afl::data::StringList_t::size_type i = 0, n = list.size(); i < n; i += 2) {
@@ -62,7 +62,7 @@ server::talk::TalkNNTP::findNewsgroup(String_t newsgroupName)
     } else {
         Forum f(m_root, fid);
         if (m_session.hasPermission(f.readPermissions().get(), m_root)) {
-            render::Context ctx(m_session.getUser());
+            render::Context ctx(m_root, m_session.getUser());
             render::Options opts;
             opts.setFormat("text");
             return f.describeAsNewsgroup(ctx, opts, m_root, m_session);

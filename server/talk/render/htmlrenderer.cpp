@@ -18,12 +18,13 @@
 #include "server/talk/render/options.hpp"
 #include "server/talk/topic.hpp"
 #include "server/talk/user.hpp"
+#include "util/string.hpp"
 #include "util/syntax/factory.hpp"
 #include "util/syntax/format.hpp"
 #include "util/syntax/highlighter.hpp"
 #include "util/syntax/segment.hpp"
-#include "util/string.hpp"
 
+using server::talk::LinkParser;
 using server::talk::TextNode;
 
 namespace {
@@ -184,176 +185,128 @@ bool
 HtmlRenderer::renderGameLink(const TextNode& n)
 {
     // Parse game Id
-    int32_t gameId;
-    if (!afl::string::strToInteger(n.text, gameId) || gameId <= 0) {
-        return false;
-    }
-
-    // FIXME: how many times have we duplicated this?
-    // Access game, check permissions
-    // xref host/game.cc, Game::hasPermission
-    afl::net::redis::Subtree root(m_root.gameRoot());
-    if (!root.intSetKey("all").contains(gameId)) {
-        return false;
-    }
-
-    afl::net::redis::Subtree game(root.subtree(gameId));
-    const String_t gameState = game.stringKey("state").get();
-    if (gameState != "joining" && gameState != "running" && gameState != "finished") {
-        return false;
-    }
-
-    const String_t gameType = game.stringKey("type").get();
-    if (gameType != "unlisted"
-        && gameType != "public"
-        && game.stringKey("owner").get() != m_context.getUser()
-        && !game.hashKey("users").field(m_context.getUser()).exists())
-    {
-        return false;
-    }
-
-    // OK, we are allowed to access it. Get its name.
-    const String_t name = game.stringKey("name").get();
-    result += "<a href=\"";
-    renderText(m_options.getBaseUrl());
-    result += m_root.linkFormatter().makeGameUrl(gameId, name);
-    result += "\">";
-    if (n.children.empty()) {
-        renderText(name);
+    afl::base::Optional<LinkParser::Result_t> r = m_context.parseGameLink(n.text);
+    if (const LinkParser::Result_t* p = r.get()) {
+        result += "<a href=\"";
+        renderText(m_options.getBaseUrl());
+        result += m_root.linkFormatter().makeGameUrl(p->first, p->second);
+        result += "\">";
+        if (n.children.empty()) {
+            renderText(p->second);
+        } else {
+            renderChildren(n);
+        }
+        result += "</a>";
+        return true;
     } else {
-        renderChildren(n);
+        return false;
     }
-    result += "</a>";
-    return true;
 }
 
 bool
 HtmlRenderer::renderForumLink(const TextNode& n)
 {
     // Parse forum Id
-    int32_t forumId;
-    if (!afl::string::strToInteger(n.text, forumId) || forumId <= 0) {
-        return false;
-    }
-
-    // Access forum, check permissions
-    server::talk::Forum forum(m_root, forumId);
-    if (!m_root.allForums().contains(forumId)) {
-        // FIXME: turn this into a method of Forum?
-        // FIXME permission check!
-        return false;
-    }
-
-    // OK, we are allowed to access it. Get its name.
-    const String_t name = forum.name().get();
-    result += "<a href=\"";
-    renderText(m_options.getBaseUrl());
-    result += m_root.linkFormatter().makeForumUrl(forumId, name);
-    result += "\">";
-    if (n.children.empty()) {
-        renderText(name);
+    afl::base::Optional<LinkParser::Result_t> r = m_context.parseForumLink(n.text);
+    if (const LinkParser::Result_t* p = r.get()) {
+        result += "<a href=\"";
+        renderText(m_options.getBaseUrl());
+        result += m_root.linkFormatter().makeForumUrl(p->first, p->second);
+        result += "\">";
+        if (n.children.empty()) {
+            renderText(p->second);
+        } else {
+            renderChildren(n);
+        }
+        result += "</a>";
+        return true;
     } else {
-        renderChildren(n);
+        return false;
     }
-    result += "</a>";
-    return true;
 }
 
 bool
 HtmlRenderer::renderUserLink(const TextNode& n)
 {
-    // Map user name to user Id
-    String_t userId = m_root.getUserIdFromLogin(n.text);
-    if (userId.empty()) {
+    afl::base::Optional<String_t> r = m_context.parseUserLink(n.text);
+    if (const String_t* p = r.get()) {
+        server::talk::User u(m_root, *p);
+
+        // Build it
+        result += "<a class=\"userlink";
+        if (*p == m_context.getUser()) {
+            result += " userlink-me";
+        }
+        result += "\" href=\"";
+        renderText(m_options.getBaseUrl());
+        result += m_root.linkFormatter().makeUserUrl(u.getLoginName());
+        result += "\">";
+        if (n.children.empty()) {
+            renderText(u.getScreenName());
+        } else {
+            renderChildren(n);
+        }
+        result += "</a>";
+        return true;
+    } else {
         return false;
     }
-    server::talk::User u(m_root, userId);
-
-    // Build it
-    result += "<a class=\"userlink";
-    if (userId == m_context.getUser()) {
-        result += " userlink-me";
-    }
-    result += "\" href=\"";
-    renderText(m_options.getBaseUrl());
-    result += m_root.linkFormatter().makeUserUrl(u.getLoginName());
-    result += "\">";
-    if (n.children.empty()) {
-        renderText(u.getScreenName());
-    } else {
-        renderChildren(n);
-    }
-    result += "</a>";
-    return true;
 }
 
 bool
 HtmlRenderer::renderPostLink(const TextNode& n)
 {
-    // Validate
-    int32_t messageId;
-    if (!afl::string::strToInteger(n.text, messageId) || messageId <= 0) {
-        return false;
-    }
+    afl::base::Optional<LinkParser::Result_t> r = m_context.parseMessageLink(n.text);
+    if (const LinkParser::Result_t* p = r.get()) {
+        // Message
+        server::talk::Message m(m_root, p->first);
 
-    // Access thread, check permissions
-    server::talk::Message m(m_root, messageId);
-    if (!m.exists()) {
-        // FIXME permission check!
-        return false;
-    }
-    int32_t topicId = m.topicId().get();
-    server::talk::Topic t(m_root, topicId);
+        // Topic
+        const int32_t topicId = m.topicId().get();
+        server::talk::Topic t(m_root, topicId);
 
-    // OK, we are allowed to access it. Get its name.
-    const String_t postName = m.subject().get();
-    const String_t topicName = t.subject().get();
-    result += "<a href=\"";
-    renderText(m_options.getBaseUrl());
-    result += m_root.linkFormatter().makePostUrl(topicId, topicName, messageId);
-    result += "\">";
-    if (n.children.empty()) {
-        if (postName.empty()) {
-            renderText("(no subject)");
+        // Render
+        const String_t topicName = t.subject().get();
+        result += "<a href=\"";
+        renderText(m_options.getBaseUrl());
+        result += m_root.linkFormatter().makePostUrl(topicId, topicName, p->first);
+        result += "\">";
+        if (n.children.empty()) {
+            if (p->second.empty()) {
+                renderText("(no subject)");
+            } else {
+                renderText(abbreviate(p->second));
+            }
         } else {
-            renderText(abbreviate(postName));
+            renderChildren(n);
         }
+        result += "</a>";
+        return true;
     } else {
-        renderChildren(n);
+        return false;
     }
-    result += "</a>";
-    return true;
 }
 
 bool
 HtmlRenderer::renderThreadLink(const TextNode& n)
 {
     // Validate
-    int32_t topicId;
-    if (!afl::string::strToInteger(n.text, topicId) || topicId <= 0) {
-        return false;
-    }
-
-    // Access thread, check permissions
-    server::talk::Topic t(m_root, topicId);
-    if (!t.exists()) {
-        // FIXME permission check!
-        return false;
-    }
-
-    // OK, we are allowed to access it. Get its name.
-    const String_t name = t.subject().get();
-    result += "<a href=\"";
-    renderText(m_options.getBaseUrl());
-    result += m_root.linkFormatter().makeTopicUrl(topicId, name);
-    result += "\">";
-    if (n.children.empty()) {
-        renderText(abbreviate(name));
+    afl::base::Optional<LinkParser::Result_t> r = m_context.parseTopicLink(n.text);
+    if (const LinkParser::Result_t* p = r.get()) {
+        result += "<a href=\"";
+        renderText(m_options.getBaseUrl());
+        result += m_root.linkFormatter().makeTopicUrl(p->first, p->second);
+        result += "\">";
+        if (n.children.empty()) {
+            renderText(abbreviate(p->second));
+        } else {
+            renderChildren(n);
+        }
+        result += "</a>";
+        return true;
     } else {
-        renderChildren(n);
+        return false;
     }
-    result += "</a>";
-    return true;
 }
 
 bool
@@ -665,7 +618,6 @@ HtmlRenderer::render(const TextNode& n)
                 result += ":";
                 renderText(n.text);
                 result += ":";
-                
             }
             break;
         }

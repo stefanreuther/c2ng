@@ -88,7 +88,7 @@ AFL_TEST("server.talk.Forum:basics", a)
     a.checkEqual("171. getNewsgroup", testee.getNewsgroup(), "g.n");
 
     // Describe
-    server::talk::render::Context ctx("u");
+    server::talk::render::Context ctx(root, "u");
     server::talk::render::Options opts;
     opts.setFormat("text");
 

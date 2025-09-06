@@ -61,7 +61,7 @@ server::talk::TalkAddress::render(afl::base::Memory<const String_t> in, afl::dat
         } else {
             std::auto_ptr<TextNode> node(new TextNode(TextNode::maParagraph, TextNode::miParFragment));
             if (renderReceiver(*p, *node)) {
-                out.push_back(server::talk::render::renderText(node, server::talk::render::Context(m_session.getUser()), m_session.renderOptions(), m_root));
+                out.push_back(server::talk::render::renderText(node, server::talk::render::Context(m_root, m_session.getUser()), m_session.renderOptions(), m_root));
             } else {
                 out.push_back(String_t());
             }

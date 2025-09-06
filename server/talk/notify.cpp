@@ -70,7 +70,7 @@ server::talk::notifyMessage(Message& msg, Root& root, server::interface::MailQue
         mq.send(groupReceivers);
     }
     if (!individualReceivers.empty()) {
-        server::talk::render::Context ctx(author);
+        server::talk::render::Context ctx(root, author);
         ctx.setMessageId(msg.getId());
 
         server::talk::render::Options opts;
@@ -138,7 +138,7 @@ server::talk::notifyMessage(Message& msg, Root& root, server::interface::MailQue
         mq.send(groupReceivers);
     }
     if (!individualReceivers.empty()) {
-        server::talk::render::Context ctx(author);
+        server::talk::render::Context ctx(root, author);
         ctx.setMessageId(msg.getId());
 
         server::talk::render::Options opts;
@@ -165,7 +165,7 @@ server::talk::notifyPM(UserPM& msg, const afl::data::StringList_t& notifyIndivid
     // Send notification with message
     if (!notifyIndividual.empty()) {
         const String_t author = msg.author().get();
-        server::talk::render::Context ctx(author);
+        server::talk::render::Context ctx(root, author);
         server::talk::render::Options opts;
         opts.setBaseUrl(root.config().baseUrl);
         opts.setFormat("mail");

@@ -24,13 +24,13 @@
 #include "server/talk/topic.hpp"
 #include "server/talk/user.hpp"
 
+using server::talk::LinkParser;
 using server::talk::TextNode;
 
 namespace {
     class MailRenderer {
      public:
-        MailRenderer(const server::talk::render::Context& ctx,
-                     const server::talk::render::Options& opts,
+        MailRenderer(const LinkParser& lp, const server::talk::render::Options& opts,
                      server::talk::Root& root, bool forNNTP, String_t& result);
 
         void renderUserName(const String_t& name);
@@ -58,7 +58,7 @@ namespace {
         void emitLine(const String_t& theLine);
 
         String_t& result;
-        const server::talk::render::Context& m_context;
+        const LinkParser& m_linkParser;
         const server::talk::render::Options& m_options;
         server::talk::Root& m_root;
         const bool forNNTP;
@@ -70,11 +70,10 @@ namespace {
     };
 }
 
-MailRenderer::MailRenderer(const server::talk::render::Context& ctx,
-                           const server::talk::render::Options& opts,
+MailRenderer::MailRenderer(const LinkParser& lp, const server::talk::render::Options& opts,
                            server::talk::Root& root, bool forNNTP, String_t& result)
     : result(result),
-      m_context(ctx),
+      m_linkParser(lp),
       m_options(opts),
       m_root(root),
       forNNTP(forNNTP),
@@ -157,84 +156,48 @@ MailRenderer::renderThreadId(const String_t& name)
 bool
 MailRenderer::renderGameLink(const String_t& text)
 {
-    // Parse game Id
-    int32_t gameId;
-    if (!afl::string::strToInteger(text, gameId) || gameId <= 0) {
+    afl::base::Optional<LinkParser::Result_t> r = m_linkParser.parseGameLink(text);
+    if (const LinkParser::Result_t* p = r.get()) {
+        renderWord("<" + m_options.getBaseUrl() + m_root.linkFormatter().makeGameUrl(p->first, p->second) + ">");
+        return true;
+    } else {
         return false;
     }
-
-    // Access game, check permissions
-    // xref host/game.cc, Game::hasPermission
-    afl::net::redis::Subtree root(m_root.gameRoot());
-    if (!root.intSetKey("all").contains(gameId)) {
-        return false;
-    }
-
-    afl::net::redis::Subtree game(root.subtree(gameId));
-    const String_t gameState = game.stringKey("state").get();
-    if (gameState != "joining" && gameState != "running" && gameState != "finished") {
-        return false;
-    }
-
-    const String_t gameType = game.stringKey("type").get();
-    if (gameType != "unlisted"
-        && gameType != "public"
-        && game.stringKey("owner").get() != m_context.getUser()
-        && !game.hashKey("users").field(m_context.getUser()).exists())
-    {
-        return false;
-    }
-
-    // OK, we are allowed to access it. Get its name.
-    const String_t name = game.stringKey("name").get();
-    renderWord("<" + m_options.getBaseUrl() + m_root.linkFormatter().makeGameUrl(gameId, name) + ">");
-    return true;
 }
 
 bool
 MailRenderer::renderUserLink(const String_t& text)
 {
-    // Map user name to user Id
-    String_t userId = m_root.getUserIdFromLogin(text);
-    if (userId.empty()) {
+    afl::base::Optional<String_t> r = m_linkParser.parseUserLink(text);
+    if (const String_t* p = r.get()) {
+        server::talk::User u(m_root, *p);
+        renderWord("<" + m_options.getBaseUrl() + m_root.linkFormatter().makeUserUrl(u.getLoginName()) + ">");
+        return true;
+    } else {
         return false;
     }
-    server::talk::User u(m_root, userId);
-
-    // Build it
-    renderWord("<" + m_options.getBaseUrl() + m_root.linkFormatter().makeUserUrl(u.getLoginName()) + ">");
-    return true;
 }
 
 bool
 MailRenderer::renderForumLink(const String_t& text)
 {
-    // Parse forum Id
-    int32_t forumId;
-    if (!afl::string::strToInteger(text, forumId) || forumId <= 0) {
-        return false;
-    }
-
-    // Access forum, check permissions
-    server::talk::Forum forum(m_root, forumId);
-    if (!forum.exists(m_root)) {
-        // FIXME permission check!
-        return false;
-    }
-
-    // Can we render as newsgroup name?
-    if (forNNTP) {
-        String_t ngName = forum.getNewsgroup();
-        if (!ngName.empty()) {
-            renderWord("<news:" + ngName + ">");
-            return true;
+    afl::base::Optional<LinkParser::Result_t> r = m_linkParser.parseForumLink(text);
+    if (const LinkParser::Result_t* p = r.get()) {
+        // Can we render as newsgroup name?
+        if (forNNTP) {
+            String_t ngName = server::talk::Forum(m_root, p->first).getNewsgroup();
+            if (!ngName.empty()) {
+                renderWord("<news:" + ngName + ">");
+                return true;
+            }
         }
-    }
 
-    // Render as link
-    const String_t name = forum.name().get();
-    renderWord("<" + m_options.getBaseUrl() + m_root.linkFormatter().makeForumUrl(forumId, name) + ">");
-    return true;
+        // Render as link
+        renderWord("<" + m_options.getBaseUrl() + m_root.linkFormatter().makeForumUrl(p->first, p->second) + ">");
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void
@@ -519,10 +482,10 @@ MailRenderer::emitLine(const String_t& theLine)
 }
 
 String_t
-server::talk::render::renderMail(TextNode* node, const Context& ctx, const Options& opts, Root& root, bool forNNTP)
+server::talk::render::renderMail(TextNode* node, const LinkParser& lp, const Options& opts, Root& root, bool forNNTP)
 {
     // ex planetscentral/talk/mailout.h:renderMail
     String_t result;
-    MailRenderer(ctx, opts, root, forNNTP, result).renderChildrenPG(node);
+    MailRenderer(lp, opts, root, forNNTP, result).renderChildrenPG(node);
     return result;
 }

@@ -280,7 +280,7 @@ server::talk::render::renderText(std::auto_ptr<TextNode> tree, const Context& ct
     } else if (fmt == "news") {
         return renderMail(tree.get(), ctx, opts, root, true);
     } else if (fmt == "text") {
-        return renderText(tree.get(), ctx, root);
+        return renderText(tree.get(), ctx);
     } else {
         // error
         return "ERROR: invalid format '" + fmt + "'";

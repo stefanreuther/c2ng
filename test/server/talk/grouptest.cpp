@@ -43,7 +43,7 @@ AFL_TEST("server.talk.Group", a)
 
     // Description
     {
-        server::talk::render::Context ctx("u");
+        server::talk::render::Context ctx(root, "u");
         server::talk::render::Options opts;
         opts.setFormat("html");
         server::interface::TalkGroup::Description desc = t.describe(ctx, opts, root);

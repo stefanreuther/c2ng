@@ -302,7 +302,7 @@ server::talk::TalkPost::render(int32_t postId, const server::interface::TalkRend
     }
     AccessChecker(m_root, m_session).checkMessage(msg);
 
-    render::Context ctx(m_session.getUser());
+    render::Context ctx(m_root, m_session.getUser());
     ctx.setMessageId(postId);
 
     render::Options temporaryOptions(m_session.renderOptions());
@@ -316,7 +316,7 @@ server::talk::TalkPost::render(afl::base::Memory<const int32_t> postIds, afl::da
 {
     // ex planetscentral/talk/cmdpost.cc:doPostMRender
     AccessChecker checker(m_root, m_session);
-    render::Context ctx(m_session.getUser());
+    render::Context ctx(m_root, m_session.getUser());
     while (const int32_t* p = postIds.eat()) {
         Message msg(m_root, *p);
         if (!msg.exists() || !checker.isAllowed(msg)) {
@@ -345,7 +345,7 @@ server::talk::TalkPost::getInfo(afl::base::Memory<const int32_t> postIds, afl::c
 {
     // ex planetscentral/talk/cmdpost.cc:doPostMStat
     AccessChecker checker(m_root, m_session);
-    render::Context ctx(m_session.getUser());
+    render::Context ctx(m_root, m_session.getUser());
     while (const int32_t* p = postIds.eat()) {
         Message msg(m_root, *p);
         if (!msg.exists() || !checker.isAllowed(msg)) {

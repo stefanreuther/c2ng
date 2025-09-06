@@ -1248,15 +1248,17 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/play/imperialstatspacker.cpp \
-    server/play/imperialstatspacker.hpp server/talk/notifier.hpp \
-    server/talk/notificationthread.cpp server/talk/notificationthread.hpp \
-    server/test/mailmock.cpp server/test/mailmock.hpp \
-    server/talk/ratelimit.cpp server/talk/ratelimit.hpp \
-    server/play/racenamepacker.cpp server/play/racenamepacker.hpp \
-    server/host/spec/directory.cpp server/host/spec/directory.hpp \
-    server/host/spec/publisherimpl.cpp server/host/spec/publisherimpl.hpp \
-    server/host/spec/publisher.hpp server/host/hostspecificationimpl.cpp \
+FILES_serverlib = server/talk/nulllinkparser.cpp \
+    server/talk/nulllinkparser.hpp server/talk/linkparser.hpp \
+    server/play/imperialstatspacker.cpp server/play/imperialstatspacker.hpp \
+    server/talk/notifier.hpp server/talk/notificationthread.cpp \
+    server/talk/notificationthread.hpp server/test/mailmock.cpp \
+    server/test/mailmock.hpp server/talk/ratelimit.cpp \
+    server/talk/ratelimit.hpp server/play/racenamepacker.cpp \
+    server/play/racenamepacker.hpp server/host/spec/directory.cpp \
+    server/host/spec/directory.hpp server/host/spec/publisherimpl.cpp \
+    server/host/spec/publisherimpl.hpp server/host/spec/publisher.hpp \
+    server/host/hostspecificationimpl.cpp \
     server/host/hostspecificationimpl.hpp \
     server/interface/hostspecificationserver.cpp \
     server/interface/hostspecificationserver.hpp \
@@ -1831,7 +1833,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/server/play/fs/sessiontest.cpp \
+FILES_testsuite = test/server/talk/nulllinkparsertest.cpp \
+    test/server/talk/linkparsertest.cpp test/server/play/fs/sessiontest.cpp \
     test/server/play/fs/directorytest.cpp \
     test/game/vcr/flak/testapplettest.cpp \
     test/game/vcr/classic/testapplettest.cpp \

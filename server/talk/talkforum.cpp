@@ -88,14 +88,14 @@ server::talk::TalkForum::getInfo(int32_t fid)
     if (!f.exists(m_root)) {
         throw std::runtime_error(FORUM_NOT_FOUND);
     }
-    return f.describe(server::talk::render::Context(m_session.getUser()), m_session.renderOptions(), m_root);
+    return f.describe(server::talk::render::Context(m_root, m_session.getUser()), m_session.renderOptions(), m_root);
 }
 
 void
 server::talk::TalkForum::getInfo(afl::base::Memory<const int32_t> fids, afl::container::PtrVector<Info>& result)
 {
     // ex doForumMStat
-    server::talk::render::Context ctx(m_session.getUser());
+    server::talk::render::Context ctx(m_root, m_session.getUser());
     while (const int32_t* fid = fids.eat()) {
         Forum f(m_root, *fid);
         if (!f.exists(m_root)) {

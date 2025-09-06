@@ -93,7 +93,7 @@ server::talk::TalkGroup::list(String_t groupId, afl::data::StringList_t& groups,
 server::talk::TalkGroup::Description
 server::talk::TalkGroup::getDescription(String_t groupId)
 {
-    return Group(m_root, groupId).describe(server::talk::render::Context(m_session.getUser()), m_session.renderOptions(), m_root);
+    return Group(m_root, groupId).describe(server::talk::render::Context(m_root, m_session.getUser()), m_session.renderOptions(), m_root);
 }
 
 void

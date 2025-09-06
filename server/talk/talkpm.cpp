@@ -326,7 +326,7 @@ server::talk::TalkPM::render(int32_t folder, int32_t pmid, const Options& option
         throw std::runtime_error(PM_NOT_FOUND);
     } else {
         // Report the message
-        render::Context ctx(m_session.getUser());
+        render::Context ctx(m_root, m_session.getUser());
         ctx.setMessageAuthor(UserPM(m_root, pmid).author().get());
 
         render::Options temporaryOptions(m_session.renderOptions());
@@ -350,7 +350,7 @@ server::talk::TalkPM::render(int32_t folder, afl::base::Memory<const int32_t> pm
             result.pushBackNew(0);
         } else {
             // Render the message
-            render::Context ctx(m_session.getUser());
+            render::Context ctx(m_root, m_session.getUser());
             ctx.setMessageAuthor(UserPM(m_root, pmid).author().get());
             result.pushBackNew(new String_t(render::renderText(UserPM(m_root, pmid).text().get(), ctx, m_session.renderOptions(), m_root)));
         }

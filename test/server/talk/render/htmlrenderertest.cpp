@@ -22,7 +22,7 @@ AFL_TEST("server.talk.render.HTMLRenderer:code", a)
 
     afl::net::NullCommandHandler nch;
     server::talk::Root root(nch, server::talk::Configuration());
-    server::talk::render::Context ctx("u");
+    server::talk::render::Context ctx(root, "u");
     server::talk::render::Options opts;
 
     root.keywordTable().add("ini.phost.GameName.link", "http://phost.de/phost4doc/config.html#GameName");
@@ -51,11 +51,10 @@ AFL_TEST("server.talk.render.HTMLRenderer:plaintext", a)
     using server::talk::InlineRecognizer;
 
     // Environment
-    const server::talk::render::Context ctx("u");   // context, required for quoting [not required?]
-    const server::talk::render::Options opts;       // options [not required?]
-
     afl::net::NullCommandHandler nch;
     server::talk::Root root(nch, server::talk::Configuration());
+    const server::talk::render::Context ctx(root, "u");   // context, required for quoting [not required?]
+    const server::talk::render::Options opts;             // options [not required?]
 
     // A single paragraph containing just text
     TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
@@ -89,11 +88,10 @@ AFL_TEST("server.talk.render.HTMLRenderer:complex", a)
     using server::talk::InlineRecognizer;
 
     // Environment
-    const server::talk::render::Context ctx("u");   // context, required for quoting [not required?]
-    const server::talk::render::Options opts;       // options [not required?]
-
     afl::net::NullCommandHandler nch;
     server::talk::Root root(nch, server::talk::Configuration());
+    const server::talk::render::Context ctx(root, "u");   // context, required for quoting [not required?]
+    const server::talk::render::Options opts;             // options [not required?]
 
     // Two paragraphs
     {
@@ -272,11 +270,10 @@ AFL_TEST("server.talk.render.HTMLRenderer:link", a)
     using server::talk::InlineRecognizer;
 
     // Environment
-    const server::talk::render::Context ctx("u");   // context, required for quoting [not required?]
-    const server::talk::render::Options opts;       // options [not required?]
-
     afl::net::NullCommandHandler nch;
     server::talk::Root root(nch, server::talk::Configuration());
+    const server::talk::render::Context ctx(root, "u");   // context, required for quoting [not required?]
+    const server::talk::render::Options opts;             // options [not required?]
 
     // A link with differing content and target
     {
@@ -321,12 +318,11 @@ AFL_TEST("server.talk.render.HTMLRenderer:special", a)
     using server::talk::InlineRecognizer;
 
     // Environment
-    const server::talk::render::Context ctx("u");   // context, required for quoting [not required?]
-    server::talk::render::Options opts;             // options
-    opts.setBaseUrl("http://base/path/");
-
     afl::net::NullCommandHandler nch;
     server::talk::Root root(nch, server::talk::Configuration());
+    const server::talk::render::Context ctx(root, "u");   // context, required for quoting [not required?]
+    server::talk::render::Options opts;                   // options
+    opts.setBaseUrl("http://base/path/");
 
     // Image link
     {
@@ -372,12 +368,11 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:user", a)
     using afl::net::redis::HashKey;
 
     // Environment
-    const server::talk::render::Context ctx("1000");
-    server::talk::render::Options opts;
-    opts.setBaseUrl("http://base/path/");
-
     afl::net::redis::InternalDatabase db;
     server::talk::Root root(db, server::talk::Configuration());
+    const server::talk::render::Context ctx(root, "1000");
+    server::talk::render::Options opts;
+    opts.setBaseUrl("http://base/path/");
 
     // Create two users
     StringKey(db, "uid:fred").set("1000");
@@ -441,12 +436,11 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:other", a)
     using afl::net::redis::StringSetKey;
 
     // Environment
-    const server::talk::render::Context ctx("1000");
-    server::talk::render::Options opts;
-    opts.setBaseUrl("http://base/path/");
-
     afl::net::redis::InternalDatabase db;
     server::talk::Root root(db, server::talk::Configuration());
+    const server::talk::render::Context ctx(root, "1000");
+    server::talk::render::Options opts;
+    opts.setBaseUrl("http://base/path/");
 
     // Create environment
     // - a game

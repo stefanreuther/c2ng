@@ -5,13 +5,13 @@
 #include "server/talk/render/textrenderer.hpp"
 #include "afl/charset/utf8.hpp"
 #include "afl/string/parse.hpp"
+#include "server/talk/forum.hpp"
 #include "server/talk/message.hpp"
 #include "server/talk/render/context.hpp"
-#include "server/talk/forum.hpp"
 #include "server/talk/topic.hpp"
 
 namespace {
-    using server::talk::render::Context;
+    using server::talk::LinkParser;
     using server::talk::Root;
 
     String_t hackSubject(const String_t s)
@@ -32,95 +32,44 @@ namespace {
         }
     }
 
-    String_t makeGameName(const String_t& text, const Context& ctx, Root& root)
+    String_t makeGameName(const String_t& text, const LinkParser& lp)
     {
-        // Parse game Id
-        int32_t gameId;
-        if (!afl::string::strToInteger(text, gameId) || gameId <= 0) {
+        afl::base::Optional<LinkParser::Result_t> r = lp.parseGameLink(text);
+        if (const LinkParser::Result_t* p = r.get()) {
+            return p->second;
+        } else {
             return text;
         }
-
-        // Access game, check permissions
-        // FIXME xref host/game.cc, Game::hasPermission
-        afl::net::redis::Subtree gameRoot(root.gameRoot());
-        if (!gameRoot.intSetKey("all").contains(gameId)) {
-            return text;
-        }
-
-        afl::net::redis::Subtree game(gameRoot.subtree(gameId));
-        const String_t gameState = game.stringKey("state").get();
-        if (gameState != "joining" && gameState != "running" && gameState != "finished") {
-            return text;
-        }
-
-        const String_t gameType = game.stringKey("type").get();
-        if (gameType != "unlisted"
-            && gameType != "public"
-            && game.stringKey("owner").get() != ctx.getUser()
-            && !game.hashKey("users").field(ctx.getUser()).exists())
-        {
-            return text;
-        }
-
-        // OK, we are allowed to access it. Get its name.
-        return game.stringKey("name").get();
     }
 
-    String_t makeForumName(const String_t& text, const Context& /*ctx*/, Root& root)
+    String_t makeForumName(const String_t& text, const LinkParser& lp)
     {
-        // Parse forum Id
-        int32_t forumId;
-        if (!afl::string::strToInteger(text, forumId) || forumId <= 0) {
+        afl::base::Optional<LinkParser::Result_t> r = lp.parseForumLink(text);
+        if (const LinkParser::Result_t* p = r.get()) {
+            return p->second;
+        } else {
             return text;
         }
-
-        // Access forum, check permissions
-        // FIXME: access checks?
-        server::talk::Forum forum(root, forumId);
-        if (!root.allForums().contains(forumId)) {
-            return text;
-        }
-
-        // OK, we are allowed to access it. Get its name.
-        return forum.name().get();
     }
 
-    String_t makePostName(String_t& text, const Context& /*ctx*/, Root& root)
+    String_t makePostName(String_t& text, const LinkParser& lp)
     {
-        // Validate
-        int32_t messageId;
-        if (!afl::string::strToInteger(text, messageId) || messageId <= 0) {
+        afl::base::Optional<LinkParser::Result_t> r = lp.parseMessageLink(text);
+        if (const LinkParser::Result_t* p = r.get()) {
+            return hackSubject(p->second);
+        } else {
             return text;
         }
-
-        // Access thread, check permissions
-        server::talk::Message m(root, messageId);
-        if (!m.exists()) {
-            // FIXME permission check!
-            return text;
-        }
-
-        // OK, we are allowed to access it. Get its name.
-        return hackSubject(m.subject().get());
     }
 
-    String_t makeThreadName(const String_t& text, const Context& /*ctx*/, Root& root)
+    String_t makeThreadName(const String_t& text, const LinkParser& lp)
     {
-        // Validate
-        int32_t topicId;
-        if (!afl::string::strToInteger(text, topicId) || topicId <= 0) {
+        afl::base::Optional<LinkParser::Result_t> r = lp.parseTopicLink(text);
+        if (const LinkParser::Result_t* p = r.get()) {
+            return hackSubject(p->second);
+        } else {
             return text;
         }
-
-        // Access thread, check permissions
-        server::talk::Topic t(root, topicId);
-        if (!t.exists()) {
-            // FIXME permission check!
-            return text;
-        }
-
-        // OK, we are allowed to access it. Get its name.
-        return hackSubject(t.subject().get());
     }
 
 }
@@ -129,7 +78,7 @@ namespace {
     This is a version of TextNode::rawTextContent(),
     but it fills in game names etc. */
 String_t
-server::talk::render::renderText(TextNode* node, const Context& ctx, Root& root)
+server::talk::render::renderText(TextNode* node, const LinkParser& lp)
 {
     // FIXME: explain 10000?
     if (node->major == TextNode::maPlain) {
@@ -137,7 +86,7 @@ server::talk::render::renderText(TextNode* node, const Context& ctx, Root& root)
     } else {
         String_t result;
         for (size_t i = 0, n = node->children.size(); i < n && result.size() < 10000; ++i) {
-            String_t next = renderText(node->children[i], ctx, root);
+            String_t next = renderText(node->children[i], lp);
             if (!next.empty() && node->children[i]->major == TextNode::maParagraph && !result.empty() && result[result.size()] != ' ') {
                 result += ' ';
             }
@@ -153,19 +102,19 @@ server::talk::render::renderText(TextNode* node, const Context& ctx, Root& root)
                 break;
 
              case TextNode::miLinkThread:
-                result = makeThreadName(node->text, ctx, root);
+                result = makeThreadName(node->text, lp);
                 break;
 
              case TextNode::miLinkPost:
-                result = makePostName(node->text, ctx, root);
+                result = makePostName(node->text, lp);
                 break;
 
              case TextNode::miLinkGame:
-                result = makeGameName(node->text, ctx, root);
+                result = makeGameName(node->text, lp);
                 break;
 
              case TextNode::miLinkForum:
-                result = makeForumName(node->text, ctx, root);
+                result = makeForumName(node->text, lp);
                 break;
             }
         }

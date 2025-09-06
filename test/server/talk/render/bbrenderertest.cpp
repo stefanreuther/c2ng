@@ -20,11 +20,10 @@ AFL_TEST("server.talk.render.BBRenderer:plaintext", a)
     using server::talk::InlineRecognizer;
 
     // Environment
-    const server::talk::render::Context ctx("u");   // context, required for quoting [not required?]
-    const server::talk::render::Options opts;       // options [not required?]
-
     afl::net::redis::InternalDatabase db;
     server::talk::Root root(db, server::talk::Configuration());
+    const server::talk::render::Context ctx(root, "u");   // context, required for quoting [not required?]
+    const server::talk::render::Options opts;       // options [not required?]
 
     const InlineRecognizer::Kinds_t noKinds;
     const InlineRecognizer::Kinds_t allKinds = InlineRecognizer::Kinds_t() + InlineRecognizer::Smiley + InlineRecognizer::Link;
@@ -141,11 +140,10 @@ AFL_TEST("server.talk.render.BBRenderer:complex", a)
     using server::talk::InlineRecognizer;
 
     // Environment
-    const server::talk::render::Context ctx("u");   // context, required for quoting [not required?]
-    const server::talk::render::Options opts;       // options [not required?]
-
     afl::net::redis::InternalDatabase db;
     server::talk::Root root(db, server::talk::Configuration());
+    const server::talk::render::Context ctx(root, "u");   // context, required for quoting [not required?]
+    const server::talk::render::Options opts;             // options [not required?]
 
     const InlineRecognizer::Kinds_t noKinds;
 
@@ -314,11 +312,10 @@ AFL_TEST("server.talk.render.BBRenderer:link", a)
     using server::talk::InlineRecognizer;
 
     // Environment
-    const server::talk::render::Context ctx("u");   // context, required for quoting [not required?]
-    const server::talk::render::Options opts;       // options [not required?]
-
     afl::net::redis::InternalDatabase db;
     server::talk::Root root(db, server::talk::Configuration());
+    const server::talk::render::Context ctx(root, "u");   // context, required for quoting [not required?]
+    const server::talk::render::Options opts;       // options [not required?]
 
     const InlineRecognizer::Kinds_t noKinds;
 
@@ -398,11 +395,10 @@ AFL_TEST("server.talk.render.BBRenderer:special", a)
     using server::talk::InlineRecognizer;
 
     // Environment
-    const server::talk::render::Context ctx("u");   // context, required for quoting [not required?]
-    const server::talk::render::Options opts;       // options [not required?]
-
     afl::net::redis::InternalDatabase db;
     server::talk::Root root(db, server::talk::Configuration());
+    const server::talk::render::Context ctx(root, "u");   // context, required for quoting [not required?]
+    const server::talk::render::Options opts;             // options [not required?]
 
     const InlineRecognizer::Kinds_t noKinds;
     const InlineRecognizer::Kinds_t allKinds = InlineRecognizer::Kinds_t() + InlineRecognizer::Smiley + InlineRecognizer::Link;

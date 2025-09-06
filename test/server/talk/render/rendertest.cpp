@@ -12,12 +12,12 @@
 
 namespace {
     struct Environment {
+        server::talk::Root root;
         server::talk::render::Context ctx;
         server::talk::render::Options opts;
         afl::net::NullCommandHandler cmdh;
-        server::talk::Root root;
         Environment()
-            : ctx("user"), opts(), cmdh(), root(cmdh, server::talk::Configuration())
+            : root(cmdh, server::talk::Configuration()), ctx(root, "user"), opts(), cmdh()
             { }
     };
 }
