@@ -1,5 +1,6 @@
 /**
   *  \file server/talk/render/bbrenderer.cpp
+  *  \brief BBCode renderer
   */
 
 #include "server/talk/render/bbrenderer.hpp"
@@ -48,15 +49,11 @@ namespace {
 
     class BBRenderer {
      public:
-        BBRenderer(const server::talk::render::Context& ctx,
-                   const server::talk::render::Options& opts,
-                   server::talk::Root& root,
+        BBRenderer(const server::talk::InlineRecognizer& recog,
                    server::talk::InlineRecognizer::Kinds_t kinds,
                    String_t& result)
             : result(result),
-              m_context(ctx),
-              m_options(opts),
-              m_root(root),
+              m_recog(recog),
               m_kinds(kinds)
             { }
 
@@ -71,10 +68,8 @@ namespace {
 
      private:
         String_t& result;
-        const server::talk::render::Context& m_context;
-        const server::talk::render::Options& m_options;
-        server::talk::Root& m_root;
-        server::talk::InlineRecognizer::Kinds_t m_kinds;
+        const server::talk::InlineRecognizer& m_recog;
+        const server::talk::InlineRecognizer::Kinds_t m_kinds;
     };
 
     bool isText(BBLexer::Token tok)
@@ -186,7 +181,7 @@ BBRenderer::renderPlaintext(const String_t& str)
 
             String_t::size_type pos = 0;
             server::talk::InlineRecognizer::Info info;
-            while (m_root.recognizer().find(token, pos, m_kinds, info)) {
+            while (m_recog.find(token, pos, m_kinds, info)) {
                 // Something that needs protection
                 result.append(token, pos, info.start - pos);
                 if (quote_end == String_t::npos) {
@@ -361,9 +356,9 @@ BBRenderer::renderPG(const TextNode& n)
 }
 
 String_t
-server::talk::render::renderBB(const TextNode& node, const Context& ctx, const Options& opts, Root& root, InlineRecognizer::Kinds_t kinds)
+server::talk::render::renderBB(const TextNode& node, const InlineRecognizer& recog, InlineRecognizer::Kinds_t kinds)
 {
     String_t result;
-    BBRenderer(ctx, opts, root, kinds, result).renderChildrenPG(node);
+    BBRenderer(recog, kinds, result).renderChildrenPG(node);
     return result;
 }

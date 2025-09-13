@@ -296,7 +296,7 @@ server::talk::render::renderText(std::auto_ptr<TextNode> tree, const Context& ct
     if (fmt == "html") {
         return renderHTML(*tree, ctx, opts, root);
     } else if (isForum(fmt, set, len) && len == fmt.size()) {
-        return renderBB(*tree, ctx, opts, root, set);
+        return renderBB(*tree, root.recognizer(), set);
     } else if (fmt == "mail") {
         return renderMail(tree.get(), ctx, opts, root, false);
     } else if (fmt == "news") {
