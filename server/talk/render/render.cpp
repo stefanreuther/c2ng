@@ -7,6 +7,7 @@
 #include "server/talk/render/render.hpp"
 #include "afl/string/format.hpp"
 #include "server/talk/message.hpp"
+#include "server/talk/nulllinkparser.hpp"
 #include "server/talk/parse/bblexer.hpp"
 #include "server/talk/parse/bbparser.hpp"
 #include "server/talk/render/bbrenderer.hpp"
@@ -17,6 +18,10 @@
 #include "server/talk/render/textrenderer.hpp"
 #include "server/talk/textnode.hpp"
 #include "server/talk/user.hpp"
+
+using server::interface::TalkRender;
+using server::talk::parse::BBLexer;
+using server::talk::parse::BBParser;
 
 namespace server { namespace talk { namespace render { namespace {
 
@@ -60,14 +65,14 @@ namespace server { namespace talk { namespace render { namespace {
 
     // FIXME: should we move this function into namespace server::talk::parse?
     // Doing so would require sharing the 'isForum' function somehow.
-    TextNode* doParse(const String_t& str, InlineRecognizer& recog)
+    TextNode* doParse(const String_t& str, InlineRecognizer& recog, const LinkParser& lp)
     {
         String_t::size_type len;
         InlineRecognizer::Kinds_t set;
         if (isForum(str, set, len) && len < str.size() && str[len] == ':') {
             // parse as BBCode
-            server::talk::parse::BBLexer lex(str.substr(len+1));
-            return server::talk::parse::BBParser(lex, recog, set).parse();
+            BBLexer lex(str.substr(len+1));
+            return BBParser(lex, recog, set, lp).parse();
         } else if (str.size() >= 5 && str.compare(0, 5, "text:", 5) == 0) {
             // parse as text
             std::auto_ptr<TextNode> result(new TextNode(TextNode::maGroup, TextNode::miGroupRoot));
@@ -128,6 +133,22 @@ namespace server { namespace talk { namespace render { namespace {
                 return false;
             }
         }
+    }
+
+    TalkRender::Warning convertWarning(const BBParser::Warning& in)
+    {
+        TalkRender::Warning out;
+        out.token = in.token;
+        out.extra = in.extra;
+        out.pos = static_cast<int>(in.pos);
+        switch (in.type) {
+         case BBParser::SuspiciousText:  out.type = "SuspiciousText"; break;
+         case BBParser::MissingClose:    out.type = "MissingClose";   break;
+         case BBParser::TagNotOpen:      out.type = "TagNotOpen";     break;
+         case BBParser::BadLink:         out.type = "BadLink";        break;
+         case BBParser::NoOwnText:       out.type = "NoOwnText";      break;
+        }
+        return out;
     }
 
     /****************************** 'abstract:' ******************************/
@@ -217,7 +238,8 @@ server::talk::render::renderText(const String_t& text, const Context& ctx, const
         return text.substr(format.size()+1);
     } else {
         // transformation required
-        std::auto_ptr<TextNode> tree(doParse(text, root.recognizer()));
+        NullLinkParser lp;
+        std::auto_ptr<TextNode> tree(doParse(text, root.recognizer(), lp));
         return renderText(tree, ctx, opts, root);
     }
 }
@@ -284,5 +306,30 @@ server::talk::render::renderText(std::auto_ptr<TextNode> tree, const Context& ct
     } else {
         // error
         return "ERROR: invalid format '" + fmt + "'";
+    }
+}
+
+void
+server::talk::render::renderCheck(const String_t& text, const Context& ctx, Root& root, std::vector<server::interface::TalkRender::Warning>& out)
+{
+    String_t::size_type len;
+    InlineRecognizer::Kinds_t set;
+    if (isForum(text, set, len) && len < text.size() && text[len] == ':') {
+        // parse as BBCode
+        BBLexer lex(text.substr(len+1));
+        BBParser p(lex, root.recognizer(), set, ctx);
+        delete p.parse();
+
+        // process
+        for (size_t i = 0, n = p.warnings().size(); i < n; ++i) {
+            out.push_back(convertWarning(p.warnings()[i]));
+        }
+    } else {
+        TalkRender::Warning w;
+        w.type = "Unsupported";
+        w.token = "";
+        w.extra = "";
+        w.pos = 0;
+        out.push_back(w);
     }
 }

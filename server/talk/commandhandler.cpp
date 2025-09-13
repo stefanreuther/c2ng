@@ -160,7 +160,8 @@ server::talk::CommandHandler::getHelp(String_t topic)
     } else if (topic == "RENDER") {
         return "Render commands:\n"
             "RENDEROPTION <renderoptions>\n"
-            "RENDER <text> <renderoptions>\n";
+            "RENDER <text> <renderoptions>\n"
+            "RENDERCHECK <text>\n";
     } else if (topic == "SYNTAX") {
         return "Syntax commands:\n"
             "SYNTAXGET <key>\n"

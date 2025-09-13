@@ -61,7 +61,7 @@ server::talk::parse::BBLexer::read()
         // Could be any kind of tag
         if (m_cursor >= m_text.size()) {
             // text ends with "["
-            result = Text;
+            result = SuspiciousText;
         } else if (m_text[m_cursor] == '/') {
             // Possibly a closing tag
             ++m_cursor;
@@ -75,8 +75,8 @@ server::talk::parse::BBLexer::read()
                 ++m_cursor;
                 result = TagEnd;
             } else {
-                // not a closing tag
-                result = Text;
+                // not a closing tag (suspicious, e.g. "[/url")
+                result = SuspiciousText;
             }
         } else if (m_text[m_cursor] == '*') {
             // Possibly a list item
@@ -88,7 +88,7 @@ server::talk::parse::BBLexer::read()
                 result = TagStart;
             } else {
                 // not a list item
-                result = Text;
+                result = SuspiciousText;
             }
         } else if (m_text[m_cursor] == ':') {
             // Possibly a smiley
@@ -106,7 +106,7 @@ server::talk::parse::BBLexer::read()
                 m_attributeLength = 0;
             } else {
                 // Not a smiley
-                result = Text;
+                result = SuspiciousText;
             }
         } else {
             // Possibly a tag
@@ -117,7 +117,7 @@ server::talk::parse::BBLexer::read()
             }
             if (m_cursor >= m_text.size()) {
                 // end with partial tag
-                result = Text;
+                result = SuspiciousText;
             } else if (m_text[m_cursor] == ']') {
                 // tag without attribute
                 ++m_cursor;
@@ -140,7 +140,7 @@ server::talk::parse::BBLexer::read()
                         result = TagStart;
                     } else {
                         // partial tag
-                        result = Text;
+                        result = SuspiciousText;
                     }
                 } else {
                     m_attributeStart = m_cursor;
@@ -154,11 +154,12 @@ server::talk::parse::BBLexer::read()
                         result = TagStart;
                     } else {
                         // partial tag
-                        result = Text;
+                        result = SuspiciousText;
                     }
                 }
             } else {
                 // partial tag
+                // Do not treat as suspicious, because it could be part of text ("x[a+1]")
                 result = Text;
             }
         }
@@ -173,13 +174,26 @@ server::talk::parse::BBLexer::read()
         if (m_attributeLength != 0) {
             result = AtLink;
         }
+    } else if (ch == '/') {
+        // Text; possibly misspelled closing tag
+        while (m_cursor < m_text.size() && isTagChar(m_text[m_cursor])) {
+            ++m_cursor;
+        }
+        if (m_cursor < m_text.size() && m_text[m_cursor] == ']') {
+            // "/foo]"
+            ++m_cursor;
+            result = SuspiciousText;
+        } else {
+            // just some "/foo"
+            result = Text;
+        }
     } else {
         // Text
         result = Text;
         bool allowAt = !isUserChar(ch);
         while (m_cursor < m_text.size()) {
             char ch = m_text[m_cursor];
-            if (ch == '\n' || ch == '[') {
+            if (ch == '\n' || ch == '[' || ch == '/') {
                 break;
             } else if (ch == '@' && allowAt) {
                 break;
@@ -212,6 +226,12 @@ server::talk::parse::BBLexer::getTokenString() const
 {
     // ex BBLexer::getTokenString
     return String_t(m_text, m_tokenStart, m_tokenLength);
+}
+
+size_t
+server::talk::parse::BBLexer::getTokenStart() const
+{
+    return m_tokenStart;
 }
 
 String_t

@@ -11,6 +11,12 @@
 using server::talk::parse::BBLexer;
 
 namespace {
+
+    bool isText(BBLexer::Token tok)
+    {
+        return tok == BBLexer::Text || tok == BBLexer::SuspiciousText;
+    }
+
     /** The lexer is allowed to split text tokens arbitrarily.
         This function verifies that we're sitting at a text token, and reads possibly following text tokens.
         The collected text is returned in \c text.
@@ -20,14 +26,32 @@ namespace {
     void parseText(afl::test::Assert a, BBLexer& lex, BBLexer::Token& tok, String_t& text)
     {
         // Check initial text token
-        a.checkEqual("01. is text", tok, BBLexer::Text);
-        a.checkEqual("02. getTokenType", lex.getTokenType(), BBLexer::Text);
+        a.check("01. is text", isText(tok));
+        a.checkEqual("02. getTokenType", lex.getTokenType(), tok);
         text = lex.getTokenString();
 
         // Read more text tokens
-        while ((tok = lex.read()) == BBLexer::Text) {
+        while (isText((tok = lex.read()))) {
             text += lex.getTokenString();
         }
+    }
+
+    void testSuspicious(afl::test::Assert a, String_t text, bool expect)
+    {
+        BBLexer lex(text);
+        String_t total;
+        bool found = false;
+        BBLexer::Token tok;
+        while ((tok = lex.read()) != BBLexer::Eof) {
+            a.checkDifferent("01. not empty", lex.getTokenString(), "");
+            a.check("02. type", tok == BBLexer::Text || tok == BBLexer::SuspiciousText);
+            total += lex.getTokenString();
+            if (tok == BBLexer::SuspiciousText) {
+                found = true;
+            }
+        }
+        a.checkEqual("11. result text", total, text);
+        a.checkEqual("12. result found", expect, found);
     }
 }
 
@@ -40,6 +64,7 @@ AFL_TEST("server.talk.parse.BBLexer:simple", a)
     String_t text;
     parseText(a("t1"), testee, t, text);
     a.checkEqual("01", text, "simple");
+    a.checkEqual("02", testee.getTokenStart(), 6U);
 
     a.checkEqual("11", t, BBLexer::Eof);
 }
@@ -54,6 +79,7 @@ AFL_TEST("server.talk.parse.BBLexer:paragraph", a)
     a.checkEqual("01", text, "a\nb");
 
     a.checkEqual("11", t, BBLexer::Paragraph);
+    a.checkEqual("12", testee.getTokenStart(), 3U);
 
     t = testee.read();
     parseText(a("t2"), testee, t, text);
@@ -202,4 +228,26 @@ AFL_TEST("server.talk.parse.BBLexer:partial", a)
 
         a.checkEqual("11", t, BBLexer::Eof);
     }
+}
+
+/** Test SuspiciousText. */
+AFL_TEST("server.talk.parse.BBLexer:suspicious", a)
+{
+    testSuspicious(a("01. pos"), "[",         true);
+    testSuspicious(a("02. pos"), "[/url foo", true);
+    testSuspicious(a("03. pos"), "[**]",      true);
+    testSuspicious(a("04. pos"), "[:foo]",    true);
+    testSuspicious(a("05. pos"), "[foo",      true);
+    testSuspicious(a("06. pos"), "[foo=\"x",  true);
+    testSuspicious(a("07. pos"), "[foo=",     true);
+    testSuspicious(a("08. pos"), "/foo] bar", true);
+    testSuspicious(a("09. pos"), "a/b]",      true);
+}
+
+/** Test SuspiciousText, negative case. */
+AFL_TEST("server.talk.parse.BBLexer:suspicious:negative", a)
+{
+    testSuspicious(a("01. neg"), "x[a+1]",          false);
+    testSuspicious(a("02. neg"), "[foo bar",        false);  // Consequence of 01
+    testSuspicious(a("03. neg"), "http://foo/bar",  false);
 }

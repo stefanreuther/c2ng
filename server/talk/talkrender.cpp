@@ -30,3 +30,10 @@ server::talk::TalkRender::render(const String_t& text, const Options& opts)
     server::talk::render::Context ctx(m_root, m_session.getUser());
     return server::talk::render::renderText(text, ctx, temporaryOptions, m_root);
 }
+
+void
+server::talk::TalkRender::check(const String_t& text, std::vector<Warning>& out)
+{
+    server::talk::render::Context ctx(m_root, m_session.getUser());
+    return server::talk::render::renderCheck(text, ctx, m_root, out);
+}

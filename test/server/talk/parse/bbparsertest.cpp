@@ -5,11 +5,14 @@
 
 #include "server/talk/parse/bbparser.hpp"
 
+#include "afl/string/format.hpp"
 #include "afl/test/testrunner.hpp"
 #include "server/talk/inlinerecognizer.hpp"
+#include "server/talk/nulllinkparser.hpp"
 #include <memory>
 
 using server::talk::TextNode;
+using server::talk::parse::BBParser;
 
 namespace {
     String_t getNodeName(const TextNode& n)
@@ -96,9 +99,60 @@ namespace {
                       server::talk::InlineRecognizer::Kinds_t options,
                       String_t text)
     {
+        server::talk::NullLinkParser lp;
         server::talk::parse::BBLexer lex(text);
-        server::talk::parse::BBParser parser(lex, recog, options);
+        BBParser parser(lex, recog, options, lp);
         return parser.parse();
+    }
+
+    const char* toString(BBParser::WarningType t)
+    {
+        switch (t) {
+         case BBParser::SuspiciousText: return "SuspiciousText";
+         case BBParser::MissingClose:   return "MissingClose";
+         case BBParser::TagNotOpen:     return "TagNotOpen";
+         case BBParser::BadLink:        return "BadLink";
+         case BBParser::NoOwnText:      return "NoOwnText";
+        }
+        return "?";
+    }
+
+    String_t toString(const BBParser::Warning& w)
+    {
+        return afl::string::Format("%s,%s,%s,%d", toString(w.type), w.token, w.extra, w.pos);
+    }
+
+    String_t doParseWarnings(String_t text)
+    {
+        class TestLinkParser : public server::talk::LinkParser {
+         public:
+            virtual afl::base::Optional<Result_t> parseGameLink(String_t text) const
+                { if (text == "bad_game") { return afl::base::Nothing; } else { return Result_t(1, "g"); } }
+            virtual afl::base::Optional<Result_t> parseForumLink(String_t text) const
+                { if (text == "bad_forum") { return afl::base::Nothing; } else { return Result_t(1, "f"); } }
+            virtual afl::base::Optional<Result_t> parseTopicLink(String_t text) const
+                { if (text == "bad_topic") { return afl::base::Nothing; } else { return Result_t(1, "t"); } }
+            virtual afl::base::Optional<Result_t> parseMessageLink(String_t text) const
+                { if (text == "bad_message") { return afl::base::Nothing; } else { return Result_t(1, "m"); } }
+            virtual afl::base::Optional<String_t> parseUserLink(String_t text) const
+                { if (text == "bad_user") { return afl::base::Nothing; } else { return String_t("u"); } }
+        };
+
+        server::talk::InlineRecognizer recog;
+        server::talk::InlineRecognizer::Kinds_t options;  // no options for now
+        server::talk::parse::BBLexer lex(text);
+        TestLinkParser lp;
+        BBParser parser(lex, recog, options, lp);
+        delete parser.parse();
+
+        String_t result;
+        for (size_t i = 0; i < parser.warnings().size(); ++i) {
+            if (i != 0) {
+                result += "|";
+            }
+            result += toString(parser.warnings()[i]);
+        }
+        return result;
     }
 }
 
@@ -252,4 +306,54 @@ AFL_TEST("server.talk.parse.BBParser:inline", a)
     a.checkEqual("11", toString(t.get()), "[root,[paragraph,[plain,'this '],[smiley,'sad'],[plain,' sucks']]]");
     t.reset(doParse(recog, options, "this :sad: sucks"));
     a.checkEqual("12", toString(t.get()), "[root,[paragraph,[plain,'this '],[smiley,'sad'],[plain,' sucks']]]");
+}
+
+/** Test warnings. */
+AFL_TEST("server.talk.parse.BBParser:warn", a)
+{
+    // Baseline
+    a.checkEqual("01", doParseWarnings("[quote]hi[/quote]ho"), "");
+
+    // Suspicious
+    a.checkEqual("11", doParseWarnings("hi["), "SuspiciousText,[,,2");
+    a.checkEqual("12", doParseWarnings("hi [whatever] ho"), "SuspiciousText,[whatever],,3");
+    a.checkEqual("13", doParseWarnings("hi [/whatever] ho"), "SuspiciousText,[/whatever],,3");
+
+    // MissingClose
+    a.checkEqual("21", doParseWarnings("hello [b]world"), "MissingClose,,b,14");
+    a.checkEqual("22", doParseWarnings("hello [b]world\n\n"), "MissingClose,\n\n,b,14");
+
+    // TagNotOpen
+    a.checkEqual("31", doParseWarnings("hello[/b] world"), "TagNotOpen,[/b],,5");
+
+    // NoOwnText
+    a.checkEqual("51", doParseWarnings("[quote]hi[/quote]"), "NoOwnText,,,17");
+    a.checkEqual("52", doParseWarnings("[quote]hi"), "MissingClose,,quote,9|NoOwnText,,,9");
+    a.checkEqual("53", doParseWarnings("[quote][b]hi"), "MissingClose,,b,12|NoOwnText,,,12");
+
+    // BadLink - Game
+    a.checkEqual("41", doParseWarnings("[game]5[/game]"), "");
+    a.checkEqual("42", doParseWarnings("[game]bad_game[/game]"), "BadLink,[/game],bad_game,14");
+    a.checkEqual("43", doParseWarnings("[game=bad_game]foo[/game]"), "BadLink,[/game],bad_game,18");
+
+    // BadLink - Forum
+    a.checkEqual("51", doParseWarnings("[forum]5[/forum]"), "");
+    a.checkEqual("52", doParseWarnings("[forum]bad_forum[/forum]"), "BadLink,[/forum],bad_forum,16");
+    a.checkEqual("53", doParseWarnings("[forum=bad_forum]foo[/forum]"), "BadLink,[/forum],bad_forum,20");
+
+    // BadLink - Topic
+    a.checkEqual("61", doParseWarnings("[thread]5[/thread]"), "");
+    a.checkEqual("62", doParseWarnings("[thread]bad_topic[/thread]"), "BadLink,[/thread],bad_topic,17");
+    a.checkEqual("63", doParseWarnings("[thread=bad_topic]foo[/thread]"), "BadLink,[/thread],bad_topic,21");
+
+    // BadLink - Message
+    a.checkEqual("71", doParseWarnings("[post]5[/post]"), "");
+    a.checkEqual("72", doParseWarnings("[post]bad_message[/post]"), "BadLink,[/post],bad_message,17");
+    a.checkEqual("73", doParseWarnings("[post=bad_message]foo[/post]"), "BadLink,[/post],bad_message,21");
+
+    // BadLink - User
+    a.checkEqual("81", doParseWarnings("[user]xx[/user]"), "");
+    a.checkEqual("82", doParseWarnings("[user]bad_user[/user]"), "BadLink,[/user],bad_user,14");
+    a.checkEqual("83", doParseWarnings("[user=bad_user]foo[/user]"), "BadLink,[/user],bad_user,18");
+    a.checkEqual("84", doParseWarnings("hi @bad_user"), "BadLink,@bad_user,bad_user,3");
 }

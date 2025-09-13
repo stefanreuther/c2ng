@@ -7,6 +7,7 @@
 #include "server/talk/parse/bbparser.hpp"
 
 using server::talk::TextNode;
+using server::talk::parse::BBLexer;
 
 namespace {
     const char* getInlineTagName(TextNode::InlineFormat minor)
@@ -75,6 +76,11 @@ namespace {
         server::talk::Root& m_root;
         server::talk::InlineRecognizer::Kinds_t m_kinds;
     };
+
+    bool isText(BBLexer::Token tok)
+    {
+        return tok == BBLexer::Text || tok == BBLexer::SuspiciousText;
+    }
 }
 
 void
@@ -154,21 +160,31 @@ void
 BBRenderer::renderPlaintext(const String_t& str)
 {
     // Look for tags
-    using server::talk::parse::BBLexer;
     BBLexer lex(str);
-    BBLexer::Token t;
+    BBLexer::Token t = lex.read();
     String_t::size_type quote_end = String_t::npos;
-    while ((t = lex.read()) != BBLexer::Eof) {
+    while (t != BBLexer::Eof) {
         if (t == BBLexer::Paragraph) {
             // Parsing this would break a paragraph, so replace by space
             result += " ";
-        } else if (t == BBLexer::Text
+            t = lex.read();
+        } else if (isText(t)
                    || ((t == BBLexer::TagStart || t == BBLexer::TagEnd)
                        && !server::talk::parse::BBParser::isKnownTag(lex.getTag())))
         {
             // Parsing this would NOT create a tag, so render it. But we may have to quote smileys.
-            String_t::size_type pos = 0;
             String_t token = lex.getTokenString();
+            if (isText(t)) {
+                t = lex.read();
+                while (isText(t)) {
+                    token += lex.getTokenString();
+                    t = lex.read();
+                }
+            } else {
+                t = lex.read();
+            }
+
+            String_t::size_type pos = 0;
             server::talk::InlineRecognizer::Info info;
             while (m_root.recognizer().find(token, pos, m_kinds, info)) {
                 // Something that needs protection
@@ -197,9 +213,11 @@ BBRenderer::renderPlaintext(const String_t& str)
                 result += lex.getTokenString();
                 quote_end = result.size();
             }
+            t = lex.read();
         } else {
             // Just append (can't happen)
             result += lex.getTokenString();
+            t = lex.read();
         }
     }
     if (quote_end != String_t::npos) {
@@ -314,7 +332,7 @@ BBRenderer::renderPG(const TextNode& n)
             break;
         }
         break;
-        
+
      case TextNode::maParagraph:
         switch (TextNode::ParagraphFormat(n.minor)) {
          case TextNode::miParCode:

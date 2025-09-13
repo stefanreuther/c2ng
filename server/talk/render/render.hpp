@@ -7,6 +7,7 @@
 
 #include <memory>
 #include "afl/string/string.hpp"
+#include "server/interface/talkrender.hpp"
 #include "server/talk/root.hpp"
 #include "server/talk/textnode.hpp"
 
@@ -34,6 +35,13 @@ namespace server { namespace talk { namespace render {
         \param root Service root
         \return formatted text */
     String_t renderText(std::auto_ptr<TextNode> tree, const Context& ctx, const Options& opts, Root& root);
+
+    /** Check text and produce warnings.
+        \param [in]  text Text
+        \param [in]  root Root
+        \param [in]  ctx  Rendering context
+        \param [out] out  Warnings */
+    void renderCheck(const String_t& text, const Context& ctx, Root& root, std::vector<server::interface::TalkRender::Warning>& out);
 
 } } }
 

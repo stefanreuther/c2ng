@@ -34,6 +34,7 @@ namespace server { namespace talk { namespace parse {
             Smiley,                 ///< "[:smile:]" (string is "smile")
             Paragraph,              ///< Paragraph break, i.e.\ double-newline
             AtLink,                 ///< "@foo"
+            SuspiciousText,         ///< Anything else, but could be a a typo
             Text                    ///< anything else
         };
 
@@ -52,6 +53,10 @@ namespace server { namespace talk { namespace parse {
         /** Get current token string.
             \return complete token text */
         String_t getTokenString() const;
+
+        /** Get current token start.
+            \return position */
+        size_t getTokenStart() const;
 
         /** Get current tag. For TagStart and TagEnd only.
             \return tag, in lower-case */

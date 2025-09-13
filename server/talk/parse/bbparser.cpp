@@ -119,6 +119,16 @@ namespace {
         return 0;
     }
 
+    const Tag* findTagName(const TextNode& n)
+    {
+        for (size_t i = 0; i != countof(tags); ++i) {
+            if (tags[i].major == n.major && tags[i].minor == n.minor) {
+                return &tags[i];
+            }
+        }
+        return 0;
+    }
+
     /** Convert a maInlineAttr attribute to canonical format. */
     bool canonicalizeAttribute(uint8_t kind, const String_t& in, String_t& out)
     {
@@ -217,6 +227,19 @@ namespace {
             }
         }
     }
+
+    /** Check for own text.
+        \param node Root node (containing further groups) */
+    bool hasOwnText(const TextNode& node)
+    {
+        for (size_t i = 0; i < node.children.size(); ++i) {
+            TextNode* ch = node.children[i];
+            if (ch->major != TextNode::maGroup || ch->minor != TextNode::miGroupQuote) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 
@@ -230,9 +253,10 @@ namespace {
  */
 
 
-server::talk::parse::BBParser::BBParser(BBLexer& lex, InlineRecognizer& recog, InlineRecognizer::Kinds_t options)
+server::talk::parse::BBParser::BBParser(BBLexer& lex, InlineRecognizer& recog, InlineRecognizer::Kinds_t options, const LinkParser& lp)
     : lex(lex),
       m_recognizer(recog),
+      m_linkParser(lp),
       options(options),
       current(),
       stack()
@@ -250,17 +274,22 @@ server::talk::parse::BBParser::parse()
     next();
     while (current != BBLexer::Eof) {
         switch (current) {
-         case BBLexer::TagStart:  handleStart();     break;
-         case BBLexer::TagEnd:    handleEnd();       break;
-         case BBLexer::Smiley:    handleSmiley();    break;
-         case BBLexer::Paragraph: handleParagraph(); break;
-         case BBLexer::AtLink:    handleAtLink();    break;
-         case BBLexer::Text:      handleText();      break;
-         case BBLexer::Eof:                          break;
+         case BBLexer::TagStart:  handleStart();     next(); break;
+         case BBLexer::TagEnd:    handleEnd();       next(); break;
+         case BBLexer::Smiley:    handleSmiley();    next(); break;
+         case BBLexer::Paragraph: handleParagraph(); next(); break;
+         case BBLexer::AtLink:    handleAtLink();    next(); break;
+         case BBLexer::SuspiciousText:
+         case BBLexer::Text:      handleText();              break;
+         case BBLexer::Eof:                                  break;
         }
-        next();
     }
-    close(1);
+    while (stack.size() > 1) {
+        closeAndWarn();
+    }
+    if (!hasOwnText(*stack.back())) {
+        addWarning(NoOwnText, "");
+    }
     return stack.extractLast();
 }
 
@@ -374,6 +403,7 @@ server::talk::parse::BBParser::handleStart()
         }
     } else {
         // Unknown
+        addWarning(SuspiciousText, "");
         appendText(lex.getTokenString());
     }
 }
@@ -384,6 +414,7 @@ server::talk::parse::BBParser::handleEnd()
     // ex BBParser::handleEnd
     const Tag* t = identify(lex.getTag());
     if (t == 0) {
+        addWarning(SuspiciousText, "");
         appendText(lex.getTokenString());
     } else {
         switch (TextNode::MajorKind(t->major)) {
@@ -409,15 +440,24 @@ server::talk::parse::BBParser::handleEnd()
                 } else if (stack[i]->major == t->major && stack[i]->minor == t->minor) {
                     // We can close it
                     close(i);
+
+                    // FIXME:
+                    // // Verify link
+                    // // We do this only when explicitly closing a link to avoid that errors pile up
+                    // if (!stack.empty() && !stack.back()->children.empty()) {
+                    //     checkLink(*stack.back()->children.back());
+                    // }
                 } else if (stack[i]->major == TextNode::maParagraph && t->major == TextNode::maInline) {
                     // We found a paragraph, and this is the end of parameterless inline markup.
                     // Auto-open it, pretending it has always been open.
                     openAt(i+1, t->major, t->minor);
                     stack[i+1]->children.swap(stack[i]->children);
                     close(i+1);
+                    addWarning(TagNotOpen, "");
                 } else {
                     // Cannot auto-open
                     appendText(lex.getTokenString());
+                    addWarning(SuspiciousText, "");
                 }
             }
             break;
@@ -430,7 +470,7 @@ server::talk::parse::BBParser::handleEnd()
             } else {
                 appendText(lex.getTokenString());
             }
-            break;            
+            break;
 
          case TextNode::maGroup:
             if (t->minor == TextNode::miGroupList) {
@@ -489,6 +529,7 @@ server::talk::parse::BBParser::handleAtLink()
     closeLinks();
     open(TextNode::maLink, TextNode::miLinkUser);
     stack.back()->text = lex.getAttribute();
+    checkLink(*stack.back());
     close();
 }
 
@@ -499,11 +540,24 @@ server::talk::parse::BBParser::handleText()
     /* This is used for the inside of tags, where text is treated normally
        (i.e. not [code] or [noparse]).
 
-       Although BBLexer is free to split text anywhere it seems fit,
-       we assume to receive chunks of text large enough to sensibly work with.
-       So far, BBLexer splits text at newlines, "[" and "@" (but "@" not after
-       a letter). This is enough to detect URLs and smileys with a good chance. */
-    const String_t str = lex.getTokenString();
+       BBLexer is free to split text anywhere it seems fit, and now also splits at "/".
+       This means we need to re-combine to detect URLs. */
+    String_t str = lex.getTokenString();
+    if (current == BBLexer::SuspiciousText) {
+        addWarning(SuspiciousText, "");
+    }
+    while (1) {
+        next();
+        if (current == BBLexer::Text || current == BBLexer::SuspiciousText) {
+            str += lex.getTokenString();
+            if (current == BBLexer::SuspiciousText) {
+                addWarning(SuspiciousText, "");
+            }
+        } else {
+            break;
+        }
+    }
+
     String_t::size_type pos = 0;
     if (!options.empty()) {
         InlineRecognizer::Info info;
@@ -648,6 +702,7 @@ server::talk::parse::BBParser::close()
         break;
      case TextNode::maLink:
         completeLink(*node);
+        checkLink(*node);
         keep = true;
         break;
      case TextNode::maParagraph:
@@ -693,7 +748,9 @@ server::talk::parse::BBParser::closeLinks()
         --i;
     }
     if (i > 0 && stack[i]->major == TextNode::maLink) {
-        close(i);
+        while (stack.size() > i) {
+            closeAndWarn();
+        }
     }
 }
 
@@ -704,7 +761,7 @@ server::talk::parse::BBParser::closeInline()
 {
     // ex BBParser::closeInline
     while (!stack.empty() && stack.back()->major != TextNode::maParagraph) {
-        close();
+        closeAndWarn();
     }
 }
 
@@ -729,6 +786,15 @@ server::talk::parse::BBParser::closeUntil(uint8_t major, uint8_t minor)
     }
 }
 
+void
+server::talk::parse::BBParser::closeAndWarn()
+{
+    if (const Tag* t = findTagName(*stack.back())) {
+        addWarning(MissingClose, t->name);
+    }
+    close();
+}
+
 /** Check for link on stack. */
 bool
 server::talk::parse::BBParser::inLink() const
@@ -739,4 +805,35 @@ server::talk::parse::BBParser::inLink() const
         --i;
     }
     return (i > 0 && (stack[i]->major == TextNode::maLink || stack[i]->major == TextNode::maSpecial));
+}
+
+void
+server::talk::parse::BBParser::checkLink(TextNode& node)
+{
+    bool ok = true;
+    switch (node.minor) {
+     case TextNode::miLinkThread: ok = m_linkParser.parseTopicLink(node.text).isValid();   break;
+     case TextNode::miLinkPost:   ok = m_linkParser.parseMessageLink(node.text).isValid(); break;
+     case TextNode::miLinkGame:   ok = m_linkParser.parseGameLink(node.text).isValid();    break;
+     case TextNode::miLinkForum:  ok = m_linkParser.parseForumLink(node.text).isValid();   break;
+     case TextNode::miLinkUser:   ok = m_linkParser.parseUserLink(node.text).isValid();    break;
+    }
+    if (!ok) {
+        addWarning(BadLink, node.text);
+    }
+}
+
+void
+server::talk::parse::BBParser::addWarning(WarningType type, const String_t& extra)
+{
+    // If multiple warnings are detected at the same place, only add the first one.
+    // This reduces the number of warnings if closing tags are missing.
+    // NoOwnText is an exception because it is created only once, and seems pretty important.
+    const size_t pos = lex.getTokenStart();
+    if (type == NoOwnText
+        || m_warnings.empty()
+        || pos != m_warnings.back().pos)
+    {
+        m_warnings.push_back(Warning(type, lex.getTokenString(), extra, pos));
+    }
 }

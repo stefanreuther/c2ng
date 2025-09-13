@@ -15,6 +15,8 @@ AFL_TEST_NOARG("server.interface.TalkRender")
             { }
         virtual String_t render(const String_t& /*text*/, const Options& /*opts*/)
             { return String_t(); }
+        virtual void check(const String_t& /*text*/, std::vector<Warning>& /*out*/)
+            { }
     };
     Tester t;
 }

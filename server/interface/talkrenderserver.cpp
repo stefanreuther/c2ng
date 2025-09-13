@@ -1,13 +1,23 @@
 /**
   *  \file server/interface/talkrenderserver.cpp
+  *  \brief Class server::interface::TalkRenderServer
   */
 
 #include <stdexcept>
 #include "server/interface/talkrenderserver.hpp"
-#include "interpreter/arguments.hpp"
+#include "afl/data/hash.hpp"
+#include "afl/data/hashvalue.hpp"
+#include "afl/data/vector.hpp"
+#include "afl/data/vectorvalue.hpp"
 #include "afl/string/string.hpp"
-#include "server/types.hpp"
+#include "interpreter/arguments.hpp"
 #include "server/errors.hpp"
+#include "server/types.hpp"
+
+using afl::data::Hash;
+using afl::data::HashValue;
+using afl::data::Vector;
+using afl::data::VectorValue;
 
 server::interface::TalkRenderServer::TalkRenderServer(TalkRender& impl)
     : m_implementation(impl)
@@ -67,6 +77,38 @@ server::interface::TalkRenderServer::handleCommand(const String_t& upcasedComman
         parseOptions(args, opts);
         result.reset(makeStringValue(m_implementation.render(text, opts)));
         return true;
+    } else if (upcasedCommand == "RENDERCHECK") {
+        /* @q RENDERCHECK text:TalkText (Talk Command)
+           Check text for syntax errors.
+
+           Returns an array of objects.
+
+           Possible warnings:
+           - SuspiciousText
+           - MissingClose
+           - TagNotOpen
+           - BadLink
+           - NoOwnText
+           - Unsupported
+
+           Permissions: none
+
+           @retkey type:Str    Warning type
+           @retkey token:Str   Token at which the warning was detected
+           @retkey extra:Str   Extra information
+           @retkey pos:Int     Position of token in text (starting at payload text, after type tag) */
+        args.checkArgumentCount(1);
+        String_t text = toString(args.getNext());
+
+        std::vector<TalkRender::Warning> warnings;
+        m_implementation.check(text, warnings);
+
+        Vector::Ref_t vec = Vector::create();
+        for (size_t i = 0; i < warnings.size(); ++i) {
+            vec->pushBackNew(packWarning(warnings[i]));
+        }
+        result.reset(new VectorValue(vec));
+        return true;
     } else {
         return false;
     }
@@ -88,4 +130,15 @@ server::interface::TalkRenderServer::parseOptions(interpreter::Arguments& args, 
             throw std::runtime_error(INVALID_OPTION);
         }
     }
+}
+
+server::Value_t*
+server::interface::TalkRenderServer::packWarning(const TalkRender::Warning& w)
+{
+    Hash::Ref_t h = Hash::create();
+    h->setNew("type",  makeStringValue(w.type));
+    h->setNew("token", makeStringValue(w.token));
+    h->setNew("extra", makeStringValue(w.extra));
+    h->setNew("pos",   makeIntegerValue(w.pos));
+    return new HashValue(h);
 }

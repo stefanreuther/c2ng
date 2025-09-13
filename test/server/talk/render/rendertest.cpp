@@ -10,6 +10,8 @@
 #include "server/talk/render/context.hpp"
 #include "server/talk/render/options.hpp"
 
+using server::interface::TalkRender;
+
 namespace {
     struct Environment {
         server::talk::Root root;
@@ -168,4 +170,40 @@ AFL_TEST("server.talk.render.Render:input:code", a)
     const char*const TEXT = "code:c:int main()";
 
     a.checkEqual("", renderText(TEXT, env.ctx, env.opts, env.root), "<pre><span class=\"syn-kw\">int</span> main()</pre>\n");
+}
+
+/* renderCheck, forum input, produces warning */
+AFL_TEST("server.talk.render.Render:check:forum:warn", a)
+{
+    Environment env;
+    std::vector<TalkRender::Warning> ws;
+
+    renderCheck("forumABC:hello [b]world", env.ctx, env.root, ws);
+
+    a.checkEqual("01. size", ws.size(), 1U);
+    a.checkEqual("02. type", ws[0].type, "MissingClose");
+    a.checkEqual("03. extra", ws[0].extra, "b");
+}
+
+/* renderCheck, forum input, no warning */
+AFL_TEST("server.talk.render.Render:check:forum:ok", a)
+{
+    Environment env;
+    std::vector<TalkRender::Warning> ws;
+
+    renderCheck("forumABC:hello [b]world[/b]", env.ctx, env.root, ws);
+
+    a.checkEqual("01. size", ws.size(), 0U);
+}
+
+/* renderCheck, unsupported */
+AFL_TEST("server.talk.render.Render:check:other", a)
+{
+    Environment env;
+    std::vector<TalkRender::Warning> ws;
+
+    renderCheck("other:foobar", env.ctx, env.root, ws);
+
+    a.checkEqual("01. size", ws.size(), 1U);
+    a.checkEqual("02. type", ws[0].type, "Unsupported");
 }

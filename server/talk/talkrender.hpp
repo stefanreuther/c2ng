@@ -21,6 +21,7 @@ namespace server { namespace talk {
 
         virtual void setOptions(const Options& opts);
         virtual String_t render(const String_t& text, const Options& opts);
+        virtual void check(const String_t& text, std::vector<Warning>& out);
 
      private:
         Session& m_session;

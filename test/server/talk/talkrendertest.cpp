@@ -6,6 +6,7 @@
 #include "server/talk/talkrender.hpp"
 
 #include "afl/net/redis/internaldatabase.hpp"
+#include "afl/net/redis/stringkey.hpp"
 #include "afl/test/testrunner.hpp"
 #include "server/talk/root.hpp"
 #include "server/talk/session.hpp"
@@ -19,6 +20,10 @@ AFL_TEST("server.talk.TalkRender", a)
     server::talk::Session session;
     session.renderOptions().setFormat("raw");
     session.renderOptions().setBaseUrl("u");
+
+    // Create a user for link verification
+    afl::net::redis::StringKey(db, "uid:fred").set("2000");
+    afl::net::redis::StringKey(db, "user:2000:name").set("fred");
 
     // Testee
     server::talk::TalkRender testee(session, root);
@@ -40,4 +45,49 @@ AFL_TEST("server.talk.TalkRender", a)
     }
     a.checkEqual("12. getBaseUrl", session.renderOptions().getBaseUrl(), "z");
     a.checkEqual("13. getFormat", session.renderOptions().getFormat(), "raw");
+
+    // check
+    // - unsupported
+    {
+        std::vector<server::interface::TalkRender::Warning> ws;
+        testee.check("unsupported:text", ws);
+        a.checkEqual("21. size", ws.size(), 1U);
+        a.checkEqual("22. type", ws[0].type, "Unsupported");
+    }
+    // - supported but warns
+    {
+        std::vector<server::interface::TalkRender::Warning> ws;
+        testee.check("forum:[quote]q", ws);
+        a.checkEqual("21. size", ws.size(), 2U);
+        a.checkEqual("22. type", ws[0].type, "MissingClose");
+        a.checkEqual("23. type", ws[1].type, "NoOwnText");
+    }
+    // - link to valid user, does not warn
+    {
+        std::vector<server::interface::TalkRender::Warning> ws;
+        testee.check("forum:@fred", ws);
+        a.checkEqual("31. size", ws.size(), 0U);
+    }
+    // - link to invalid user, warns (verifies proper integration with database)
+    {
+        std::vector<server::interface::TalkRender::Warning> ws;
+        testee.check("forum:@barney", ws);
+        a.checkEqual("41. size", ws.size(), 1U);
+        a.checkEqual("42. size", ws[0].type, "BadLink");
+        a.checkEqual("43. size", ws[0].extra, "barney");
+    }
+    // - no own text, standard case
+    {
+        std::vector<server::interface::TalkRender::Warning> ws;
+        testee.check("forum:", ws);
+        a.checkEqual("51. size", ws.size(), 1U);
+        a.checkEqual("52. size", ws[0].type, "NoOwnText");
+    }
+    // - no own text, standard case with quote
+    {
+        std::vector<server::interface::TalkRender::Warning> ws;
+        testee.check("forum:[quote]foo[/quote]", ws);
+        a.checkEqual("61. size", ws.size(), 1U);
+        a.checkEqual("62. size", ws[0].type, "NoOwnText");
+    }
 }
