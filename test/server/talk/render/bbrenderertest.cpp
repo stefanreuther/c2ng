@@ -364,6 +364,51 @@ AFL_TEST("server.talk.render.BBRenderer:link", a)
 
         a.checkEqual("51", renderBB(tn, recog, noKinds), "before [url=\"http://x/y?a[1]=2\"][/url] after");
     }
+
+    // Email link
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "before "));
+        par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkEmail, "u@h.d"));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " after"));
+
+        a.checkEqual("61", renderBB(tn, recog, noKinds), "before [email]u@h.d[/email] after");
+    }
+
+    // Topic link
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "before "));
+        par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkThread, "77"))
+            ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "link"));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " after"));
+
+        a.checkEqual("71", renderBB(tn, recog, noKinds), "before [thread=77]link[/thread] after");
+    }
+
+    // Post link
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "before "));
+        par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkPost, "222"));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " after"));
+
+        a.checkEqual("81", renderBB(tn, recog, noKinds), "before [post]222[/post] after");
+    }
+
+    // Forum link
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "before "));
+        par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkForum, "9"));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " after"));
+
+        a.checkEqual("91", renderBB(tn, recog, noKinds), "before [forum]9[/forum] after");
+    }
 }
 
 /** Test specials. */
@@ -409,5 +454,50 @@ AFL_TEST("server.talk.render.BBRenderer:special", a)
 
         a.checkEqual("21", renderBB(tn, recog, noKinds), "before [:smile:] after");
         a.checkEqual("22", renderBB(tn, recog, allKinds), "before :smile: after");
+    }
+
+    // Markup inside code
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParCode)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "a = x[b];"));
+
+        a.checkEqual("31", renderBB(tn, recog, noKinds), "[code]\na = x[b];[/code]");
+        a.checkEqual("32", renderBB(tn, recog, allKinds), "[code]\na = x[b];[/code]");
+    }
+
+    // Markup inside paragraph
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "a = x[b];"));
+
+        a.checkEqual("41", renderBB(tn, recog, noKinds), "a = x[noparse][b][/noparse];");
+        a.checkEqual("42", renderBB(tn, recog, allKinds), "a = x[noparse][b][/noparse];");
+    }
+
+    // List
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& list(*tn.children.pushBackNew(new TextNode(TextNode::maGroup, TextNode::miGroupList)));
+        list.children.pushBackNew(new TextNode(TextNode::maGroup, TextNode::miGroupListItem))
+            ->children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal))
+            ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "first"));
+        list.children.pushBackNew(new TextNode(TextNode::maGroup, TextNode::miGroupListItem))
+            ->children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal))
+            ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "second"));
+
+        a.checkEqual("51", renderBB(tn, recog, noKinds), "[list]\n[*] first\n\n[*] second[/list]");
+        a.checkEqual("52", renderBB(tn, recog, allKinds), "[list]\n[*] first\n\n[*] second[/list]");
+    }
+
+    // Center
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParCentered)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "text"));
+
+        a.checkEqual("61", renderBB(tn, recog, noKinds), "[center]\ntext[/center]");
+        a.checkEqual("62", renderBB(tn, recog, allKinds), "[center]\ntext[/center]");
     }
 }

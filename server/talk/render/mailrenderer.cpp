@@ -1,17 +1,6 @@
 /**
   *  \file server/talk/render/mailrenderer.cpp
-  *
-  *  PCC2 comment:
-  *
-  *  Mail output is produced for two purposes:
-  *  - notification mails
-  *  - NNTP messages
-  *
-  *  Those are subtly different. Whereas notifications preserve some
-  *  more forum specifics, NNTP messages are converted into a format
-  *  which a skilled NNTP user prefers. In particular, post references
-  *  are turned into message-Id links, and forum references are turned
-  *  into newsgroup names.
+  *  \brief Mail renderer
   */
 
 #include "server/talk/render/mailrenderer.hpp"
@@ -42,11 +31,11 @@ namespace {
         void renderPlaintext(const String_t& text);
         void renderCode(const String_t& text);
         void renderAttribution(const String_t& text);
-        void renderPG(TextNode* n);
-        void renderChildrenPG(TextNode* n);
+        void renderPG(const TextNode& n);
+        void renderChildrenPG(const TextNode& n);
 
-        void renderInline(TextNode* n);
-        void renderChildrenInline(TextNode* n);
+        void renderInline(const TextNode& n);
+        void renderChildrenInline(const TextNode& n);
 
         MailRenderer& withPrefix(String_t pfx, String_t second);
 
@@ -68,6 +57,17 @@ namespace {
         String_t prefix;
         String_t second_prefix;
     };
+
+    void discardTrailingSpace(String_t& out)
+    {
+        size_t i = out.size();
+        while (i > 0 && out[i-1] == ' ') {
+            --i;
+        }
+        if (i < out.size()) {
+            out.erase(i, out.size());
+        }
+    }
 }
 
 MailRenderer::MailRenderer(const LinkParser& lp, const server::talk::render::Options& opts,
@@ -267,14 +267,14 @@ MailRenderer::renderAttribution(const String_t& text)
 
 /** Render a paragraph/group. These always produce complete lines. */
 void
-MailRenderer::renderPG(TextNode* n)
+MailRenderer::renderPG(const TextNode& n)
 {
     String_t::size_type x = result.size();
-    switch (TextNode::MajorKind(n->major)) {
+    switch (TextNode::MajorKind(n.major)) {
      case TextNode::maGroup:
-        switch (TextNode::GroupFormat(n->minor)) {
+        switch (TextNode::GroupFormat(n.minor)) {
          case TextNode::miGroupQuote:
-            renderAttribution(n->text);
+            renderAttribution(n.text);
             if (prefix.empty()) {
                 MailRenderer(*this).withPrefix("> ", "> ").renderChildrenPG(n);
             } else {
@@ -300,9 +300,9 @@ MailRenderer::renderPG(TextNode* n)
         break;
 
      case TextNode::maParagraph:
-        switch (TextNode::ParagraphFormat(n->minor)) {
+        switch (TextNode::ParagraphFormat(n.minor)) {
          case TextNode::miParCode:
-            renderCode(n->getTextContent());
+            renderCode(n.getTextContent());
             break;
          case TextNode::miParCentered:    // centering is not rendered in mails
          case TextNode::miParNormal:      // regular paragraphs
@@ -325,18 +325,19 @@ MailRenderer::renderPG(TextNode* n)
 
 /** Render a paragraph/group container. */
 void
-MailRenderer::renderChildrenPG(TextNode* n)
+MailRenderer::renderChildrenPG(const TextNode& n)
 {
-    if (n->major == TextNode::maParagraph && n->minor == TextNode::miParFragment) {
-        // FIXME: do we need the miParFragment condition?
+    if (n.major == TextNode::maParagraph && n.minor == TextNode::miParFragment) {
+        // miParFragment means we do not want to end the output with a newline; renderPG() does that.
         renderPG(n);
     } else {
-        for (size_t i = 0, e = n->children.size(); i != e; ++i) {
+        for (size_t i = 0, e = n.children.size(); i != e; ++i) {
             if (i != 0) {
                 result += prefix;
+                discardTrailingSpace(result);
                 result += "\n";
             }
-            renderPG(n->children[i]);
+            renderPG(*n.children[i]);
         }
     }
 }
@@ -344,11 +345,11 @@ MailRenderer::renderChildrenPG(TextNode* n)
 /** Render inline markup. Inline markup produced by accumulating and
     word-wrapping it in \c line. */
 void
-MailRenderer::renderInline(TextNode* n)
+MailRenderer::renderInline(const TextNode& n)
 {
-    switch (TextNode::MajorKind(n->major)) {
+    switch (TextNode::MajorKind(n.major)) {
      case TextNode::maPlain:
-        renderPlaintext(n->text);
+        renderPlaintext(n.text);
         break;
      case TextNode::maInline:
         renderChildrenInline(n);
@@ -359,41 +360,41 @@ MailRenderer::renderInline(TextNode* n)
      case TextNode::maLink:
         renderChildrenInline(n);
         renderSpace();
-        switch (TextNode::LinkFormat(n->minor)) {
+        switch (TextNode::LinkFormat(n.minor)) {
          case TextNode::miLinkUrl:
-            renderWord("<" + n->text + ">");
+            renderWord("<" + n.text + ">");
             break;
          case TextNode::miLinkEmail:
-            renderWord("<mailto:" + n->text + ">");
+            renderWord("<mailto:" + n.text + ">");
             break;
          case TextNode::miLinkPost:
-            renderWord(formatMessageId(n->text));
+            renderWord(formatMessageId(n.text));
             break;
          case TextNode::miLinkThread:
-            if (!renderThreadId(n->text)) {
-                renderWord("<thread:" + n->text + ">");
+            if (!renderThreadId(n.text)) {
+                renderWord("<thread:" + n.text + ">");
             }
             break;
          case TextNode::miLinkGame:
-            if (!renderGameLink(n->text)) {
-                renderWord("<game:" + n->text + ">");
+            if (!renderGameLink(n.text)) {
+                renderWord("<game:" + n.text + ">");
             }
             break;
          case TextNode::miLinkUser:
-            if (!renderUserLink(n->text)) {
-                renderWord("<user:" + n->text + ">");
+            if (!renderUserLink(n.text)) {
+                renderWord("<user:" + n.text + ">");
             }
             break;
          case TextNode::miLinkForum:
-            if (!renderForumLink(n->text)) {
-                renderWord("<forum:" + n->text + ">");
+            if (!renderForumLink(n.text)) {
+                renderWord("<forum:" + n.text + ">");
             }
             break;
         }
         break;
 
      case TextNode::maSpecial:
-        switch (TextNode::SpecialFormat(n->minor)) {
+        switch (TextNode::SpecialFormat(n.minor)) {
          case TextNode::miSpecialBreak:
             flushLine();
             break;
@@ -401,11 +402,11 @@ MailRenderer::renderInline(TextNode* n)
          case TextNode::miSpecialImage:
             renderChildrenInline(n);
             renderSpace();
-            renderWord("<" + n->text + ">");
+            renderWord("<" + n.text + ">");
             break;
 
          case TextNode::miSpecialSmiley:
-            renderWord(":" + n->text + ":");
+            renderWord(":" + n.text + ":");
             break;
         }
         break;
@@ -418,10 +419,10 @@ MailRenderer::renderInline(TextNode* n)
 
 /** Render a inline markup container. */
 void
-MailRenderer::renderChildrenInline(TextNode* n)
+MailRenderer::renderChildrenInline(const TextNode& n)
 {
-    for (size_t i = 0, e = n->children.size(); i != e; ++i) {
-        renderInline(n->children[i]);
+    for (size_t i = 0, e = n.children.size(); i != e; ++i) {
+        renderInline(*n.children[i]);
     }
 }
 
@@ -477,12 +478,13 @@ MailRenderer::emitLine(const String_t& theLine)
 {
     result += prefix;
     result += theLine;
+    discardTrailingSpace(result);
     result += "\n";
     prefix = second_prefix;
 }
 
 String_t
-server::talk::render::renderMail(TextNode* node, const LinkParser& lp, const Options& opts, Root& root, bool forNNTP)
+server::talk::render::renderMail(const TextNode& node, const LinkParser& lp, const Options& opts, Root& root, bool forNNTP)
 {
     // ex planetscentral/talk/mailout.h:renderMail
     String_t result;

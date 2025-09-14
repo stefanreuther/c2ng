@@ -1833,7 +1833,10 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/server/talk/nulllinkparsertest.cpp \
+FILES_testsuite = test/server/talk/serverapplicationtest.cpp \
+    test/server/talk/render/textrenderertest.cpp \
+    test/server/talk/render/mailrenderertest.cpp \
+    test/server/talk/nulllinkparsertest.cpp \
     test/server/talk/linkparsertest.cpp test/server/play/fs/sessiontest.cpp \
     test/server/play/fs/directorytest.cpp \
     test/game/vcr/flak/testapplettest.cpp \

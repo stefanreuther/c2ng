@@ -1,7 +1,6 @@
 /**
   *  \file server/talk/render/htmlrenderer.cpp
-  *
-  *  FIXME: do we use renderText for LinkFormatter results?
+  *  \brief HTML Rendering
   */
 
 #include <cstring>
@@ -88,16 +87,21 @@ namespace {
     String_t abbreviate(String_t s)
     {
         // FIXME: duplicate!
-        if (s.size() > 30) {
-            std::size_t i = 28;
-            while (i > 0 && (s[i-1] == ' ' || afl::charset::Utf8::isContinuationByte(s[i]))) {
-                // Yes, this is intended to check i-1 for spaces, and i for continuation
-                --i;
+        if (s.empty()) {
+            return "(no subject)";
+        } else {
+            if (s.size() > 30) {
+                std::size_t i = 28;
+                while (i > 0 && (s[i-1] == ' ' || afl::charset::Utf8::isContinuationByte(s[i]))) {
+                    // If s[i-1] is a space, we want to cut before it.
+                    // If s[i] is a continuation byte, s[i-1] is part of the same UTF-8 rune, so go before it.
+                    --i;
+                }
+                s.erase(i);
+                s += "...";
             }
-            s.erase(i);
-            s += "...";
+            return s;
         }
-        return s;
     }
 
     const char* getInlineTagName(TextNode::InlineFormat minor)
@@ -135,7 +139,6 @@ namespace {
 void
 HtmlRenderer::renderText(const String_t& text)
 {
-    // FIXME: work on a ConstStringMemory_t instead to save allocations?
     result += util::encodeHtml(text, true);
 }
 
@@ -189,7 +192,7 @@ HtmlRenderer::renderGameLink(const TextNode& n)
     if (const LinkParser::Result_t* p = r.get()) {
         result += "<a href=\"";
         renderText(m_options.getBaseUrl());
-        result += m_root.linkFormatter().makeGameUrl(p->first, p->second);
+        renderText(m_root.linkFormatter().makeGameUrl(p->first, p->second));
         result += "\">";
         if (n.children.empty()) {
             renderText(p->second);
@@ -211,7 +214,7 @@ HtmlRenderer::renderForumLink(const TextNode& n)
     if (const LinkParser::Result_t* p = r.get()) {
         result += "<a href=\"";
         renderText(m_options.getBaseUrl());
-        result += m_root.linkFormatter().makeForumUrl(p->first, p->second);
+        renderText(m_root.linkFormatter().makeForumUrl(p->first, p->second));
         result += "\">";
         if (n.children.empty()) {
             renderText(p->second);
@@ -239,7 +242,7 @@ HtmlRenderer::renderUserLink(const TextNode& n)
         }
         result += "\" href=\"";
         renderText(m_options.getBaseUrl());
-        result += m_root.linkFormatter().makeUserUrl(u.getLoginName());
+        renderText(m_root.linkFormatter().makeUserUrl(u.getLoginName()));
         result += "\">";
         if (n.children.empty()) {
             renderText(u.getScreenName());
@@ -269,14 +272,10 @@ HtmlRenderer::renderPostLink(const TextNode& n)
         const String_t topicName = t.subject().get();
         result += "<a href=\"";
         renderText(m_options.getBaseUrl());
-        result += m_root.linkFormatter().makePostUrl(topicId, topicName, p->first);
+        renderText(m_root.linkFormatter().makePostUrl(topicId, topicName, p->first));
         result += "\">";
         if (n.children.empty()) {
-            if (p->second.empty()) {
-                renderText("(no subject)");
-            } else {
-                renderText(abbreviate(p->second));
-            }
+            renderText(abbreviate(p->second));
         } else {
             renderChildren(n);
         }
@@ -295,7 +294,7 @@ HtmlRenderer::renderThreadLink(const TextNode& n)
     if (const LinkParser::Result_t* p = r.get()) {
         result += "<a href=\"";
         renderText(m_options.getBaseUrl());
-        result += m_root.linkFormatter().makeTopicUrl(p->first, p->second);
+        renderText(m_root.linkFormatter().makeTopicUrl(p->first, p->second));
         result += "\">";
         if (n.children.empty()) {
             renderText(abbreviate(p->second));

@@ -298,11 +298,11 @@ server::talk::render::renderText(std::auto_ptr<TextNode> tree, const Context& ct
     } else if (isForum(fmt, set, len) && len == fmt.size()) {
         return renderBB(*tree, root.recognizer(), set);
     } else if (fmt == "mail") {
-        return renderMail(tree.get(), ctx, opts, root, false);
+        return renderMail(*tree, ctx, opts, root, false);
     } else if (fmt == "news") {
-        return renderMail(tree.get(), ctx, opts, root, true);
+        return renderMail(*tree, ctx, opts, root, true);
     } else if (fmt == "text") {
-        return renderText(tree.get(), ctx);
+        return renderPlainText(*tree, ctx);
     } else {
         // error
         return "ERROR: invalid format '" + fmt + "'";

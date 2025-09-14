@@ -1,9 +1,9 @@
 /**
-  *  \file test/server/talk/render/htmlrenderertest.cpp
-  *  \brief Test for server::talk::render::HTMLRenderer
+  *  \file test/server/talk/render/mailrenderertest.cpp
+  *  \brief Test for server::talk::render::MailRenderer
   */
 
-#include "server/talk/render/htmlrenderer.hpp"
+#include "server/talk/render/mailrenderer.hpp"
 
 #include "afl/net/nullcommandhandler.hpp"
 #include "afl/net/redis/hashkey.hpp"
@@ -14,41 +14,14 @@
 #include "server/talk/render/context.hpp"
 #include "server/talk/render/options.hpp"
 
-using server::talk::render::renderHTML;
+using server::talk::render::renderMail;
 using server::talk::TextNode;
 using afl::net::redis::StringKey;
 using afl::net::redis::HashKey;
 using afl::net::redis::StringSetKey;
 
-/** Test some code highlighting.
-    This is bug #330 which applies to the highlighter, but we're testing the full stack here. */
-AFL_TEST("server.talk.render.HTMLRenderer:code", a)
-{
-    afl::net::NullCommandHandler nch;
-    server::talk::Root root(nch, server::talk::Configuration());
-    server::talk::render::Context ctx(root, "u");
-    server::talk::render::Options opts;
-
-    root.keywordTable().add("ini.phost.GameName.link", "http://phost.de/phost4doc/config.html#GameName");
-    root.keywordTable().add("ini.phost.GameName.info", "Name of the game");
-
-    // forum:[code=pconfig.src]pHost.Gamename=foo
-    TextNode n1(TextNode::maGroup, TextNode::miGroupRoot);
-    n1.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParCode, "pconfig.src"));
-    n1.children[0]->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "pHost.Gamename=foo"));
-    a.checkEqual("01", server::talk::render::renderHTML(n1, ctx, opts, root),
-                 "<pre><a href=\"http://phost.de/phost4doc/config.html#GameName\" title=\"Name of the game\" class=\"syn-name\">pHost.Gamename</a>=foo</pre>\n");
-
-    // forum:[code=pconfig.src]%foo\nbar
-    TextNode n2(TextNode::maGroup, TextNode::miGroupRoot);
-    n2.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParCode, "pconfig.src"));
-    n2.children[0]->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "%foo\nbar"));
-    a.checkEqual("11", server::talk::render::renderHTML(n2, ctx, opts, root),
-                 "<pre><span class=\"syn-sec\">%foo</span>\n<span class=\"syn-name\">bar</span></pre>\n");
-}
-
 /** Render plaintext. */
-AFL_TEST("server.talk.render.HTMLRenderer:plaintext", a)
+AFL_TEST("server.talk.render.MailRenderer:plaintext", a)
 {
     // Environment
     afl::net::NullCommandHandler nch;
@@ -64,24 +37,20 @@ AFL_TEST("server.talk.render.HTMLRenderer:plaintext", a)
     // Basic test
     {
         text.text = "hi mom";
-        a.checkEqual("01", renderHTML(tn, ctx, opts, root), "<p>hi mom</p>\n");
+        a.checkEqual("01", renderMail(tn, ctx, opts, root, false), "hi mom\n");
+        a.checkEqual("02", renderMail(tn, ctx, opts, root, true),  "hi mom\n");
     }
 
-    // Looks like a tag
+    // Word wrap
     {
-        text.text = "a<b>c";
-        a.checkEqual("11", renderHTML(tn, ctx, opts, root), "<p>a&lt;b&gt;c</p>\n");
-    }
-
-    // Ampersand
-    {
-        text.text = "a&c";
-        a.checkEqual("21", renderHTML(tn, ctx, opts, root), "<p>a&amp;c</p>\n");
+        text.text = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Duis sem velit, ultrices et, fermentum auctor, rhoncus ut, ligula.";
+        a.checkEqual("11", renderMail(tn, ctx, opts, root, false), "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Duis sem\nvelit, ultrices et, fermentum auctor, rhoncus ut, ligula.\n");
+        a.checkEqual("12", renderMail(tn, ctx, opts, root, true),  "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Duis sem\nvelit, ultrices et, fermentum auctor, rhoncus ut, ligula.\n");
     }
 }
 
 /** Render some regular text. */
-AFL_TEST("server.talk.render.HTMLRenderer:complex", a)
+AFL_TEST("server.talk.render.MailRenderer:complex", a)
 {
     // Environment
     afl::net::NullCommandHandler nch;
@@ -98,7 +67,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:complex", a)
         TextNode& par2(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
         par2.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "mom"));
 
-        a.checkEqual("01", renderHTML(tn, ctx, opts, root), "<p>hi</p>\n<p>mom</p>\n");
+        a.checkEqual("01", renderMail(tn, ctx, opts, root, false), "hi\n\nmom\n");
+        a.checkEqual("02", renderMail(tn, ctx, opts, root, true),  "hi\n\nmom\n");
     }
 
     // Paragraph with inline formatting (bold)
@@ -110,70 +80,11 @@ AFL_TEST("server.talk.render.HTMLRenderer:complex", a)
         par.children.back()->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "mom"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "!"));
 
-        a.checkEqual("11", renderHTML(tn, ctx, opts, root), "<p>hi <b>mom</b>!</p>\n");
+        a.checkEqual("11", renderMail(tn, ctx, opts, root, false), "hi mom!\n");
+        a.checkEqual("12", renderMail(tn, ctx, opts, root, true),  "hi mom!\n");
     }
 
-    // Same thing, italic
-    {
-        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
-        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "hi "));
-        par.children.pushBackNew(new TextNode(TextNode::maInline, TextNode::miInItalic));
-        par.children.back()->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "mom"));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "!"));
-
-        a.checkEqual("21", renderHTML(tn, ctx, opts, root), "<p>hi <em>mom</em>!</p>\n");
-    }
-
-    // Same thing, strikethrough
-    {
-        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
-        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "hi "));
-        par.children.pushBackNew(new TextNode(TextNode::maInline, TextNode::miInStrikeThrough));
-        par.children.back()->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "mom"));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "!"));
-
-        a.checkEqual("31", renderHTML(tn, ctx, opts, root), "<p>hi <s>mom</s>!</p>\n");
-    }
-
-    // Same thing, underlined
-    {
-        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
-        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "hi "));
-        par.children.pushBackNew(new TextNode(TextNode::maInline, TextNode::miInUnderline));
-        par.children.back()->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "mom"));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "!"));
-
-        a.checkEqual("41", renderHTML(tn, ctx, opts, root), "<p>hi <u>mom</u>!</p>\n");
-    }
-
-    // Same thing, monospaced
-    {
-        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
-        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "hi "));
-        par.children.pushBackNew(new TextNode(TextNode::maInline, TextNode::miInMonospace));
-        par.children.back()->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "mom"));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "!"));
-
-        a.checkEqual("51", renderHTML(tn, ctx, opts, root), "<p>hi <tt>mom</tt>!</p>\n");
-    }
-
-    // Same thing, invalid maInline
-    {
-        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
-        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "hi "));
-        par.children.pushBackNew(new TextNode(TextNode::maInline, 99));
-        par.children.back()->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "mom"));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "!"));
-
-        a.checkEqual("61", renderHTML(tn, ctx, opts, root), "<p>hi mom!</p>\n");
-    }
-
-    // Same thing, colored
+    // Same thing, colored (maInlineAttr instead of maInline)
     {
         TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
         TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
@@ -182,84 +93,43 @@ AFL_TEST("server.talk.render.HTMLRenderer:complex", a)
         par.children.back()->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "mom"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "!"));
 
-        a.checkEqual("71", renderHTML(tn, ctx, opts, root), "<p>hi <font color=\"#ff0000\">mom</font>!</p>\n");
+        a.checkEqual("21", renderMail(tn, ctx, opts, root, false), "hi mom!\n");
+        a.checkEqual("22", renderMail(tn, ctx, opts, root, true),  "hi mom!\n");
     }
+}
 
-    // Same thing, font
+/** Render some code. */
+AFL_TEST("server.talk.render.MailRenderer:code", a)
+{
+    // Environment
+    afl::net::NullCommandHandler nch;
+    server::talk::Root root(nch, server::talk::Configuration());
+    const server::talk::render::Context ctx(root, "u");   // context, required for quoting [not required?]
+    const server::talk::render::Options opts;             // options [not required?]
+
+    // Normal
     {
         TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
-        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "hi "));
-        par.children.pushBackNew(new TextNode(TextNode::maInlineAttr, TextNode::miIAFont, "courier"));
-        par.children.back()->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "mom"));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "!"));
+        tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParCode))
+            ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "void foo()\n{\n}"));
 
-        a.checkEqual("81", renderHTML(tn, ctx, opts, root), "<p>hi <span style=\"font-family: courier;\">mom</span>!</p>\n");
+        a.checkEqual("01", renderMail(tn, ctx, opts, root, false), "  void foo()\n  {\n  }\n");
+        a.checkEqual("02", renderMail(tn, ctx, opts, root, true),  "  void foo()\n  {\n  }\n");
     }
 
-    // Same thing, font that needs quoting
+    // DOS linefeeds
     {
         TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
-        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "hi "));
-        par.children.pushBackNew(new TextNode(TextNode::maInlineAttr, TextNode::miIAFont, "x&y"));
-        par.children.back()->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "mom"));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "!"));
+        tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParCode))
+            ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "void foo()\r\n{\r\n}"));
 
-        a.checkEqual("91", renderHTML(tn, ctx, opts, root), "<p>hi <span style=\"font-family: x&amp;y;\">mom</span>!</p>\n");
-    }
-
-    // Same thing, increased size
-    {
-        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
-        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "hi "));
-        par.children.pushBackNew(new TextNode(TextNode::maInlineAttr, TextNode::miIASize, "3"));
-        par.children.back()->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "mom"));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "!"));
-
-        a.checkEqual("101", renderHTML(tn, ctx, opts, root), "<p>hi <span style=\"font-size: 195%;\">mom</span>!</p>\n");
-    }
-
-    // Same thing, reduced size
-    {
-        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
-        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "hi "));
-        par.children.pushBackNew(new TextNode(TextNode::maInlineAttr, TextNode::miIASize, "-1"));
-        par.children.back()->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "mom"));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "!"));
-
-        a.checkEqual("111", renderHTML(tn, ctx, opts, root), "<p>hi <span style=\"font-size: 80%;\">mom</span>!</p>\n");
-    }
-
-    // Same thing, attributeless size
-    {
-        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
-        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "hi "));
-        par.children.pushBackNew(new TextNode(TextNode::maInlineAttr, TextNode::miIASize, ""));
-        par.children.back()->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "mom"));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "!"));
-
-        a.checkEqual("121", renderHTML(tn, ctx, opts, root), "<p>hi mom!</p>\n");
-    }
-
-    // Same thing, invalid maInlineAttr
-    {
-        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
-        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "hi "));
-        par.children.pushBackNew(new TextNode(TextNode::maInlineAttr, 99, "3"));
-        par.children.back()->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "mom"));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "!"));
-
-        a.checkEqual("131", renderHTML(tn, ctx, opts, root), "<p>hi mom!</p>\n");
+        a.checkEqual("03", renderMail(tn, ctx, opts, root, false), "  void foo()\n  {\n  }\n");
+        a.checkEqual("04", renderMail(tn, ctx, opts, root, true),  "  void foo()\n  {\n  }\n");
     }
 }
 
 /** Test rendering of links. */
-AFL_TEST("server.talk.render.HTMLRenderer:link", a)
+AFL_TEST("server.talk.render.MailRenderer:link", a)
 {
     // Environment
     afl::net::NullCommandHandler nch;
@@ -276,7 +146,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:link", a)
         par.children.back()->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "text"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " after"));
 
-        a.checkEqual("01", renderHTML(tn, ctx, opts, root), "<p>before <a href=\"http://web\" rel=\"nofollow\">text</a> after</p>\n");
+        a.checkEqual("01", renderMail(tn, ctx, opts, root, false), "before text <http://web> after\n");
+        a.checkEqual("02", renderMail(tn, ctx, opts, root, true),  "before text <http://web> after\n");
     }
 
     // A link with no content (=shortened form)
@@ -287,34 +158,13 @@ AFL_TEST("server.talk.render.HTMLRenderer:link", a)
         par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkUrl, "http://web"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " after"));
 
-        a.checkEqual("11", renderHTML(tn, ctx, opts, root), "<p>before <a href=\"http://web\" rel=\"nofollow\">http://web</a> after</p>\n");
-    }
-
-    // Quoted link
-    {
-        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
-        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "before "));
-        par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkUrl, "http://a/x<y>z"));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " after"));
-
-        a.checkEqual("21", renderHTML(tn, ctx, opts, root), "<p>before <a href=\"http://a/x&lt;y&gt;z\" rel=\"nofollow\">http://a/x&lt;y&gt;z</a> after</p>\n");
-    }
-
-    // Invalid link
-    {
-        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
-        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "before "));
-        par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkUrl, "javascript:alert(\"hello\")"));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " after"));
-
-        a.checkEqual("31", renderHTML(tn, ctx, opts, root), "<p>before <span class=\"tfailedlink\">link javascript:alert(&quot;hello&quot;)</span> after</p>\n");
+        a.checkEqual("11", renderMail(tn, ctx, opts, root, false), "before <http://web> after\n");
+        a.checkEqual("12", renderMail(tn, ctx, opts, root, true),  "before <http://web> after\n");
     }
 }
 
 /** Test specials. */
-AFL_TEST("server.talk.render.HTMLRenderer:special", a)
+AFL_TEST("server.talk.render.MailRenderer:special", a)
 {
     // Environment
     afl::net::NullCommandHandler nch;
@@ -331,7 +181,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:special", a)
         par.children.pushBackNew(new TextNode(TextNode::maSpecial, TextNode::miSpecialImage, "http://xyz"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " after"));
 
-        a.checkEqual("01", renderHTML(tn, ctx, opts, root), "<p>before <img src=\"http://xyz\" /> after</p>\n");
+        a.checkEqual("01", renderMail(tn, ctx, opts, root, false), "before <http://xyz> after\n");
+        a.checkEqual("02", renderMail(tn, ctx, opts, root, true),  "before <http://xyz> after\n");
     }
 
     // Bad image link
@@ -342,7 +193,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:special", a)
         par.children.pushBackNew(new TextNode(TextNode::maSpecial, TextNode::miSpecialImage, "javascript:alert(\"hi\")"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " after"));
 
-        a.checkEqual("02", renderHTML(tn, ctx, opts, root), "<p>before <span class=\"tfailedlink\">image javascript:alert(&quot;hi&quot;)</span> after</p>\n");
+        a.checkEqual("11", renderMail(tn, ctx, opts, root, false), "before <javascript:alert(\"hi\")> after\n");
+        a.checkEqual("12", renderMail(tn, ctx, opts, root, true),  "before <javascript:alert(\"hi\")> after\n");
     }
 
     // Image link with alt text
@@ -354,7 +206,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:special", a)
             ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "some text"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " after"));
 
-        a.checkEqual("03", renderHTML(tn, ctx, opts, root), "<p>before <img src=\"http://xyz\" alt=\"some text\" /> after</p>\n");
+        a.checkEqual("21", renderMail(tn, ctx, opts, root, false), "before some text <http://xyz> after\n");
+        a.checkEqual("22", renderMail(tn, ctx, opts, root, true),  "before some text <http://xyz> after\n");
     }
 
     // Break
@@ -365,7 +218,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:special", a)
         par.children.pushBackNew(new TextNode(TextNode::maSpecial, TextNode::miSpecialBreak));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " after"));
 
-        a.checkEqual("11", renderHTML(tn, ctx, opts, root), "<p>before <br /> after</p>\n");
+        a.checkEqual("31", renderMail(tn, ctx, opts, root, false), "before\nafter\n");
+        a.checkEqual("32", renderMail(tn, ctx, opts, root, true),  "before\nafter\n");
     }
 
     // Smiley
@@ -376,12 +230,13 @@ AFL_TEST("server.talk.render.HTMLRenderer:special", a)
         par.children.pushBackNew(new TextNode(TextNode::maSpecial, TextNode::miSpecialSmiley, "smile"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " after"));
 
-        a.checkEqual("21", renderHTML(tn, ctx, opts, root), "<p>before <img src=\"http://base/path/res/smileys/smile.png\" width=\"16\" height=\"16\" alt=\":smile:\" /> after</p>\n");
+        a.checkEqual("41", renderMail(tn, ctx, opts, root, false), "before :smile: after\n");
+        a.checkEqual("42", renderMail(tn, ctx, opts, root, true),  "before :smile: after\n");
     }
 }
 
 /** Test rendering user links. */
-AFL_TEST("server.talk.render.HTMLRenderer:link:user", a)
+AFL_TEST("server.talk.render.MailRenderer:link:user", a)
 {
     // Environment
     afl::net::redis::InternalDatabase db;
@@ -406,7 +261,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:user", a)
         par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkUser, "wilma"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
-        a.checkEqual("01", renderHTML(tn, ctx, opts, root), "<p>[ <a class=\"userlink\" href=\"http://base/path/userinfo.cgi/wilma\">Wilma F</a> ]</p>\n");
+        a.checkEqual("01", renderMail(tn, ctx, opts, root, false), "[ <http://base/path/userinfo.cgi/wilma> ]\n");
+        a.checkEqual("02", renderMail(tn, ctx, opts, root, true),  "[ <http://base/path/userinfo.cgi/wilma> ]\n");
     }
 
     // Named user link
@@ -418,18 +274,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:user", a)
             ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "Text"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
-        a.checkEqual("02", renderHTML(tn, ctx, opts, root), "<p>[ <a class=\"userlink\" href=\"http://base/path/userinfo.cgi/wilma\">Text</a> ]</p>\n");
-    }
-
-    // Regular user link to user himself
-    {
-        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
-        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "[ "));
-        par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkUser, "fred"));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
-
-        a.checkEqual("11", renderHTML(tn, ctx, opts, root), "<p>[ <a class=\"userlink userlink-me\" href=\"http://base/path/userinfo.cgi/fred\">Fred F</a> ]</p>\n");
+        a.checkEqual("11", renderMail(tn, ctx, opts, root, false), "[ Text <http://base/path/userinfo.cgi/wilma> ]\n");
+        a.checkEqual("12", renderMail(tn, ctx, opts, root, true),  "[ Text <http://base/path/userinfo.cgi/wilma> ]\n");
     }
 
     // Unknown user
@@ -440,7 +286,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:user", a)
         par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkUser, "barney"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
-        a.checkEqual("21", renderHTML(tn, ctx, opts, root), "<p>[ <span class=\"tfailedlink\">user barney</span> ]</p>\n");
+        a.checkEqual("21", renderMail(tn, ctx, opts, root, false), "[ <user:barney> ]\n");
+        a.checkEqual("22", renderMail(tn, ctx, opts, root, true),  "[ <user:barney> ]\n");
     }
 
     // Partial tree, just a paragraph fragment
@@ -450,12 +297,13 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:user", a)
         tn.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkUser, "wilma"));
         tn.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
-        a.checkEqual("31", renderHTML(tn, ctx, opts, root), "[ <a class=\"userlink\" href=\"http://base/path/userinfo.cgi/wilma\">Wilma F</a> ]");
+        a.checkEqual("31", renderMail(tn, ctx, opts, root, false), "[ <http://base/path/userinfo.cgi/wilma> ]");
+        a.checkEqual("32", renderMail(tn, ctx, opts, root, true),  "[ <http://base/path/userinfo.cgi/wilma> ]");
     }
 }
 
 /** Test more links. */
-AFL_TEST("server.talk.render.HTMLRenderer:link:other", a)
+AFL_TEST("server.talk.render.MailRenderer:link:other", a)
 {
     // Environment
     afl::net::redis::InternalDatabase db;
@@ -474,10 +322,16 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:other", a)
     // - a forum
     StringSetKey(db, "forum:all").add("3");
     HashKey(db, "forum:3:header").stringField("name").set("Chat Room");
+    HashKey(db, "forum:3:header").stringField("newsgroup").set("news.group.name");
+
+    // - another forum
+    StringSetKey(db, "forum:all").add("4");
+    HashKey(db, "forum:4:header").stringField("name").set("Other Room");
 
     // - a thread
     HashKey(db, "thread:9:header").stringField("subject").set("Hi There");
     HashKey(db, "thread:9:header").stringField("forum").set("3");
+    HashKey(db, "thread:9:header").stringField("firstpost").set("12");
 
     // - a posting
     HashKey(db, "msg:12:header").stringField("subject").set("Re: Hi There");
@@ -495,10 +349,11 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:other", a)
         par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkForum, "3"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
-        a.checkEqual("01", renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"http://base/path/talk/forum.cgi/3-Chat-Room\">Chat Room</a> ]</p>\n");
+        a.checkEqual("01", renderMail(tn, ctx, opts, root, false), "[ <http://base/path/talk/forum.cgi/3-Chat-Room> ]\n");
+        a.checkEqual("02", renderMail(tn, ctx, opts, root, true),  "[ <news:news.group.name> ]\n");
     }
 
-    // Bad forum link
+    // Forum that does not have a newsgroup name
     {
         TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
         TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
@@ -506,7 +361,20 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:other", a)
         par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkForum, "4"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
-        a.checkEqual("02", renderHTML(tn, ctx, opts, root), "<p>[ <span class=\"tfailedlink\">forum 4</span> ]</p>\n");
+        a.checkEqual("03", renderMail(tn, ctx, opts, root, false), "[ <http://base/path/talk/forum.cgi/4-Other-Room> ]\n");
+        a.checkEqual("04", renderMail(tn, ctx, opts, root, true),  "[ <http://base/path/talk/forum.cgi/4-Other-Room> ]\n");
+    }
+
+    // Bad forum link
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "[ "));
+        par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkForum, "5"));
+        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
+
+        a.checkEqual("05", renderMail(tn, ctx, opts, root, false), "[ <forum:5> ]\n");
+        a.checkEqual("06", renderMail(tn, ctx, opts, root, true),  "[ <forum:5> ]\n");
     }
 
     // Named forum link
@@ -518,7 +386,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:other", a)
         link.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "text"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
-        a.checkEqual("11", renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"http://base/path/talk/forum.cgi/3-Chat-Room\">text</a> ]</p>\n");
+        a.checkEqual("11", renderMail(tn, ctx, opts, root, false), "[ text <http://base/path/talk/forum.cgi/3-Chat-Room> ]\n");
+        a.checkEqual("12", renderMail(tn, ctx, opts, root, true),  "[ text <news:news.group.name> ]\n");
     }
 
     // Bad named forum link
@@ -526,11 +395,12 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:other", a)
         TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
         TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "[ "));
-        TextNode& link(*par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkForum, "4")));
+        TextNode& link(*par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkForum, "5")));
         link.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "text"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
-        a.checkEqual("12", renderHTML(tn, ctx, opts, root), "<p>[ <span class=\"tfailedlink\">text</span> ]</p>\n");
+        a.checkEqual("13", renderMail(tn, ctx, opts, root, false), "[ text <forum:5> ]\n");
+        a.checkEqual("14", renderMail(tn, ctx, opts, root, true),  "[ text <forum:5> ]\n");
     }
 
     // Thread link
@@ -541,7 +411,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:other", a)
         par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkThread, "9"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
-        a.checkEqual("21", renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"http://base/path/talk/thread.cgi/9-Hi-There\">Hi There</a> ]</p>\n");
+        a.checkEqual("21", renderMail(tn, ctx, opts, root, false), "[ <thread:9> ]\n");
+        a.checkEqual("22", renderMail(tn, ctx, opts, root, true),  "[ <12.0@localhost> ]\n");
     }
 
     // Bad thread link
@@ -552,7 +423,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:other", a)
         par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkThread, "bad"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
-        a.checkEqual("22", renderHTML(tn, ctx, opts, root), "<p>[ <span class=\"tfailedlink\">thread bad</span> ]</p>\n");
+        a.checkEqual("23", renderMail(tn, ctx, opts, root, false), "[ <thread:bad> ]\n");
+        a.checkEqual("23", renderMail(tn, ctx, opts, root, true),  "[ <thread:bad> ]\n");
     }
 
     // Named thread link
@@ -564,7 +436,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:other", a)
         link.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "label"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
-        a.checkEqual("31", renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"http://base/path/talk/thread.cgi/9-Hi-There\">label</a> ]</p>\n");
+        a.checkEqual("31", renderMail(tn, ctx, opts, root, false), "[ label <thread:9> ]\n");
+        a.checkEqual("32", renderMail(tn, ctx, opts, root, true),  "[ label <12.0@localhost> ]\n");
     }
 
     // Post link
@@ -575,7 +448,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:other", a)
         par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkPost, "12"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
-        a.checkEqual("41", renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"http://base/path/talk/thread.cgi/9-Hi-There#p12\">Re: Hi There</a> ]</p>\n");
+        a.checkEqual("41", renderMail(tn, ctx, opts, root, false), "[ <post:12> ]\n");
+        a.checkEqual("42", renderMail(tn, ctx, opts, root, true),  "[ <12.0@localhost> ]\n");
     }
 
     // Bad post link
@@ -586,29 +460,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:other", a)
         par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkPost, "999"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
-        a.checkEqual("42", renderHTML(tn, ctx, opts, root), "<p>[ <span class=\"tfailedlink\">post 999</span> ]</p>\n");
-    }
-
-    // Post link that is abbreviated
-    {
-        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
-        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "[ "));
-        par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkPost, "13"));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
-
-        a.checkEqual("43", renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"http://base/path/talk/thread.cgi/9-Hi-There#p13\">We can also use a very long...</a> ]</p>\n");
-    }
-
-    // Post without subject
-    {
-        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
-        TextNode& par(*tn.children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal)));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "[ "));
-        par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkPost, "14"));
-        par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
-
-        a.checkEqual("43", renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"http://base/path/talk/thread.cgi/9-Hi-There#p14\">(no subject)</a> ]</p>\n");
+        a.checkEqual("43", renderMail(tn, ctx, opts, root, false), "[ <post:999> ]\n");
+        a.checkEqual("44", renderMail(tn, ctx, opts, root, true),  "[ <post:999> ]\n");
     }
 
     // Named post link
@@ -620,7 +473,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:other", a)
         link.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "text"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
-        a.checkEqual("51", renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"http://base/path/talk/thread.cgi/9-Hi-There#p12\">text</a> ]</p>\n");
+        a.checkEqual("51", renderMail(tn, ctx, opts, root, false), "[ text <post:12> ]\n");
+        a.checkEqual("52", renderMail(tn, ctx, opts, root, true),  "[ text <12.0@localhost> ]\n");
     }
 
     // Game link
@@ -631,7 +485,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:other", a)
         par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkGame, "7"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
-        a.checkEqual("61", renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"http://base/path/host/game.cgi/7-Seven-of-Nine\">Seven of Nine</a> ]</p>\n");
+        a.checkEqual("61", renderMail(tn, ctx, opts, root, false), "[ <http://base/path/host/game.cgi/7-Seven-of-Nine> ]\n");
+        a.checkEqual("62", renderMail(tn, ctx, opts, root, true),  "[ <http://base/path/host/game.cgi/7-Seven-of-Nine> ]\n");
     }
 
     // Named game link
@@ -643,7 +498,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:other", a)
         link.children.pushBackNew(new TextNode(TextNode::maPlain, 0, "play"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
-        a.checkEqual("71", renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"http://base/path/host/game.cgi/7-Seven-of-Nine\">play</a> ]</p>\n");
+        a.checkEqual("71", renderMail(tn, ctx, opts, root, false), "[ play <http://base/path/host/game.cgi/7-Seven-of-Nine> ]\n");
+        a.checkEqual("72", renderMail(tn, ctx, opts, root, true),  "[ play <http://base/path/host/game.cgi/7-Seven-of-Nine> ]\n");
     }
 
     // Bad game link
@@ -654,7 +510,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:other", a)
         par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkGame, "17"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
-        a.checkEqual("81", renderHTML(tn, ctx, opts, root), "<p>[ <span class=\"tfailedlink\">game 17</span> ]</p>\n");
+        a.checkEqual("81", renderMail(tn, ctx, opts, root, false), "[ <game:17> ]\n");
+        a.checkEqual("82", renderMail(tn, ctx, opts, root, true), "[ <game:17> ]\n");
     }
 
     // Email link
@@ -665,12 +522,13 @@ AFL_TEST("server.talk.render.HTMLRenderer:link:other", a)
         par.children.pushBackNew(new TextNode(TextNode::maLink, TextNode::miLinkEmail, "a@b.c"));
         par.children.pushBackNew(new TextNode(TextNode::maPlain, 0, " ]"));
 
-        a.checkEqual("91", renderHTML(tn, ctx, opts, root), "<p>[ <a href=\"mailto:a@b.c\">a@b.c</a> ]</p>\n");
+        a.checkEqual("91", renderMail(tn, ctx, opts, root, false), "[ <mailto:a@b.c> ]\n");
+        a.checkEqual("92", renderMail(tn, ctx, opts, root, true),  "[ <mailto:a@b.c> ]\n");
     }
 }
 
 /** Test quotes. */
-AFL_TEST("server.talk.render.HTMLRenderer:quote", a)
+AFL_TEST("server.talk.render.MailRenderer:quote", a)
 {
     // Environment
     afl::net::redis::InternalDatabase db;
@@ -682,6 +540,7 @@ AFL_TEST("server.talk.render.HTMLRenderer:quote", a)
     // Create environment
     StringKey(db, "user:1000:name").set("fred");
     StringKey(db, "uid:fred").set("1000");
+    HashKey(db, "user:1000:profile").stringField("screenname").set("Fred F");
 
     // - a forum
     StringSetKey(db, "forum:all").add("3");
@@ -702,10 +561,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:quote", a)
             ->children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal))
             ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "text"));
 
-        a.checkEqual("01", renderHTML(tn, ctx, opts, root),
-                     "<div class=\"attribution\"><a class=\"userlink userlink-me\" href=\"http://base/path/userinfo.cgi/fred\"></a>:</div>\n"
-                     "<blockquote><p>text</p>\n"
-                     "</blockquote>\n");
+        a.checkEqual("01", renderMail(tn, ctx, opts, root, false), "* Fred F:\n> text\n");
+        a.checkEqual("02", renderMail(tn, ctx, opts, root, true),  "* Fred F:\n> text\n");
     }
 
     // Nonexisting user
@@ -715,10 +572,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:quote", a)
             ->children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal))
             ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "text"));
 
-        a.checkEqual("02", renderHTML(tn, ctx, opts, root),
-                     "<div class=\"attribution\">barney:</div>\n"
-                     "<blockquote><p>text</p>\n"
-                     "</blockquote>\n");
+        a.checkEqual("03", renderMail(tn, ctx, opts, root, false), "* barney:\n> text\n");
+        a.checkEqual("04", renderMail(tn, ctx, opts, root, true),  "* barney:\n> text\n");
     }
 
     // User and posting
@@ -728,10 +583,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:quote", a)
             ->children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal))
             ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "text"));
 
-        a.checkEqual("03", renderHTML(tn, ctx, opts, root),
-                     "<div class=\"attribution\"><a class=\"userlink userlink-me\" href=\"http://base/path/userinfo.cgi/fred\"></a> in <a href=\"http://base/path/talk/thread.cgi/9-Hi-There#p12\">Re: Hi There</a>:</div>\n"
-                     "<blockquote><p>text</p>\n"
-                     "</blockquote>\n");
+        a.checkEqual("05", renderMail(tn, ctx, opts, root, false), "* Fred F in <post:12>:\n> text\n");
+        a.checkEqual("06", renderMail(tn, ctx, opts, root, true),  "* Fred F in <12.0@localhost>:\n> text\n");
     }
 
     // Nonexistant user, existing posting
@@ -741,10 +594,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:quote", a)
             ->children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal))
             ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "text"));
 
-        a.checkEqual("04", renderHTML(tn, ctx, opts, root),
-                     "<div class=\"attribution\">barney in <a href=\"http://base/path/talk/thread.cgi/9-Hi-There#p12\">Re: Hi There</a>:</div>\n"
-                     "<blockquote><p>text</p>\n"
-                     "</blockquote>\n");
+        a.checkEqual("07", renderMail(tn, ctx, opts, root, false), "* barney in <post:12>:\n> text\n");
+        a.checkEqual("08", renderMail(tn, ctx, opts, root, true),  "* barney in <12.0@localhost>:\n> text\n");
     }
 
     // Existant user, nonexistant posting
@@ -754,10 +605,8 @@ AFL_TEST("server.talk.render.HTMLRenderer:quote", a)
             ->children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal))
             ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "text"));
 
-        a.checkEqual("05", renderHTML(tn, ctx, opts, root),
-                     "<div class=\"attribution\"><a class=\"userlink userlink-me\" href=\"http://base/path/userinfo.cgi/fred\"></a> in 77:</div>\n"
-                     "<blockquote><p>text</p>\n"
-                     "</blockquote>\n");
+        a.checkEqual("09", renderMail(tn, ctx, opts, root, false), "* Fred F in <post:77>:\n> text\n");
+        a.checkEqual("10", renderMail(tn, ctx, opts, root, true),  "* Fred F in <post:77>:\n> text\n");
     }
 
     // No attribution
@@ -767,15 +616,24 @@ AFL_TEST("server.talk.render.HTMLRenderer:quote", a)
             ->children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal))
             ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "text"));
 
-        a.checkEqual("01", renderHTML(tn, ctx, opts, root),
-                     "<blockquote><p>text</p>\n"
-                     "</blockquote>\n");
+        a.checkEqual("11", renderMail(tn, ctx, opts, root, false), "> text\n");
+        a.checkEqual("12", renderMail(tn, ctx, opts, root, true),  "> text\n");
+    }
+
+    // Word wrap
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        tn.children.pushBackNew(new TextNode(TextNode::maGroup, TextNode::miGroupQuote, ""))
+            ->children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal))
+            ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "In consectetuer, lorem eu lobortis egestas, velit odio imperdiet eros, sit amet sagittis nunc mi ac neque. "));
+
+        a.checkEqual("13", renderMail(tn, ctx, opts, root, false), "> In consectetuer, lorem eu lobortis egestas, velit odio imperdiet eros,\n> sit amet sagittis nunc mi ac neque.\n");
+        a.checkEqual("14", renderMail(tn, ctx, opts, root, true),  "> In consectetuer, lorem eu lobortis egestas, velit odio imperdiet eros,\n> sit amet sagittis nunc mi ac neque.\n");
     }
 }
 
-
 /** Test list. */
-AFL_TEST("server.talk.render.HTMLRenderer:list", a)
+AFL_TEST("server.talk.render.MailRenderer:list", a)
 {
     // Environment
     afl::net::redis::InternalDatabase db;
@@ -795,10 +653,11 @@ AFL_TEST("server.talk.render.HTMLRenderer:list", a)
             ->children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal))
             ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "second"));
 
-        a.checkEqual("01", renderHTML(tn, ctx, opts, root), "<ul><li>first</li>\n<li>second</li>\n</ul>");
+        a.checkEqual("01", renderMail(tn, ctx, opts, root, false), "* first\n\n* second\n");
+        a.checkEqual("02", renderMail(tn, ctx, opts, root, true),  "* first\n\n* second\n");
     }
 
-    // Compact form, with numbering
+    // Compact form; numbering requested but not honored by MailRenderer
     {
         TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
         TextNode& list(*tn.children.pushBackNew(new TextNode(TextNode::maGroup, TextNode::miGroupList, "1")));
@@ -809,24 +668,11 @@ AFL_TEST("server.talk.render.HTMLRenderer:list", a)
             ->children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal))
             ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "second"));
 
-        a.checkEqual("02", renderHTML(tn, ctx, opts, root), "<ol><li>first</li>\n<li>second</li>\n</ol>");
+        a.checkEqual("03", renderMail(tn, ctx, opts, root, false), "* first\n\n* second\n");
+        a.checkEqual("04", renderMail(tn, ctx, opts, root, true),  "* first\n\n* second\n");
     }
 
-    // Compact form, with custom numbering
-    {
-        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
-        TextNode& list(*tn.children.pushBackNew(new TextNode(TextNode::maGroup, TextNode::miGroupList, "\"a\"")));
-        list.children.pushBackNew(new TextNode(TextNode::maGroup, TextNode::miGroupListItem))
-            ->children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal))
-            ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "first"));
-        list.children.pushBackNew(new TextNode(TextNode::maGroup, TextNode::miGroupListItem))
-            ->children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal))
-            ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "second"));
-
-        a.checkEqual("03", renderHTML(tn, ctx, opts, root), "<ol type=\"&quot;a&quot;\"><li>first</li>\n<li>second</li>\n</ol>");
-    }
-
-    // Full form: an entry with multiple paragraphs causes the list to be rendered as li-containing-p.
+    // Full form
     {
         TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
         TextNode& list(*tn.children.pushBackNew(new TextNode(TextNode::maGroup, TextNode::miGroupList)));
@@ -839,6 +685,19 @@ AFL_TEST("server.talk.render.HTMLRenderer:list", a)
             ->children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal))
             ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "second"));
 
-        a.checkEqual("04", renderHTML(tn, ctx, opts, root), "<ul><li><p>first top</p>\n<p>first bottom</p>\n</li>\n<li><p>second</p>\n</li>\n</ul>");
+        a.checkEqual("05", renderMail(tn, ctx, opts, root, false), "* first top\n\n  first bottom\n\n* second\n");
+        a.checkEqual("06", renderMail(tn, ctx, opts, root, true),  "* first top\n\n  first bottom\n\n* second\n");
+    }
+
+    // Word wrap
+    {
+        TextNode tn(TextNode::maGroup, TextNode::miGroupRoot);
+        TextNode& list(*tn.children.pushBackNew(new TextNode(TextNode::maGroup, TextNode::miGroupList)));
+        list.children.pushBackNew(new TextNode(TextNode::maGroup, TextNode::miGroupListItem))
+            ->children.pushBackNew(new TextNode(TextNode::maParagraph, TextNode::miParNormal))
+            ->children.pushBackNew(new TextNode(TextNode::maPlain, 0, "In consectetuer, lorem eu lobortis egestas, velit odio imperdiet eros, sit amet sagittis nunc mi ac neque. "));
+
+        a.checkEqual("07", renderMail(tn, ctx, opts, root, false), "* In consectetuer, lorem eu lobortis egestas, velit odio imperdiet eros,\n  sit amet sagittis nunc mi ac neque.\n");
+        a.checkEqual("08", renderMail(tn, ctx, opts, root, true),  "* In consectetuer, lorem eu lobortis egestas, velit odio imperdiet eros,\n  sit amet sagittis nunc mi ac neque.\n");
     }
 }
