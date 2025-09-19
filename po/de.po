@@ -1,10 +1,10 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-07-05 21:48+0200\n"
+"PO-Revision-Date: 2025-09-19 21:19+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: util/plugin/consoleapplication.cpp:388
+#: util/plugin/consoleapplication.cpp:390
 msgid ""
 "\n"
 "Usage:\n"
@@ -164,7 +164,7 @@ msgstr " - Bergbau"
 msgid " - Planetary Economy"
 msgstr " - Wirtschaft"
 
-#: util/plugin/consoleapplication.cpp:405
+#: util/plugin/consoleapplication.cpp:407
 msgid ""
 " -l\tList more details\n"
 " -b\tList fewer details\n"
@@ -302,7 +302,7 @@ msgstr "%d Crew"
 msgid "%d crew (of %d)"
 msgstr "%d von %d Crew"
 
-#: game/db/loader.cpp:367
+#: game/db/loader.cpp:366
 msgid "%d database record%!1{s have%| has%} been ignored"
 msgstr "%d Datenbank-%!1{Einträge wurden%|Eintrag wurde%} ignoriert"
 
@@ -515,7 +515,7 @@ msgstr "%d pro Zug für je %s"
 msgid "%d player%1{'s%|s'%} data remains."
 msgstr "Daten von %d Spieler%!1{n%} verbleiben."
 
-#: util/plugin/consoleapplication.cpp:165
+#: util/plugin/consoleapplication.cpp:167
 msgid "%d plugin%!1{s%} installed."
 msgstr "%d Plugin%!1{s%} installiert."
 
@@ -863,12 +863,12 @@ msgstr "%s: %d%% (%d mc)"
 msgid "%s: %d%% (%d mc, with %d colonist clan%!1{s%})"
 msgstr "%s: %d%% (%d mc, mit %d Kolonistenclan%!1{s%})"
 
-#: util/plugin/consoleapplication.cpp:357
+#: util/plugin/consoleapplication.cpp:359
 msgid "%s: Plugin '%s' (%s) tested successfully."
 msgstr "%s: Plugin '%s' (%s) erfolgreich getestet."
 
-#: util/plugin/consoleapplication.cpp:236
-#: util/plugin/consoleapplication.cpp:352
+#: util/plugin/consoleapplication.cpp:238
+#: util/plugin/consoleapplication.cpp:354
 msgid "%s: Unknown file type"
 msgstr "%s: unbekannter Dateityp"
 
@@ -892,8 +892,8 @@ msgstr "%s: Fehler (network access failed, HTTP-Fehler %d)"
 msgid "%s: network access timed out"
 msgstr "%s: Zeitlimit überschritten (network access timed out)"
 
-#: util/doc/application.cpp:516 util/doc/application.cpp:557
-#: util/doc/application.cpp:618
+#: util/doc/application.cpp:503 util/doc/application.cpp:544
+#: util/doc/application.cpp:605
 msgid "%s: not found"
 msgstr "%s: nicht gefunden"
 
@@ -905,7 +905,7 @@ msgstr "%s: ungültige Daten vom Netzwerk empfangen"
 msgid "%s: unknown file format"
 msgstr "%s: unbekanntes Dateiformat"
 
-#: util/doc/helpimport.cpp:393
+#: util/doc/helpimport.cpp:450
 msgid "%s:%d: absolute link '%s' used as <page id>"
 msgstr "%s:%d: absoluter Link '%s' als <page id> verwendet"
 
@@ -925,7 +925,7 @@ msgstr "%s:%d: ungültige ID-Nummer"
 msgid "%s:%d: invalid number"
 msgstr "%s:%d: ungültige Zahl"
 
-#: util/doc/helpimport.cpp:353
+#: util/doc/helpimport.cpp:354
 msgid "%s:%d: mismatching tag names, expect \"</%s>\", found \"</%s>\""
 msgstr "%s:%d: Unpassende Tag-Namen, erwarte \"</%s>\", gefunden: \"</%s>\""
 
@@ -933,11 +933,11 @@ msgstr "%s:%d: Unpassende Tag-Namen, erwarte \"</%s>\", gefunden: \"</%s>\""
 msgid "%s:%d: missing delimiter"
 msgstr "%s:%d: fehlendes Trennzeichen"
 
-#: util/doc/helpimport.cpp:466 util/doc/helpimport.cpp:649
+#: util/doc/helpimport.cpp:390
 msgid "%s:%d: raw text on page"
 msgstr "%s:%d: reiner Text auf der Seite"
 
-#: util/doc/helpimport.cpp:412 util/doc/helpimport.cpp:589
+#: util/doc/helpimport.cpp:372
 msgid "%s:%d: referenced image not found"
 msgstr "%s:%d: Bild nicht gefunden"
 
@@ -945,7 +945,7 @@ msgstr "%s:%d: Bild nicht gefunden"
 msgid "%s:%d: source ID not defined yet"
 msgstr "%s:%d: Quell-ID noch nicht definiert"
 
-#: util/doc/helpimport.cpp:535
+#: util/doc/helpimport.cpp:548
 msgid "%s:%d: tag <%s> inside <file> unexpected"
 msgstr "%s:%d: Tag <%s> in <file> unerwartet"
 
@@ -953,7 +953,7 @@ msgstr "%s:%d: Tag <%s> in <file> unerwartet"
 msgid "%s:%d: unexpected EOF in .text section"
 msgstr "%s:%d: unerwartetes Dateiende in .text-Bereich"
 
-#: util/doc/helpimport.cpp:433 util/doc/helpimport.cpp:620
+#: util/doc/helpimport.cpp:471 util/doc/helpimport.cpp:620
 msgid "%s:%d: unexpected closing tag \"</%s>\""
 msgstr "%s:%d: unerwartetes Ende-Tag \"</%s>\""
 
@@ -1217,7 +1217,7 @@ msgstr "- Tarnung"
 msgid "- Movement"
 msgstr "- Bewegung"
 
-#: server/console/consoleapplication.cpp:300
+#: server/console/consoleapplication.cpp:301
 msgid ""
 "--log=CONFIG\tSet logger configuration\n"
 "--proxy=URL\tAdd network proxy\n"
@@ -1869,6 +1869,14 @@ msgstr "Bewaffnet"
 msgid "Artificial"
 msgstr "Artificial"
 
+#: afl/string/messages.hpp:308
+msgid "Assertion failed: %s"
+msgstr "Assertion fehlgeschlagen: %s"
+
+#: afl/string/messages.hpp:314
+msgid "Assertion failed: %s, at %s"
+msgstr "Assertion fehlgeschlagen: %s, an %s"
+
 #: client/dialogs/hullfunctionview.cpp:309
 msgid "Assigned to ship"
 msgstr "Dem Schiff zugeordnet"
@@ -1964,7 +1972,7 @@ msgstr "Automatisch bauen"
 msgid "Auto-build goals have been changed on %d planet%!1{s%}."
 msgstr "Bau-Ziele wurden auf %d Planet%!1{en%} geändert."
 
-#: game/db/loader.cpp:305
+#: game/db/loader.cpp:304
 msgid "Autobuild record has unexpected size"
 msgstr "Ein Autobuild-Datensatz hat eine unerwartete Größe"
 
@@ -2392,7 +2400,15 @@ msgstr "Anforderung der Fernsteuerung für dieses Schiff zurücknehmen?"
 msgid "Cancel tow"
 msgstr "Abschleppen stornieren"
 
-#: util/doc/helpimport.cpp:345
+#: afl/string/messages.hpp:236
+msgid "Cannot access directories"
+msgstr "Kann nicht auf Verzeichnisse zugreifen"
+
+#: afl/string/messages.hpp:230
+msgid "Cannot access files here"
+msgstr "Kann hier nicht auf Dateien zugreifen"
+
+#: util/doc/helpimport.cpp:346
 msgid "Cannot import file"
 msgstr "Datei kann nicht importiert werden"
 
@@ -2403,6 +2419,14 @@ msgstr "Spiel kann nicht geladen werden; du bist nicht eingeloggt"
 #: util/plugin/manager.cpp:99
 msgid "Cannot load plugins"
 msgstr "Kann Plugins nicht laden"
+
+#: afl/string/messages.hpp:242
+msgid "Cannot modify archive file"
+msgstr "Archivdatei kann nicht geändert werden"
+
+#: afl/string/messages.hpp:248
+msgid "Cannot write"
+msgstr "Kann nicht schreiben"
 
 #: game/score/tablebuilder.cpp:126
 msgid "Cap."
@@ -3253,6 +3277,10 @@ msgstr "Gelöschtes Minenfeld #%d"
 msgid "Derived Information"
 msgstr "Abgeleitete Informationen"
 
+#: afl/string/messages.hpp:338
+msgid "Desktop"
+msgstr "Desktop"
+
 #: game/spec/info/info.cpp:332 game/spec/info/info.cpp:365
 #: game/spec/info/info.cpp:406
 msgid "Destroy"
@@ -3820,7 +3848,7 @@ msgstr "Fehler beim Ausführen der Anweisung: %s"
 msgid "Error in user-interface thread"
 msgstr "Fehler im User-Interface-Thread"
 
-#: gfx/sdl/engine.cpp:216 gfx/sdl2/engine.cpp:337
+#: gfx/sdl/engine.cpp:216 gfx/sdl2/engine.cpp:321
 msgid "Error initializing SDL: %s"
 msgstr "Fehler beim Initialisieren der SDL: %s"
 
@@ -3840,7 +3868,7 @@ msgstr "Fehlermeldung"
 msgid "Error reading file"
 msgstr "Fehler beim Lesen einer Datei"
 
-#: game/db/loader.cpp:363
+#: game/db/loader.cpp:362
 msgid "Error reading starchart database"
 msgstr "Fehler beim Lesen der Sternenkarten-Datenbank"
 
@@ -3852,8 +3880,8 @@ msgstr "Fehler beim Speichern der Konfiguration"
 msgid "Error scanning help file"
 msgstr "Fehler beim Einlesen der Hilfedatei"
 
-#: gfx/sdl2/engine.cpp:379 gfx/sdl2/engine.cpp:398 gfx/sdl2/engine.cpp:406
-#: gfx/sdl2/engine.cpp:427
+#: gfx/sdl2/engine.cpp:354 gfx/sdl2/engine.cpp:373 gfx/sdl2/engine.cpp:381
+#: gfx/sdl2/engine.cpp:402
 msgid "Error setting video mode (%s): %s"
 msgstr "Fehler beim Einstellen des Grafikmodus (%s): %s"
 
@@ -4248,6 +4276,10 @@ msgstr "Datei enthält eine Auswahl aus dem aktuellen Zug"
 msgid "File does not contain required font"
 msgstr "Datei enthält nicht die erforderliche Schrift"
 
+#: afl/string/messages.hpp:182
+msgid "File exists"
+msgstr "Datei existiert"
+
 #: game/v3/directoryscanner.cpp:167 game/v3/directoryscanner.cpp:304
 #: game/v3/directoryscanner.cpp:308 game/v3/directoryscanner.cpp:97
 msgid "File exists but is invalid and has been ignored"
@@ -4257,7 +4289,7 @@ msgstr "Datei existiert, aber ist ungültig und wurde ignoriert"
 msgid "File format error"
 msgstr "Dateiformat-Fehler"
 
-#: game/pcc/turnloader.cpp:228 game/pcc/turnloader.cpp:237
+#: game/pcc/turnloader.cpp:226 game/pcc/turnloader.cpp:235
 #: game/turnloader.cpp:79 game/turnloader.cpp:90
 #: game/v3/directoryloader.cpp:484 game/v3/resultloader.cpp:265
 #: game/v3/resultloader.cpp:275
@@ -4277,7 +4309,7 @@ msgstr "Datei ist ungültig"
 msgid "File is missing required section"
 msgstr "In Datei fehlt ein erforderlicher Bereich"
 
-#: game/db/loader.cpp:183 game/interface/selectionfunctions.cpp:286
+#: game/db/loader.cpp:182 game/interface/selectionfunctions.cpp:286
 #: game/maint/messagesearchapplication.cpp:412 game/score/loader.cpp:54
 #: game/sim/loader.cpp:82 game/teamsettings.cpp:408
 #: game/vcr/flak/database.cpp:28 gfx/bitmapfont.cpp:173
@@ -4290,6 +4322,10 @@ msgstr "Datei hat nicht die erforderliche Kennung"
 msgid "File is owned by player %d, should be %d"
 msgstr "Datei gehört Spieler %d, erwartet wurde %d"
 
+#: afl/string/messages.hpp:176
+msgid "File not found"
+msgstr "Datei nicht gefunden"
+
 #: game/browser/filesystemfolder.cpp:130
 msgid "File system folder"
 msgstr "Ordner im Dateisystem"
@@ -4298,7 +4334,7 @@ msgstr "Ordner im Dateisystem"
 msgid "File too large"
 msgstr "Datei zu groß"
 
-#: game/v3/udata/parser.cpp:921
+#: afl/string/messages.hpp:188 game/v3/udata/parser.cpp:921
 msgid "File too short"
 msgstr "Datei zu kurz"
 
@@ -4314,7 +4350,7 @@ msgstr "Datei..."
 msgid "Files"
 msgstr "Dateien"
 
-#: util/plugin/consoleapplication.cpp:186
+#: util/plugin/consoleapplication.cpp:188
 msgid "Files (in '%s')"
 msgstr "Dateien (in '%s')"
 
@@ -4618,7 +4654,7 @@ msgstr ""
 "--get=OPTION\tWert einer Option abfragen\n"
 "--save-hconfig=DATEI\tBinäre HConfig-Datei speichern"
 
-#: game/pcc/turnloader.cpp:273 game/v3/resultloader.cpp:343
+#: game/pcc/turnloader.cpp:271 game/v3/resultloader.cpp:343
 msgid "Generating turn commands..."
 msgstr "Erzeuge Turn-Kommandos..."
 
@@ -4660,7 +4696,7 @@ msgstr "Raumschiff an anderes Volk übergeben"
 msgid "Global Actions"
 msgstr "Global-Aktionen"
 
-#: util/doc/application.cpp:686
+#: util/doc/application.cpp:673
 msgid ""
 "Global Options:\n"
 "--dir=DIR\tSet repository, directory mode\n"
@@ -4919,6 +4955,10 @@ msgstr "Trefferquote"
 #: game/actions/multitransfersetup.cpp:115
 msgid "Hold space"
 msgstr "Zwischenspeicher"
+
+#: afl/string/messages.hpp:350
+msgid "Home Directory"
+msgstr "Home-Verzeichnis"
 
 #: client/dialogs/simulationconfiguration.cpp:165
 msgid "Honor alliances/teams"
@@ -5210,7 +5250,7 @@ msgstr "Befehl einfügen"
 msgid "Install Plugin"
 msgstr "Plugin installieren"
 
-#: util/plugin/consoleapplication.cpp:242
+#: util/plugin/consoleapplication.cpp:244
 msgid "Installing plugin '%s'..."
 msgstr "Installiere Plugin '%s'..."
 
@@ -5258,9 +5298,13 @@ msgstr "Ungültige Geschütz-Nummer %d, Komponente wurde ignoriert"
 msgid "Invalid boolean setting"
 msgstr "Ungültiger boolescher Wert"
 
-#: util/plugin/consoleapplication.cpp:127
+#: util/plugin/consoleapplication.cpp:129
 msgid "Invalid command specified. Use 'c2plugin -h' for help."
 msgstr "ungültiges Kommando angegeben. Mit 'c2plugin -h' erhalten Sie Hilfe"
+
+#: afl/string/messages.hpp:224
+msgid "Invalid compressed data"
+msgstr "Ungültige komprimierte Daten"
 
 #: game/spec/basichullfunctionlist.cpp:78
 msgid "Invalid device number for \"%s\""
@@ -5282,6 +5326,10 @@ msgstr "Ungültiger Ausdruck"
 #: game/maint/messagesearchapplication.cpp:455
 msgid "Invalid file block"
 msgstr "Ungültiger Block in Datei"
+
+#: gfx/codec/custom.cpp:497
+msgid "Invalid file format"
+msgstr "Ungültiges Dateiformat"
 
 #: game/v3/turnfile.cpp:999
 msgid "Invalid file format (bad pointer)"
@@ -5307,10 +5355,14 @@ msgstr "Ungültiges Dateiformat (invalid owner information)"
 msgid "Invalid file format (object count is zero)"
 msgstr "Ungültiges Dateiformat (Objekt-Zahl ist 0)"
 
-#: game/db/fleetloader.cpp:174 game/interface/vmfile.cpp:171
-#: interpreter/vmio/objectloader.cpp:304
+#: afl/string/messages.hpp:218 game/db/fleetloader.cpp:174
+#: game/interface/vmfile.cpp:171 interpreter/vmio/objectloader.cpp:304
 msgid "Invalid file header"
 msgstr "Ungültiger Dateikopf"
+
+#: afl/string/messages.hpp:194
+msgid "Invalid file name"
+msgstr "Ungültiger Dateiname"
 
 #: game/spec/friendlycode.cpp:227
 msgid "Invalid flags for friendly code \"%s\""
@@ -5382,7 +5434,8 @@ msgstr "Ungültiger Nachrichtenempfänger"
 msgid "Invalid minefield Id #%d, minefield has been ignored"
 msgstr "Ungültige Minenfeld-Id #%d, Minenfeld wird ignoriert"
 
-#: game/v3/specificationloader.cpp:288 game/vcr/flak/configuration.cpp:112
+#: afl/string/messages.hpp:212 game/v3/specificationloader.cpp:288
+#: game/vcr/flak/configuration.cpp:112
 msgid "Invalid number"
 msgstr "Ungültige Zahl"
 
@@ -5401,6 +5454,14 @@ msgstr "Ungültige Anzahl Schiffe"
 #: game/v3/unpacker.cpp:634
 msgid "Invalid number of targets"
 msgstr "Ungültige Anzahl Sichtungen"
+
+#: afl/string/messages.hpp:206
+msgid "Invalid operation"
+msgstr "Ungültige Operation"
+
+#: afl/string/messages.hpp:200
+msgid "Invalid or unsupported URL"
+msgstr "Ungültige oder nicht unterstützte URL"
 
 #: gfx/windowparameters.cpp:27
 msgid "Invalid parameter to \"-bpp\""
@@ -5570,7 +5631,7 @@ msgstr "Taste %s"
 msgid "Key '%s' in '%s'"
 msgstr "Taste '%s' in '%s'"
 
-#: gfx/sdl/engine.cpp:472 gfx/sdl2/engine.cpp:632
+#: gfx/sdl/engine.cpp:472 gfx/sdl2/engine.cpp:597
 msgid "Key not mapped: 0x%x"
 msgstr "Taste nicht erkannt: 0x%x"
 
@@ -5778,11 +5839,11 @@ msgstr "Lade %d Sternbas%1{is%|en%}..."
 msgid "Loading %d visual contact%!1{s%}..."
 msgstr "Lade %d visuelle%1{n Kontakt%| Kontakte%}..."
 
-#: game/pcc/turnloader.cpp:215 game/v3/resultloader.cpp:242
+#: game/pcc/turnloader.cpp:213 game/v3/resultloader.cpp:242
 msgid "Loading %s RST file..."
 msgstr "Lade %s RST-Datei..."
 
-#: game/pcc/turnloader.cpp:223 game/v3/resultloader.cpp:212
+#: game/pcc/turnloader.cpp:221 game/v3/resultloader.cpp:212
 msgid "Loading %s TRN file..."
 msgstr "Lade %s TRN-Datei..."
 
@@ -5794,7 +5855,7 @@ msgstr "Lade %s Backup-Datei..."
 msgid "Loading %s data..."
 msgstr "Lade %s Daten..."
 
-#: game/db/loader.cpp:185
+#: game/db/loader.cpp:184
 msgid "Loading starchart database..."
 msgstr "Lade Sternkartendatei..."
 
@@ -6242,19 +6303,19 @@ msgstr "Fehlender ':' in Nachrichten-Filterausdruck"
 msgid "Missing '=' in message match expression"
 msgstr "Fehlender '=' in Nachrichten-Filterausdruck"
 
-#: util/plugin/consoleapplication.cpp:315
+#: util/plugin/consoleapplication.cpp:317
 msgid "Missing name of plugin to uninstall. '%s -h' for help."
 msgstr ""
 "Kein Name für ein zu deinstallierendes Plugin angegeben. Nutze '%s -h' für "
 "Hilfe."
 
-#: util/plugin/consoleapplication.cpp:262
+#: util/plugin/consoleapplication.cpp:264
 msgid "Missing name plugin or file to install. '%s -h' for help."
 msgstr ""
 "Kein Name für ein zu installierendes Plugin angegeben. Nutze '%s -h' für "
 "Hilfe."
 
-#: util/plugin/consoleapplication.cpp:376
+#: util/plugin/consoleapplication.cpp:378
 msgid "Missing name plugin or file to test. '%s -h' for help."
 msgstr ""
 "Kein Name für ein zu testendes Plugin angegeben. Nutze '%s -h' für Hilfe."
@@ -6442,6 +6503,10 @@ msgstr "Mehrere Völker"
 msgid "My Computer"
 msgstr "Mein Computer"
 
+#: afl/string/messages.hpp:332
+msgid "My Files"
+msgstr "Meine Dateien"
+
 #: client/dialogs/chartconfig.cpp:370
 msgid "N - Name"
 msgstr "N - Name"
@@ -6504,6 +6569,18 @@ msgstr "Eingeborene vorhanden"
 #: game/map/info/info.cpp:921
 msgid "Nearly undefended"
 msgstr "Fast unverteidigt"
+
+#: afl/string/messages.hpp:266
+msgid "Network connection lost"
+msgstr "Netzwerkverbindung verloren"
+
+#: afl/string/messages.hpp:260
+msgid "Network error"
+msgstr "Netzwerkfehler"
+
+#: afl/string/messages.hpp:254
+msgid "Network name not found"
+msgstr "Netzwerkname nicht gefunden"
 
 #: client/tiles/shipcargotile.cpp:108 share/resource/core_tiles.q:1000
 #: share/resource/core_tiles.q:1163 share/resource/core_tiles.q:797
@@ -6600,7 +6677,7 @@ msgstr "Keine Kolonisten."
 msgid "No command matched the filter."
 msgstr "Kein Kommando passte auf den Filter-Ausdruck."
 
-#: util/plugin/consoleapplication.cpp:122
+#: util/plugin/consoleapplication.cpp:124
 msgid "No command specified. Use 'c2plugin -h' for help."
 msgstr "kein Kommando angegeben. Mit 'c2plugin -h' erhalten Sie Hilfe"
 
@@ -6878,6 +6955,14 @@ msgstr "Nur noch %d weitere möglich!"
 msgid "Open game read-only"
 msgstr "Nur zum Ansehen öffnen"
 
+#: afl/string/messages.hpp:284
+msgid "Operation cancelled"
+msgstr "Operation abgebrochen"
+
+#: afl/string/messages.hpp:320
+msgid "Option \"%s\" is missing its parameter"
+msgstr "Fehlender Parameter für Option \"%s\""
+
 #: client/applicationparameters.cpp:85 client/screens/playerscreen.cpp:149
 #: share/resource/core_config.q:464
 msgid "Options"
@@ -7139,7 +7224,7 @@ msgstr "PCC2"
 msgid "PCC2 Battle Simulation Utility v%s - (c) 2020-2025 Stefan Reuther"
 msgstr "PCC2 Schlachtsimulator v%s - (c) 2020-2025 Stefan Reuther"
 
-#: server/console/consoleapplication.cpp:288
+#: server/console/consoleapplication.cpp:289
 msgid "PCC2 Console v%s - (c) 2017-2025 Stefan Reuther"
 msgstr "PCC2 Konsole v%s - (c) 2017-2025 Stefan Reuther"
 
@@ -7147,7 +7232,7 @@ msgstr "PCC2 Konsole v%s - (c) 2017-2025 Stefan Reuther"
 msgid "PCC2 Database Export v%s - (c) 2017-2025 Stefan Reuther"
 msgstr "PCC2 Datenbank-Export v%s - (c) 2017-2025 Stefan Reuther"
 
-#: util/doc/application.cpp:678
+#: util/doc/application.cpp:665
 msgid "PCC2 Documentation Manager v%s - (c) 2021-2025 Stefan Reuther"
 msgstr "PCC2 Dokumentations-Manager v%s - (c) 2021-2025 Stefan Reuther"
 
@@ -7183,7 +7268,7 @@ msgstr "PCC2 Spiel-Server v%s - (c) 2019-2025 Stefan Reuther"
 msgid "PCC2 Plugin Installer"
 msgstr "PCC2-Plugin-Installer"
 
-#: util/plugin/consoleapplication.cpp:387
+#: util/plugin/consoleapplication.cpp:389
 msgid "PCC2 Plugin Manager v%s - (c) 2015-2025 Stefan Reuther"
 msgstr "PCC2 Plugin-Manager v%s - (c) 2015-2025 Stefan Reuther"
 
@@ -7445,11 +7530,11 @@ msgstr "Plugin '%s' wurde installiert."
 msgid "Plugin '%s' has been updated."
 msgstr "Plugin '%s' wurde aktualisiert."
 
-#: util/plugin/consoleapplication.cpp:309
+#: util/plugin/consoleapplication.cpp:311
 msgid "Plugin '%s' is not known."
 msgstr "Plugin '%s' ist nicht bekannt."
 
-#: util/plugin/consoleapplication.cpp:173
+#: util/plugin/consoleapplication.cpp:175
 msgid "Plugin '%s': %s"
 msgstr "Plugin '%s': %s"
 
@@ -7630,20 +7715,20 @@ msgstr "Programm-Interoperation | Eingehende Nachrichten neu umbrechen"
 msgid "Program exits abnormally (crash)"
 msgstr "Programm unerwartet beendet (Absturz)"
 
-#: game/db/loader.cpp:778
+#: game/db/loader.cpp:777
 msgid "Properties cannot be saved and have been discarded"
 msgstr "Eigenschaften können nicht gespeichert werden und wurden verworfen"
 
-#: game/db/loader.cpp:635
+#: game/db/loader.cpp:634
 msgid "Property record has invalid Id (%d) and has been ignored"
 msgstr ""
 "Ein Eigenschafts-Datensatz hat eine ungültige Id (%d) und wird ignoriert"
 
-#: game/db/loader.cpp:645
+#: game/db/loader.cpp:644
 msgid "Property record has invalid content and has been ignored"
 msgstr "Ein Eigenschafts-Datensatz hat ungültigen Inhalt und wird ignoriert"
 
-#: game/db/loader.cpp:614
+#: game/db/loader.cpp:613
 msgid "Property record has unexpected size and has been ignored"
 msgstr ""
 "Ein Eigenschafts-Datensatz hat eine unerwartete Größe und wird ignoriert"
@@ -7664,7 +7749,7 @@ msgstr "R - Wiederholung"
 msgid "RGA max. %d turn%!1{s%}"
 msgstr "RGA max. %d %1{Zug%|Züge%}"
 
-#: game/pcc/turnloader.cpp:66 game/v3/resultloader.cpp:67
+#: game/pcc/turnloader.cpp:64 game/v3/resultloader.cpp:67
 msgid "RST"
 msgstr "RST"
 
@@ -7720,6 +7805,10 @@ msgstr "Kommandocodes auf zufällige Werte setzen?"
 #: client/dialogs/visibilityrange.cpp:111
 msgid "Range [ly]"
 msgstr "Reichweite [ly]"
+
+#: afl/string/messages.hpp:170
+msgid "Range error"
+msgstr "Bereichs-Fehler"
 
 #: client/dialogs/visibilityrange.cpp:109
 #: client/dialogs/visibilityrange.cpp:144
@@ -7883,7 +7972,7 @@ msgstr "Löschen"
 msgid "Remove leader from fleet?"
 msgstr "Führer aus der Flotte entfernen?"
 
-#: util/plugin/consoleapplication.cpp:303
+#: util/plugin/consoleapplication.cpp:305
 msgid "Removing plugin '%s'..."
 msgstr "Entferne Plugin '%s'..."
 
@@ -8031,6 +8120,14 @@ msgstr "Rob-Fehlschlagsrate"
 #: game/spec/racialabilitylist.cpp:276
 msgid "Rob mission"
 msgstr "Rob-Mission"
+
+#: afl/string/messages.hpp:326
+msgid "Root"
+msgstr "Stammverzeichnis"
+
+#: afl/string/messages.hpp:344
+msgid "Root Directory"
+msgstr "Stammverzeichnis"
 
 #: client/dialogs/chartconfig.cpp:329
 msgid "Round wrap (circular, PWrap)"
@@ -9291,7 +9388,7 @@ msgstr "Fangminenfelder mit Jägern räumen"
 msgid "Symmetric relations"
 msgstr "Symmetrische Relationen"
 
-#: game/spec/basichullfunctionlist.cpp:59
+#: afl/string/messages.hpp:272 game/spec/basichullfunctionlist.cpp:59
 #: game/spec/basichullfunctionlist.cpp:71 util/configurationfileparser.cpp:74
 #: util/configurationfileparser.cpp:80
 msgid "Syntax error"
@@ -9484,7 +9581,7 @@ msgstr "Beendet."
 msgid "Text file"
 msgstr "Textdatei"
 
-#: game/db/loader.cpp:338
+#: game/db/loader.cpp:337
 msgid "Text record appears at unexpected place"
 msgstr "Ein Text-Datensatz steht an unerwarteter Position"
 
@@ -9813,7 +9910,7 @@ msgstr "Dieser Kampf kann nicht wiedergegeben werden."
 
 #: gfx/gen/application.cpp:223 gfx/gen/application.cpp:273
 #: gfx/gen/application.cpp:345 gfx/gen/application.cpp:403
-#: gfx/gen/application.cpp:448 util/plugin/consoleapplication.cpp:144
+#: gfx/gen/application.cpp:448 util/plugin/consoleapplication.cpp:146
 msgid "This command does not take positional parameters"
 msgstr "Dieser Befehl akzeptiert keine Positionsparameter"
 
@@ -10562,7 +10659,7 @@ msgstr "Profil-Verzeichnis kann nicht geöffnet werden"
 msgid "Unable to save %s: %s"
 msgstr "%s kann nicht gespeichert werden: %s"
 
-#: client/si/commands.cpp:429 game/pcc/turnloader.cpp:130
+#: client/si/commands.cpp:429 game/pcc/turnloader.cpp:128
 #: game/v3/directoryloader.cpp:232 game/v3/resultloader.cpp:122
 msgid "Unable to save game"
 msgstr "Spiel kann nicht gespeichert werden"
@@ -10625,7 +10722,7 @@ msgstr "Unklassifiziert"
 msgid "Undo Supply Sale"
 msgstr "Vorräte Verkaufen - Rückgängig"
 
-#: game/proxy/attachmentproxy.cpp:73
+#: afl/string/messages.hpp:302 game/proxy/attachmentproxy.cpp:73
 msgid "Unexpected error"
 msgstr "Unerwarteter Fehler"
 
@@ -10669,7 +10766,7 @@ msgstr "Einheit kann nicht zu Simulation hinzugefügt werden."
 msgid "Unit could not be added to simulation."
 msgstr "Einheit kann nicht zu Simulation hinzugefügt werden."
 
-#: game/db/loader.cpp:706
+#: game/db/loader.cpp:705
 msgid "Unit score record is invalid"
 msgstr "Unit-Score-Datensatz ist ungültig"
 
@@ -10701,6 +10798,10 @@ msgstr "Unbekannter PHost"
 msgid "Unknown command line parameter \"-%s\""
 msgstr "Unbekannter Kommandozeilenparameter \"-%s\""
 
+#: afl/string/messages.hpp:278
+msgid "Unknown error"
+msgstr "Unbekannter Fehler"
+
 #: share/resource/core_tiles.q:1101
 msgid "Unknown government."
 msgstr "Unbekannte Regierungsform"
@@ -10713,10 +10814,10 @@ msgstr "Unbekannte Schiffsfunktion \"%s\""
 msgid "Unknown native race."
 msgstr "Unbekannte Eingeborene."
 
-#: util/plugin/consoleapplication.cpp:153
-#: util/plugin/consoleapplication.cpp:229
-#: util/plugin/consoleapplication.cpp:297
-#: util/plugin/consoleapplication.cpp:341
+#: util/plugin/consoleapplication.cpp:155
+#: util/plugin/consoleapplication.cpp:231
+#: util/plugin/consoleapplication.cpp:299
+#: util/plugin/consoleapplication.cpp:343
 msgid "Unknown option \"-%s\""
 msgstr "Unbekannte Option \"-%s\""
 
@@ -10858,7 +10959,7 @@ msgstr "Version-3.5-Objekt-Datei (kore) entpackt."
 msgid "Unpacking player %d: %s"
 msgstr "Entpacke Spieler %d: %s"
 
-#: server/console/consoleapplication.cpp:189
+#: server/console/consoleapplication.cpp:190
 msgid "Unrecognized proxy URL: \"%s\""
 msgstr "Nicht erkannte Proxy-URL: \"%s\""
 
@@ -10869,6 +10970,14 @@ msgstr "Unregistriert"
 #: client/dialogs/choosehull.cpp:191
 msgid "Unsorted"
 msgstr "Unsortiert"
+
+#: afl/string/messages.hpp:296
+msgid "Unsupported compression mode"
+msgstr "Nicht unterstütztes Kompressionsverfahren"
+
+#: afl/string/messages.hpp:290
+msgid "Unsupported feature"
+msgstr "Nicht unterstützte Funktion"
 
 #: game/score/loader.cpp:128 game/score/loader.cpp:62
 #: game/vcr/flak/setup.cpp:324
@@ -10896,11 +11005,11 @@ msgstr "Bis zu %d ihrer Clans überleb%1{t%|en%}."
 msgid "Update/write back"
 msgstr "Aktual./Zurückschr."
 
-#: util/plugin/consoleapplication.cpp:240
+#: util/plugin/consoleapplication.cpp:242
 msgid "Updating plugin '%s'..."
 msgstr "Aktualisiere Plugin '%s'..."
 
-#: game/pcc/turnloader.cpp:303
+#: game/pcc/turnloader.cpp:301
 msgid "Uploading data..."
 msgstr "Daten hochladen..."
 
@@ -10970,7 +11079,7 @@ msgstr ""
 "\n"
 "Fehler bitte melden an <Streu@gmx.de>"
 
-#: server/console/consoleapplication.cpp:290
+#: server/console/consoleapplication.cpp:291
 msgid ""
 "Usage:\n"
 "  %s [-h]\n"
@@ -11079,7 +11188,7 @@ msgstr ""
 "%s\n"
 "Fehler bitte melden an <Streu@gmx.de>"
 
-#: util/doc/application.cpp:680
+#: util/doc/application.cpp:667
 msgid ""
 "Usage:\n"
 "  %s [-h]\n"
@@ -11428,7 +11537,7 @@ msgstr "Prüfung erfolgreich"
 msgid "Video driver: %s (%dk%s)"
 msgstr "Video-Treiber: %s (%dk%s)"
 
-#: gfx/sdl2/engine.cpp:422
+#: gfx/sdl2/engine.cpp:397
 msgid "Video driver: %s%s"
 msgstr "Video-Treiber: %s%s"
 
@@ -12570,13 +12679,13 @@ msgstr "Ungültige Option angegeben."
 #: game/v3/unpackapplication.cpp:96 gfx/gen/application.cpp:240
 #: gfx/gen/application.cpp:306 gfx/gen/application.cpp:366
 #: gfx/gen/application.cpp:416 gfx/gen/application.cpp:461
-#: gfx/gen/application.cpp:497 util/doc/application.cpp:730
+#: gfx/gen/application.cpp:497 util/doc/application.cpp:717
 msgid "invalid option specified. Use \"%s -h\" for help"
 msgstr "Ungültige Option angegeben. Mit '%s -h' erhalten Sie Hilfe."
 
 #: game/interface/exportapplication.cpp:108
 #: game/maint/messagesearchapplication.cpp:544
-#: server/console/consoleapplication.cpp:194
+#: server/console/consoleapplication.cpp:195
 #: server/dbexport/exportapplication.cpp:50
 #: server/file/clientapplication.cpp:128 server/file/clientapplication.cpp:164
 #: server/file/clientapplication.cpp:240 server/file/clientapplication.cpp:269
@@ -12809,8 +12918,8 @@ msgstr "keine Befehle angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 msgid "no fighters aboard"
 msgstr "keine Raumjäger geladen"
 
-#: game/v3/trn/dumperapplication.cpp:110 util/doc/application.cpp:364
-#: util/doc/application.cpp:416 util/doc/application.cpp:462
+#: game/v3/trn/dumperapplication.cpp:110 util/doc/application.cpp:362
+#: util/doc/application.cpp:403 util/doc/application.cpp:449
 msgid "no file name specified. Use \"%s -h\" for help"
 msgstr "kein Dateiname angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 
@@ -12850,7 +12959,7 @@ msgstr "keine Eingabedateien angegeben. Mit '%s -h' erhalten Sie Hilfe."
 msgid "no level"
 msgstr "keine Stufen"
 
-#: util/doc/application.cpp:542 util/doc/application.cpp:589
+#: util/doc/application.cpp:529 util/doc/application.cpp:576
 msgid "no node name specified. Use \"%s -h\" for help"
 msgstr "kein Knotenname angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 
@@ -12874,7 +12983,7 @@ msgstr "keine Torpedos geladen"
 msgid "nobody"
 msgstr "niemand"
 
-#: util/doc/application.cpp:737
+#: util/doc/application.cpp:724
 msgid "non-option unexpected. Use \"%s -h\" for help"
 msgstr "unerwartete Nicht-Option. Mit \"%s -h\" erhalten Sie Hilfe"
 
@@ -13201,7 +13310,7 @@ msgstr "für das gewählte Format muss eine Ausgabedatei angegeben werden ('-o')
 #: game/sim/consoleapplication.cpp:213 game/v3/trn/dumperapplication.cpp:71
 #: interpreter/consoleapplication.cpp:343
 #: interpreter/exporter/configuration.cpp:84
-#: server/play/consoleapplication.cpp:102 util/doc/application.cpp:446
+#: server/play/consoleapplication.cpp:102 util/doc/application.cpp:433
 msgid "the specified character set is not known"
 msgstr "der angegebene Zeichensatz ist nicht bekannt"
 
@@ -13233,8 +13342,8 @@ msgstr "zu lange"
 #: game/interface/exportapplication.cpp:118 game/maint/sweepapplication.cpp:78
 #: game/v3/maketurnapplication.cpp:79 game/v3/trn/dumperapplication.cpp:104
 #: game/v3/unpackapplication.cpp:111 gfx/codec/application.cpp:160
-#: server/play/consoleapplication.cpp:134 util/doc/application.cpp:454
-#: util/doc/application.cpp:648
+#: server/play/consoleapplication.cpp:134 util/doc/application.cpp:441
+#: util/doc/application.cpp:635
 msgid "too many arguments"
 msgstr "zu viele Parameter"
 
@@ -13282,7 +13391,7 @@ msgstr "Kann Schiffsliste nicht laden"
 msgid "unable to load turn"
 msgstr "Kann Zug nicht laden"
 
-#: util/doc/application.cpp:268 util/doc/application.cpp:378
+#: util/doc/application.cpp:268
 msgid "unable to resolve node: \"%s\""
 msgstr "Knoten kann nicht gefunden werden: \"%s\""
 

@@ -297,8 +297,10 @@ my $msgextract = normalize_filename($V{IN}, "scripts/msgextract.pl");
 my $message_po = normalize_filename($V{OUT}, "messages.po");
 my @all_sources = map {split /\s+/, $settings->{"FILES_$_"}} @GUI_APPS, @SERVER_APPS, @CONSOLE_APPS, @LIBS;
 push @all_sources, grep {/\.q$/} split /\s+/, $settings->{FILES_extra};
-generate($message_po, [$msgextract, map {normalize_filename($V{IN}, $_)} @all_sources],
-         "$V{PERL} $msgextract -C $V{IN} " . join(' ', @all_sources) . " > $message_po");
+generate($message_po, [$msgextract, "$V{AFL_DIR}/include/afl/string/messages.hpp", map {normalize_filename($V{IN}, $_)} @all_sources],
+         "$V{PERL} $msgextract -C $V{IN} " . join(' ', @all_sources) .
+         " --reset-wd -C $V{AFL_DIR}/include afl/string/messages.hpp" .
+         " > $message_po");
 rule_add_info($message_po, 'Extracting message strings');
 
 # Actual language file(s). From the po/XX.po file, we create a language file.

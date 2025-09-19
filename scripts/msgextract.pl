@@ -15,7 +15,9 @@
 #     perl msgextract.pl $cpp_files > $po_file
 #
 use strict;
+use Cwd;
 
+my $oldcwd = Cwd::getcwd();
 my %translations;
 
 # File header. Emacs insists on a PO-Revision-Date, otherwise, it will create a new header.
@@ -27,6 +29,8 @@ while (defined(my $fn = shift @ARGV)) {
         my $dir = shift @ARGV;
         die "Missing argument to -C" if !defined $dir;
         chdir $dir or die "$dir: $!";
+    } elsif ($fn eq '--reset-wd') {
+        chdir $oldcwd or die "$oldcwd: $!";
     } elsif ($fn =~ /\.[ch]p+$/) {
         cpp_read($fn, \%translations);
     } elsif ($fn =~ /\.q$/) {
@@ -126,6 +130,7 @@ sub script_read {
 sub cpp_read {
     my ($fn, $db) = @_;
     my %is_translator_invocation = (
+        AFL_TRANSLATE_STRING => 1,
         tx => 1,
         translate => 1,
         translateString => 1,
