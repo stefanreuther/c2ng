@@ -24,6 +24,7 @@
 #include "ui/spacer.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/cardtabbar.hpp"
+#include "ui/widgets/focusiterator.hpp"
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/inputline.hpp"
 #include "ui/widgets/quit.hpp"
@@ -40,6 +41,7 @@ using game::interface::ConfigurationEditorContext;
 using game::proxy::ConfigurationEditorAdaptor;
 using game::proxy::ConfigurationEditorProxy;
 using interpreter::VariableReference;
+using ui::widgets::FocusIterator;
 using ui::widgets::FrameGroup;
 using ui::widgets::ScrollbarContainer;
 
@@ -569,6 +571,7 @@ Dialog::run()
 
     // Window
     ui::Window& win = del.addNew(new ui::Window(tx("Settings"), root().provider(), root().colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
+    FocusIterator& it = del.addNew(new FocusIterator(FocusIterator::Tab | FocusIterator::F6));
 
     // Cards
     ui::CardGroup cards;
@@ -577,9 +580,11 @@ Dialog::run()
         ui::Widget& widget = m_pages[i]->createWidget(del);
         cards.add(widget);
         tabs.addPage(m_pages[i]->getName(), widget);
+        it.add(widget);
     }
     win.add(tabs);
     win.add(cards);
+    win.add(it);
 
     // Buttons
     ui::widgets::Button& btnClose = del.addNew(new ui::widgets::Button(tx("Close"), util::Key_Escape, root()));

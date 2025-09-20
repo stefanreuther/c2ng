@@ -61,6 +61,9 @@ ui::widgets::FocusIterator::handleKey(util::Key_t key, int /*prefix*/)
      case util::Key_PgUp:                        type = Page;       direction = Forward;  break;
      case util::Key_PgDn:                        type = Page;       direction = Backward; break;
 
+     case util::Key_F6:                          type = F6;         direction = Forward;  break;
+     case util::Key_F6 + util::KeyMod_Shift:     type = F6;         direction = Backward; break;
+
      default:                                    type = 0;          direction = Forward;  break;
     }
 
@@ -96,7 +99,7 @@ ui::widgets::FocusIterator::handleKey(util::Key_t key, int /*prefix*/)
         }
 
         // We can wrap only if configured so, and even then only once.
-        bool canWrap = (m_flags & Wrap) != 0 || (type & Tab) != 0;
+        bool canWrap = (m_flags & Wrap) != 0 || (type & (Tab | F6)) != 0;
         bool found = true;
         while (mustGo || m_widgets[index]->hasState(DisabledState)) {
             // Need to go another step

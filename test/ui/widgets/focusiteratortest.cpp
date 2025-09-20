@@ -89,6 +89,39 @@ AFL_TEST("ui.widgets.FocusIterator:Tab:normal", a)
     a.check("34", !b.in3.hasState(ui::Widget::FocusedState));
 }
 
+/** Test F6 behaviour. */
+AFL_TEST("ui.widgets.FocusIterator:Tab:f6", a)
+{
+    TestBench b(ui::widgets::FocusIterator::F6);
+    b.in1.requestFocus();
+
+    // Verify pre-state
+    a.check("01",  b.in1.hasState(ui::Widget::FocusedState));
+    a.check("02", !b.in2.hasState(ui::Widget::FocusedState));
+    a.check("03", !b.in3.hasState(ui::Widget::FocusedState));
+
+    // Try F6
+    a.check("11", b.root.handleKey(util::Key_F6, 0));
+    a.check("12", !b.in1.hasState(ui::Widget::FocusedState));
+    a.check("13",  b.in2.hasState(ui::Widget::FocusedState));
+    a.check("14", !b.in3.hasState(ui::Widget::FocusedState));
+
+    // Back
+    a.check("21", b.root.handleKey(util::Key_F6 | util::KeyMod_Shift, 0));
+    a.check("22",  b.in1.hasState(ui::Widget::FocusedState));
+    a.check("23", !b.in2.hasState(ui::Widget::FocusedState));
+    a.check("24", !b.in3.hasState(ui::Widget::FocusedState));
+
+    // Verify others
+    a.check("91", !b.root.handleKey(util::Key_Tab, 0));
+    a.check("92", !b.root.handleKey(util::Key_PgUp, 0));
+    a.check("93", !b.root.handleKey(util::Key_Right, 0));
+    a.check("94", !b.root.handleKey(util::Key_Down, 0));
+    a.check("95",  b.in1.hasState(ui::Widget::FocusedState));
+    a.check("96", !b.in2.hasState(ui::Widget::FocusedState));
+    a.check("97", !b.in3.hasState(ui::Widget::FocusedState));
+}
+
 /** Test behaviour with empty FocusIterator.
     Must not deadlock / infinite loop. */
 AFL_TEST("ui.widgets.FocusIterator:Tab:empty", a)

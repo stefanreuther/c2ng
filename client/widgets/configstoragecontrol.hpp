@@ -9,14 +9,12 @@
 #include "game/config/configurationeditor.hpp"
 #include "game/config/configurationoption.hpp"
 #include "ui/group.hpp"
-#include "ui/spacer.hpp"
-#include "ui/widgets/button.hpp"
-#include "ui/widgets/statictext.hpp"
+#include "ui/widgets/optiongrid.hpp"
 
 namespace client { namespace widgets {
 
     /** Configuration storage control.
-        Displays a ConfigurationEditor::Source (current storage location) along with a button 's' to change it.
+        Displays a ConfigurationEditor::Source (current storage location) in an OptionGrid widget.
         When used, emits a sig_change with a ConfigurationOption::Source for a new location.
 
         @change In PCC2, the widget observes and manipulates the configuration directly.
@@ -44,15 +42,13 @@ namespace client { namespace widgets {
      private:
         ui::Root& m_root;
         afl::string::Translator& m_translator;
-        ui::widgets::Button m_button;
-        ui::widgets::StaticText m_text;
-        ui::Spacer m_spacer;
+        ui::widgets::OptionGrid m_grid;
         game::config::ConfigurationEditor::Source m_source;
 
-        void init(ui::Root& root);
+        void init();
         void render();
 
-        void onButtonClick();
+        void onButtonClick(int id);
     };
 
 } }

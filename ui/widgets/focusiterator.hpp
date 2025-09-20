@@ -30,6 +30,7 @@ namespace ui { namespace widgets {
         static const int Page = 8;         ///< Accept page up/down keys. ex fi_Page.
         static const int Home = 16;        ///< Accept home/end keys. ex fi_Home.
         static const int Wrap = 32;        ///< Accept wraparound for horizontal/vertical movement. ex fi_Wrap.
+        static const int F6 = 64;          ///< Accept F6 key.
 
         /** Constructor.
             \param flags Combination of Horizontal/Vertical/Tab/Page/Home/Wrap to select behaviour. */
