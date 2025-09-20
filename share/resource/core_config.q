@@ -357,7 +357,7 @@ On UserPreferences Do
   LinkPref "Backup.Result"
   LinkExtra "%d/backups/result%p.%t"
 
-  Add Translate("Unpack | Error correction"), CCfg.Boolean.Edit, CCfg.Backup.Value
+  Add Translate("Unpack | Error correction"), CCfg.Boolean.Edit, CCfg.Boolean.Value
   LinkPref "Unpack.FixErrors"
 
   % TODO: Missing PCC1 Option: Unpack | Wait after each race
