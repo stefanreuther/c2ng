@@ -77,6 +77,10 @@ namespace game { namespace map {
             \param flag True if growing, false if weakening */
         void setIsGrowing(bool flag);
 
+        /** Set parent storm Id (Nu).
+            \param parentId Id; 0 if none */
+        void setParentId(int parentId);
+
         /** Get name.
             \param tx Translator
             \return name (same as getName(PlainName), but with fewer dependencies) */
@@ -107,6 +111,10 @@ namespace game { namespace map {
             \return true this ion storm is currently active/visible */
         bool isActive() const;
 
+        /** Get parent storm Id (Nu).
+            \return Id; 0 if none */
+        int getParentId() const;
+
         /** Add report from a message.
             This will update internal members as required.
             \param info Message information */
@@ -125,6 +133,7 @@ namespace game { namespace map {
         IntegerProperty_t m_heading;
         bool m_isGrowing;       // false if unknown
         String_t m_name;        // "" if unknown
+        int m_parentId;
 
         String_t getDefaultName(afl::string::Translator& tx) const;
     };

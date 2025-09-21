@@ -52,9 +52,11 @@ AFL_TEST("game.map.IonStorm", a)
     a.check("12. isGrowing",            !i.isGrowing());
     a.check("13. isActive",             !i.isActive());
     a.checkEqual("14. getName/1",        i.getName(tx), "Ion storm #3");
+    a.checkEqual("15. getParentId",      i.getParentId(), 0);
 
     // Populate it
     configureIonStorm(i);
+    i.setParentId(42);
 
     // Verify
     a.checkEqual("21. getName",          i.getName(game::PlainName, tx, iface), "Klothilde");
@@ -81,6 +83,7 @@ AFL_TEST("game.map.IonStorm", a)
     a.check("42. isGrowing",             i.isGrowing());
     a.check("43. isActive",              i.isActive());
     a.checkEqual("44. getName/1",        i.getName(tx), "Klothilde");
+    a.checkEqual("55. getParentId",      i.getParentId(), 42);
 }
 
 /** Test addMessageInformation to clear a storm.

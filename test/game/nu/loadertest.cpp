@@ -1170,7 +1170,7 @@ AFL_TEST("game.nu.Loader:loadTurn", a)
         "        \"warp\": 6,"
         "        \"heading\": 234,"
         "        \"isgrowing\": false,"
-        "        \"parentid\": 0,"
+        "        \"parentid\": 3,"
         "        \"id\": 56"
         "      }"
         "    ],"
@@ -1822,6 +1822,7 @@ AFL_TEST("game.nu.Loader:loadTurn", a)
     a.checkNonNull("i01", turn.universe().ionStorms().get(56));
     a.checkEqual("i02", turn.universe().ionStorms().get(56)->getRadius().orElse(-1), 166);
     a.checkEqual("i02", turn.universe().ionStorms().get(56)->getVoltage().orElse(-1), 104);
+    a.checkEqual("i03", turn.universe().ionStorms().get(56)->getParentId(), 3);
 
     // - vcrs -
     a.checkNonNull("v01", turn.getBattles().get());

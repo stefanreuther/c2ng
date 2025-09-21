@@ -67,6 +67,11 @@ game::interface::getIonStormProperty(const game::map::IonStorm& ion, IonStormPro
         /* @q Name:Str (Storm Property)
            Ion storm name. */
         return makeStringValue(ion.getName(tx));
+     case iipParentId:
+        /* @q Parent:Int (Storm Property)
+           Parent Ion storm Id (Nu).
+           @since PCC2 2.41.4 */
+        return makeIntegerValue(ion.getParentId());
      case iipRadius:
         /* @q Radius:Int (Storm Property)
            Ion storm radius in ly. */

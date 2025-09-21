@@ -1165,9 +1165,7 @@ namespace {
                 out->setWarpFactor(in("warp").toInteger());
                 out->setHeading   (in("heading").toInteger());
                 out->setIsGrowing (in("isgrowing").toInteger());
-
-                // FIXME: unknown:
-                //   parentid
+                out->setParentId  (in("parentid").toInteger());
             } else {
                 log.write(LogListener::Warn, LOG_NAME, Format(tx("Invalid ion storm Id #%d. Storm will be ignored"), id));
             }

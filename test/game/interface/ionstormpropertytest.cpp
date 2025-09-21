@@ -29,6 +29,7 @@ AFL_TEST("game.interface.IonStormProperty:get:full", a)
     storm.setWarpFactor(4);
     storm.setHeading(70);
     storm.setIsGrowing(true);
+    storm.setParentId(23);
 
     verifyNewInteger(a("iipClass"),       getIonStormProperty(storm, game::interface::iipClass,       tx), 1);
     verifyNewInteger(a("iipHeadingInt"),  getIonStormProperty(storm, game::interface::iipHeadingInt,  tx), 70);
@@ -38,6 +39,7 @@ AFL_TEST("game.interface.IonStormProperty:get:full", a)
     verifyNewInteger(a("iipLocY"),        getIonStormProperty(storm, game::interface::iipLocY,        tx), 1701);
     verifyNewBoolean(a("iipMarked"),      getIonStormProperty(storm, game::interface::iipMarked,      tx), false);
     verifyNewString (a("iipName"),        getIonStormProperty(storm, game::interface::iipName,        tx), "Kyrill");
+    verifyNewInteger(a("iipParentId"),    getIonStormProperty(storm, game::interface::iipParentId,    tx), 23);
     verifyNewInteger(a("iipRadius"),      getIonStormProperty(storm, game::interface::iipRadius,      tx), 20);
     verifyNewInteger(a("iipSpeedInt"),    getIonStormProperty(storm, game::interface::iipSpeedInt,    tx), 4);
     verifyNewString (a("iipSpeedName"),   getIonStormProperty(storm, game::interface::iipSpeedName,   tx), "Warp 4");
@@ -62,6 +64,7 @@ AFL_TEST("game.interface.IonStormProperty:get:empty", a)
     verifyNewNull(a("iipLocY"),        getIonStormProperty(storm, game::interface::iipLocY,        tx));
     verifyNewNull(a("iipMarked"),      getIonStormProperty(storm, game::interface::iipMarked,      tx));
     verifyNewNull(a("iipName"),        getIonStormProperty(storm, game::interface::iipName,        tx));
+    verifyNewNull(a("iipParentId"),    getIonStormProperty(storm, game::interface::iipParentId,    tx));
     verifyNewNull(a("iipRadius"),      getIonStormProperty(storm, game::interface::iipRadius,      tx));
     verifyNewNull(a("iipSpeedInt"),    getIonStormProperty(storm, game::interface::iipSpeedInt,    tx));
     verifyNewNull(a("iipSpeedName"),   getIonStormProperty(storm, game::interface::iipSpeedName,   tx));
@@ -88,6 +91,7 @@ AFL_TEST("game.interface.IonStormProperty:get:mostly-empty", a)
     verifyNewNull   (a("iipLocY"),        getIonStormProperty(storm, game::interface::iipLocY,        tx));
     verifyNewBoolean(a("iipMarked"),      getIonStormProperty(storm, game::interface::iipMarked,      tx), true);
     verifyNewString (a("iipName"),        getIonStormProperty(storm, game::interface::iipName,        tx), "Ion storm #23");
+    verifyNewInteger(a("iipParentId"),    getIonStormProperty(storm, game::interface::iipParentId,    tx), 0);
     verifyNewNull   (a("iipRadius"),      getIonStormProperty(storm, game::interface::iipRadius,      tx));
     verifyNewNull   (a("iipSpeedInt"),    getIonStormProperty(storm, game::interface::iipSpeedInt,    tx));
     verifyNewNull   (a("iipSpeedName"),   getIonStormProperty(storm, game::interface::iipSpeedName,   tx));

@@ -35,6 +35,7 @@ namespace {
         { "MARK",      iicMark,                         IonStormMethodDomain,   interpreter::thProcedure },
         { "MARKED",    game::interface::iipMarked,      IonStormPropertyDomain, interpreter::thBool },
         { "NAME",      game::interface::iipName,        IonStormPropertyDomain, interpreter::thString },
+        { "PARENT",    game::interface::iipParentId,    IonStormPropertyDomain, interpreter::thInt },
         { "RADIUS",    game::interface::iipRadius,      IonStormPropertyDomain, interpreter::thInt },
         { "SPEED",     game::interface::iipSpeedName,   IonStormPropertyDomain, interpreter::thString },
         { "SPEED$",    game::interface::iipSpeedInt,    IonStormPropertyDomain, interpreter::thInt },

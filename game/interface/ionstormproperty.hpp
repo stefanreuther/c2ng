@@ -20,6 +20,7 @@ namespace game { namespace interface {
         iipLocY,
         iipMarked,
         iipName,
+        iipParentId,
         iipRadius,
         iipSpeedInt,
         iipSpeedName,

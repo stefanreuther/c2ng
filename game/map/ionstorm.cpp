@@ -53,7 +53,8 @@ game::map::IonStorm::IonStorm(int id)
       m_speed(),
       m_heading(),
       m_isGrowing(false),
-      m_name()
+      m_name(),
+      m_parentId(0)
 { }
 
 game::map::IonStorm::~IonStorm()
@@ -161,6 +162,12 @@ game::map::IonStorm::setIsGrowing(bool flag)
     m_isGrowing = flag;
 }
 
+void
+game::map::IonStorm::setParentId(int parentId)
+{
+    m_parentId = parentId;
+}
+
 String_t
 game::map::IonStorm::getName(afl::string::Translator& tx) const
 {
@@ -219,6 +226,12 @@ game::map::IonStorm::isActive() const
     int volt;
     return getVoltage().get(volt)
         && volt > 0;
+}
+
+int
+game::map::IonStorm::getParentId() const
+{
+    return m_parentId;
 }
 
 void
