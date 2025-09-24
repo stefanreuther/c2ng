@@ -12,16 +12,18 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = util/processrunnerapplet.cpp util/processrunnerapplet.hpp \
-    game/v3/scannerapplet.cpp game/v3/scannerapplet.hpp \
-    game/parser/testapplet.cpp game/parser/testapplet.hpp \
-    game/browser/testapplet.cpp game/browser/testapplet.hpp \
-    util/directorybrowserapplet.cpp util/directorybrowserapplet.hpp \
-    game/vcr/flak/testapplet.cpp game/vcr/flak/testapplet.hpp \
-    game/vcr/classic/testapplet.cpp game/vcr/classic/testapplet.hpp \
-    util/applet.cpp util/applet.hpp util/net.cpp util/net.hpp \
-    game/test/staticpage.cpp game/test/staticpage.hpp game/test/webpage.cpp \
-    game/test/webpage.hpp game/test/webserver.hpp game/test/webserver.cpp \
+FILES_gamelib = game/interface/vcrfilefunction.cpp \
+    game/interface/vcrfilefunction.hpp util/processrunnerapplet.cpp \
+    util/processrunnerapplet.hpp game/v3/scannerapplet.cpp \
+    game/v3/scannerapplet.hpp game/parser/testapplet.cpp \
+    game/parser/testapplet.hpp game/browser/testapplet.cpp \
+    game/browser/testapplet.hpp util/directorybrowserapplet.cpp \
+    util/directorybrowserapplet.hpp game/vcr/flak/testapplet.cpp \
+    game/vcr/flak/testapplet.hpp game/vcr/classic/testapplet.cpp \
+    game/vcr/classic/testapplet.hpp util/applet.cpp util/applet.hpp \
+    util/net.cpp util/net.hpp game/test/staticpage.cpp \
+    game/test/staticpage.hpp game/test/webpage.cpp game/test/webpage.hpp \
+    game/test/webserver.hpp game/test/webserver.cpp \
     interpreter/coveragerecorder.cpp interpreter/coveragerecorder.hpp \
     game/nu/loader.cpp game/nu/loader.hpp game/spec/advantagelist.cpp \
     game/spec/advantagelist.hpp game/pcc/servertransport.cpp \
@@ -1833,7 +1835,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/server/talk/serverapplicationtest.cpp \
+FILES_testsuite = test/game/interface/vcrfilefunctiontest.cpp \
+    test/server/talk/serverapplicationtest.cpp \
     test/server/talk/render/textrenderertest.cpp \
     test/server/talk/render/mailrenderertest.cpp \
     test/server/talk/nulllinkparsertest.cpp \

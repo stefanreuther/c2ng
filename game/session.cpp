@@ -41,6 +41,7 @@
 #include "game/interface/shipfunction.hpp"
 #include "game/interface/torpedofunction.hpp"
 #include "game/interface/ufofunction.hpp"
+#include "game/interface/vcrfilefunction.hpp"
 #include "game/interface/vcrfunction.hpp"
 #include "game/map/object.hpp"
 #include "game/root.hpp"
@@ -815,6 +816,7 @@ game::Session::initWorld()
     m_world->setNewGlobalValue("TRUEHULL",      new SessionFunction_t(*this, game::interface::IFTruehull));
     m_world->setNewGlobalValue("UFO",           new game::interface::UfoFunction(*this));
     m_world->setNewGlobalValue("VCR",           new game::interface::VcrFunction(*this));
+    m_world->setNewGlobalValue("VCRFILE",       new SessionFunction_t(*this, game::interface::IFVcrFile));
 
     m_world->setNewGlobalValue("RADD",          new GlobalFunction_t(game::interface::IFRAdd));
     m_world->setNewGlobalValue("RALIGN",        new GlobalFunction_t(game::interface::IFRAlign));
