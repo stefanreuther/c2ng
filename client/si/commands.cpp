@@ -108,6 +108,7 @@
 #include "game/interface/richtextvalue.hpp"
 #include "game/interface/shiptaskpredictor.hpp"
 #include "game/interface/taskeditorcontext.hpp"
+#include "game/interface/vcrfilefunction.hpp"
 #include "game/interface/vmfile.hpp"
 #include "game/map/chunnelmission.hpp"
 #include "game/map/fleetmember.hpp"
@@ -2973,7 +2974,7 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
        @since PCC2 2.40.4 */
     static const char*const INDEX_VAR_NAME = "CCUI$CURRENTVCR";
 
-    args.checkArgumentCount(0);
+    args.checkArgumentCount(0, 1);
 
     // Verify that we have all components. If we don't, Adaptor/VcrDatabaseProxy will run in totally degraded mode,
     // so it's better to prevent this.
@@ -2981,13 +2982,9 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
     game::actions::mustHaveRoot(session);
     game::actions::mustHaveShipList(session);
 
-    // Likewise, there needs to be a VCR database. Not having one is not an error, though.
-    game::vcr::Database* db = g.viewpointTurn().getBattles().get();
-    if (db == 0) {
-        return;
-    }
-
     // Adaptor for VcrDatabaseProxy
+    typedef afl::base::Closure<game::proxy::VcrDatabaseAdaptor*(game::Session&)> AdaptorFactory_t;
+
     class Adaptor : public game::proxy::VcrDatabaseAdaptor {
      public:
         Adaptor(game::Session& session)
@@ -3037,10 +3034,61 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
         game::Session& m_session;
     };
 
-    class AdaptorFromSession : public afl::base::Closure<game::proxy::VcrDatabaseAdaptor*(game::Session&)> {
+    class AdaptorFromSession : public AdaptorFactory_t {
      public:
         virtual Adaptor* call(game::Session& session)
             { return new Adaptor(session); }
+    };
+
+    class FileAdaptor : public game::proxy::VcrDatabaseAdaptor {
+     public:
+        FileAdaptor(game::Session& session, VariableReference ref)
+            : m_session(session), m_ref(ref)
+            { }
+        virtual afl::base::Ref<const Root> getRoot() const
+            { return game::actions::mustHaveRoot(m_session); }
+        virtual afl::base::Ref<const ShipList> getShipList() const
+            { return game::actions::mustHaveShipList(m_session); }
+        virtual const game::TeamSettings* getTeamSettings() const
+            { return &game::actions::mustHaveGame(m_session).teamSettings(); }
+        virtual afl::base::Ref<game::vcr::Database> getBattles()
+            {
+                std::auto_ptr<afl::data::Value> p(m_ref.get(m_session.processList()));
+                game::interface::VcrFileFunction* ff = dynamic_cast<game::interface::VcrFileFunction*>(p.get());
+                afl::except::checkAssertion(ff != 0, "VCR object present");
+                return ff->battles();
+            }
+        virtual afl::string::Translator& translator()
+            { return m_session.translator(); }
+        virtual afl::sys::LogListener& log()
+            { return m_session.log(); }
+        virtual afl::io::FileSystem& fileSystem()
+            { return m_session.world().fileSystem(); }
+        virtual size_t getCurrentBattle() const
+            { return 0; }
+        virtual void setCurrentBattle(size_t /*n*/)
+            { }
+        virtual game::sim::Setup* getSimulationSetup() const
+            { return 0; }
+        virtual bool isGameObject(const game::vcr::Object& obj) const
+            {
+                Game* g = m_session.getGame().get();
+                return g != 0 && g->isGameObject(obj, getShipList()->hulls());
+            }
+     private:
+        game::Session& m_session;
+        VariableReference m_ref;
+    };
+
+    class FileAdaptorFromSession : public AdaptorFactory_t {
+     public:
+        FileAdaptorFromSession(VariableReference ref)
+            : m_ref(ref)
+            { }
+        virtual FileAdaptor* call(game::Session& session)
+            { return new FileAdaptor(session, m_ref); }
+     private:
+        VariableReference m_ref;
     };
 
     class JoiningControl : public Control {
@@ -3081,22 +3129,53 @@ client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 
         RequestLink2 m_link;
     };
 
+
+    // Check argument
+    std::auto_ptr<AdaptorFactory_t> pAdaptor;
+    if (args.getNumArgs() > 0) {
+        // VCRs from object.
+        afl::data::Value* p = args.getNext();
+        if (p == 0) {
+            return;
+        }
+        game::interface::VcrFileFunction* ff = dynamic_cast<game::interface::VcrFileFunction*>(p);
+        if (ff == 0) {
+            throw interpreter::Error::typeError(interpreter::Error::ExpectNone);
+        }
+
+        // Save in a variable
+        VariableReference ref = VariableReference::Maker(link.getProcess()).make("CC$VCR", p);
+        pAdaptor.reset(new FileAdaptorFromSession(ref));
+    } else {
+        // Global VCRs. There needs to be a VCR database. Not having one is not an error, though.
+        game::vcr::Database* db = g.viewpointTurn().getBattles().get();
+        if (db == 0) {
+            return;
+        }
+        pAdaptor.reset(new AdaptorFromSession());
+    }
+
     class CombatTask : public UserTask {
      public:
+        CombatTask(std::auto_ptr<AdaptorFactory_t>& pAdaptor)
+            : m_pAdaptor(pAdaptor)
+            { }
         virtual void handle(Control& ctl, RequestLink2 link)
             {
                 client::si::UserSide& us = ctl.interface();
-                Reference ref = client::dialogs::playCombat(ctl.root(), ctl.translator(), us.gameSender().makeTemporary(new AdaptorFromSession()), us.gameSender(), us.mainLog());
+                Reference ref = client::dialogs::playCombat(ctl.root(), ctl.translator(), us.gameSender().makeTemporary(m_pAdaptor.release()), us.gameSender(), us.mainLog());
                 if (ref.isSet()) {
                     // Re-using the existing executeGoToReferenceWait function requires use of a Control,
                     // and will produce a potential second process that we need to join with ours.
-                    JoiningControl(ctl, link).executeGoToReferenceWait("(Battle Simulator)", ref, Control::ShowUnit);
+                    JoiningControl(ctl, link).executeGoToReferenceWait("(VCR)", ref, Control::ShowUnit);
                 }
                 us.continueProcess(link);
             }
+     private:
+        std::auto_ptr<AdaptorFactory_t> m_pAdaptor;
     };
 
-    si.postNewTask(link, new CombatTask());
+    si.postNewTask(link, new CombatTask(pAdaptor));
 }
 
 // @since PCC2 2.40.5

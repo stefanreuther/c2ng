@@ -709,6 +709,7 @@ Bind RaceScreen       "c-s"    := "SaveGame"
 Bind RaceScreen       "t"      := "UI.EditTeams"
 Bind RaceScreen       "alt-u"  := "CCUI.Messages.ViewUtilData"
 Bind RaceScreen       "v"      := "CC$ViewCombat"
+Bind RaceScreen       "alt-v"  := "CCUI.VCR.ViewFile"
 Bind RaceScreen       "w"      := "CC$SendMessage"
 Bind RaceScreen       "find"   := "UI.Search"
 

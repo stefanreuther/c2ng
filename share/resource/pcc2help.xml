@@ -436,6 +436,7 @@
         <ki key="Alt-N">Open <a href="pcc2:notify">Notification messages</a>;</ki>
         <ki key="Alt-Q">Open <a href="pcc2:processmgr">Process Manager</a>;</ki>
         <ki key="Alt-U">Show <tt>util.dat</tt> using <a href="pcc2:msgin">message viewer</a>;</ki>
+        <ki key="Alt-V">Show saved combat using <a href="pcc2:vcr">VCR player</a>;</ki>
         <ki key="Alt-.">Open <a href="pcc2:selectionmgr">selection manager</a>;</ki>
         <ki key="Alt-Left, Alt-Right">Next/previous selection layer;</ki>
         <ki key="Backspace">Go to previous screen;</ki>

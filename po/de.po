@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-09-19 21:19+0200\n"
+"PO-Revision-Date: 2025-09-24 13:11+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:390
@@ -1041,7 +1041,7 @@ msgstr "(Id #%d, %s - %d°F, %s)"
 msgid "(Id #%d, %s)"
 msgstr "(Id #%d, %s)"
 
-#: client/widgets/configstoragecontrol.cpp:21
+#: client/widgets/configstoragecontrol.cpp:23
 msgid "(Multiple files)"
 msgstr "(Mehrere Dateien)"
 
@@ -1085,7 +1085,7 @@ msgstr "(Verteidigung) %d"
 msgid "(dialog)"
 msgstr "(Dialog)"
 
-#: client/dialogs/preferences.cpp:348
+#: client/dialogs/preferences.cpp:350
 msgid "(empty)"
 msgstr "(leer)"
 
@@ -1659,7 +1659,7 @@ msgstr "Planet hinzufügen"
 msgid "Add Ship"
 msgstr "Schiff hinzufügen"
 
-#: share/resource/core_ui.q:2154
+#: share/resource/core_ui.q:2187
 msgid "Add all to fleet"
 msgstr "Alle zu Flotte hinzufügen"
 
@@ -1944,15 +1944,15 @@ msgstr "Angreifer"
 msgid "Auto Task"
 msgstr "Aufgabe"
 
-#: game/session.cpp:340
+#: game/session.cpp:341
 msgid "Auto Task Planet %d"
 msgstr "Aufgabe Planet %d"
 
-#: game/session.cpp:338
+#: game/session.cpp:339
 msgid "Auto Task Ship %d"
 msgstr "Aufgabe Schiff %d"
 
-#: game/session.cpp:341
+#: game/session.cpp:342
 msgid "Auto Task Starbase %d"
 msgstr "Aufgabe Sternenbasis %d"
 
@@ -2238,7 +2238,7 @@ msgstr "Raumjäger/Torpedos bauen"
 msgid "Build a new ship..."
 msgstr "Ein neues Schiff bauen..."
 
-#: share/resource/core_ui.q:1788 share/resource/core_ui.q:2122
+#: share/resource/core_ui.q:1788 share/resource/core_ui.q:2155
 msgid "Build defense posts"
 msgstr "Verteidigungsposten bauen"
 
@@ -2246,11 +2246,11 @@ msgstr "Verteidigungsposten bauen"
 msgid "Build earlier"
 msgstr "Früher bauen"
 
-#: share/resource/core_ui.q:1793 share/resource/core_ui.q:2120
+#: share/resource/core_ui.q:1793 share/resource/core_ui.q:2153
 msgid "Build factories"
 msgstr "Fabriken bauen"
 
-#: share/resource/core_ui.q:2019
+#: share/resource/core_ui.q:2052
 msgid "Build fighters"
 msgstr "Raumjäger bauen"
 
@@ -2258,7 +2258,7 @@ msgstr "Raumjäger bauen"
 msgid "Build later"
 msgstr "Später bauen"
 
-#: share/resource/core_ui.q:1798 share/resource/core_ui.q:2121
+#: share/resource/core_ui.q:1798 share/resource/core_ui.q:2154
 msgid "Build mines"
 msgstr "Minen bauen"
 
@@ -2266,7 +2266,7 @@ msgstr "Minen bauen"
 msgid "Build order rejected"
 msgstr "Bauauftrag abgelehnt"
 
-#: share/resource/core_tiles.q:966 share/resource/core_ui.q:2119
+#: share/resource/core_tiles.q:966 share/resource/core_ui.q:2152
 msgid "Build starbase"
 msgstr "Sternenbasis bauen"
 
@@ -2278,7 +2278,7 @@ msgstr "Dieses Schiff bauen?"
 msgid "Build this starbase?"
 msgstr "Diese Sternenbasis bauen?"
 
-#: share/resource/core_ui.q:2020
+#: share/resource/core_ui.q:2053
 msgid "Build torpedoes"
 msgstr "Torpedos bauen"
 
@@ -2376,15 +2376,15 @@ msgstr "Können getarnte Schiffe erkennen"
 msgid "Cancel"
 msgstr "Abbruch"
 
-#: share/resource/core_ui.q:2062
+#: share/resource/core_ui.q:2095
 msgid "Cancel \"fix\" order"
 msgstr "Reparatur-Auftrag stornieren"
 
-#: share/resource/core_ui.q:2030 share/resource/core_ui.q:2063
+#: share/resource/core_ui.q:2063 share/resource/core_ui.q:2096
 msgid "Cancel \"recycle\" order"
 msgstr "`Recycle'-Auftrag stornieren"
 
-#: share/resource/core_ui.q:2025
+#: share/resource/core_ui.q:2058
 msgid "Cancel \"repair\" order"
 msgstr "Reparatur-Auftrag stornieren"
 
@@ -2463,15 +2463,15 @@ msgstr "Fracht-Zusammenfassung (Vorhersage)"
 #: client/dialogs/cargotransferdialog.cpp:74
 #: client/dialogs/multitransfer.cpp:523 client/dialogs/multitransfer.cpp:728
 #: client/dialogs/multitransfer.cpp:735 client/dialogs/multitransfer.cpp:739
-#: client/si/commands.cpp:2753 share/resource/core_ui.q:336
+#: client/si/commands.cpp:2754 share/resource/core_ui.q:336
 msgid "Cargo Transfer"
 msgstr "Fracht-Transfer"
 
-#: share/resource/core_ui.q:1825 share/resource/core_ui.q:2100
+#: share/resource/core_ui.q:1825 share/resource/core_ui.q:2133
 msgid "Cargo Unload"
 msgstr "Fracht entladen"
 
-#: share/resource/core_ui.q:1835 share/resource/core_ui.q:2101
+#: share/resource/core_ui.q:1835 share/resource/core_ui.q:2134
 msgid "Cargo Upload"
 msgstr "Fracht aufladen"
 
@@ -2528,7 +2528,7 @@ msgstr "Zeichensatz ändern"
 msgid "Change File Type"
 msgstr "Dateityp ändern"
 
-#: client/si/commands.cpp:4147
+#: client/si/commands.cpp:4226
 msgid "Change Friendly Code"
 msgstr "Kommandocode ändern"
 
@@ -2626,7 +2626,7 @@ msgid "Choose player slots to clean"
 msgstr "Wähle aufzuräumende Spieler:"
 
 #: client/dialogs/navchartdialog.cpp:675 client/dialogs/navchartdialog.cpp:684
-#: client/si/commands.cpp:1512
+#: client/si/commands.cpp:1513
 msgid "Chunnel"
 msgstr "Chunnel"
 
@@ -2710,7 +2710,7 @@ msgstr "Klone %s"
 msgid "Clone Ship"
 msgstr "Schiff klonen"
 
-#: share/resource/core_ui.q:2034
+#: share/resource/core_ui.q:2067
 msgid "Clone this ship"
 msgstr "Dieses Schiff klonen"
 
@@ -2732,7 +2732,7 @@ msgstr "Klone, und baue ein %s"
 #: client/dialogs/imperialstats.cpp:278 client/dialogs/ionstormforecast.cpp:149
 #: client/dialogs/ionstorminfo.cpp:149 client/dialogs/keymapdialog.cpp:145
 #: client/dialogs/minefieldinfo.cpp:220 client/dialogs/planetinfodialog.cpp:107
-#: client/dialogs/pluginmanager.cpp:124 client/dialogs/preferences.cpp:585
+#: client/dialogs/pluginmanager.cpp:124 client/dialogs/preferences.cpp:590
 #: client/dialogs/processlistdialog.cpp:722 client/dialogs/scores.cpp:736
 #: client/dialogs/searchdialog.cpp:335 client/dialogs/shipcostcalculator.cpp:73
 #: client/dialogs/simpleconsole.cpp:22
@@ -2978,7 +2978,7 @@ msgstr "Vervollständigungen"
 msgid "Computing..."
 msgstr "Arbeite..."
 
-#: client/dialogs/preferences.cpp:496 game/v3/attachmentunpacker.cpp:569
+#: client/dialogs/preferences.cpp:498 game/v3/attachmentunpacker.cpp:569
 msgid "Configuration File"
 msgstr "Konfigurationsdatei"
 
@@ -3212,7 +3212,7 @@ msgstr "Weltraum (%d,%d)"
 msgid "Default marker"
 msgstr "Standard-Marker"
 
-#: client/widgets/configstoragecontrol.cpp:22
+#: client/widgets/configstoragecontrol.cpp:24
 msgid "Default value"
 msgstr "Standardwert"
 
@@ -3465,7 +3465,7 @@ msgstr "Zahlen keine Steuern; fressen Kolonisten"
 msgid "Don't pay taxes; extend sensor range"
 msgstr "Zahlen keine Steuern; erweitern Sensorreichweite"
 
-#: share/resource/core_ui.q:2114
+#: share/resource/core_ui.q:2147
 msgid "Don't show turn distances"
 msgstr "Keine Entfernungen anzeigen"
 
@@ -3610,7 +3610,7 @@ msgstr "Marker bearbeiten"
 msgid "Edit Message"
 msgstr "Nachricht bearbeiten"
 
-#: client/dialogs/preferences.cpp:523 share/resource/core_config.q:258
+#: client/dialogs/preferences.cpp:525 share/resource/core_config.q:258
 msgid "Edit Option"
 msgstr "Einstellung ändern"
 
@@ -3709,7 +3709,7 @@ msgstr "Triebwerk-Schild-Bonus-Rate"
 msgid "Engines"
 msgstr "Triebwerke"
 
-#: share/resource/core_ui.q:2131
+#: share/resource/core_ui.q:2164
 msgid "Enqueue Ship Build Order"
 msgstr "Schiffs-Bauauftrag erstellen"
 
@@ -3717,7 +3717,7 @@ msgstr "Schiffs-Bauauftrag erstellen"
 msgid "Enter - Build"
 msgstr "Enter - Bauen"
 
-#: client/dialogs/preferences.cpp:318
+#: client/dialogs/preferences.cpp:320
 msgid "Enter - Change"
 msgstr "Enter - Ändern"
 
@@ -4342,7 +4342,7 @@ msgstr "Datei zu kurz"
 msgid "File type"
 msgstr "Dateityp"
 
-#: client/si/commands.cpp:2476
+#: client/si/commands.cpp:2477
 msgid "File..."
 msgstr "Datei..."
 
@@ -4366,11 +4366,11 @@ msgstr "Zeichnungen filtern"
 msgid "Filtered"
 msgstr "Gefiltert"
 
-#: share/resource/core_ui.q:2060
+#: share/resource/core_ui.q:2093
 msgid "Fix (repair) a ship"
 msgstr "Schiff reparieren"
 
-#: share/resource/core_ui.q:2027
+#: share/resource/core_ui.q:2060
 msgid "Fix (repair) this ship"
 msgstr "Schiff reparieren"
 
@@ -4409,7 +4409,7 @@ msgstr "Flottenkosten-Vergleich"
 msgid "Fleet Cost Comparison...\t[Ctrl-C]"
 msgstr "Flottenkosten-Vergleich...\t[Strg-C]"
 
-#: share/resource/core_ui.q:2138
+#: share/resource/core_ui.q:2171
 msgid "Fleet screen"
 msgstr "Flotten-Bildschirm"
 
@@ -4592,7 +4592,7 @@ msgstr "Spielverzeichnis-Setup"
 msgid "Game Settings"
 msgstr "Spiel-Einstellungen"
 
-#: client/widgets/configstoragecontrol.cpp:25
+#: client/widgets/configstoragecontrol.cpp:27
 msgid "Game configuration file"
 msgstr "Spiel-Konfigurationsdatei"
 
@@ -4813,7 +4813,7 @@ msgstr "Gehe zu X/Y"
 msgid "Go to"
 msgstr "Gehe zu"
 
-#: share/resource/core_ui.q:2142
+#: share/resource/core_ui.q:2175
 msgid "Go to fleet leader"
 msgstr "Zum Flotten-Führer wechseln"
 
@@ -4917,7 +4917,7 @@ msgstr "Kurs"
 #: client/dialogs/newdrawing.cpp:84 client/dialogs/newdrawingtag.cpp:98
 #: client/dialogs/objectselectiondialog.cpp:373
 #: client/dialogs/outboxdialog.cpp:78 client/dialogs/pluginmanager.cpp:123
-#: client/dialogs/preferences.cpp:586 client/dialogs/processlistdialog.cpp:723
+#: client/dialogs/preferences.cpp:591 client/dialogs/processlistdialog.cpp:723
 #: client/dialogs/revertdialog.cpp:83 client/dialogs/scores.cpp:735
 #: client/dialogs/searchdialog.cpp:338 client/dialogs/selectionmanager.cpp:371
 #: client/dialogs/sellsuppliesdialog.cpp:62
@@ -5398,7 +5398,7 @@ msgstr "Ungültige Eingabe."
 msgid "Invalid ion storm Id #%d"
 msgstr "Ungültige Ionensturm-Id #%d"
 
-#: game/nu/loader.cpp:1172 game/v3/loader.cpp:482
+#: game/nu/loader.cpp:1170 game/v3/loader.cpp:482
 msgid "Invalid ion storm Id #%d. Storm will be ignored"
 msgstr "Ungültige Ionensturm-Id #%d. Sturm wird ignoriert."
 
@@ -5552,7 +5552,7 @@ msgstr "Ionensturm-Informationen"
 msgid "Ion Storms"
 msgstr "Ionenstürme"
 
-#: game/map/ionstorm.cpp:291
+#: game/map/ionstorm.cpp:304
 msgid "Ion storm #%d"
 msgstr "Ionensturm #%d"
 
@@ -5611,7 +5611,7 @@ msgstr "Fracht über Bord werfen"
 msgid "Join Fleet"
 msgstr "Einer Flotte beitreten"
 
-#: share/resource/core_ui.q:2147
+#: share/resource/core_ui.q:2180
 msgid "Join a fleet"
 msgstr "Einer Flotte beitreten"
 
@@ -5720,7 +5720,7 @@ msgstr "Fangminen legen"
 msgid "Leader of fleet #%d"
 msgstr "Führer von Flotte #%d"
 
-#: share/resource/core_ui.q:2140
+#: share/resource/core_ui.q:2173
 msgid "Leave fleet"
 msgstr "Flotte verlassen"
 
@@ -5736,12 +5736,12 @@ msgstr "Links/Rechts-Ausgleich"
 msgid "Level %d"
 msgstr "Stufe %d"
 
-#: client/si/commands.cpp:4351
+#: client/si/commands.cpp:4430
 msgid "List Fleets"
 msgstr "Flotten-Liste"
 
 #: client/dialogs/navchartdialog.cpp:513
-#: client/dialogs/visualscandialog.cpp:1079 client/si/commands.cpp:4526
+#: client/dialogs/visualscandialog.cpp:1079 client/si/commands.cpp:4605
 msgid "List Ships"
 msgstr "Schiffe"
 
@@ -5795,7 +5795,7 @@ msgstr "\"%s\" geladen"
 msgid "Loaded %d combat recording%!1{s%} (FLAK)..."
 msgstr "%d Kampf-Aufzeichnung%!1{en%} (FLAK) geladen..."
 
-#: game/nu/loader.cpp:1196 game/v3/loader.cpp:534
+#: game/nu/loader.cpp:1194 game/v3/loader.cpp:534
 msgid "Loaded %d combat recording%!1{s%}..."
 msgstr "%d Kampf-Aufzeichnung%!1{en%} geladen..."
 
@@ -6113,7 +6113,7 @@ msgstr "Teil von Flotte #%d"
 msgid "Merge Selection"
 msgstr "Auswahl hinzufügen"
 
-#: client/si/commands.cpp:4633 client/si/commands.cpp:852
+#: client/si/commands.cpp:4712 client/si/commands.cpp:853
 #: share/resource/core.q:59
 msgid "Message"
 msgstr "Nachricht"
@@ -6162,7 +6162,7 @@ msgid "Message too big"
 msgstr "Nachricht zu groß"
 
 #: client/dialogs/visualscandialog.cpp:433 client/screens/playerscreen.cpp:142
-#: client/si/commands.cpp:249
+#: client/si/commands.cpp:250
 msgid "Messages"
 msgstr "Nachrichten"
 
@@ -6463,11 +6463,11 @@ msgstr "Maus"
 msgid "Mouse wheel does..."
 msgstr "Mausrad-Aktion..."
 
-#: share/resource/core_ui.q:1848 share/resource/core_ui.q:2093
+#: share/resource/core_ui.q:1848 share/resource/core_ui.q:2126
 msgid "Move To"
 msgstr "Bewege zu"
 
-#: share/resource/core_ui.q:1859 share/resource/core_ui.q:2094
+#: share/resource/core_ui.q:1859 share/resource/core_ui.q:2127
 msgid "Move Towards"
 msgstr "Bewege in Richtung"
 
@@ -6601,7 +6601,7 @@ msgstr "Neutronium-Dichte"
 msgid "New"
 msgstr "Neu"
 
-#: client/dialogs/preferences.cpp:523 share/resource/core_config.q:258
+#: client/dialogs/preferences.cpp:525 share/resource/core_config.q:258
 msgid "New Value"
 msgstr "Neuer Wert"
 
@@ -6729,7 +6729,7 @@ msgstr "Keine Locks im System aktiv."
 msgid "No matching ship found."
 msgstr "Kein passendes Schiff gefunden."
 
-#: client/si/commands.cpp:250
+#: client/si/commands.cpp:251
 msgid "No messages"
 msgstr "Keine Nachrichten"
 
@@ -6737,7 +6737,7 @@ msgstr "Keine Nachrichten"
 msgid "No messages for this ship"
 msgstr "Keine Nachrichten für dieses Schiff"
 
-#: client/si/commands.cpp:2502
+#: client/si/commands.cpp:2503
 msgid "No messages sent so far"
 msgstr "Keine Nachrichten gesendet bisher"
 
@@ -6858,7 +6858,7 @@ msgstr "Meldungen"
 msgid "Notify"
 msgstr "Meldung"
 
-#: share/resource/core_ui.q:2081
+#: share/resource/core_ui.q:2114
 msgid "Notify message"
 msgstr "Meldung"
 
@@ -6910,9 +6910,9 @@ msgstr "O - Optionen"
 #: client/dialogs/shipspeeddialog.cpp:66 client/dialogs/taxationdialog.cpp:607
 #: client/dialogs/turnlistdialog.cpp:112
 #: client/dialogs/visualscandialog.cpp:1080
-#: client/dialogs/visualscandialog.cpp:915 client/si/commands.cpp:2016
-#: client/si/commands.cpp:4350 client/si/commands.cpp:4414
-#: client/si/commands.cpp:4525 client/si/commands.cpp:4634
+#: client/dialogs/visualscandialog.cpp:915 client/si/commands.cpp:2017
+#: client/si/commands.cpp:4429 client/si/commands.cpp:4493
+#: client/si/commands.cpp:4604 client/si/commands.cpp:4713
 #: client/widgets/markercolorselector.cpp:80 share/resource/core.q:87
 #: share/resource/core_config.q:72 share/resource/core_ui.q:1056
 #: share/resource/core_ui.q:1228 share/resource/core_ui.q:1235
@@ -7460,6 +7460,11 @@ msgstr "Plasmaoid"
 msgid "Play"
 msgstr "Wiedergabe"
 
+#: share/resource/core_ui.q:1997 share/resource/core_ui.q:2005
+#: share/resource/core_ui.q:2013 share/resource/core_ui.q:2021
+msgid "Play VCRs from File"
+msgstr "Spiele VCR aus Datei"
+
 #: client/dialogs/searchdialog.cpp:394
 msgid "Played objects only"
 msgstr "Nur gespielte Objekte"
@@ -7490,7 +7495,7 @@ msgstr "Spieler"
 msgid "Players..."
 msgstr "Spieler..."
 
-#: client/si/commands.cpp:1507
+#: client/si/commands.cpp:1508
 msgid "Please fix the following problems to make the chunnel work"
 msgstr "Bitte behebe die folgenden Probleme, damit der Chunnel funktioniert"
 
@@ -7581,15 +7586,15 @@ msgstr "Vordefinierte Ausdrücke"
 msgid "Predefined queries"
 msgstr "Vordefinierte Abfragen"
 
-#: share/resource/core_ui.q:2113
+#: share/resource/core_ui.q:2146
 msgid "Predict to cursor"
 msgstr "Vorhersage bis Cursor"
 
-#: share/resource/core_ui.q:2113
+#: share/resource/core_ui.q:2146
 msgid "Predict to end"
 msgstr "Vorhersage bis Ende"
 
-#: client/si/commands.cpp:2012
+#: client/si/commands.cpp:2013
 msgid "Prediction Details"
 msgstr "Vorhersage-Details"
 
@@ -7883,11 +7888,11 @@ msgstr "Rechteck"
 msgid "Recycle Ship"
 msgstr "Raumschiff verschrotten"
 
-#: share/resource/core_ui.q:2061
+#: share/resource/core_ui.q:2094
 msgid "Recycle a ship"
 msgstr "Raumschiff verschrotten"
 
-#: share/resource/core_ui.q:2032
+#: share/resource/core_ui.q:2065
 msgid "Recycle this ship"
 msgstr "Raumschiff verschrotten"
 
@@ -8073,7 +8078,7 @@ msgstr "Ressourcen-Datei (Grafik)"
 msgid "Resources Needed"
 msgstr "Benötigte Ressourcen"
 
-#: share/resource/core_ui.q:2087
+#: share/resource/core_ui.q:2120
 msgid "Restart task from beginning"
 msgstr "Beginne Aufgabe erneut"
 
@@ -8093,11 +8098,11 @@ msgstr "Ergebnisse nach %d Simulation%!1{en%}"
 msgid "Return to race selection"
 msgstr "Zurück zur Spielauswahl"
 
-#: client/dialogs/outboxdialog.cpp:355 client/si/commands.cpp:2500
+#: client/dialogs/outboxdialog.cpp:355 client/si/commands.cpp:2501
 msgid "Revise Messages"
 msgstr "Nachrichten überarbeiten"
 
-#: client/si/commands.cpp:2473
+#: client/si/commands.cpp:2474
 msgid "Revise..."
 msgstr "Überarbeiten..."
 
@@ -8403,7 +8408,7 @@ msgstr "Raumschiff auswählen"
 msgid "Select Starbase"
 msgstr "Sternenbasis auswählen"
 
-#: client/si/commands.cpp:1540
+#: client/si/commands.cpp:1541
 msgid "Select Waypoint"
 msgstr "Wähle Zielpunkt"
 
@@ -8445,7 +8450,7 @@ msgstr "Semikolon-getrennte Werte"
 msgid "Send"
 msgstr "Senden"
 
-#: client/si/commands.cpp:2468
+#: client/si/commands.cpp:2469
 msgid "Send Message"
 msgstr "Nachricht senden"
 
@@ -8454,7 +8459,7 @@ msgid "Send file with TRN (will echo back with next RST, PHost 4.0+)"
 msgstr ""
 "Datei mit dem TRN übertragen (wird mit dem RST zurückgesendet, PHost 4.0+)"
 
-#: client/si/commands.cpp:2510 client/si/commands.cpp:2514
+#: client/si/commands.cpp:2511 client/si/commands.cpp:2515
 msgid "Send message to file"
 msgstr "Nachricht in Datei senden"
 
@@ -8490,7 +8495,7 @@ msgstr "Sternenbasis-Verteidigung setzen"
 msgid "Set Base Fighters"
 msgstr "Anzahl Jäger setzen"
 
-#: share/resource/core_ui.q:1886 share/resource/core_ui.q:2082
+#: share/resource/core_ui.q:1886 share/resource/core_ui.q:2115
 msgid "Set Comment"
 msgstr "Setze Notiz"
 
@@ -8506,7 +8511,7 @@ msgstr "Schaden setzen"
 msgid "Set Defense"
 msgstr "Verteidigung setzen"
 
-#: share/resource/core_ui.q:2106
+#: share/resource/core_ui.q:2139
 msgid "Set Enemy"
 msgstr "Setze Primärziel"
 
@@ -8518,8 +8523,8 @@ msgstr "Triebwerkstyp setzen"
 msgid "Set Experience Level"
 msgstr "Erfahrungsstufe setzen"
 
-#: share/resource/core_ui.q:2107 share/resource/core_ui.q:2118
-#: share/resource/core_ui.q:2133
+#: share/resource/core_ui.q:2140 share/resource/core_ui.q:2151
+#: share/resource/core_ui.q:2166
 msgid "Set FCode"
 msgstr "Setze Kommandocode"
 
@@ -8547,11 +8552,11 @@ msgstr "Setzen Verlassen Abbruch"
 msgid "Set Mass"
 msgstr "Masse setzen"
 
-#: share/resource/core_ui.q:2108 share/resource/core_ui.q:2132
+#: share/resource/core_ui.q:2141 share/resource/core_ui.q:2165
 msgid "Set Mission"
 msgstr "Setze Mission"
 
-#: share/resource/core_ui.q:1913 share/resource/core_ui.q:2084
+#: share/resource/core_ui.q:1913 share/resource/core_ui.q:2117
 msgid "Set Name"
 msgstr "Name setzen"
 
@@ -8584,7 +8589,7 @@ msgid "Set Ship Name"
 msgstr "Name setzen"
 
 #: client/dialogs/shipspeeddialog.cpp:49 share/resource/core_ui.q:1937
-#: share/resource/core_ui.q:2092
+#: share/resource/core_ui.q:2125
 msgid "Set Speed"
 msgstr "Geschwindigkeit setzen"
 
@@ -8596,7 +8601,7 @@ msgstr "Setze Sternenbasis-Beam-Tech"
 msgid "Set Starbase Torpedo Tech"
 msgstr "Setze Sternenbasis-Torpedo-Tech"
 
-#: share/resource/core_ui.q:1943 share/resource/core_ui.q:2095
+#: share/resource/core_ui.q:1943 share/resource/core_ui.q:2128
 msgid "Set Waypoint"
 msgstr "Setze Kurs"
 
@@ -8624,7 +8629,7 @@ msgstr "Passwort für Result-Datei..."
 msgid "Set up for playing"
 msgstr "Einrichten für Spiel"
 
-#: client/dialogs/preferences.cpp:571
+#: client/dialogs/preferences.cpp:573
 msgid "Settings"
 msgstr "Einstellungen"
 
@@ -8734,7 +8739,7 @@ msgstr "Schiffs-Liste"
 msgid "Ship Mission"
 msgstr "Schiffs-Mission"
 
-#: client/si/commands.cpp:4415
+#: client/si/commands.cpp:4494
 msgid "Ship Prediction"
 msgstr "Schiffs-Vorhersage"
 
@@ -8854,7 +8859,7 @@ msgstr "Schiffe beginnen mit Erfahrung"
 msgid "Ships w/o fuel"
 msgstr "Schiffe ohne Sprit"
 
-#: share/resource/core_ui.q:2074
+#: share/resource/core_ui.q:2107
 msgid "Shipyard"
 msgstr "Raumdock"
 
@@ -8883,7 +8888,7 @@ msgstr "Zeige alle Schiffstypen"
 msgid "Show minefield to an ally"
 msgstr "Minenfeld einem Verbündeten zeigen"
 
-#: client/si/commands.cpp:1916
+#: client/si/commands.cpp:1917
 msgid "Show minefield to..."
 msgstr "Zeige Minenfeld..."
 
@@ -8939,7 +8944,7 @@ msgstr "Zeige nur Torpedos"
 msgid "Show planet to an ally"
 msgstr "Planet einem Verbündeten zeigen"
 
-#: client/si/commands.cpp:1912
+#: client/si/commands.cpp:1913
 msgid "Show planet to..."
 msgstr "Zeige Planet..."
 
@@ -8947,11 +8952,11 @@ msgstr "Zeige Planet..."
 msgid "Show ship to an ally"
 msgstr "Schiff einem Verbündeten zeigen"
 
-#: client/si/commands.cpp:1914
+#: client/si/commands.cpp:1915
 msgid "Show ship to..."
 msgstr "Zeige Schiff..."
 
-#: share/resource/core_ui.q:2114
+#: share/resource/core_ui.q:2147
 msgid "Show turn distances"
 msgstr "Entfernungen anzeigen"
 
@@ -9176,7 +9181,7 @@ msgstr "Sternenbasis #%d hat keinen Planeten, wird gelöscht"
 msgid "Starbase #%d: %s"
 msgstr "Sternenbasis #%d: %s"
 
-#: share/resource/core_ui.q:2042
+#: share/resource/core_ui.q:2075
 msgid "Starbase Commands"
 msgstr "Sternenbasis-Befehle"
 
@@ -9217,7 +9222,7 @@ msgstr "Sternenbasis wird gebaut..."
 msgid "Starbase present"
 msgstr "Sternenbasis im Orbit"
 
-#: share/resource/core_ui.q:2021
+#: share/resource/core_ui.q:2054
 msgid "Starbase screen"
 msgstr "Sternenbasis-Bildschirm"
 
@@ -9266,7 +9271,7 @@ msgstr "Schiffs-Rümpfe"
 msgid "Starships"
 msgstr "Raumschiffe"
 
-#: share/resource/core_ui.q:2145
+#: share/resource/core_ui.q:2178
 msgid "Start new fleet"
 msgstr "Beginne neue Flotte"
 
@@ -9294,6 +9299,10 @@ msgstr "Stop"
 #: client/si/userside.cpp:100
 msgid "Stopping..."
 msgstr "Unterbrechen..."
+
+#: client/widgets/configstoragecontrol.cpp:61
+msgid "Stored in"
+msgstr "Gespeichert in"
 
 #: game/parser/messagevalue.cpp:238
 msgid "Storm Status"
@@ -9399,7 +9408,7 @@ msgstr "Syntax-Fehler"
 msgid "Syntax error, line has been ignored"
 msgstr "Syntaxfehler, Zeile wurde ignoriert"
 
-#: client/widgets/configstoragecontrol.cpp:23
+#: client/widgets/configstoragecontrol.cpp:25
 msgid "System configuration file"
 msgstr "System-Konfigurationsdatei"
 
@@ -9775,7 +9784,7 @@ msgstr "An dieser Position befindet sich kein weiteres unserer Schiffe."
 msgid "There is no other unit at this place which could carry %s."
 msgstr "Keine andere Einheit an dieser Stelle kann %s tragen."
 
-#: share/resource/core_ui.q:2074
+#: share/resource/core_ui.q:2107
 msgid "There is no ship at this starbase which could be fixed or recycled."
 msgstr ""
 "An dieser Sternenbasis halten sich keine Schiffe auf, die repariert oder "
@@ -9958,6 +9967,10 @@ msgstr ""
 "Diese Datei enthielt %d Zeile%1{, die in einer Aufgabe nicht zulässig ist. "
 "Sie wurde ignoriert%|n, die in einer Aufgabe nicht zulässig sind. Sie wurden "
 "ignoriert%}."
+
+#: share/resource/core_ui.q:2021
+msgid "This file does not contain any battles."
+msgstr "Diese Datei enthält keine Kämpfe."
 
 #: share/resource/core_ui.q:774
 msgid ""
@@ -10413,7 +10426,7 @@ msgstr "Frachttransfer zu..."
 msgid "Transfer cash/ammo to foreign ship"
 msgstr "Geld/Munition auf fremdes Schiff laden"
 
-#: client/si/commands.cpp:2753
+#: client/si/commands.cpp:2754
 msgid "Transfer which cargo?"
 msgstr "Welches Frachtgut übertragen?"
 
@@ -10659,12 +10672,12 @@ msgstr "Profil-Verzeichnis kann nicht geöffnet werden"
 msgid "Unable to save %s: %s"
 msgstr "%s kann nicht gespeichert werden: %s"
 
-#: client/si/commands.cpp:429 game/pcc/turnloader.cpp:128
+#: client/si/commands.cpp:430 game/pcc/turnloader.cpp:128
 #: game/v3/directoryloader.cpp:232 game/v3/resultloader.cpp:122
 msgid "Unable to save game"
 msgstr "Spiel kann nicht gespeichert werden"
 
-#: client/si/commands.cpp:2514
+#: client/si/commands.cpp:2515
 msgid "Unable to save message: %s"
 msgstr "Nachricht kann nicht gespeichert werden: %s"
 
@@ -10842,7 +10855,7 @@ msgstr "Unbekannter Turn-Status (%d)"
 msgid "Unknown type"
 msgstr "Unbekannter Typ"
 
-#: share/resource/core_ui.q:2127
+#: share/resource/core_ui.q:2160
 msgid "Unload All Ships"
 msgstr "Alle Schiffe entladen"
 
@@ -11489,7 +11502,7 @@ msgstr ""
 msgid "User cc-res.cfg"
 msgstr "cc-res.cfg des Benutzers"
 
-#: client/widgets/configstoragecontrol.cpp:24
+#: client/widgets/configstoragecontrol.cpp:26
 msgid "User configuration file"
 msgstr "Benutzer-Konfigurationsdatei"
 
@@ -11612,7 +11625,7 @@ msgstr ""
 "WARNUNG: Die Option '-O' wurde ignoriert, da die Standardausgabe benutzt "
 "wird."
 
-#: share/resource/core_ui.q:2086
+#: share/resource/core_ui.q:2119
 msgid "Wait One Turn"
 msgstr "Warte einen Zug"
 
@@ -11732,7 +11745,7 @@ msgstr "Kurs: %s"
 msgid "We are beaming down %d clan%!1{s%}."
 msgstr "Wir entladen %d Clan%!1{s%}."
 
-#: share/resource/core_ui.q:2042
+#: share/resource/core_ui.q:2075
 msgid "We are not at one of our starbases."
 msgstr "Wir sind nicht bei einer unserer Sternenbasen."
 

@@ -1989,6 +1989,39 @@ Sub CCUI.Messages.ViewFile
   CC$ViewMailbox m
 EndSub
 
+% @since PCC2 2.41.4
+Sub CCUI.VCR.ViewFile
+  % ex flak.pas:FlakPlayFile, vcrplay.pas:StandaloneCombatViewer
+  Local System.Err, fd, fname, battles, UI.Result
+
+  UI.FileWindow Translate("Play VCRs from File"), "*.*"
+  If IsEmpty(UI.Result) Then Return
+  fname := UI.Result
+
+  fd := FreeFile()
+  Try
+    Open fname For Input As #fd
+  Else
+    UI.Message Format("%s: %s", fname, System.Err), Translate("Play VCRs from File")
+    Return
+  EndTry
+
+  Try
+    battles := VcrFile(#fd)
+  Else
+    Close #fd
+    UI.Message Format("%s: %s", fname, System.Err), Translate("Play VCRs from File")
+    Return
+  EndTry
+
+  Close #fd
+  If battles Then
+    CC$ViewCombat battles
+  Else
+    UI.Message Format("%s: %s", fname, Translate("This file does not contain any battles.")), Translate("Play VCRs from File")
+  EndIf
+EndSub
+
 
 %
 %  Menus
