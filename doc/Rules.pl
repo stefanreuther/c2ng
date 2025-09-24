@@ -95,7 +95,13 @@ if ($CGI_PATH ne '') {
 #  Help file HTML
 #
 
-# ... FIXME ...
+my $help_xml  = normalize_filename($ROOT, "share/resource/pcc2help.xml");
+my $help_html = generate("$OUT/pcc2help.html",
+                         [$help_xml, $style],
+                         "$XSLTPROC --path \"$ROOT/scripts\" $style $help_xml >\$@");
+rule_add_info($help_html, "Rendering help HTML");
+generate("all", $help_html);
+generate("install-doc", generate_copy("$prefix/doc/pcc2help.html", $help_html));
 
 rule_set_phony("install-doc");
 generate("install", "install-doc");
