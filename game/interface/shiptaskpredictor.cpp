@@ -9,6 +9,21 @@
 #include "game/map/universe.hpp"
 #include "interpreter/arguments.hpp"
 
+namespace {
+    game::map::Point findGravityPosition(game::map::Point pt,
+                                         const game::map::Universe& univ,
+                                         const game::map::Configuration& mapConfig,
+                                         const game::config::HostConfiguration& config,
+                                         const game::HostVersion& hostVersion)
+    {
+        if (const game::map::Planet* pl = univ.planets().get(univ.findPlanetAt(pt, true, mapConfig, config, hostVersion))) {
+            return pl->getPosition().orElse(pt);
+        } else {
+            return pt;
+        }
+    }
+}
+
 game::interface::ShipTaskPredictor::ShipTaskPredictor(const game::map::Universe& univ, Id_t id,
                                                       const UnitScoreDefinitionList& scoreDefinitions,
                                                       const game::spec::ShipList& shipList,
@@ -21,6 +36,8 @@ game::interface::ShipTaskPredictor::ShipTaskPredictor(const game::map::Universe&
       m_shipList(shipList),
       m_mapConfig(mapConfig),
       m_config(config),
+      m_hostVersion(hostVersion),
+      m_mode(NormalMovement),
       m_numPositions(0),
       m_numFuelPositions(0),
       m_numFuelTurns(0),
@@ -32,6 +49,12 @@ game::interface::ShipTaskPredictor::ShipTaskPredictor(const game::map::Universe&
 
 game::interface::ShipTaskPredictor::~ShipTaskPredictor()
 { }
+
+void
+game::interface::ShipTaskPredictor::setMovementMode(MovementMode m)
+{
+    m_mode = m;
+}
 
 size_t
 game::interface::ShipTaskPredictor::getNumPositions() const
@@ -130,12 +153,7 @@ game::interface::ShipTaskPredictor::advanceTurn()
     m_predictor.computeTurn();
 
     // Remember ship position
-    if (m_numPositions < MAX_XYS) {
-        game::map::Point pt = m_predictor.getPosition();
-        if (m_numPositions == 0 || pt != m_positions[m_numPositions-1]) {
-            m_positions[m_numPositions++] = pt;
-        }
-    }
+    storePosition();
 
     // Remember that we had fuel
     if (m_haveFuel && m_predictor.getCargo(Element::Neutronium) >= 0) {
@@ -157,10 +175,17 @@ game::interface::ShipTaskPredictor::predictInstruction(const String_t& name, int
     // ex IntShipPredictor::predictInstruction, shipint.pas:ShipPredictor
     if (name == "MOVETO") {
         setWaypoint(args);
-        int n = 0;
-        while (n < game::map::ShipPredictor::MOVEMENT_TIME_LIMIT && !m_predictor.isAtWaypoint()) {
-            advanceTurn();
-            ++n;
+        switch (m_mode) {
+         case NormalMovement:
+            for (int n = 0; n < game::map::ShipPredictor::MOVEMENT_TIME_LIMIT && !m_predictor.isAtWaypoint(); ++n) {
+                advanceTurn();
+            }
+            break;
+         case SimpleMovement:
+            m_predictor.setPosition(findGravityPosition(m_predictor.getWaypoint(), m_universe, m_mapConfig, m_config, m_hostVersion));
+            storePosition();
+            m_predictor.setWaypoint(m_predictor.getPosition());
+            break;
         }
         return true;
     } else if (name == "SETWAYPOINT") {
@@ -205,6 +230,17 @@ game::interface::ShipTaskPredictor::predictInstruction(const String_t& name, int
         return true;
     } else {
         return true;
+    }
+}
+
+void
+game::interface::ShipTaskPredictor::storePosition()
+{
+    if (m_numPositions < MAX_XYS) {
+        game::map::Point pt = m_predictor.getPosition();
+        if (m_numPositions == 0 || pt != m_positions[m_numPositions-1]) {
+            m_positions[m_numPositions++] = pt;
+        }
     }
 }
 

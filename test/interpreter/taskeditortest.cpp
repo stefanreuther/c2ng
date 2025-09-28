@@ -44,6 +44,7 @@ AFL_TEST("interpreter.TaskEditor:empty", a)
     {
         interpreter::TaskEditor testee(h.proc);
         a.checkEqual("11. process", &testee.process(), &h.proc);
+        a.checkEqual("12. changed", testee.isChanged(), false);
     }
 
     // Process needs to be unchanged
@@ -85,6 +86,7 @@ AFL_TEST("interpreter.TaskEditor:roundtrip", a)
         a.checkEqual("11. getNumInstructions", ed.getNumInstructions(), 3U);
         a.checkEqual("12. getPC", ed.getPC(), 0U);
         a.checkEqual("13. isInSubroutineCall", ed.isInSubroutineCall(), false);
+        a.checkEqual("14. changed", ed.isChanged(), true);
     }
 
     // Verify process content: must be one frame
@@ -313,22 +315,4 @@ AFL_TEST("interpreter.TaskEditor:process-format", a)
     // Creating a TaskEditor will fail
     std::auto_ptr<interpreter::TaskEditor> ed;
     AFL_CHECK_THROWS(a, ed.reset(new interpreter::TaskEditor(h.proc)), interpreter::Error);
-}
-
-/** Test isValidCommand(). */
-AFL_TEST("interpreter.TaskEditor:isValidCommand", a)
-{
-    using interpreter::TaskEditor;
-    a.check("01", TaskEditor::isValidCommand("MoveTo 1,2"));
-    a.check("02", TaskEditor::isValidCommand("Print \"Hi mom\""));
-    a.check("03", TaskEditor::isValidCommand(""));
-
-    a.check("11", !TaskEditor::isValidCommand("If x Then Print \"Hi mom\""));
-    a.check("12", !TaskEditor::isValidCommand("If x"));
-    a.check("13", !TaskEditor::isValidCommand("Break"));
-    a.check("14", !TaskEditor::isValidCommand("Function f"));
-    a.check("15", !TaskEditor::isValidCommand("(x+1)"));
-    a.check("16", !TaskEditor::isValidCommand("Print 'hi"));       // unbalanced quotes
-    a.check("17", !TaskEditor::isValidCommand("'foo'"));
-    a.check("18", !TaskEditor::isValidCommand("~"));               // invalid token
 }

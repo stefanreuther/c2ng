@@ -49,6 +49,7 @@ namespace client { namespace map {
         void setDrawingTagFilter(util::Atom_t tag);
         void clearDrawingTagFilter();
         void setShipTrailId(game::Id_t id);
+        void setShipIgnoreTaskId(game::Id_t id);
         const game::map::RenderOptions& getOptions() const;
 
         const Renderer& renderer() const;

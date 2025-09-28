@@ -214,6 +214,16 @@ game::map::RenderList::drawShipWaypoint(Point a, Point b, Relation_t rel)
 }
 
 void
+game::map::RenderList::drawShipTask(Point a, Point b, Relation_t rel, int seq)
+{
+    addInstruction(riShipTask);
+    addPointParameter(a);
+    addPointParameter(b);
+    addParameter(rel);
+    addParameter(seq);
+}
+
+void
 game::map::RenderList::drawShipVector(Point a, Point b, Relation_t rel)
 {
     addInstruction(riShipVector);
@@ -393,6 +403,15 @@ game::map::RenderList::replay(RendererListener& listener) const
             int32_t rel;
             if (it.readPointParameter(a) && it.readPointParameter(b) && it.readParameter(rel)) {
                 listener.drawShipWaypoint(a, b, Relation_t(rel));
+            }
+            break;
+         }
+
+         case riShipTask: {
+            Point a, b;
+            int32_t rel, seq;
+            if (it.readPointParameter(a) && it.readPointParameter(b) && it.readParameter(rel) && it.readParameter(seq)) {
+                listener.drawShipTask(a, b, Relation_t(rel), seq);
             }
             break;
          }

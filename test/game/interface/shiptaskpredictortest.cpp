@@ -6,6 +6,7 @@
 #include "game/interface/shiptaskpredictor.hpp"
 
 #include "afl/data/segment.hpp"
+#include "afl/string/nulltranslator.hpp"
 #include "afl/test/testrunner.hpp"
 #include "game/hostversion.hpp"
 #include "game/map/universe.hpp"
@@ -157,6 +158,74 @@ AFL_TEST("game.interface.ShipTaskPredictor:command:MoveTo", a)
     a.checkEqual("18. getNumPositions",     testee.getNumPositions(), 2U);
     a.checkEqual("19. getNumFuelPositions", testee.getNumFuelPositions(), 2U);
     a.checkEqual("20. isHyperdriving",      testee.isHyperdriving(), false);
+}
+
+/** Test "MoveTo" command, SimpleMovement version.
+    A: create ship. Predict "MoveTo" command in SimpleMovement.
+    E: correct movement predicted */
+AFL_TEST("game.interface.ShipTaskPredictor:command:MoveTo:simple", a)
+{
+    // Prepare
+    TestHarness h;
+    prepare(h);
+    game::map::Ship& sh = addShip(h, 99);
+    sh.setWarpFactor(7);
+    sh.setCargo(game::Element::Neutronium, 1000);
+
+    afl::data::Segment seg;
+    seg.pushBackInteger(1080);
+    seg.pushBackInteger(1000);
+    interpreter::Arguments args(seg, 0, 2);
+
+    // Object under test
+    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.mapConfig, h.config, h.hostVersion, h.key);
+    testee.setMovementMode(game::interface::ShipTaskPredictor::SimpleMovement);
+    bool ok = testee.predictInstruction("MOVETO", args);
+    a.check("01. predictInstruction", ok);
+
+    // Verify
+    a.checkEqual("11. getNumPositions",     testee.getNumPositions(), 1U);
+    a.checkEqual("12. position 1 X",        testee.getPosition(0).getX(), 1080);
+    a.checkEqual("13. position X",          testee.getPosition().getX(), 1080);
+}
+
+/** Test "MoveTo" command, SimpleMovement version with gravity.
+    A: create ship. Add planet close to ship waypoint. Predict "MoveTo" command in SimpleMovement.
+    E: correct movement predicted */
+AFL_TEST("game.interface.ShipTaskPredictor:command:MoveTo:gravity", a)
+{
+    // Prepare
+    TestHarness h;
+    prepare(h);
+    game::map::Ship& sh = addShip(h, 99);
+    sh.setWarpFactor(7);
+    sh.setCargo(game::Element::Neutronium, 1000);
+
+    // Create planet
+    {
+        afl::string::NullTranslator tx;
+        afl::sys::Log log;
+        game::map::Planet* pl = h.univ.planets().create(42);
+        pl->setPosition(game::map::Point(1082, 1000));
+        pl->internalCheck(h.mapConfig, game::PlayerSet_t(1), 10, tx, log);
+    }
+
+    // Command
+    afl::data::Segment seg;
+    seg.pushBackInteger(1080);
+    seg.pushBackInteger(1000);
+    interpreter::Arguments args(seg, 0, 2);
+
+    // Object under test
+    game::interface::ShipTaskPredictor testee(h.univ, 99, h.scoreDefinitions, h.shipList, h.mapConfig, h.config, h.hostVersion, h.key);
+    testee.setMovementMode(game::interface::ShipTaskPredictor::SimpleMovement);
+    bool ok = testee.predictInstruction("MOVETO", args);
+    a.check("01. predictInstruction", ok);
+
+    // Verify
+    a.checkEqual("11. getNumPositions",     testee.getNumPositions(), 1U);
+    a.checkEqual("12. position 1 X",        testee.getPosition(0).getX(), 1082);
+    a.checkEqual("13. position X",          testee.getPosition().getX(), 1082);
 }
 
 /** Test "SetWaypoint" command.

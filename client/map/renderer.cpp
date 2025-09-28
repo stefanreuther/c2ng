@@ -502,6 +502,19 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
             drawVLine(m_context, bx.getX(), bx.getY()-waypointCrossSize, bx.getY()+waypointCrossSize);
         }
 
+    virtual void drawShipTask(game::map::Point a, game::map::Point b, Relation_t /*rel*/, int /*seq*/)
+        {
+            int waypointCrossSize = std::min(SCMaxWPCrossRadius, m_parent.scale(SCWPCrossRadius)) / 2;
+            m_context.setColor(ui::Color_Dark);
+            m_context.setLinePattern(0xFF);
+
+            gfx::Point ax = m_parent.scale(a);
+            gfx::Point bx = m_parent.scale(b);
+            drawLine(m_context, ax, bx);
+            drawHLine(m_context, bx.getX()-waypointCrossSize, bx.getY(), bx.getX()+waypointCrossSize);
+            drawVLine(m_context, bx.getX(), bx.getY()-waypointCrossSize, bx.getY()+waypointCrossSize);
+        }
+
     virtual void drawShipVector(game::map::Point a, game::map::Point b, Relation_t /*rel*/)
         {
             int arrowHeadSize = m_parent.scale(10) >= 5 ? 5 : 3;

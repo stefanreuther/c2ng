@@ -8,12 +8,14 @@
 #include "afl/base/ptr.hpp"
 #include "game/game.hpp"
 #include "game/interface/labelextra.hpp"
+#include "game/interface/taskwaypoints.hpp"
 #include "game/map/renderer.hpp"
 #include "game/root.hpp"
 #include "game/turn.hpp"
 
 using afl::base::Ptr;
 using game::interface::LabelExtra;
+using game::interface::TaskWaypoints;
 using game::map::RenderOptions;
 using game::map::Viewport;
 using game::map::Renderer;
@@ -35,6 +37,7 @@ class game::proxy::MapRendererProxy::Trampoline {
     void setDrawingTagFilter(util::Atom_t tag);
     void clearDrawingTagFilter();
     void setShipTrailId(Id_t id);
+    void setShipIgnoreTaskId(Id_t id);
 
  private:
     void loadOptions();
@@ -88,7 +91,8 @@ game::proxy::MapRendererProxy::Trampoline::attachTurn()
 
         // Create objects
         m_viewport.reset(new Viewport(m_turn->universe(), m_turn->getTurnNumber(), m_game->teamSettings(),
-                                      LabelExtra::get(m_session), m_game->shipScores(), *m_shipList, m_game->mapConfiguration(), m_root->hostConfiguration(), m_root->hostVersion()));
+                                      LabelExtra::get(m_session), TaskWaypoints::get(m_session),
+                                      m_game->shipScores(), *m_shipList, m_game->mapConfiguration(), m_root->hostConfiguration(), m_root->hostVersion()));
         m_renderer.reset(new Renderer(*m_viewport));
         loadOptions();
 
@@ -194,6 +198,14 @@ game::proxy::MapRendererProxy::Trampoline::setShipTrailId(Id_t id)
 }
 
 void
+game::proxy::MapRendererProxy::Trampoline::setShipIgnoreTaskId(Id_t id)
+{
+    if (m_viewport.get() != 0) {
+        m_viewport->setShipIgnoreTaskId(id);
+    }
+}
+
+void
 game::proxy::MapRendererProxy::Trampoline::loadOptions()
 {
     if (m_viewport.get() != 0 && m_root.get() != 0) {
@@ -263,6 +275,12 @@ void
 game::proxy::MapRendererProxy::setShipTrailId(Id_t id)
 {
     m_trampoline.postRequest(&Trampoline::setShipTrailId, id);
+}
+
+void
+game::proxy::MapRendererProxy::setShipIgnoreTaskId(Id_t id)
+{
+    m_trampoline.postRequest(&Trampoline::setShipIgnoreTaskId, id);
 }
 
 void

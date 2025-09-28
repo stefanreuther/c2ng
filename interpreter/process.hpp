@@ -172,6 +172,7 @@ namespace interpreter {
             for an Auto-Task, this is the task's text.
             \return frame; null if nonexistant */
         Frame* getOutermostFrame();
+        const Frame* getOutermostFrame() const;
 
         /** Get frame by index.
             For inspection and serialisation.

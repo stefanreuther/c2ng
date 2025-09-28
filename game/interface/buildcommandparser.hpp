@@ -10,6 +10,7 @@
 #include "game/root.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/types.hpp"
+#include "interpreter/taskeditor.hpp"
 #include "interpreter/taskpredictor.hpp"
 
 namespace game { namespace interface {

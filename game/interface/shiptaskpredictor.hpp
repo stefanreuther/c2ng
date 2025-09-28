@@ -16,6 +16,12 @@ namespace game { namespace interface {
         Predicts movement and fuel usage. */
     class ShipTaskPredictor : public interpreter::TaskPredictor {
      public:
+        /** Movement mode. */
+        enum MovementMode {
+            NormalMovement,     ///< Normal (turn-by-turn) move, precise fuel computation.
+            SimpleMovement      ///< Waypoints only, no fuel consumption.
+        };
+
         /** Constructor.
             \param univ              Universe
             \param id                Ship Id
@@ -33,6 +39,10 @@ namespace game { namespace interface {
                           const HostVersion& hostVersion,
                           const RegistrationKey& key);
         ~ShipTaskPredictor();
+
+        /** Set movement computation mode.
+            \param mode New mode */
+        void setMovementMode(MovementMode m);
 
         /** Get number of computed positions.
             A position is only recorded when the ship moves, so there can be fewer positions than turns.
@@ -104,6 +114,8 @@ namespace game { namespace interface {
         const game::spec::ShipList& m_shipList;
         const game::map::Configuration& m_mapConfig;
         const game::config::HostConfiguration& m_config;
+        const HostVersion& m_hostVersion;
+        MovementMode m_mode;
 
         enum { MAX_XYS = 30 };
         game::map::Point m_positions[MAX_XYS];     // ex positions
@@ -112,6 +124,7 @@ namespace game { namespace interface {
         int m_numFuelTurns;                        // ex turn_fuel
         bool m_haveFuel;                           // ex have_fuel
 
+        void storePosition();
         void setWaypoint(interpreter::Arguments& args);
     };
 

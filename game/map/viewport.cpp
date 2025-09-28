@@ -9,6 +9,7 @@
 
 game::map::Viewport::Viewport(Universe& univ, int turnNumber, const TeamSettings& teams,
                               game::interface::LabelExtra* labels,
+                              const game::interface::TaskWaypoints* tasks,
                               const UnitScoreDefinitionList& shipScoreDefinitions,
                               const game::spec::ShipList& shipList,
                               const Configuration& mapConfig,
@@ -17,6 +18,7 @@ game::map::Viewport::Viewport(Universe& univ, int turnNumber, const TeamSettings
     : m_universe(univ),
       m_teamSettings(teams),
       m_labels(labels),
+      m_tasks(tasks),
       m_turnNumber(turnNumber),
       m_shipScoreDefinitions(shipScoreDefinitions),
       m_shipList(shipList),
@@ -29,6 +31,7 @@ game::map::Viewport::Viewport(Universe& univ, int turnNumber, const TeamSettings
       m_drawingTagFilterActive(false),
       m_drawingTagFilter(),
       m_shipTrailId(),
+      m_shipIgnoreTaskId(),
       conn_universeChange(univ.sig_universeChange.add(this, &Viewport::onChange)),
       conn_teamChange(univ.sig_universeChange.add(this, &Viewport::onChange)),
       conn_labelChange()
@@ -57,6 +60,12 @@ const game::interface::LabelExtra*
 game::map::Viewport::labels() const
 {
     return m_labels;
+}
+
+const game::interface::TaskWaypoints*
+game::map::Viewport::tasks() const
+{
+    return m_tasks;
 }
 
 int
@@ -187,6 +196,21 @@ game::Id_t
 game::map::Viewport::getShipTrailId() const
 {
     return m_shipTrailId;
+}
+
+void
+game::map::Viewport::setShipIgnoreTaskId(Id_t id)
+{
+    if (m_shipIgnoreTaskId != id) {
+        m_shipIgnoreTaskId = id;
+        onChange();
+    }
+}
+
+game::Id_t
+game::map::Viewport::getShipIgnoreTaskId() const
+{
+    return m_shipIgnoreTaskId;
 }
 
 bool

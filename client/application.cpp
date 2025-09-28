@@ -49,6 +49,7 @@
 #include "game/game.hpp"
 #include "game/interface/labelextra.hpp"
 #include "game/interface/plugins.hpp"
+#include "game/interface/taskwaypoints.hpp"
 #include "game/interface/vmfile.hpp"
 #include "game/nu/browserhandler.hpp"
 #include "game/pcc/browserhandler.hpp"
@@ -824,6 +825,7 @@ client::Application::appMain(gfx::Engine& engine)
     gameSession.log().addListener(log());
     gameSession.setSystemInformation(util::getSystemInformation());
     game::interface::LabelExtra::create(gameSession);
+    game::interface::TaskWaypoints::create(gameSession);
 
     // Password
     if (const String_t* p = params.getPassword().get()) {

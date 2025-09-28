@@ -44,6 +44,7 @@ namespace game { namespace map {
         virtual void drawExplosion(Point p);
         virtual void drawShipTrail(Point a, Point b, Relation_t rel, int flags, int age);
         virtual void drawShipWaypoint(Point a, Point b, Relation_t rel);
+        virtual void drawShipTask(Point a, Point b, Relation_t rel, int seq);
         virtual void drawShipVector(Point a, Point b, Relation_t rel);
         virtual void drawWarpWellEdge(Point a, Edge e);
 
@@ -72,6 +73,7 @@ namespace game { namespace map {
             riExplosion,                // x,y
             riShipTrail,                // x1,y1,x2,y2,rel,flags,age
             riShipWaypoint,             // x1,y1,x2,y2,rel
+            riShipTask,                 // x1,y1,x2,y2,rel,seq
             riShipVector,               // x1,y1,x2,y2,rel
             riWarpWellEdge              // x,y,edge
         };

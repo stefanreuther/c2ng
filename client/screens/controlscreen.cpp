@@ -844,6 +844,9 @@ client::screens::ControlScreen::setId(game::Id_t id)
     interface().history().push(ScreenHistory::Reference(m_definition.historyType, id, 0));
     if (m_taskEditorProxy.get() != 0) {
         m_taskEditorProxy->selectTask(id, m_taskKind, true);
+        if (m_taskKind == interpreter::Process::pkShipTask) {
+            m_mapWidget.setShipIgnoreTaskId(id);
+        }
     }
 }
 

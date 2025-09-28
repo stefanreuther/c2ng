@@ -9,6 +9,7 @@
 #include "afl/string/format.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/test/testrunner.hpp"
+#include "game/game.hpp"
 #include "game/map/configuration.hpp"
 #include "game/map/drawing.hpp"
 #include "game/map/ionstorm.hpp"
@@ -18,6 +19,12 @@
 #include "game/map/ufo.hpp"
 #include "game/map/viewport.hpp"
 #include "game/parser/messageinformation.hpp"
+#include "game/session.hpp"
+#include "game/test/root.hpp"
+#include "game/turn.hpp"
+#include "interpreter/bytecodeobject.hpp"
+#include "interpreter/opcode.hpp"
+#include "interpreter/subroutinevalue.hpp"
 #include <set>
 
 /*
@@ -39,6 +46,9 @@ using game::map::Ship;
 using game::map::Ufo;
 using game::map::Viewport;
 using game::parser::MessageInformation;
+using interpreter::Opcode;
+using interpreter::Process;
+using interpreter::TaskEditor;
 
 namespace {
     const int TURN_NUMBER = 20;
@@ -81,6 +91,8 @@ namespace {
             { addCommand("drawShipTrail", Format("%s,%s,%s,%s,%d") << a.toString() << b.toString() << formatRelation(rel) << formatTrailFlags(flags) << age); }
         virtual void drawShipWaypoint(Point a, Point b, Relation_t rel)
             { addCommand("drawShipWaypoint", Format("%s,%s,%s", a.toString(), b.toString(), formatRelation(rel))); }
+        virtual void drawShipTask(Point a, Point b, Relation_t rel, int seq)
+            { addCommand("drawShipTask", Format("%s,%s,%d,%d") << a.toString() << b.toString() << formatRelation(rel) << seq); }
         virtual void drawShipVector(Point a, Point b, Relation_t rel)
             { addCommand("drawShipVector", Format("%s,%s,%s", a.toString(), b.toString(), formatRelation(rel))); }
         virtual void drawWarpWellEdge(Point a, Edge e)
@@ -203,6 +215,61 @@ namespace {
     };
 
     /*
+     *  TaskEnvironment
+     */
+    struct TaskEnvironment {
+        afl::io::NullFileSystem fs;
+        afl::string::NullTranslator tx;
+        game::Session session;
+
+        TaskEnvironment()
+            : fs(), tx(), session(tx, fs)
+            {
+                // Environment
+                session.setRoot(game::test::makeRoot(HostVersion()).asPtr());
+                session.setShipList(new game::spec::ShipList());
+                session.setGame(new game::Game());
+
+                // Create CC$AUTOEXEC mock.
+                // This is "do / stop / loop", i.e. will suspend indefinitely.
+                // If we do not use this, the auto tasks will fail (which largely produces the same net effect but is unrealistic)
+                interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);
+                bco->addArgument("A", false);
+                bco->addInstruction(Opcode::maSpecial, Opcode::miSpecialSuspend, 0);
+                bco->addInstruction(Opcode::maJump, Opcode::jAlways, 0);
+                session.world().setNewGlobalValue("CC$AUTOEXEC", new interpreter::SubroutineValue(bco));
+
+                // Create TaskWaypoints
+                game::interface::TaskWaypoints::create(session);
+            }
+    };
+
+    Ship& addShip(afl::test::Assert a, TaskEnvironment& env, int id, Point pt, int owner)
+    {
+        Ship* sh = env.session.getGame()->currentTurn().universe().ships().create(id);
+        a.checkNonNull("ship created", sh);
+
+        game::map::ShipData sd;
+        sd.x = pt.getX();
+        sd.y = pt.getY();
+        sd.owner = owner;
+        sd.waypointDX = 0;
+        sd.waypointDY = 0;
+        sh->addCurrentShipData(sd, PlayerSet_t(owner));
+        sh->internalCheck(PlayerSet_t(owner), TURN_NUMBER);
+        a.check("ship visible", sh->isVisible());
+        return *sh;
+    }
+
+    void addShipTask(afl::test::Assert a, TaskEnvironment& env, int id, String_t cmd)
+    {
+        afl::base::Ptr<TaskEditor> ed = env.session.getAutoTaskEditor(id, Process::pkShipTask, true);
+        a.checkNonNull("editor created", ed.get());
+        ed->addAtEnd(TaskEditor::Commands_t::fromSingleObject(cmd));
+        env.session.releaseAutoTaskEditor(ed);
+    }
+
+    /*
      *  RenderEnvironment
      *
      *  Aggregates all objects for rendering
@@ -213,15 +280,29 @@ namespace {
 
         // Environment without labels
         explicit RenderEnvironment(GameEnvironment& env)
-            : viewport(env.univ, TURN_NUMBER, env.teams, 0, env.shipScoreDefinitions,
+            : viewport(env.univ, TURN_NUMBER, env.teams, 0, 0, env.shipScoreDefinitions,
                        env.shipList, env.mapConfig, env.hostConfiguration, env.host),
               listener()
             { viewport.setRange(Point(900, 900), Point(3100, 3100)); }
 
         // Environment with labels
         RenderEnvironment(GameEnvironment& env, LabelEnvironment& lenv)
-            : viewport(env.univ, TURN_NUMBER, env.teams, &lenv.extra, env.shipScoreDefinitions,
+            : viewport(env.univ, TURN_NUMBER, env.teams, &lenv.extra, 0, env.shipScoreDefinitions,
                        env.shipList, env.mapConfig, env.hostConfiguration, env.host),
+              listener()
+            { viewport.setRange(Point(900, 900), Point(3100, 3100)); }
+
+        // Environment with tasks
+        RenderEnvironment(TaskEnvironment& env)
+            : viewport(env.session.getGame()->currentTurn().universe(), TURN_NUMBER,
+                       env.session.getGame()->teamSettings(),
+                       0,
+                       game::interface::TaskWaypoints::get(env.session),
+                       env.session.getGame()->shipScores(),
+                       *env.session.getShipList(),
+                       env.session.getGame()->mapConfiguration(),
+                       env.session.getRoot()->hostConfiguration(),
+                       env.session.getRoot()->hostVersion()),
               listener()
             { viewport.setRange(Point(900, 900), Point(3100, 3100)); }
     };
@@ -1749,4 +1830,49 @@ AFL_TEST("game.map.Renderer:planet:ship-label", a)
     // ...I expect the planets to be rendered with ship markers (and no ships).
     a.check("01", renv.listener.hasCommand("drawPlanet", "(1700,1800),10,uE,"));
     a.check("02", renv.listener.hasCommand("drawShip", "(1700,1800),33,enemy,p,ship label"));
+}
+
+AFL_TEST("game.map.Renderer:ship-task", a)
+{
+    // Given a map with ships...
+    TaskEnvironment env;
+    addShip(a, env, 33, Point(1700, 1800), 3);
+    addShip(a, env, 44, Point(1111, 1222), 3);
+
+    // ...and auto tasks...
+    addShipTask(a, env, 33, "MoveTo 3000, 2000");
+    addShipTask(a, env, 33, "MoveTo 4000, 2000");
+    addShipTask(a, env, 44, "MoveTo 1333, 1444");
+
+    game::interface::TaskWaypoints::create(env.session).updateAll();
+
+    // ...and ShowTrails enabled...
+    RenderEnvironment renv(env);
+    render(renv);
+
+    // ...I expect the ship tasks to be rendered.
+    a.check("01", renv.listener.hasCommand("drawShipTask", "(1700,1800),(3000,2000),enemy,0"));
+    a.check("02", renv.listener.hasCommand("drawShipTask", "(3000,2000),(4000,2000),enemy,1"));
+    a.check("03", renv.listener.hasCommand("drawShipTask", "(1111,1222),(1333,1444),enemy,0"));
+}
+
+AFL_TEST("game.map.Renderer:ship-task:hidden", a)
+{
+    // Given a map with ship...
+    TaskEnvironment env;
+    addShip(a, env, 33, Point(1700, 1800), 3);
+
+    // ...and auto task...
+    addShipTask(a, env, 33, "MoveTo 3000, 2000");
+    addShipTask(a, env, 33, "MoveTo 4000, 2000");
+
+    game::interface::TaskWaypoints::create(env.session).updateAll();
+
+    // ...and ShowTrails enabled, but ship disabled...
+    RenderEnvironment renv(env);
+    renv.viewport.setShipIgnoreTaskId(33);
+    render(renv);
+
+    // ...I expect no ship tasks to be rendered.
+    a.check("01", !renv.listener.hasCommand("drawShipTask"));
 }

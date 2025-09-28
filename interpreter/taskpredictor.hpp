@@ -12,7 +12,7 @@
 namespace interpreter {
 
     class Arguments;
-    class TaskEditor;
+    class BaseTaskEditor;
 
     /** Auto Task Prediction.
         A TaskPredictor operates on the format provided by a TaskEditor to predict future states of the object.
@@ -44,14 +44,14 @@ namespace interpreter {
 
             \param editor editor
             \param endPC stop predicting before this instruction. If not given, predict to end. */
-        void predictTask(const TaskEditor& editor, size_t endPC = size_t(-1));
+        void predictTask(const BaseTaskEditor& editor, size_t endPC = size_t(-1));
 
         /** Predict single statement.
             If the specified program counter points to a valid instruction, calls predictInstruction for it, otherwise does nothing.
             Use this to parse single instructions.
             \param editor editor
             \param pc instruction to interpret */
-        void predictStatement(const TaskEditor& editor, size_t pc);
+        void predictStatement(const BaseTaskEditor& editor, size_t pc);
 
         /** Predict single statement.
             \param statement Statement */

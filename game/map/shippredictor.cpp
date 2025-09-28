@@ -1224,6 +1224,14 @@ game::map::ShipPredictor::getPosition() const
     return Point(m_ship.x.orElse(0), m_ship.y.orElse(0));
 }
 
+// Get current waypoint.
+game::map::Point
+game::map::ShipPredictor::getWaypoint() const
+{
+    return Point(m_ship.x.orElse(0) + m_ship.waypointDX.orElse(0),
+                 m_ship.y.orElse(0) + m_ship.waypointDY.orElse(0));
+}
+
 // Get computed cargo.
 int
 game::map::ShipPredictor::getCargo(Element::Type el) const

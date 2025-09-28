@@ -160,7 +160,7 @@ namespace game { namespace map {
             @param p Position */
         virtual void drawExplosion(Point p) = 0;
 
-        /** Draw ship trail.
+        /** Draw ship trail (historic movement).
             @param a     First (older, from) position
             @param b     Second (newer, to) position
             @param rel   Ownership relation
@@ -168,11 +168,18 @@ namespace game { namespace map {
             @param age   Age of this trail (0=current) */
         virtual void drawShipTrail(Point a, Point b, Relation_t rel, int flags, int age) = 0;
 
-        /** Draw ship waypoint (planned movement order).
+        /** Draw ship waypoint (current movement order).
             @param a     First (current) position
             @param b     Second (waypoint) position
             @param rel   Ownership relation */
         virtual void drawShipWaypoint(Point a, Point b, Relation_t rel) = 0;
+
+        /** Draw ship task waypoint (future movement order).
+            @param a     First (current) position
+            @param b     Second (waypoint) position
+            @param rel   Ownership relation
+            @param seq   Sequence number (0=currently executed operation, 1=next, etc.) */
+        virtual void drawShipTask(Point a, Point b, Relation_t rel, int seq) = 0;
 
         /** Draw ship vector (scanned movement).
             @param a     First (current) position

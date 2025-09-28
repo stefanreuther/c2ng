@@ -273,6 +273,8 @@ namespace {
         finish(t);
 
         ShipPredictor testee(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+        a.checkEqual("getWaypoint X", testee.getWaypoint().getX(), X + distance);
+        a.checkEqual("getWaypoint Y", testee.getWaypoint().getY(), Y);
         testee.computeTurn();
 
         a.checkEqual("getMovementFuelUsed", testee.getMovementFuelUsed(), expected);
@@ -297,6 +299,8 @@ namespace {
         finish(t);
 
         ShipPredictor testee(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+        a.checkEqual("getWaypoint X", testee.getWaypoint().getX(), X + 75);
+        a.checkEqual("getWaypoint Y", testee.getWaypoint().getY(), Y + 34);
         testee.computeTurn();
 
         a.checkEqual("getMovementFuelUsed", testee.getMovementFuelUsed(), need);
@@ -670,6 +674,8 @@ AFL_TEST("game.map.ShipPredictor:movement:normal", a)
     a.checkEqual("03. getMovementFuelUsed", p.getMovementFuelUsed(), 41);
     a.checkEqual("04. getCloakFuelUsed", p.getCloakFuelUsed(), 0);
     a.check("05. isHyperdriving", !p.isHyperdriving());
+    a.checkEqual("06. getWaypoint X", p.getWaypoint().getX(), X + 15);
+    a.checkEqual("07. getWaypoint Y", p.getWaypoint().getY(), Y);
 }
 
 // Timeout case (warp 1)

@@ -19,6 +19,7 @@
 
 using game::config::HostConfiguration;
 using game::interface::LabelExtra;
+using game::interface::TaskWaypoints;
 
 class game::map::Renderer::State {
  public:
@@ -91,6 +92,13 @@ class game::map::Renderer::State {
         {
             if (m_viewport.containsLine(a, b)) {
                 m_listener.drawShipWaypoint(a, b, rel);
+            }
+        }
+
+    void drawShipTask(Point a, Point b, TeamSettings::Relation rel, int seq) const
+        {
+            if (m_viewport.containsLine(a, b)) {
+                m_listener.drawShipTask(a, b, rel, seq);
             }
         }
 
@@ -685,37 +693,24 @@ game::map::Renderer::renderShipVector(const State& st, const Ship& sh, int shipO
     const Configuration& config = m_viewport.mapConfiguration();
     const TeamSettings::Relation rel = m_viewport.teamSettings().getPlayerRelation(shipOwner);
 
-    /* Auto Task */
-//     ppred := Ships^[sid].Predict;
-//     IF ppred<>NIL THEN BEGIN
-//       Color := Dark;
-//       WriteMode := wmOR;
-//       x0 := Ships^[sid].x;
-//       y0 := Ships^[sid].y;
-//       x0t := view.x0 + ScaleL(view, x0);
-//       y0t := view.y0 - ScaleL(view, y0);
-//       FOR i:=1 TO ppred^.valid DO BEGIN
-//         x1 := ppred^.x[i];
-//         y1 := ppred^.y[i];
-//         MoveToNearest(x0,y0,x1,y1);
-//         x1t := view.x0 + ScaleL(view, x1);
-//         y1t := view.y0 - ScaleL(view, y1);
-//         LongLine(x0t, y0t, x1t-x0t, y1t-y0t);
-//         IF (x1t > -waypointCrossSize) AND (y1t > -waypointCrossSize) AND (x1t < 5000) AND (y1t < 5000) THEN BEGIN
-//           j := waypointCrossSize DIV 2;
-//           HLine(x1t-j, y1t, x1t+j);
-//           VLine(x1t, y1t-j, y1t+j);
-//         END;
-//         x0 := x1;
-//         y0 := y1;
-//         x0t := x1t;
-//         y0t := y1t;
-//       END;
-//       WriteMode := 0;
-//     END;
-
     Point shipPos;
     if (sh.getPosition().get(shipPos)) {
+        // Task
+        if (sh.getId() != m_viewport.getShipIgnoreTaskId()) {
+            if (const TaskWaypoints* task = m_viewport.tasks()) {
+                if (const TaskWaypoints::Track* p = task->getTrack(sh.getId())) {
+                    Point a = shipPos;
+                    for (size_t i = 0; i < p->waypoints.size(); ++i) {
+                        Point b = config.getSimpleNearestAlias(p->waypoints[i], a);
+                        for (int img = st.getFirstImage(); img >= 0; img = st.getNextImage(img)) {
+                            st.drawShipTask(config.getSimplePointAlias(a, img), config.getSimplePointAlias(b, img), rel, static_cast<int>(i));
+                        }
+                        a = p->waypoints[i];
+                    }
+                }
+            }
+        }
+
         // Waypoint
         Point shipWaypoint;
         if (sh.getWaypoint().get(shipWaypoint) && shipWaypoint != shipPos) {

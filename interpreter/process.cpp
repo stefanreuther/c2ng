@@ -247,6 +247,15 @@ interpreter::Process::getOutermostFrame()
             : 0);
 }
 
+// Get outermost frame.
+const interpreter::Process::Frame*
+interpreter::Process::getOutermostFrame() const
+{
+    return (!m_frames.empty()
+            ? m_frames[0]
+            : 0);
+}
+
 // Get frame by index.
 const interpreter::Process::Frame*
 interpreter::Process::getFrame(size_t nr) const

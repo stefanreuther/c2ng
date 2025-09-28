@@ -48,6 +48,8 @@ AFL_TEST_NOARG("game.map.RendererListener")
             { }
         virtual void drawShipWaypoint(Point /*a*/, Point /*b*/, Relation_t /*rel*/)
             { }
+        virtual void drawShipTask(Point /*a*/, Point /*b*/, Relation_t /*rel*/, int /*seq*/)
+            { }
         virtual void drawShipVector(Point /*a*/, Point /*b*/, Relation_t /*rel*/)
             { }
         virtual void drawWarpWellEdge(Point /*a*/, Edge /*e*/)

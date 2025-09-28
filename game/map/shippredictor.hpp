@@ -158,6 +158,10 @@ namespace game { namespace map {
             \return position */
         Point getPosition() const;
 
+        /** Get current waypoint.
+            \return waypoint */
+        Point getWaypoint() const;
+
         /** Get computed cargo.
             \param el Cargo type
             \return amount */

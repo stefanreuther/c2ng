@@ -11,6 +11,7 @@
 #include "afl/bits/smallset.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/interface/labelextra.hpp"
+#include "game/interface/taskwaypoints.hpp"
 #include "game/map/point.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/teamsettings.hpp"
@@ -60,6 +61,7 @@ namespace game { namespace map {
             @param turnNumber            Turn number (for ship trails)
             @param teams                 Team settings (for player relations)
             @param labels                Optional LabelExtra. If not specified, labels will not be rendered (non-const to attach listeners)
+            @param tasks                 Optional TaskWaypoints. If not specified, auto tasks will not be rendered.
             @param shipScoreDefinitions  Ship score definitions (for hull functions/gravitonic)
             @param shipList              Ship list (for hull functions/gravitonic)
             @param mapConfig             Map configuration
@@ -67,6 +69,7 @@ namespace game { namespace map {
             @param host                  Host version (for minefield decay) */
         Viewport(Universe& univ, int turnNumber, const TeamSettings& teams,
                  game::interface::LabelExtra* labels,
+                 const game::interface::TaskWaypoints* tasks,
                  const UnitScoreDefinitionList& shipScoreDefinitions,
                  const game::spec::ShipList& shipList,
                  const Configuration& mapConfig,
@@ -87,6 +90,10 @@ namespace game { namespace map {
         /** Access LabelExtra.
             @return LabelExtra */
         const game::interface::LabelExtra* labels() const;
+
+        /** Access TaskWaypoints.
+            @return TaskWaypoints */
+        const game::interface::TaskWaypoints* tasks() const;
 
         /** Get turn number.
             @return turn number */
@@ -166,6 +173,14 @@ namespace game { namespace map {
             @return Id */
         Id_t getShipTrailId() const;
 
+        /** Set ship Id for which not to show auto task.
+            @param id Ship Id */
+        void setShipIgnoreTaskId(Id_t id);
+
+        /** Get ship Id for which not to show auto task.
+            @return Ship Id */
+        Id_t getShipIgnoreTaskId() const;
+
         /** Check whether circle is visible.
             @param origin Center
             @param radius Radius
@@ -202,6 +217,7 @@ namespace game { namespace map {
         Universe& m_universe;
         const TeamSettings& m_teamSettings;
         const game::interface::LabelExtra* m_labels;
+        const game::interface::TaskWaypoints* m_tasks;
         const int m_turnNumber;
         const UnitScoreDefinitionList& m_shipScoreDefinitions;
         const game::spec::ShipList& m_shipList;
@@ -217,6 +233,7 @@ namespace game { namespace map {
         bool m_drawingTagFilterActive;
         util::Atom_t m_drawingTagFilter;
         Id_t m_shipTrailId;
+        Id_t m_shipIgnoreTaskId;
 
         afl::base::SignalConnection conn_universeChange;
         afl::base::SignalConnection conn_teamChange;

@@ -56,6 +56,8 @@ namespace {
             { checkCall(Format("drawShipTrail(%d,%d,%d,%d,%d,%d,%d)") << a.getX() << a.getY() << b.getX() << b.getY() << int(rel) << flags << age); }
         virtual void drawShipWaypoint(Point a, Point b, Relation_t rel)
             { checkCall(Format("drawShipWaypoint(%d,%d,%d,%d,%d)") << a.getX() << a.getY() << b.getX() << b.getY() << int(rel)); }
+        virtual void drawShipTask(Point a, Point b, Relation_t rel, int seq)
+            { checkCall(Format("drawShipTask(%d,%d,%d,%d,%d,%d)") << a.getX() << a.getY() << b.getX() << b.getY() << int(rel) << seq); }
         virtual void drawShipVector(Point a, Point b, Relation_t rel)
             { checkCall(Format("drawShipVector(%d,%d,%d,%d,%d)") << a.getX() << a.getY() << b.getX() << b.getY() << int(rel)); }
         virtual void drawWarpWellEdge(Point a, Edge e)
@@ -109,6 +111,8 @@ AFL_TEST("game.map.RenderList:replay", a)
     li.expectCall("drawShipTrail(40,50,20,90,2,3,7)");
     testee.drawShipWaypoint(Point(9,8), Point(7,6), game::TeamSettings::AlliedPlayer);
     li.expectCall("drawShipWaypoint(9,8,7,6,1)");
+    testee.drawShipTask(Point(7,8), Point(9,10), game::TeamSettings::AlliedPlayer, 5);
+    li.expectCall("drawShipTask(7,8,9,10,1,5)");
     testee.drawShipVector(Point(19,28), Point(37,46), game::TeamSettings::EnemyPlayer);
     li.expectCall("drawShipVector(19,28,37,46,2)");
     testee.drawWarpWellEdge(Point(500,400), game::map::RendererListener::East);

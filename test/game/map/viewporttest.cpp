@@ -24,7 +24,7 @@ AFL_TEST("game.map.Viewport:rectangle", a)
     game::config::HostConfiguration config;
     game::UnitScoreDefinitionList shipScores;
     game::spec::ShipList shipList;
-    Viewport t(univ, 7, teams, 0, shipScores, shipList, mapConfig, config, game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+    Viewport t(univ, 7, teams, 0, 0, shipScores, shipList, mapConfig, config, game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
     t.setRange(Point(100, 100), Point(200, 300));
 
     // Verify settings
@@ -73,7 +73,7 @@ AFL_TEST("game.map.Viewport:options", a)
     game::config::HostConfiguration config;
     game::UnitScoreDefinitionList shipScores;
     game::spec::ShipList shipList;
-    Viewport t(univ, 7, teams, 0, shipScores, shipList, mapConfig, config, game::HostVersion());
+    Viewport t(univ, 7, teams, 0, 0, shipScores, shipList, mapConfig, config, game::HostVersion());
 
     // Set an option
     t.setOption(Viewport::ShowMessages, true);
@@ -96,6 +96,12 @@ AFL_TEST("game.map.Viewport:options", a)
     a.check("32. isDrawingTagVisible", t.isDrawingTagVisible(99));
 
     // Ship trail Id
+    a.checkEqual("41. getShipTrailId", t.getShipTrailId(), 0);
     t.setShipTrailId(77);
-    a.checkEqual("41. getShipTrailId", t.getShipTrailId(), 77);
+    a.checkEqual("42. getShipTrailId", t.getShipTrailId(), 77);
+
+    // Set ignore-ship Id
+    a.checkEqual("51. getShipIgnoreTaskId", t.getShipIgnoreTaskId(), 0);
+    t.setShipIgnoreTaskId(33);
+    a.checkEqual("52. getShipIgnoreTaskId", t.getShipIgnoreTaskId(), 33);
 }

@@ -268,6 +268,12 @@ client::map::Widget::setShipTrailId(game::Id_t id)
     m_proxy.setShipTrailId(id);
 }
 
+void
+client::map::Widget::setShipIgnoreTaskId(game::Id_t id)
+{
+    m_proxy.setShipIgnoreTaskId(id);
+}
+
 const game::map::RenderOptions&
 client::map::Widget::getOptions() const
 {

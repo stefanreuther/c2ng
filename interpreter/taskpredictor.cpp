@@ -5,8 +5,8 @@
 
 #include "interpreter/taskpredictor.hpp"
 #include "interpreter/arguments.hpp"
+#include "interpreter/basetaskeditor.hpp"
 #include "interpreter/error.hpp"
-#include "interpreter/taskeditor.hpp"
 #include "interpreter/tokenizer.hpp"
 #include "interpreter/values.hpp"
 
@@ -92,7 +92,7 @@ namespace {
 }
 
 void
-interpreter::TaskPredictor::predictTask(const TaskEditor& editor, size_t endPC)
+interpreter::TaskPredictor::predictTask(const BaseTaskEditor& editor, size_t endPC)
 {
     // IntAutoTaskPredictor::predictTask
     const size_t startPC = editor.getPC();
@@ -140,7 +140,7 @@ interpreter::TaskPredictor::predictTask(const TaskEditor& editor, size_t endPC)
 }
 
 void
-interpreter::TaskPredictor::predictStatement(const TaskEditor& editor, size_t pc)
+interpreter::TaskPredictor::predictStatement(const BaseTaskEditor& editor, size_t pc)
 {
     // ex IntAutoTaskPredictor::predictStatement
     if (pc < editor.getNumInstructions()) {
