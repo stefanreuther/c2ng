@@ -7,7 +7,6 @@
 #include "afl/except/assertionfailedexception.hpp"
 #include "afl/string/format.hpp"
 #include "game/game.hpp"
-#include "game/proxy/simulationsetupproxy.hpp"
 #include "game/root.hpp"
 #include "game/session.hpp"
 #include "game/sim/parallelrunner.hpp"
@@ -36,7 +35,7 @@ namespace {
 class game::proxy::SimulationRunProxy::Trampoline {
     friend class Adaptor;
  public:
-    Trampoline(util::RequestSender<SimulationRunProxy> reply, Session& session);
+    Trampoline(util::RequestSender<SimulationRunProxy> reply, SimulationAdaptor& adaptor);
 
     void runFinite(size_t n, afl::base::Ptr<util::StopSignal> stopper);
     void runInfinite(afl::base::Ptr<util::StopSignal> stopper);
@@ -47,14 +46,14 @@ class game::proxy::SimulationRunProxy::Trampoline {
 
  private:
     util::RequestSender<SimulationRunProxy> m_reply;
+    SimulationAdaptor& m_adaptor;
 
     afl::base::Ref<game::sim::Session> m_sim;
     afl::sys::LogListener& m_log;
     afl::io::FileSystem& m_fileSystem;
     afl::string::Translator& m_translator;
-    afl::base::Ptr<game::spec::ShipList> m_shipList;
-    afl::base::Ptr<Root> m_root;
-    afl::base::Ptr<Game> m_game;
+    afl::base::Ptr<const game::spec::ShipList> m_shipList;
+    afl::base::Ptr<const Root> m_root;
     util::RandomNumberGenerator m_rng;
 
     std::auto_ptr<game::sim::Runner> m_runner;
@@ -80,10 +79,7 @@ class game::proxy::SimulationRunProxy::Adaptor : public VcrDatabaseAdaptor {
             return *m_trampoline.m_shipList;
         }
     virtual const TeamSettings* getTeamSettings() const
-        {
-            Game* g = m_trampoline.m_game.get();
-            return g != 0 ? &g->teamSettings() : 0;
-        }
+        { return m_trampoline.m_adaptor.getTeamSettings(); }
     virtual afl::base::Ref<game::vcr::Database> getBattles()
         { return m_battles; }
     virtual afl::sys::LogListener& log()
@@ -99,29 +95,26 @@ class game::proxy::SimulationRunProxy::Adaptor : public VcrDatabaseAdaptor {
     virtual game::sim::Setup* getSimulationSetup() const
         { return &m_trampoline.m_sim->setup(); }
     virtual bool isGameObject(const game::vcr::Object& obj) const
-        {
-            Game* g = m_trampoline.m_game.get();
-            return g != 0 && g->isGameObject(obj, getShipList()->hulls());
-        }
+        { return m_trampoline.m_adaptor.isGameObject(obj); }
  private:
     Trampoline& m_trampoline;
     afl::base::Ref<game::vcr::Database> m_battles;
 };
 
-game::proxy::SimulationRunProxy::Trampoline::Trampoline(util::RequestSender<SimulationRunProxy> reply, Session& session)
+game::proxy::SimulationRunProxy::Trampoline::Trampoline(util::RequestSender<SimulationRunProxy> reply, SimulationAdaptor& adaptor)
     : m_reply(reply),
-      m_sim(game::sim::getSimulatorSession(session)),
-      m_log(session.log()),
-      m_fileSystem(session.world().fileSystem()),
-      m_translator(session.translator()),
-      m_shipList(session.getShipList()),
-      m_root(session.getRoot()),
-      m_game(session.getGame()),
-      m_rng(session.rng()),
+      m_adaptor(adaptor),
+      m_sim(adaptor.simSession()),
+      m_log(adaptor.log()),
+      m_fileSystem(adaptor.fileSystem()),
+      m_translator(adaptor.translator()),
+      m_shipList(adaptor.getShipList()),
+      m_root(adaptor.getRoot()),
+      m_rng(adaptor.rng()),
       m_runner()
 {
     // Advance session's RNG so next invocation will be different
-    session.rng()();
+    adaptor.rng()();
 
     // Create runner
     if (m_shipList.get() != 0 && m_root.get() != 0) {
@@ -131,7 +124,7 @@ game::proxy::SimulationRunProxy::Trampoline::Trampoline(util::RequestSender<Simu
 
         // Build runner
         const int configThreads = m_root->userConfiguration()[game::config::UserConfiguration::Sim_NumThreads]();
-        const size_t systemThreads = session.getSystemInformation().numProcessors;
+        const size_t systemThreads = adaptor.getNumProcessors();
         const size_t numThreads = (configThreads > 0 && configThreads < 512
                                    ? static_cast<size_t>(configThreads)
                                    : systemThreads > 0
@@ -263,18 +256,13 @@ game::proxy::SimulationRunProxy::Trampoline::reportStop()
     m_reply.postRequest(&SimulationRunProxy::reportStop);
 }
 
-
-/*
- *  TrampolineFromSession
- */
-
-class game::proxy::SimulationRunProxy::TrampolineFromSession : public afl::base::Closure<Trampoline* (Session&)> {
+class game::proxy::SimulationRunProxy::TrampolineFromAdaptor : public afl::base::Closure<Trampoline* (SimulationAdaptor&)> {
  public:
-    TrampolineFromSession(util::RequestSender<SimulationRunProxy> reply)
+    TrampolineFromAdaptor(util::RequestSender<SimulationRunProxy> reply)
         : m_reply(reply)
         { }
-    virtual Trampoline* call(Session& session)
-        { return new Trampoline(m_reply, session); }
+    virtual Trampoline* call(SimulationAdaptor& adaptor)
+        { return new Trampoline(m_reply, adaptor); }
  private:
     util::RequestSender<SimulationRunProxy> m_reply;
 };
@@ -284,10 +272,10 @@ class game::proxy::SimulationRunProxy::TrampolineFromSession : public afl::base:
  *  SimulationRunProxy
  */
 
-game::proxy::SimulationRunProxy::SimulationRunProxy(SimulationSetupProxy& setup, util::RequestDispatcher& reply)
+game::proxy::SimulationRunProxy::SimulationRunProxy(util::RequestSender<SimulationAdaptor> adaptorSender, util::RequestDispatcher& reply)
     : m_stopper(),
       m_reply(reply, *this),
-      m_request(setup.gameSender().makeTemporary(new TrampolineFromSession(m_reply.getSender()))),
+      m_request(adaptorSender.makeTemporary(new TrampolineFromAdaptor(m_reply.getSender()))),
       m_numBattles(),
       m_classResults(),
       m_unitResults()

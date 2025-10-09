@@ -5,14 +5,13 @@
 #ifndef C2NG_GAME_PROXY_FLEETCOSTPROXY_HPP
 #define C2NG_GAME_PROXY_FLEETCOSTPROXY_HPP
 
-#include "game/session.hpp"
+#include "game/proxy/simulationadaptor.hpp"
 #include "game/sim/fleetcost.hpp"
 #include "game/spec/costsummary.hpp"
 #include "util/requestsender.hpp"
 
 namespace game { namespace proxy {
 
-    class SimulationSetupProxy;
     class WaitIndicator;
 
     /** Fleet cost summary proxy.
@@ -22,8 +21,8 @@ namespace game { namespace proxy {
     class FleetCostProxy {
      public:
         /** Constructor.
-            \param setup SimulationSetupProxy whose setup to observe */
-        explicit FleetCostProxy(SimulationSetupProxy& setup);
+            \param adaptorSender Access to SimulationAdaptor */
+        explicit FleetCostProxy(util::RequestSender<SimulationAdaptor> adaptorSender);
         ~FleetCostProxy();
 
         /** Set options.
@@ -57,7 +56,7 @@ namespace game { namespace proxy {
         PlayerSet_t getInvolvedTeams(WaitIndicator& ind);
 
      private:
-        util::RequestSender<Session> m_gameSender;
+        util::RequestSender<SimulationAdaptor> m_adaptorSender;
         game::sim::FleetCostOptions m_options;
     };
 

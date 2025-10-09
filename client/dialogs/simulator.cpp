@@ -21,6 +21,7 @@
 #include "client/widgets/simulationlist.hpp"
 #include "client/widgets/simulationobjectinfo.hpp"
 #include "client/widgets/stoppablebusyindicator.hpp"
+#include "game/proxy/simulationadaptorfromsession.hpp"
 #include "game/proxy/simulationrunproxy.hpp"
 #include "game/proxy/simulationsetupproxy.hpp"
 #include "game/sim/ship.hpp"
@@ -51,6 +52,7 @@ using afl::string::Format;
 using client::Downlink;
 using client::si::OutputState;
 using client::si::RequestLink2;
+using game::proxy::SimulationAdaptorFromSession;
 using game::proxy::SimulationSetupProxy;
 using game::sim::Configuration;
 using game::sim::GameInterface;
@@ -710,7 +712,7 @@ SimulatorDialog::onRun()
     }
 
     // First simulation
-    game::proxy::SimulationRunProxy runner(m_proxy, m_root.engine().dispatcher());
+    game::proxy::SimulationRunProxy runner(m_proxy.adaptorSender(), m_root.engine().dispatcher());
     if (!runFirstSimulation(runner, m_root, m_translator)) {
         return;
     }
@@ -1628,7 +1630,7 @@ client::dialogs::doBattleSimulator(client::si::UserSide& iface,
                                    client::si::OutputState& outputState)
 {
     // ex client/scr-sim.cc:doSimulator
-    SimulationSetupProxy proxy(iface.gameSender(), ctl.root().engine().dispatcher());
+    SimulationSetupProxy proxy(iface.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ctl.root().engine().dispatcher());
     Downlink link(iface);
     SimulationSetupProxy::ListItems_t list;
     proxy.usePlayerRelations();

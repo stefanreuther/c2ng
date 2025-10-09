@@ -7,6 +7,7 @@
 
 #include "afl/test/testrunner.hpp"
 #include "game/game.hpp"
+#include "game/proxy/simulationadaptorfromsession.hpp"
 #include "game/proxy/simulationsetupproxy.hpp"
 #include "game/teamsettings.hpp"
 #include "game/test/root.hpp"
@@ -14,10 +15,11 @@
 #include "game/test/shiplist.hpp"
 #include "game/test/waitindicator.hpp"
 
+using game::proxy::SimulationAdaptorFromSession;
+using game::proxy::SimulationSetupProxy;
 using game::spec::Cost;
 using game::test::SessionThread;
 using game::test::WaitIndicator;
-using game::proxy::SimulationSetupProxy;
 
 namespace {
     void prepare(SessionThread& thread)
@@ -49,7 +51,7 @@ AFL_TEST("game.proxy.FleetCostProxy:normal", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add two ships
     t.addShip(ind, 0, 2);
@@ -61,7 +63,7 @@ AFL_TEST("game.proxy.FleetCostProxy:normal", a)
     t.setEngineType(1, 5);
 
     // Verify
-    game::proxy::FleetCostProxy testee(t);
+    game::proxy::FleetCostProxy testee(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()));
 
     // Set Inquiry
     a.checkEqual("01. getInvolvedPlayers", testee.getInvolvedPlayers(ind), game::PlayerSet_t() + 2 + 4);
@@ -127,8 +129,7 @@ AFL_TEST("game.proxy.FleetCostProxy:empty", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
-    game::proxy::FleetCostProxy testee(t);
+    game::proxy::FleetCostProxy testee(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()));
 
     // Empty sets
     a.checkEqual("01. getInvolvedPlayers", testee.getInvolvedPlayers(ind), game::PlayerSet_t());

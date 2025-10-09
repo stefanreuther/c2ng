@@ -25,6 +25,7 @@
 #include "game/spec/basichullfunction.hpp"
 #include "util/math.hpp"
 #include "game/sim/sort.hpp"
+#include "game/game.hpp"
 
 using afl::string::Format;
 using game::config::HostConfiguration;
@@ -194,7 +195,7 @@ class game::proxy::SimulationSetupProxy::Trampoline {
     typedef util::Request<Trampoline> Request_t;
     typedef util::Request<SimulationSetupProxy> Reply_t;
 
-    Trampoline(util::RequestSender<SimulationSetupProxy> reply, Session& session);
+    Trampoline(util::RequestSender<SimulationSetupProxy> reply, SimulationAdaptor& adaptor);
     ~Trampoline();
 
     // Data export
@@ -280,8 +281,8 @@ class game::proxy::SimulationSetupProxy::Trampoline {
 
     util::RequestSender<SimulationSetupProxy> m_reply;
     afl::base::Ref<game::sim::Session> m_sim;
-    afl::base::Ptr<ShipList> m_shipList;
-    afl::base::Ptr<Root> m_root;
+    afl::base::Ptr<const ShipList> m_shipList;
+    afl::base::Ptr<const Root> m_root;
     afl::string::Translator& m_translator;
     afl::io::FileSystem& m_fileSystem;
     util::RandomNumberGenerator& m_rng;
@@ -293,26 +294,26 @@ class game::proxy::SimulationSetupProxy::Trampoline {
     bool m_structureChanged;
 };
 
-class game::proxy::SimulationSetupProxy::TrampolineFromSession : public afl::base::Closure<Trampoline* (game::Session&)> {
+class game::proxy::SimulationSetupProxy::TrampolineFromAdaptor : public afl::base::Closure<Trampoline* (SimulationAdaptor&)> {
  public:
-    TrampolineFromSession(util::RequestSender<SimulationSetupProxy> reply)
+    TrampolineFromAdaptor(util::RequestSender<SimulationSetupProxy> reply)
         : m_reply(reply)
         { }
-    virtual Trampoline* call(game::Session& session)
-        { return new Trampoline(m_reply, session); }
+    virtual Trampoline* call(SimulationAdaptor& adaptor)
+        { return new Trampoline(m_reply, adaptor); }
  private:
     util::RequestSender<SimulationSetupProxy> m_reply;
 };
 
 inline
-game::proxy::SimulationSetupProxy::Trampoline::Trampoline(util::RequestSender<SimulationSetupProxy> reply, Session& session)
+game::proxy::SimulationSetupProxy::Trampoline::Trampoline(util::RequestSender<SimulationSetupProxy> reply, SimulationAdaptor& adaptor)
     : m_reply(reply),
-      m_sim(game::sim::getSimulatorSession(session)),
-      m_shipList(session.getShipList()),
-      m_root(session.getRoot()),
-      m_translator(session.translator()),
-      m_fileSystem(session.world().fileSystem()),
-      m_rng(session.rng()),
+      m_sim(adaptor.simSession()),
+      m_shipList(adaptor.getShipList()),
+      m_root(adaptor.getRoot()),
+      m_translator(adaptor.translator()),
+      m_fileSystem(adaptor.fileSystem()),
+      m_rng(adaptor.rng()),
       conn_structureChange(), conn_planetChange(), conn_shipChange(),
       m_observedSlot(),
       m_suppressStructureChanges(false),
@@ -1505,10 +1506,10 @@ game::proxy::SimulationSetupProxy::Trampoline::onShipChange(Slot_t slot)
  *  SimulationSetupProxy
  */
 
-game::proxy::SimulationSetupProxy::SimulationSetupProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& reply)
-    : m_gameSender(gameSender),
+game::proxy::SimulationSetupProxy::SimulationSetupProxy(util::RequestSender<SimulationAdaptor> adaptorSender, util::RequestDispatcher& reply)
+    : m_adaptorSender(adaptorSender),
       m_reply(reply, *this),
-      m_trampoline(gameSender.makeTemporary(new TrampolineFromSession(m_reply.getSender())))
+      m_trampoline(adaptorSender.makeTemporary(new TrampolineFromAdaptor(m_reply.getSender())))
 { }
 
 void
@@ -2265,10 +2266,10 @@ game::proxy::SimulationSetupProxy::usePlayerRelations()
     m_trampoline.postRequest(&Trampoline::usePlayerRelations);
 }
 
-util::RequestSender<game::Session>
-game::proxy::SimulationSetupProxy::gameSender()
+util::RequestSender<game::proxy::SimulationAdaptor>
+game::proxy::SimulationSetupProxy::adaptorSender()
 {
-    return m_gameSender;
+    return m_adaptorSender;
 }
 
 template<typename Object, typename Property>

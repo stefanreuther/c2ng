@@ -1,6 +1,6 @@
 /**
   *  \file game/proxy/simulationtransferproxy.cpp
-  *  \brief Class game::proxy::SimulationSetupProxy
+  *  \brief Class game::proxy::SimulationTransferProxy
   */
 
 #include "game/proxy/simulationtransferproxy.hpp"

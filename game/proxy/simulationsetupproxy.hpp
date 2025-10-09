@@ -11,6 +11,7 @@
 #include "afl/base/signal.hpp"
 #include "afl/string/string.hpp"
 #include "game/map/point.hpp"
+#include "game/proxy/simulationadaptor.hpp"
 #include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "game/sim/ability.hpp"
@@ -200,9 +201,9 @@ namespace game { namespace proxy {
 
 
         /** Constructor.
-            \param gameSender Sender
+            \param adaptorSender Access to SimulationAdaptor
             \param reply RequestDispatcher to receive replies back */
-        SimulationSetupProxy(util::RequestSender<Session> gameSender, util::RequestDispatcher& reply);
+        SimulationSetupProxy(util::RequestSender<SimulationAdaptor> adaptorSender, util::RequestDispatcher& reply);
 
 
         /*
@@ -720,15 +721,16 @@ namespace game { namespace proxy {
 
 
 
-        /** Access the underlying game::Session sender.
-            Use of this method is discouraged. */
-        util::RequestSender<Session> gameSender();
+        /** Access the underlying SimulationAdaptor sender.
+            \return SimulationAdaptor */
+        util::RequestSender<SimulationAdaptor> adaptorSender();
 
 
      private:
-        class TrampolineFromSession;
+        class TrampolineFromAdaptor;
+        class AdaptorFromSession;
         class Trampoline;
-        util::RequestSender<Session> m_gameSender;
+        util::RequestSender<SimulationAdaptor> m_adaptorSender;
         util::RequestReceiver<SimulationSetupProxy> m_reply;
         util::RequestSender<Trampoline> m_trampoline;
 

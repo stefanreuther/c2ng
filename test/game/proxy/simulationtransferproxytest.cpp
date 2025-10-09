@@ -10,6 +10,7 @@
 #include "game/map/planet.hpp"
 #include "game/map/ship.hpp"
 #include "game/map/universe.hpp"
+#include "game/proxy/simulationadaptorfromsession.hpp"
 #include "game/proxy/simulationsetupproxy.hpp"
 #include "game/sim/planet.hpp"
 #include "game/sim/sessionextra.hpp"
@@ -23,6 +24,7 @@
 #include "game/turn.hpp"
 
 using game::Reference;
+using game::proxy::SimulationAdaptorFromSession;
 using game::proxy::SimulationSetupProxy;
 using game::proxy::SimulationTransferProxy;
 using game::test::Counter;
@@ -210,7 +212,7 @@ AFL_TEST("game.proxy.SimulationTransferProxy:interaction", a)
     prepare(thread);
     game::map::Ship& sh = addShip(thread, 77);
     SimulationTransferProxy t(thread.gameSender());
-    SimulationSetupProxy sp(thread.gameSender(), ind);
+    SimulationSetupProxy sp(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     const Reference REF(Reference::Ship, 77);
 

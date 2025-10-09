@@ -240,7 +240,7 @@ SimulationResultDialog::init()
     client::Downlink link(m_root, m_translator);
 
     // List of players; available on FleetCostProxy
-    m_resultList.setPlayers(game::proxy::FleetCostProxy(m_setupProxy).getInvolvedPlayers(link));
+    m_resultList.setPlayers(game::proxy::FleetCostProxy(m_setupProxy.adaptorSender()).getInvolvedPlayers(link));
 
     // Player names
     m_resultList.setPlayerNames(game::proxy::PlayerProxy(m_gameSender).getPlayerNames(link, game::Player::AdjectiveName));

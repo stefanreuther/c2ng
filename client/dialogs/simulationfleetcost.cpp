@@ -89,7 +89,7 @@ FleetCostDialog::FleetCostDialog(ui::Root& root,
                                  util::NumberFormatter fmt,
                                  afl::string::Translator& tx)
     : m_root(root),
-      m_costProxy(setupProxy),
+      m_costProxy(setupProxy.adaptorSender()),
       m_gameSender(gameSender),
       m_translator(tx),
       m_label("", util::SkinColor::Static, "", root.provider()),

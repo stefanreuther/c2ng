@@ -8,6 +8,7 @@
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/thread.hpp"
 #include "afl/test/testrunner.hpp"
+#include "game/proxy/simulationadaptorfromsession.hpp"
 #include "game/proxy/simulationsetupproxy.hpp"
 #include "game/proxy/vcrdatabaseproxy.hpp"
 #include "game/test/counter.hpp"
@@ -19,6 +20,7 @@
 using game::test::SessionThread;
 using game::test::WaitIndicator;
 using game::test::Counter;
+using game::proxy::SimulationAdaptorFromSession;
 using game::proxy::SimulationRunProxy;
 using game::proxy::SimulationSetupProxy;
 
@@ -46,8 +48,8 @@ AFL_TEST("game.proxy.SimulationRunProxy:empty", a)
 {
     SessionThread h;
     WaitIndicator ind;
-    SimulationSetupProxy setup(h.gameSender(), ind);
-    SimulationRunProxy t(setup, ind);
+    SimulationSetupProxy setup(h.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
+    SimulationRunProxy t(setup.adaptorSender(), ind);
     Counter c;
     t.sig_stop.add(&c, &Counter::increment);
 
@@ -69,12 +71,12 @@ AFL_TEST("game.proxy.SimulationRunProxy:runFinite", a)
     prepare(h);
 
     // Create two hostile ships
-    SimulationSetupProxy setup(h.gameSender(), ind);
+    SimulationSetupProxy setup(h.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
     setup.addShip(ind, 0, 2);
     setup.setOwner(1, 3);
 
     // Run one simulation
-    SimulationRunProxy t(setup, ind);
+    SimulationRunProxy t(setup.adaptorSender(), ind);
     Counter c;
     t.sig_stop.add(&c, &Counter::increment);
     t.runFinite(1);
@@ -128,12 +130,12 @@ AFL_TEST("game.proxy.SimulationRunProxy:runSeries", a)
     prepare(h);
 
     // Create two hostile ships
-    SimulationSetupProxy setup(h.gameSender(), ind);
+    SimulationSetupProxy setup(h.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
     setup.addShip(ind, 0, 2);
     setup.setOwner(1, 3);
 
     // Run series
-    SimulationRunProxy t(setup, ind);
+    SimulationRunProxy t(setup.adaptorSender(), ind);
     Counter c;
     t.sig_stop.add(&c, &Counter::increment);
     t.runSeries();
@@ -155,12 +157,12 @@ AFL_TEST("game.proxy.SimulationRunProxy:runInfinite", a)
     prepare(h);
 
     // Create two hostile ships
-    SimulationSetupProxy setup(h.gameSender(), ind);
+    SimulationSetupProxy setup(h.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
     setup.addShip(ind, 0, 2);
     setup.setOwner(1, 3);
 
     // Run infinitely
-    SimulationRunProxy t(setup, ind);
+    SimulationRunProxy t(setup.adaptorSender(), ind);
     Counter c;
     t.sig_stop.add(&c, &Counter::increment);
     t.runInfinite();
@@ -184,11 +186,11 @@ AFL_TEST("game.proxy.SimulationRunProxy:no-fight", a)
     prepare(h);
 
     // Create two friendly ships (just don't set an owner)
-    SimulationSetupProxy setup(h.gameSender(), ind);
+    SimulationSetupProxy setup(h.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
     setup.addShip(ind, 0, 2);
 
     // Run one simulation
-    SimulationRunProxy t(setup, ind);
+    SimulationRunProxy t(setup.adaptorSender(), ind);
     Counter c;
     t.sig_stop.add(&c, &Counter::increment);
     t.runFinite(1);
@@ -210,7 +212,7 @@ AFL_TEST("game.proxy.SimulationRunProxy:makeClassResultBattleAdaptor", a)
     prepare(h);
 
     // Add ship and planet
-    SimulationSetupProxy setup(h.gameSender(), ind);
+    SimulationSetupProxy setup(h.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
     setup.addShip(ind, 0, 1);
     setup.addPlanet(ind);
     setup.setName(0, "Oliver's Kahn");
@@ -219,7 +221,7 @@ AFL_TEST("game.proxy.SimulationRunProxy:makeClassResultBattleAdaptor", a)
     setup.setOwner(1, 7);
 
     // Run one simulation
-    SimulationRunProxy t(setup, ind);
+    SimulationRunProxy t(setup.adaptorSender(), ind);
     Counter c;
     t.sig_stop.add(&c, &Counter::increment);
     t.runFinite(1);
@@ -250,7 +252,7 @@ AFL_TEST("game.proxy.SimulationRunProxy:makeUnitResultBattleAdaptor", a)
     prepare(h);
 
     // Add ship and planet
-    SimulationSetupProxy setup(h.gameSender(), ind);
+    SimulationSetupProxy setup(h.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
     setup.addShip(ind, 0, 1);
     setup.addPlanet(ind);
     setup.setName(0, "Oliver's Kahn");
@@ -259,7 +261,7 @@ AFL_TEST("game.proxy.SimulationRunProxy:makeUnitResultBattleAdaptor", a)
     setup.setOwner(1, 7);
 
     // Run one simulation
-    SimulationRunProxy t(setup, ind);
+    SimulationRunProxy t(setup.adaptorSender(), ind);
     Counter c;
     t.sig_stop.add(&c, &Counter::increment);
     t.runFinite(1);

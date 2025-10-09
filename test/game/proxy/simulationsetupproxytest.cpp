@@ -12,6 +12,7 @@
 #include "game/game.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/universe.hpp"
+#include "game/proxy/simulationadaptorfromsession.hpp"
 #include "game/sim/object.hpp"                // Flag definitions
 #include "game/sim/ship.hpp"
 #include "game/test/counter.hpp"
@@ -24,6 +25,7 @@
 using game::test::SessionThread;
 using game::test::WaitIndicator;
 using game::test::Counter;
+using game::proxy::SimulationAdaptorFromSession;
 using game::proxy::SimulationSetupProxy;
 
 namespace {
@@ -160,7 +162,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:uninitialized", a)
 {
     SessionThread thread;
     WaitIndicator ind;
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Check list
     SimulationSetupProxy::ListItems_t list;
@@ -181,7 +183,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:empty", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Check list
     SimulationSetupProxy::ListItems_t list;
@@ -202,7 +204,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:addShip", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
     thread.sync();
 
     Counter c;
@@ -248,7 +250,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:addPlanet", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     Counter c;
     t.sig_listChange.add(&c, &Counter::increment);
@@ -281,7 +283,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:swapShips", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add ships; this will produce sequence 1,2,3,4,5
     t.addShip(ind, 0, 5);
@@ -308,7 +310,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:removeObject", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add some units; this will produce sequence 1,2,3,4,5,p
     t.addShip(ind, 0, 5);
@@ -336,7 +338,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:clear", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add some units; this will produce sequence 1,2,3,4,5,p
     t.addShip(ind, 0, 5);
@@ -359,7 +361,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getObject", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add units
     t.addShip(ind, 0, 1);
@@ -402,7 +404,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:isDuplicateId", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add some units; this will produce sequence 1,2,3,4,5,p
     t.addShip(ind, 0, 5);
@@ -431,7 +433,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getNumBaseTorpedoes", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add base
     t.addPlanet(ind);
@@ -473,7 +475,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setFlags", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -508,7 +510,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:toggleDisabled", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -542,7 +544,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:toggleCloak", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -570,7 +572,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:toggleRandomFriendlyCode", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -596,7 +598,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setAbilities", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -641,7 +643,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setSequentialFriendlyCode", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add ships, set FC on first
     t.addShip(ind, 0, 3);
@@ -664,7 +666,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setId", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -698,7 +700,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setName", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -725,7 +727,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setFriendlyCode", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -755,7 +757,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setDamage", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -778,7 +780,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setShield", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -800,7 +802,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setOwner", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -835,7 +837,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setExperienceLevel", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -858,7 +860,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setFlakRatingOverride", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -880,7 +882,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setFlakCompensationOverride", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -902,7 +904,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setCrew", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -924,7 +926,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setHullType", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -961,7 +963,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setHullType:after-add", a)
     // 3+4 can build Gorbies
     assignHull(thread, 3, 1, game::test::GORBIE_HULL_ID);
     assignHull(thread, 4, 1, game::test::GORBIE_HULL_ID);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -1000,7 +1002,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setHullType:after-add:cloak", a)
     WaitIndicator ind;
     prepare(thread);
     makeHullCloakable(thread, game::test::GORBIE_HULL_ID);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add ships
     t.addShip(ind, 0, 2);
@@ -1035,7 +1037,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setHullType:after-add:damage", a)
     prepare(thread);
     // Only player 1 can build Outriders
     assignHull(thread, 1, 1, game::test::OUTRIDER_HULL_ID);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -1064,7 +1066,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setHullType:after-add:self-aggression"
     // Only player 1 can build Outriders, Outrider can cloak.
     assignHull(thread, 1, 1, game::test::OUTRIDER_HULL_ID);
     makeHullCloakable(thread, game::test::OUTRIDER_HULL_ID);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -1091,7 +1093,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setMass", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -1113,7 +1115,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setBeamType", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -1138,7 +1140,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setTorpedoType", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -1165,7 +1167,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setNumBays", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -1189,7 +1191,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setEngineType", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -1212,7 +1214,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setAggressiveness", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 1);
@@ -1235,7 +1237,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setAggressiveness:interaction", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add ships
     t.addShip(ind, 0, 2);
@@ -1265,7 +1267,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setInterceptId", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add a ship
     t.addShip(ind, 0, 2);
@@ -1295,7 +1297,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setDefense", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add planet
     t.addPlanet(ind);
@@ -1317,7 +1319,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setPopulation", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add planet
     t.addPlanet(ind);
@@ -1344,7 +1346,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setBaseDefense", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add planet
     t.addPlanet(ind);
@@ -1367,7 +1369,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setBaseBeamTech", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add planet
     t.addPlanet(ind);
@@ -1389,7 +1391,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setBaseTorpedoTech", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add base
     t.addPlanet(ind);
@@ -1412,7 +1414,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setNumBaseFighters", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add base
     t.addPlanet(ind);
@@ -1435,7 +1437,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setNumBaseTorpedoes", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add base
     t.addPlanet(ind);
@@ -1463,7 +1465,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getAbilityChoices:ship", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add ship
     t.addShip(ind, 0, 1);
@@ -1494,7 +1496,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getAbilityChoices:planet", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add ship
     t.addPlanet(ind);
@@ -1519,7 +1521,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getFriendlyCodeChoices", a)
     WaitIndicator ind;
     prepare(thread);
     prepareFriendlyCodes(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add ship and planet
     t.addShip(ind, 0, 1);
@@ -1547,7 +1549,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getOwnerChoices", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Query
     SimulationSetupProxy::Elements_t list;
@@ -1571,7 +1573,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getExperienceLevelChoices", a)
     prepare(thread);
     thread.session().getRoot()->hostConfiguration()[game::config::HostConfiguration::NumExperienceLevels].set(3);
     thread.session().getRoot()->hostConfiguration()[game::config::HostConfiguration::ExperienceLevelNames].set("Noob,Intern,Apprentice,Junior,Senior");
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Query
     SimulationSetupProxy::Elements_t list;
@@ -1597,7 +1599,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getHullTypeChoices", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Query
     SimulationSetupProxy::Elements_t list;
@@ -1625,7 +1627,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getPrimaryChoices", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add 2 ships, one custom, one outrider
     t.addShip(ind, 0, 2);
@@ -1657,7 +1659,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getSecondaryChoices", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add 4 ships: custom, outrider, anni, gorbie
     t.addShip(ind, 0, 4);
@@ -1717,7 +1719,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getEngineTypeChoices", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Query
     SimulationSetupProxy::Elements_t list;
@@ -1739,7 +1741,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getAggressivenessChoices", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Query
     SimulationSetupProxy::Elements_t list;
@@ -1765,7 +1767,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getBaseBeamLevelChoices", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Query
     SimulationSetupProxy::Elements_t list;
@@ -1789,7 +1791,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getBaseTorpedoLevelChoices", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Query
     SimulationSetupProxy::Elements_t list;
@@ -1812,7 +1814,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getPlanetNameChoices", a)
     WaitIndicator ind;
     prepare(thread);
     preparePlanetNames(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Query
     SimulationSetupProxy::Elements_t list;
@@ -1837,7 +1839,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getPopulationChoices", a)
     WaitIndicator ind;
     prepare(thread);
     preparePlanetNames(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Create planet
     t.addPlanet(ind);
@@ -1877,7 +1879,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getIdRange", a)
     WaitIndicator ind;
     prepare(thread);
     prepareUniverse(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add ship and planet.
     t.addShip(ind, 0, 1);
@@ -1901,7 +1903,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getDamageRange", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add ships, one Lizard
     t.addShip(ind, 0, 2);
@@ -1925,7 +1927,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getShieldRange", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add ships, one damaged
     t.addShip(ind, 0, 2);
@@ -1949,7 +1951,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getCrewRange", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add ships, one Gorbie
     t.addShip(ind, 0, 2);
@@ -1974,7 +1976,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getInterceptIdRange", a)
     WaitIndicator ind;
     prepare(thread);
     prepareUniverse(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add ship
     t.addShip(ind, 0, 1);
@@ -1994,7 +1996,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getBaseDefenseRange", a)
     WaitIndicator ind;
     prepare(thread);
     thread.session().getRoot()->hostConfiguration()[game::config::HostConfiguration::MaximumDefenseOnBase].set("10,15,20,30");
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add base
     t.addPlanet(ind);
@@ -2022,7 +2024,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:getNumBaseFightersRange", a)
     WaitIndicator ind;
     prepare(thread);
     thread.session().getRoot()->hostConfiguration()[game::config::HostConfiguration::MaximumFightersOnBase].set("32,16,8,4,2");
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add base
     t.addPlanet(ind);
@@ -2049,7 +2051,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:setSlot", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add some ships: 1,2,3,4,5
     t.addShip(ind, 0, 5);
@@ -2101,7 +2103,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:configuration", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Set configuration
     {
@@ -2126,7 +2128,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:sort", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add ships
     t.addShip(ind, 0, 4);
@@ -2173,7 +2175,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:sort:battle-order", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add ships
     t.addShip(ind, 0, 3);
@@ -2239,7 +2241,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:copy", a)
     WaitIndicator ind;
     prepare(thread);
     preparePlayedShip(thread, 77);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Add ship to sim
     t.addShip(ind, 0, 1);
@@ -2300,7 +2302,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:load", a)
     WaitIndicator ind;
     prepare(thread);
     preparePlayedShip(thread, 77);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Load
     String_t error;
@@ -2328,7 +2330,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:load:error", a)
     SessionThread thread;
     WaitIndicator ind;
     prepare(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Load
     String_t error;
@@ -2348,7 +2350,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:relations", a)
     WaitIndicator ind;
     prepare(thread);
     prepareAlliances(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Get status
     // - initially, no alliances
@@ -2379,7 +2381,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:relations:disabled", a)
     WaitIndicator ind;
     prepare(thread);
     prepareAlliances(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     // Disable
     t.setUsePlayerRelations(false);
@@ -2413,7 +2415,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:isMatchingShipList:empty", a)
     WaitIndicator ind;
     prepare(thread);
     prepareAlliances(thread);
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
 
     a.checkEqual("01. isMatchingShipList", t.isMatchingShipList(ind), true);
 }
@@ -2428,7 +2430,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:isMatchingShipList:match", a)
     prepare(thread);
     prepareAlliances(thread);
 
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
     t.addShip(ind, 0, 1);
     t.setHullType(0, game::test::OUTRIDER_HULL_ID, false);
     t.setTorpedoType(0, 0);
@@ -2447,7 +2449,7 @@ AFL_TEST("game.proxy.SimulationSetupProxy:isMatchingShipList:mismatch", a)
     prepare(thread);
     prepareAlliances(thread);
 
-    SimulationSetupProxy t(thread.gameSender(), ind);
+    SimulationSetupProxy t(thread.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
     t.addShip(ind, 0, 1);
     t.setHullType(0, game::test::OUTRIDER_HULL_ID, false);
     t.setTorpedoType(0, 5);

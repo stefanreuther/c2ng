@@ -1,6 +1,6 @@
 /**
   *  \file game/proxy/simulationtransferproxy.hpp
-  *  \brief Class game::proxy::SimulationSetupProxy
+  *  \brief Class game::proxy::SimulationTransferProxy
   */
 #ifndef C2NG_GAME_PROXY_SIMULATIONTRANSFERPROXY_HPP
 #define C2NG_GAME_PROXY_SIMULATIONTRANSFERPROXY_HPP

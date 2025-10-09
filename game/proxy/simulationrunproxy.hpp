@@ -14,10 +14,10 @@
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
 #include "util/stopsignal.hpp"
+#include "game/proxy/simulationadaptor.hpp"
 
 namespace game { namespace proxy {
 
-    class SimulationSetupProxy;
     class WaitIndicator;
 
     /** Simulation runner proxy.
@@ -31,7 +31,7 @@ namespace game { namespace proxy {
         This proxy caches the information received from the game thread and can therefore be queried at any time.
 
         Usage:
-        - construct SimulationRunProxy from the SimulationSetupProxy you want to simulate
+        - construct SimulationRunProxy (from the SimulationSetupProxy's adaptorSender())
         - call a run() method to run simulations.
         - wait for sig_stop signal before performing operations on other proxies
         - at any time, query current simulation result
@@ -45,9 +45,9 @@ namespace game { namespace proxy {
         typedef std::vector<UnitInfo_t> UnitInfos_t;
 
         /** Constructor.
-            \param setup SimulationSetupProxy whose setup to simulate
+            \param adaptorSender Access to SimulationAdaptor
             \param reply RequestDispatcher to receive replies */
-        explicit SimulationRunProxy(SimulationSetupProxy& setup, util::RequestDispatcher& reply);
+        SimulationRunProxy(util::RequestSender<SimulationAdaptor> adaptorSender, util::RequestDispatcher& reply);
         ~SimulationRunProxy();
 
         /** Run a finite number of iterations.
@@ -142,7 +142,7 @@ namespace game { namespace proxy {
 
      private:
         class Trampoline;
-        class TrampolineFromSession;
+        class TrampolineFromAdaptor;
         class Adaptor;
 
         afl::base::Ptr<util::StopSignal> m_stopper;
