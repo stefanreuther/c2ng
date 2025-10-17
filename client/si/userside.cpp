@@ -8,6 +8,9 @@
 #include "client/si/control.hpp"
 #include "client/si/scriptside.hpp"
 #include "game/extraidentifier.hpp"
+#include "game/game.hpp"
+#include "game/root.hpp"
+#include "game/spec/shiplist.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "util/unicodechars.hpp"
 
@@ -157,6 +160,10 @@ client::si::UserSide::reset()
 
                 session.processList().terminateAllProcesses();
                 session.processList().removeTerminatedProcesses();
+
+                session.setGame(0);
+                session.setShipList(0);
+                session.setRoot(0);
             }
     };
     m_gameSender.postNewRequest(new Task());

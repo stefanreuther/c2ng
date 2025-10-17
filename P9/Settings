@@ -12,7 +12,9 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/proxy/simulationadaptorfromsession.cpp \
+FILES_gamelib = game/interface/privatefunctions.cpp \
+    game/interface/privatefunctions.hpp \
+    game/proxy/simulationadaptorfromsession.cpp \
     game/proxy/simulationadaptorfromsession.hpp \
     game/proxy/simulationadaptor.hpp game/interface/taskwaypoints.cpp \
     game/interface/taskwaypoints.hpp interpreter/basetaskeditor.cpp \
@@ -1839,7 +1841,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/game/proxy/simulationadaptorfromsessiontest.cpp \
+FILES_testsuite = test/game/interface/privatefunctionstest.cpp \
+    test/game/proxy/simulationadaptorfromsessiontest.cpp \
     test/game/proxy/simulationadaptortest.cpp \
     test/game/interface/taskwaypointstest.cpp \
     test/interpreter/basetaskeditortest.cpp \
