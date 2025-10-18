@@ -28,6 +28,7 @@
 #include "afl/sys/thread.hpp"
 #include "afl/test/translator.hpp"
 #include "client/applicationparameters.hpp"
+#include "client/dialogs/simulator.hpp"
 #include "client/map/screen.hpp"
 #include "client/screens/browserscreen.hpp"
 #include "client/screens/controlscreen.hpp"
@@ -92,6 +93,12 @@ namespace {
     const char LOG_NAME[] = "main";
 
     const char PROGRAM_TITLE[] = "PCC2 v" PCC2_VERSION;
+
+    enum ConfirmAction {
+        ActionCanceled,
+        ActionPlay,
+        ActionSimulator
+    };
 
     class ScriptInitializer : public client::si::ScriptTask {
      public:
@@ -217,30 +224,64 @@ namespace {
     };
 
     /*
-     *  The BrowserListener is invoked when the user wants to open a game.
-     *  This is currently pretty ugly spaghetti code waiting to be factored into nice re-usable methods.
+     *  The BrowserListener is invoked by BrowserScreen when the user wants to open a game or simulator.
      */
-    class BrowserListener : public afl::base::Closure<void(int)> {
+    class BrowserListener : public client::screens::BrowserScreen::Callback {
      public:
-        BrowserListener(client::screens::BrowserScreen& screen,
-                        client::si::UserSide& us,
+        BrowserListener(client::si::UserSide& us,
                         RequestSender<game::browser::Session> browserSender,
                         RequestSender<game::Session> gameSender)
-            : m_screen(screen),
+            : m_pScreen(0),
               m_userSide(us),
-              m_uiSender(screen.getSender()),
               m_browserSender(browserSender),
               m_gameSender(gameSender)
             { }
 
-        void call(int player)
+        void setScreen(client::screens::BrowserScreen* pScreen)
             {
-                client::si::NullControl(m_userSide).executeHookWait("BeforeLoad");
-                m_screen.setBlockState(true);
-                m_gameSender.postNewRequest(new LoadRequest(player, m_uiSender, m_gameSender, m_browserSender));
+                m_pScreen = pScreen;
+            }
+
+        void onOpenGame(int player)
+            {
+                if (m_pScreen != 0) {
+                    client::si::NullControl(m_userSide).executeHookWait("BeforeLoad");
+                    m_pScreen->setBlockState(true);
+                    m_gameSender.postNewRequest(new LoadRequest(player, m_pScreen->getSender(), m_gameSender, m_browserSender));
+                }
+            }
+
+        void onSimulate()
+            {
+                if (m_pScreen != 0) {
+                    m_pScreen->setBlockState(true);
+                    m_gameSender.postNewRequest(new SimRequest(m_pScreen->getSender(), m_gameSender, m_browserSender));
+                }
             }
 
      private:
+        class Finalizer : public Process::Finalizer {
+         public:
+            Finalizer(RequestSender<client::screens::BrowserScreen> uiSender, ConfirmAction successAction)
+                : m_uiSender(uiSender),
+                  m_successAction(successAction)
+                { }
+            ~Finalizer()
+                { /* TODO: unexpected stop */ }
+            virtual void finalizeProcess(Process& p)
+                {
+                    if (p.getState() == Process::Ended) {
+                        m_uiSender.postNewRequest(new ConfirmRequest(m_successAction));
+                    } else {
+                        m_uiSender.postNewRequest(new ConfirmRequest(ActionCanceled));
+                    }
+                }
+         private:
+            RequestSender<client::screens::BrowserScreen> m_uiSender;
+            ConfirmAction m_successAction;
+        };
+
+        // Request to load a game: prepare everything
         class LoadRequest : public util::Request<game::Session> {
          public:
             LoadRequest(int player,
@@ -251,25 +292,6 @@ namespace {
                 { }
             void handle(game::Session& session)
                 {
-                    class Finalizer : public Process::Finalizer {
-                     public:
-                        Finalizer(RequestSender<client::screens::BrowserScreen> uiSender)
-                            : m_uiSender(uiSender)
-                            { }
-                        ~Finalizer()
-                            { /* TODO: unexpected stop */ }
-                        virtual void finalizeProcess(Process& p)
-                            {
-                                if (p.getState() == Process::Ended) {
-                                    m_uiSender.postNewRequest(new ConfirmRequest(true));
-                                } else {
-                                    m_uiSender.postNewRequest(new ConfirmRequest(false));
-                                }
-                            }
-                     private:
-                        RequestSender<client::screens::BrowserScreen> m_uiSender;
-                    };
-
                     Process& proc = session.processList().create(session.world(), "<Loader>");
                     interpreter::BCORef_t bco = BytecodeObject::create(true);
                     PrivateFunctions::addTakeRoot(session, *bco, m_gameSender, m_browserSender);
@@ -279,7 +301,7 @@ namespace {
                     PrivateFunctions::addLoadCurrentTurn(session, *bco, m_player);
                     PrivateFunctions::addPostprocessCurrentTurn(session, *bco, m_player);
                     proc.pushFrame(bco, false);
-                    proc.setNewFinalizer(new Finalizer(m_uiSender));
+                    proc.setNewFinalizer(new Finalizer(m_uiSender, ActionPlay));
 
                     uint32_t pgid = session.processList().allocateProcessGroup();
                     session.processList().resumeProcess(proc, pgid);
@@ -294,25 +316,54 @@ namespace {
             RequestSender<game::browser::Session> m_browserSender;
         };
 
+        // Request for simulation: prepare ship list
+        class SimRequest : public util::Request<game::Session> {
+         public:
+            SimRequest(RequestSender<client::screens::BrowserScreen> uiSender,
+                       RequestSender<game::Session> gameSender,
+                       RequestSender<game::browser::Session> browserSender)
+                : m_uiSender(uiSender), m_gameSender(gameSender), m_browserSender(browserSender)
+                { }
+            void handle(game::Session& session)
+                {
+                    Process& proc = session.processList().create(session.world(), "<Loader>");
+                    interpreter::BCORef_t bco = BytecodeObject::create(true);
+                    PrivateFunctions::addTakeRoot(session, *bco, m_gameSender, m_browserSender);
+                    PrivateFunctions::addMakeShipList(session, *bco);
+                    PrivateFunctions::addLoadShipList(session, *bco);
+                    proc.pushFrame(bco, false);
+                    proc.setNewFinalizer(new Finalizer(m_uiSender, ActionSimulator));
+
+                    uint32_t pgid = session.processList().allocateProcessGroup();
+                    session.processList().resumeProcess(proc, pgid);
+                    session.processList().startProcessGroup(pgid);
+                    session.runScripts();
+                }
+
+         private:
+            RequestSender<client::screens::BrowserScreen> m_uiSender;
+            RequestSender<game::Session> m_gameSender;
+            RequestSender<game::browser::Session> m_browserSender;
+        };
+
         class ConfirmRequest : public util::Request<client::screens::BrowserScreen> {
          public:
-            ConfirmRequest(bool ok)
-                : m_ok(ok)
+            ConfirmRequest(ConfirmAction action)
+                : m_action(action)
                 { }
             void handle(client::screens::BrowserScreen& screen)
                 {
                     screen.setBlockState(false);
-                    if (m_ok) {
-                        screen.stop(1);
+                    if (m_action != ActionCanceled) {
+                        screen.stop(m_action);
                     }
                 }
          private:
-            const bool m_ok;
+            const ConfirmAction m_action;
         };
 
-        client::screens::BrowserScreen& m_screen;
+        client::screens::BrowserScreen* m_pScreen;
         client::si::UserSide& m_userSide;
-        RequestSender<client::screens::BrowserScreen> m_uiSender;
         RequestSender<game::browser::Session> m_browserSender;
         RequestSender<game::Session> m_gameSender;
     };
@@ -745,8 +796,9 @@ client::Application::appMain(gfx::Engine& engine)
         docView.setColorScheme(docColors);
         root.add(docView);
 
-        client::screens::BrowserScreen browserScreen(userSide, browserProxy, browserSender);
-        browserScreen.sig_gameSelection.addNewClosure(new BrowserListener(browserScreen, userSide, browserSender, gameReceiver.getSender()));
+        BrowserListener cb(userSide, browserSender, gameReceiver.getSender());
+        client::screens::BrowserScreen browserScreen(cb, userSide, browserProxy, browserSender);
+        cb.setScreen(&browserScreen);
         if (browserAction.get() != 0) {
             browserAction->call(browserScreen);
             browserAction.reset();
@@ -754,8 +806,18 @@ client::Application::appMain(gfx::Engine& engine)
         int result = browserScreen.run(docColors);
         if (result != 0) {
             // OK, play
-            play(userSide);
-            client::si::NullControl(userSide).executeHookWait("AfterExit");
+            client::si::NullControl ctl(userSide);
+            client::si::OutputState out;
+            switch (result) {
+             case ActionPlay:
+                play(userSide);
+                ctl.executeHookWait("AfterExit");
+                break;
+
+             case ActionSimulator:
+                client::dialogs::doBattleSimulator(userSide, ctl, out);
+                break;
+            }
             userSide.reset();
             browserAction.reset(new AutoFocusAction(browserScreen.getCurrentPlayerNumber()));
         } else {

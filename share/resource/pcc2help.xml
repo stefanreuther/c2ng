@@ -139,6 +139,7 @@
         <ki key="T"><a href="pcc2:resultattachments">Unpack attachments</a>;</ki>
         <ki key="M">Make turn files;</ki>
         <ki key="S"><a href="pcc2:sweep">Clean up directory (sweep)</a>;</ki>
+        <ki key="F4"><a href="pcc2:bsim">Battle Simulator</a>;</ki>
         <ki key="F5"><a href="pcc2:plugins">Plugin Manager</a>;</ki>
         <ki key="ESC">Exit.</ki>
       </kl>

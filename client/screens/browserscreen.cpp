@@ -170,8 +170,9 @@ namespace {
 
 /***************************** BrowserScreen *****************************/
 
-client::screens::BrowserScreen::BrowserScreen(client::si::UserSide& us, game::proxy::BrowserProxy& proxy, util::RequestSender<game::browser::Session> browserSender)
-    : m_userSide(us),
+client::screens::BrowserScreen::BrowserScreen(Callback& cb, client::si::UserSide& us, game::proxy::BrowserProxy& proxy, util::RequestSender<game::browser::Session> browserSender)
+    : m_callback(cb),
+      m_userSide(us),
       m_root(us.root()),
       m_translator(us.translator()),
       m_gameSender(us.gameSender()),
@@ -210,12 +211,23 @@ client::screens::BrowserScreen::run(gfx::ColorScheme<util::SkinColor::Color>& pa
 {
     ui::widgets::TransparentWindow window(parentColors, ui::layout::VBox::instance5);
 
-    ui::Group buttons(ui::layout::HBox::instance5);
+    ui::Group buttons1(ui::layout::HBox::instance5);
+    ui::Group buttons2(ui::layout::HBox::instance5);
     ui::widgets::Button btnExit(m_translator("Exit"), util::Key_Escape, m_root);
-    ui::Spacer btnSpacer;
-    buttons.add(btnExit);
-    buttons.add(btnSpacer);
-    buttons.add(m_optionButton);
+    ui::widgets::Button btnHelp(m_translator("Help"), 'h', m_root);
+    ui::widgets::Button btnPlugins(m_translator("Plugins"), util::Key_F5, m_root);
+    ui::widgets::Button btnSim(m_translator("Simulator"), util::Key_F4, m_root);
+
+    ui::Spacer spacer1;
+    buttons1.add(m_optionButton);
+    buttons1.add(spacer1);
+    buttons1.add(btnPlugins);
+    buttons1.add(btnSim);
+
+    ui::Spacer spacer2;
+    buttons2.add(btnExit);
+    buttons2.add(spacer2);
+    buttons2.add(btnHelp);
 
     window.add(m_crumbs);
 
@@ -231,15 +243,21 @@ client::screens::BrowserScreen::run(gfx::ColorScheme<util::SkinColor::Color>& pa
     keys.add('u',                                this, &BrowserScreen::onUnpackAction);
     keys.add('t',                                this, &BrowserScreen::onReceiveAttachmentsAction);
     keys.add(util::Key_F1,                       this, &BrowserScreen::onKeyHelp);
+    keys.add(util::Key_F4,                       this, &BrowserScreen::onKeySimulator);
     keys.add(util::Key_F5,                       this, &BrowserScreen::onKeyPlugin);
     keys.add(util::Key_Quit,                     this, &BrowserScreen::onKeyQuit);
     window.add(keys);
+
+    btnSim.dispatchKeyTo(keys);
+    btnPlugins.dispatchKeyTo(keys);
+    btnHelp.dispatchKeyTo(keys);
 
     ui::Group g(ui::layout::HBox::instance5);
     g.add(m_list);
     g.add(m_info);
     window.add(g);
-    window.add(buttons);
+    window.add(buttons1);
+    window.add(buttons2);
     window.pack();
     m_root.centerWidget(window);
     m_root.add(window);
@@ -294,6 +312,12 @@ util::RequestSender<client::screens::BrowserScreen>
 client::screens::BrowserScreen::getSender()
 {
     return m_receiver.getSender();
+}
+
+client::si::UserSide&
+client::screens::BrowserScreen::userSide()
+{
+    return m_userSide;
 }
 
 bool
@@ -438,7 +462,7 @@ client::screens::BrowserScreen::onKeyEnter(int)
 
              case PlayAction:
                 if (preparePlayAction(param)) {
-                    sig_gameSelection.raise(param);
+                    m_callback.onOpenGame(param);
                 }
                 break;
 
@@ -474,6 +498,15 @@ client::screens::BrowserScreen::onKeyHelp(int)
 {
     // ex PCC2GameChooserWindow::handleEvent (part)
     client::dialogs::doHelpDialog(m_root, m_translator, m_gameSender, "pcc2:gamesel");
+}
+
+void
+client::screens::BrowserScreen::onKeySimulator(int)
+{
+    // ex WVcrGameChooserWindow::onSimulate (part)
+    if (m_state == Working) {
+        m_callback.onSimulate();
+    }
 }
 
 void

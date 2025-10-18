@@ -35,12 +35,33 @@ namespace client { namespace screens {
         When a game is selected for loading, sig_gameSelection will be raised. */
     class BrowserScreen {
      public:
+        class Callback {
+         public:
+            virtual ~Callback()
+                { }
+
+            /** Callback: game selected.
+                At this time, the browser will have a selected child and root (game::browser::Browser::getSelectedChildIndex(), game::browser::Browser::getSelectedRoot())
+                which identify the game to play, and that game will have the given player number.
+                The BrowserScreen will still be running.
+                \param playerNr Player number */
+            virtual void onOpenGame(int playerNr) = 0;
+
+            /** Callback: open simulator.
+                At this time, the browser will have a selected child and root (game::browser::Browser::getSelectedChildIndex(), game::browser::Browser::getSelectedRoot())
+                which identify the game to simulate.
+                The BrowserScreen will still be running. */
+            virtual void onSimulate() = 0;
+        };
+
+
         /** Constructor.
             Prepares a BrowserScreen.
+            \param cb Callback
             \param us UserSide
             \param proxy Browser proxy for most operations
             \param browserSender Sender for the browser */
-        BrowserScreen(client::si::UserSide& us, game::proxy::BrowserProxy& proxy, util::RequestSender<game::browser::Session> browserSender);
+        BrowserScreen(Callback& cb, client::si::UserSide& us, game::proxy::BrowserProxy& proxy, util::RequestSender<game::browser::Session> browserSender);
 
         /** Display this screen.
             Returns when the user cancels the dialog.
@@ -72,12 +93,9 @@ namespace client { namespace screens {
             This can be used to send requests to this object. */
         util::RequestSender<BrowserScreen> getSender();
 
-        /** Signal: game selected.
-            At this time, the browser will have a selected child and root (game::browser::Browser::getSelectedChildIndex(), game::browser::Browser::getSelectedRoot())
-            which identify the game to play, and that game will have the given player number.
-            The BrowserScreen will still be running.
-            \param player Player number */
-        afl::base::Signal<void(int)> sig_gameSelection;
+        /** Access UserSide.
+            \return UserSide object */
+        client::si::UserSide& userSide();
 
      private:
         enum AutoAction {
@@ -125,6 +143,7 @@ namespace client { namespace screens {
         void onKeyEnter(int);
         void onKeyLeft(int);
         void onKeyHelp(int);
+        void onKeySimulator(int);
         void onKeyPlugin(int);
         void onKeyQuit(int);
         void onAddAccount(int);
@@ -152,6 +171,7 @@ namespace client { namespace screens {
         size_t findUniquePlayAction() const;
         size_t findPlayAction(int playerNumber) const;
 
+        Callback& m_callback;
         client::si::UserSide& m_userSide;
         ui::Root& m_root;
         afl::string::Translator& m_translator;
