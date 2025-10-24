@@ -1,19 +1,22 @@
 /**
   *  \file client/vcr/classic/renderer.cpp
+  *  \brief Class client::vcr::classic::Renderer
   */
 
-#include <cassert>
 #include "client/vcr/classic/renderer.hpp"
+
+#include <cassert>
 #include "afl/string/format.hpp"
-#include "ui/res/resid.hpp"
 #include "client/vcr/beamsprite.hpp"
 #include "client/vcr/torpedosprite.hpp"
-#include "gfx/context.hpp"
-#include "gfx/complex.hpp"
-#include "ui/colorscheme.hpp"
 #include "game/vcr/classic/algorithm.hpp"
 #include "game/vcr/classic/utils.hpp"
+#include "gfx/complex.hpp"
+#include "gfx/context.hpp"
+#include "gfx/gen/explosionrenderer.hpp"
 #include "gfx/scan.hpp"
+#include "ui/colorscheme.hpp"
+#include "ui/res/resid.hpp"
 
 namespace gvc = game::vcr::classic;
 using afl::string::Format;
@@ -72,6 +75,109 @@ namespace {
      private:
         int m_state;
         ui::ColorScheme& m_colors;
+    };
+
+    class ShieldSprite : public gfx::anim::Sprite {
+     public:
+        static const int SIZE = 35;
+        ShieldSprite(ui::ColorScheme& cs)
+            : Sprite(),
+              m_state(0),
+              m_colors(cs)
+            { setExtent(gfx::Rectangle(0, 0, 2*SIZE+1, 2*SIZE+1)); }
+
+        virtual void draw(gfx::Canvas& can)
+            {
+                gfx::Context<uint8_t> ctx(can, m_colors);
+                ctx.setColor(static_cast<uint8_t>(ui::Color_Shield + 15 - m_state));
+                drawCircle(ctx, getCenter(), SIZE);
+            }
+
+        virtual void tick()
+            {
+                if (++m_state > 10) {
+                    markForDeletion();
+                } else {
+                    markChanged();
+                }
+            }
+
+     private:
+        int m_state;
+        ui::ColorScheme& m_colors;
+    };
+
+    class GeneratedExplosionSprite : public gfx::anim::Sprite {
+     public:
+        GeneratedExplosionSprite()
+            : Sprite(),
+              m_rng(77),
+              m_renderer(gfx::Point(12, 12), 6, 7, m_rng),
+              m_canvas()
+            { setExtent(gfx::Rectangle(0, 0, 12, 12)); }
+
+        virtual void draw(gfx::Canvas& can)
+            {
+                if (m_canvas.get() != 0) {
+                    can.blit(getExtent().getTopLeft(), *m_canvas, gfx::Rectangle(0, 0, 12, 12));
+                }
+            }
+
+        virtual void tick()
+            {
+                if (m_renderer.hasMoreFrames()) {
+                    m_canvas = m_renderer.renderFrame().asPtr();
+                    markChanged();
+                } else {
+                    m_canvas = 0;
+                    markForDeletion();
+                }
+            }
+
+     private:
+        util::RandomNumberGenerator m_rng;
+        gfx::gen::ExplosionRenderer m_renderer;
+        afl::base::Ptr<gfx::Canvas> m_canvas;
+    };
+
+    class GeneratedShieldSprite : public gfx::anim::Sprite {
+     public:
+        static const int SIZE = 35;
+        GeneratedShieldSprite(ui::ColorScheme& cs, const client::vcr::classic::Renderer::ObjectSprite& obj)
+            : Sprite(),
+              m_state(0),
+              m_colors(cs),
+              m_object(obj)
+            { setPosition(); }
+
+        virtual void draw(gfx::Canvas& can)
+            {
+                gfx::Context<uint8_t> ctx(can, m_colors);
+                ctx.setColor(static_cast<uint8_t>(ui::Color_Shield + 15 - m_state));
+                m_object.drawOutline(ctx);
+            }
+
+        virtual void tick()
+            {
+                setPosition();
+                if (++m_state > 10) {
+                    markForDeletion();
+                } else {
+                    markChanged();
+                }
+            }
+
+     private:
+        int m_state;
+        ui::ColorScheme& m_colors;
+        const client::vcr::classic::Renderer::ObjectSprite& m_object;
+
+        void setPosition()
+            {
+                gfx::Rectangle r = m_object.getExtent();
+                r.grow(1, 1);
+                setExtent(r);
+            }
     };
 }
 
@@ -153,17 +259,63 @@ client::vcr::classic::Renderer::ObjectSprite::getWeaponTarget() const
     }
 }
 
+gfx::Rectangle
+client::vcr::classic::Renderer::ObjectSprite::getExtent() const
+{
+    if (m_sprite == 0) {
+        return gfx::Rectangle();
+    } else {
+        return m_sprite->getExtent();
+    }
+}
+
+void
+client::vcr::classic::Renderer::ObjectSprite::drawOutline(gfx::BaseContext& ctx) const
+{
+    if (m_sprite != 0) {
+        const int origX = m_sprite->getExtent().getLeftX();
+        const int origY = m_sprite->getExtent().getTopY();
+        for (size_t i = 0; i < m_ranges.size(); ++i) {
+            const Range& me = m_ranges[i];
+            bool isFirst = (i == 0 || me.y != m_ranges[i-1].y+1);
+            bool isLast = (i+1 >= m_ranges.size() || me.y+1 != m_ranges[i+1].y);
+
+            // First in a bunch
+            if (isFirst) {
+                drawHLine(ctx, me.minX + origX, me.y + origY-1, me.maxX + origX);
+            }
+
+            // Sides
+            int minX = me.minX;
+            int maxX = me.maxX;
+            if (!isFirst) {
+                minX = std::min(minX, m_ranges[i-1].minX);
+                maxX = std::max(maxX, m_ranges[i-1].maxX);
+            }
+            if (!isLast) {
+                minX = std::min(minX, m_ranges[i+1].minX);
+                maxX = std::max(maxX, m_ranges[i+1].maxX);
+            }
+            drawHLine(ctx, minX + origX-1, me.y + origY, me.minX + origX-1);
+            drawHLine(ctx, maxX + origX+1, me.y + origY, me.maxX + origX+1);
+
+            // Last in a bunch
+            if (isLast) {
+                drawHLine(ctx, me.minX + origX, me.y + origY+1, me.maxX + origX);
+            }
+        }
+    }
+}
 
 
 /******************************** Renderer *******************************/
 
-
-
-client::vcr::classic::Renderer::Renderer(gfx::anim::Controller& ctl, ui::Root& root, afl::string::Translator& tx)
+client::vcr::classic::Renderer::Renderer(gfx::anim::Controller& ctl, ui::Root& root, afl::string::Translator& tx, int animationMode)
     : m_controller(ctl),
       m_root(root),
       m_translator(tx),
       m_extent(),
+      m_animationMode(animationMode),
       m_result(),
       m_distanceSprite(m_controller.addNew(new gfx::anim::TextSprite(root.provider()))),
       m_timeSprite(m_controller.addNew(new gfx::anim::TextSprite(root.provider()))),
@@ -269,6 +421,7 @@ client::vcr::classic::Renderer::hitObject(Side_t side, int32_t damageDone, int32
         if (damageDone > 0 || crewKilled > 0) {
             addExplosion(m_objects[side].getWeaponTarget(), id);
         } else if (shieldLost > 0) {
+            addShield(m_objects[side], m_objects[side].getWeaponTarget(), id);
         } else {
         }
     }
@@ -348,7 +501,27 @@ client::vcr::classic::Renderer::fireTorpedo(Side_t side, int32_t launcher, int32
 void
 client::vcr::classic::Renderer::addExplosion(gfx::Point pt, int id)
 {
-    gfx::anim::Sprite* p = new ExplosionSprite(m_root.colorScheme());
+    gfx::anim::Sprite* p;
+    if (m_animationMode == 0) {
+        p = new ExplosionSprite(m_root.colorScheme());
+    } else {
+        p = new GeneratedExplosionSprite();
+    }
+    m_controller.addNewSprite(p);
+    p->setCenter(pt);
+    p->setId(id);
+    p->setZ(Z_BANG);
+}
+
+void
+client::vcr::classic::Renderer::addShield(const ObjectSprite& obj, gfx::Point pt, int id)
+{
+    gfx::anim::Sprite* p;
+    if (m_animationMode == 0) {
+        p = new ShieldSprite(m_root.colorScheme());
+    } else {
+        p = new GeneratedShieldSprite(m_root.colorScheme(), obj);
+    }
     m_controller.addNewSprite(p);
     p->setCenter(pt);
     p->setId(id);

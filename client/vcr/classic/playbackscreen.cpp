@@ -275,7 +275,7 @@ client::vcr::classic::PlaybackScreen::run()
     PlaybackPanel panel(m_root, m_spriteWidget, m_leftStatus, m_rightStatus, g);
     panel.setExtent(m_root.getExtent());
 
-    m_renderer.reset(new Renderer(m_spriteWidget.controller(), m_root, m_translator));
+    m_renderer.reset(new Renderer(m_spriteWidget.controller(), m_root, m_translator, 1));
     m_renderer->setExtent(m_spriteWidget.getExtent());
 
     m_root.add(panel);
