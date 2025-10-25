@@ -33,8 +33,9 @@ namespace game { namespace vcr { namespace classic {
         /** Remove animations by Id.
             For use by implementation of EventListener::removeAnimations(),
             to remove animations placed by pushEvent().
-            @param id Id */
-        virtual void removeAnimations(int32_t id) = 0;
+            @param from First Id
+            @param to Last Id */
+        virtual void removeAnimations(int32_t from, int32_t to) = 0;
     };
 
 } } }

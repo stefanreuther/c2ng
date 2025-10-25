@@ -47,8 +47,8 @@ namespace {
             { m_events.push_back(afl::string::Format("placeObject(%d,%d)", int(side), info.position)); }
         virtual void pushEvent(ScheduledEvent e)
             { m_events.push_back(afl::string::Format("%s(%d,%d,%d,%d,%d,%d)") << ScheduledEvent::toString(e.type) << int(e.side) << e.a << e.b << e.c << e.d << e.e); }
-        virtual void removeAnimations(int32_t id)
-            { m_events.push_back(afl::string::Format("removeAnimations(%d)", id)); }
+        virtual void removeAnimations(int32_t from, int32_t to)
+            { m_events.push_back(afl::string::Format("removeAnimations(%d,%d)", from, to)); }
 
         void assertEvent(String_t event)
             {
@@ -423,7 +423,7 @@ AFL_TEST("game.vcr.classic.StandardScheduler:removeAnimations", a)
     testee.removeAnimations();
     testee.updateTime(500, 3000);
 
-    mock.assertEvent("removeAnimations(*)");
+    mock.assertEvent("removeAnimations(*,*)");
     mock.assertEvent("UpdateTime(*,500,*,*,*,*)");
     mock.assertEvent("UpdateDistance(*,3000,*,*,*,*)");
     mock.assertEvent("WaitTick(*,*,*,*,*,*)");

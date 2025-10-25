@@ -43,7 +43,7 @@ namespace client { namespace vcr { namespace classic {
         void updateDistance(int32_t d);
         void setResult(game::vcr::classic::BattleResult_t result);
         void setResultVisible(bool flag);
-        void removeAnimations(int32_t id);
+        void removeAnimations(int32_t from, int32_t to);
 
      private:
         struct Range {

@@ -23,6 +23,7 @@ namespace gfx { namespace anim {
         const Rectangle& getDirtyRegion() const;
 
         Sprite* findSpriteById(int id) const;
+        void deleteSpritesById(int from, int to);
 
      private:
         afl::container::PtrVector<Sprite> m_sprites;

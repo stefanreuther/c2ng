@@ -16,7 +16,7 @@ AFL_TEST_NOARG("game.vcr.classic.ScheduledEventConsumer")
             { }
         virtual void pushEvent(game::vcr::classic::ScheduledEvent /*e*/)
             { }
-        virtual void removeAnimations(int32_t /*id*/)
+        virtual void removeAnimations(int32_t /*from*/, int32_t /*to*/)
             { }
     };
     Tester t;

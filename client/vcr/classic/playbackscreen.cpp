@@ -416,10 +416,10 @@ client::vcr::classic::PlaybackScreen::pushEvent(ScheduledEvent e)
 }
 
 void
-client::vcr::classic::PlaybackScreen::removeAnimations(int32_t id)
+client::vcr::classic::PlaybackScreen::removeAnimations(int32_t from, int32_t to)
 {
     if (Renderer* p = m_renderer.get()) {
-        p->removeAnimations(id);
+        p->removeAnimations(from, to);
     }
 }
 

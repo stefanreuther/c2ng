@@ -158,7 +158,7 @@ game::vcr::classic::StandardScheduler::setResult(BattleResult_t result)
 void
 game::vcr::classic::StandardScheduler::removeAnimations()
 {
-    m_consumer.removeAnimations(ANIMATION_ID);
+    m_consumer.removeAnimations(ANIMATION_ID, ANIMATION_ID);
 }
 
 void

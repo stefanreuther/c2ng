@@ -179,9 +179,8 @@ game::vcr::classic::InterleavedScheduler::setResult(BattleResult_t result)
 void
 game::vcr::classic::InterleavedScheduler::removeAnimations()
 {
-    // FIXME: this is inefficient. Can we do better?
-    for (int i = FIRST_ANIMATION_ID; i < m_animationCounter; ++i) {
-        m_consumer.removeAnimations(i);
+    if (m_animationCounter != FIRST_ANIMATION_ID) {
+        m_consumer.removeAnimations(FIRST_ANIMATION_ID, m_animationCounter-1);
     }
     m_animationCounter = FIRST_ANIMATION_ID;
 }

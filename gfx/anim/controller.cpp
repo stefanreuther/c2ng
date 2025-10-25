@@ -106,3 +106,15 @@ gfx::anim::Controller::findSpriteById(int id) const
     }
     return 0;
 }
+
+void
+gfx::anim::Controller::deleteSpritesById(int from, int to)
+{
+    for (size_t i = 0, n = m_sprites.size(); i < n; ++i) {
+        if (Sprite* p = m_sprites[i]) {
+            if (p->getId() >= from && p->getId() <= to && !p->isMarkedForDeletion()) {
+                p->markForDeletion();
+            }
+        }
+    }
+}

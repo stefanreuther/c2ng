@@ -462,14 +462,10 @@ client::vcr::classic::Renderer::setResultVisible(bool flag)
 }
 
 void
-client::vcr::classic::Renderer::removeAnimations(int32_t id)
+client::vcr::classic::Renderer::removeAnimations(int32_t from, int32_t to)
 {
     // Our sprites have ID 0. Bad things happen if someone deletes them, so refuse that.
-    if (id != 0) {
-        while (gfx::anim::Sprite* p = m_controller.findSpriteById(id)) {
-            p->markForDeletion();
-        }
-    }
+    m_controller.deleteSpritesById(std::max(1, from), to);
 }
 
 String_t

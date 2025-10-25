@@ -110,7 +110,7 @@ namespace client { namespace vcr { namespace classic {
 
         virtual void placeObject(game::vcr::classic::Side side, const game::vcr::classic::EventListener::UnitInfo& info);
         virtual void pushEvent(game::vcr::classic::ScheduledEvent e);
-        virtual void removeAnimations(int32_t id);
+        virtual void removeAnimations(int32_t from, int32_t to);
 
         std::queue<game::vcr::classic::ScheduledEvent> m_events;
         int32_t m_currentTime;  // Time we're showing
