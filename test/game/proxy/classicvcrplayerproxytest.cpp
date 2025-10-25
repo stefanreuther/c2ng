@@ -163,6 +163,8 @@ namespace {
             { }
         virtual void setResult(game::vcr::classic::BattleResult_t /*result*/)
             { }
+        virtual void removeAnimations()
+            { }
 
         int getPosition(Side side) const
             { return m_position[side]; }

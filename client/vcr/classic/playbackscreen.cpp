@@ -7,9 +7,9 @@
 #include "afl/string/format.hpp"
 #include "client/downlink.hpp"
 #include "client/imageloader.hpp"
-#include "client/vcr/classic/interleavedscheduler.hpp"
-#include "client/vcr/classic/standardscheduler.hpp"
-#include "client/vcr/classic/traditionalscheduler.hpp"
+#include "game/vcr/classic/interleavedscheduler.hpp"
+#include "game/vcr/classic/standardscheduler.hpp"
+#include "game/vcr/classic/traditionalscheduler.hpp"
 #include "game/root.hpp"
 #include "game/vcr/classic/battle.hpp"
 #include "game/vcr/classic/database.hpp"
@@ -39,6 +39,7 @@ using gvc::Side;
 using gvc::Time_t;
 using gvc::FighterStatus;
 using gvc::LeftSide;
+using gvc::ScheduledEvent;
 
 namespace {
     /* Number of battle ticks to have buffered before starting playback.
@@ -226,9 +227,9 @@ client::vcr::classic::PlaybackScreen::PlaybackScreen(ui::Root& root, afl::string
       m_renderer(),
       m_state(Initializing),
       m_targetTime(0),
-      // m_scheduler(new TraditionalScheduler(*this)),
-      m_scheduler(new StandardScheduler(*this)),
-      // m_scheduler(new InterleavedScheduler(*this)),
+      // m_scheduler(new game::vcr::classic::TraditionalScheduler(*this)),
+      m_scheduler(new game::vcr::classic::StandardScheduler(*this)),
+      // m_scheduler(new game::vcr::classic::InterleavedScheduler(*this)),
       m_timer(root.engine().createTimer()),
       m_ticksPerBattleCycle(3),
       m_ticks(0),
@@ -327,7 +328,7 @@ client::vcr::classic::PlaybackScreen::handleEvents(util::StringInstructionList& 
         break;
 
      case BeforeJumping:
-        m_events = std::queue<Event>();
+        m_events = std::queue<ScheduledEvent>();
         m_currentTime = -1;
         m_queuedTime = 0;
         setState(Jumping, "Events");
@@ -406,10 +407,10 @@ client::vcr::classic::PlaybackScreen::placeObject(game::vcr::classic::Side side,
 }
 
 void
-client::vcr::classic::PlaybackScreen::pushEvent(Event e)
+client::vcr::classic::PlaybackScreen::pushEvent(ScheduledEvent e)
 {
     m_events.push(e);
-    if (e.type == Event::UpdateTime) {
+    if (e.type == ScheduledEvent::UpdateTime) {
         m_queuedTime = e.a;
     }
 }
@@ -480,7 +481,7 @@ client::vcr::classic::PlaybackScreen::jumpTo(int32_t t)
         m_playState = Paused;
         m_targetTime = t;
         setState(Jumping, "Jump");
-        m_events = std::queue<Event>();
+        m_events = std::queue<ScheduledEvent>();
         m_currentTime = -1;
         m_queuedTime = 0;
         requestJump(std::max(0, t - 10));
@@ -599,114 +600,114 @@ client::vcr::classic::PlaybackScreen::executeEvents(int32_t timeLimit)
 {
     // return true when we need to wait for a tick
     while (!m_events.empty()) {
-        const Event& e = m_events.front();
+        const ScheduledEvent& e = m_events.front();
         // m_log.write(afl::sys::LogListener::Trace, LOG_NAME, Format("Event(%s, %d, %d)", Event::toString(e.type), int(e.side), e.a));
         switch (e.type) {
-         case Event::UpdateTime:
+         case ScheduledEvent::UpdateTime:
             m_currentTime = e.a;
             if (m_renderer.get() != 0) {
                 m_renderer->updateTime(e.a);
             }
             break;
-         case Event::UpdateDistance:
+         case ScheduledEvent::UpdateDistance:
             if (m_renderer.get() != 0) {
                 m_renderer->updateDistance(e.a);
             }
             break;
-         case Event::MoveObject:
+         case ScheduledEvent::MoveObject:
             if (m_renderer.get() != 0) {
                 m_renderer->moveObject(e.side, e.a);
             }
             break;
 
-         case Event::StartFighter:
+         case ScheduledEvent::StartFighter:
             if (m_renderer.get() != 0) {
                 m_renderer->startFighter(e.side, e.a, e.b, e.c);
             }
             break;
-         case Event::RemoveFighter:
+         case ScheduledEvent::RemoveFighter:
             if (m_renderer.get() != 0) {
                 m_renderer->removeFighter(e.side, e.a);
             }
             break;
-         case Event::UpdateNumFighters:
+         case ScheduledEvent::UpdateNumFighters:
             unitStatus(e.side).addProperty(UnitStatusWidget::NumFighters, e.a);
             break;
-         case Event::FireBeamShipFighter:
+         case ScheduledEvent::FireBeamShipFighter:
             if (m_renderer.get() != 0) {
                 m_renderer->fireBeamShipFighter(e.side, e.a, e.b, e.c);
             }
             break;
-         case Event::FireBeamShipShip:
+         case ScheduledEvent::FireBeamShipShip:
             if (m_renderer.get() != 0) {
                 m_renderer->fireBeamShipShip(e.side, e.a, e.b);
             }
             break;
-         case Event::FireBeamFighterFighter:
+         case ScheduledEvent::FireBeamFighterFighter:
             if (m_renderer.get() != 0) {
                 m_renderer->fireBeamFighterFighter(e.side, e.a, e.b, e.c);
             }
             break;
-         case Event::FireBeamFighterShip:
+         case ScheduledEvent::FireBeamFighterShip:
             if (m_renderer.get() != 0) {
                 m_renderer->fireBeamFighterShip(e.side, e.a, e.b);
             }
             break;
-         case Event::BlockBeam:
+         case ScheduledEvent::BlockBeam:
             unitStatus(e.side).setWeaponStatus(UnitStatusWidget::Beam, e.a, true);
             break;
-         case Event::UnblockBeam:
+         case ScheduledEvent::UnblockBeam:
             unitStatus(e.side).setWeaponStatus(UnitStatusWidget::Beam, e.a, false);
             break;
-         case Event::UpdateBeam:
+         case ScheduledEvent::UpdateBeam:
             unitStatus(e.side).setWeaponLevel(UnitStatusWidget::Beam, e.a, e.b);
             break;
-         case Event::BlockLauncher:
+         case ScheduledEvent::BlockLauncher:
             unitStatus(e.side).setWeaponStatus(UnitStatusWidget::Launcher, e.a, true);
             break;
-         case Event::UnblockLauncher:
+         case ScheduledEvent::UnblockLauncher:
             unitStatus(e.side).setWeaponStatus(UnitStatusWidget::Launcher, e.a, false);
             break;
-         case Event::UpdateLauncher:
+         case ScheduledEvent::UpdateLauncher:
             unitStatus(e.side).setWeaponLevel(UnitStatusWidget::Launcher, e.a, e.b);
             break;
-         case Event::FireTorpedo:
+         case ScheduledEvent::FireTorpedo:
             if (m_renderer.get() != 0) {
                 m_renderer->fireTorpedo(e.side, e.a, e.b, e.c, e.d);
             }
             break;
-         case Event::UpdateNumTorpedoes:
+         case ScheduledEvent::UpdateNumTorpedoes:
             unitStatus(e.side).addProperty(UnitStatusWidget::NumTorpedoes, e.a);
             break;
-         case Event::MoveFighter:
+         case ScheduledEvent::MoveFighter:
             if (m_renderer.get() != 0) {
                 m_renderer->moveFighter(e.side, e.a, e.b, e.c, e.d);
             }
             break;
-         case Event::UpdateFighter:
+         case ScheduledEvent::UpdateFighter:
             if (m_renderer.get() != 0) {
                 m_renderer->updateFighter(e.side, e.a, e.b, e.c, e.d);
             }
             break;
-         case Event::ExplodeFighter:
+         case ScheduledEvent::ExplodeFighter:
             if (m_renderer.get() != 0) {
                 m_renderer->explodeFighter(e.side, e.a, e.b);
             }
             break;
 
-         case Event::UpdateObject:
+         case ScheduledEvent::UpdateObject:
             unitStatus(e.side).setProperty(UnitStatusWidget::Damage, e.a);
             unitStatus(e.side).setProperty(UnitStatusWidget::Crew, e.b);
             unitStatus(e.side).setProperty(UnitStatusWidget::Shield, e.c);
             unitStatus(e.side).unblockAllWeapons();
             break;
 
-         case Event::UpdateAmmo:
+         case ScheduledEvent::UpdateAmmo:
             unitStatus(e.side).setProperty(UnitStatusWidget::NumTorpedoes, e.a);
             unitStatus(e.side).setProperty(UnitStatusWidget::NumFighters, e.b);
             break;
 
-         case Event::HitObject:
+         case ScheduledEvent::HitObject:
             if (m_renderer.get() != 0) {
                 m_renderer->hitObject(e.side, e.a, e.b, e.c, e.d);
             }
@@ -715,13 +716,13 @@ client::vcr::classic::PlaybackScreen::executeEvents(int32_t timeLimit)
             unitStatus(e.side).addProperty(UnitStatusWidget::Shield, -e.c);
             break;
 
-         case Event::SetResult:
+         case ScheduledEvent::SetResult:
             if (m_renderer.get() != 0) {
                 m_renderer->setResult(game::vcr::classic::BattleResult_t::fromInteger(e.a));
             }
             break;
 
-         case Event::WaitTick:
+         case ScheduledEvent::WaitTick:
             // m_log.write(afl::sys::LogListener::Trace, LOG_NAME, Format("WaitTick: ticks=%d / %d", m_ticks, m_ticksPerBattleCycle));
             if (m_ticks < m_ticksPerBattleCycle) {
                 return true;
@@ -732,7 +733,7 @@ client::vcr::classic::PlaybackScreen::executeEvents(int32_t timeLimit)
             }
             break;
 
-         case Event::WaitAnimation:
+         case ScheduledEvent::WaitAnimation:
             if (m_renderer.get() && m_renderer->hasAnimation(e.a)) {
                 return true;
             }

@@ -1,20 +1,21 @@
 /**
-  *  \file client/vcr/classic/event.hpp
+  *  \file game/vcr/classic/scheduledevent.hpp
+  *  \brief Class game::vcr::classic::ScheduledEvent
   */
-#ifndef C2NG_CLIENT_VCR_CLASSIC_EVENT_HPP
-#define C2NG_CLIENT_VCR_CLASSIC_EVENT_HPP
+#ifndef C2NG_GAME_VCR_CLASSIC_SCHEDULEDEVENT_HPP
+#define C2NG_GAME_VCR_CLASSIC_SCHEDULEDEVENT_HPP
 
-#include "game/vcr/classic/types.hpp"
 #include "afl/base/types.hpp"
+#include "game/vcr/classic/types.hpp"
 
-namespace client { namespace vcr { namespace classic {
+namespace game { namespace vcr { namespace classic {
 
-    struct Event {
-        typedef game::vcr::classic::Side Side_t;
-
+    /** Encoded event.
+        Contains a type and matching parameters. */
+    struct ScheduledEvent {
         enum Type {
-            UpdateTime,             // time
-            UpdateDistance,         // distance
+            UpdateTime,             // -, time
+            UpdateDistance,         // -, distance
             MoveObject,             // side, position
             StartFighter,           // side, track, position, distance
             RemoveFighter,          // side, track
@@ -39,17 +40,20 @@ namespace client { namespace vcr { namespace classic {
             HitObject,              // side, damageDone, crewKilled, shieldLost, animId
             SetResult,              // -, result
             WaitTick,
-            WaitAnimation           // animId
+            WaitAnimation           // -, animId
         };
 
         Type type;
-        Side_t side;
+        Side side;
         int32_t a, b, c, d, e;
 
-        Event(Type t, Side_t side, int32_t a = 0, int32_t b = 0, int32_t c = 0, int32_t d = 0, int32_t e = 0)
+        ScheduledEvent(Type t, Side side, int32_t a = 0, int32_t b = 0, int32_t c = 0, int32_t d = 0, int32_t e = 0)
             : type(t), side(side), a(a), b(b), c(c), d(d), e(e)
             { }
 
+        /** Get name for a type.
+            @param t Type
+            @return Name; never null */
         static const char* toString(Type t);
     };
 

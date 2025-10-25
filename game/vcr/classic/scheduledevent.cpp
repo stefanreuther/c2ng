@@ -1,11 +1,12 @@
 /**
-  *  \file client/vcr/classic/event.cpp
+  *  \file game/vcr/classic/scheduledevent.cpp
+  *  \brief Class game::vcr::classic::ScheduledEvent
   */
 
-#include "client/vcr/classic/event.hpp"
+#include "game/vcr/classic/scheduledevent.hpp"
 
 const char*
-client::vcr::classic::Event::toString(Type t)
+game::vcr::classic::ScheduledEvent::toString(Type t)
 {
     const char* result = "?";
     switch (t) {

@@ -53,6 +53,8 @@ namespace {
             { checkCall(Format("updateFighter(%d,%d,%d,%d,%d)") << int(side) << track << position << distance << int(status)); }
         virtual void setResult(game::vcr::classic::BattleResult_t result)
             { checkCall(Format("setResult(%d)") << result.toInteger()); }
+        virtual void removeAnimations()
+            { checkCall("removeAnimations()"); }
     };
 }
 
@@ -126,6 +128,9 @@ AFL_TEST("game.vcr.classic.EventRecorder:basics", a)
 
     testee.setResult(game::vcr::classic::BattleResult_t::fromInteger(12));
     t.expectCall("setResult(12)");
+
+    testee.removeAnimations();
+    t.expectCall("removeAnimations()");
 
     // Verify
     AFL_CHECK_SUCCEEDS(a("replay"), testee.replay(t));

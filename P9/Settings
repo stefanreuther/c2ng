@@ -12,8 +12,15 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/interface/privatefunctions.cpp \
-    game/interface/privatefunctions.hpp \
+FILES_gamelib = game/vcr/classic/standardscheduler.cpp \
+    game/vcr/classic/standardscheduler.hpp \
+    game/vcr/classic/interleavedscheduler.cpp \
+    game/vcr/classic/interleavedscheduler.hpp \
+    game/vcr/classic/traditionalscheduler.cpp \
+    game/vcr/classic/traditionalscheduler.hpp \
+    game/vcr/classic/scheduledeventconsumer.hpp \
+    game/vcr/classic/scheduledevent.cpp game/vcr/classic/scheduledevent.hpp \
+    game/interface/privatefunctions.cpp game/interface/privatefunctions.hpp \
     game/proxy/simulationadaptorfromsession.cpp \
     game/proxy/simulationadaptorfromsession.hpp \
     game/proxy/simulationadaptor.hpp game/interface/taskwaypoints.cpp \
@@ -1088,17 +1095,9 @@ FILES_guilib = gfx/threed/modelapplet.cpp gfx/threed/modelapplet.hpp \
     client/widgets/simplegauge.hpp client/tiles/shipcargotile.hpp \
     client/dialogs/inboxdialog.cpp client/dialogs/inboxdialog.hpp \
     client/widgets/messageactionpanel.cpp \
-    client/widgets/messageactionpanel.hpp client/vcr/classic/event.cpp \
-    client/vcr/classic/interleavedscheduler.cpp \
-    client/vcr/classic/interleavedscheduler.hpp gfx/scan.cpp gfx/scan.hpp \
+    client/widgets/messageactionpanel.hpp gfx/scan.cpp gfx/scan.hpp \
     client/vcr/classic/playbackscreen.cpp \
-    client/vcr/classic/playbackscreen.hpp \
-    client/vcr/classic/standardscheduler.cpp \
-    client/vcr/classic/standardscheduler.hpp \
-    client/vcr/classic/traditionalscheduler.cpp \
-    client/vcr/classic/traditionalscheduler.hpp \
-    client/vcr/classic/scheduler.hpp client/vcr/classic/eventconsumer.hpp \
-    client/vcr/classic/event.hpp client/vcr/classic/renderer.cpp \
+    client/vcr/classic/playbackscreen.hpp client/vcr/classic/renderer.cpp \
     client/vcr/classic/renderer.hpp gfx/gen/texture.cpp gfx/gen/texture.hpp \
     gfx/gen/colorrange.cpp gfx/gen/colorrange.hpp \
     client/vcr/playbackcontrolwidget.cpp \
@@ -1841,7 +1840,12 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/game/interface/privatefunctionstest.cpp \
+FILES_testsuite = test/game/vcr/classic/interleavedschedulertest.cpp \
+    test/game/vcr/classic/standardschedulertest.cpp \
+    test/game/vcr/classic/traditionalschedulertest.cpp \
+    test/game/vcr/classic/scheduledeventconsumertest.cpp \
+    test/game/vcr/classic/scheduledeventtest.cpp \
+    test/game/interface/privatefunctionstest.cpp \
     test/game/proxy/simulationadaptorfromsessiontest.cpp \
     test/game/proxy/simulationadaptortest.cpp \
     test/game/interface/taskwaypointstest.cpp \

@@ -46,6 +46,8 @@ AFL_TEST_NOARG("game.vcr.classic.EventListener")
             { }
         virtual void setResult(game::vcr::classic::BattleResult_t /*result*/)
             { }
+        virtual void removeAnimations()
+            { }
     };
     Tester t;
 }

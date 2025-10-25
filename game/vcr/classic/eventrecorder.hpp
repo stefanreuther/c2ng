@@ -59,6 +59,7 @@ namespace game { namespace vcr { namespace classic {
         virtual void updateAmmo(Side side, int numTorpedoes, int numFighters);
         virtual void updateFighter(Side side, int track, int position, int distance, FighterStatus status);
         virtual void setResult(BattleResult_t result);
+        virtual void removeAnimations();
 
      private:
         util::StringInstructionList m_content;

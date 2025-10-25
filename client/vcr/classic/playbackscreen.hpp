@@ -6,10 +6,10 @@
 
 #include <queue>
 #include "afl/sys/loglistener.hpp"
-#include "client/vcr/classic/event.hpp"
-#include "client/vcr/classic/eventconsumer.hpp"
+#include "game/vcr/classic/scheduledevent.hpp"
+#include "game/vcr/classic/scheduledeventconsumer.hpp"
 #include "client/vcr/classic/renderer.hpp"
-#include "client/vcr/classic/scheduler.hpp"
+#include "game/vcr/classic/eventlistener.hpp"
 #include "client/vcr/playbackcontrolwidget.hpp"
 #include "client/vcr/unitstatuswidget.hpp"
 #include "game/proxy/classicvcrplayerproxy.hpp"
@@ -24,7 +24,7 @@
 
 namespace client { namespace vcr { namespace classic {
 
-    class PlaybackScreen : private EventConsumer {
+    class PlaybackScreen : private game::vcr::classic::ScheduledEventConsumer {
      public:
         PlaybackScreen(ui::Root& root, afl::string::Translator& tx,
                        util::RequestSender<game::proxy::VcrDatabaseAdaptor> adaptorSender,
@@ -94,7 +94,7 @@ namespace client { namespace vcr { namespace classic {
         };
         State m_state;
         int32_t m_targetTime;
-        std::auto_ptr<Scheduler> m_scheduler;
+        std::auto_ptr<game::vcr::classic::EventListener> m_scheduler;
 
         afl::base::Ref<gfx::Timer> m_timer;
 
@@ -109,10 +109,10 @@ namespace client { namespace vcr { namespace classic {
         PlayState m_playState;
 
         virtual void placeObject(game::vcr::classic::Side side, const game::vcr::classic::EventListener::UnitInfo& info);
-        virtual void pushEvent(client::vcr::classic::Event e);
+        virtual void pushEvent(game::vcr::classic::ScheduledEvent e);
         virtual void removeAnimations(int32_t id);
 
-        std::queue<Event> m_events;
+        std::queue<game::vcr::classic::ScheduledEvent> m_events;
         int32_t m_currentTime;  // Time we're showing
         int32_t m_queuedTime;   // Last time in event list
 

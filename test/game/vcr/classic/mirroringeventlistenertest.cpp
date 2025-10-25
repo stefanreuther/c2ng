@@ -56,6 +56,8 @@ namespace {
             { checkCall(Format("updateFighter(%d,%d,%d,%d,%d)") << int(side) << track << position << distance << int(status)); }
         virtual void setResult(gvc::BattleResult_t result)
             { checkCall(Format("setResult(%d)") << result.toInteger()); }
+        virtual void removeAnimations()
+            { checkCall("removeAnimations()"); }
     };
 }
 
@@ -135,6 +137,9 @@ AFL_TEST("game.vcr.classic.MirroringEventListener", a)
     static_assert(gvc::Timeout == 4, "Timeout");
     t.expectCall("setResult(16)");
     testee.setResult(gvc::BattleResult_t::fromInteger(16));
+
+    t.expectCall("removeAnimations()");
+    testee.removeAnimations();
 
     t.checkFinish();
 }

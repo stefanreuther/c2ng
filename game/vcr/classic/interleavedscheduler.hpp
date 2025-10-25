@@ -1,28 +1,26 @@
 /**
-  *  \file game/vcr/classic/mirroringeventlistener.hpp
-  *  \brief Class game::vcr::classic::MirroringEventListener
+  *  \file game/vcr/classic/interleavedscheduler.hpp
+  *  \brief Class game::vcr::classic::InterleavedScheduler
   */
-#ifndef C2NG_GAME_VCR_CLASSIC_MIRRORINGEVENTLISTENER_HPP
-#define C2NG_GAME_VCR_CLASSIC_MIRRORINGEVENTLISTENER_HPP
+#ifndef C2NG_GAME_VCR_CLASSIC_INTERLEAVEDSCHEDULER_HPP
+#define C2NG_GAME_VCR_CLASSIC_INTERLEAVEDSCHEDULER_HPP
 
+#include <vector>
 #include "game/vcr/classic/eventlistener.hpp"
+#include "game/vcr/classic/scheduledevent.hpp"
 
 namespace game { namespace vcr { namespace classic {
 
-    /** EventListener that swaps sides.
-        This is an adaptor to EventListener that reports all events with sides swapped.
+    class ScheduledEventConsumer;
 
-        Note that the logical order of callbacks is not adapted, that is,
-        if the original battle always reports left weapons firing before right,
-        the flipped battle will have right weapons firing before left. */
-    class MirroringEventListener : public EventListener {
+    /** Interleaved event scheduler.
+        This attempt to shuffle the events around a bit, so that playback is more fluent.
+        Most importantly, torpedoes are fired earlier. */
+    class InterleavedScheduler : public EventListener {
      public:
         /** Constructor.
-            \param listener Target */
-        explicit MirroringEventListener(EventListener& listener);
-
-        /** Destructor. */
-        ~MirroringEventListener();
+            @param parent Event consumer */
+        explicit InterleavedScheduler(ScheduledEventConsumer& parent);
 
         // EventListener:
         virtual void placeObject(Side side, const UnitInfo& info);
@@ -44,9 +42,26 @@ namespace game { namespace vcr { namespace classic {
         virtual void removeAnimations();
 
      private:
-        EventListener& m_listener;
+        ScheduledEventConsumer& m_consumer;
 
-        static int flipCoordinate(int x);
+        enum { NUM_FRAMES = 10 };
+        struct Frame {
+            std::vector<ScheduledEvent> pre;
+            std::vector<ScheduledEvent> post;
+        };
+
+        /** Queue of frames, newest (future) at front, current at end.
+            Events are added according to desired age, and shifted out of the queue. */
+        Frame m_queue[NUM_FRAMES];
+
+        /** Identifier counter for animations. */
+        int m_animationCounter;
+
+        /** true if fight ends. */
+        bool m_finished;
+
+        void renderHit(Side side, const HitEffect& effect);
+        void shift();
     };
 
 } } }

@@ -26,8 +26,8 @@ namespace game { namespace vcr { namespace classic {
 
         An exception are the requests
         - placeObject(): always first in a battle, to initialize the object.
-        - updateObject(), updateAmmo(), updateFighter(): always after a discontinuity (FF/REW),
-          never during normal playback.
+        - updateObject(), updateAmmo(), updateFighter(), removeAnimations(): always after a
+          discontinuity (FF/REW), never during normal playback.
 
         A regular battle tick consists of a number of event callbacks, followed by updateTime().
 
@@ -161,6 +161,10 @@ namespace game { namespace vcr { namespace classic {
             This is the final report of a battle (only followed by the last time report).
             \param result Result status */
         virtual void setResult(BattleResult_t result) = 0;
+
+        /** Remove animations.
+            Call after a discontinuity to tell consumer that animations playing asynchronously should be removed. */
+        virtual void removeAnimations() = 0;
     };
 
 } } }

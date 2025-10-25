@@ -1,28 +1,27 @@
 /**
-  *  \file game/vcr/classic/mirroringeventlistener.hpp
-  *  \brief Class game::vcr::classic::MirroringEventListener
+  *  \file game/vcr/classic/traditionalscheduler.hpp
+  *  \brief Class game::vcr::classic::TraditionalScheduler
   */
-#ifndef C2NG_GAME_VCR_CLASSIC_MIRRORINGEVENTLISTENER_HPP
-#define C2NG_GAME_VCR_CLASSIC_MIRRORINGEVENTLISTENER_HPP
+#ifndef C2NG_GAME_VCR_CLASSIC_TRADITIONALSCHEDULER_HPP
+#define C2NG_GAME_VCR_CLASSIC_TRADITIONALSCHEDULER_HPP
 
 #include "game/vcr/classic/eventlistener.hpp"
 
 namespace game { namespace vcr { namespace classic {
 
-    /** EventListener that swaps sides.
-        This is an adaptor to EventListener that reports all events with sides swapped.
+    class ScheduledEventConsumer;
 
-        Note that the logical order of callbacks is not adapted, that is,
-        if the original battle always reports left weapons firing before right,
-        the flipped battle will have right weapons firing before left. */
-    class MirroringEventListener : public EventListener {
+    /** Traditional event scheduler.
+
+        Converts the incoming calls into ScheduledEventConsumer callbacks.
+
+        Implements similar visualisation as vcr.exe/pvcr.exe:
+        all event happen strictly in sequence, in the same order they actually happen in the algorithm. */
+    class TraditionalScheduler : public EventListener {
      public:
         /** Constructor.
-            \param listener Target */
-        explicit MirroringEventListener(EventListener& listener);
-
-        /** Destructor. */
-        ~MirroringEventListener();
+            @param parent Event consumer */
+        explicit TraditionalScheduler(ScheduledEventConsumer& parent);
 
         // EventListener:
         virtual void placeObject(Side side, const UnitInfo& info);
@@ -44,9 +43,8 @@ namespace game { namespace vcr { namespace classic {
         virtual void removeAnimations();
 
      private:
-        EventListener& m_listener;
-
-        static int flipCoordinate(int x);
+        void renderHit(Side side, const HitEffect& effect);
+        ScheduledEventConsumer& m_consumer;
     };
 
 } } }

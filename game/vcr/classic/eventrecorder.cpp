@@ -23,7 +23,8 @@ namespace {
         iUpdateObject,
         iUpdateAmmo,
         iUpdateFighter,
-        iSetResult
+        iSetResult,
+        iRemoveAnimations
     };
 }
 
@@ -234,6 +235,9 @@ game::vcr::classic::EventRecorder::replay(EventListener& listener)
             }
             break;
          }
+         case iRemoveAnimations:
+            listener.removeAnimations();
+            break;
         }
     }
 }
@@ -417,4 +421,10 @@ game::vcr::classic::EventRecorder::setResult(BattleResult_t result)
 {
     m_content.addInstruction(iSetResult)
         .addParameter(result.toInteger());
+}
+
+void
+game::vcr::classic::EventRecorder::removeAnimations()
+{
+    m_content.addInstruction(iRemoveAnimations);
 }

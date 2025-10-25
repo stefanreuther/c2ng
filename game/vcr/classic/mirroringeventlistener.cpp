@@ -133,6 +133,12 @@ game::vcr::classic::MirroringEventListener::setResult(BattleResult_t result)
     m_listener.setResult(flipped);
 }
 
+void
+game::vcr::classic::MirroringEventListener::removeAnimations()
+{
+    m_listener.removeAnimations();
+}
+
 inline int
 game::vcr::classic::MirroringEventListener::flipCoordinate(int x)
 {

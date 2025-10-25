@@ -1,28 +1,28 @@
 /**
-  *  \file game/vcr/classic/mirroringeventlistener.hpp
-  *  \brief Class game::vcr::classic::MirroringEventListener
+  *  \file game/vcr/classic/standardscheduler.hpp
+  *  \brief Class game::vcr::classic::StandardScheduler
   */
-#ifndef C2NG_GAME_VCR_CLASSIC_MIRRORINGEVENTLISTENER_HPP
-#define C2NG_GAME_VCR_CLASSIC_MIRRORINGEVENTLISTENER_HPP
+#ifndef C2NG_GAME_VCR_CLASSIC_STANDARDSCHEDULER_HPP
+#define C2NG_GAME_VCR_CLASSIC_STANDARDSCHEDULER_HPP
 
+#include <vector>
 #include "game/vcr/classic/eventlistener.hpp"
+#include "game/vcr/classic/scheduledevent.hpp"
 
 namespace game { namespace vcr { namespace classic {
 
-    /** EventListener that swaps sides.
-        This is an adaptor to EventListener that reports all events with sides swapped.
+    class ScheduledEventConsumer;
 
-        Note that the logical order of callbacks is not adapted, that is,
-        if the original battle always reports left weapons firing before right,
-        the flipped battle will have right weapons firing before left. */
-    class MirroringEventListener : public EventListener {
+    /** Standard event scheduler.
+        Implements similar visualisation as PCC2:
+        - all weapons fire simultaneously
+        - all explosions occur simultaneously
+        - everything that happens within a tick, stays in that tick */
+    class StandardScheduler : public EventListener {
      public:
         /** Constructor.
-            \param listener Target */
-        explicit MirroringEventListener(EventListener& listener);
-
-        /** Destructor. */
-        ~MirroringEventListener();
+            @param parent Event consumer */
+        explicit StandardScheduler(ScheduledEventConsumer& parent);
 
         // EventListener:
         virtual void placeObject(Side side, const UnitInfo& info);
@@ -42,11 +42,12 @@ namespace game { namespace vcr { namespace classic {
         virtual void updateFighter(Side side, int track, int position, int distance, FighterStatus status);
         virtual void setResult(BattleResult_t result);
         virtual void removeAnimations();
-
      private:
-        EventListener& m_listener;
+        void renderHit(Side side, const HitEffect& effect);
 
-        static int flipCoordinate(int x);
+        ScheduledEventConsumer& m_consumer;
+        std::vector<ScheduledEvent> m_pre;
+        std::vector<ScheduledEvent> m_post;
     };
 
 } } }
