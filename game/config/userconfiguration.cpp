@@ -161,6 +161,17 @@ namespace game { namespace config {
 
     // Simulation
     const IntegerOptionDescriptor UserConfiguration::Sim_NumThreads        = { "Sim.NumThreads",        &IntegerValueParser::instance };
+
+    // VCR
+    namespace { const EnumValueParser parse_renderer("standard,traditional,interleaved"); }
+    namespace { const EnumValueParser parse_effects("standard,simple"); }
+    namespace { const EnumValueParser parse_flak_renderer("3d,flat"); }
+    const IntegerOptionDescriptor UserConfiguration::Vcr_Speed         = { "Vcr.Speed",     &IntegerValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::Vcr_Renderer      = { "Vcr.Renderer",  &parse_renderer };
+    const IntegerOptionDescriptor UserConfiguration::Vcr_Effects       = { "Vcr.Effects",   &parse_effects };
+    const IntegerOptionDescriptor UserConfiguration::Flak_Grid         = { "Flak.Grid",     &BooleanValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::Flak_Renderer     = { "Flak.Renderer", &parse_flak_renderer };
+
 } }
 
 
@@ -283,6 +294,13 @@ game::config::UserConfiguration::setDefaultValues()
 
     // Simulation
     me[Sim_NumThreads].set(0);
+
+    // VCR
+    me[Vcr_Speed].set(2);    // same default as PCC2
+    me[Vcr_Renderer].set(0);
+    me[Vcr_Effects].set(0);
+    me[Flak_Renderer].set(0);
+    me[Flak_Grid].set(1);
 
     markAllOptionsUnset();
 }

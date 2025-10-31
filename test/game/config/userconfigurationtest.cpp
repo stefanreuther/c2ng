@@ -49,6 +49,7 @@ AFL_TEST("game.config.UserConfiguration:defaults", a)
     game::config::UserConfiguration testee;
     a.checkEqual("Display_ThousandsSep", testee[testee.Display_ThousandsSep](), 1);
     a.checkEqual("Display_Clans",        testee[testee.Display_Clans](), 0);
+    a.checkEqual("Vcr_Speed",            testee[testee.Vcr_Speed](), 2);
 }
 
 /*

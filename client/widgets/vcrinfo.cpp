@@ -267,6 +267,9 @@ client::widgets::VcrInfo::handleKey(util::Key_t key, int prefix)
      case 's':
         sig_action.raise(ShowScoreSummary);
         return true;
+     case 'o':
+        sig_action.raise(EditOptions);
+        return true;
      default:
         return defaultHandleKey(key, prefix);
     }
@@ -422,6 +425,7 @@ client::widgets::VcrInfo::onMenu()
     box.addItem(ExportUnits,      m_translator("Export units in this battle"));
     box.addItem(SaveAllBattles,   m_translator("Save all battles"));
     box.addItem(SaveThisBattle,   m_translator("Save this battle"));
+    box.addItem(EditOptions,      m_translator("VCR options [O]"));
 
     gfx::Point anchor = m_menuButton.getExtent().getBottomLeft();
     ui::EventLoop loop(m_root);

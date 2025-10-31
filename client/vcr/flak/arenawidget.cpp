@@ -11,6 +11,7 @@
 #include "client/vcr/flak/renderer.hpp"
 #include "client/vcr/flak/threedrenderer.hpp"
 
+using game::config::UserConfiguration;
 
 client::vcr::flak::ArenaWidget::ArenaWidget(ui::Root& root,
                                             game::vcr::flak::VisualisationState& state,
@@ -38,6 +39,15 @@ client::vcr::flak::ArenaWidget::init()
     }
 }
 
+void
+client::vcr::flak::ArenaWidget::setGrid(bool flag)
+{
+    if (m_grid != flag) {
+        m_grid = flag;
+        requestRedraw();
+    }
+}
+
 bool
 client::vcr::flak::ArenaWidget::hasGrid() const
 {
@@ -45,14 +55,7 @@ client::vcr::flak::ArenaWidget::hasGrid() const
 }
 
 void
-client::vcr::flak::ArenaWidget::toggleGrid()
-{
-    m_grid = !m_grid;
-    requestRedraw();
-}
-
-void
-client::vcr::flak::ArenaWidget::setMode(Mode m)
+client::vcr::flak::ArenaWidget::setMode(Mode_t m)
 {
     if (m != m_currentRenderer) {
         m_currentRenderer = m;
@@ -60,28 +63,18 @@ client::vcr::flak::ArenaWidget::setMode(Mode m)
     }
 }
 
-void
-client::vcr::flak::ArenaWidget::toggleMode(Mode a, Mode b)
-{
-    if (m_currentRenderer == a) {
-        setMode(b);
-    } else {
-        setMode(a);
-    }
-}
-
-client::vcr::flak::ArenaWidget::Mode
+client::vcr::flak::ArenaWidget::Mode_t
 client::vcr::flak::ArenaWidget::getMode() const
 {
     return m_currentRenderer;
 }
 
 String_t
-client::vcr::flak::ArenaWidget::toString(Mode m, afl::string::Translator& tx)
+client::vcr::flak::ArenaWidget::toString(Mode_t m, afl::string::Translator& tx)
 {
     switch (m) {
-     case FlatMode:   return tx("flat");
-     case ThreeDMode: return tx("3-D");
+     case UserConfiguration::FlatMode:   return tx("flat");
+     case UserConfiguration::ThreeDMode: return tx("3-D");
     }
     return String_t();
 }

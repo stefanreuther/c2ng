@@ -1,5 +1,6 @@
 /**
   *  \file client/vcr/classic/playbackscreen.cpp
+  *  \brief Class client::vcr::classic::PlaybackScreen
   */
 
 #include <algorithm>
@@ -7,14 +8,15 @@
 #include "afl/string/format.hpp"
 #include "client/downlink.hpp"
 #include "client/imageloader.hpp"
-#include "game/vcr/classic/interleavedscheduler.hpp"
-#include "game/vcr/classic/standardscheduler.hpp"
-#include "game/vcr/classic/traditionalscheduler.hpp"
+#include "client/widgets/decayingmessage.hpp"
 #include "game/root.hpp"
 #include "game/vcr/classic/battle.hpp"
 #include "game/vcr/classic/database.hpp"
 #include "game/vcr/classic/eventlistener.hpp"
 #include "game/vcr/classic/eventrecorder.hpp"
+#include "game/vcr/classic/interleavedscheduler.hpp"
+#include "game/vcr/classic/standardscheduler.hpp"
+#include "game/vcr/classic/traditionalscheduler.hpp"
 #include "game/vcr/classic/utils.hpp"
 #include "gfx/anim/controller.hpp"
 #include "gfx/anim/pixmapsprite.hpp"
@@ -40,6 +42,7 @@ using gvc::Time_t;
 using gvc::FighterStatus;
 using gvc::LeftSide;
 using gvc::ScheduledEvent;
+using game::config::UserConfiguration;
 
 namespace {
     /* Number of battle ticks to have buffered before starting playback.
@@ -212,14 +215,18 @@ namespace {
 
 client::vcr::classic::PlaybackScreen::PlaybackScreen(ui::Root& root, afl::string::Translator& tx,
                                                      util::RequestSender<game::proxy::VcrDatabaseAdaptor> adaptorSender,
-                                                     size_t index, afl::sys::LogListener& log)
+                                                     size_t index,
+                                                     game::proxy::ConfigurationProxy& confProxy,
+                                                     afl::sys::LogListener& log)
     : m_root(root),
       m_translator(tx),
       m_adaptorSender(adaptorSender),
       m_proxy(adaptorSender, root.engine().dispatcher()),
       m_index(index),
+      m_configProxy(confProxy),
       m_log(log),
       m_loop(root),
+      m_config(),
       m_spriteWidget(),
       m_leftStatus(root, tx),
       m_rightStatus(root, tx),
@@ -227,13 +234,9 @@ client::vcr::classic::PlaybackScreen::PlaybackScreen(ui::Root& root, afl::string
       m_renderer(),
       m_state(Initializing),
       m_targetTime(0),
-      // m_scheduler(new game::vcr::classic::TraditionalScheduler(*this)),
-      m_scheduler(new game::vcr::classic::StandardScheduler(*this)),
-      // m_scheduler(new game::vcr::classic::InterleavedScheduler(*this)),
+      m_scheduler(),
       m_timer(root.engine().createTimer()),
-      m_ticksPerBattleCycle(3),
       m_ticks(0),
-      m_tickInterval(20),
       m_playState(Playing),
       m_events(),
       m_currentTime(0),
@@ -247,10 +250,14 @@ client::vcr::classic::PlaybackScreen::~PlaybackScreen()
 {
 }
 
-int
+void
 client::vcr::classic::PlaybackScreen::run()
 {
-    preloadImages();
+    prepare();
+    if (m_scheduler.get() == 0) {
+        // Cannot happen
+        return;
+    }
 
     ui::widgets::Button btn("OK", util::Key_Escape, m_root);
     btn.sig_fire.addNewClosure(m_loop.makeStop(1));
@@ -260,6 +267,7 @@ client::vcr::classic::PlaybackScreen::run()
     m_playbackControl.sig_moveToBeginning.add(this, &PlaybackScreen::onMoveToBeginning);
     m_playbackControl.sig_moveBy.add(this, &PlaybackScreen::onMoveBy);
     m_playbackControl.sig_moveToEnd.add(this, &PlaybackScreen::onMoveToEnd);
+    m_playbackControl.sig_changeSpeed.add(this, &PlaybackScreen::onChangeSpeed);
 
     ui::Group g(ui::layout::VBox::instance5);
     g.add(btn);
@@ -275,7 +283,7 @@ client::vcr::classic::PlaybackScreen::run()
     PlaybackPanel panel(m_root, m_spriteWidget, m_leftStatus, m_rightStatus, g);
     panel.setExtent(m_root.getExtent());
 
-    m_renderer.reset(new Renderer(m_spriteWidget.controller(), m_root, m_translator, 1));
+    m_renderer.reset(new Renderer(m_spriteWidget.controller(), m_root, m_translator, 1 - m_config.getEffectsMode()));
     m_renderer->setExtent(m_spriteWidget.getExtent());
 
     m_root.add(panel);
@@ -286,13 +294,12 @@ client::vcr::classic::PlaybackScreen::run()
     m_loop.run();
 
     m_renderer.reset();
-
-    return 0;
 }
 
 void
 client::vcr::classic::PlaybackScreen::handleError(String_t msg)
 {
+    /* Callback for ClassicVcrPlayerProxy::sig_error: stop playback */
     util::rich::Text text = m_translator("This battle cannot be played.");
     text += "\n\n";
     text += util::rich::Text(Format(m_translator("Most likely, your local configuration does not match the host's, or your host software is incompatible with PCC2.\n\n"
@@ -305,6 +312,7 @@ client::vcr::classic::PlaybackScreen::handleError(String_t msg)
 void
 client::vcr::classic::PlaybackScreen::handleEvents(util::StringInstructionList& list, bool finish)
 {
+    /* Callback for ClassicVcrPlayerProxy::sig_event: process events */
     gvc::EventRecorder r;
     r.swapContent(list);
     m_log.write(afl::sys::LogListener::Trace, LOG_NAME, Format("-> %d events", r.size()));
@@ -348,7 +356,7 @@ client::vcr::classic::PlaybackScreen::handleEvents(util::StringInstructionList& 
 }
 
 void
-client::vcr::classic::PlaybackScreen::preloadImages()
+client::vcr::classic::PlaybackScreen::prepare()
 {
     // Query images
     ImageQuery q;
@@ -362,15 +370,29 @@ client::vcr::classic::PlaybackScreen::preloadImages()
         loader.loadImage(images[i]);
     }
     loader.wait();
+
+    // Load config
+    m_config.load(link, m_configProxy);
+    switch (m_config.getRendererMode()) {
+     case UserConfiguration::TraditionalRenderer:
+        m_scheduler.reset(new game::vcr::classic::TraditionalScheduler(*this));
+        break;
+     case UserConfiguration::StandardRenderer:
+        m_scheduler.reset(new game::vcr::classic::StandardScheduler(*this));
+        break;
+     case UserConfiguration::InterleavedRenderer:
+        m_scheduler.reset(new game::vcr::classic::InterleavedScheduler(*this));
+        break;
+    }
 }
 
-void
+inline void
 client::vcr::classic::PlaybackScreen::requestEvents()
 {
     m_proxy.eventRequest();
 }
 
-void
+inline void
 client::vcr::classic::PlaybackScreen::requestJump(int32_t time)
 {
     m_proxy.jumpRequest(time);
@@ -390,7 +412,7 @@ client::vcr::classic::PlaybackScreen::placeObject(game::vcr::classic::Side side,
     d.ownerName     = info.ownerName;
     d.beamName      = info.beamName;
     d.launcherName  = info.launcherName;
-    d.unitImageName = info.object.isPlanet() ? "planet" : ui::res::makeResourceId(ui::res::SHIP, info.object.getPicture(), info.object.getId());
+    d.unitImageName = info.object.isPlanet() ? ui::res::PLANET : ui::res::makeResourceId(ui::res::SHIP, info.object.getPicture(), info.object.getId());
     d.numBeams      = info.object.getNumBeams();
     d.numLaunchers  = info.object.getNumLaunchers();
     d.numBays       = info.object.getNumBays();
@@ -443,6 +465,15 @@ void
 client::vcr::classic::PlaybackScreen::onMoveToEnd()
 {
     jumpTo(MAX_TIME);
+}
+
+void
+client::vcr::classic::PlaybackScreen::onChangeSpeed(bool faster)
+{
+    m_config.changeSpeed(faster ? -1 : +1);
+    m_config.save(m_configProxy);
+    onPlay();
+    client::widgets::showDecayingMessage(m_root, Format(m_translator("Speed: %s"), Configuration::getSpeedName(m_config.getSpeed(), m_translator)));
 }
 
 void
@@ -550,7 +581,7 @@ client::vcr::classic::PlaybackScreen::onTick()
             if (m_events.empty()) {
                 setState(Red, "Underflow");
             } else {
-                m_timer->setInterval(m_tickInterval);
+                m_timer->setInterval(m_config.getTickInterval());
             }
             break;
 
@@ -570,7 +601,7 @@ client::vcr::classic::PlaybackScreen::onTick()
                     requestEvents();
                     setState(Yellow, "Underflow");
                 }
-                m_timer->setInterval(m_tickInterval);
+                m_timer->setInterval(m_config.getTickInterval());
             }
             break;
 
@@ -585,7 +616,7 @@ client::vcr::classic::PlaybackScreen::onTick()
                 m_spriteWidget.tick();      // FIXME? Needed to make the last sprite visible
                 setState(Finished, "Underflow");
             } else {
-                m_timer->setInterval(m_tickInterval);
+                m_timer->setInterval(m_config.getTickInterval());
             }
             break;
 
@@ -724,7 +755,7 @@ client::vcr::classic::PlaybackScreen::executeEvents(int32_t timeLimit)
 
          case ScheduledEvent::WaitTick:
             // m_log.write(afl::sys::LogListener::Trace, LOG_NAME, Format("WaitTick: ticks=%d / %d", m_ticks, m_ticksPerBattleCycle));
-            if (m_ticks < m_ticksPerBattleCycle) {
+            if (m_ticks < m_config.getNumTicksPerBattleCycle()) {
                 return true;
             }
             m_ticks = 0;
@@ -773,7 +804,7 @@ client::vcr::classic::PlaybackScreen::handleEventReceptionRed(bool finish)
 
             // If we ought to play, do so.
             if (m_playState == Playing) {
-                m_timer->setInterval(m_tickInterval);
+                m_timer->setInterval(m_config.getTickInterval());
             }
         } else {
             // Events exhausted. Do NOT draw, the frame is incomplete.
@@ -833,7 +864,7 @@ client::vcr::classic::PlaybackScreen::handleEventReceptionForwarding(bool finish
         m_spriteWidget.tick();
         m_spriteWidget.requestRedraw();
         if (m_playState == Playing) {
-            m_timer->setInterval(m_tickInterval);
+            m_timer->setInterval(m_config.getTickInterval());
         }
     }
 }

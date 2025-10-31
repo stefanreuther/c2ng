@@ -817,7 +817,9 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = gfx/threed/modelapplet.cpp gfx/threed/modelapplet.hpp \
+FILES_guilib = client/dialogs/vcroptions.cpp client/dialogs/vcroptions.hpp \
+    client/vcr/configuration.cpp client/vcr/configuration.hpp \
+    gfx/threed/modelapplet.cpp gfx/threed/modelapplet.hpp \
     gfx/threed/renderapplet.cpp gfx/threed/renderapplet.hpp \
     client/widgets/testapplet.cpp client/widgets/testapplet.hpp \
     ui/widgets/testapplet.cpp ui/widgets/testapplet.hpp gfx/applet.cpp \
@@ -1840,7 +1842,9 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/game/vcr/classic/interleavedschedulertest.cpp \
+FILES_testsuite = test/client/vcr/playbackcontrolwidgettest.cpp \
+    test/client/vcr/configurationtest.cpp \
+    test/game/vcr/classic/interleavedschedulertest.cpp \
     test/game/vcr/classic/standardschedulertest.cpp \
     test/game/vcr/classic/traditionalschedulertest.cpp \
     test/game/vcr/classic/scheduledeventconsumertest.cpp \

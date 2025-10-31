@@ -75,6 +75,7 @@
 #include "client/dialogs/techupgradedialog.hpp"
 #include "client/dialogs/turnlistdialog.hpp"
 #include "client/dialogs/ufoinfo.hpp"
+#include "client/dialogs/vcroptions.hpp"
 #include "client/dialogs/vcrplayer.hpp"
 #include "client/dialogs/visualscandialog.hpp"
 #include "client/help.hpp"
@@ -3588,6 +3589,31 @@ client::si::IFUIEditTeams(game::Session& session, ScriptSide& si, RequestLink1 l
     si.postNewTask(link, new Task());
 }
 
+/* @q UI.EditVcrOptions (Global Command)
+   VCR Options dialog.
+
+   @since PCC2 2.41.4 */
+void
+client::si::IFUIEditVcrOptions(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
+{
+    class Task : public UserTask {
+     public:
+        void handle(Control& ctl, RequestLink2 link)
+            {
+                UserSide& iface = ctl.interface();
+                client::dialogs::editVcrOptions(ctl.root(), ctl.translator(), iface.gameSender());
+                iface.continueProcess(link);
+            }
+    };
+
+    // Preconditions
+    args.checkArgumentCount(0);
+    game::actions::mustHaveGame(session);
+
+    // Do it
+    si.postNewTask(link, new Task());
+}
+
 /* @q UI.EndDialog Optional code:Int (Global Command)
    Closes the dialog if there currently is one open.
    If there is no dialog, this command is ignored.
@@ -5151,6 +5177,7 @@ client::si::registerCommands(UserSide& ui)
                 s.world().setNewGlobalValue("UI.CHOOSETURN",         new ScriptProcedure(s, &si, IFUIChooseTurn));
                 s.world().setNewGlobalValue("UI.EDITALLIANCES",      new ScriptProcedure(s, &si, IFUIEditAlliances));
                 s.world().setNewGlobalValue("UI.EDITTEAMS",          new ScriptProcedure(s, &si, IFUIEditTeams));
+                s.world().setNewGlobalValue("UI.EDITVCROPTIONS",     new ScriptProcedure(s, &si, IFUIEditVcrOptions));
                 s.world().setNewGlobalValue("UI.DIALOG",             new DialogFunction(s, &si));
                 s.world().setNewGlobalValue("UI.ENDDIALOG",          new ScriptProcedure(s, &si, IFUIEndDialog));
                 s.world().setNewGlobalValue("UI.FILEWINDOW",         new ScriptProcedure(s, &si, IFUIFileWindow));

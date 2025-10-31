@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-09-24 13:11+0200\n"
+"PO-Revision-Date: 2025-11-02 10:15+0100\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:390
@@ -786,7 +786,7 @@ msgstr "%s eigenes Schiff"
 msgid "%s fighter"
 msgstr "%s Jäger"
 
-#: client/dialogs/flakvcrobject.cpp:126 client/vcr/flak/playbackscreen.cpp:631
+#: client/dialogs/flakvcrobject.cpp:126 client/vcr/flak/playbackscreen.cpp:664
 msgid "%s fleet"
 msgstr "%s Flotte"
 
@@ -814,7 +814,7 @@ msgstr "%s Eingeborene"
 msgid "%s natives, %d clan%!1{s%}"
 msgstr "%s Eingeborene, %d Clan%!1{s%}"
 
-#: client/vcr/flak/playbackscreen.cpp:630
+#: client/vcr/flak/playbackscreen.cpp:663
 #: game/proxy/simulationsetupproxy.cpp:353
 msgid "%s planet"
 msgstr "%s Planet"
@@ -1324,7 +1324,7 @@ msgstr "3 - Mission"
 msgid "3 mc + 1 supply"
 msgstr "3 mc + 1 Supply"
 
-#: client/vcr/flak/arenawidget.cpp:84
+#: client/dialogs/vcroptions.cpp:34 client/vcr/flak/arenawidget.cpp:77
 msgid "3-D"
 msgstr "3-D"
 
@@ -2016,7 +2016,7 @@ msgstr "Avian"
 msgid "B - Starbases"
 msgstr "B - Sternenbasen"
 
-#: client/dialogs/helpdialog.cpp:122 client/dialogs/vcrselection.cpp:79
+#: client/dialogs/helpdialog.cpp:122 client/dialogs/vcrselection.cpp:80
 msgid "Back"
 msgstr "Zurück"
 
@@ -2024,23 +2024,23 @@ msgstr "Zurück"
 msgid "Backup Setting"
 msgstr "Backup-Einstellung"
 
-#: share/resource/core_config.q:427
+#: share/resource/core_config.q:429
 msgid "Backups | Result file backups..."
 msgstr "Backups | Result-Datei-Backups..."
 
-#: share/resource/core_config.q:443
+#: share/resource/core_config.q:445
 msgid "Backups | Scripts/Auto Task backups..."
 msgstr "Backups | Script/Auto-Task-Backup..."
 
-#: share/resource/core_config.q:439
+#: share/resource/core_config.q:441
 msgid "Backups | Starchart database backups..."
 msgstr "Backups | Sternkarten-Datenbank-Backups..."
 
-#: share/resource/core_config.q:435
+#: share/resource/core_config.q:437
 msgid "Backups | Turn file backups..."
 msgstr "Backups | Turn-Datei-Backups..."
 
-#: share/resource/core_config.q:431
+#: share/resource/core_config.q:433
 msgid "Backups | UTIL.DAT file backups..."
 msgstr "Backups | UTIL.DAT-Backup..."
 
@@ -2463,7 +2463,7 @@ msgstr "Fracht-Zusammenfassung (Vorhersage)"
 #: client/dialogs/cargotransferdialog.cpp:74
 #: client/dialogs/multitransfer.cpp:523 client/dialogs/multitransfer.cpp:728
 #: client/dialogs/multitransfer.cpp:735 client/dialogs/multitransfer.cpp:739
-#: client/si/commands.cpp:2754 share/resource/core_ui.q:336
+#: client/si/commands.cpp:2755 share/resource/core_ui.q:336
 msgid "Cargo Transfer"
 msgstr "Fracht-Transfer"
 
@@ -2528,7 +2528,7 @@ msgstr "Zeichensatz ändern"
 msgid "Change File Type"
 msgstr "Dateityp ändern"
 
-#: client/si/commands.cpp:4226
+#: client/si/commands.cpp:4252
 msgid "Change Friendly Code"
 msgstr "Kommandocode ändern"
 
@@ -2626,7 +2626,7 @@ msgid "Choose player slots to clean"
 msgstr "Wähle aufzuräumende Spieler:"
 
 #: client/dialogs/navchartdialog.cpp:675 client/dialogs/navchartdialog.cpp:684
-#: client/si/commands.cpp:1513
+#: client/si/commands.cpp:1514
 msgid "Chunnel"
 msgstr "Chunnel"
 
@@ -2657,6 +2657,10 @@ msgid ""
 msgstr ""
 "Ergebnisklassen\n"
 "---------------"
+
+#: client/dialogs/vcroptions.cpp:75
+msgid "Classic"
+msgstr "Klassisch"
 
 #: client/dialogs/sweep.cpp:137 client/dialogs/sweep.cpp:169
 #: client/dialogs/sweep.cpp:83
@@ -2739,7 +2743,7 @@ msgstr "Klone, und baue ein %s"
 #: client/dialogs/simulationfleetcost.cpp:160
 #: client/dialogs/simulationresult.cpp:479 client/dialogs/simulator.cpp:373
 #: client/dialogs/specbrowserdialog.cpp:321 client/dialogs/ufoinfo.cpp:180
-#: client/vcr/flak/playbackscreen.cpp:141
+#: client/vcr/flak/playbackscreen.cpp:147
 msgid "Close"
 msgstr "Schließen"
 
@@ -3327,6 +3331,10 @@ msgstr "Anzeige"
 msgid "Display by"
 msgstr "Anzeige nach"
 
+#: client/dialogs/vcroptions.cpp:59 client/dialogs/vcroptions.cpp:63
+msgid "Display mode"
+msgstr "Anzeigemodus"
+
 #: share/resource/core_ui.q:1039
 msgid "Dissolve this fleet?"
 msgstr "Diese Flotte auflösen?"
@@ -3345,7 +3353,7 @@ msgstr "Entfernung vom ersten Punkt: %.1f ly"
 msgid "Distance too short"
 msgstr "Entfernung zu gering"
 
-#: client/vcr/classic/renderer.cpp:430
+#: client/vcr/classic/renderer.cpp:603
 msgid "Distance: %5d m"
 msgstr "Abstand: %5d m"
 
@@ -3626,6 +3634,10 @@ msgstr "Befehl bearbeiten"
 msgid "Edit..."
 msgstr "Bearbeiten..."
 
+#: client/dialogs/vcroptions.cpp:61
+msgid "Effects"
+msgstr "Effekte"
+
 #: client/dialogs/hullspecification.cpp:132
 msgid "Effects on %d kt %s ship"
 msgstr "Wirkung auf ein %d-kt-%s-Schiff"
@@ -3836,7 +3848,7 @@ msgstr "Fehler beim Ausführen der Aufgabe"
 msgid "Error during export: %s"
 msgstr "Fehler beim Export: %s"
 
-#: client/dialogs/vcrselection.cpp:295
+#: client/dialogs/vcrselection.cpp:299
 msgid "Error during save: %s"
 msgstr "Fehler beim Speichern: %s"
 
@@ -3994,7 +4006,7 @@ msgstr "Explosion von Schiff #%d"
 msgid "Export"
 msgstr "Export"
 
-#: client/widgets/vcrinfo.cpp:421
+#: client/widgets/vcrinfo.cpp:424
 msgid "Export all battles"
 msgstr "Alle Kämpfe exportieren"
 
@@ -4002,7 +4014,7 @@ msgstr "Alle Kämpfe exportieren"
 msgid "Export succeeded."
 msgstr "Export erfolgreich."
 
-#: client/widgets/vcrinfo.cpp:422
+#: client/widgets/vcrinfo.cpp:425
 msgid "Export units in this battle"
 msgstr "Einheiten in diesem Kampf exportieren"
 
@@ -4089,7 +4101,8 @@ msgstr "Kommandocode: \"%s\", Schaden: %d%%"
 msgid "FCode: %s"
 msgstr "K.Code: %s"
 
-#: game/sim/configuration.cpp:313 game/vcr/flak/battle.cpp:224
+#: client/dialogs/vcroptions.cpp:76 game/sim/configuration.cpp:313
+#: game/vcr/flak/battle.cpp:224
 msgid "FLAK"
 msgstr "FLAK"
 
@@ -4342,7 +4355,7 @@ msgstr "Datei zu kurz"
 msgid "File type"
 msgstr "Dateityp"
 
-#: client/si/commands.cpp:2477
+#: client/si/commands.cpp:2478
 msgid "File..."
 msgstr "Datei..."
 
@@ -4588,7 +4601,7 @@ msgstr "G - Bauziele"
 msgid "Game Directory Setup"
 msgstr "Spielverzeichnis-Setup"
 
-#: share/resource/core_config.q:463
+#: share/resource/core_config.q:465
 msgid "Game Settings"
 msgstr "Spiel-Einstellungen"
 
@@ -4926,8 +4939,8 @@ msgstr "Kurs"
 #: client/dialogs/simulationresult.cpp:480 client/dialogs/simulator.cpp:374
 #: client/dialogs/specbrowserdialog.cpp:322
 #: client/dialogs/taxationdialog.cpp:610 client/dialogs/ufoinfo.cpp:178
-#: client/dialogs/vcrselection.cpp:80 client/dialogs/visualscandialog.cpp:692
-#: client/screens/browserscreen.cpp:217 client/vcr/flak/playbackscreen.cpp:140
+#: client/dialogs/vcrselection.cpp:81 client/dialogs/visualscandialog.cpp:692
+#: client/screens/browserscreen.cpp:217 client/vcr/flak/playbackscreen.cpp:146
 #: ui/dialogs/messagebox.cpp:99 ui/widgets/standarddialogbuttons.cpp:42
 msgid "Help"
 msgstr "Hilfe"
@@ -5736,12 +5749,12 @@ msgstr "Links/Rechts-Ausgleich"
 msgid "Level %d"
 msgstr "Stufe %d"
 
-#: client/si/commands.cpp:4430
+#: client/si/commands.cpp:4456
 msgid "List Fleets"
 msgstr "Flotten-Liste"
 
 #: client/dialogs/navchartdialog.cpp:513
-#: client/dialogs/visualscandialog.cpp:1079 client/si/commands.cpp:4605
+#: client/dialogs/visualscandialog.cpp:1079 client/si/commands.cpp:4631
 msgid "List Ships"
 msgstr "Schiffe"
 
@@ -6113,7 +6126,7 @@ msgstr "Teil von Flotte #%d"
 msgid "Merge Selection"
 msgstr "Auswahl hinzufügen"
 
-#: client/si/commands.cpp:4712 client/si/commands.cpp:853
+#: client/si/commands.cpp:4738 client/si/commands.cpp:854
 #: share/resource/core.q:59
 msgid "Message"
 msgstr "Nachricht"
@@ -6162,7 +6175,7 @@ msgid "Message too big"
 msgstr "Nachricht zu groß"
 
 #: client/dialogs/visualscandialog.cpp:433 client/screens/playerscreen.cpp:142
-#: client/si/commands.cpp:250
+#: client/si/commands.cpp:251
 msgid "Messages"
 msgstr "Nachrichten"
 
@@ -6443,7 +6456,7 @@ msgstr "Geld-Kosten"
 msgid "More..."
 msgstr "Mehr..."
 
-#: client/vcr/classic/playbackscreen.cpp:297
+#: client/vcr/classic/playbackscreen.cpp:305
 msgid ""
 "Most likely, your local configuration does not match the host's, or your "
 "host software is incompatible with PCC2.\n"
@@ -6729,7 +6742,7 @@ msgstr "Keine Locks im System aktiv."
 msgid "No matching ship found."
 msgstr "Kein passendes Schiff gefunden."
 
-#: client/si/commands.cpp:251
+#: client/si/commands.cpp:252
 msgid "No messages"
 msgstr "Keine Nachrichten"
 
@@ -6737,7 +6750,7 @@ msgstr "Keine Nachrichten"
 msgid "No messages for this ship"
 msgstr "Keine Nachrichten für dieses Schiff"
 
-#: client/si/commands.cpp:2503
+#: client/si/commands.cpp:2504
 msgid "No messages sent so far"
 msgstr "Keine Nachrichten gesendet bisher"
 
@@ -6910,9 +6923,9 @@ msgstr "O - Optionen"
 #: client/dialogs/shipspeeddialog.cpp:66 client/dialogs/taxationdialog.cpp:607
 #: client/dialogs/turnlistdialog.cpp:112
 #: client/dialogs/visualscandialog.cpp:1080
-#: client/dialogs/visualscandialog.cpp:915 client/si/commands.cpp:2017
-#: client/si/commands.cpp:4429 client/si/commands.cpp:4493
-#: client/si/commands.cpp:4604 client/si/commands.cpp:4713
+#: client/dialogs/visualscandialog.cpp:915 client/si/commands.cpp:2018
+#: client/si/commands.cpp:4455 client/si/commands.cpp:4519
+#: client/si/commands.cpp:4630 client/si/commands.cpp:4739
 #: client/widgets/markercolorselector.cpp:80 share/resource/core.q:87
 #: share/resource/core_config.q:72 share/resource/core_ui.q:1056
 #: share/resource/core_ui.q:1228 share/resource/core_ui.q:1235
@@ -6964,7 +6977,7 @@ msgid "Option \"%s\" is missing its parameter"
 msgstr "Fehlender Parameter für Option \"%s\""
 
 #: client/applicationparameters.cpp:85 client/screens/playerscreen.cpp:149
-#: share/resource/core_config.q:464
+#: share/resource/core_config.q:466
 msgid "Options"
 msgstr "Optionen"
 
@@ -7456,7 +7469,7 @@ msgstr "Planeten nach Erfahrungsstufe"
 msgid "Plasmaoid"
 msgstr "Plasmaoid"
 
-#: client/dialogs/vcrselection.cpp:77
+#: client/dialogs/vcrselection.cpp:78
 msgid "Play"
 msgstr "Wiedergabe"
 
@@ -7495,7 +7508,7 @@ msgstr "Spieler"
 msgid "Players..."
 msgstr "Spieler..."
 
-#: client/si/commands.cpp:1508
+#: client/si/commands.cpp:1509
 msgid "Please fix the following problems to make the chunnel work"
 msgstr "Bitte behebe die folgenden Probleme, damit der Chunnel funktioniert"
 
@@ -7595,7 +7608,7 @@ msgstr "Vorhersage bis Cursor"
 msgid "Predict to end"
 msgstr "Vorhersage bis Ende"
 
-#: client/si/commands.cpp:2013
+#: client/si/commands.cpp:2014
 msgid "Prediction Details"
 msgstr "Vorhersage-Details"
 
@@ -7607,23 +7620,23 @@ msgstr "Vorhersage-Effekte"
 msgid "Prediction ends turn %d"
 msgstr "Berechnung endet Zug %d"
 
-#: share/resource/core_config.q:416
+#: share/resource/core_config.q:418
 msgid "Preferences | Automatic optimum warp"
 msgstr "Vorlieben | Automatisch optimaler Warpfaktor"
 
-#: share/resource/core_config.q:408
+#: share/resource/core_config.q:410
 msgid "Preferences | Automatically lock at warp"
 msgstr "Vorlieben | Automatisch auf Gravitation einrasten"
 
-#: share/resource/core_config.q:394
+#: share/resource/core_config.q:396
 msgid "Preferences | Starchart | General settings..."
 msgstr "Vorlieben | Sternenkarte | Allgemeine Einstellungen..."
 
-#: share/resource/core_config.q:403
+#: share/resource/core_config.q:405
 msgid "Preferences | Starchart | Object labels..."
 msgstr "Vorlieben | Sternenkarte | Objekt-Beschriftungen..."
 
-#: share/resource/core_config.q:411
+#: share/resource/core_config.q:413
 msgid "Preferences | Taxation predicts relative growth"
 msgstr "Vorlieben | Relative Bevölkerungsvorhersage in Besteuerung"
 
@@ -7638,6 +7651,10 @@ msgstr "Vorlieben | Benutzerschnittstelle | Tausender-Trennzeichen"
 #: share/resource/core_config.q:381
 msgid "Preferences | User Interface | Use clans everywhere"
 msgstr "Vorlieben | Benutzerschnittstelle | Überall Clans anzeigen"
+
+#: share/resource/core_config.q:393
+msgid "Preferences | User Interface | VCR..."
+msgstr "Vorlieben | Benutzerschnittstelle | VCR..."
 
 #: game/spec/racialabilitylist.cpp:368
 msgid "Prefers hot planets"
@@ -7846,7 +7863,7 @@ msgstr "Nur Ansicht"
 msgid "Reading FLAK configuration from %s..."
 msgstr "Lese FLAK-Konfiguration aus %s..."
 
-#: game/config/userconfiguration.cpp:297 game/config/userconfiguration.cpp:318
+#: game/config/userconfiguration.cpp:315 game/config/userconfiguration.cpp:336
 #: game/v3/loader.cpp:611 game/v3/loader.cpp:617 game/v3/loader.cpp:643
 msgid "Reading configuration from %s..."
 msgstr "Lese Konfiguration aus %s..."
@@ -8099,11 +8116,11 @@ msgstr "Ergebnisse nach %d Simulation%!1{en%}"
 msgid "Return to race selection"
 msgstr "Zurück zur Spielauswahl"
 
-#: client/dialogs/outboxdialog.cpp:355 client/si/commands.cpp:2501
+#: client/dialogs/outboxdialog.cpp:355 client/si/commands.cpp:2502
 msgid "Revise Messages"
 msgstr "Nachrichten überarbeiten"
 
-#: client/si/commands.cpp:2474
+#: client/si/commands.cpp:2475
 msgid "Revise..."
 msgstr "Überarbeiten..."
 
@@ -8181,8 +8198,8 @@ msgstr "SB-Jäger verl."
 msgid "Sample hull"
 msgstr "Beispiel-Typ"
 
-#: client/dialogs/simulator.cpp:362 client/dialogs/vcrselection.cpp:288
-#: client/dialogs/vcrselection.cpp:295
+#: client/dialogs/simulator.cpp:362 client/dialogs/vcrselection.cpp:292
+#: client/dialogs/vcrselection.cpp:299
 msgid "Save"
 msgstr "Speichern"
 
@@ -8219,7 +8236,7 @@ msgstr "Simulation speichern"
 msgid "Save Task"
 msgstr "Aufgabe speichern"
 
-#: client/widgets/vcrinfo.cpp:423
+#: client/widgets/vcrinfo.cpp:426
 msgid "Save all battles"
 msgstr "Alle Kämpfe speichern"
 
@@ -8235,7 +8252,7 @@ msgstr "Nur speichern"
 msgid "Save this Message"
 msgstr "Diese Nachricht speichern"
 
-#: client/widgets/vcrinfo.cpp:424
+#: client/widgets/vcrinfo.cpp:427
 msgid "Save this battle"
 msgstr "Diesen Kampf speichern"
 
@@ -8277,7 +8294,7 @@ msgstr "Punktestand Sieg-Limit"
 msgid "Scores"
 msgstr "Punkte"
 
-#: client/widgets/vcrinfo.cpp:420
+#: client/widgets/vcrinfo.cpp:423
 msgid "Scores [S]"
 msgstr "Punkte [S]"
 
@@ -8409,7 +8426,7 @@ msgstr "Raumschiff auswählen"
 msgid "Select Starbase"
 msgstr "Sternenbasis auswählen"
 
-#: client/si/commands.cpp:1541
+#: client/si/commands.cpp:1542
 msgid "Select Waypoint"
 msgstr "Wähle Zielpunkt"
 
@@ -8451,7 +8468,7 @@ msgstr "Semikolon-getrennte Werte"
 msgid "Send"
 msgstr "Senden"
 
-#: client/si/commands.cpp:2469
+#: client/si/commands.cpp:2470
 msgid "Send Message"
 msgstr "Nachricht senden"
 
@@ -8460,7 +8477,7 @@ msgid "Send file with TRN (will echo back with next RST, PHost 4.0+)"
 msgstr ""
 "Datei mit dem TRN übertragen (wird mit dem RST zurückgesendet, PHost 4.0+)"
 
-#: client/si/commands.cpp:2511 client/si/commands.cpp:2515
+#: client/si/commands.cpp:2512 client/si/commands.cpp:2516
 msgid "Send message to file"
 msgstr "Nachricht in Datei senden"
 
@@ -8740,7 +8757,7 @@ msgstr "Schiffs-Liste"
 msgid "Ship Mission"
 msgstr "Schiffs-Mission"
 
-#: client/si/commands.cpp:4494
+#: client/si/commands.cpp:4520
 msgid "Ship Prediction"
 msgstr "Schiffs-Vorhersage"
 
@@ -8885,11 +8902,15 @@ msgstr "Zeige alle Bereiche"
 msgid "Show all ship types"
 msgstr "Zeige alle Schiffstypen"
 
+#: client/dialogs/vcroptions.cpp:65
+msgid "Show grid"
+msgstr "Raster anzeigen"
+
 #: game/v3/command.cpp:421
 msgid "Show minefield to an ally"
 msgstr "Minenfeld einem Verbündeten zeigen"
 
-#: client/si/commands.cpp:1917
+#: client/si/commands.cpp:1918
 msgid "Show minefield to..."
 msgstr "Zeige Minenfeld..."
 
@@ -8945,7 +8966,7 @@ msgstr "Zeige nur Torpedos"
 msgid "Show planet to an ally"
 msgstr "Planet einem Verbündeten zeigen"
 
-#: client/si/commands.cpp:1913
+#: client/si/commands.cpp:1914
 msgid "Show planet to..."
 msgstr "Zeige Planet..."
 
@@ -8953,7 +8974,7 @@ msgstr "Zeige Planet..."
 msgid "Show ship to an ally"
 msgstr "Schiff einem Verbündeten zeigen"
 
-#: client/si/commands.cpp:1915
+#: client/si/commands.cpp:1916
 msgid "Show ship to..."
 msgstr "Zeige Schiff..."
 
@@ -9135,6 +9156,11 @@ msgstr "Spc-Wählen"
 #: share/resource/core_tiles.q:402
 msgid "Speed"
 msgstr "Geschwindigkeit"
+
+#: client/vcr/classic/playbackscreen.cpp:476
+#: client/vcr/flak/playbackscreen.cpp:368
+msgid "Speed: %s"
+msgstr "Geschwindigkeit: %s"
 
 #: client/tiles/visualscanshipinfotile.cpp:60
 msgid "Speed: warp %d"
@@ -9915,7 +9941,7 @@ msgstr ""
 "Diese Sternenbasis klont gerade %s. Wenn du fortsetzt, wird dieser Auftrag "
 "ersetzt. Fortsetzen?"
 
-#: client/vcr/classic/playbackscreen.cpp:295
+#: client/vcr/classic/playbackscreen.cpp:303
 msgid "This battle cannot be played."
 msgstr "Dieser Kampf kann nicht wiedergegeben werden."
 
@@ -10192,7 +10218,7 @@ msgstr ""
 "möchtest. <b>Fracht</b> setzt alles zurück, was mit Fracht zusammenhängt "
 "(Bauten, Transfers, usw.), <b>Missionen</b> den Rest."
 
-#: client/vcr/classic/renderer.cpp:423
+#: client/vcr/classic/renderer.cpp:596
 msgid "Time: %3d:%02d"
 msgstr "Zeit: %3d:%02d"
 
@@ -10428,7 +10454,7 @@ msgstr "Frachttransfer zu..."
 msgid "Transfer cash/ammo to foreign ship"
 msgstr "Geld/Munition auf fremdes Schiff laden"
 
-#: client/si/commands.cpp:2754
+#: client/si/commands.cpp:2755
 msgid "Transfer which cargo?"
 msgstr "Welches Frachtgut übertragen?"
 
@@ -10674,12 +10700,12 @@ msgstr "Profil-Verzeichnis kann nicht geöffnet werden"
 msgid "Unable to save %s: %s"
 msgstr "%s kann nicht gespeichert werden: %s"
 
-#: client/si/commands.cpp:430 game/pcc/turnloader.cpp:128
+#: client/si/commands.cpp:431 game/pcc/turnloader.cpp:128
 #: game/v3/directoryloader.cpp:232 game/v3/resultloader.cpp:122
 msgid "Unable to save game"
 msgstr "Spiel kann nicht gespeichert werden"
 
-#: client/si/commands.cpp:2515
+#: client/si/commands.cpp:2516
 msgid "Unable to save message: %s"
 msgstr "Nachricht kann nicht gespeichert werden: %s"
 
@@ -11524,9 +11550,13 @@ msgstr "Nutze Verzeichnis \"%s\""
 msgid "Using turn file %s."
 msgstr "Nutze Turn-Datei %s."
 
-#: client/dialogs/vcrselection.cpp:71
+#: client/dialogs/vcrselection.cpp:72
 msgid "VCR"
 msgstr "VCR"
+
+#: client/dialogs/vcroptions.cpp:74
+msgid "VCR Options"
+msgstr "VCR-Optionen"
 
 #: game/proxy/classicvcrplayerproxy.cpp:70
 msgid "VCR algorithm does not accept (incompatible version?)"
@@ -11539,6 +11569,10 @@ msgstr "VCR-Algorithmus akzeptiert nicht (falsche Schiffsliste?)"
 #: game/v3/unpacker.cpp:684
 msgid "VCR file is invalid"
 msgstr "VCR-Datei ist ungültig"
+
+#: client/widgets/vcrinfo.cpp:428
+msgid "VCR options [O]"
+msgstr "VCR-Optionen [O]"
 
 #: game/tables/ionstormclassname.cpp:24
 msgid "VERY dangerous"
@@ -11600,7 +11634,7 @@ msgstr "Auf Sensoren sichtbar"
 msgid "Vision alliance"
 msgstr "Sichtungs-(Vision-)Allianz"
 
-#: client/vcr/classic/playbackscreen.cpp:300
+#: client/vcr/classic/playbackscreen.cpp:308
 msgid "Visual Combat Recorder"
 msgstr "Visual Combat Recorder"
 
@@ -11886,7 +11920,7 @@ msgstr "Schreibe %s Turn-Datei (%d Kommando%!1{s%})..."
 msgid "Writing '%s', %d object%!1{s%}..."
 msgstr "Schreibe '%s', %d Objekt%!1{e%}..."
 
-#: game/config/userconfiguration.cpp:330 game/config/userconfiguration.cpp:342
+#: game/config/userconfiguration.cpp:348 game/config/userconfiguration.cpp:360
 msgid "Writing configuration to %s..."
 msgstr "Schreibe Konfiguration nach %s..."
 
@@ -12554,6 +12588,10 @@ msgstr "Erwarte \"NAME=WERT\" für Option \"-A\""
 msgid "expecting \"KEY=VALUE\" for option \"-D\""
 msgstr "Erwarte \"NAME=WERT\" für Option \"-D\""
 
+#: client/vcr/configuration.cpp:212
+msgid "fastest"
+msgstr "schnellste"
+
 #: game/spec/info/info.cpp:403
 msgid "fighter"
 msgstr "Raumjäger"
@@ -12562,7 +12600,7 @@ msgstr "Raumjäger"
 msgid "fighting"
 msgstr "kämpfend"
 
-#: client/vcr/flak/arenawidget.cpp:83
+#: client/dialogs/vcroptions.cpp:35 client/vcr/flak/arenawidget.cpp:76
 msgid "flat"
 msgstr "flach"
 
@@ -12634,6 +12672,10 @@ msgstr "in Datei '%s'"
 #: interpreter/filecommandsource.cpp:40 interpreter/process.cpp:581
 msgid "in file '%s', line %d"
 msgstr "in Datei '%s', Zeile %d"
+
+#: client/dialogs/vcroptions.cpp:25
+msgid "interleaved"
+msgstr "überlappend"
 
 #: game/maint/raterapplication.cpp:67
 msgid "invalid argument to \"-value=\""
@@ -12893,7 +12935,8 @@ msgstr "neues RST"
 #: client/dialogs/folderconfigdialog.cpp:98
 #: client/dialogs/globalactions.cpp:296 client/dialogs/globalactions.cpp:319
 #: client/dialogs/searchdialog.cpp:59 client/dialogs/simulationabilities.cpp:23
-#: client/dialogs/ufoinfo.cpp:389 client/dialogs/visibilityrange.cpp:157
+#: client/dialogs/ufoinfo.cpp:389 client/dialogs/vcroptions.cpp:39
+#: client/dialogs/visibilityrange.cpp:157
 #: client/vcr/cameracontrolwidget.cpp:135 client/widgets/vcrobjectinfo.cpp:160
 #: game/spec/info/filter.cpp:118
 msgid "no"
@@ -13275,9 +13318,17 @@ msgstr "Schiff"
 msgid "ships"
 msgstr "Schiffe"
 
+#: client/dialogs/vcroptions.cpp:30
+msgid "simple"
+msgstr "einfach"
+
 #: game/sim/consoleapplication.cpp:457
 msgid "simulation does not match ship list"
 msgstr "Simulation und Schiffsliste passen nicht zusammen"
+
+#: client/vcr/configuration.cpp:214
+msgid "slowest"
+msgstr "langsamste"
 
 #: client/widgets/cargotransferheader.cpp:93
 msgid "space left"
@@ -13286,6 +13337,10 @@ msgstr "frei"
 #: game/tables/wormholestabilityname.cpp:18
 msgid "stable (<15%)"
 msgstr "stabil (<15%)"
+
+#: client/dialogs/vcroptions.cpp:23 client/dialogs/vcroptions.cpp:29
+msgid "standard"
+msgstr "Standard"
 
 #: game/searchquery.cpp:409
 msgid "starbases"
@@ -13377,6 +13432,10 @@ msgstr "total"
 #: game/ref/sortby.cpp:560
 msgid "towing %s"
 msgstr "schleppe %s"
+
+#: client/dialogs/vcroptions.cpp:24
+msgid "traditional"
+msgstr "traditionell"
 
 #: client/tiles/shipmovementtile.cpp:232
 msgid "training, won't move"
@@ -13585,7 +13644,8 @@ msgstr "abgebildet auf %4d,%4d"
 #: client/dialogs/folderconfigdialog.cpp:97
 #: client/dialogs/globalactions.cpp:295 client/dialogs/globalactions.cpp:319
 #: client/dialogs/searchdialog.cpp:60 client/dialogs/simulationabilities.cpp:24
-#: client/dialogs/ufoinfo.cpp:389 client/dialogs/visibilityrange.cpp:157
+#: client/dialogs/ufoinfo.cpp:389 client/dialogs/vcroptions.cpp:40
+#: client/dialogs/visibilityrange.cpp:157
 #: client/vcr/cameracontrolwidget.cpp:135 client/widgets/vcrobjectinfo.cpp:160
 #: game/spec/info/filter.cpp:120
 msgid "yes"
@@ -13635,6 +13695,15 @@ msgstr "▶ Gesamt"
 #: client/dialogs/scores.cpp:1386
 msgid "▶▶ Totals"
 msgstr "▶▶ Gesamt"
+
+#~ msgid "Classic VCR Effects"
+#~ msgstr "Effekte für klassischen VCR"
+
+#~ msgid "Classic VCR Renderer"
+#~ msgstr "Darstellung von klassischen VCR"
+
+#~ msgid "FLAK VCR Renderer"
+#~ msgstr "Darstellung von FLAK VCR"
 
 #~ msgid "Battle too large"
 #~ msgstr "Kampf zu groß"

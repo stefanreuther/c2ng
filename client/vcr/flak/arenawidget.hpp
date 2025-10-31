@@ -6,11 +6,12 @@
 #define C2NG_CLIENT_VCR_FLAK_ARENAWIDGET_HPP
 
 #include "afl/container/ptrvector.hpp"
+#include "afl/string/translator.hpp"
+#include "game/config/userconfiguration.hpp"
 #include "game/vcr/flak/visualisationsettings.hpp"
 #include "game/vcr/flak/visualisationstate.hpp"
 #include "ui/root.hpp"
 #include "ui/simplewidget.hpp"
-#include "afl/string/translator.hpp"
 
 namespace client { namespace vcr { namespace flak {
 
@@ -28,10 +29,7 @@ namespace client { namespace vcr { namespace flak {
         - repeatedly call requestRedraw() as needed */
     class ArenaWidget : public ui::SimpleWidget {
      public:
-        enum Mode {
-            ThreeDMode,
-            FlatMode
-        };
+        typedef game::config::UserConfiguration::FlakRendererMode Mode_t;
 
         /** Constructor.
             \param root     Root
@@ -46,31 +44,26 @@ namespace client { namespace vcr { namespace flak {
             Requires that the VisualisationState object has been prepared. */
         void init();
 
+        /** Set whether grid is enabled.
+            \param flag Flag */
+        void setGrid(bool flag);
+
         /** Check whether grid is enabled.
             \return status */
         bool hasGrid() const;
 
-        /** Toggle whether grid is enabled.
-            \return status */
-        void toggleGrid();
-
         /** Set mode.
             \param m New mode */
-        void setMode(Mode m);
-
-        /** Toggle mode.
-            \param a Set this mode if it is not already active.
-            \param b Set this mode instead. */
-        void toggleMode(Mode a, Mode b);
+        void setMode(Mode_t m);
 
         /** Get current mode.
             \return mode */
-        Mode getMode() const;
+        Mode_t getMode() const;
 
         /** Get mode name.
             \param m Mode
             \param tx Translator */
-        static String_t toString(Mode m, afl::string::Translator& tx);
+        static String_t toString(Mode_t m, afl::string::Translator& tx);
 
         // Widget / SimpleWidget:
         virtual void draw(gfx::Canvas& can);
@@ -87,7 +80,7 @@ namespace client { namespace vcr { namespace flak {
         game::vcr::flak::VisualisationSettings& m_settings;
 
         afl::container::PtrVector<Renderer> m_renderers;
-        Mode m_currentRenderer;
+        Mode_t m_currentRenderer;
 
         bool m_grid;
     };

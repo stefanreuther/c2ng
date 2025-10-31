@@ -1,5 +1,6 @@
 /**
   *  \file client/vcr/playbackcontrolwidget.cpp
+  *  \brief Class client::vcr::PlaybackControlWidget
   */
 
 #include "client/vcr/playbackcontrolwidget.hpp"
@@ -121,6 +122,14 @@ client::vcr::PlaybackControlWidget::handleKey(util::Key_t key, int prefix)
      case ' ':
      case util::Key_Return:
         sig_togglePlay.raise();
+        return true;
+
+     case '+':
+        sig_changeSpeed.raise(true);
+        return true;
+
+     case '-':
+        sig_changeSpeed.raise(false);
         return true;
 
      default:

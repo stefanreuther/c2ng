@@ -389,7 +389,9 @@ On UserPreferences Do
 
   % TODO: Missing PCC1 Option: Preferences | User Interface | Scanner/Waypoint independant
   % TODO: Missing PCC1 Option: Preferences | User Interface | Display Auto Waypoints in map
-  % TODO: Missing PCC1 Option: Preferences | VCR...
+
+  Add Translate("Preferences | User Interface | VCR..."), UI.EditVcrOptions, CCfg.Dialog.Value
+  LinkPref "Vcr.Renderer", "Vcr.Effects", "Flak.Renderer", "Flak.Grid"
 
   Add Translate("Preferences | Starchart | General settings..."), CC$StarchartConfig, CCfg.Dialog.Value
   % Link all the user options but NOT the geometry options!

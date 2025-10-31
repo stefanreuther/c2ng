@@ -9,6 +9,7 @@
 #include "afl/string/translator.hpp"
 #include "afl/sys/loglistener.hpp"
 #include "client/vcr/cameracontrolwidget.hpp"
+#include "client/vcr/configuration.hpp"
 #include "client/vcr/flak/arenawidget.hpp"
 #include "client/vcr/playbackcontrolwidget.hpp"
 #include "client/widgets/combatunitlist.hpp"
@@ -58,6 +59,7 @@ namespace client { namespace vcr { namespace flak {
         game::PlayerArray<String_t> m_playerAdjectives;
         game::TeamSettings m_teamSettings;
 
+        Configuration m_config;
         game::vcr::flak::VisualisationState m_visState;
         game::vcr::flak::VisualisationSettings m_visSettings;
         ArenaWidget m_arena;
@@ -97,8 +99,6 @@ namespace client { namespace vcr { namespace flak {
         State m_state;
         afl::container::PtrQueue<util::StringInstructionList> m_queue;
 
-        int m_tickInterval;
-
         int32_t m_targetTime;
         game::vcr::flak::VisualisationState m_shadowState;
 
@@ -116,6 +116,7 @@ namespace client { namespace vcr { namespace flak {
         void onMoveToBeginning();
         void onMoveBy(int delta);
         void onMoveToEnd();
+        void onChangeSpeed(bool faster);
         void onPlay();
         void onPause();
         void onFollow();
@@ -129,6 +130,7 @@ namespace client { namespace vcr { namespace flak {
         void jumpTo(int32_t time);
         void processJump(bool finished);
 
+        void startTimer();
         void updatePlayState();
         void initList();
         void updateList();
@@ -136,6 +138,7 @@ namespace client { namespace vcr { namespace flak {
         void updateGrid();
         void updateFollowedFleet();
         void updateMode();
+        void updateConfig();
 
         void handleChanges(game::vcr::flak::VisualisationSettings::Changes_t ch);
 

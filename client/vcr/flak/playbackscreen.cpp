@@ -6,7 +6,9 @@
 #include "client/vcr/flak/playbackscreen.hpp"
 #include "afl/string/format.hpp"
 #include "client/downlink.hpp"
+#include "client/widgets/decayingmessage.hpp"
 #include "client/widgets/helpwidget.hpp"
+#include "game/proxy/configurationproxy.hpp"
 #include "game/proxy/playerproxy.hpp"
 #include "game/proxy/vcrdatabaseproxy.hpp"
 #include "game/vcr/flak/eventrecorder.hpp"
@@ -24,6 +26,7 @@
 
 using afl::string::Format;
 using client::widgets::CombatUnitList;
+using game::config::UserConfiguration;
 using game::vcr::flak::VisualisationSettings;
 using game::vcr::flak::VisualisationState;
 
@@ -69,6 +72,9 @@ client::vcr::flak::PlaybackScreen::PlaybackScreen(ui::Root& root, afl::string::T
       m_gameSender(gameSender),
       m_log(log),
       m_timer(root.engine().createTimer()),
+      m_playerAdjectives(),
+      m_teamSettings(),
+      m_config(),
       m_visState(),
       m_visSettings(),
       m_arena(root, m_visState, m_visSettings),
@@ -77,7 +83,6 @@ client::vcr::flak::PlaybackScreen::PlaybackScreen(ui::Root& root, afl::string::T
       m_unitList(root),
       m_state(Initializing),
       m_queue(),
-      m_tickInterval(50),
       m_playState(Playing)
 {
     m_proxy.sig_event.add(this, &PlaybackScreen::onEvent);
@@ -85,6 +90,7 @@ client::vcr::flak::PlaybackScreen::PlaybackScreen(ui::Root& root, afl::string::T
     m_playbackControl.sig_moveToBeginning.add(this, &PlaybackScreen::onMoveToBeginning);
     m_playbackControl.sig_moveBy.add(this, &PlaybackScreen::onMoveBy);
     m_playbackControl.sig_moveToEnd.add(this, &PlaybackScreen::onMoveToEnd);
+    m_playbackControl.sig_changeSpeed.add(this, &PlaybackScreen::onChangeSpeed);
     m_timer->sig_fire.add(this, &PlaybackScreen::onTimer);
     m_cameraControl.dispatchKeysTo(*this);
 
@@ -167,8 +173,9 @@ client::vcr::flak::PlaybackScreen::handleKey(util::Key_t key, int /*prefix*/)
 
      case '3':
      case util::Key_Tab:
-        m_arena.toggleMode(ArenaWidget::ThreeDMode, ArenaWidget::FlatMode);
+        m_config.toggleFlakRendererMode(UserConfiguration::ThreeDMode, UserConfiguration::FlatMode);
         updateMode();
+        updateConfig();
         return true;
 
      case 'a':
@@ -184,8 +191,9 @@ client::vcr::flak::PlaybackScreen::handleKey(util::Key_t key, int /*prefix*/)
         return true;
 
      case 'g':
-        m_arena.toggleGrid();
+        m_config.toggleFlakGrid();
         updateGrid();
+        updateConfig();
         return true;
 
      case 'y':
@@ -217,10 +225,19 @@ client::vcr::flak::PlaybackScreen::handleKey(util::Key_t key, int /*prefix*/)
 void
 client::vcr::flak::PlaybackScreen::loadEnvironment()
 {
+    // Settings
     Downlink link(m_root, m_translator);
     game::proxy::VcrDatabaseProxy proxy(m_adaptorSender, m_root.engine().dispatcher(), m_translator, std::auto_ptr<game::spec::info::PictureNamer>());
     proxy.getTeamSettings(link, m_teamSettings);
     m_playerAdjectives = proxy.getPlayerNames(link, game::Player::AdjectiveName);
+
+    // Configuration
+    game::proxy::ConfigurationProxy configProxy(m_gameSender);
+    m_config.load(link, configProxy);
+
+    // Apply configuration to arena
+    m_arena.setGrid(m_config.hasFlakGrid());
+    m_arena.setMode(m_config.getFlakRendererMode());
 }
 
 void
@@ -275,7 +292,7 @@ client::vcr::flak::PlaybackScreen::onTimer()
             if (m_queue.empty()) {
                 setState(Red, "Underflow");
             } else {
-                m_timer->setInterval(m_tickInterval);
+                startTimer();
             }
             break;
 
@@ -291,7 +308,7 @@ client::vcr::flak::PlaybackScreen::onTimer()
                     m_proxy.eventRequest();
                     setState(Yellow, "Underflow");
                 }
-                m_timer->setInterval(m_tickInterval);
+                startTimer();
             }
             break;
 
@@ -300,7 +317,7 @@ client::vcr::flak::PlaybackScreen::onTimer()
             if (!ok && m_queue.empty()) {
                 setState(Finished, "Underflow");
             } else {
-                m_timer->setInterval(m_tickInterval);
+                startTimer();
             }
             break;
 
@@ -340,6 +357,15 @@ client::vcr::flak::PlaybackScreen::onMoveToEnd()
 {
     // ex FlakPlayWidget::onForwardToEnd
     jumpTo(MAX_TIME);
+}
+
+void
+client::vcr::flak::PlaybackScreen::onChangeSpeed(bool faster)
+{
+    m_config.changeSpeed(faster ? -1 : +1);
+    updateConfig();
+    onPlay();
+    client::widgets::showDecayingMessage(m_root, Format(m_translator("Speed: %s"), Configuration::getSpeedName(m_config.getSpeed(), m_translator)));
 }
 
 void
@@ -423,7 +449,7 @@ client::vcr::flak::PlaybackScreen::handleEventReceptionInit(bool finished)
 
         // Schedule next
         if (play && m_playState == Playing) {
-            m_timer->setInterval(m_tickInterval);
+            startTimer();
         }
     }
 }
@@ -455,7 +481,7 @@ client::vcr::flak::PlaybackScreen::handleEventReceptionRed(bool finished)
         // Play events
         // Do not play if m_playState != Playing; this would mean we can never slow-backward across a block boundary
         playTick(false);
-        m_timer->setInterval(m_tickInterval);
+        startTimer();
     }
 }
 
@@ -607,6 +633,13 @@ client::vcr::flak::PlaybackScreen::processJump(bool finished)
 }
 
 void
+client::vcr::flak::PlaybackScreen::startTimer()
+{
+    int interval = m_config.getTickInterval() * m_config.getNumTicksPerBattleCycle();
+    m_timer->setInterval(interval);
+}
+
+void
 client::vcr::flak::PlaybackScreen::updatePlayState()
 {
     m_playbackControl.setPlayState(m_playState == Playing);
@@ -680,7 +713,8 @@ client::vcr::flak::PlaybackScreen::updateCamera()
 void
 client::vcr::flak::PlaybackScreen::updateGrid()
 {
-    m_cameraControl.setGrid(m_arena.hasGrid());
+    m_arena.setGrid(m_config.hasFlakGrid());
+    m_cameraControl.setGrid(m_config.hasFlakGrid());
 }
 
 void
@@ -700,7 +734,15 @@ client::vcr::flak::PlaybackScreen::updateFollowedFleet()
 void
 client::vcr::flak::PlaybackScreen::updateMode()
 {
-    m_cameraControl.setModeName(ArenaWidget::toString(m_arena.getMode(), m_translator));
+    m_arena.setMode(m_config.getFlakRendererMode());
+    m_cameraControl.setModeName(ArenaWidget::toString(m_config.getFlakRendererMode(), m_translator));
+}
+
+void
+client::vcr::flak::PlaybackScreen::updateConfig()
+{
+    game::proxy::ConfigurationProxy configProxy(m_gameSender);
+    m_config.save(configProxy);
 }
 
 void
@@ -747,4 +789,3 @@ client::vcr::flak::PlaybackScreen::setState(State st, const char* why)
                 << m_queue.size());
     m_state = st;
 }
-

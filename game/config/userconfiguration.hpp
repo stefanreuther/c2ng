@@ -42,6 +42,25 @@ namespace game { namespace config {
             WheelPage           ///< Page through objects. ex cw_Page
         };
 
+        /** Values for option Vcr_Renderer. */
+        enum RendererMode {
+            StandardRenderer,
+            TraditionalRenderer,
+            InterleavedRenderer
+        };
+
+        /** Values for option Vcr_Effects. */
+        enum EffectsMode {
+            StandardEffects,
+            SimpleEffects
+        };
+
+        /** Values for option Flak_Renderer. */
+        enum FlakRendererMode {
+            ThreeDMode,
+            FlatMode
+        };
+
         /** Constructor.
             Makes a default configuration. */
         UserConfiguration();
@@ -202,6 +221,13 @@ namespace game { namespace config {
 
         // Simulation
         static const IntegerOptionDescriptor Sim_NumThreads;
+
+        // VCR
+        static const IntegerOptionDescriptor Vcr_Speed;
+        static const IntegerOptionDescriptor Vcr_Renderer;
+        static const IntegerOptionDescriptor Vcr_Effects;
+        static const IntegerOptionDescriptor Flak_Grid;
+        static const IntegerOptionDescriptor Flak_Renderer;
     };
 
 } }

@@ -2408,7 +2408,8 @@
           <li><b>Export all battles</b>: <a href="pcc2:export">export</a> properties of all battles;</li>
           <li><b>Export units in this battle</b>: <a href="pcc2:export">export</a> properties of all units in this fight.
           This is particularly useful for FLAK combat, when there are more than two units.
-          The other Export option only allows access to the first two units (Left and Right, respectively).</li>
+          The other Export option only allows access to the first two units (Left and Right, respectively);</li>
+          <li><b>Options</b>: show <a href="pcc2:vcr:options">VCR options</a> (<kbd>O</kbd>).</li>
         </ul></ki>
         <ki key="L, R"><a href="pcc2:vcrinfo">Display information about one side of the fight</a>;</ki>
         <ki key="F4">Show location of fight on <a href="pcc2:starchart">starchart</a>, if position is known;</ki>
@@ -2447,6 +2448,7 @@
         <ki key="Shift-F">Move forward single frame;</ki>
         <ki key="Ctrl-Right, Ctrl-Left">Move 20 frames;</ki>
         <ki key="Alt-Right, Alt-Left">Go to end&#47;beginning;</ki>
+        <ki key="+, -">Play faster/slower;</ki>
         <ki key="ESC">Exit.</ki>
       </kl>
 
@@ -2456,6 +2458,49 @@
       </dl>
     </page>
 
+    <!-- VCR Options -->
+    <page id="pcc2:vcr:options">
+      <h1>VCR Options</h1>
+      <p>This dialog allows configuring some options.</p>
+
+      <dl>
+        <di term="Classic: Display mode:">
+          In classic combat, all actions (movement, firing of weapons, etc.) happens in "battle ticks".
+          For example, if a ship fires a several torpedoes during one tick, movement seemingly pauses while these torpedoes fire.
+          <ul>
+            <li>In "Standard" mode, all actions from one battle tick happen at the same time.
+              All torpedoes of a salvo are fired at the same time.
+              Ships still stop until all actions of the battle tick are done;</li>
+            <li>In "Traditional" mode, PCC2 tries to behave as close as possible as the original VCR viewers (VCR.EXE, PVCR.EXE).
+              All actions happen strictly after each other, i.e. torpedoes are fired one after another.
+              Ships stop more/longer than in Standard mode;
+            </li>
+            <li>In "Interleaved" mode, PCC2 tries to achieve fluent playback by accounting for animation duration.
+              For example, if a torpedo is supposed to hit a ship at a certain battle tick,
+              its firing is shown earlier in time, so ships do not have to stop often.</li>
+          </ul>
+          Note that mode selection does not change the battle result, effects are still accounted to the battle tick where they happen;
+        </di>
+        <di term="Classic: Effects:">
+          Toggles between standard and simple effects for shields and explosions;
+        </di>
+        <di term="FLAK: Display mode:">
+          Toggles between perspective 3-D and flat, top-down mode.
+          You can also use <kbd>3</kbd> in <a href="pcc2:flak">FLAK player</a> to toggle this option;
+        </di>
+        <di term="FLAK: Show grid:">
+          If enabled, FLAK combat shows a grid to ease orientation in 3-D space.
+          You can also use <kbd>G</kbd> in <a href="pcc2:flak">FLAK player</a> to toggle this option.
+        </di>
+      </dl>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>O</kbd> or menu from <a href="pcc2:vcr">VCR selection</a>; also via <a href="pcc2:settings">Settings</a>;</di>
+        <di term="Related command:"> <a href="int:name:ui.editvcroptions">UI.EditVcrOptions</a>;</di>
+        <di term="See also:"> <a href="pcc2:vcr:playback">Classic VCR playback</a>, <a href="pcc2:flak">FLAK playback</a>.</di>
+      </dl>
+    </page>
 
     <!-- VCR Info -->
     <page id="pcc2:vcrinfo">
@@ -2504,10 +2549,12 @@
         <ki key="Alt-&#x2192;">Fast-forward to end;</ki>
         <ki key="Shift-B">Rewind one second;</ki>
         <ki key="Shift-F">Forward one second;</ki>
+        <ki key="+, -">Play faster/slower;</ki>
         <ki key="3, Tab">Toggle display mode;</ki>
         <!-- FIXME: missing <ki key="1, 2">Show status of currently-selected ship on left/right info panel;</ki> -->
-        <ki key="F">(perspective mode) Camera follows current fleet;</ki>
         <ki key="C">Toggle automatic camera;</ki>
+        <ki key="F">(perspective mode) Camera follows current fleet;</ki>
+        <ki key="G">Toggle grid;</ki>
         <ki key="Shift-Arrow">(perspective mode) Move camera;</ki>
         <ki key="A">Zoom in;</ki>
         <ki key="Z, Y">Zoom out.</ki>

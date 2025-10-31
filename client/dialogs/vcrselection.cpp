@@ -11,6 +11,7 @@
 #include "client/dialogs/export.hpp"
 #include "client/dialogs/flakvcrobject.hpp"
 #include "client/dialogs/sessionfileselectiondialog.hpp"
+#include "client/dialogs/vcroptions.hpp"
 #include "client/downlink.hpp"
 #include "client/picturenamer.hpp"
 #include "client/widgets/helpwidget.hpp"
@@ -259,6 +260,9 @@ client::dialogs::VcrSelection::onAction(client::widgets::VcrInfo::Action a)
         break;
      case VcrInfo::SaveThisBattle:
         onSave(m_currentIndex, 1);
+        break;
+     case VcrInfo::EditOptions:
+        editVcrOptions(m_root, m_translator, m_gameSender);
         break;
     }
 }
