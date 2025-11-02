@@ -1,11 +1,12 @@
 <!ENTITY nbsp "&#160;">
 
 <!ENTITY % block "h1|h2|h3|p|ul|ol|kl|dl|img|table|pre">
-<!ENTITY % text  "#PCDATA|a|b|em|tt|kbd|font">
+<!ENTITY % text  "#PCDATA|a|b|em|tt|kbd|font|small|big|u">
 <!ENTITY % nestedBlock "ul|ol|kl|dl|img|br|table|pre">
 
 <!-- Help system entry points -->
 <!ELEMENT help (page|group)*>
+<!ATTLIST help priority CDATA #IMPLIED>
 
 <!ELEMENT group (page|group)*>
 <!ATTLIST group id    CDATA #IMPLIED
@@ -45,6 +46,9 @@
 <!ELEMENT ul     (li)*>
 <!ELEMENT ol     (li)*>
 <!ELEMENT li     (%text;|%nestedBlock;)*>
+<!ATTLIST ul class CDATA #IMPLIED>
+<!ATTLIST ol class CDATA #IMPLIED>
+<!ATTLIST li bullet CDATA #IMPLIED>
 
 <!-- kl contains any number of <ki key="...">...</ki> -->
 <!ELEMENT kl     (ki)*>
@@ -63,10 +67,13 @@
 
 <!-- Font styles -->
 <!ELEMENT b      (%text;)*>
+<!ELEMENT u      (%text;)*>
 <!ELEMENT em     (%text;)*>
 <!ELEMENT tt     (%text;)*>
 <!ELEMENT font   (%text;)*>
 <!ATTLIST font color CDATA #IMPLIED>
+<!ELEMENT small  (%text;)*>
+<!ELEMENT big    (%text;)*>
 
 <!-- Keycaps. These do not nest. -->
 <!ELEMENT kbd    (#PCDATA)>

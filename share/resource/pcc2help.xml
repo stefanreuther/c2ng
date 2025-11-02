@@ -447,7 +447,7 @@
         <ki key="ESC">Save and exit.</ki>
       </kl>
       <h2>Reference</h2>
-      <dl class="compact">
+      <dl>
         <di term="Keys:"> <kbd>ESC</kbd> from most screens;</di>
         <di term="Keymap:"> <a href="int:name:racescreen">RaceScreen</a>;</di>
         <di term="Script context:"> global context.</di>
@@ -1347,10 +1347,10 @@
           This option is ignored for the "Marked" origin.</ki>
         <ki key="Down">Choose from predefined ranges according to host configuration:
         <ul>
-          <li>Sensor range: range of sensor sweep mission (<cfg>SensorRange</cfg>);</li>
-          <li>Visibility range: distance at which ships in free space are visible (<cfg>ScanRange</cfg>);</li>
-          <li>Minefields visible: distance at which minefield are visible to Mine Sweep (<cfg>MineScanRange</cfg>);</li>
-          <li>Dark sense: range of the Dark Sense mission (<cfg>DarkSenseRange</cfg>).</li>
+          <li>Sensor range: range of sensor sweep mission (<tt>SensorRange</tt>);</li>
+          <li>Visibility range: distance at which ships in free space are visible (<tt>ScanRange</tt>);</li>
+          <li>Minefields visible: distance at which minefield are visible to Mine Sweep (<tt>MineScanRange</tt>);</li>
+          <li>Dark sense: range of the Dark Sense mission (<tt>DarkSenseRange</tt>).</li>
         </ul></ki>
       </kl>
 
