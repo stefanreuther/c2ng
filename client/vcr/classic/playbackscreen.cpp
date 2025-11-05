@@ -316,10 +316,10 @@ client::vcr::classic::PlaybackScreen::handleEvents(util::StringInstructionList& 
     gvc::EventRecorder r;
     r.swapContent(list);
     m_log.write(afl::sys::LogListener::Trace, LOG_NAME, Format("-> %d events", r.size()));
-    r.replay(*m_scheduler);
 
     switch (m_state) {
      case Initializing:
+        r.replay(*m_scheduler);
         if (m_renderer.get() != 0 && m_renderer->isInitialized()) {
             handleEventReceptionRed(finish);
         } else {
@@ -332,10 +332,12 @@ client::vcr::classic::PlaybackScreen::handleEvents(util::StringInstructionList& 
      case Jumping:
      case Forwarding:
         m_scheduler->removeAnimations();
+        r.replay(*m_scheduler);
         handleEventReceptionForwarding(finish);
         break;
 
      case BeforeJumping:
+        r.replay(*m_scheduler);
         m_events = std::queue<ScheduledEvent>();
         m_currentTime = -1;
         m_queuedTime = 0;
@@ -343,6 +345,7 @@ client::vcr::classic::PlaybackScreen::handleEvents(util::StringInstructionList& 
         break;
 
      case Red:
+        r.replay(*m_scheduler);
         handleEventReceptionRed(finish);
         break;
 
@@ -350,6 +353,7 @@ client::vcr::classic::PlaybackScreen::handleEvents(util::StringInstructionList& 
      case Green:
      case Finished:  // Cannot happen, but normally follows Green
      case Draining:  // Cannot happen, but normally follows Green
+        r.replay(*m_scheduler);
         handleEventReceptionYellowGreen(finish);
         break;
     }

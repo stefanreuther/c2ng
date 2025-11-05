@@ -182,6 +182,10 @@ game::vcr::classic::InterleavedScheduler::removeAnimations()
     if (m_animationCounter != FIRST_ANIMATION_ID) {
         m_consumer.removeAnimations(FIRST_ANIMATION_ID, m_animationCounter-1);
     }
+    for (int i = 0; i < NUM_FRAMES; ++i) {
+        m_queue[i].pre.clear();
+        m_queue[i].post.clear();
+    }
     m_animationCounter = FIRST_ANIMATION_ID;
 }
 

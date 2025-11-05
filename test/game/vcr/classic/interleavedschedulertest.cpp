@@ -453,14 +453,12 @@ AFL_TEST("game.vcr.classic.InterleavedScheduler:removeAnimations", a)
     eff.crewKilled = 3;
     eff.shieldLost = 4;
 
-    testee.fireBeam(game::vcr::classic::RightSide, 12, 9, 50, 5, 6, eff);
+    testee.fireBeam(game::vcr::classic::RightSide, 12, 9, 50, 5, 6, eff);  // Event is entirely removed by removeAnimations()
     testee.removeAnimations();
     testee.setResult(game::vcr::classic::BattleResult_t());
     testee.updateTime(500, 3000);
 
     mock.assertEvent("removeAnimations(*,*)");
-    mock.assertEvent("FireBeamFighterFighter(1,12,9,*,*,*)");
-    mock.assertEvent("WaitAnimation(*,*,*,*,*,*)");
     mock.assertEvent("SetResult(*,*,*,*,*,*)");
     mock.assertEvent("UpdateTime(*,500,*,*,*,*)");
     mock.assertEvent("UpdateDistance(*,3000,*,*,*,*)");
