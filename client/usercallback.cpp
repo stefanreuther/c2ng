@@ -12,6 +12,7 @@
 #include "ui/layout/vbox.hpp"
 #include "ui/spacer.hpp"
 #include "ui/widgets/inputline.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
@@ -64,6 +65,8 @@ client::UserCallback::askPassword(const PasswordRequest& req)
 
                 ui::EventLoop loop(root);
                 btn.addStop(loop);
+
+                window.add(del.addNew(new ui::widgets::Quit(root, loop)));
 
                 window.pack();
                 root.centerWidget(window);

@@ -9,6 +9,7 @@
 #include "ui/layout/vbox.hpp"
 #include "ui/spacer.hpp"
 #include "ui/widgets/framegroup.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
 
@@ -76,6 +77,11 @@ ui::widgets::doStandardDialog(String_t title, String_t prompt, Widget& content, 
     }
     container->add(content);
 
+    // Quit
+    EventLoop loop(root);
+    Quit quit(root, loop);
+    window.add(quit);
+
     // Buttons
     StandardDialogButtons& buttons = del.addNew(new StandardDialogButtons(root, tx));
     window.add(buttons);
@@ -83,7 +89,6 @@ ui::widgets::doStandardDialog(String_t title, String_t prompt, Widget& content, 
     content.requestFocus();
 
     // Operate
-    EventLoop loop(root);
     buttons.addStop(loop);
     root.centerWidget(window);
     root.add(window);

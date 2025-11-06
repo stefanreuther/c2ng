@@ -15,6 +15,7 @@
 #include "ui/widgets/decimalselector.hpp"
 #include "ui/widgets/focusablegroup.hpp"
 #include "ui/widgets/focusiterator.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
 
@@ -274,6 +275,7 @@ client::dialogs::GoalDialog::init(ui::Widget* pHelp)
         btnHelp.dispatchKeyTo(*pHelp);
     }
     win.add(buttonGroup);
+    win.add(m_deleter.addNew(new ui::widgets::Quit(m_root, m_loop)));
     win.pack();
 
     m_pWindow = &win;

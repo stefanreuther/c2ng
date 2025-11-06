@@ -30,8 +30,7 @@ namespace {
             : m_root(root),
               m_translator(tx),
               m_list(root),
-              m_proxy(proxy),
-              m_loop(root)
+              m_proxy(proxy)
             {
                 m_list.setNumLines(15);
                 m_list.setWidth(root.provider().getFont(gfx::FontRequest())->getCellSize().getX() * 40);
@@ -59,7 +58,6 @@ namespace {
         afl::string::Translator& m_translator;
         client::widgets::ReferenceListbox m_list;
         game::proxy::ReferenceListProxy& m_proxy;
-        ui::EventLoop m_loop;
     };
 
     bool solveConflicts(game::proxy::WaitIndicator& ind, ui::Root& root, afl::string::Translator& tx, game::proxy::CargoTransferSetupProxy& setupProxy)

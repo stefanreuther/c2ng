@@ -25,6 +25,7 @@
 #include "ui/spacer.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/inputline.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/window.hpp"
 #include "util/messagecollector.hpp"
@@ -371,6 +372,7 @@ namespace {
               m_spacer(),
               m_okButton(translator()("OK"), util::Key_Return, parentControl.root()),
               m_cancelButton(translator()("Cancel"), util::Key_Escape, parentControl.root()),
+              m_quit(parentControl.root(), m_loop),
               m_consoleView(parentControl.root().provider(), gfx::Point(35, 15)),
               m_consoleController(m_consoleView, m_input, iface, parentControl.root(), parentControl.translator()),
               m_outputState(outputState)
@@ -382,6 +384,7 @@ namespace {
                 m_window.add(m_consoleController);
                 m_window.add(m_input);
                 m_window.add(m_group);
+                m_window.add(m_quit);
                 m_group.add(m_spacer);
                 m_group.add(m_okButton);
                 m_group.add(m_cancelButton);
@@ -459,6 +462,7 @@ namespace {
         ui::Spacer m_spacer;
         ui::widgets::Button m_okButton;
         ui::widgets::Button m_cancelButton;
+        ui::widgets::Quit m_quit;
         client::widgets::ConsoleView m_consoleView;
         ConsoleController m_consoleController;
         client::si::OutputState& m_outputState;

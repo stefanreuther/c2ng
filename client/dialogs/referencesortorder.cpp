@@ -13,6 +13,7 @@
 #include "ui/widgets/focusiterator.hpp"
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/menuframe.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/richlistbox.hpp"
 #include "ui/widgets/scrollbar.hpp"
 #include "ui/widgets/scrollbarcontainer.hpp"
@@ -175,6 +176,9 @@ ReferenceSortOrderDialog::run(game::ref::Configuration& order, ui::Root& root, a
 
     ui::EventLoop loop(root);
     btn.addStop(loop);
+
+    ui::widgets::Quit quit(root, loop);
+    win.add(quit);
 
     win.pack();
     root.centerWidget(win);

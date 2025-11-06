@@ -13,6 +13,7 @@
 #include "ui/spacer.hpp"
 #include "ui/widgets/inputline.hpp"
 #include "ui/widgets/keydispatcher.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/scrollbarcontainer.hpp"
 #include "ui/widgets/simpleiconbox.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
@@ -231,6 +232,7 @@ namespace {
                 window.add(g);
                 window.add(m_buttons);
                 window.add(keys);
+                window.add(del.addNew(new ui::widgets::Quit(m_root, m_loop)));
                 window.pack();
 
                 m_buttons.ok().sig_fire.add(this, &Dialog::onEnter);

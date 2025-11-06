@@ -58,8 +58,8 @@ client::dialogs::SimpleConsole::run(String_t title)
     KeyDispatcher& disp = del.addNew(new KeyDispatcher());
     disp.add(util::Key_Return, this, &SimpleConsole::onClose);
     disp.add(util::Key_Escape, this, &SimpleConsole::onClose);
+    disp.add(util::Key_Quit, this, &SimpleConsole::onQuit);
     win.add(disp);
-    // FIXME: deal with Quit
 
     win.pack();
     m_root.centerWidget(win);
@@ -72,6 +72,15 @@ client::dialogs::SimpleConsole::onClose()
 {
     if (m_allowClose) {
         m_loop.stop(0);
+    }
+}
+
+void
+client::dialogs::SimpleConsole::onQuit()
+{
+    if (m_allowClose) {
+        m_loop.stop(0);
+        m_root.ungetKeyEvent(util::Key_Quit, 0);
     }
 }
 

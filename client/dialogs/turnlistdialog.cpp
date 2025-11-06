@@ -12,6 +12,7 @@
 #include "ui/layout/vbox.hpp"
 #include "ui/spacer.hpp"
 #include "ui/widgets/button.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/window.hpp"
 #include "util/rich/parser.hpp"
 
@@ -122,6 +123,8 @@ client::dialogs::TurnListDialog::run()
 
     btnOK.sig_fire.add(this, &TurnListDialog::onOK);
     btnCancel.sig_fire.add(this, &TurnListDialog::onCancel);
+
+    win.add(del.addNew(new ui::widgets::Quit(m_root, m_loop)));
 
     win.pack();
     m_root.centerWidget(win);

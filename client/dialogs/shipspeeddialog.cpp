@@ -15,6 +15,7 @@
 #include "ui/spacer.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/framegroup.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/window.hpp"
 
 namespace {
@@ -68,6 +69,7 @@ namespace {
                 hg.add(btnOK);
                 hg.add(btnCancel);
                 win.add(hg);
+                win.add(del.addNew(new ui::widgets::Quit(m_root, m_loop)));
 
                 btnOK.sig_fire.addNewClosure(m_loop.makeStop(1));
                 btnCancel.sig_fire.add(this, &Window::onCancel);

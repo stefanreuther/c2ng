@@ -14,6 +14,7 @@
 #include "ui/eventloop.hpp"
 #include "ui/layout/vbox.hpp"
 #include "ui/rich/statictext.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/richlistbox.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/window.hpp"
@@ -101,12 +102,16 @@ client::dialogs::doDirectorySetupDialog(game::proxy::BrowserProxy& proxy, ui::Wi
         window.add(*pHelp);
     }
     window.add(btns);
-    window.pack();
 
     ui::EventLoop loop(root);
     btns.addStop(loop);
+
+    ui::widgets::Quit quit(root, loop);
+    window.add(quit);
+
     box.requestFocus();
 
+    window.pack();
     root.centerWidget(window);
     root.add(window);
     if (!loop.run()) {

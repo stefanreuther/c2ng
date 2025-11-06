@@ -16,6 +16,7 @@
 #include "ui/layout/vbox.hpp"
 #include "ui/widgets/focusablegroup.hpp"
 #include "ui/widgets/focusiterator.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/window.hpp"
 #include "util/requestsender.hpp"
@@ -124,6 +125,7 @@ TechUpgradeDialog::run()
     dlg.add(m_costDisplay);
     dlg.add(m_buttons);
     dlg.add(it);
+    dlg.add(del.addNew(new ui::widgets::Quit(m_root, m_loop)));
     m_buttons.cancel().sig_fire.addNewClosure(m_loop.makeStop(0));
     m_buttons.ok().sig_fire.add(this, &TechUpgradeDialog::onOK);
 

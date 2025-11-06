@@ -9,6 +9,7 @@
 #include "afl/base/signalconnection.hpp"
 #include "ui/draw.hpp"
 #include "ui/widgets/abstractlistbox.hpp"
+#include "ui/widgets/quit.hpp"
 
 namespace {
     // Animation interval. PCC2 used "one per 50 Hz tick".
@@ -100,10 +101,14 @@ ui::widgets::MenuFrame::doMenu(AbstractListbox& list, gfx::Point anchor)
     list.setFlag(AbstractListbox::MenuBehaviour, true);
     afl::base::SignalConnection conn(list.sig_itemDoubleClick.add(this, &MenuFrame::onMenuItemClick));
 
-    // Add to MenuFrame and operate
+    // Add to MenuFrame
     add(list);
     animate(gfx::Rectangle(anchor, gfx::Point()));
     m_root.add(*this);
+
+    // Operate
+    ui::widgets::Quit quit(m_root, m_loop);
+    add(quit);
     bool result = m_loop.run() != 0;
 
     // Clean up

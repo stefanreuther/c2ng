@@ -11,6 +11,7 @@
 #include "ui/eventloop.hpp"
 #include "ui/layout/vbox.hpp"
 #include "ui/widgets/framegroup.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/scrollbarcontainer.hpp"
 #include "ui/widgets/simpleiconbox.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
@@ -117,6 +118,7 @@ Dialog::run(String_t title, String_t helpId, afl::string::Translator& tx, util::
     }
     btn.addStop(m_loop);
     win.add(btn);
+    win.add(m_deleter.addNew(new ui::widgets::Quit(m_root, m_loop)));
 
     win.pack();
     m_root.centerWidget(win);

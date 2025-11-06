@@ -14,6 +14,7 @@
 #include "ui/spacer.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/keydispatcher.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
 #include "util/keystring.hpp"
@@ -66,12 +67,13 @@ namespace {
             win.add(del.addNew(new ui::widgets::StaticText(tx("You can't build a starbase here."), util::SkinColor::Static, gfx::FontRequest().addSize(1), root.provider(), gfx::CenterAlign)));
 
             Button& btn = del.addNew(new Button(tx("OK"), util::Key_Return, root));
-            btn.sig_fire.addNewClosure(loop.makeStop(1));
+            btn.sig_fire.addNewClosure(loop.makeStop(0));
 
             g.add(btn);
         }
         g.add(del.addNew(new ui::Spacer()));
         win.add(g);
+        win.add(del.addNew(new ui::widgets::Quit(root, loop)));
         win.add(disp);
         win.pack();
         disp.addNewClosure(util::Key_Return, loop.makeStop(1));

@@ -11,6 +11,7 @@
 #include "game/proxy/configurationproxy.hpp"
 #include "ui/layout/vbox.hpp"
 #include "ui/widgets/optiongrid.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
@@ -87,6 +88,9 @@ namespace {
 
                 ui::EventLoop loop(m_root);
                 btn.addStop(loop);
+
+                ui::widgets::Quit quit(m_root, loop);
+                win.add(quit);
 
                 win.pack();
                 m_root.centerWidget(win);

@@ -32,6 +32,7 @@
 #include "ui/spacer.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/panel.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/spritewidget.hpp"
 #include "util/rich/text.hpp"
 
@@ -279,6 +280,9 @@ client::vcr::classic::PlaybackScreen::run()
     gg.add(spc2);
     g.add(spc3);
     g.add(gg);
+
+    ui::widgets::Quit quit(m_root, m_loop);
+    g.add(quit);
 
     PlaybackPanel panel(m_root, m_spriteWidget, m_leftStatus, m_rightStatus, g);
     panel.setExtent(m_root.getExtent());

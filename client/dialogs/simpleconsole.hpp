@@ -57,6 +57,7 @@ namespace client { namespace dialogs {
         bool m_allowClose;
 
         void onClose();
+        void onQuit();
         void updateClose();
     };
 

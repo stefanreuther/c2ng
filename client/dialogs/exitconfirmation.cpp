@@ -16,6 +16,7 @@
 #include "ui/widgets/abstractlistbox.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/keydispatcher.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
 #include "util/skincolor.hpp"
@@ -169,18 +170,25 @@ client::dialogs::askExitConfirmation(ui::Root& root, afl::string::Translator& tx
     g.add(del.addNew(new ui::Spacer()));
     win.add(g);
 
+    const int ID_OK = 1, ID_CANCEL = 2;
+
     ui::EventLoop loop(root);
-    btnOK.sig_fire.addNewClosure(loop.makeStop(1));
-    btnCancel.sig_fire.addNewClosure(loop.makeStop(0));
+    btnOK.sig_fire.addNewClosure(loop.makeStop(ID_OK));
+    btnCancel.sig_fire.addNewClosure(loop.makeStop(ID_CANCEL));
 
     ui::widgets::KeyDispatcher& disp = del.addNew(new ui::widgets::KeyDispatcher());
-    disp.addNewClosure(' ', loop.makeStop(1));
+    disp.addNewClosure(' ', loop.makeStop(ID_OK));
     win.add(disp);
+    win.add(del.addNew(new ui::widgets::Quit(root, loop)));
     win.pack();
 
     root.centerWidget(win);
     root.add(win);
-    if (loop.run() == 0) {
+    int runResult = loop.run();
+    if (runResult == 0) {
+        return ExitDialog_Save + ExitDialog_Exit; /* Quit */
+    }
+    if (runResult == ID_CANCEL) {
         return 0; /* ex ExitCancelled */
     }
 

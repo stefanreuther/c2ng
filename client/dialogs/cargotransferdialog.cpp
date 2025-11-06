@@ -18,6 +18,7 @@
 #include "ui/widgets/checkbox.hpp"
 #include "ui/widgets/focusablegroup.hpp"
 #include "ui/widgets/focusiterator.hpp"
+#include "ui/widgets/quit.hpp"
 #include "util/rich/parser.hpp"
 
 using game::Element;
@@ -135,6 +136,7 @@ client::dialogs::CargoTransferDialog::run(util::RequestSender<game::Session> gam
     g.add(btnOK);
     g.add(btnCancel);
     win.add(g);
+    win.add(del.addNew(new ui::widgets::Quit(m_root, m_loop)));
 
     btnOK.sig_fire.addNewClosure(m_loop.makeStop(1));
     btnCancel.sig_fire.addNewClosure(m_loop.makeStop(0));
