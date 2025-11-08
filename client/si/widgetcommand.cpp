@@ -23,6 +23,7 @@
 #include "interpreter/values.hpp"
 #include "ui/layoutablegroup.hpp"
 #include "ui/widgets/focusiterator.hpp"
+#include "ui/widgets/quit.hpp"
 #include "ui/widgets/stringlistbox.hpp"
 
 namespace {
@@ -125,10 +126,13 @@ client::si::IFWidgetRun(game::Session& /*session*/, ScriptSide& ss, const Widget
             }
         void run(ui::Root& root, ui::Widget& w)
             {
+                ui::widgets::Quit quit(root, m_loop);
+                w.addChild(quit, 0);
                 root.centerWidget(w);
                 root.add(w);
                 m_result = m_loop.run();
                 root.remove(w);
+                w.removeChild(quit);
             }
         OutputState& output()
             { return m_outputState; }
