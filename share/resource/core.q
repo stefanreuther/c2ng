@@ -17,7 +17,7 @@
 
 % @q CC$LibraryVersion:Str (Internal)
 % Version of the standard library (<tt>core.q</tt>).
-Dim Shared CC$LibraryVersion = '2.40.13'
+Dim Shared CC$LibraryVersion = '2.41.4'
 
 %%% Console-Mode Replacements for GUI routines %%%%%%%%%%%%%%%%%%%%%%
 

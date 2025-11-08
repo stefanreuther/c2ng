@@ -1,6 +1,27 @@
 PCC2ng NEWS FILE
 ================
 
+2.41.4
+------
+
+  Performance improvemments: control screens should now "feel" as fast
+  as in PCC2.
+
+  Auto waypoints are now shown on the map - a PCC1 feature that never
+  made it into PCC2.
+
+  VCR rendering improved with slightly better animations, and
+  different renderer modes: in "traditional" mode, weapons fire one
+  after another, like in Dosplan/Winplan/PVCR, whereas in
+  "interleaved", VCR tries to play smoother and stop ships less often
+  for weapon effects. An option dialog accessible from the VCR
+  selection window allows selecting the mode; playback speed can be
+  adjusted using + and - keys.
+
+  Finally, there is now a "View VCR from File" feature (Alt+V on
+  player screen) to complement the "Save VCR to File" feature.
+
+
 2.41.3
 ------
 
