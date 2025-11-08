@@ -10,7 +10,8 @@
 client::widgets::BusyIndicator::BusyIndicator(ui::Root& root, String_t text)
     : m_root(root),
       m_text(text),
-      m_keys()
+      m_keys(),
+      m_quit(false)
 { }
 void
 client::widgets::BusyIndicator::draw(gfx::Canvas& can)
@@ -51,9 +52,16 @@ client::widgets::BusyIndicator::handleKey(util::Key_t key, int /*prefix*/)
         // Break
         m_keys.clear();
         sig_interrupt.raise();
+    } else if (key == util::Key_Quit) {
+        // Quit
+        m_quit = true;
+        m_keys.clear();
+        sig_quit.raise();
     } else {
         // This loses the prefixes, but there shouldn't be any.
-        m_keys.push_back(key);
+        if (!m_quit) {
+            m_keys.push_back(key);
+        }
     }
     return true;
 }
@@ -70,5 +78,9 @@ client::widgets::BusyIndicator::replayEvents()
     while (!m_keys.empty()) {
         m_root.ungetKeyEvent(m_keys.back(), 0);
         m_keys.pop_back();
+    }
+    if (m_quit) {
+        m_root.ungetKeyEvent(util::Key_Quit, 0);
+        m_quit = false;
     }
 }

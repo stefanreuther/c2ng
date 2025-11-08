@@ -254,7 +254,9 @@ client::vcr::classic::PlaybackScreen::~PlaybackScreen()
 void
 client::vcr::classic::PlaybackScreen::run()
 {
-    prepare();
+    if (!prepare()) {
+        return;
+    }
     if (m_scheduler.get() == 0) {
         // Cannot happen
         return;
@@ -363,7 +365,7 @@ client::vcr::classic::PlaybackScreen::handleEvents(util::StringInstructionList& 
     }
 }
 
-void
+bool
 client::vcr::classic::PlaybackScreen::prepare()
 {
     // Query images
@@ -377,7 +379,9 @@ client::vcr::classic::PlaybackScreen::prepare()
     for (size_t i = 0, n = images.size(); i < n; ++i) {
         loader.loadImage(images[i]);
     }
-    loader.wait();
+    if (!loader.wait()) {
+        return false;
+    }
 
     // Load config
     m_config.load(link, m_configProxy);
@@ -392,6 +396,7 @@ client::vcr::classic::PlaybackScreen::prepare()
         m_scheduler.reset(new game::vcr::classic::InterleavedScheduler(*this));
         break;
     }
+    return true;
 }
 
 inline void

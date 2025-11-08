@@ -136,7 +136,7 @@ namespace client { namespace vcr { namespace classic {
         void handleError(String_t msg);
         void handleEvents(util::StringInstructionList& list, bool finish);
 
-        void prepare();
+        bool prepare();
         void requestEvents();
         void requestJump(int32_t time);
 

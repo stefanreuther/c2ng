@@ -5,10 +5,10 @@
 #define C2NG_CLIENT_WIDGETS_BUSYINDICATOR_HPP
 
 #include <vector>
-#include "ui/root.hpp"
-#include "afl/string/string.hpp"
-#include "ui/simplewidget.hpp"
 #include "afl/base/signal.hpp"
+#include "afl/string/string.hpp"
+#include "ui/root.hpp"
+#include "ui/simplewidget.hpp"
 
 namespace client { namespace widgets {
 
@@ -29,12 +29,14 @@ namespace client { namespace widgets {
         void replayEvents();
 
         afl::base::Signal<void()> sig_interrupt;
+        afl::base::Signal<void()> sig_quit;
 
      private:
         ui::Root& m_root;
         String_t m_text;
 
         std::vector<util::Key_t> m_keys;
+        bool m_quit;
     };
 
 } }

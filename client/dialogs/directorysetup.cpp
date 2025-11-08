@@ -72,7 +72,9 @@ client::dialogs::doDirectorySetupDialog(game::proxy::BrowserProxy& proxy, ui::Wi
 {
     ImageLoader loader(root, tx);
     loader.loadImage("gamedirsetup");
-    loader.wait();
+    if (!loader.wait()) {
+        return false;
+    }
 
     afl::base::Ptr<gfx::Canvas> pix = root.provider().getImage("gamedirsetup");
 

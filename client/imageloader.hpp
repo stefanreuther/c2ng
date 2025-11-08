@@ -38,11 +38,13 @@ namespace client {
         void loadImage(const String_t& name);
 
         /** Wait for pending images.
-            Returns after all images have been loaded. */
-        void wait();
+            Returns after all images have been loaded, or if user requested quit.
+            \return true on success, false on quit (a Key_Quit is on the input queue)  */
+        bool wait();
 
      private:
         void onImageChange();
+        void onQuit();
 
         ui::Root& m_root;
         afl::string::Translator& m_translator;

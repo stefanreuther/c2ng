@@ -27,16 +27,21 @@ client::ImageLoader::loadImage(const String_t& name)
 }
 
 // Wait for pending images.
-void
+bool
 client::ImageLoader::wait()
 {
     if (!m_unloadedImages.empty()) {
         afl::base::SignalConnection conn(m_root.provider().sig_imageChange.add(this, &ImageLoader::onImageChange));
         client::widgets::BusyIndicator indicator(m_root, m_translator("Loading..."));
         indicator.setExtent(gfx::Rectangle(gfx::Point(), indicator.getLayoutInfo().getPreferredSize()));
+        indicator.sig_quit.add(this, &ImageLoader::onQuit);
         m_root.moveWidgetToEdge(indicator, gfx::CenterAlign, gfx::BottomAlign, 10);
         m_root.add(indicator);
-        m_loop.run();
+        int result = m_loop.run();
+        indicator.replayEvents();
+        return result == 0;
+    } else {
+        return true;
     }
 }
 
@@ -56,4 +61,10 @@ client::ImageLoader::onImageChange()
     if (m_unloadedImages.empty()) {
         m_loop.stop(0);
     }
+}
+
+void
+client::ImageLoader::onQuit()
+{
+    m_loop.stop(1);
 }
