@@ -20,7 +20,7 @@ AFL_TEST("game.interface.MinefieldMethod:Mark", a)
     game::map::Universe univ;
     game::map::Minefield& mf = *univ.minefields().create(10);
     mf.addReport(game::map::Point(2000, 3000), 7, game::map::Minefield::IsWeb, game::map::Minefield::UnitsKnown, 400, 15, game::map::Minefield::MinefieldSwept);
-    mf.internalCheck(15, game::HostVersion(), game::config::HostConfiguration());
+    mf.internalCheck(15, game::HostVersion(), *game::config::HostConfiguration::create());
 
     // Mark
     {
@@ -45,7 +45,7 @@ AFL_TEST("game.interface.MinefieldMethod:Delete", a)
     game::map::Universe univ;
     game::map::Minefield& mf = *univ.minefields().create(10);
     mf.addReport(game::map::Point(2000, 3000), 7, game::map::Minefield::IsWeb, game::map::Minefield::UnitsKnown, 400, 15, game::map::Minefield::MinefieldSwept);
-    mf.internalCheck(15, game::HostVersion(), game::config::HostConfiguration());
+    mf.internalCheck(15, game::HostVersion(), *game::config::HostConfiguration::create());
 
     a.checkEqual("01. countObjects", univ.minefields().countObjects(), 1);
 

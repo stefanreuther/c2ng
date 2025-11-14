@@ -95,7 +95,8 @@ AFL_TEST("game.spec.FriendlyCode:getDescription", a)
 AFL_TEST("game.spec.FriendlyCode:worksOn", a)
 {
     // Environment
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> rconfig = game::config::HostConfiguration::create();
+    game::config::HostConfiguration& config = *rconfig;
     config.setDefaultValues();
 
     afl::sys::Log log;
@@ -199,7 +200,8 @@ AFL_TEST("game.spec.FriendlyCode:worksOn:ship", a)
     // Environment
     game::UnitScoreDefinitionList scoreDefinitions;
     game::spec::ShipList shipList;
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> rconfig = game::config::HostConfiguration::create();
+    game::config::HostConfiguration& config = *rconfig;
     config.setDefaultValues();
 
     const int HULL_NR = 12;

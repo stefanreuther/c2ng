@@ -8,6 +8,7 @@
 #include "afl/test/testrunner.hpp"
 #include "game/v3/structures.hpp"
 
+using afl::base::Ref;
 using game::v3::structures::HConfig;
 using game::config::HostConfiguration;
 using game::config::Configuration;
@@ -21,8 +22,8 @@ AFL_TEST("game.v3.HConfig:pack", a)
     bytes.fill(0xE1);
 
     // Pack a default host configuration
-    HostConfiguration config;
-    game::v3::packHConfig(fig, config);
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    game::v3::packHConfig(fig, *config);
 
     // Check. There shouldn't be a 0xE1 byte in there
     a.checkEqual("no dummy byte", bytes.find(0xE1), bytes.size());
@@ -67,7 +68,8 @@ AFL_TEST("game.v3.HConfig:roundtrip", a)
     std::memcpy(&fig, FILE_DATA, sizeof(fig));
 
     // Create a as-blank-as-possible configuration
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     afl::base::Ref<Configuration::Enumerator_t> opts(config.getOptions());
     Configuration::OptionInfo_t optInfo;
     while (opts->getNextElement(optInfo)) {
@@ -96,7 +98,8 @@ AFL_TEST("game.v3.HConfig:roundtrip", a)
 
 AFL_TEST("game.v3.HConfig:LokiDecloaksBirds:on", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     HConfig fig;
     afl::base::fromObject(fig).fill(0);
 
@@ -117,7 +120,8 @@ AFL_TEST("game.v3.HConfig:LokiDecloaksBirds:on", a)
 
 AFL_TEST("game.v3.HConfig:LokiDecloaksBirds:on:PlayerRace", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     HConfig fig;
     afl::base::fromObject(fig).fill(0);
     config[HostConfiguration::PlayerRace].set("3,2,1,4");
@@ -139,7 +143,8 @@ AFL_TEST("game.v3.HConfig:LokiDecloaksBirds:on:PlayerRace", a)
 
 AFL_TEST("game.v3.HConfig:LokiDecloaksBirds:on:PlayerRace:none", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     HConfig fig;
     afl::base::fromObject(fig).fill(0);
     config[HostConfiguration::PlayerRace].set("1,1,1,4");
@@ -161,7 +166,8 @@ AFL_TEST("game.v3.HConfig:LokiDecloaksBirds:on:PlayerRace:none", a)
 
 AFL_TEST("game.v3.HConfig:LokiDecloaksBirds:off", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     HConfig fig;
     afl::base::fromObject(fig).fill(0);
 
@@ -186,7 +192,8 @@ AFL_TEST("game.v3.HConfig:LokiDecloaksBirds:off", a)
 
 AFL_TEST("game.v3.HConfig:ColonialFighterSweepRate", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     HConfig fig;
     afl::base::fromObject(fig).fill(0);
 
@@ -208,7 +215,8 @@ AFL_TEST("game.v3.HConfig:ColonialFighterSweepRate", a)
 
 AFL_TEST("game.v3.HConfig:ColonialFighterSweepRate:PlayerRace", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     HConfig fig;
     afl::base::fromObject(fig).fill(0);
     config[HostConfiguration::PlayerRace].set("1,11,3");
@@ -232,7 +240,8 @@ AFL_TEST("game.v3.HConfig:ColonialFighterSweepRate:PlayerRace", a)
 
 AFL_TEST("game.v3.HConfig:ColonialFighterSweepRate:PlayerRace:none", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     HConfig fig;
     afl::base::fromObject(fig).fill(0);
     config[HostConfiguration::PlayerRace].set("1,1,1");

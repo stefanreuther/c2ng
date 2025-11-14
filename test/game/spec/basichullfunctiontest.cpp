@@ -84,14 +84,16 @@ AFL_TEST("game.spec.BasicHullFunction:explanation:set-with-newline+add", a)
     a.checkEqual("getExplanation", testee.getExplanation(), "b\na");
 }
 
-
 AFL_TEST("game.spec.BasicHullFunction:getDamageLimit", a)
 {
+    using afl::base::Ref;
     using game::spec::BasicHullFunction;
     using game::config::HostConfiguration;
 
-    HostConfiguration defaultConfig;
-    HostConfiguration otherConfig;
+    Ref<HostConfiguration> rdefault = HostConfiguration::create();
+    Ref<HostConfiguration> rother = HostConfiguration::create();
+    HostConfiguration& defaultConfig = *rdefault;
+    HostConfiguration& otherConfig = *rother;
     otherConfig[HostConfiguration::DamageLevelForCloakFail].set(27);
     otherConfig[HostConfiguration::DamageLevelForAntiCloakFail].set(12);
     otherConfig[HostConfiguration::DamageLevelForChunnelFail].set(3);

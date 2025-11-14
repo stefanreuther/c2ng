@@ -541,7 +541,7 @@ namespace {
         afl::string::NullTranslator tx;
         World world;
         game::spec::ShipList sl;
-        game::config::HostConfiguration config;
+        afl::base::Ref<game::config::HostConfiguration> config;
         game::Game g;
         game::Turn t;
 
@@ -549,7 +549,7 @@ namespace {
             : cs(afl::charset::g_codepage437),
               log(), fs(), tx(),
               world(log, tx, fs),
-              sl(), config(), g(), t()
+              sl(), config(game::config::HostConfiguration::create()), g(), t()
             {
                 game::test::initDefaultShipList(sl);
                 t.setTurnNumber(turnNr);
@@ -583,7 +583,7 @@ AFL_TEST("game.db.Loader:prepared", a)
 
     // Must postprocess to set types
     env.t.universe().postprocess(PlayerSet_t(20), PlayerSet_t(20), game::map::Object::ReadOnly,
-                                 env.g.mapConfiguration(), game::HostVersion(), env.config, 7, env.sl, env.tx, env.log);
+                                 env.g.mapConfiguration(), game::HostVersion(), *env.config, 7, env.sl, env.tx, env.log);
 
     // Verify
     // - autobuild
@@ -778,7 +778,7 @@ AFL_TEST("game.db.Loader:roundtrip", a)
 
         // Postprocess to set finish
         env.t.universe().postprocess(PlayerSet_t(20), PlayerSet_t(20), game::map::Object::ReadOnly,
-                                     env.g.mapConfiguration(), game::HostVersion(), env.config, 10, env.sl, env.tx, env.log);
+                                     env.g.mapConfiguration(), game::HostVersion(), *env.config, 10, env.sl, env.tx, env.log);
 
         // Save
         game::db::Loader(env.cs, env.world, env.tx).save(stream, env.t, env.g, env.sl);

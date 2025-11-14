@@ -169,7 +169,8 @@ AFL_TEST("game.pcc.GameFolder:basics", a)
     Environment env;
     GameFolder testee(env.handler, env.acct, "u/id/one", 0);
 
-    UserConfiguration uc;
+    Ref<UserConfiguration> ruc = UserConfiguration::create();
+    UserConfiguration& uc = *ruc;
 
     // Accessors
     a.check         ("01. canEnter",              !testee.canEnter());
@@ -252,7 +253,8 @@ AFL_TEST("game.pcc.GameFolder:loadGameRoot", a)
 
     // Actual test
     GameFolder testee(env.handler, env.acct, "u/id/one", 0);
-    UserConfiguration uc;
+    Ref<UserConfiguration> ruc = UserConfiguration::create();
+    UserConfiguration& uc = *ruc;
     RootReceiver recv;
     testee.loadGameRoot(uc, std::auto_ptr<LoadGameRootTask_t>(LoadGameRootTask_t::makeBound(&recv, &RootReceiver::take)))
         ->call();

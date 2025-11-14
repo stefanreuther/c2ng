@@ -111,8 +111,8 @@ AFL_TEST("game.sim.SessionExtra:initSimulatorSession", a)
 
     // Set some defaults
     afl::base::Ref<game::sim::Session> ss = game::sim::getSimulatorSession(gs);
-    game::config::HostConfiguration config;
-    ss->configuration().setMode(game::sim::Configuration::VcrPHost4, 0, config);
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
+    ss->configuration().setMode(game::sim::Configuration::VcrPHost4, 0, *config);
 
     // Load game defaults
     game::sim::initSimulatorSession(gs);

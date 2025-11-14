@@ -10,12 +10,14 @@
 #include "game/config/aliasoption.hpp"
 #include "game/limits.hpp"
 
+using afl::base::Ref;
 using game::config::HostConfiguration;
 
 /** Test race number accesses. */
 AFL_TEST("game.config.HostConfiguration:getPlayerRaceNumber", a)
 {
-    HostConfiguration testee;
+    Ref<HostConfiguration> rtestee = HostConfiguration::create();
+    HostConfiguration& testee = *rtestee;
 
     a.checkEqual("01", testee.getPlayerRaceNumber(1), 1);
     a.checkEqual("02", testee.getPlayerRaceNumber(5), 5);
@@ -43,7 +45,8 @@ AFL_TEST("game.config.HostConfiguration:getPlayerRaceNumber", a)
 /** Test configuration of aliases. */
 AFL_TEST("game.config.HostConfiguration:aliases", a)
 {
-    HostConfiguration testee;
+    Ref<HostConfiguration> rtestee = HostConfiguration::create();
+    HostConfiguration& testee = *rtestee;
 
     // Get enumerator
     afl::base::Ref<HostConfiguration::Enumerator_t> e = testee.getOptions();
@@ -77,7 +80,8 @@ AFL_TEST("game.config.HostConfiguration:aliases", a)
     SensorRange propagates to DarkSenseRange. */
 AFL_TEST("game.config.HostConfiguration:setDependantOptions:unset", a)
 {
-    HostConfiguration testee;
+    Ref<HostConfiguration> rtestee = HostConfiguration::create();
+    HostConfiguration& testee = *rtestee;
 
     testee.setOption("sensorrange", "125", game::config::ConfigurationOption::Game);
     testee.setDependantOptions();
@@ -90,7 +94,8 @@ AFL_TEST("game.config.HostConfiguration:setDependantOptions:unset", a)
     SensorRange does not propagate to DarkSenseRange if set previously. */
 AFL_TEST("game.config.HostConfiguration:setDependantOptions:set", a)
 {
-    HostConfiguration testee;
+    Ref<HostConfiguration> rtestee = HostConfiguration::create();
+    HostConfiguration& testee = *rtestee;
 
     testee.setOption("darksenserange", "204", game::config::ConfigurationOption::Game);
     testee.setOption("sensorrange", "125", game::config::ConfigurationOption::Game);
@@ -104,7 +109,8 @@ AFL_TEST("game.config.HostConfiguration:setDependantOptions:set", a)
 AFL_TEST("game.config.HostConfiguration:getExperienceLevelName", a)
 {
     afl::string::NullTranslator tx;
-    HostConfiguration testee;
+    Ref<HostConfiguration> rtestee = HostConfiguration::create();
+    HostConfiguration& testee = *rtestee;
 
     testee.setOption("experiencelevelnames", "Erdwurm,Flugwapps, Ladehugo ,Nieswurz,Brotfahrer", game::config::ConfigurationOption::Game);
 
@@ -117,7 +123,8 @@ AFL_TEST("game.config.HostConfiguration:getExperienceLevelName", a)
 /** Get getExperienceBonus(). */
 AFL_TEST("game.config.HostConfiguration:getExperienceBonus", a)
 {
-    HostConfiguration testee;
+    Ref<HostConfiguration> rtestee = HostConfiguration::create();
+    HostConfiguration& testee = *rtestee;
 
     testee.setOption("emodbayrechargerate", "1,5,8,3", game::config::ConfigurationOption::Game);
 
@@ -134,7 +141,8 @@ AFL_TEST("game.config.HostConfiguration:getExperienceBonus", a)
 // Experience disabled
 AFL_TEST("game.config.HostConfiguration:getExperienceLevelFromPoints:disabled", a)
 {
-    HostConfiguration testee;
+    Ref<HostConfiguration> rtestee = HostConfiguration::create();
+    HostConfiguration& testee = *rtestee;
     testee.setOption("NumExperienceLevels", "0", game::config::ConfigurationOption::Game);
 
     a.checkEqual("01", testee.getExperienceLevelFromPoints(0), 0);
@@ -144,7 +152,8 @@ AFL_TEST("game.config.HostConfiguration:getExperienceLevelFromPoints:disabled", 
 // Experience enabled
 AFL_TEST("game.config.HostConfiguration:getExperienceLevelFromPoints:enabled", a)
 {
-    HostConfiguration testee;
+    Ref<HostConfiguration> rtestee = HostConfiguration::create();
+    HostConfiguration& testee = *rtestee;
     testee.setOption("NumExperienceLevels", "4", game::config::ConfigurationOption::Game);
     testee.setOption("ExperienceLevels", "750,1500,3000,4500,7000", game::config::ConfigurationOption::Game);
 
@@ -164,7 +173,8 @@ AFL_TEST("game.config.HostConfiguration:getExperienceLevelFromPoints:enabled", a
 // Disabled
 AFL_TEST("game.config.HostConfiguration:hasExtraFuelConsumption:off", a)
 {
-    HostConfiguration testee;
+    Ref<HostConfiguration> rtestee = HostConfiguration::create();
+    HostConfiguration& testee = *rtestee;
     testee.setOption("FuelUsagePerFightFor100KT", "0", game::config::ConfigurationOption::Game);
     testee.setOption("FuelUsagePerTurnFor100KT", "0", game::config::ConfigurationOption::Game);
     a.checkEqual("", testee.hasExtraFuelConsumption(), false);
@@ -173,7 +183,8 @@ AFL_TEST("game.config.HostConfiguration:hasExtraFuelConsumption:off", a)
 // Partially enabled
 AFL_TEST("game.config.HostConfiguration:hasExtraFuelConsumption:part", a)
 {
-    HostConfiguration testee;
+    Ref<HostConfiguration> rtestee = HostConfiguration::create();
+    HostConfiguration& testee = *rtestee;
     testee.setOption("FuelUsagePerFightFor100KT", "0", game::config::ConfigurationOption::Game);
     testee.setOption("FuelUsagePerTurnFor100KT", "0,0,0,0,0,1,0,0", game::config::ConfigurationOption::Game);
     a.checkEqual("", testee.hasExtraFuelConsumption(), true);
@@ -182,7 +193,8 @@ AFL_TEST("game.config.HostConfiguration:hasExtraFuelConsumption:part", a)
 // Fully enabled
 AFL_TEST("game.config.HostConfiguration:hasExtraFuelConsumption:on", a)
 {
-    HostConfiguration testee;
+    Ref<HostConfiguration> rtestee = HostConfiguration::create();
+    HostConfiguration& testee = *rtestee;
     testee.setOption("FuelUsagePerFightFor100KT", "5", game::config::ConfigurationOption::Game);
     testee.setOption("FuelUsagePerTurnFor100KT", "3", game::config::ConfigurationOption::Game);
     a.checkEqual("", testee.hasExtraFuelConsumption(), true);
@@ -194,14 +206,16 @@ AFL_TEST("game.config.HostConfiguration:hasExtraFuelConsumption:on", a)
 
 AFL_TEST("game.config.HostConfiguration:hasDoubleTorpedoPower:on", a)
 {
-    HostConfiguration testee;
+    Ref<HostConfiguration> rtestee = HostConfiguration::create();
+    HostConfiguration& testee = *rtestee;
     testee.setOption("AllowAlternativeCombat", "No", game::config::ConfigurationOption::Game);
     a.checkEqual("", testee.hasDoubleTorpedoPower(), true);
 }
 
 AFL_TEST("game.config.HostConfiguration:hasDoubleTorpedoPower:off", a)
 {
-    HostConfiguration testee;
+    Ref<HostConfiguration> rtestee = HostConfiguration::create();
+    HostConfiguration& testee = *rtestee;
     testee.setOption("AllowAlternativeCombat", "Yes", game::config::ConfigurationOption::Game);
     a.checkEqual("", testee.hasDoubleTorpedoPower(), false);
 }

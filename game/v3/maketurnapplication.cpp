@@ -85,11 +85,11 @@ game::v3::MaketurnApplication::appMain()
     Ref<Directory> specDirObj = openSpecDirectory(fileSystem(), rootDir, gameDirObj, environment());
 
     // Configuration
-    game::config::UserConfiguration config;
-    config.loadGameConfiguration(*gameDirObj, log(), translator());
+    Ref<game::config::UserConfiguration> config = game::config::UserConfiguration::create();
+    config->loadGameConfiguration(*gameDirObj, log(), translator());
 
     // Character set
-    std::auto_ptr<afl::charset::Charset> charset(util::CharsetFactory().createCharset(config[config.Game_Charset]()));
+    std::auto_ptr<afl::charset::Charset> charset(util::CharsetFactory().createCharset((*config)[game::config::UserConfiguration::Game_Charset]()));
     if (charset.get() == 0) {
         charset.reset(new afl::charset::CodepageCharset(afl::charset::g_codepageLatin1));
     }
@@ -124,7 +124,7 @@ game::v3::MaketurnApplication::appMain()
     // Write them out
     // @change PCC2 would write some entertaining message here; we have that in saveAll()
     // standardOutput().writeLine(afl::string::Format(tx("Writing %d turn file%!1{s%}..."), theMaketurn.getNumFiles()));
-    theMaketurn.saveAll(log(), fileSystem(), config);
+    theMaketurn.saveAll(log(), fileSystem(), *config);
 }
 
 void

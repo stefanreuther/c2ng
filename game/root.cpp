@@ -20,9 +20,9 @@ game::Root::Root(afl::base::Ref<afl::io::Directory> gameDirectory,
     : m_gameDirectory(gameDirectory),
       m_specificationLoader(specLoader),
       m_hostVersion(hostVersion),
-      m_hostConfiguration(),
+      m_hostConfiguration(game::config::HostConfiguration::create()),
       m_flakConfiguration(),
-      m_userConfiguration(),
+      m_userConfiguration(game::config::UserConfiguration::create()),
       m_playerList(),
       m_registrationKey(registrationKey),
       m_stringVerifier(stringVerifier),
@@ -64,8 +64,8 @@ game::Root::notifyListeners()
 
     // m_hostVersion: ?
 
-    m_hostConfiguration.notifyListeners();
-    m_userConfiguration.notifyListeners();
+    m_hostConfiguration->notifyListeners();
+    m_userConfiguration->notifyListeners();
     m_playerList.notifyListeners();
 
     // m_registrationKey: ?

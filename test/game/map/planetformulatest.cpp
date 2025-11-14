@@ -12,6 +12,7 @@
 #include <cstdio>
 #include <stdio.h>
 
+using afl::base::Ref;
 using game::Element;
 using game::HostVersion;
 using game::config::HostConfiguration;
@@ -38,7 +39,8 @@ AFL_TEST("game.map.PlanetFormula:getColonistChange", a)
     p.setNumBuildings(game::MineBuilding, 20);
     p.setNumBuildings(game::DefenseBuilding, 0);
 
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     HostVersion host(HostVersion::PHost, MKVERSION(3,0,0));
 
     // Parameterized and non-parameterized version must agree. We had a typo here.
@@ -76,7 +78,7 @@ namespace {
 
     void doTaxSeries(afl::test::Assert a, const HostVersion host, const int8_t (&expectedHappiness)[50], const int8_t (&expectedIncome)[50])
     {
-        const HostConfiguration config;
+        const Ref<const HostConfiguration> config = HostConfiguration::create();
         for (int tax = 0; tax < 50; ++tax) {
             game::map::Planet p(66);
             p.setOwner(1);                  // test set is built for Feds
@@ -93,8 +95,8 @@ namespace {
 
             char name[50];
             std::sprintf(name, "tax=%d", tax);
-            a(name).checkEqual("getColonistChange", getColonistChange(p, config, host).orElse(-777) + 80, expectedHappiness[tax]);
-            a(name).checkEqual("getColonistDue",    getColonistDue(p, config, host, tax).orElse(-777),    expectedIncome[tax]);
+            a(name).checkEqual("getColonistChange", getColonistChange(p, *config, host).orElse(-777) + 80, expectedHappiness[tax]);
+            a(name).checkEqual("getColonistDue",    getColonistDue(p, *config, host, tax).orElse(-777),    expectedIncome[tax]);
         }
     }
 }
@@ -146,7 +148,7 @@ namespace {
 
     void doTemperatureSeries(afl::test::Assert a, const HostVersion host, const int planetOwner, const int8_t (&expectedHappiness)[101])
     {
-        const HostConfiguration config;
+        const Ref<const HostConfiguration> config = HostConfiguration::create();
         for (int temp = 0; temp <= 100; ++temp) {
             game::map::Planet p(12);
             p.setOwner(planetOwner);
@@ -162,7 +164,7 @@ namespace {
 
             char name[50];
             std::sprintf(name, "temp=%d", temp);
-            a(name).checkEqual("getColonistChange", getColonistChange(p, config, host).orElse(-777) + 80, expectedHappiness[temp]);
+            a(name).checkEqual("getColonistChange", getColonistChange(p, *config, host).orElse(-777) + 80, expectedHappiness[temp]);
         }
     }
 }
@@ -196,7 +198,7 @@ AFL_TEST("game.map.PlanetFormula:getColonistChange:temperature-series:crystal:ph
 namespace {
     void doBuildingSeries(afl::test::Assert a, const HostVersion host, const int cutoff)
     {
-        const HostConfiguration config;
+        const Ref<const HostConfiguration> config = HostConfiguration::create();
         for (int n = 0; n < 400; ++n) {
             game::map::Planet p(99);
             p.setOwner(1);
@@ -217,7 +219,7 @@ namespace {
             char name[50];
             std::sprintf(name, "mifa=%d", n);
 
-            a(name).checkEqual("getColonistChange", getColonistChange(p, config, host).orElse(-777) + 80, expectedHappiness);
+            a(name).checkEqual("getColonistChange", getColonistChange(p, *config, host).orElse(-777) + 80, expectedHappiness);
         }
     }
 }
@@ -254,7 +256,7 @@ namespace {
 
     void doNativeTaxSeries(afl::test::Assert a, const HostVersion host, const int8_t (&expectedHappiness)[50], const int8_t (&expectedIncome)[50])
     {
-        const HostConfiguration config;
+        const Ref<const HostConfiguration> config = HostConfiguration::create();
         for (int tax = 0; tax < 50; ++tax) {
             game::map::Planet p(66);
             p.setOwner(1);                  // test set is built for Feds
@@ -276,7 +278,7 @@ namespace {
             char name[50];
             std::sprintf(name, "tax=%d", tax);
             a(name).checkEqual("getNativeChange", getNativeChange(p, host).orElse(-777) + 80,      expectedHappiness[tax]);
-            a(name).checkEqual("getNativeDue",    getNativeDue(p, config, host, tax).orElse(-777), expectedIncome[tax]);
+            a(name).checkEqual("getNativeDue",    getNativeDue(p, *config, host, tax).orElse(-777), expectedIncome[tax]);
         }
     }
 }
@@ -387,7 +389,7 @@ AFL_TEST("game.map.PlanetFormula:getMaxBuildings", a)
     };
 
     for (int i = 0; i < LIMIT; ++i) {
-        const HostConfiguration fig;
+        const Ref<const HostConfiguration> fig = HostConfiguration::create();
 
         const int clans = i+1;
 
@@ -396,15 +398,15 @@ AFL_TEST("game.map.PlanetFormula:getMaxBuildings", a)
         p.setCargo(Element::Colonists, 10000);
 
         // 4-argument version
-        a.checkEqual("01. MineBuilding/4",    game::map::getMaxBuildings(p, game::MineBuilding,    fig, clans).orElse(-1), EXPECT_MINES[i]);
-        a.checkEqual("02. FactoryBuilding/4", game::map::getMaxBuildings(p, game::FactoryBuilding, fig, clans).orElse(-1), EXPECT_FACTORIES[i]);
-        a.checkEqual("03. DefenseBuilding/4", game::map::getMaxBuildings(p, game::DefenseBuilding, fig, clans).orElse(-1), EXPECT_DEFENSE[i]);
+        a.checkEqual("01. MineBuilding/4",    game::map::getMaxBuildings(p, game::MineBuilding,    *fig, clans).orElse(-1), EXPECT_MINES[i]);
+        a.checkEqual("02. FactoryBuilding/4", game::map::getMaxBuildings(p, game::FactoryBuilding, *fig, clans).orElse(-1), EXPECT_FACTORIES[i]);
+        a.checkEqual("03. DefenseBuilding/4", game::map::getMaxBuildings(p, game::DefenseBuilding, *fig, clans).orElse(-1), EXPECT_DEFENSE[i]);
 
         // 3-argument version
         p.setCargo(Element::Colonists, clans);
-        a.checkEqual("11. MineBuilding/3",    game::map::getMaxBuildings(p, game::MineBuilding,    fig).orElse(-1), EXPECT_MINES[i]);
-        a.checkEqual("12. FactoryBuilding/3", game::map::getMaxBuildings(p, game::FactoryBuilding, fig).orElse(-1), EXPECT_FACTORIES[i]);
-        a.checkEqual("13. DefenseBuilding/3", game::map::getMaxBuildings(p, game::DefenseBuilding, fig).orElse(-1), EXPECT_DEFENSE[i]);
+        a.checkEqual("11. MineBuilding/3",    game::map::getMaxBuildings(p, game::MineBuilding,    *fig).orElse(-1), EXPECT_MINES[i]);
+        a.checkEqual("12. FactoryBuilding/3", game::map::getMaxBuildings(p, game::FactoryBuilding, *fig).orElse(-1), EXPECT_FACTORIES[i]);
+        a.checkEqual("13. DefenseBuilding/3", game::map::getMaxBuildings(p, game::DefenseBuilding, *fig).orElse(-1), EXPECT_DEFENSE[i]);
     }
 }
 
@@ -470,10 +472,10 @@ AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:normal:host", a)
         70683,  68427,  66104,  63715,  61264,  58753,  56183,  53558,  50881,  48153,     31,     29,     27,     25,     23,
            21,     19,     17,     15,     13,     11,      9,      7,      5,      3,      1
     };
-    HostConfiguration config;
-    config[HostConfiguration::ClimateLimitsPopulation].set(1);
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    (*config)[HostConfiguration::ClimateLimitsPopulation].set(1);
 
-    doMaxColonistSeries(a, HostVersion(HostVersion::Host, MKVERSION(3,22,46)), config, 3, EXPECT);
+    doMaxColonistSeries(a, HostVersion(HostVersion::Host, MKVERSION(3,22,46)), *config, 3, EXPECT);
 }
 
 AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:normal:phost", a)
@@ -487,10 +489,10 @@ AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:normal:phost", a)
         P+70711,  P+68455,  P+66132,  P+63743,  P+61291,  P+58779,  P+56209,  P+53583,  P+50905,  P+48176,      151,      141,      131,      121,      111,
             101,       91,       81,       71,       61,       51,       41,       31,       21,       11,        1
     };
-    HostConfiguration config;
-    config[HostConfiguration::ClimateLimitsPopulation].set(1);
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    (*config)[HostConfiguration::ClimateLimitsPopulation].set(1);
 
-    doMaxColonistSeries(a, HostVersion(HostVersion::PHost, MKVERSION(4,1,0)), config, 3, EXPECT);
+    doMaxColonistSeries(a, HostVersion(HostVersion::PHost, MKVERSION(4,1,0)), *config, 3, EXPECT);
 }
 
 AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:rebel:host", a)
@@ -504,10 +506,10 @@ AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:rebel:host", a)
         70683,  68427,  66104,  63715,  61264,  58753,  56183,  53558,  50881,  48153,     60,     60,     60,     60,     60,
            60,     60,     60,     60,     60,     60,     60,     60,     60,     60,     60
     };
-    HostConfiguration config;
-    config[HostConfiguration::ClimateLimitsPopulation].set(1);
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    (*config)[HostConfiguration::ClimateLimitsPopulation].set(1);
 
-    doMaxColonistSeries(a, HostVersion(HostVersion::Host, MKVERSION(3,22,46)), config, 10, EXPECT);
+    doMaxColonistSeries(a, HostVersion(HostVersion::Host, MKVERSION(3,22,46)), *config, 10, EXPECT);
 }
 
 AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:rebel:phost", a)
@@ -521,10 +523,10 @@ AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:rebel:phost", a)
         P+70711,  P+68455,  P+66132,  P+63743,  P+61291,  P+58779,  P+56209,  P+53583,  P+50905,  P+48176,      151,      141,      131,      121,      111,
             101,       91,       81,       71,       61,       60,       60,       60,       60,       60,       60
     };
-    HostConfiguration config;
-    config[HostConfiguration::ClimateLimitsPopulation].set(1);
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    (*config)[HostConfiguration::ClimateLimitsPopulation].set(1);
 
-    doMaxColonistSeries(a, HostVersion(HostVersion::PHost, MKVERSION(4,1,0)), config, 10, EXPECT);
+    doMaxColonistSeries(a, HostVersion(HostVersion::PHost, MKVERSION(4,1,0)), *config, 10, EXPECT);
 }
 
 AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:klingon:host", a)
@@ -538,10 +540,10 @@ AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:klingon:host", a)
         70683,  68427,  66104,  63715,  61264,  58753,  56183,  53558,  50881,  48153,     60,     60,     60,     60,     60,
            60,     60,     60,     60,     60,     60,     60,     60,     60,     60,     60
     };
-    HostConfiguration config;
-    config[HostConfiguration::ClimateLimitsPopulation].set(1);
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    (*config)[HostConfiguration::ClimateLimitsPopulation].set(1);
 
-    doMaxColonistSeries(a, HostVersion(HostVersion::Host, MKVERSION(3,22,46)), config, 4, EXPECT);
+    doMaxColonistSeries(a, HostVersion(HostVersion::Host, MKVERSION(3,22,46)), *config, 4, EXPECT);
 }
 
 AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:klingon:phost", a)
@@ -555,10 +557,10 @@ AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:klingon:phost", a)
         P+70711,  P+68455,  P+66132,  P+63743,  P+61291,  P+58779,  P+56209,  P+53583,  P+50905,  P+48176,      151,      141,      131,      121,      111,
             101,       91,       81,       71,       61,       60,       60,       60,       60,       60,       60
     };
-    HostConfiguration config;
-    config[HostConfiguration::ClimateLimitsPopulation].set(1);
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    (*config)[HostConfiguration::ClimateLimitsPopulation].set(1);
 
-    doMaxColonistSeries(a, HostVersion(HostVersion::PHost, MKVERSION(4,1,0)), config, 4, EXPECT);
+    doMaxColonistSeries(a, HostVersion(HostVersion::PHost, MKVERSION(4,1,0)), *config, 4, EXPECT);
 }
 
 AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:crystal:host", a)
@@ -572,10 +574,10 @@ AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:crystal:host", a)
         75000,  76000,  77000,  78000,  79000,  80000,  81000,  82000,  83000,  84000,  85000,  86000,  87000,  88000,  89000,
         90000,  91000,  92000,  93000,  94000,  95000,  96000,  97000,  98000,  99000, 100000
     };
-    HostConfiguration config;
-    config[HostConfiguration::ClimateLimitsPopulation].set(1);
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    (*config)[HostConfiguration::ClimateLimitsPopulation].set(1);
 
-    doMaxColonistSeries(a, HostVersion(HostVersion::Host, MKVERSION(3,22,46)), config, 7, EXPECT);
+    doMaxColonistSeries(a, HostVersion(HostVersion::Host, MKVERSION(3,22,46)), *config, 7, EXPECT);
 }
 
 AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:crystal:phost", a)
@@ -589,10 +591,10 @@ AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:crystal:phost", a)
         75000,  76000,  77000,  78000,  79000,  80000,  81000,  82000,  83000,  84000,  85000,  86000,  87000,  88000,  89000,
         90000,  91000,  92000,  93000,  94000,  95000,  96000,  97000,  98000,  99000, 100000
     };
-    HostConfiguration config;
-    config[HostConfiguration::ClimateLimitsPopulation].set(1);
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    (*config)[HostConfiguration::ClimateLimitsPopulation].set(1);
 
-    doMaxColonistSeries(a, HostVersion(HostVersion::PHost, MKVERSION(4,1,0)), config, 7, EXPECT);
+    doMaxColonistSeries(a, HostVersion(HostVersion::PHost, MKVERSION(4,1,0)), *config, 7, EXPECT);
 }
 
 AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:crystal:phost:sinoid", a)
@@ -606,11 +608,11 @@ AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:crystal:phost:sinoid",
         P+92388,  P+92978,  P+93545,  P+94089,  P+94609,  P+95106,  P+95580,  P+96030,  P+96456,  P+96859,  P+97237,  P+97592,  P+97923,  P+98229,  P+98511,
         P+98769,  P+99003,  P+99212,  P+99397,  P+99557,  P+99692,  P+99803,  P+99889,  P+99951,  P+99988,   100000
     };
-    HostConfiguration config;
-    config[HostConfiguration::ClimateLimitsPopulation].set(1);
-    config[HostConfiguration::CrystalSinTempBehavior].set(1);
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    (*config)[HostConfiguration::ClimateLimitsPopulation].set(1);
+    (*config)[HostConfiguration::CrystalSinTempBehavior].set(1);
 
-    doMaxColonistSeries(a, HostVersion(HostVersion::PHost, MKVERSION(4,1,0)), config, 7, EXPECT);
+    doMaxColonistSeries(a, HostVersion(HostVersion::PHost, MKVERSION(4,1,0)), *config, 7, EXPECT);
 }
 
 /*
@@ -620,14 +622,14 @@ AFL_TEST("game.map.PlanetFormula:getMaxSupportedColonists:crystal:phost:sinoid",
 namespace {
     struct ExpEnvironment {
         game::map::Planet planet;
-        HostConfiguration config;
+        Ref<HostConfiguration> config;
         HostVersion host;
 
         ExpEnvironment()
-            : planet(77), config(), host(HostVersion::PHost, MKVERSION(4,0,0))
+            : planet(77), config(HostConfiguration::create()), host(HostVersion::PHost, MKVERSION(4,0,0))
             {
-                config[HostConfiguration::EPPlanetAging].set(20);
-                config[HostConfiguration::EPPlanetGovernment].set(50);
+                (*config)[HostConfiguration::EPPlanetAging].set(20);
+                (*config)[HostConfiguration::EPPlanetGovernment].set(50);
             }
     };
 }
@@ -636,33 +638,33 @@ namespace {
 AFL_TEST("game.map.PlanetFormula:getExperienceGain:disabled", a)
 {
     ExpEnvironment env;
-    env.config[HostConfiguration::NumExperienceLevels].set(0);
-    a.check("", !getExperienceGain(env.planet, env.config, env.host).isValid());
+    (*env.config)[HostConfiguration::NumExperienceLevels].set(0);
+    a.check("", !getExperienceGain(env.planet, *env.config, env.host).isValid());
 }
 
 // Experience enabled, but planet has no attributes: no result
 AFL_TEST("game.map.PlanetFormula:getExperienceGain:empty", a)
 {
     ExpEnvironment env;
-    env.config[HostConfiguration::NumExperienceLevels].set(4);
-    a.check("", !getExperienceGain(env.planet, env.config, env.host).isValid());
+    (*env.config)[HostConfiguration::NumExperienceLevels].set(4);
+    a.check("", !getExperienceGain(env.planet, *env.config, env.host).isValid());
 }
 
 // Buildings known: default result
 AFL_TEST("game.map.PlanetFormula:getExperienceGain:building", a)
 {
     ExpEnvironment env;
-    env.config[HostConfiguration::NumExperienceLevels].set(4);
+    (*env.config)[HostConfiguration::NumExperienceLevels].set(4);
     env.planet.setNumBuildings(game::FactoryBuilding, 1);
     env.planet.setNumBuildings(game::MineBuilding, 1);
-    a.checkEqual("", getExperienceGain(env.planet, env.config, env.host).orElse(-1), 70);
+    a.checkEqual("", getExperienceGain(env.planet, *env.config, env.host).orElse(-1), 70);
 }
 
 // Colonists known
 AFL_TEST("game.map.PlanetFormula:getExperienceGain:colonists", a)
 {
     ExpEnvironment env;
-    env.config[HostConfiguration::NumExperienceLevels].set(4);
+    (*env.config)[HostConfiguration::NumExperienceLevels].set(4);
     env.planet.setNumBuildings(game::FactoryBuilding, 1);
     env.planet.setNumBuildings(game::MineBuilding, 1);
     env.planet.setOwner(3);
@@ -670,15 +672,15 @@ AFL_TEST("game.map.PlanetFormula:getExperienceGain:colonists", a)
     env.planet.setColonistHappiness(80);
     env.planet.setColonistTax(10);
     env.planet.setTemperature(50);
-    a.checkEqual("change", getColonistChange(env.planet, env.config, env.host).orElse(-99), 1);
-    a.checkEqual("gain",   getExperienceGain(env.planet, env.config, env.host).orElse(-1), 60);
+    a.checkEqual("change", getColonistChange(env.planet, *env.config, env.host).orElse(-99), 1);
+    a.checkEqual("gain",   getExperienceGain(env.planet, *env.config, env.host).orElse(-1), 60);
 }
 
 // Colonists known but very unhappy
 AFL_TEST("game.map.PlanetFormula:getExperienceGain:colonists:unhappy", a)
 {
     ExpEnvironment env;
-    env.config[HostConfiguration::NumExperienceLevels].set(4);
+    (*env.config)[HostConfiguration::NumExperienceLevels].set(4);
     env.planet.setNumBuildings(game::FactoryBuilding, 1);
     env.planet.setNumBuildings(game::MineBuilding, 1);
     env.planet.setOwner(3);
@@ -686,15 +688,15 @@ AFL_TEST("game.map.PlanetFormula:getExperienceGain:colonists:unhappy", a)
     env.planet.setColonistHappiness(20);
     env.planet.setColonistTax(10);
     env.planet.setTemperature(50);
-    a.checkEqual("change", getColonistChange(env.planet, env.config, env.host).orElse(-99), 1); /* computed using tax=10 */
-    a.checkEqual("gain",   getExperienceGain(env.planet, env.config, env.host).orElse(-1), 34); /* computed using tax=0, using change=9, thus happy=29 */
+    a.checkEqual("change", getColonistChange(env.planet, *env.config, env.host).orElse(-99), 1); /* computed using tax=10 */
+    a.checkEqual("gain",   getExperienceGain(env.planet, *env.config, env.host).orElse(-1), 34); /* computed using tax=0, using change=9, thus happy=29 */
 }
 
 // Natives known
 AFL_TEST("game.map.PlanetFormula:getExperienceGain:native", a)
 {
     ExpEnvironment env;
-    env.config[HostConfiguration::NumExperienceLevels].set(4);
+    (*env.config)[HostConfiguration::NumExperienceLevels].set(4);
     env.planet.setNumBuildings(game::FactoryBuilding, 1);
     env.planet.setNumBuildings(game::MineBuilding, 1);
     env.planet.setNativeRace(2);
@@ -704,14 +706,14 @@ AFL_TEST("game.map.PlanetFormula:getExperienceGain:native", a)
     env.planet.setNativeTax(10);
     env.planet.setTemperature(50);
     a.checkEqual("change", getNativeChange(env.planet, env.host).orElse(-99), -1);
-    a.checkEqual("gain",   getExperienceGain(env.planet, env.config, env.host).orElse(-1), 59);
+    a.checkEqual("gain",   getExperienceGain(env.planet, *env.config, env.host).orElse(-1), 59);
 }
 
 // Natives known
 AFL_TEST("game.map.PlanetFormula:getExperienceGain:native:unhappy", a)
 {
     ExpEnvironment env;
-    env.config[HostConfiguration::NumExperienceLevels].set(4);
+    (*env.config)[HostConfiguration::NumExperienceLevels].set(4);
     env.planet.setNumBuildings(game::FactoryBuilding, 1);
     env.planet.setNumBuildings(game::MineBuilding, 1);
     env.planet.setNativeRace(2);
@@ -721,5 +723,5 @@ AFL_TEST("game.map.PlanetFormula:getExperienceGain:native:unhappy", a)
     env.planet.setNativeTax(10);
     env.planet.setTemperature(50);
     a.checkEqual("change", getNativeChange(env.planet, env.host).orElse(-99), -1);
-    a.checkEqual("gain",   getExperienceGain(env.planet, env.config, env.host).orElse(-1), 28); /* computed using tax=0, using change=7, thus happy=17 */
+    a.checkEqual("gain",   getExperienceGain(env.planet, *env.config, env.host).orElse(-1), 28); /* computed using tax=0, using change=7, thus happy=17 */
 }

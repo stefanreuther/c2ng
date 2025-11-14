@@ -13,6 +13,9 @@
 #include "game/test/simpleturn.hpp"
 #include <algorithm>
 
+using afl::base::Ref;
+using game::config::HostConfiguration;
+using game::config::UserConfiguration;
 using game::map::Point;
 
 /** Test toString().
@@ -31,11 +34,11 @@ AFL_TEST("game.map.VisibilityRange:toString", a)
     E: result must include at least one setting with range=33. All settings must have a name. */
 AFL_TEST("game.map.VisibilityRange:getVisibilityRangeSettings", a)
 {
-    game::config::HostConfiguration config;
-    config[game::config::HostConfiguration::ScanRange].set("10,10,10,33,10,10");
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    (*config)[HostConfiguration::ScanRange].set("10,10,10,33,10,10");
     afl::string::NullTranslator tx;
 
-    game::map::VisSettings_t result = game::map::getVisibilityRangeSettings(config, 4, tx);
+    game::map::VisSettings_t result = game::map::getVisibilityRangeSettings(*config, 4, tx);
 
     a.checkDifferent("01. size", result.size(), 0U);
     bool found = false;
@@ -122,7 +125,8 @@ AFL_TEST("game.map.VisibilityRange:buildVisibilityRange", a)
 AFL_TEST("game.map.VisibilityRange:config", a)
 {
     // Load
-    game::config::UserConfiguration pref;
+    Ref<UserConfiguration> rpref = UserConfiguration::create();
+    UserConfiguration& pref = *rpref;
     game::map::VisConfig vc = game::map::loadVisibilityConfiguration(pref);
     a.checkEqual("01. rang",    vc.range, 0);
     a.checkEqual("02. mode",    vc.mode, game::map::VisModeOwn);

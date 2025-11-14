@@ -148,11 +148,11 @@ AFL_TEST("game.browser.DirectoryHandler:loadGameRootMaybe:none", a)
     Ref<Directory> dir = InternalDirectory::create("dir");
 
     // Empty user configuration
-    UserConfiguration config;
+    Ref<UserConfiguration> config = UserConfiguration::create();
 
     LoadTask loader;
     std::auto_ptr<LoadGameRootTask_t> inTask(LoadGameRootTask_t::makeBound(&loader, &LoadTask::keep));
-    std::auto_ptr<game::Task_t> outTask(testee.loadGameRootMaybe(dir, config, inTask));
+    std::auto_ptr<game::Task_t> outTask(testee.loadGameRootMaybe(dir, *config, inTask));
 
     // Task created
     a.checkNull("01. inTask", inTask.get());
@@ -173,11 +173,11 @@ AFL_TEST("game.browser.DirectoryHandler:loadGameRootMaybe:empty", a)
     Ref<Directory> dir = createGameDirectory();
 
     // Empty user configuration
-    UserConfiguration config;
+    Ref<UserConfiguration> config = UserConfiguration::create();
 
     LoadTask loader;
     std::auto_ptr<LoadGameRootTask_t> inTask(LoadGameRootTask_t::makeBound(&loader, &LoadTask::keep));
-    std::auto_ptr<game::Task_t> outTask(testee.loadGameRootMaybe(dir, config, inTask));
+    std::auto_ptr<game::Task_t> outTask(testee.loadGameRootMaybe(dir, *config, inTask));
 
     // Task created
     a.checkNull("01. inTask", inTask.get());
@@ -198,12 +198,12 @@ AFL_TEST("game.browser.DirectoryHandler:loadGameRootMaybe:local", a)
     Ref<Directory> dir = createGameDirectory();
 
     // User configuration
-    UserConfiguration config;
-    config[UserConfiguration::Game_Type].set("local");
+    Ref<UserConfiguration> config = UserConfiguration::create();
+    (*config)[UserConfiguration::Game_Type].set("local");
 
     LoadTask loader;
     std::auto_ptr<LoadGameRootTask_t> inTask(LoadGameRootTask_t::makeBound(&loader, &LoadTask::keep));
-    std::auto_ptr<game::Task_t> outTask(testee.loadGameRootMaybe(dir, config, inTask));
+    std::auto_ptr<game::Task_t> outTask(testee.loadGameRootMaybe(dir, *config, inTask));
 
     // Task created
     a.checkNull("01. inTask", inTask.get());
@@ -224,12 +224,12 @@ AFL_TEST("game.browser.DirectoryHandler:loadGameRootMaybe:remote", a)
     Ref<Directory> dir = createGameDirectory();
 
     // User configuration
-    UserConfiguration config;
-    config[UserConfiguration::Game_Type].set("remote");
+    Ref<UserConfiguration> config = UserConfiguration::create();
+    (*config)[UserConfiguration::Game_Type].set("remote");
 
     LoadTask loader;
     std::auto_ptr<LoadGameRootTask_t> inTask(LoadGameRootTask_t::makeBound(&loader, &LoadTask::keep));
-    std::auto_ptr<game::Task_t> outTask(testee.loadGameRootMaybe(dir, config, inTask));
+    std::auto_ptr<game::Task_t> outTask(testee.loadGameRootMaybe(dir, *config, inTask));
 
     // No task created
     a.checkNonNull("01. inTask", inTask.get());

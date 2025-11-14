@@ -205,11 +205,11 @@ game::maint::ConfigurationApplication::loadHConfig(util::ConfigurationFile& out,
     size_t size = in.read(afl::base::fromObject(data));
 
     // Convert to internal format
-    game::config::HostConfiguration config;
-    game::v3::unpackHConfig(data, size, config, game::config::ConfigurationOption::User);
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
+    game::v3::unpackHConfig(data, size, *config, game::config::ConfigurationOption::User);
 
     // Convert that into result
-    afl::base::Ref<game::config::Configuration::Enumerator_t> e(config.getOptions());
+    afl::base::Ref<game::config::Configuration::Enumerator_t> e(config->getOptions());
     game::config::Configuration::OptionInfo_t oi;
     while (e->getNextElement(oi)) {
         if (oi.second != 0 && oi.second->getSource() == game::config::ConfigurationOption::User) {
@@ -222,12 +222,12 @@ void
 game::maint::ConfigurationApplication::saveHConfig(const util::ConfigurationFile& in, afl::io::Stream& out)
 {
     // Convert to internal format
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
     for (size_t i = 0, n = in.getNumElements(); i < n; ++i) {
         if (const util::ConfigurationFile::Element* pElem = in.getElementByIndex(i)) {
             if (pElem->key.compare(0, 6, "PHOST.", 6) == 0) {
                 try {
-                    config.setOption(pElem->key.substr(6), pElem->value, game::config::ConfigurationOption::User);
+                    config->setOption(pElem->key.substr(6), pElem->value, game::config::ConfigurationOption::User);
                 }
                 catch (std::exception& e) {
                     log().write(afl::sys::LogListener::Warn, "config", pElem->key, e);
@@ -238,7 +238,7 @@ game::maint::ConfigurationApplication::saveHConfig(const util::ConfigurationFile
 
     // Convert to hconfig format
     game::v3::structures::HConfig data;
-    game::v3::packHConfig(data, config);
+    game::v3::packHConfig(data, *config);
 
     // Write file
     out.fullWrite(afl::base::fromObject(data));

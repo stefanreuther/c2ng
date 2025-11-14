@@ -20,6 +20,7 @@
 #include "game/test/root.hpp"
 #include "util/profiledirectory.hpp"
 
+using afl::base::Ref;
 using afl::container::PtrVector;
 using afl::io::FileSystem;
 using afl::io::InternalFileSystem;
@@ -87,7 +88,7 @@ namespace {
             { return false; }
         virtual Folder* createAccountFolder(const afl::base::Ref<Account>& /*acc*/)
             { return 0; }
-        virtual std::auto_ptr<game::Task_t> loadGameRootMaybe(afl::base::Ref<afl::io::Directory> /*dir*/, const game::config::UserConfiguration& /*config*/, std::auto_ptr<LoadGameRootTask_t>& then)
+        virtual std::auto_ptr<game::Task_t> loadGameRootMaybe(afl::base::Ref<afl::io::Directory> /*dir*/, const UserConfiguration& /*config*/, std::auto_ptr<LoadGameRootTask_t>& then)
             {
                 class Task : public game::Task_t {
                  public:
@@ -229,12 +230,12 @@ AFL_TEST("game.browser.FileSystemFolder:normal", a)
     FileSystemFolder testee(env.browser, env.fs.openDirectory("/dir"), "dir", false);
 
     // Configuration
-    UserConfiguration config;
-    a.check("01. loadConfiguration", testee.loadConfiguration(config));
-    a.checkEqual("02. config", config[UserConfiguration::ExportShipFields](), "name,id,hull");
+    Ref<UserConfiguration> config = UserConfiguration::create();
+    a.check("01. loadConfiguration", testee.loadConfiguration(*config));
+    a.checkEqual("02. config", (*config)[UserConfiguration::ExportShipFields](), "name,id,hull");
 
     a.check("05. setLocalDirectoryName", !testee.setLocalDirectoryName("/"));
-    AFL_CHECK_SUCCEEDS(a("06. saveConfiguration"), testee.saveConfiguration(config));
+    AFL_CHECK_SUCCEEDS(a("06. saveConfiguration"), testee.saveConfiguration(*config));
 
     // Names
     a.checkEqual("11. getName", testee.getName(), "dir");
@@ -261,7 +262,7 @@ AFL_TEST("game.browser.FileSystemFolder:normal", a)
     // - Task is created successfully
     LoadTask result;
     std::auto_ptr<LoadGameRootTask_t> inTask(LoadGameRootTask_t::makeBound(&result, &LoadTask::keep));
-    std::auto_ptr<game::Task_t> outTask(testee.loadGameRoot(config, inTask));
+    std::auto_ptr<game::Task_t> outTask(testee.loadGameRoot(*config, inTask));
 
     a.checkNull("41. inTask", inTask.get());
     a.checkNonNull("42. outTask", outTask.get());

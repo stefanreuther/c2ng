@@ -143,8 +143,8 @@ game::interface::ExportApplication::appMain()
     // Check game data
     // Keep using default config
     const String_t usedGameDir = fs.getAbsolutePathName(arg_gamedir.orElse("."));
-    const game::config::UserConfiguration uc;
-    const afl::base::Ptr<Root> root = loader.load(fs.openDirectory(usedGameDir), *gameCharset, uc, false);
+    afl::base::Ref<const game::config::UserConfiguration> uc = game::config::UserConfiguration::create();
+    const afl::base::Ptr<Root> root = loader.load(fs.openDirectory(usedGameDir), *gameCharset, *uc, false);
     if (root.get() == 0 || root->getTurnLoader().get() == 0) {
         errorExit(Format(tx("no game data found in directory \"%s\""), usedGameDir));
     }

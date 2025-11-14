@@ -89,13 +89,13 @@ namespace {
     /* Environment. For simplicity, we use a GameEnvironment and build its environment,
        instead of making a full Environment mock. */
     struct TestEnvironment {
-        game::config::HostConfiguration config;
+        afl::base::Ref<game::config::HostConfiguration> config;
         game::spec::BeamVector_t beams;
         game::spec::TorpedoVector_t torps;
         game::vcr::flak::GameEnvironment env;
 
         TestEnvironment()
-            : config(), beams(), torps(), env(config, beams, torps)
+            : config(game::config::HostConfiguration::create()), beams(), torps(), env(*config, beams, torps)
             { }
     };
 
@@ -154,7 +154,7 @@ namespace {
             { "StandoffDistance",         "10000" },
         };
         for (size_t i = 0; i < countof(OPTIONS); ++i) {
-            env.config.setOption(OPTIONS[i][0], OPTIONS[i][1], game::config::ConfigurationOption::Game);
+            env.config->setOption(OPTIONS[i][0], OPTIONS[i][1], game::config::ConfigurationOption::Game);
         }
     }
 
@@ -368,7 +368,7 @@ AFL_TEST("game.vcr.flak.Algorithm:play:non-ac", a)
     initConfig(env);
     initBeams(env);
     initTorpedoes(env);
-    env.config[game::config::HostConfiguration::AllowAlternativeCombat].set(0);
+    (*env.config)[game::config::HostConfiguration::AllowAlternativeCombat].set(0);
 
     // Test
     game::vcr::flak::Setup testee;
@@ -659,7 +659,7 @@ AFL_TEST("game.vcr.flak.Algorithm:setup:fighters", a)
     game::vcr::flak::Configuration config;
 
     // We want to check fighter intercept!
-    env.config[game::config::HostConfiguration::FighterKillOdds].set(30);
+    (*env.config)[game::config::HostConfiguration::FighterKillOdds].set(30);
 
     // Test
     game::vcr::flak::Setup testee;
@@ -1078,11 +1078,11 @@ AFL_TEST("game.vcr.flak.Algorithm:pair", a)
 {
     // Environment
     afl::string::NullTranslator tx;
-    game::config::HostConfiguration config; // default
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create(); // default
     game::spec::ShipList shipList;
     game::test::initStandardTorpedoes(shipList);
     game::test::initStandardBeams(shipList);
-    game::vcr::flak::GameEnvironment env(config, shipList.beams(), shipList.launchers());
+    game::vcr::flak::GameEnvironment env(*config, shipList.beams(), shipList.launchers());
 
     // Test
     for (int left = 1; left <= 12; ++left) {

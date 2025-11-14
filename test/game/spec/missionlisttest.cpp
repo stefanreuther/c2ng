@@ -519,7 +519,8 @@ AFL_TEST("game.spec.MissionList:getGroupedMissions:complex", a)
 
 AFL_TEST("game.spec.MissionList:isMissionCloaking", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config.setDefaultValues();
     HostVersion(HostVersion::PHost, MKVERSION(3,4,0)).setImpliedHostConfiguration(config);
     Ref<MissionList> testee = MissionList::create();
@@ -555,7 +556,8 @@ AFL_TEST("game.spec.MissionList:isMissionCloaking", a)
 
 AFL_TEST("game.spec.MissionList:isExtendedMission:phost:default", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config.setDefaultValues();
     HostVersion(HostVersion::PHost, MKVERSION(3,4,0)).setImpliedHostConfiguration(config);
     Ref<MissionList> testee = MissionList::create();
@@ -567,7 +569,8 @@ AFL_TEST("game.spec.MissionList:isExtendedMission:phost:default", a)
 
 AFL_TEST("game.spec.MissionList:isExtendedMission:phost:off", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config.setDefaultValues();
     config[HostConfiguration::AllowExtendedMissions].set(0);
     HostVersion(HostVersion::PHost, MKVERSION(3,4,0)).setImpliedHostConfiguration(config);
@@ -580,7 +583,8 @@ AFL_TEST("game.spec.MissionList:isExtendedMission:phost:off", a)
 
 AFL_TEST("game.spec.MissionList:isExtendedMission:phost:moved", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config.setDefaultValues();
     config[HostConfiguration::ExtMissionsStartAt].set(50);
     HostVersion(HostVersion::PHost, MKVERSION(3,4,0)).setImpliedHostConfiguration(config);
@@ -593,7 +597,8 @@ AFL_TEST("game.spec.MissionList:isExtendedMission:phost:moved", a)
 
 AFL_TEST("game.spec.MissionList:isExtendedMission:host", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config.setDefaultValues();
     config[HostConfiguration::AllowExtendedMissions].set(0);
     HostVersion(HostVersion::Host, MKVERSION(3,22,0)).setImpliedHostConfiguration(config);
@@ -610,7 +615,8 @@ AFL_TEST("game.spec.MissionList:isExtendedMission:host", a)
 
 AFL_TEST("game.spec.MissionList:isSpecialMission:phost:default", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config.setDefaultValues();
     HostVersion(HostVersion::PHost, MKVERSION(3,4,0)).setImpliedHostConfiguration(config);
     Ref<MissionList> testee = MissionList::create();
@@ -623,7 +629,8 @@ AFL_TEST("game.spec.MissionList:isSpecialMission:phost:default", a)
 
 AFL_TEST("game.spec.MissionList:isSpecialMission:phost:off", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config.setDefaultValues();
     config[HostConfiguration::AllowExtendedMissions].set(0);
     HostVersion(HostVersion::PHost, MKVERSION(3,4,0)).setImpliedHostConfiguration(config);
@@ -637,7 +644,8 @@ AFL_TEST("game.spec.MissionList:isSpecialMission:phost:off", a)
 
 AFL_TEST("game.spec.MissionList:isSpecialMission:phost:moved", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config.setDefaultValues();
     config[HostConfiguration::ExtMissionsStartAt].set(50);
     HostVersion(HostVersion::PHost, MKVERSION(3,4,0)).setImpliedHostConfiguration(config);
@@ -651,7 +659,8 @@ AFL_TEST("game.spec.MissionList:isSpecialMission:phost:moved", a)
 
 AFL_TEST("game.spec.MissionList:isSpecialMission:host", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config.setDefaultValues();
     config[HostConfiguration::AllowExtendedMissions].set(0);
     HostVersion(HostVersion::Host, MKVERSION(3,22,0)).setImpliedHostConfiguration(config);

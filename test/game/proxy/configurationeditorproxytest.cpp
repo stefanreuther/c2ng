@@ -27,26 +27,26 @@ namespace {
     class TestAdaptor : public game::proxy::ConfigurationEditorAdaptor {
      public:
         TestAdaptor()
-            : m_config()
+            : m_config(game::config::Configuration::create())
             {
-                m_config[opt1].set(1);
-                m_config[opt1].setSource(game::config::ConfigurationOption::User);
-                m_config[opt2].set(30);
-                m_config[opt2].setSource(game::config::ConfigurationOption::Game);
+                (*m_config)[opt1].set(1);
+                (*m_config)[opt1].setSource(game::config::ConfigurationOption::User);
+                (*m_config)[opt2].set(30);
+                (*m_config)[opt2].setSource(game::config::ConfigurationOption::Game);
                 m_editor.addToggle(0, "toggle 1", opt1);
                 m_editor.addGeneric(0, "generic 2", 333, "(value)")
                     .addOption(opt2);
             }
         virtual game::config::Configuration& config()
-            { return m_config; }
+            { return *m_config; }
         virtual game::config::ConfigurationEditor& editor()
             { return m_editor; }
         virtual afl::string::Translator& translator()
             { return m_translator; }
         virtual void notifyListeners()
-            { m_config.notifyListeners(); }
+            { m_config->notifyListeners(); }
      private:
-        game::config::Configuration m_config;
+        afl::base::Ref<game::config::Configuration> m_config;
         game::config::ConfigurationEditor m_editor;
         afl::string::NullTranslator m_translator;
     };

@@ -21,10 +21,10 @@ AFL_TEST("game.map.Viewport:rectangle", a)
     game::map::Universe univ;
     game::map::Configuration mapConfig;
     game::TeamSettings teams;
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
     game::UnitScoreDefinitionList shipScores;
     game::spec::ShipList shipList;
-    Viewport t(univ, 7, teams, 0, 0, shipScores, shipList, mapConfig, config, game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
+    Viewport t(univ, 7, teams, 0, 0, shipScores, shipList, mapConfig, *config, game::HostVersion(game::HostVersion::PHost, MKVERSION(4,0,0)));
     t.setRange(Point(100, 100), Point(200, 300));
 
     // Verify settings
@@ -70,10 +70,10 @@ AFL_TEST("game.map.Viewport:options", a)
     game::map::Universe univ;
     game::map::Configuration mapConfig;
     game::TeamSettings teams;
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
     game::UnitScoreDefinitionList shipScores;
     game::spec::ShipList shipList;
-    Viewport t(univ, 7, teams, 0, 0, shipScores, shipList, mapConfig, config, game::HostVersion());
+    Viewport t(univ, 7, teams, 0, 0, shipScores, shipList, mapConfig, *config, game::HostVersion());
 
     // Set an option
     t.setOption(Viewport::ShowMessages, true);

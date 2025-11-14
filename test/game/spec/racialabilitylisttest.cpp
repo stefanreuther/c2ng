@@ -11,6 +11,7 @@
 #include "game/spec/advantagelist.hpp"
 
 namespace {
+    using afl::base::Ref;
     using game::config::HostConfiguration;
     using game::config::ConfigurationOption;
     using game::spec::RacialAbilityList;
@@ -36,7 +37,8 @@ namespace {
 AFL_TEST("game.spec.RacialAbilityList:addConfigRacialAbilities", a)
 {
     // Prepare a configuration
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     const ConfigurationOption::Source src = ConfigurationOption::Game;
     config.setOption("MaxPlanetaryIncome", "1000,2000,1000", src);  // generates 'increase' for Lizards
     config.setOption("RaceMiningRate", "70,100,100", src);          // generates 'reduced' for Feds
@@ -95,7 +97,8 @@ AFL_TEST("game.spec.RacialAbilityList:addConfigRacialAbilities:categories", a)
     advList.setName(p, "AdName");
     advList.addPlayer(p, 1);
 
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config.setOption("SensorRange", "100,200", ConfigurationOption::Game);   // default config does not generate a Sensor element
     afl::string::NullTranslator tx;
     game::spec::RacialAbilityList list;
@@ -162,7 +165,8 @@ AFL_TEST("game.spec.RacialAbilityList:addAdvantages", a)
 AFL_TEST("game.spec.RacialAbilityList:filterPlayers", a)
 {
     // Prepare a configuration
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     const ConfigurationOption::Source src = ConfigurationOption::Game;
     config.setOption("MaxPlanetaryIncome", "1000,2000,1000", src);  // generates 'increase' for Lizards
     config.setOption("RaceMiningRate", "70,100,100", src);          // generates 'reduced' for Feds

@@ -50,7 +50,8 @@ AFL_TEST("game.spec.Beam:derived-information", a)
     b.setDamagePower(45);
 
     // Host configuration using defaults
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> rconfig = game::config::HostConfiguration::create();
+    game::config::HostConfiguration& config = *rconfig;
 
     // Independant of host version
     a.checkEqual("01. getNumMinesSwept", b.getNumMinesSwept(1, true, config), 300);

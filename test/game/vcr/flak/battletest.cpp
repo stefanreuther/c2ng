@@ -159,7 +159,8 @@ namespace {
 AFL_TEST("game.vcr.flak.Battle", a)
 {
     // Environment
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> rconfig = game::config::HostConfiguration::create();
+    game::config::HostConfiguration& config = *rconfig;
     game::spec::ShipList shipList;
     afl::string::NullTranslator tx;
     initConfig(config);

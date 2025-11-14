@@ -66,7 +66,8 @@ AFL_TEST("game.interface.PlayerProperty", a)
     g.teamSettings().setPlayerTeam(PLAYER_NR, 7);
 
     // Host configuration
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> rconfig = game::config::HostConfiguration::create();
+    game::config::HostConfiguration& config = *rconfig;
     config[game::config::HostConfiguration::PlayerRace].set("11,10,9,8,7,6,5,4,3,2,1");
     config[game::config::HostConfiguration::PlayerSpecialMission].set("3,2,1,6,5,4,9,8,7,11,10");
 

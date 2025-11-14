@@ -44,7 +44,7 @@ namespace game { namespace test {
 
         /** Access embedded HostConfiguration object. */
         game::config::HostConfiguration& config()
-            { return m_config; }
+            { return *m_config; }
 
         /** Access embedded map configuration object. */
         game::map::Configuration& mapConfiguration()
@@ -105,7 +105,7 @@ namespace game { namespace test {
      private:
         Turn m_turn;
         InterpreterInterface m_interface;
-        game::config::HostConfiguration m_config;
+        afl::base::Ref<game::config::HostConfiguration> m_config;
         game::map::Configuration m_mapConfiguration;
         game::spec::ShipList m_shipList;
         HostVersion m_version;

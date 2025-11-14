@@ -21,6 +21,7 @@
 
 using afl::base::Optional;
 using afl::base::Ptr;
+using afl::base::Ref;
 using afl::io::FileSystem;
 using afl::io::TextWriter;
 using afl::string::Format;
@@ -89,7 +90,8 @@ game::vcr::classic::TestApplet::run(util::Application& app, afl::sys::Environmen
                                 fs);
 
     // Root
-    Ptr<Root> root(loader.load(fs.openDirectory(dir.orElse(".")), cs, game::config::UserConfiguration(), true));
+    Ref<game::config::UserConfiguration> config = game::config::UserConfiguration::create();
+    Ptr<Root> root(loader.load(fs.openDirectory(dir.orElse(".")), cs, *config, true));
     if (root.get() == 0) {
         app.errorOutput().writeLine("No game data found.");
         return 1;

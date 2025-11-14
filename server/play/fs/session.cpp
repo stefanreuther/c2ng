@@ -47,6 +47,6 @@ server::play::fs::Session::createRoot(String_t pathName, afl::string::Translator
      */
     afl::base::Ref<afl::io::Directory> gameDirectory(Directory::create(*this, pathName));
     game::v3::RootLoader loader(*rootDir, 0 /* profile */, 0 /* callback */, tx, log, fs);
-    const game::config::UserConfiguration uc;
-    return loader.load(gameDirectory, gameCharset, uc, false);
+    afl::base::Ref<const game::config::UserConfiguration> uc = game::config::UserConfiguration::create();
+    return loader.load(gameDirectory, gameCharset, *uc, false);
 }

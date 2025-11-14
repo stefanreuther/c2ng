@@ -11,6 +11,7 @@
 #include "afl/test/testrunner.hpp"
 #include "game/test/interpreterinterface.hpp"
 
+using afl::base::Ref;
 using game::config::HostConfiguration;
 using game::map::Minefield;
 using game::map::Point;
@@ -20,7 +21,8 @@ AFL_TEST("game.map.Minefield:getUnitsAfterDecay:Host", a)
 {
     // Environment
     game::HostVersion host(game::HostVersion::Host, MKVERSION(3, 22, 46));
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[config.MineDecayRate].set(5);
 
     // Minefield
@@ -54,7 +56,8 @@ AFL_TEST("game.map.Minefield:getUnitsAfterDecay:PHost", a)
 {
     // Environment
     game::HostVersion host(game::HostVersion::PHost, MKVERSION(4, 0, 0));
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[config.MineDecayRate].set(5);
 
     // Minefield
@@ -160,7 +163,8 @@ AFL_TEST("game.map.Minefield:init-empty", a)
 AFL_TEST("game.map.Minefield:addReport:unit-then-radius", a)
 {
     game::HostVersion host(game::HostVersion::PHost, MKVERSION(3,0,0));
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     const int TURN = 5;
 
     Minefield m(10);
@@ -175,7 +179,8 @@ AFL_TEST("game.map.Minefield:addReport:unit-then-radius", a)
 AFL_TEST("game.map.Minefield:addReport:unit-then-outside-radius", a)
 {
     game::HostVersion host(game::HostVersion::PHost, MKVERSION(3,0,0));
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     const int TURN = 5;
 
     Minefield m(10);
@@ -190,7 +195,8 @@ AFL_TEST("game.map.Minefield:addReport:unit-then-outside-radius", a)
 AFL_TEST("game.map.Minefield:addReport:web-then-neutral", a)
 {
     game::HostVersion host(game::HostVersion::PHost, MKVERSION(3,0,0));
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     const int TURN = 5;
 
     Minefield m(10);
@@ -206,7 +212,8 @@ AFL_TEST("game.map.Minefield:addReport:web-then-neutral", a)
 AFL_TEST("game.map.Minefield:addReport:web-then-neutral-elsewhere", a)
 {
     game::HostVersion host(game::HostVersion::PHost, MKVERSION(3,0,0));
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     const int TURN = 5;
 
     Minefield m(10);
@@ -226,7 +233,8 @@ AFL_TEST("game.map.Minefield:addReport:web-then-neutral-elsewhere", a)
 AFL_TEST("game.map.Minefield:getPassRate", a)
 {
     game::HostVersion host(game::HostVersion::PHost, MKVERSION(3,0,0));
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[HostConfiguration::MineHitOdds].set(1);
     config[HostConfiguration::WebMineHitOdds].set(5);
     config[HostConfiguration::MineHitOddsWhenCloakedX10].set(5);

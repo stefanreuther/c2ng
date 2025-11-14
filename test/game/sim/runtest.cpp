@@ -215,7 +215,7 @@ namespace {
     /* Common environment */
     struct TestHarness {
         game::spec::ShipList list;
-        game::config::HostConfiguration config;
+        afl::base::Ref<game::config::HostConfiguration> config;
         game::vcr::flak::Configuration flakConfiguration;
         util::RandomNumberGenerator rng;
         std::vector<game::vcr::Statistic> stats;
@@ -224,7 +224,8 @@ namespace {
         game::sim::Result result;
 
         TestHarness()
-            : list(), config(), flakConfiguration(), rng(42)
+            : list(), config(game::config::HostConfiguration::create()), flakConfiguration(), rng(42),
+              stats(), opts(), setup(), result()
             { initShipList(list); }
     };
 }
@@ -236,7 +237,7 @@ AFL_TEST("game.sim.Run:VcrHost", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     Ship* s1 = addOutrider(a, h.setup, 1, 12, h.list);
@@ -244,7 +245,7 @@ AFL_TEST("game.sim.Run:VcrHost", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -281,7 +282,7 @@ AFL_TEST("game.sim.Run:VcrHost:big", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     Ship* s1 = addGorbie(a, h.setup, 1, 8, h.list);
@@ -289,7 +290,7 @@ AFL_TEST("game.sim.Run:VcrHost:big", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -330,7 +331,7 @@ AFL_TEST("game.sim.Run:VcrHost:NTP", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     Ship* s1 = addAnnihilation(a, h.setup, 1, 6, h.list);
@@ -339,7 +340,7 @@ AFL_TEST("game.sim.Run:VcrHost:NTP", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -384,7 +385,7 @@ AFL_TEST("game.sim.Run:VcrHost:Balance360k", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::Balance360k);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::Balance360k);
 
     // Setup
     Ship* s1 = addOutrider(a, h.setup, 1, 12, h.list);
@@ -392,7 +393,7 @@ AFL_TEST("game.sim.Run:VcrHost:Balance360k", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -429,7 +430,7 @@ AFL_TEST("game.sim.Run:VcrHost:BalanceMasterAtArms", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceMasterAtArms);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceMasterAtArms);
 
     // Setup
     Ship* s1 = addGorbie(a, h.setup, 1, 8, h.list);
@@ -437,7 +438,7 @@ AFL_TEST("game.sim.Run:VcrHost:BalanceMasterAtArms", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -480,7 +481,7 @@ AFL_TEST("game.sim.Run:VcrHost:planet", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     Ship* s = addOutrider(a, h.setup, 1, 5, h.list);
@@ -488,7 +489,7 @@ AFL_TEST("game.sim.Run:VcrHost:planet", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -524,7 +525,7 @@ AFL_TEST("game.sim.Run:VcrHost:intercept", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     /*Ship* s1 =*/ addOutrider(a, h.setup, 1, 1, h.list);
@@ -541,7 +542,7 @@ AFL_TEST("game.sim.Run:VcrHost:intercept", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -580,7 +581,7 @@ AFL_TEST("game.sim.Run:VcrHost:multi-ship", a)
 {
     // Environment
     TestHarness h;
-    h.opts.setMode(game::sim::Configuration::VcrHost, 0, h.config);
+    h.opts.setMode(game::sim::Configuration::VcrHost, 0, *h.config);
 
     // Setup
     Ship* s1 = addOutrider(a, h.setup, 1, 1, h.list);
@@ -597,7 +598,7 @@ AFL_TEST("game.sim.Run:VcrHost:multi-ship", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has been used
@@ -667,7 +668,7 @@ AFL_TEST("game.sim.Run:VcrHost:esb", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
     h.opts.setEngineShieldBonus(20);
 
     // Setup
@@ -678,7 +679,7 @@ AFL_TEST("game.sim.Run:VcrHost:esb", a)
     s2->setEngineType(9);          // Transwarp Drive, 60 kt bonus
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -719,7 +720,7 @@ AFL_TEST("game.sim.Run:VcrPHost4", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrPHost4, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrPHost4, game::sim::Configuration::BalanceNone);
     h.opts.setRandomLeftRight(true);
 
     // Setup
@@ -728,7 +729,7 @@ AFL_TEST("game.sim.Run:VcrPHost4", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -768,7 +769,7 @@ AFL_TEST("game.sim.Run:VcrPHost3:big", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrPHost3, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrPHost3, game::sim::Configuration::BalanceNone);
 
     // Setup
     Ship* s1 = addGorbie(a, h.setup, 1, 8, h.list);
@@ -776,7 +777,7 @@ AFL_TEST("game.sim.Run:VcrPHost3:big", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -818,7 +819,7 @@ AFL_TEST("game.sim.Run:VcrPHost4:planet", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrPHost4, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrPHost4, game::sim::Configuration::BalanceNone);
 
     // Setup
     Ship* s = addOutrider(a, h.setup, 1, 5, h.list);
@@ -826,7 +827,7 @@ AFL_TEST("game.sim.Run:VcrPHost4:planet", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -866,8 +867,8 @@ AFL_TEST("game.sim.Run:VcrPHost4:PlanetsHaveTubes", a)
 {
     // Environment
     TestHarness h;
-    h.config[game::config::HostConfiguration::PlanetsHaveTubes].set(true);
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrPHost4, game::sim::Configuration::BalanceNone);
+    (*h.config)[game::config::HostConfiguration::PlanetsHaveTubes].set(true);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrPHost4, game::sim::Configuration::BalanceNone);
 
     // Setup
     Ship* s = addAnnihilation(a, h.setup, 1, 6, h.list);
@@ -883,7 +884,7 @@ AFL_TEST("game.sim.Run:VcrPHost4:PlanetsHaveTubes", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -935,7 +936,7 @@ AFL_TEST("game.sim.Run:VcrPHost4:intercept", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrPHost4, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrPHost4, game::sim::Configuration::BalanceNone);
 
     // Setup
     /*Ship* s1 =*/ addOutrider(a, h.setup, 1, 1, h.list);
@@ -952,7 +953,7 @@ AFL_TEST("game.sim.Run:VcrPHost4:intercept", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -995,7 +996,7 @@ AFL_TEST("game.sim.Run:VcrPHost2:multi-ship", a)
 {
     // Environment
     TestHarness h;
-    h.opts.setMode(game::sim::Configuration::VcrPHost2, 0, h.config);
+    h.opts.setMode(game::sim::Configuration::VcrPHost2, 0, *h.config);
 
     // Setup
     Ship* s1 = addOutrider(a, h.setup, 1, 1, h.list);
@@ -1012,7 +1013,7 @@ AFL_TEST("game.sim.Run:VcrPHost2:multi-ship", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has been used
@@ -1082,8 +1083,8 @@ AFL_TEST("game.sim.Run:VcrPHost4:Commander", a)
 {
     // Environment
     TestHarness h;
-    h.config[game::config::HostConfiguration::NumExperienceLevels].set(4);
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrPHost4, game::sim::Configuration::BalanceNone);
+    (*h.config)[game::config::HostConfiguration::NumExperienceLevels].set(4);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrPHost4, game::sim::Configuration::BalanceNone);
 
     // Setup
     Ship* s1 = addOutrider(a, h.setup, 1, 1, h.list);
@@ -1098,7 +1099,7 @@ AFL_TEST("game.sim.Run:VcrPHost4:Commander", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been used
@@ -1142,7 +1143,7 @@ AFL_TEST("game.sim.Run:ship:deactivated", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     // As of 20200920, setting an Intercept Id will try to match the ships even though #1 is not part of battle order due to being disabled.
@@ -1151,7 +1152,7 @@ AFL_TEST("game.sim.Run:ship:deactivated", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1165,7 +1166,7 @@ AFL_TEST("game.sim.Run:ship:allied", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
     h.opts.allianceSettings().set(11, 12, true);
     h.opts.allianceSettings().set(12, 11, true);
 
@@ -1175,7 +1176,7 @@ AFL_TEST("game.sim.Run:ship:allied", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1189,7 +1190,7 @@ AFL_TEST("game.sim.Run:ship:passive", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     addOutrider(a, h.setup, 1, 12, h.list)->setAggressiveness(Ship::agg_Passive);
@@ -1197,7 +1198,7 @@ AFL_TEST("game.sim.Run:ship:passive", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1211,7 +1212,7 @@ AFL_TEST("game.sim.Run:ship:not-enemy", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     addOutrider(a, h.setup, 1, 12, h.list)->setAggressiveness(7);
@@ -1219,7 +1220,7 @@ AFL_TEST("game.sim.Run:ship:not-enemy", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1233,7 +1234,7 @@ AFL_TEST("game.sim.Run:ship:enemy", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     addOutrider(a, h.setup, 1, 12, h.list)->setAggressiveness(11);
@@ -1241,7 +1242,7 @@ AFL_TEST("game.sim.Run:ship:enemy", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1255,7 +1256,7 @@ AFL_TEST("game.sim.Run:ship:persistent-enemy", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
     h.opts.enemySettings().set(11, 12, true);
 
     // Setup
@@ -1264,7 +1265,7 @@ AFL_TEST("game.sim.Run:ship:persistent-enemy", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1278,8 +1279,8 @@ AFL_TEST("game.sim.Run:ship:cloaked", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
-    h.config[game::config::HostConfiguration::AllowCloakedShipsAttack].set(0);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    (*h.config)[game::config::HostConfiguration::AllowCloakedShipsAttack].set(0);
 
     // Setup
     addOutrider(a, h.setup, 1, 12, h.list)->setFlags(Ship::fl_Cloaked);
@@ -1287,7 +1288,7 @@ AFL_TEST("game.sim.Run:ship:cloaked", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1301,7 +1302,7 @@ AFL_TEST("game.sim.Run:ship:fcode-match", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     addOutrider(a, h.setup, 1, 12, h.list)->setFriendlyCode("abc");
@@ -1309,7 +1310,7 @@ AFL_TEST("game.sim.Run:ship:fcode-match", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1323,7 +1324,7 @@ AFL_TEST("game.sim.Run:ship:no-fuel", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     addOutrider(a, h.setup, 1, 12, h.list)->setAggressiveness(Ship::agg_NoFuel);
@@ -1331,7 +1332,7 @@ AFL_TEST("game.sim.Run:ship:no-fuel", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1345,7 +1346,7 @@ AFL_TEST("game.sim.Run:ship:CloakedFighterBays", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrNuHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrNuHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     Ship* s1 = addGorbie(a, h.setup, 1, 8, h.list);
@@ -1358,7 +1359,7 @@ AFL_TEST("game.sim.Run:ship:CloakedFighterBays", a)
     // s2->setFlags(Ship::fl_DoubleBeamCharge | Ship::fl_DoubleBeamChargeSet);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -1413,7 +1414,7 @@ AFL_TEST("game.sim.Run:ship:CloakedFighterBays:ammo-limit", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrNuHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrNuHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     Ship* s1 = addOutrider(a, h.setup, 1, 12, h.list);
@@ -1425,7 +1426,7 @@ AFL_TEST("game.sim.Run:ship:CloakedFighterBays:ammo-limit", a)
     s3->setFlags(Ship::fl_Cloaked | Ship::fl_CloakedBays | Ship::fl_CloakedBaysSet);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -1478,7 +1479,7 @@ AFL_TEST("game.sim.Run:ship:Squadron", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrNuHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrNuHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     Ship* s1 = addGorbie(a, h.setup, 1, 8, h.list);
@@ -1491,7 +1492,7 @@ AFL_TEST("game.sim.Run:ship:Squadron", a)
     s1->setFlags(Ship::fl_Squadron | Ship::fl_SquadronSet);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -1534,7 +1535,7 @@ AFL_TEST("game.sim.Run:planet:deactivated", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     addOutrider(a, h.setup, 1, 5, h.list);
@@ -1542,7 +1543,7 @@ AFL_TEST("game.sim.Run:planet:deactivated", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1556,8 +1557,8 @@ AFL_TEST("game.sim.Run:planet:cloaked-ship", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
-    h.config[game::config::HostConfiguration::AllowCloakedShipsAttack].set(0);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    (*h.config)[game::config::HostConfiguration::AllowCloakedShipsAttack].set(0);
 
     // Setup
     addOutrider(a, h.setup, 1, 5, h.list)->setFlags(Ship::fl_Cloaked);
@@ -1565,7 +1566,7 @@ AFL_TEST("game.sim.Run:planet:cloaked-ship", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1579,7 +1580,7 @@ AFL_TEST("game.sim.Run:planet:fcode-match", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     addOutrider(a, h.setup, 1, 5, h.list)->setFriendlyCode("xyz");
@@ -1587,7 +1588,7 @@ AFL_TEST("game.sim.Run:planet:fcode-match", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1601,7 +1602,7 @@ AFL_TEST("game.sim.Run:planet:allied", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
     h.opts.allianceSettings().set(4, 5, true);
     h.opts.allianceSettings().set(5, 4, true);
 
@@ -1611,7 +1612,7 @@ AFL_TEST("game.sim.Run:planet:allied", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1625,7 +1626,7 @@ AFL_TEST("game.sim.Run:planet:not-aggressive", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     addOutrider(a, h.setup, 1, 5, h.list)->setAggressiveness(Ship::agg_Passive);
@@ -1633,7 +1634,7 @@ AFL_TEST("game.sim.Run:planet:not-aggressive", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1647,7 +1648,7 @@ AFL_TEST("game.sim.Run:planet:not-enemy", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     addOutrider(a, h.setup, 1, 5, h.list)->setAggressiveness(7);
@@ -1655,7 +1656,7 @@ AFL_TEST("game.sim.Run:planet:not-enemy", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1669,7 +1670,7 @@ AFL_TEST("game.sim.Run:planet:immune-race", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     addOutrider(a, h.setup, 1, 4, h.list)->setAggressiveness(7);
@@ -1677,7 +1678,7 @@ AFL_TEST("game.sim.Run:planet:immune-race", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1691,7 +1692,7 @@ AFL_TEST("game.sim.Run:planet:immune-bird", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     addOutrider(a, h.setup, 1, 3, h.list)->setAggressiveness(Ship::agg_NoFuel);
@@ -1699,7 +1700,7 @@ AFL_TEST("game.sim.Run:planet:immune-bird", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1713,7 +1714,7 @@ AFL_TEST("game.sim.Run:planet:matching-enemy", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     addOutrider(a, h.setup, 1, 9, h.list)->setAggressiveness(2);
@@ -1721,7 +1722,7 @@ AFL_TEST("game.sim.Run:planet:matching-enemy", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1735,7 +1736,7 @@ AFL_TEST("game.sim.Run:planet:NUK", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
     addOutrider(a, h.setup, 1, 9, h.list)->setAggressiveness(Ship::agg_NoFuel);
@@ -1743,7 +1744,7 @@ AFL_TEST("game.sim.Run:planet:NUK", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1757,7 +1758,7 @@ AFL_TEST("game.sim.Run:VcrFLAK", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrFLAK, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrFLAK, game::sim::Configuration::BalanceNone);
 
     // Setup
     Ship* s1 = addOutrider(a, h.setup, 1, 12, h.list);
@@ -1765,7 +1766,7 @@ AFL_TEST("game.sim.Run:VcrFLAK", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // Note that FLAK does not support seed control and will touch the RNG.
@@ -1809,7 +1810,7 @@ AFL_TEST("game.sim.Run:VcrFLAK:esb", a)
 {
     // Environment
     TestHarness h;
-    setDeterministicConfig(h.opts, h.config, game::sim::Configuration::VcrFLAK, game::sim::Configuration::BalanceNone);
+    setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrFLAK, game::sim::Configuration::BalanceNone);
     h.opts.setEngineShieldBonus(20);
 
     // Setup
@@ -1818,7 +1819,7 @@ AFL_TEST("game.sim.Run:VcrFLAK:esb", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // Note that FLAK does not support seed control and will touch the RNG.
@@ -1862,7 +1863,7 @@ AFL_TEST("game.sim.Run:VcrFLAK:multi-ship", a)
 {
     // Environment
     TestHarness h;
-    h.opts.setMode(game::sim::Configuration::VcrFLAK, 0, h.config);
+    h.opts.setMode(game::sim::Configuration::VcrFLAK, 0, *h.config);
 
     // Setup
     Ship* s1 = addOutrider(a, h.setup, 1, 1, h.list);
@@ -1880,7 +1881,7 @@ AFL_TEST("game.sim.Run:VcrFLAK:multi-ship", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - battles have been created; series length unchanged
@@ -1933,7 +1934,7 @@ AFL_TEST("game.sim.Run:VcrHost:battle-order", a)
 {
     // Environment
     TestHarness h;
-    h.opts.setMode(game::sim::Configuration::VcrHost, 0, h.config);
+    h.opts.setMode(game::sim::Configuration::VcrHost, 0, *h.config);
     h.opts.setRandomLeftRight(false);
 
     // Setup
@@ -1941,7 +1942,7 @@ AFL_TEST("game.sim.Run:VcrHost:battle-order", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1968,7 +1969,7 @@ AFL_TEST("game.sim.Run:VcrHost:battle-order:planet", a)
 {
     // Environment
     TestHarness h;
-    h.opts.setMode(game::sim::Configuration::VcrHost, 0, h.config);
+    h.opts.setMode(game::sim::Configuration::VcrHost, 0, *h.config);
     h.opts.setRandomLeftRight(false);
 
     // Setup
@@ -1976,7 +1977,7 @@ AFL_TEST("game.sim.Run:VcrHost:battle-order:planet", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -1995,7 +1996,7 @@ AFL_TEST("game.sim.Run:VcrPHost4:battle-order", a)
 {
     // Environment
     TestHarness h;
-    h.opts.setMode(game::sim::Configuration::VcrPHost4, 0, h.config);
+    h.opts.setMode(game::sim::Configuration::VcrPHost4, 0, *h.config);
     h.opts.setRandomLeftRight(false);
 
     // Setup
@@ -2003,7 +2004,7 @@ AFL_TEST("game.sim.Run:VcrPHost4:battle-order", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -2036,7 +2037,7 @@ AFL_TEST("game.sim.Run:VcrPHost4:battle-order:planet", a)
 {
     // Environment
     TestHarness h;
-    h.opts.setMode(game::sim::Configuration::VcrPHost4, 0, h.config);
+    h.opts.setMode(game::sim::Configuration::VcrPHost4, 0, *h.config);
     h.opts.setRandomLeftRight(false);
 
     // Setup
@@ -2044,7 +2045,7 @@ AFL_TEST("game.sim.Run:VcrPHost4:battle-order:planet", a)
     h.result.init(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     a.checkNonNull("01. battles", h.result.battles.get());
@@ -2062,7 +2063,7 @@ AFL_TEST("game.sim.Run:ship:ShieldGenerator", a)
 {
     // Environment
     TestHarness h;
-    h.opts.setMode(game::sim::Configuration::VcrHost, 0, h.config);
+    h.opts.setMode(game::sim::Configuration::VcrHost, 0, *h.config);
     h.opts.setRandomLeftRight(false);
 
     // Setup
@@ -2080,7 +2081,7 @@ AFL_TEST("game.sim.Run:ship:ShieldGenerator", a)
     }
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // THost places aggressor to the right, thus, freighters always on the left.

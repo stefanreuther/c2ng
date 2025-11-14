@@ -176,8 +176,6 @@ AFL_TEST("game.nu.GameFolder:basics", a)
     Environment env;
     GameFolder testee(env.handler, env.acct, 11111, 0);
 
-    UserConfiguration uc;
-
     // Accessors
     a.check     ("01. canEnter",              !testee.canEnter());
     a.checkEqual("02. getName",                testee.getName(), "First Game (11111)");
@@ -224,7 +222,8 @@ AFL_TEST("game.nu.GameFolder:config", a)
     env.fs.openFile("/gameDir/pcc2.ini", FileSystem::Create)
         ->fullWrite(afl::string::toBytes("Export.ShipFields=Name,Hull,Id\n"));
 
-    UserConfiguration uc;
+    Ref<UserConfiguration> ruc = UserConfiguration::create();
+    UserConfiguration& uc = *ruc;
 
     // Configure directory and load
     a.check("01. setLocalDirectoryName", testee.setLocalDirectoryName("/gameDir"));
@@ -250,10 +249,10 @@ AFL_TEST("game.nu.GameFolder:loadGameRoot", a)
     addTurnResponse(env);
 
     // Setup
-    UserConfiguration config;
+    Ref<UserConfiguration> config = UserConfiguration::create();
     RootReceiver recv;
     std::auto_ptr<LoadGameRootTask_t> in(LoadGameRootTask_t::makeBound(&recv, &RootReceiver::take));
-    std::auto_ptr<Task_t> out(testee.loadGameRoot(config, in));
+    std::auto_ptr<Task_t> out(testee.loadGameRoot(*config, in));
     a.checkNull("01. in", in.get());
     a.checkNonNull("02. out", out.get());
 
@@ -290,10 +289,10 @@ AFL_TEST("game.nu.GameFolder:loadGameRoot:local", a)
     env.acct->setGameFolderName("11111", "/game");
 
     // Setup
-    UserConfiguration config;
+    Ref<UserConfiguration> config = UserConfiguration::create();
     RootReceiver recv;
     std::auto_ptr<LoadGameRootTask_t> in(LoadGameRootTask_t::makeBound(&recv, &RootReceiver::take));
-    std::auto_ptr<Task_t> out(testee.loadGameRoot(config, in));
+    std::auto_ptr<Task_t> out(testee.loadGameRoot(*config, in));
     a.checkNull("01. in", in.get());
     a.checkNonNull("02. out", out.get());
 
@@ -329,10 +328,10 @@ AFL_TEST("game.nu.GameFolder:loadGameRoot:lost", a)
     env.acct->setGameFolderName("11111", "/game");
 
     // Setup
-    UserConfiguration config;
+    Ref<UserConfiguration> config = UserConfiguration::create();
     RootReceiver recv;
     std::auto_ptr<LoadGameRootTask_t> in(LoadGameRootTask_t::makeBound(&recv, &RootReceiver::take));
-    std::auto_ptr<Task_t> out(testee.loadGameRoot(config, in));
+    std::auto_ptr<Task_t> out(testee.loadGameRoot(*config, in));
     a.checkNull("01. in", in.get());
     a.checkNonNull("02. out", out.get());
 

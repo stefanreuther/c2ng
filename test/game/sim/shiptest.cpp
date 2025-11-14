@@ -187,7 +187,8 @@ AFL_TEST("game.sim.Ship:shiplist", a)
 
     // Derived attributes
     {
-        game::config::HostConfiguration config;
+        afl::base::Ref<game::config::HostConfiguration> rconfig = game::config::HostConfiguration::create();
+        game::config::HostConfiguration& config = *rconfig;
         game::vcr::flak::Configuration flakConfiguration;
         game::sim::Configuration opts;
         opts.setEngineShieldBonus(20);
@@ -301,7 +302,8 @@ AFL_TEST("game.sim.Ship:abilities", a)
     }
 
     // Configuration
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> rconfig = game::config::HostConfiguration::create();
+    game::config::HostConfiguration& config = *rconfig;
     game::sim::Configuration opts;
 
     game::sim::Configuration nuOpts;

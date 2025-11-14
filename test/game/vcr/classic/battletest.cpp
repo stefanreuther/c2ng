@@ -10,6 +10,9 @@
 #include "game/spec/shiplist.hpp"
 #include "game/test/shiplist.hpp"
 
+using afl::base::Ref;
+using game::config::HostConfiguration;
+
 namespace {
     game::vcr::Object makeLeftShip()
     {
@@ -55,7 +58,8 @@ AFL_TEST("game.vcr.classic.Battle:sample", a)
     game::test::initStandardBeams(shipList);
     game::test::initStandardTorpedoes(shipList);
 
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
 
     afl::string::NullTranslator tx;
 
@@ -125,7 +129,8 @@ AFL_TEST("game.vcr.classic.Battle:points", a)
     game::test::initStandardBeams(shipList);
     game::test::initStandardTorpedoes(shipList);
 
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[config.NumExperienceLevels].set(3);
 
     afl::string::NullTranslator tx;
@@ -166,7 +171,8 @@ AFL_TEST("game.vcr.classic.Battle:points:range", a)
     game::test::initStandardBeams(shipList);
     game::test::initStandardTorpedoes(shipList);
 
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[config.NumExperienceLevels].set(3);
     config[config.PALCombatAggressor].set(12);
     config[config.PALOpponentPointsPer10KT].set(5);

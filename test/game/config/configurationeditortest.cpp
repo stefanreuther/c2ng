@@ -40,7 +40,8 @@ AFL_TEST("game.config.ConfigurationEditor:basic", a)
         .addOption(stringOption);
 
     // Configuration Instance
-    game::config::Configuration config;
+    afl::base::Ref<game::config::Configuration> rconfig = game::config::Configuration::create();
+    game::config::Configuration& config = *rconfig;
     config[intOption].set(20);
     config[boolOption].set(1);
     config[stringOption].set("fred");
@@ -94,7 +95,8 @@ AFL_TEST("game.config.ConfigurationEditor:toggleValue", a)
 {
     // Environment: a bool option
     static const IntegerOptionDescriptor boolOption = { "bool", &BooleanValueParser::instance };
-    game::config::Configuration config;
+    afl::base::Ref<game::config::Configuration> rconfig = game::config::Configuration::create();
+    game::config::Configuration& config = *rconfig;
     config[boolOption].set(1);
 
     ConfigurationEditor ed;
@@ -118,7 +120,8 @@ AFL_TEST("game.config.ConfigurationEditor:setValue", a)
     // Environment: an integer option
     static const IntegerOptionDescriptor intOption   = { "int",   &IntegerValueParser::instance };
     static const IntegerOptionDescriptor otherOption = { "other", &IntegerValueParser::instance };
-    game::config::Configuration config;
+    afl::base::Ref<game::config::Configuration> rconfig = game::config::Configuration::create();
+    game::config::Configuration& config = *rconfig;
     config[intOption].set(7);
     config[otherOption].set(3);
 
@@ -143,7 +146,8 @@ AFL_TEST("game.config.ConfigurationEditor:getSource:single", a)
 {
     // Environment: a bool option
     static const IntegerOptionDescriptor boolOption = { "bool", &BooleanValueParser::instance };
-    game::config::Configuration config;
+    afl::base::Ref<game::config::Configuration> rconfig = game::config::Configuration::create();
+    game::config::Configuration& config = *rconfig;
     config[boolOption].set(1);
     config[boolOption].setSource(ConfigurationOption::System);
 
@@ -166,7 +170,8 @@ AFL_TEST("game.config.ConfigurationEditor:getSource:single", a)
 AFL_TEST("game.config.ConfigurationEditor:getSource:empty", a)
 {
     // Environment: a divider
-    game::config::Configuration config;
+    afl::base::Ref<game::config::Configuration> rconfig = game::config::Configuration::create();
+    game::config::Configuration& config = *rconfig;
     ConfigurationEditor ed;
     ed.addDivider(0, "divi");
 
@@ -187,7 +192,8 @@ AFL_TEST("game.config.ConfigurationEditor:getSource:mixed", a)
     // Environment: two bool options with different locations in one node
     static const IntegerOptionDescriptor boolOption  = { "bool",  &BooleanValueParser::instance };
     static const IntegerOptionDescriptor otherOption = { "other", &BooleanValueParser::instance };
-    game::config::Configuration config;
+    afl::base::Ref<game::config::Configuration> rconfig = game::config::Configuration::create();
+    game::config::Configuration& config = *rconfig;
     config[boolOption].set(1);
     config[boolOption].setSource(ConfigurationOption::System);
     config[otherOption].set(1);
@@ -217,7 +223,8 @@ AFL_TEST("game.config.ConfigurationEditor:change-notification", a)
     // Environment: two bool options
     static const IntegerOptionDescriptor boolOption  = { "bool",  &BooleanValueParser::instance };
     static const IntegerOptionDescriptor otherOption = { "other", &BooleanValueParser::instance };
-    game::config::Configuration config;
+    afl::base::Ref<game::config::Configuration> rconfig = game::config::Configuration::create();
+    game::config::Configuration& config = *rconfig;
     config[boolOption].set(1);
     config[boolOption].setSource(ConfigurationOption::Game);
     config[otherOption].set(1);
@@ -272,7 +279,8 @@ AFL_TEST("game.config.ConfigurationEditor:alias", a)
     static const IntegerOptionDescriptor boolOption = { "bool",  &BooleanValueParser::instance };
     static const AliasOptionDescriptor a1 = { "a1", "bool" };
     static const AliasOptionDescriptor a2 = { "a2", "deadlink" };
-    game::config::Configuration config;
+    afl::base::Ref<game::config::Configuration> rconfig = game::config::Configuration::create();
+    game::config::Configuration& config = *rconfig;
     config[boolOption].set(0);
     config[boolOption].setSource(ConfigurationOption::User);
     config[a1].setSource(ConfigurationOption::System);
@@ -309,7 +317,8 @@ AFL_TEST("game.config.ConfigurationEditor:addAll", a)
     static const IntegerOptionDescriptor opt1  = { "v1",  &IntegerValueParser::instance };
     static const IntegerOptionDescriptor opt2  = { "v2",  &IntegerValueParser::instance };
     static const IntegerOptionDescriptor opt3  = { "v3",  &IntegerValueParser::instance };
-    game::config::Configuration config;
+    afl::base::Ref<game::config::Configuration> rconfig = game::config::Configuration::create();
+    game::config::Configuration& config = *rconfig;
     config[opt1].set(42);
     config[opt2].set(23);
     config[opt3].set(69);
@@ -342,7 +351,8 @@ AFL_TEST("game.config.ConfigurationEditor:addAll", a)
     a.checkEqual("35. getFirstOption", n3->getFirstOption(config), &config[opt3]);
 
     // Apply the editor to a different config
-    game::config::Configuration config2;
+    afl::base::Ref<game::config::Configuration> rconfig2 = game::config::Configuration::create();
+    game::config::Configuration& config2 = *rconfig2;
     config2[opt1].set(17);
 
     a.checkEqual("41. getValue", n1->getValue(config2, tx), "17");

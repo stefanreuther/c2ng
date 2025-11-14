@@ -6,6 +6,7 @@
 #include "game/map/configuration.hpp"
 #include "afl/test/testrunner.hpp"
 
+using afl::base::Ref;
 using game::map::Point;
 using game::config::HostConfiguration;
 using game::config::UserConfiguration;
@@ -568,8 +569,10 @@ AFL_TEST("game.map.Configuration:circular:image", a)
 /** Test initialisation from default configuration. */
 AFL_TEST("game.map.Configuration:initFromConfiguration:default", a)
 {
-    HostConfiguration config;
-    UserConfiguration pref;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
+    Ref<UserConfiguration> rpref = UserConfiguration::create();
+    UserConfiguration& pref = *rpref;
 
     game::map::Configuration testee;
     testee.initFromConfiguration(config, pref);
@@ -583,8 +586,10 @@ AFL_TEST("game.map.Configuration:initFromConfiguration:default", a)
 /** Test initialisation from wrapped map configuration. */
 AFL_TEST("game.map.Configuration:initFromConfiguration:wrap", a)
 {
-    HostConfiguration config;
-    UserConfiguration pref;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
+    Ref<UserConfiguration> rpref = UserConfiguration::create();
+    UserConfiguration& pref = *rpref;
     config.setOption("AllowWraparoundMap", "Yes", ConfigurationOption::Game);
     config.setOption("WraparoundRectangle", "1000,1010,3000,3020", ConfigurationOption::Game);
     a.checkEqual("01. AllowWraparoundMap", config[HostConfiguration::AllowWraparoundMap](), 1);
@@ -602,8 +607,10 @@ AFL_TEST("game.map.Configuration:initFromConfiguration:wrap", a)
 /** Test initialisation from invalid wrapped map configuration. */
 AFL_TEST("game.map.Configuration:initFromConfiguration:bad", a)
 {
-    HostConfiguration config;
-    UserConfiguration pref;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
+    Ref<UserConfiguration> rpref = UserConfiguration::create();
+    UserConfiguration& pref = *rpref;
     config.setOption("AllowWraparoundMap", "Yes", ConfigurationOption::Game);
     config.setOption("WraparoundRectangle", "1000,1010,1020,1030", ConfigurationOption::Game);
 
@@ -620,8 +627,10 @@ AFL_TEST("game.map.Configuration:initFromConfiguration:bad", a)
     Saving a default configuration should not set any option in UserConfiguration. */
 AFL_TEST("game.map.Configuration:saveToConfiguration:default", a)
 {
-    HostConfiguration config;
-    UserConfiguration pref;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
+    Ref<UserConfiguration> rpref = UserConfiguration::create();
+    UserConfiguration& pref = *rpref;
 
     game::map::Configuration testee;
     testee.saveToConfiguration(pref, config);
@@ -638,8 +647,10 @@ AFL_TEST("game.map.Configuration:saveToConfiguration:default", a)
     This should produce a single Chart.Geo.Mode entry because other values are standard. */
 AFL_TEST("game.map.Configuration:saveToConfiguration:wrap", a)
 {
-    HostConfiguration config;
-    UserConfiguration pref;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
+    Ref<UserConfiguration> rpref = UserConfiguration::create();
+    UserConfiguration& pref = *rpref;
 
     game::map::Configuration testee;
     testee.setConfiguration(testee.Wrapped, Point(2000, 2000), Point(2000, 2000));
@@ -662,8 +673,10 @@ AFL_TEST("game.map.Configuration:saveToConfiguration:wrap", a)
     Configure some more values to force other values to be generated. */
 AFL_TEST("game.map.Configuration:saveToConfiguration:full", a)
 {
-    HostConfiguration config;
-    UserConfiguration pref;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
+    Ref<UserConfiguration> rpref = UserConfiguration::create();
+    UserConfiguration& pref = *rpref;
 
     game::map::Configuration testee;
     testee.setConfiguration(testee.Wrapped, Point(1800, 1900), Point(2000, 2100));
@@ -702,8 +715,10 @@ AFL_TEST("game.map.Configuration:saveToConfiguration:full", a)
     However, an option that was previously set in Game scope remains there. */
 AFL_TEST("game.map.Configuration:saveToConfiguration:preserve-source", a)
 {
-    UserConfiguration pref;
-    HostConfiguration config;
+    Ref<UserConfiguration> rpref = UserConfiguration::create();
+    UserConfiguration& pref = *rpref;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     pref.setOption("Chart.Geo.Mode", "flat", ConfigurationOption::Game);
 
     game::map::Configuration testee;
@@ -720,8 +735,10 @@ AFL_TEST("game.map.Configuration:saveToConfiguration:preserve-source", a)
     Saving a default configuration should create a Chart.Geo.Mode if game has AllowWraparoundMap=1 */
 AFL_TEST("game.map.Configuration:saveToConfiguration:wrap-default", a)
 {
-    UserConfiguration pref;
-    HostConfiguration config;
+    Ref<UserConfiguration> rpref = UserConfiguration::create();
+    UserConfiguration& pref = *rpref;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[HostConfiguration::AllowWraparoundMap].set(1);
 
     game::map::Configuration testee;

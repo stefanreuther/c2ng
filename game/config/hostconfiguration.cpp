@@ -1346,11 +1346,17 @@ const game::config::AliasOptionDescriptor game::config::HostConfiguration::Nativ
 
 
 // Default constructor.
+inline
 game::config::HostConfiguration::HostConfiguration()
 {
     setDefaultValues();
 }
 
+afl::base::Ref<game::config::HostConfiguration>
+game::config::HostConfiguration::create()
+{
+    return *new HostConfiguration();
+}
 
 // Assign default values to all options.
 void

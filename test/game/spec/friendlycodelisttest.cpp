@@ -211,9 +211,9 @@ AFL_TEST("game.spec.FriendlyCodeList:container", a)
     p.setOwner(1);
     p.setPlayability(p.ReadOnly);
 
-    const game::config::HostConfiguration hostConfig;
+    afl::base::Ref<const game::config::HostConfiguration> hostConfig = game::config::HostConfiguration::create();
     game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
-    game::spec::FriendlyCodeList sublist(testee, game::spec::FriendlyCode::Filter::fromPlanet(p, hostConfig), key);
+    game::spec::FriendlyCodeList sublist(testee, game::spec::FriendlyCode::Filter::fromPlanet(p, *hostConfig), key);
     a.checkEqual("71. size", sublist.size(), 2U);
     a.checkEqual("72. at", sublist.at(0)->getCode(), "ffc");
     a.checkEqual("73. at", sublist.at(1)->getCode(), "pfc");
@@ -575,11 +575,11 @@ AFL_TEST("game.spec.FriendlyCodeList:isAcceptedFriendlyCode", a)
     p.setPlayability(game::map::Object::Playable);
 
     // -- for that, a configuration
-    game::config::HostConfiguration hostConfig;
+    afl::base::Ref<game::config::HostConfiguration> hostConfig = game::config::HostConfiguration::create();
 
     // -- the filters
     game::spec::FriendlyCode::Filter emptyFilter;
-    game::spec::FriendlyCode::Filter planetFilter(game::spec::FriendlyCode::Filter::fromPlanet(p, hostConfig));
+    game::spec::FriendlyCode::Filter planetFilter(game::spec::FriendlyCode::Filter::fromPlanet(p, *hostConfig));
 
     // - FriendlyCodeList
     // -- for that, a translator

@@ -19,6 +19,7 @@
 #include "game/v3/command.hpp"
 #include "game/v3/commandextra.hpp"
 
+using afl::base::Ref;
 using game::Element;
 using game::actions::CargoTransfer;
 using game::actions::CargoTransferSetup;
@@ -633,7 +634,8 @@ AFL_TEST("game.actions.CargoTransferSetup:build:beam-up", a)
     h.addShip(42, 5, Object::Playable);
     h.addPlanet(99, 5, Object::Playable);
 
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[HostConfiguration::AllowBeamUpMultiple].set(1);
 
     // Create transfer.
@@ -670,7 +672,8 @@ AFL_TEST("game.actions.CargoTransferSetup:build:beam-up:error:disabled", a)
     h.addShip(42, 5, Object::Playable);
     h.addPlanet(99, 5, Object::Playable);
 
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[HostConfiguration::AllowBeamUpMultiple].set(0);
 
     // Create transfer.
@@ -685,7 +688,8 @@ AFL_TEST("game.actions.CargoTransferSetup:build:beam-up:error:missing", a)
     SimpleTurn h;
     h.addShip(42, 5, Object::Playable);
 
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[HostConfiguration::AllowBeamUpMultiple].set(1);
 
     // Create transfer.

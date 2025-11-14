@@ -121,8 +121,8 @@ game::vcr::flak::TestApplet::run(util::Application& app, afl::sys::Environment::
     specLoader.loadLaunchers(list, *specDir);
 
     // Config:
-    HostConfiguration config;
-    ConfigurationParser parser(log, tx, config, ConfigurationOption::Game);
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    ConfigurationParser parser(log, tx, *config, ConfigurationOption::Game);
     {
         Ptr<Stream> file = specDir->openFileNT("pconfig.src", FileSystem::OpenRead);
         if (file.get() != 0) {
@@ -137,7 +137,7 @@ game::vcr::flak::TestApplet::run(util::Application& app, afl::sys::Environment::
             parser.parseFile(*file);
         }
     }
-    GameEnvironment env(config, list.beams(), list.launchers());
+    GameEnvironment env(*config, list.beams(), list.launchers());
 
     /* Now read the input file */
     Ref<Stream> io = fs.openFile(*fileName.get(), FileSystem::OpenRead);

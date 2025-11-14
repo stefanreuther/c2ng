@@ -15,6 +15,7 @@
 
 namespace gp = game::parser;
 
+using afl::base::Ref;
 using game::map::Point;
 using game::map::Ufo;
 using game::config::HostConfiguration;
@@ -236,7 +237,8 @@ AFL_TEST("game.map.UfoType:postprocess:wormhole-from-ufo", a)
     Point pt;
     int r;
     afl::string::NullTranslator tx;
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::map::Configuration mapConfig;
     afl::sys::Log log;
 
@@ -282,7 +284,8 @@ AFL_TEST("game.map.UfoType:postprocess:wormholes-from-util", a)
     Point pt;
     int r;
     afl::string::NullTranslator tx;
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::map::Configuration mapConfig;
     afl::sys::Log log;
 
@@ -330,7 +333,8 @@ AFL_TEST("game.map.UfoType:postprocess:wormholes-from-both", a)
     Point pt;
     int r;
     afl::string::NullTranslator tx;
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::map::Configuration mapConfig;
     afl::sys::Log log;
 
@@ -378,7 +382,8 @@ AFL_TEST("game.map.UfoType:postprocess:history", a)
 {
     // Boilerplate
     afl::string::NullTranslator tx;
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::map::Configuration mapConfig;
     afl::sys::Log log;
 
@@ -423,7 +428,8 @@ AFL_TEST("game.map.UfoType:postprocess:history", a)
 /** Test movement guessing with Non-overlapping WrmDisplacement / WrmRandDisplacement. */
 AFL_TEST("game.map.UfoType:movement-guessing:non-overlapping-config", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[HostConfiguration::WrmDisplacement].set(10);
     config[HostConfiguration::WrmRandDisplacement].set(2);
 
@@ -459,7 +465,8 @@ AFL_TEST("game.map.UfoType:movement-guessing:non-overlapping-config", a)
 /* Test movement guessing with overlapping WrmDisplacement / WrmRandDisplacement. */
 AFL_TEST("game.map.UfoType:movement-guessing:overlapping-config", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[HostConfiguration::WrmDisplacement].set(10);
     config[HostConfiguration::WrmRandDisplacement].set(7);
 
@@ -506,7 +513,8 @@ AFL_TEST("game.map.UfoType:movement-guessing:overlapping-config", a)
 /* Test movement guessing with disabled displacement. */
 AFL_TEST("game.map.UfoType:movement-guessing:no-displacement", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[HostConfiguration::WrmDisplacement].set(0);
     config[HostConfiguration::WrmRandDisplacement].set(7);
 

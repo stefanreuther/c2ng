@@ -17,6 +17,7 @@
 #include "game/test/root.hpp"
 #include "game/test/shiplist.hpp"
 
+using afl::base::Ref;
 using game::HostVersion;
 using game::UnitScoreDefinitionList;
 using game::config::HostConfiguration;
@@ -94,7 +95,7 @@ AFL_TEST("game.map.ShipInfo:packShipLocationInfo", a)
 
     // Misc environment
     game::map::Configuration mapConfig;
-    HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     game::HostVersion host;
     afl::string::NullTranslator tx;
     afl::sys::Log log;
@@ -124,7 +125,7 @@ AFL_TEST("game.map.ShipInfo:packShipLocationInfo", a)
 
     // Do it
     game::map::ShipLocationInfos_t result;
-    packShipLocationInfo(result, sh, univ, TURN_NR, mapConfig, config, host, sl, tx);
+    packShipLocationInfo(result, sh, univ, TURN_NR, mapConfig, *config, host, sl, tx);
 
     // Verify
     a.check("01. result size", result.size() >= 3);
@@ -594,8 +595,8 @@ AFL_TEST("game.map.ShipInfo:getShipTrainingExperience:rebel-small", a)
 {
     // Configuration from North Star series
     // c2hosttest test case ship/06_training/rebel-small
-    HostConfiguration config;
-    config[HostConfiguration::EPTrainingScale].set("45,50,40,55,45,50,48,50,55,70,50");
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    (*config)[HostConfiguration::EPTrainingScale].set("45,50,40,55,45,50,48,50,55,70,50");
 
     static const int16_t EXPECT[] = {
          11,    23,    35,    46,    58,    70,    81,    93,   105,   116,   128,   140,   151,   163,   175,   186,   198,   210,   221,   233,
@@ -626,7 +627,7 @@ AFL_TEST("game.map.ShipInfo:getShipTrainingExperience:rebel-small", a)
     };
 
     for (int i = 0; i < int(countof(EXPECT)); ++i) {
-        a.checkEqual("", game::map::getShipTrainingExperience(10,  i+1, false, 25, config), EXPECT[i]);
+        a.checkEqual("", game::map::getShipTrainingExperience(10,  i+1, false, 25, *config), EXPECT[i]);
     }
 }
 
@@ -634,8 +635,8 @@ AFL_TEST("game.map.ShipInfo:getShipTrainingExperience:rebel-big", a)
 {
     // Configuration from North Star series
     // c2hosttest test case ship/06_training/rebel-big
-    HostConfiguration config;
-    config[HostConfiguration::EPTrainingScale].set("45,50,40,55,45,50,48,50,55,70,50");
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    (*config)[HostConfiguration::EPTrainingScale].set("45,50,40,55,45,50,48,50,55,70,50");
 
     static const int16_t EXPECT[] = {
           4,     8,    13,    17,    21,    26,    30,    35,    39,    43,    48,    52,    56,    61,    65,    70,    74,    78,    83,    87,
@@ -666,7 +667,7 @@ AFL_TEST("game.map.ShipInfo:getShipTrainingExperience:rebel-big", a)
     };
 
     for (int i = 0; i < int(countof(EXPECT)); ++i) {
-        a.checkEqual("", game::map::getShipTrainingExperience(10,  i+1, false, 224, config), EXPECT[i]);
+        a.checkEqual("", game::map::getShipTrainingExperience(10,  i+1, false, 224, *config), EXPECT[i]);
     }
 }
 
@@ -674,8 +675,8 @@ AFL_TEST("game.map.ShipInfo:getShipTrainingExperience:rebel-academy", a)
 {
     // Configuration from North Star series
     // c2hosttest test case ship/06_training/rebel-academy
-    HostConfiguration config;
-    config[HostConfiguration::EPTrainingScale].set("45,50,40,55,45,50,48,50,55,70,50");
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    (*config)[HostConfiguration::EPTrainingScale].set("45,50,40,55,45,50,48,50,55,70,50");
 
     static const int16_t EXPECT[] = {
           46,    93,   140,   186,   233,   280,   326,   373,   420,   466,   513,   560,   606,   653,   700,   746,   793,   840,   886,   933,
@@ -706,7 +707,7 @@ AFL_TEST("game.map.ShipInfo:getShipTrainingExperience:rebel-academy", a)
     };
 
     for (int i = 0; i < int(countof(EXPECT)); ++i) {
-        a.checkEqual("", game::map::getShipTrainingExperience(10,  i+1, true, 25, config), EXPECT[i]);
+        a.checkEqual("", game::map::getShipTrainingExperience(10,  i+1, true, 25, *config), EXPECT[i]);
     }
 }
 
@@ -714,8 +715,8 @@ AFL_TEST("game.map.ShipInfo:getShipTrainingExperience:bird-small", a)
 {
     // Configuration from North Star series
     // c2hosttest test case ship/06_training/bird-small
-    HostConfiguration config;
-    config[HostConfiguration::EPTrainingScale].set("45,50,40,55,45,50,48,50,55,70,50");
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    (*config)[HostConfiguration::EPTrainingScale].set("45,50,40,55,45,50,48,50,55,70,50");
 
     static const int16_t EXPECT[] = {
           6,    13,    20,    26,    33,    40,    46,    53,    60,    66,    73,    80,    86,    93,   100,   106,   113,   120,   126,   133,
@@ -746,7 +747,7 @@ AFL_TEST("game.map.ShipInfo:getShipTrainingExperience:bird-small", a)
     };
 
     for (int i = 0; i < int(countof(EXPECT)); ++i) {
-        a.checkEqual("", game::map::getShipTrainingExperience(3,  i+1, false, 25, config), EXPECT[i]);
+        a.checkEqual("", game::map::getShipTrainingExperience(3,  i+1, false, 25, *config), EXPECT[i]);
     }
 }
 
@@ -754,19 +755,19 @@ AFL_TEST("game.map.ShipInfo:packShipExperienceInfo:empty", a)
 {
     Ship sh(42);
     UnitScoreDefinitionList scoreDefs;
-    HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     HostVersion host(HostVersion::PHost, MKVERSION(4,0,0));
     ShipList list;
 
-    config[HostConfiguration::NumExperienceLevels].set(4);
+    (*config)[HostConfiguration::NumExperienceLevels].set(4);
 
     sh.setOwner(3);
     sh.setHull(77);
     list.hulls().create(77)->setMaxCrew(42);
 
-    a.checkEqual("01. EPShipAging", config[HostConfiguration::EPShipAging](), 15);
+    a.checkEqual("01. EPShipAging", (*config)[HostConfiguration::EPShipAging](), 15);
 
-    game::map::ShipExperienceInfo exp = game::map::packShipExperienceInfo(sh, scoreDefs, config, host, list);
+    game::map::ShipExperienceInfo exp = game::map::packShipExperienceInfo(sh, scoreDefs, *config, host, list);
     a.check     ("11. level",       !exp.level.isValid());
     a.check     ("12. points",      !exp.points.isValid());
     a.checkEqual("13. pointGrowth",  exp.pointGrowth.orElse(-1), 15);
@@ -776,12 +777,12 @@ AFL_TEST("game.map.ShipInfo:packShipExperienceInfo:normal", a)
 {
     Ship sh(42);
     UnitScoreDefinitionList scoreDefs;
-    HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     HostVersion host(HostVersion::PHost, MKVERSION(4,0,0));
     ShipList list;
 
-    config[HostConfiguration::NumExperienceLevels].set(4);
-    config[HostConfiguration::EPTrainingScale].set("45,50,40,55,45,50,48,50,55,70,50");
+    (*config)[HostConfiguration::NumExperienceLevels].set(4);
+    (*config)[HostConfiguration::EPTrainingScale].set("45,50,40,55,45,50,48,50,55,70,50");
 
     // Definition of points
     UnitScoreDefinitionList::Definition pdef;
@@ -804,9 +805,9 @@ AFL_TEST("game.map.ShipInfo:packShipExperienceInfo:normal", a)
     sh.unitScores().set(lindex, 1, 10);
     list.hulls().create(77)->setMaxCrew(25);
 
-    a.checkEqual("01. EPShipAging", config[HostConfiguration::EPShipAging](), 15);
+    a.checkEqual("01. EPShipAging", (*config)[HostConfiguration::EPShipAging](), 15);
 
-    game::map::ShipExperienceInfo exp = game::map::packShipExperienceInfo(sh, scoreDefs, config, host, list);
+    game::map::ShipExperienceInfo exp = game::map::packShipExperienceInfo(sh, scoreDefs, *config, host, list);
     a.checkEqual("11. level",        exp.level.orElse(-1), 1);
     a.checkEqual("12. points",       exp.points.orElse(-1), 800);
     a.checkEqual("13. pointGrowth",  exp.pointGrowth.orElse(-1), 15 + 329);

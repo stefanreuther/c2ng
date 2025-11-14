@@ -193,8 +193,8 @@ namespace {
 
         // Check game data
         // FIXME: load correct config!
-        const game::config::UserConfiguration uc;
-        afl::base::Ptr<game::Root> root = loader.load(fs.openDirectory(fs.getAbsolutePathName(params.arg_gamedir.orElse("."))), *params.gameCharset, uc, false);
+        afl::base::Ref<const game::config::UserConfiguration> uc = game::config::UserConfiguration::create();
+        afl::base::Ptr<game::Root> root = loader.load(fs.openDirectory(fs.getAbsolutePathName(params.arg_gamedir.orElse("."))), *params.gameCharset, *uc, false);
         if (root.get() == 0 || root->getTurnLoader().get() == 0) {
             session.log().write(LogListener::Error, LOG_NAME, tx.translateString("no game data found"));
             return 1;

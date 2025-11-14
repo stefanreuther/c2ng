@@ -12,7 +12,8 @@
 AFL_TEST("game.spec.HullAssignmentList:basics", a)
 {
     // A configuration
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> rconfig = game::config::HostConfiguration::create();
+    game::config::HostConfiguration& config = *rconfig;
     config[config.MapTruehullByPlayerRace].set(false);
 
     // Configure a testee
@@ -74,7 +75,8 @@ AFL_TEST("game.spec.HullAssignmentList:basics", a)
 AFL_TEST("game.spec.HullAssignmentList:PlayerRace", a)
 {
     // A configuration
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> rconfig = game::config::HostConfiguration::create();
+    game::config::HostConfiguration& config = *rconfig;
     config[config.MapTruehullByPlayerRace].set(false);
     config[config.PlayerRace].set("6,5,4,3,2,1");
 

@@ -379,9 +379,13 @@ namespace game { namespace config {
         static const AliasOptionDescriptor                NativeGovFrequencies;
 
 
+     private:
+        HostConfiguration();
+
+     public:
         /** Default constructor.
             Makes a configuration containing all values at defaults (see setDefaultValues()). */
-        HostConfiguration();
+        static afl::base::Ref<HostConfiguration> create();
 
         /** Assign default values to all options.
             This populates the object with all configuration values, and gives them sensible default values. */

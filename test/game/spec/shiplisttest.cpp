@@ -6,7 +6,9 @@
 #include "game/spec/shiplist.hpp"
 #include "afl/test/testrunner.hpp"
 
+using afl::base::Ref;
 using game::PlayerSet_t;
+using game::config::HostConfiguration;
 using game::spec::BasicHullFunction;
 using game::spec::HullFunction;
 using game::spec::ModifiedHullFunctionList;
@@ -42,7 +44,8 @@ AFL_TEST("game.spec.ShipList:basics", a)
     a.checkEqual("61. racialAbilities", &sl.racialAbilities(), &csl.racialAbilities());
     // a.checkEqual("62", csl.racialAbilities().getNumEntries(), 0U); <- cannot check this; HullAssignmentList is preloaded with default no-op entries
 
-    game::config::HostConfiguration hostConfig;
+    Ref<HostConfiguration> rhostConfig = HostConfiguration::create();
+    HostConfiguration& hostConfig = *rhostConfig;
     a.checkEqual("71. hullAssignments", &sl.hullAssignments(), &csl.hullAssignments());
     a.checkEqual("72. hullAssignments", csl.hullAssignments().getMaxIndex(hostConfig, 1), 0);
 
@@ -71,7 +74,8 @@ AFL_TEST("game.spec.ShipList:findRacialAbilities", a)
     testee.hulls().create(3);
 
     // Create host configuration
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config.setDefaultValues();
     config[config.PlanetsAttackKlingons].set(false);
     config[config.PlanetsAttackRebels].set(false);
@@ -100,7 +104,8 @@ AFL_TEST("game.spec.ShipList:findRacialAbilities:ssd", a)
     testee.hulls().create(3);
 
     // Create host configuration
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config.setDefaultValues();
     config[config.PlanetsAttackKlingons].set(false);
     config[config.PlanetsAttackRebels].set(false);
@@ -129,7 +134,8 @@ AFL_TEST("game.spec.ShipList:findRacialAbilities:sparse", a)
     testee.hulls().create(30);
 
     // Create host configuration
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config.setDefaultValues();
     config[config.PlanetsAttackKlingons].set(false);
     config[config.PlanetsAttackRebels].set(false);
@@ -157,7 +163,8 @@ AFL_TEST("game.spec.ShipList:findRacialAbilities:one-hull", a)
     testee.hulls().create(1)->changeHullFunction(ModifiedHullFunctionList::Function_t(BasicHullFunction::Cloak), PlayerSet_t(9), PlayerSet_t(), true);
 
     // Create host configuration
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config.setDefaultValues();
     config[config.PlanetsAttackKlingons].set(false);
     config[config.PlanetsAttackRebels].set(false);
@@ -188,7 +195,8 @@ AFL_TEST("game.spec.ShipList:findRacialAbilities:no-hulls", a)
     game::spec::ShipList testee;
 
     // Create host configuration
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config.setDefaultValues();
     config[config.PlanetsAttackKlingons].set(false);
     config[config.PlanetsAttackRebels].set(false);
@@ -215,7 +223,8 @@ AFL_TEST("game.spec.ShipList:findRacialAbilities:failure", a)
     testee.hulls().create(1)->changeHullFunction(ModifiedHullFunctionList::Function_t(BasicHullFunction::Cloak), PlayerSet_t(9), PlayerSet_t(), false);
 
     // Do it
-    game::config::HostConfiguration hostConfig;
+    Ref<HostConfiguration> rhostConfig = HostConfiguration::create();
+    HostConfiguration& hostConfig = *rhostConfig;
     testee.findRacialAbilities(hostConfig);
 
     // Must not find Cloak.
@@ -245,7 +254,8 @@ AFL_TEST("game.spec.ShipList:hull-functions", a)
     testee.racialAbilities().change(ModifiedHullFunctionList::Function_t(BasicHullFunction::Bioscan), PlayerSet_t(2), noPlayers);
 
     // Create a configuration
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[config.PlanetsAttackRebels].set(false);
     config[config.PlanetsAttackKlingons].set(false);
     config[config.AllowFedCombatBonus].set(false);
@@ -409,7 +419,8 @@ AFL_TEST("game.spec.ShipList:findRacialAbilities:many", a)
     }
 
     // Do it
-    game::config::HostConfiguration hostConfig;
+    Ref<HostConfiguration> rhostConfig = HostConfiguration::create();
+    HostConfiguration& hostConfig = *rhostConfig;
     testee.findRacialAbilities(hostConfig);
 
     // The functions must not be converted to racial abilities
@@ -451,7 +462,8 @@ AFL_TEST("game.spec.ShipList:findSpecimenHullForFunction", a)
     testee.hullAssignments().add(5, 1, 4);
 
     // Tests follow:
-    game::config::HostConfiguration hostConfig;
+    Ref<HostConfiguration> rhostConfig = HostConfiguration::create();
+    HostConfiguration& hostConfig = *rhostConfig;
 
     // f1 -> hull 1 when searched for all or single player
     a.checkEqual("01", testee.findSpecimenHullForFunction(1, hostConfig, PlayerSet_t::allUpTo(10), PlayerSet_t(), true), h1);

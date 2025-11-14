@@ -11,6 +11,7 @@
 #include "game/map/configuration.hpp"
 #include "game/test/interpreterinterface.hpp"
 
+using afl::base::Ref;
 using game::Reference;
 using game::config::HostConfiguration;
 using game::map::Point;
@@ -94,7 +95,10 @@ AFL_TEST("game.map.Universe:find", a)
     const game::map::Configuration mapConfig;
     game::HostVersion tim(game::HostVersion::Host, MKVERSION(3,22,0));
     game::HostVersion andrew(game::HostVersion::PHost, MKVERSION(3,2,5));
-    HostConfiguration noWW, squareWW, roundWW;
+    Ref<HostConfiguration> rnoWW = HostConfiguration::create(), rsquareWW = HostConfiguration::create(), rroundWW = HostConfiguration::create();
+    HostConfiguration& noWW = *rnoWW;
+    HostConfiguration& squareWW = *rsquareWW;
+    HostConfiguration& roundWW = *rroundWW;
     noWW[HostConfiguration::AllowGravityWells].set(0);
     squareWW[HostConfiguration::AllowGravityWells].set(1);
     squareWW[HostConfiguration::RoundGravityWells].set(0);

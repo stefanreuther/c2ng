@@ -34,17 +34,17 @@ namespace {
         TestHarness()
             : univ(),
               mapConfig(),
-              config(),
+              config(game::config::HostConfiguration::create()),
               shipList(),
               mutexList()
             {
-                config.setDefaultValues();
+                config->setDefaultValues();
                 shipList.missions().addMission(game::spec::Mission(MY_INTERCEPT_MISSION, "!is*,Intercept"));
             }
 
         game::map::Universe univ;
         game::map::Configuration mapConfig;
-        game::config::HostConfiguration config;
+        afl::base::Ref<game::config::HostConfiguration> config;
         game::spec::ShipList shipList;
         LockAccessMock mutexList;
 
@@ -131,15 +131,15 @@ AFL_TEST("game.map.FleetMember:setWaypoint", a)
     // Test:
     // - permitted on single ships and one-member fleets
     game::map::Point pt(1010, 1020);
-    a.checkEqual("01. setWaypoint", FleetMember(h.univ, h.ship(1), h.mapConfig).setWaypoint(pt, h.config, h.shipList), true);
-    a.checkEqual("02. setWaypoint", FleetMember(h.univ, h.ship(2), h.mapConfig).setWaypoint(pt, h.config, h.shipList), true);
-    a.checkEqual("03. setWaypoint", FleetMember(h.univ, h.ship(3), h.mapConfig).setWaypoint(pt, h.config, h.shipList), true);
+    a.checkEqual("01. setWaypoint", FleetMember(h.univ, h.ship(1), h.mapConfig).setWaypoint(pt, *h.config, h.shipList), true);
+    a.checkEqual("02. setWaypoint", FleetMember(h.univ, h.ship(2), h.mapConfig).setWaypoint(pt, *h.config, h.shipList), true);
+    a.checkEqual("03. setWaypoint", FleetMember(h.univ, h.ship(3), h.mapConfig).setWaypoint(pt, *h.config, h.shipList), true);
 
     // - permitted on fleet leader but not member
-    a.checkEqual("11. setWaypoint", FleetMember(h.univ, h.ship(7), h.mapConfig).setWaypoint(pt, h.config, h.shipList), false);
+    a.checkEqual("11. setWaypoint", FleetMember(h.univ, h.ship(7), h.mapConfig).setWaypoint(pt, *h.config, h.shipList), false);
     a.checkEqual("12. getWaypoint", *h.ship(7).getWaypoint().get(), game::map::Point(1000, 1000));
 
-    a.checkEqual("21. setWaypoint", FleetMember(h.univ, h.ship(9), h.mapConfig).setWaypoint(pt, h.config, h.shipList), true);
+    a.checkEqual("21. setWaypoint", FleetMember(h.univ, h.ship(9), h.mapConfig).setWaypoint(pt, *h.config, h.shipList), true);
 
     // Verify results
     a.checkEqual("31. getWaypoint", *h.ship(1).getWaypoint().get(), pt);
@@ -168,11 +168,11 @@ AFL_TEST("game.map.FleetMember:setWarpFactor", a)
     h.ship(9).setFleetNumber(9);
 
     // Test:
-    a.checkEqual("01. setWarpFactor", FleetMember(h.univ, h.ship(1), h.mapConfig).setWarpFactor(7, h.config, h.shipList), true);
-    a.checkEqual("02. setWarpFactor", FleetMember(h.univ, h.ship(3), h.mapConfig).setWarpFactor(7, h.config, h.shipList), true);
-    a.checkEqual("03. setWarpFactor", FleetMember(h.univ, h.ship(7), h.mapConfig).setWarpFactor(7, h.config, h.shipList), false);
+    a.checkEqual("01. setWarpFactor", FleetMember(h.univ, h.ship(1), h.mapConfig).setWarpFactor(7, *h.config, h.shipList), true);
+    a.checkEqual("02. setWarpFactor", FleetMember(h.univ, h.ship(3), h.mapConfig).setWarpFactor(7, *h.config, h.shipList), true);
+    a.checkEqual("03. setWarpFactor", FleetMember(h.univ, h.ship(7), h.mapConfig).setWarpFactor(7, *h.config, h.shipList), false);
     a.checkEqual("04. getWarpFactor", h.ship(7).getWarpFactor().orElse(-1), 2);
-    a.checkEqual("05. setWarpFactor", FleetMember(h.univ, h.ship(9), h.mapConfig).setWarpFactor(7, h.config, h.shipList), true);
+    a.checkEqual("05. setWarpFactor", FleetMember(h.univ, h.ship(9), h.mapConfig).setWarpFactor(7, *h.config, h.shipList), true);
 
     // Verify results
     a.checkEqual("11. getWarpFactor", h.ship(1).getWarpFactor().orElse(-1), 7);
@@ -193,9 +193,9 @@ AFL_TEST("game.map.FleetMember:setMission", a)
     h.ship(9).setFleetNumber(9);
 
     // Test
-    a.checkEqual("01. setMission", FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(2, 44, 55, h.config, h.shipList), true);
-    a.checkEqual("02. setMission", FleetMember(h.univ, h.ship(7), h.mapConfig).setMission(3, 44, 55, h.config, h.shipList), true);
-    a.checkEqual("03. setMission", FleetMember(h.univ, h.ship(9), h.mapConfig).setMission(4, 44, 55, h.config, h.shipList), true);
+    a.checkEqual("01. setMission", FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(2, 44, 55, *h.config, h.shipList), true);
+    a.checkEqual("02. setMission", FleetMember(h.univ, h.ship(7), h.mapConfig).setMission(3, 44, 55, *h.config, h.shipList), true);
+    a.checkEqual("03. setMission", FleetMember(h.univ, h.ship(9), h.mapConfig).setMission(4, 44, 55, *h.config, h.shipList), true);
 
     // Verify results
     a.checkEqual("11. getMission", h.ship(1).getMission().orElse(-1), 2);
@@ -215,9 +215,9 @@ AFL_TEST("game.map.FleetMember:setMission:to-intercept", a)
     h.ship(9).setFleetNumber(9);
 
     // Test
-    a.checkEqual("01. setMission", FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(MY_INTERCEPT_MISSION, 2, 0, h.config, h.shipList), true);
-    a.checkEqual("02. setMission", FleetMember(h.univ, h.ship(7), h.mapConfig).setMission(MY_INTERCEPT_MISSION, 3, 0, h.config, h.shipList), false);
-    a.checkEqual("03. setMission", FleetMember(h.univ, h.ship(9), h.mapConfig).setMission(MY_INTERCEPT_MISSION, 4, 0, h.config, h.shipList), true);
+    a.checkEqual("01. setMission", FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(MY_INTERCEPT_MISSION, 2, 0, *h.config, h.shipList), true);
+    a.checkEqual("02. setMission", FleetMember(h.univ, h.ship(7), h.mapConfig).setMission(MY_INTERCEPT_MISSION, 3, 0, *h.config, h.shipList), false);
+    a.checkEqual("03. setMission", FleetMember(h.univ, h.ship(9), h.mapConfig).setMission(MY_INTERCEPT_MISSION, 4, 0, *h.config, h.shipList), true);
 
     // Verify results
     a.checkEqual("11. getMission", h.ship(1).getMission().orElse(-1), MY_INTERCEPT_MISSION);
@@ -243,9 +243,9 @@ AFL_TEST("game.map.FleetMember:setMission:from-intercept", a)
     h.ship(9).setMission(MY_INTERCEPT_MISSION, 4, 0);
 
     // Test
-    a.checkEqual("01. setMission", FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(99, 2, 0, h.config, h.shipList), true);
-    a.checkEqual("02. setMission", FleetMember(h.univ, h.ship(7), h.mapConfig).setMission(99, 3, 0, h.config, h.shipList), false);
-    a.checkEqual("03. setMission", FleetMember(h.univ, h.ship(9), h.mapConfig).setMission(99, 4, 0, h.config, h.shipList), true);
+    a.checkEqual("01. setMission", FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(99, 2, 0, *h.config, h.shipList), true);
+    a.checkEqual("02. setMission", FleetMember(h.univ, h.ship(7), h.mapConfig).setMission(99, 3, 0, *h.config, h.shipList), false);
+    a.checkEqual("03. setMission", FleetMember(h.univ, h.ship(9), h.mapConfig).setMission(99, 4, 0, *h.config, h.shipList), true);
 
     // Verify results
     a.checkEqual("11. getMission", h.ship(1).getMission().orElse(-1), 99);
@@ -268,13 +268,13 @@ AFL_TEST("game.map.FleetMember:setFleetNumber:fail", a)
 
     // Test
     // - non-existant ship
-    a.checkEqual("01. setFleetNumber", FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetNumber(99, h.config, h.shipList), false);
+    a.checkEqual("01. setFleetNumber", FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetNumber(99, *h.config, h.shipList), false);
 
     // - existing ship that is not in a fleet
-    a.checkEqual("11. setFleetNumber", FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetNumber(2, h.config, h.shipList), false);
+    a.checkEqual("11. setFleetNumber", FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetNumber(2, *h.config, h.shipList), false);
 
     // - existing ship that is not a fleet leader
-    a.checkEqual("21. setFleetNumber", FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetNumber(7, h.config, h.shipList), false);
+    a.checkEqual("21. setFleetNumber", FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetNumber(7, *h.config, h.shipList), false);
 
     // Verify result
     a.checkEqual("31. getFleetNumber", h.ship(1).getFleetNumber(), 0);
@@ -291,11 +291,11 @@ AFL_TEST("game.map.FleetMember:setFleetNumber:success", a)
     h.ship(3).setWaypoint(game::map::Point(1111, 1222));
 
     // Create a new fleet
-    a.checkEqual("01. setFleetNumber", FleetMember(h.univ, h.ship(3), h.mapConfig).setFleetNumber(3, h.config, h.shipList), true);
+    a.checkEqual("01. setFleetNumber", FleetMember(h.univ, h.ship(3), h.mapConfig).setFleetNumber(3, *h.config, h.shipList), true);
 
     // Add members
-    a.checkEqual("11. setFleetNumber", FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetNumber(3, h.config, h.shipList), true);
-    a.checkEqual("12. setFleetNumber", FleetMember(h.univ, h.ship(9), h.mapConfig).setFleetNumber(3, h.config, h.shipList), true);
+    a.checkEqual("11. setFleetNumber", FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetNumber(3, *h.config, h.shipList), true);
+    a.checkEqual("12. setFleetNumber", FleetMember(h.univ, h.ship(9), h.mapConfig).setFleetNumber(3, *h.config, h.shipList), true);
 
     // Verify result
     a.checkEqual("21. getFleetNumber", h.ship(1).getFleetNumber(), 3);
@@ -320,7 +320,7 @@ AFL_TEST("game.map.FleetMember:setFleetNumber:drop-leader", a)
 
     // Remove the leader
     a.checkEqual("01. isFleetLeader", h.ship(4).isFleetLeader(), true);
-    a.checkEqual("02. setFleetNumber", FleetMember(h.univ, h.ship(4), h.mapConfig).setFleetNumber(0, h.config, h.shipList), true);
+    a.checkEqual("02. setFleetNumber", FleetMember(h.univ, h.ship(4), h.mapConfig).setFleetNumber(0, *h.config, h.shipList), true);
 
     // Verify result
     a.checkEqual("11. getFleetNumber", h.ship(1).getFleetNumber(), 1);      // renamed fleet Id
@@ -347,7 +347,7 @@ AFL_TEST("game.map.FleetMember:setFleetNumber:drop-member", a)
 
     // Remove a member
     a.checkEqual("01. isFleetLeader", h.ship(7).isFleetMember(), true);
-    a.checkEqual("02. setFleetNumber", FleetMember(h.univ, h.ship(7), h.mapConfig).setFleetNumber(0, h.config, h.shipList), true);
+    a.checkEqual("02. setFleetNumber", FleetMember(h.univ, h.ship(7), h.mapConfig).setFleetNumber(0, *h.config, h.shipList), true);
 
     // Verify result
     a.checkEqual("11. getFleetNumber", h.ship(1).getFleetNumber(), 4);
@@ -376,7 +376,7 @@ AFL_TEST("game.map.FleetMember:setFleetNumber:move-member", a)
 
     // Move member
     a.checkEqual("01. isFleetLeader", h.ship(1).isFleetMember(), true);
-    a.checkEqual("02. setFleetNumber", FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetNumber(5, h.config, h.shipList), true);
+    a.checkEqual("02. setFleetNumber", FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetNumber(5, *h.config, h.shipList), true);
 
     // Verify result
     a.checkEqual("11. getFleetNumber", h.ship(1).getFleetNumber(), 5);
@@ -396,7 +396,7 @@ AFL_TEST("game.map.FleetMember:setMission:tow-member", a)
     }
 
     // Set tow mission
-    a.checkEqual("01. setMission", FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(game::spec::Mission::msn_Tow, 0, 3, h.config, h.shipList), true);
+    a.checkEqual("01. setMission", FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(game::spec::Mission::msn_Tow, 0, 3, *h.config, h.shipList), true);
 
     // Verify: ship 3 (tow target) must have warp zero and no waypoint
     a.checkEqual("11. getMission", h.ship(1).getMission().orElse(-1), int(game::spec::Mission::msn_Tow));
@@ -406,7 +406,7 @@ AFL_TEST("game.map.FleetMember:setMission:tow-member", a)
     a.checkEqual("15. getWarpFactor", h.ship(3).getWarpFactor().orElse(-1), 0);
 
     // Clear tow mission
-    a.checkEqual("21. setMission", FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(77, 0, 0, h.config, h.shipList), true);
+    a.checkEqual("21. setMission", FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(77, 0, 0, *h.config, h.shipList), true);
 
     // Verify
     a.checkEqual("31. getMission", h.ship(1).getMission().orElse(-1), 77);
@@ -430,7 +430,7 @@ AFL_TEST("game.map.FleetMember:setMission:tow-other", a)
     }
 
     // Set tow mission
-    a.checkEqual("01. setMission", FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(game::spec::Mission::msn_Tow, 0, 9, h.config, h.shipList), true);
+    a.checkEqual("01. setMission", FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(game::spec::Mission::msn_Tow, 0, 9, *h.config, h.shipList), true);
 
     // Verify: ship 5 (tow target) not affected
     a.checkEqual("11. getMission", h.ship(1).getMission().orElse(-1), int(game::spec::Mission::msn_Tow));
@@ -453,7 +453,7 @@ AFL_TEST("game.map.FleetMember:setMission:tow-invalid", a)
     }
 
     // Set tow mission
-    a.checkEqual("01. setMission", FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(game::spec::Mission::msn_Tow, 0, 777, h.config, h.shipList), true);
+    a.checkEqual("01. setMission", FleetMember(h.univ, h.ship(1), h.mapConfig).setMission(game::spec::Mission::msn_Tow, 0, 777, *h.config, h.shipList), true);
 
     a.checkEqual("11. getMission", h.ship(1).getMission().orElse(-1), int(game::spec::Mission::msn_Tow));
     a.checkEqual("12. getMissionParameter", h.ship(1).getMissionParameter(game::TowParameter).orElse(-1), 777);
@@ -469,30 +469,30 @@ AFL_TEST("game.map.FleetMember:isMissionLocked", a)
     }
     h.ship(2).setFleetNumber(2);
     h.ship(3).setFleetNumber(2);
-    a.check("01. setMission", FleetMember(h.univ, h.ship(2), h.mapConfig).setMission(MY_INTERCEPT_MISSION, 7, 0, h.config, h.shipList));
+    a.check("01. setMission", FleetMember(h.univ, h.ship(2), h.mapConfig).setMission(MY_INTERCEPT_MISSION, 7, 0, *h.config, h.shipList));
 
     h.ship(5).setFleetNumber(5);
     h.ship(6).setFleetNumber(5);
 
     // Ship 1: non-fleet-member: not locked
-    a.check("11. isMissionLocked", !FleetMember(h.univ, h.ship(1), h.mapConfig).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
-    a.check("12. isMissionLocked", !FleetMember(h.univ, h.ship(1), h.mapConfig).isMissionLocked(FleetMember::AcceptLeaders, h.config, h.shipList, h.mutexList));
+    a.check("11. isMissionLocked", !FleetMember(h.univ, h.ship(1), h.mapConfig).isMissionLocked(0,                          *h.config, h.shipList, h.mutexList));
+    a.check("12. isMissionLocked", !FleetMember(h.univ, h.ship(1), h.mapConfig).isMissionLocked(FleetMember::AcceptLeaders, *h.config, h.shipList, h.mutexList));
 
     // Ship 2: fleet leader on intercept mission: not locked unless requested
-    a.check("21. isMissionLocked",  FleetMember(h.univ, h.ship(2), h.mapConfig).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
-    a.check("22. isMissionLocked", !FleetMember(h.univ, h.ship(2), h.mapConfig).isMissionLocked(FleetMember::AcceptLeaders, h.config, h.shipList, h.mutexList));
+    a.check("21. isMissionLocked",  FleetMember(h.univ, h.ship(2), h.mapConfig).isMissionLocked(0,                          *h.config, h.shipList, h.mutexList));
+    a.check("22. isMissionLocked", !FleetMember(h.univ, h.ship(2), h.mapConfig).isMissionLocked(FleetMember::AcceptLeaders, *h.config, h.shipList, h.mutexList));
 
     // Ship 3: fleet member on intercept mission: always locked
-    a.check("31. isMissionLocked",  FleetMember(h.univ, h.ship(3), h.mapConfig).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
-    a.check("32. isMissionLocked",  FleetMember(h.univ, h.ship(3), h.mapConfig).isMissionLocked(FleetMember::AcceptLeaders, h.config, h.shipList, h.mutexList));
+    a.check("31. isMissionLocked",  FleetMember(h.univ, h.ship(3), h.mapConfig).isMissionLocked(0,                          *h.config, h.shipList, h.mutexList));
+    a.check("32. isMissionLocked",  FleetMember(h.univ, h.ship(3), h.mapConfig).isMissionLocked(FleetMember::AcceptLeaders, *h.config, h.shipList, h.mutexList));
 
     // Ship 5: fleet leader not on intercept mission: not locked
-    a.check("41. isMissionLocked", !FleetMember(h.univ, h.ship(5), h.mapConfig).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
-    a.check("42. isMissionLocked", !FleetMember(h.univ, h.ship(5), h.mapConfig).isMissionLocked(FleetMember::AcceptLeaders, h.config, h.shipList, h.mutexList));
+    a.check("41. isMissionLocked", !FleetMember(h.univ, h.ship(5), h.mapConfig).isMissionLocked(0,                          *h.config, h.shipList, h.mutexList));
+    a.check("42. isMissionLocked", !FleetMember(h.univ, h.ship(5), h.mapConfig).isMissionLocked(FleetMember::AcceptLeaders, *h.config, h.shipList, h.mutexList));
 
     // Ship 6: fleet member not on intercept mission: not locked
-    a.check("51. isMissionLocked", !FleetMember(h.univ, h.ship(6), h.mapConfig).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
-    a.check("52. isMissionLocked", !FleetMember(h.univ, h.ship(6), h.mapConfig).isMissionLocked(FleetMember::AcceptLeaders, h.config, h.shipList, h.mutexList));
+    a.check("51. isMissionLocked", !FleetMember(h.univ, h.ship(6), h.mapConfig).isMissionLocked(0,                          *h.config, h.shipList, h.mutexList));
+    a.check("52. isMissionLocked", !FleetMember(h.univ, h.ship(6), h.mapConfig).isMissionLocked(FleetMember::AcceptLeaders, *h.config, h.shipList, h.mutexList));
 }
 
 /** Test isMissionLocked().
@@ -507,12 +507,12 @@ AFL_TEST("game.map.FleetMember:isMissionLocked:mutex", a)
     h.mutexList.addLock("S3.WAYPOINT");
 
     // Ship 1: not locked
-    a.check("01. isMissionLocked", !FleetMember(h.univ, h.ship(1), h.mapConfig).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
-    a.check("02. isMissionLocked", !FleetMember(h.univ, h.ship(1), h.mapConfig).isMissionLocked(FleetMember::OverrideLocks, h.config, h.shipList, h.mutexList));
+    a.check("01. isMissionLocked", !FleetMember(h.univ, h.ship(1), h.mapConfig).isMissionLocked(0,                          *h.config, h.shipList, h.mutexList));
+    a.check("02. isMissionLocked", !FleetMember(h.univ, h.ship(1), h.mapConfig).isMissionLocked(FleetMember::OverrideLocks, *h.config, h.shipList, h.mutexList));
 
     // Ship 3: locked waypoint
-    a.check("11. isMissionLocked",  FleetMember(h.univ, h.ship(3), h.mapConfig).isMissionLocked(0,                          h.config, h.shipList, h.mutexList));
-    a.check("12. isMissionLocked", !FleetMember(h.univ, h.ship(3), h.mapConfig).isMissionLocked(FleetMember::OverrideLocks, h.config, h.shipList, h.mutexList));
+    a.check("11. isMissionLocked",  FleetMember(h.univ, h.ship(3), h.mapConfig).isMissionLocked(0,                          *h.config, h.shipList, h.mutexList));
+    a.check("12. isMissionLocked", !FleetMember(h.univ, h.ship(3), h.mapConfig).isMissionLocked(FleetMember::OverrideLocks, *h.config, h.shipList, h.mutexList));
 }
 
 /** Test setFleetNumber(), failure case, foreign ship.
@@ -524,9 +524,9 @@ AFL_TEST("game.map.FleetMember:setFleetNumber:foreign", a)
     createShip(h, 2, 9, 1000, 1000);
     createShip(h, 3, 7, 1000, 1000);
 
-    a.checkEqual("01. setFleetNumber", FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetNumber(1, h.config, h.shipList), true);
-    a.checkEqual("02. setFleetNumber", FleetMember(h.univ, h.ship(2), h.mapConfig).setFleetNumber(1, h.config, h.shipList), false);
-    a.checkEqual("03. setFleetNumber", FleetMember(h.univ, h.ship(3), h.mapConfig).setFleetNumber(1, h.config, h.shipList), true);
+    a.checkEqual("01. setFleetNumber", FleetMember(h.univ, h.ship(1), h.mapConfig).setFleetNumber(1, *h.config, h.shipList), true);
+    a.checkEqual("02. setFleetNumber", FleetMember(h.univ, h.ship(2), h.mapConfig).setFleetNumber(1, *h.config, h.shipList), false);
+    a.checkEqual("03. setFleetNumber", FleetMember(h.univ, h.ship(3), h.mapConfig).setFleetNumber(1, *h.config, h.shipList), true);
 
     // Verify result
     a.checkEqual("11. getFleetNumber", h.ship(1).getFleetNumber(), 1);

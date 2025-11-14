@@ -31,7 +31,7 @@ namespace {
     }
 
     struct TestHarness {
-        game::config::HostConfiguration config;
+        afl::base::Ref<game::config::HostConfiguration> config;
         game::map::Planet planet;
         game::map::PlanetStorage container;
 
@@ -39,11 +39,11 @@ namespace {
     };
 
     TestHarness::TestHarness()
-        : config(),
+        : config(game::config::HostConfiguration::create()),
           planet(99),
-          container(preparePlanet(planet), config)
+          container(preparePlanet(planet), *config)
     {
-        config.setDefaultValues();
+        config->setDefaultValues();
     }
 }
 
@@ -53,9 +53,9 @@ AFL_TEST("game.actions.BuildStructures:error:not-played", a)
 {
     game::map::Planet planet(99);
     game::test::CargoContainer container;
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
 
-    AFL_CHECK_THROWS(a, (game::actions::BuildStructures(planet, container, config)), game::Exception);
+    AFL_CHECK_THROWS(a, (game::actions::BuildStructures(planet, container, *config)), game::Exception);
 }
 
 /** Test standard success case.
@@ -63,7 +63,7 @@ AFL_TEST("game.actions.BuildStructures:error:not-played", a)
 AFL_TEST("game.actions.BuildStructures:success", a)
 {
     TestHarness h;
-    game::actions::BuildStructures act(h.planet, h.container, h.config);
+    game::actions::BuildStructures act(h.planet, h.container, *h.config);
 
     // Verify
     // - ranges
@@ -95,7 +95,7 @@ AFL_TEST("game.actions.BuildStructures:parallel-modification", a)
     TestHarness h;
 
     // Action: build 15
-    game::actions::BuildStructures act(h.planet, h.container, h.config);
+    game::actions::BuildStructures act(h.planet, h.container, *h.config);
     a.checkEqual("01. add", act.add(game::MineBuilding, 15, false), 15);
 
     // In the background, build 10
@@ -117,7 +117,7 @@ AFL_TEST("game.actions.BuildStructures:parallel-modification:notify", a)
     TestHarness h;
 
     // Action: build 15
-    game::actions::BuildStructures act(h.planet, h.container, h.config);
+    game::actions::BuildStructures act(h.planet, h.container, *h.config);
     a.checkEqual("01. add", act.add(game::MineBuilding, 15, false), 15);
     a.checkEqual("02. cost", act.costAction().getCost().toCargoSpecString(), "15S 60$");
 
@@ -134,7 +134,7 @@ AFL_TEST("game.actions.BuildStructures:parallel-modification:notify", a)
 AFL_TEST("game.actions.BuildStructures:multiple", a)
 {
     TestHarness h;
-    game::actions::BuildStructures act(h.planet, h.container, h.config);
+    game::actions::BuildStructures act(h.planet, h.container, *h.config);
 
     // Add 3 of each
     a.checkEqual("01. add", act.add(game::MineBuilding,    3, false), 3);
@@ -150,7 +150,7 @@ AFL_TEST("game.actions.BuildStructures:multiple", a)
 AFL_TEST("game.actions.BuildStructures:addLimitCash", a)
 {
     TestHarness h;
-    game::actions::BuildStructures act(h.planet, h.container, h.config);
+    game::actions::BuildStructures act(h.planet, h.container, *h.config);
 
     // Check how callbacks are suppressed
     int counter = 0;
@@ -190,7 +190,7 @@ AFL_TEST("game.actions.BuildStructures:addLimitCash", a)
 AFL_TEST("game.actions.BuildStructures:doStandardAutoBuild", a)
 {
     TestHarness h;
-    game::actions::BuildStructures act(h.planet, h.container, h.config);
+    game::actions::BuildStructures act(h.planet, h.container, *h.config);
 
     // Set autobuild goals. (These are defaults.)
     h.planet.setAutobuildGoal(game::MineBuilding,        1000);
@@ -232,7 +232,7 @@ AFL_TEST("game.actions.BuildStructures:doStandardAutoBuild", a)
 AFL_TEST("game.actions.BuildStructures:doStandardAutoBuild:grouping", a)
 {
     TestHarness h;
-    game::actions::BuildStructures act(h.planet, h.container, h.config);
+    game::actions::BuildStructures act(h.planet, h.container, *h.config);
 
     // Set autobuild goals. Factories and defense form a group.
     h.planet.setAutobuildGoal(game::MineBuilding,        1000);
@@ -272,7 +272,7 @@ AFL_TEST("game.actions.BuildStructures:doStandardAutoBuild:grouping", a)
 AFL_TEST("game.actions.BuildStructures:error:no-resources", a)
 {
     TestHarness h;
-    game::actions::BuildStructures act(h.planet, h.container, h.config);
+    game::actions::BuildStructures act(h.planet, h.container, *h.config);
 
     // Add 15 defense. These cost 150$ which we do not have
     a.checkEqual("01. add", act.add(game::DefenseBuilding, 15, false), 15);

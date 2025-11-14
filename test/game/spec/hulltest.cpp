@@ -8,6 +8,9 @@
 #include "afl/test/testrunner.hpp"
 #include "game/config/hostconfiguration.hpp"
 
+using afl::base::Ref;
+using game::config::HostConfiguration;
+
 /** Accessor tests. */
 AFL_TEST("game.spec.Hull:basics", a)
 {
@@ -77,8 +80,9 @@ AFL_TEST("game.spec.Hull:getHullFunctions", a)
 AFL_TEST("game.spec.Hull:getTurnFuelUsage", a)
 {
     // Values verified using c2hosttest/ship/02_fuelperturn
-    game::config::HostConfiguration config;
-    config[game::config::HostConfiguration::FuelUsagePerTurnFor100KT].set(5);
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
+    config[HostConfiguration::FuelUsagePerTurnFor100KT].set(5);
 
     game::spec::Hull t(1);
 
@@ -107,8 +111,9 @@ AFL_TEST("game.spec.Hull:getTurnFuelUsage", a)
 AFL_TEST("game.spec.Hull:getCloakFuelUsage", a)
 {
     // Values verified using c2hosttest/ship/02_fuelperturn
-    game::config::HostConfiguration config;
-    config[game::config::HostConfiguration::CloakFuelBurn].set(5);
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
+    config[HostConfiguration::CloakFuelBurn].set(5);
 
     game::spec::Hull t(1);
 
@@ -129,7 +134,8 @@ AFL_TEST("game.spec.Hull:getCloakFuelUsage", a)
 AFL_TEST("game.spec.Hull:getMineHitDamage", a)
 {
     // Values verified using c2hosttest/mine/02_damage
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::HostVersion h(game::HostVersion::Host, MKVERSION(3,22,40));
     game::HostVersion p(game::HostVersion::PHost, MKVERSION(4,0,0));
 
@@ -154,7 +160,8 @@ AFL_TEST("game.spec.Hull:getMineHitDamage", a)
 /** Test point computations. */
 AFL_TEST("game.spec.Hull:points", a)
 {
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::HostVersion h(game::HostVersion::Host, MKVERSION(3,22,40));
     game::HostVersion p(game::HostVersion::PHost, MKVERSION(4,0,0));
 

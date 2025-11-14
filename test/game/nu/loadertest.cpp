@@ -1758,9 +1758,9 @@ AFL_TEST("game.nu.Loader:loadTurn", a)
     // Postprocess. Required for starbase status.
     game::map::Configuration mapConfig;
     game::HostVersion hostVersion;
-    game::config::HostConfiguration hostConfig;
+    afl::base::Ref<game::config::HostConfiguration> hostConfig = game::config::HostConfiguration::create();
     game::spec::ShipList shipList;
-    turn.universe().postprocess(PlayerSet_t() + 7, PlayerSet_t() + 7, game::map::Object::Playable, mapConfig, hostVersion, hostConfig, turn.getTurnNumber(), shipList, tx, log);
+    turn.universe().postprocess(PlayerSet_t() + 7, PlayerSet_t() + 7, game::map::Object::Playable, mapConfig, hostVersion, *hostConfig, turn.getTurnNumber(), shipList, tx, log);
 
     // Verify
     // - turn metadata -

@@ -11,6 +11,9 @@
 #include "game/vcr/classic/nullvisualizer.hpp"
 #include "game/vcr/classic/statustoken.hpp"
 
+using afl::base::Ref;
+using game::config::HostConfiguration;
+
 namespace {
     void initShipList(game::spec::ShipList& list)
     {
@@ -94,7 +97,7 @@ namespace {
         return result;
     }
 
-    void initConfig(game::config::HostConfiguration& config)
+    void initConfig(HostConfiguration& config)
     {
         config[config.AllowAlternativeCombat].set(1);
         config[config.BayLaunchInterval].set(2);
@@ -155,7 +158,8 @@ AFL_TEST("game.vcr.classic.PVCRAlgorithm:torper-vs-carrier", a)
 {
     // Surroundings
     game::vcr::classic::NullVisualizer vis;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::ShipList list;
     initShipList(list);
     initConfig(config);
@@ -201,7 +205,8 @@ AFL_TEST("game.vcr.classic.PVCRAlgorithm:carrier-vs-planet", a)
 {
     // Surroundings
     game::vcr::classic::NullVisualizer vis;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::ShipList list;
     initShipList(list);
     initConfig(config);
@@ -253,7 +258,8 @@ AFL_TEST("game.vcr.classic.PVCRAlgorithm:bug:304", a)
 {
     // Surroundings
     game::vcr::classic::NullVisualizer vis;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::ShipList list;
     initShipList(list);
     initConfig(config);
@@ -304,7 +310,8 @@ AFL_TEST("game.vcr.classic.PVCRAlgorithm:token", a)
 {
     // Surroundings
     game::vcr::classic::NullVisualizer vis;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::ShipList list;
     initShipList(list);
     initConfig(config);
@@ -367,7 +374,8 @@ AFL_TEST("game.vcr.classic.PVCRAlgorithm:asymmetric-fighters", a)
 {
     // Surroundings
     game::vcr::classic::NullVisualizer vis;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::ShipList list;
     initShipList(list);
 
@@ -477,7 +485,8 @@ AFL_TEST("game.vcr.classic.PVCRAlgorithm:firing-range-bonus", a)
 {
     // Surroundings
     game::vcr::classic::NullVisualizer vis;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::ShipList list;
     for (int i = 1; i <= 10; ++i) {
         list.beams().create(i);
@@ -486,8 +495,8 @@ AFL_TEST("game.vcr.classic.PVCRAlgorithm:firing-range-bonus", a)
     list.launchers().get(1)->setDamagePower(100);
     list.launchers().get(2)->setDamagePower(100);
     list.launchers().get(2)->setFiringRangeBonus(100);
-    config[game::config::HostConfiguration::TorpHitOdds].set(100);
-    config[game::config::HostConfiguration::TorpHitBonus].set(0);
+    config[HostConfiguration::TorpHitOdds].set(100);
+    config[HostConfiguration::TorpHitBonus].set(0);
 
     static const Battle def =
         {0,42,0,"P", {{0, 0, 1000, 0, 0, 0, 0, 1, 10, 0, 20, "Lefty", 6, 100, 1, 10, 1, 0, 1,1,0,1,0},

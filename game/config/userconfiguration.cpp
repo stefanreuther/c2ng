@@ -179,10 +179,17 @@ namespace game { namespace config {
  *  UserConfiguration
  */
 
+inline
 game::config::UserConfiguration::UserConfiguration()
     : Configuration()
 {
     setDefaultValues();
+}
+
+afl::base::Ref<game::config::UserConfiguration>
+game::config::UserConfiguration::create()
+{
+    return *new UserConfiguration();
 }
 
 game::config::UserConfiguration::~UserConfiguration()

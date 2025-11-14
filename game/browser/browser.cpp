@@ -334,7 +334,7 @@ game::browser::Browser::loadChildRoot(std::auto_ptr<Task_t> then)
                 size_t n;
                 if (!m_parent.m_childLoaded && m_parent.m_selectedChild.get(n) && n < m_parent.m_content.size()) {
                     m_parent.m_childLoaded = true;
-                    m_parent.m_childConfig.reset(new game::config::UserConfiguration());
+                    m_parent.m_childConfig = game::config::UserConfiguration::create().asPtr();
 
                     // Load configuration
                     try {

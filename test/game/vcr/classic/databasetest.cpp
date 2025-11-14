@@ -13,6 +13,8 @@
 #include "game/config/hostconfiguration.hpp"
 
 using afl::base::ConstBytes_t;
+using afl::base::Ref;
+using game::config::HostConfiguration;
 
 /** Verify behaviour of empty database.
     A: default-construct database
@@ -32,7 +34,8 @@ AFL_TEST("game.vcr.classic.Database:load:empty", a)
 {
     // Environment
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
 
     static const uint8_t FILE[] = {
         0x00, 0x00
@@ -59,7 +62,8 @@ AFL_TEST("game.vcr.classic.Database:load:phost4", a)
 {
     // Environment
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
 
     static const uint8_t FILE[] = {
         0x02, 0x00, 0x6c, 0x8b, 0x83, 0x33, 0x03, 0x80, 0x01, 0x00, 0xec, 0x01, 0x64, 0x00, 0x56, 0x69,
@@ -134,7 +138,8 @@ AFL_TEST("game.vcr.classic.Database:load:phost3", a)
 {
     // Environment
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
 
     static const uint8_t FILE[] = {
         // join517
@@ -196,7 +201,8 @@ AFL_TEST("game.vcr.classic.Database:load:phost2", a)
 {
     // Environment
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
 
     static const uint8_t FILE[] = {
         0x02, 0x00, 0xe0, 0x24, 0x0f, 0x9a, 0x00, 0x00, 0x00, 0x00, 0x37, 0x00, 0x8c, 0x00, 0x53, 0x48,
@@ -270,7 +276,8 @@ AFL_TEST("game.vcr.classic.Database:load:host", a)
 {
     // Environment
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
 
     static const uint8_t FILE[] = {
         // schule,
@@ -332,7 +339,8 @@ AFL_TEST("game.vcr.classic.Database:load:corr", a)
 {
     // Environment
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
 
     static const uint8_t FILE[] = {
         // join517
@@ -384,7 +392,8 @@ AFL_TEST("game.vcr.classic.Database:load:c2nu", a)
 {
     // Environment
     afl::charset::CodepageCharset cs(afl::charset::g_codepage437);
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
 
     static const uint8_t FILE[] = {
         0x02, 0x00, 0x0e, 0x00, 0x4e, 0x55, 0x00, 0x00, 0x00, 0x00, 0x1e, 0x00, 0x78, 0x00, 0x42, 0x32,

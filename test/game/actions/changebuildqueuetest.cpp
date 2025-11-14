@@ -29,12 +29,12 @@ namespace {
         game::map::Universe univ;
         game::map::Configuration mapConfig;
         game::spec::ShipList shipList;
-        game::config::HostConfiguration config;
+        afl::base::Ref<game::config::HostConfiguration> config;
         game::HostVersion host;
         util::RandomNumberGenerator rng;
 
         Environment()
-            : univ(), mapConfig(), shipList(), config(), host(HostVersion::PHost, MKVERSION(3,4,0)), rng(32)
+            : univ(), mapConfig(), shipList(), config(game::config::HostConfiguration::create()), host(HostVersion::PHost, MKVERSION(3,4,0)), rng(32)
             { }
     };
 
@@ -128,8 +128,8 @@ namespace {
         afl::string::NullTranslator tx;
         afl::sys::Log log;
         game::PlayerSet_t p(PLAYER);
-        env.univ.postprocess(p, p, game::map::Object::Playable, env.mapConfig, env.host, env.config, 77, env.shipList, tx, log);
-        env.host.setImpliedHostConfiguration(env.config);
+        env.univ.postprocess(p, p, game::map::Object::Playable, env.mapConfig, env.host, *env.config, 77, env.shipList, tx, log);
+        env.host.setImpliedHostConfiguration(*env.config);
     }
 }
 
@@ -145,7 +145,7 @@ AFL_TEST("game.actions.ChangeBuildQueue:init", a)
     finish(env);
 
     // Test
-    game::actions::ChangeBuildQueue testee(env.univ, env.shipList, env.host, env.config, env.rng, PLAYER);
+    game::actions::ChangeBuildQueue testee(env.univ, env.shipList, env.host, *env.config, env.rng, PLAYER);
     afl::string::NullTranslator tx;
     game::actions::ChangeBuildQueue::Infos_t infos;
     testee.describe(infos, tx);
@@ -190,7 +190,7 @@ AFL_TEST("game.actions.ChangeBuildQueue:increasePriority", a)
     finish(env);
 
     // Test
-    game::actions::ChangeBuildQueue testee(env.univ, env.shipList, env.host, env.config, env.rng, PLAYER);
+    game::actions::ChangeBuildQueue testee(env.univ, env.shipList, env.host, *env.config, env.rng, PLAYER);
     testee.increasePriority(2);
     testee.increasePriority(5);
 
@@ -234,7 +234,7 @@ AFL_TEST("game.actions.ChangeBuildQueue:decreasePriority", a)
     finish(env);
 
     // Test
-    game::actions::ChangeBuildQueue testee(env.univ, env.shipList, env.host, env.config, env.rng, PLAYER);
+    game::actions::ChangeBuildQueue testee(env.univ, env.shipList, env.host, *env.config, env.rng, PLAYER);
     testee.decreasePriority(2);
 
     afl::string::NullTranslator tx;
@@ -277,7 +277,7 @@ AFL_TEST("game.actions.ChangeBuildQueue:points", a)
     finish(env);
 
     // Test
-    game::actions::ChangeBuildQueue testee(env.univ, env.shipList, env.host, env.config, env.rng, PLAYER);
+    game::actions::ChangeBuildQueue testee(env.univ, env.shipList, env.host, *env.config, env.rng, PLAYER);
     afl::string::NullTranslator tx;
 
     // Verify initial build points
@@ -324,7 +324,7 @@ AFL_TEST("game.actions.ChangeBuildQueue:clone", a)
     finish(env);
 
     // Test
-    game::actions::ChangeBuildQueue testee(env.univ, env.shipList, env.host, env.config, env.rng, PLAYER);
+    game::actions::ChangeBuildQueue testee(env.univ, env.shipList, env.host, *env.config, env.rng, PLAYER);
     afl::string::NullTranslator tx;
     game::actions::ChangeBuildQueue::Infos_t infos;
     testee.describe(infos, tx);

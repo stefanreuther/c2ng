@@ -10,6 +10,8 @@
 #include "game/spec/basichullfunction.hpp"
 #include "game/spec/hull.hpp"
 
+using afl::base::Ref;
+using game::config::HostConfiguration;
 using game::spec::BasicHullFunction;
 using game::spec::HullFunction;
 using game::PlayerSet_t;
@@ -71,7 +73,8 @@ AFL_TEST("game.spec.HullFunction:isSame", a)
 // - one engine, no one-engine-towing
 AFL_TEST("game.spec.HullFunction:getDefaultAssignment:Tow:one-engine", a)
 {
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::Hull hull(3);
     hull.setNumEngines(1);
     config[config.AllowOneEngineTowing].set(false);
@@ -81,7 +84,8 @@ AFL_TEST("game.spec.HullFunction:getDefaultAssignment:Tow:one-engine", a)
 // - one engine, one-engine-towing enabled
 AFL_TEST("game.spec.HullFunction:getDefaultAssignment:Tow:one-engine-enabled", a)
 {
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::Hull hull(3);
     hull.setNumEngines(1);
     config[config.AllowOneEngineTowing].set(true);
@@ -91,7 +95,8 @@ AFL_TEST("game.spec.HullFunction:getDefaultAssignment:Tow:one-engine-enabled", a
 // - two engines
 AFL_TEST("game.spec.HullFunction:getDefaultAssignment:Tow:two-engines", a)
 {
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::Hull hull(3);
     hull.setNumEngines(2);
     config[config.AllowOneEngineTowing].set(false);
@@ -102,7 +107,8 @@ AFL_TEST("game.spec.HullFunction:getDefaultAssignment:Tow:two-engines", a)
 // - all disabled
 AFL_TEST("game.spec.HullFunction:getDefaultAssignment:Boarding:disabled", a)
 {
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::Hull hull(7);
     config.setDefaultValues();
     config[config.AllowPrivateerTowCapture].set(false);
@@ -113,7 +119,8 @@ AFL_TEST("game.spec.HullFunction:getDefaultAssignment:Boarding:disabled", a)
 // - privateer enabled
 AFL_TEST("game.spec.HullFunction:getDefaultAssignment:Boarding:privateer", a)
 {
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::Hull hull(7);
     config.setDefaultValues();
     config[config.AllowPrivateerTowCapture].set(true);
@@ -124,7 +131,8 @@ AFL_TEST("game.spec.HullFunction:getDefaultAssignment:Boarding:privateer", a)
 // - all enabled
 AFL_TEST("game.spec.HullFunction:getDefaultAssignment:Boarding:privateer+tholian", a)
 {
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::Hull hull(7);
     config.setDefaultValues();
     config[config.AllowPrivateerTowCapture].set(true);
@@ -135,7 +143,8 @@ AFL_TEST("game.spec.HullFunction:getDefaultAssignment:Boarding:privateer+tholian
 // - nonstandard PlayerRace
 AFL_TEST("game.spec.HullFunction:getDefaultAssignment:Boarding:PlayerRace", a)
 {
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::Hull hull(7);
     config.setDefaultValues();
     config[config.AllowPrivateerTowCapture].set(true);
@@ -147,7 +156,8 @@ AFL_TEST("game.spec.HullFunction:getDefaultAssignment:Boarding:PlayerRace", a)
 // AntiCloakImmunity
 AFL_TEST("game.spec.HullFunction:getDefaultAssignment:AntiCloakImmunity", a)
 {
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::Hull hull(9);
     config.setDefaultValues();
     config[config.AntiCloakImmunity].set("yes,no,yes,no,yes,no");
@@ -158,7 +168,8 @@ AFL_TEST("game.spec.HullFunction:getDefaultAssignment:AntiCloakImmunity", a)
 // - default
 AFL_TEST("game.spec.HullFunction:getDefaultAssignment:PlanetImmunity:default", a)
 {
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::Hull hull(77);
     config.setDefaultValues();
     config[config.PlanetsAttackKlingons].set(false);
@@ -169,7 +180,8 @@ AFL_TEST("game.spec.HullFunction:getDefaultAssignment:PlanetImmunity:default", a
 // - rebels can be attacked
 AFL_TEST("game.spec.HullFunction:getDefaultAssignment:PlanetImmunity:rebel", a)
 {
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::Hull hull(77);
     config.setDefaultValues();
     config[config.PlanetsAttackKlingons].set(false);
@@ -180,7 +192,8 @@ AFL_TEST("game.spec.HullFunction:getDefaultAssignment:PlanetImmunity:rebel", a)
 // - nonstandard PlayerRace
 AFL_TEST("game.spec.HullFunction:getDefaultAssignment:PlanetImmunity:PlayerRace", a)
 {
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::Hull hull(77);
     config.setDefaultValues();
     config[config.PlanetsAttackKlingons].set(false);
@@ -193,7 +206,8 @@ AFL_TEST("game.spec.HullFunction:getDefaultAssignment:PlanetImmunity:PlayerRace"
 // - disabled
 AFL_TEST("game.spec.HullFunction:getDefaultAssignment:FullWeaponry:disabled", a)
 {
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::Hull hull(77);
     config.setDefaultValues();
     config[config.AllowFedCombatBonus].set(false);
@@ -203,7 +217,8 @@ AFL_TEST("game.spec.HullFunction:getDefaultAssignment:FullWeaponry:disabled", a)
 // - enabled
 AFL_TEST("game.spec.HullFunction:getDefaultAssignment:FullWeaponry:enabled", a)
 {
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::Hull hull(77);
     config.setDefaultValues();
     config[config.AllowFedCombatBonus].set(true);
@@ -213,7 +228,8 @@ AFL_TEST("game.spec.HullFunction:getDefaultAssignment:FullWeaponry:enabled", a)
 // - nonstandard PlayerRace
 AFL_TEST("game.spec.HullFunction:getDefaultAssignment:FullWeaponry:PlayerRace", a)
 {
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::Hull hull(77);
     config.setDefaultValues();
     config[config.AllowFedCombatBonus].set(true);
@@ -224,7 +240,8 @@ AFL_TEST("game.spec.HullFunction:getDefaultAssignment:FullWeaponry:PlayerRace", 
 // Other
 AFL_TEST("game.spec.HullFunction:getDefaultAssignment:other", a)
 {
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::Hull hull(42);
     config.setDefaultValues();
     a.checkEqual("", HullFunction::getDefaultAssignment(BasicHullFunction::Bioscan, config, hull), PlayerSet_t());

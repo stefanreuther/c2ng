@@ -20,7 +20,8 @@ AFL_TEST("game.spec.Fighter", a)
     pl->setName(game::Player::AdjectiveName, "French");
 
     // Configuration. We check the default parameters.
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> rconfig = game::config::HostConfiguration::create();
+    game::config::HostConfiguration& config = *rconfig;
 
     // Translator
     afl::string::NullTranslator tx;

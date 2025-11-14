@@ -68,7 +68,8 @@ AFL_TEST("game.spec.HullFunctionAssignmentList:basics", a)
     for (int player = 1; player <= 3; ++player) {
         // Query the list
         ModifiedHullFunctionList modList;
-        game::config::HostConfiguration config;
+        afl::base::Ref<game::config::HostConfiguration> rconfig = game::config::HostConfiguration::create();
+        game::config::HostConfiguration& config = *rconfig;
         config[config.AllowFedCombatBonus].set(true);
         game::spec::Hull hull(2);
         game::spec::HullFunctionList result;
@@ -119,7 +120,8 @@ AFL_TEST("game.spec.HullFunctionAssignmentList:getPlayersThatCan:implied", a)
     // Lists
     ModifiedHullFunctionList modList;
     game::spec::BasicHullFunctionList basicList;
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> rconfig = game::config::HostConfiguration::create();
+    game::config::HostConfiguration& config = *rconfig;
     game::spec::HullFunctionAssignmentList testee;
 
     // Add a function: Tow implies This
@@ -152,7 +154,8 @@ AFL_TEST("game.spec.HullFunctionAssignmentList:getPlayersThatCan:implied-merged"
     // Lists
     ModifiedHullFunctionList modList;
     game::spec::BasicHullFunctionList basicList;
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> rconfig = game::config::HostConfiguration::create();
+    game::config::HostConfiguration& config = *rconfig;
     game::spec::HullFunctionAssignmentList testee;
     game::spec::Hull hull(3);
 
@@ -173,7 +176,8 @@ AFL_TEST("game.spec.HullFunctionAssignmentList:getPlayersThatCan:defaulted", a)
 {
     ModifiedHullFunctionList modList;
     game::spec::BasicHullFunctionList basicList;
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> rconfig = game::config::HostConfiguration::create();
+    game::config::HostConfiguration& config = *rconfig;
     game::spec::HullFunctionAssignmentList testee;
     game::spec::Hull hull(3);
     const game::ExperienceLevelSet_t allLevels = game::ExperienceLevelSet_t::allUpTo(game::MAX_EXPERIENCE_LEVELS);
@@ -288,7 +292,8 @@ AFL_TEST("game.spec.HullFunctionAssignmentList:filter", a)
     // Query, limited to one player
     game::spec::HullFunctionList out;
     game::spec::ModifiedHullFunctionList definitions;
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> rconfig = game::config::HostConfiguration::create();
+    game::config::HostConfiguration& config = *rconfig;
     game::spec::Hull hull(33);
     testee.getAll(out, definitions, config, hull, game::PlayerSet_t(7), game::ExperienceLevelSet_t::allUpTo(game::MAX_EXPERIENCE_LEVELS), game::spec::HullFunction::AssignedToHull);
 

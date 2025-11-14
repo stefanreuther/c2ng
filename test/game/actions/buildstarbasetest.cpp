@@ -11,7 +11,9 @@
 #include "game/map/planetstorage.hpp"
 #include "game/test/cargocontainer.hpp"
 
+using afl::base::Ref;
 using game::Element;
+using game::config::HostConfiguration;
 
 namespace {
     const int OWNER = 5;
@@ -30,7 +32,7 @@ namespace {
     }
 
     struct TestHarness {
-        game::config::HostConfiguration config;
+        Ref<HostConfiguration> config;
         game::map::Planet planet;
         game::map::PlanetStorage container;
 
@@ -38,11 +40,11 @@ namespace {
     };
 
     TestHarness::TestHarness()
-        : config(),
+        : config(HostConfiguration::create()),
           planet(99),
-          container(preparePlanet(planet), config)
+          container(preparePlanet(planet), *config)
     {
-        config.setDefaultValues();
+        config->setDefaultValues();
     }
 }
 
@@ -52,9 +54,9 @@ AFL_TEST("game.actions.BuildStarbase:error:not-played", a)
 {
     game::map::Planet somePlanet(77);
     game::test::CargoContainer container;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
 
-    AFL_CHECK_THROWS(a, (game::actions::BuildStarbase(somePlanet, container, true, config)), game::Exception);
+    AFL_CHECK_THROWS(a, (game::actions::BuildStarbase(somePlanet, container, true, *config)), game::Exception);
 }
 
 /** Test null operation.
@@ -62,7 +64,7 @@ AFL_TEST("game.actions.BuildStarbase:error:not-played", a)
 AFL_TEST("game.actions.BuildStarbase:error:null-op", a)
 {
     TestHarness h;
-    AFL_CHECK_THROWS(a, (game::actions::BuildStarbase(h.planet, h.container, false, h.config)), game::Exception);
+    AFL_CHECK_THROWS(a, (game::actions::BuildStarbase(h.planet, h.container, false, *h.config)), game::Exception);
 }
 
 /** Test normal case.
@@ -70,7 +72,7 @@ AFL_TEST("game.actions.BuildStarbase:error:null-op", a)
 AFL_TEST("game.actions.BuildStarbase:normal", a)
 {
     TestHarness h;
-    game::actions::BuildStarbase act(h.planet, h.container, true, h.config);
+    game::actions::BuildStarbase act(h.planet, h.container, true, *h.config);
 
     // Verify cost
     a.checkEqual("01. getCost", act.costAction().getCost().toCargoSpecString(), "402T 120D 340M 900$");
@@ -89,7 +91,7 @@ AFL_TEST("game.actions.BuildStarbase:normal", a)
 AFL_TEST("game.actions.BuildStarbase:parallel-modification", a)
 {
     TestHarness h;
-    game::actions::BuildStarbase act(h.planet, h.container, true, h.config);
+    game::actions::BuildStarbase act(h.planet, h.container, true, *h.config);
 
     // Parallel action
     h.planet.setBuildBaseFlag(true);
@@ -108,10 +110,10 @@ AFL_TEST("game.actions.BuildStarbase:parallel-modification", a)
 AFL_TEST("game.actions.BuildStarbase:config-change", a)
 {
     TestHarness h;
-    game::actions::BuildStarbase act(h.planet, h.container, true, h.config);
+    game::actions::BuildStarbase act(h.planet, h.container, true, *h.config);
 
     // Parallel action
-    h.config[game::config::HostConfiguration::StarbaseCost].set("T100 D100 M100");
+    (*h.config)[HostConfiguration::StarbaseCost].set("T100 D100 M100");
 
     // Commit. Must deduct new config value.
     AFL_CHECK_SUCCEEDS(a("01. commit"), act.commit());
@@ -127,11 +129,11 @@ AFL_TEST("game.actions.BuildStarbase:config-change", a)
 AFL_TEST("game.actions.BuildStarbase:config-change:signal", a)
 {
     TestHarness h;
-    game::actions::BuildStarbase act(h.planet, h.container, true, h.config);
+    game::actions::BuildStarbase act(h.planet, h.container, true, *h.config);
 
     // Parallel action
-    h.config[game::config::HostConfiguration::StarbaseCost].set("T100 D100 M100");
-    h.config.notifyListeners();
+    (*h.config)[HostConfiguration::StarbaseCost].set("T100 D100 M100");
+    h.config->notifyListeners();
 
     // Cost must have been updated
     a.checkEqual("01. getCost", act.costAction().getCost().toCargoSpecString(), "100TDM");
@@ -142,8 +144,8 @@ AFL_TEST("game.actions.BuildStarbase:config-change:signal", a)
 AFL_TEST("game.actions.BuildStarbase:error:no-resources", a)
 {
     TestHarness h;
-    h.config[game::config::HostConfiguration::StarbaseCost].set("T2000 D100 M100");
-    game::actions::BuildStarbase act(h.planet, h.container, true, h.config);
+    (*h.config)[HostConfiguration::StarbaseCost].set("T2000 D100 M100");
+    game::actions::BuildStarbase act(h.planet, h.container, true, *h.config);
 
     // Verify
     a.checkEqual("01. getCost", act.costAction().getCost().toCargoSpecString(), "2000T 100D 100M");

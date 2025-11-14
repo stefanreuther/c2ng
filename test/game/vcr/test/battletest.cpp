@@ -13,11 +13,15 @@
 #include "game/vcr/score.hpp"
 #include "util/numberformatter.hpp"
 
+using afl::base::Ref;
+using game::config::HostConfiguration;
+
 /** General tests. */
 AFL_TEST("game.vcr.test.Battle:basics", a)
 {
     // Environment
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     game::spec::ShipList shipList;
     afl::string::NullTranslator tx;
     util::NumberFormatter fmt(false, false);
@@ -84,7 +88,8 @@ AFL_TEST("game.vcr.test.Battle:basics", a)
 AFL_TEST("game.vcr.test.Battle:groups", a)
 {
     // Environment
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
 
     // Test battle with some objects
     game::vcr::test::Battle testee;

@@ -16,7 +16,8 @@ AFL_TEST("game.config.AliasOption", a)
     static const game::config::AliasOptionDescriptor one = { "One", "base" };
     static const game::config::AliasOptionDescriptor two = { "Two", "Other" };
 
-    game::config::Configuration fig;
+    afl::base::Ref<game::config::Configuration> rfig = game::config::Configuration::create();
+    game::config::Configuration& fig = *rfig;
     fig[base].set("hi");
 
     // Validate option one

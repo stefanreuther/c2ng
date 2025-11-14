@@ -58,19 +58,19 @@ AFL_TEST("game.browser.UnsupportedAccountFolder", a)
     Ref<Account> account = Account::create();
     account->setName("the acc");
     UnsupportedAccountFolder testee(tx, account);
-    game::config::UserConfiguration uc;
+    Ref<game::config::UserConfiguration> uc = game::config::UserConfiguration::create();
 
     // Accessors
     a.check         ("01. canEnter",              !testee.canEnter());
     a.checkEqual    ("02. getName",                testee.getName(), "the acc");
     a.checkDifferent("03. getText",                testee.getDescription().getText(), "");
     a.check         ("04. setLocalDirectoryName", !testee.setLocalDirectoryName("foo"));
-    a.check         ("05. loadConfiguration",     !testee.loadConfiguration(uc));
+    a.check         ("05. loadConfiguration",     !testee.loadConfiguration(*uc));
     a.checkEqual    ("06. getKind",                testee.getKind(), Folder::kAccount);
 
     // loadGameRoot
     Receiver recv(a("Receiver"));
-    std::auto_ptr<game::Task_t> t = testee.loadGameRoot(uc, std::auto_ptr<game::browser::LoadGameRootTask_t>(game::browser::LoadGameRootTask_t::makeBound(&recv, &Receiver::take)));
+    std::auto_ptr<game::Task_t> t = testee.loadGameRoot(*uc, std::auto_ptr<game::browser::LoadGameRootTask_t>(game::browser::LoadGameRootTask_t::makeBound(&recv, &Receiver::take)));
     a.checkNonNull("11. get", t.get());
     t->call();
     a.check("12. beenHere", recv.beenHere());
@@ -80,7 +80,7 @@ AFL_TEST("game.browser.UnsupportedAccountFolder", a)
     testee.loadContent(result);
     a.check("21. loadContent", result.empty());
 
-    AFL_CHECK_SUCCEEDS(a("22. saveConfiguration"), testee.saveConfiguration(uc));
+    AFL_CHECK_SUCCEEDS(a("22. saveConfiguration"), testee.saveConfiguration(*uc));
 }
 
 /*

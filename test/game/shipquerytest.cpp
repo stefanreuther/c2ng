@@ -6,6 +6,7 @@
 #include "game/shipquery.hpp"
 #include "afl/test/testrunner.hpp"
 
+using afl::base::Ref;
 using game::ExperienceLevelSet_t;
 using game::PlayerSet_t;
 using game::ShipQuery;
@@ -116,7 +117,8 @@ AFL_TEST("game.ShipQuery:initForExistingShip", a)
     shipList.engines().create(ENGINE_NR)->cost().set(game::spec::Cost::Money, 400);
 
     // Configuration
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[HostConfiguration::AllowEngineShieldBonus].set(1);
     config[HostConfiguration::EngineShieldBonusRate].set(25);
 
@@ -162,7 +164,8 @@ AFL_TEST("game.ShipQuery:initForExistingShip:exp", a)
 
     // Ship list, config
     ShipList shipList;
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
 
     // Score definitions
     UnitScoreDefinitionList scoreDefs;
@@ -193,7 +196,8 @@ AFL_TEST("game.ShipQuery:complete:owner-from-display", a)
 
     Universe univ;
     ShipList shipList;
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     UnitScoreDefinitionList scoreDefs;
 
     q.complete(univ, shipList, config, scoreDefs, 3);
@@ -212,7 +216,8 @@ AFL_TEST("game.ShipQuery:complete:default-owner", a)
 
     Universe univ;
     ShipList shipList;
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     UnitScoreDefinitionList scoreDefs;
 
     q.complete(univ, shipList, config, scoreDefs, 3);

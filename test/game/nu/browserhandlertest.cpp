@@ -585,7 +585,8 @@ AFL_TEST("game.nu.BrowserHandler:loadGameRootMaybe", a)
 
     // Config
     Ref<InternalDirectory> gameDir = InternalDirectory::create("game");
-    UserConfiguration config;
+    Ref<UserConfiguration> rconfig = UserConfiguration::create();
+    UserConfiguration& config = *rconfig;
     config[UserConfiguration::Game_Type].set("nu");
     config[UserConfiguration::Game_User].set("u");
     config[UserConfiguration::Game_Host].set("planets.nu");
@@ -646,7 +647,8 @@ AFL_TEST("game.nu.BrowserHandler:loadGameRootMaybe:error:no-account", a)
 
     // Config
     Ref<InternalDirectory> gameDir = InternalDirectory::create("game");
-    UserConfiguration config;
+    Ref<UserConfiguration> rconfig = UserConfiguration::create();
+    UserConfiguration& config = *rconfig;
     config[UserConfiguration::Game_Type].set("nu");
     config[UserConfiguration::Game_User].set("u");
     config[UserConfiguration::Game_Host].set("planets.nu");
@@ -675,7 +677,8 @@ AFL_TEST("game.nu.BrowserHandler:loadGameRootMaybe:error:no-id", a)
 
     // Config
     Ref<InternalDirectory> gameDir = InternalDirectory::create("game");
-    UserConfiguration config;
+    Ref<UserConfiguration> rconfig = UserConfiguration::create();
+    UserConfiguration& config = *rconfig;
     config[UserConfiguration::Game_Type].set("nu");
     config[UserConfiguration::Game_User].set("u");
     config[UserConfiguration::Game_Host].set("planets.nu");
@@ -704,7 +707,8 @@ AFL_TEST("game.nu.BrowserHandler:loadGameRootMaybe:no-match", a)
 
     // Config
     Ref<InternalDirectory> gameDir = InternalDirectory::create("game");
-    UserConfiguration config;
+    Ref<UserConfiguration> rconfig = UserConfiguration::create();
+    UserConfiguration& config = *rconfig;
     config[UserConfiguration::Game_Type].set("other");
     config[UserConfiguration::Game_User].set("u");
     config[UserConfiguration::Game_Host].set("planets.nu");

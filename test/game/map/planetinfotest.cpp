@@ -22,6 +22,7 @@
 #include "game/test/simpleturn.hpp"
 #include "game/test/specificationloader.hpp"
 
+using afl::base::Ref;
 using afl::string::Format;
 using afl::string::NullTranslator;
 using game::Element;
@@ -229,11 +230,11 @@ namespace {
 AFL_TEST("game.map.PlanetInfo:packPlanetMineralInfo:basic", a)
 {
     Planet pl = makeScannedPlanet();
-    HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     HostVersion host(HostVersion::PHost, MKVERSION(3, 2, 0));
     NullTranslator tx;
 
-    PlanetMineralInfo info = game::map::packPlanetMineralInfo(pl, Element::Tritanium, TURN, config, host, afl::base::Nothing, tx);
+    PlanetMineralInfo info = game::map::packPlanetMineralInfo(pl, Element::Tritanium, TURN, *config, host, afl::base::Nothing, tx);
 
     // Amounts
     a.checkEqual("01. status", info.status, PlanetMineralInfo::Scanned);
@@ -255,10 +256,10 @@ AFL_TEST("game.map.PlanetInfo:packPlanetMineralInfo:basic", a)
 // Mine override given: 50 mines x 30% = 15 kt/turn = 20 turns
 AFL_TEST("game.map.PlanetInfo:packPlanetMineralInfo:override:mines", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     HostVersion host(HostVersion::PHost, MKVERSION(3, 2, 0));
     NullTranslator tx;
-    PlanetMineralInfo info = game::map::packPlanetMineralInfo(makeScannedPlanet(), Element::Tritanium, TURN, config, host, 50, tx);
+    PlanetMineralInfo info = game::map::packPlanetMineralInfo(makeScannedPlanet(), Element::Tritanium, TURN, *config, host, 50, tx);
     a.checkEqual("miningPerTurn", info.miningPerTurn.orElse(-1), 15);
     a.checkEqual("miningDuration", info.miningDuration.orElse(-1), 20);
 }
@@ -266,12 +267,12 @@ AFL_TEST("game.map.PlanetInfo:packPlanetMineralInfo:override:mines", a)
 // Number of mines on planet: 100 mines x 30% = 30 kt/turn = 10 turns
 AFL_TEST("game.map.PlanetInfo:packPlanetMineralInfo:override:none", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     HostVersion host(HostVersion::PHost, MKVERSION(3, 2, 0));
     NullTranslator tx;
     Planet p = makeScannedPlanet();
     p.setNumBuildings(game::MineBuilding, 100);
-    PlanetMineralInfo info = game::map::packPlanetMineralInfo(p, Element::Tritanium, TURN, config, host, afl::base::Nothing, tx);
+    PlanetMineralInfo info = game::map::packPlanetMineralInfo(p, Element::Tritanium, TURN, *config, host, afl::base::Nothing, tx);
     a.checkEqual("miningPerTurn", info.miningPerTurn.orElse(-1), 30);
     a.checkEqual("miningDuration", info.miningDuration.orElse(-1), 10);
 }
@@ -279,10 +280,10 @@ AFL_TEST("game.map.PlanetInfo:packPlanetMineralInfo:override:none", a)
 // Mine override given: 0 mines
 AFL_TEST("game.map.PlanetInfo:packPlanetMineralInfo:override:zero", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     HostVersion host(HostVersion::PHost, MKVERSION(3, 2, 0));
     NullTranslator tx;
-    PlanetMineralInfo info = game::map::packPlanetMineralInfo(makeScannedPlanet(), Element::Tritanium, TURN, config, host, 0, tx);
+    PlanetMineralInfo info = game::map::packPlanetMineralInfo(makeScannedPlanet(), Element::Tritanium, TURN, *config, host, 0, tx);
     a.checkEqual("miningPerTurn", info.miningPerTurn.orElse(-1), 0);
     a.checkEqual("miningDuration", info.miningDuration.isValid(), false);
 }
@@ -290,12 +291,12 @@ AFL_TEST("game.map.PlanetInfo:packPlanetMineralInfo:override:zero", a)
 // Number of mines on planet and override
 AFL_TEST("game.map.PlanetInfo:packPlanetMineralInfo:override:both", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     HostVersion host(HostVersion::PHost, MKVERSION(3, 2, 0));
     NullTranslator tx;
     Planet p = makeScannedPlanet();
     p.setNumBuildings(game::MineBuilding, 50);
-    PlanetMineralInfo info = game::map::packPlanetMineralInfo(p, Element::Tritanium, TURN, config, host, 10, tx);
+    PlanetMineralInfo info = game::map::packPlanetMineralInfo(p, Element::Tritanium, TURN, *config, host, 10, tx);
     a.checkEqual("miningPerTurn", info.miningPerTurn.orElse(-1), 3);
     a.checkEqual("miningDuration", info.miningDuration.orElse(-1), game::map::MAX_MINING_DURATION);
 }
@@ -303,10 +304,10 @@ AFL_TEST("game.map.PlanetInfo:packPlanetMineralInfo:override:both", a)
 /** Test packPlanetMineralInfo(), empty (unknown) planet. */
 AFL_TEST("game.map.PlanetInfo:packPlanetMineralInfo:empty", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     HostVersion host(HostVersion::PHost, MKVERSION(3, 2, 0));
     NullTranslator tx;
-    PlanetMineralInfo info = game::map::packPlanetMineralInfo(Planet(99), Element::Tritanium, TURN, config, host, afl::base::Nothing, tx);
+    PlanetMineralInfo info = game::map::packPlanetMineralInfo(Planet(99), Element::Tritanium, TURN, *config, host, afl::base::Nothing, tx);
 
     a.checkEqual("01. status", info.status, PlanetMineralInfo::Unknown);
     a.checkEqual("02. age", info.age.isValid(), false);
@@ -705,7 +706,7 @@ AFL_TEST("game.map.PlanetInfo:prepareUnloadInfo", a)
     const int PLANET_ID = 77;
     const int VIEWPOINT = 4;
 
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
 
     game::test::SimpleTurn t;
     t.setPosition(game::map::Point(1000, 1000));
@@ -739,7 +740,7 @@ AFL_TEST("game.map.PlanetInfo:prepareUnloadInfo", a)
         s.setTransporterCargo(Ship::UnloadTransporter, Element::Colonists, 11);
     }
 
-    game::map::UnloadInfo info = game::map::prepareUnloadInfo(t.universe(), PLANET_ID, VIEWPOINT, game::UnitScoreDefinitionList(), t.shipList(), config);
+    game::map::UnloadInfo info = game::map::prepareUnloadInfo(t.universe(), PLANET_ID, VIEWPOINT, game::UnitScoreDefinitionList(), t.shipList(), *config);
 
     a.checkEqual("01. hostileUnload", info.hostileUnload, 12);
     a.checkEqual("02. friendlyUnload", info.friendlyUnload, 0);

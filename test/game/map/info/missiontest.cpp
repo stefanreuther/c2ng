@@ -34,7 +34,7 @@ namespace {
         game::UnitScoreDefinitionList scoreDefinitions;
         game::spec::ShipList shipList;
         game::map::Configuration mapConfig;
-        game::config::HostConfiguration config;
+        afl::base::Ref<game::config::HostConfiguration> config;
         game::HostVersion hostVersion;
         game::test::RegistrationKey key;
 
@@ -42,7 +42,8 @@ namespace {
         game::PlayerList playerList;
 
         Environment()
-            : univ(), scoreDefinitions(), shipList(), mapConfig(), config(),
+            : univ(), scoreDefinitions(), shipList(), mapConfig(),
+              config(game::config::HostConfiguration::create()),
               hostVersion(game::HostVersion::PHost, MKVERSION(3,0,0)),
               key(game::RegistrationKey::Unknown, 6),
               playerList()
@@ -110,7 +111,7 @@ AFL_TEST("game.map.info.Mission:renderShipPredictorUsedProperties:fcode+mission"
 
     // Predict
     game::map::ShipPredictor pred(env.univ, 99, env.scoreDefinitions, env.shipList,
-                                  env.mapConfig, env.config, env.hostVersion, env.key);
+                                  env.mapConfig, *env.config, env.hostVersion, env.key);
     pred.computeTurn();
     a.checkEqual("01. getNumTurns", pred.getNumTurns(), 1);
     a.check("02. UsedMission",      pred.getUsedProperties().contains(game::map::ShipPredictor::UsedMission));
@@ -161,7 +162,7 @@ AFL_TEST("game.map.info.Mission:renderShipPredictorUsedProperties:damage", a)
 
     // Predict
     game::map::ShipPredictor pred(env.univ, 99, env.scoreDefinitions, env.shipList,
-                                  env.mapConfig, env.config, env.hostVersion, env.key);
+                                  env.mapConfig, *env.config, env.hostVersion, env.key);
     pred.computeTurn();
     a.checkEqual("01. getNumTurns", pred.getNumTurns(), 1);
     a.check("02. UsedRepair",       pred.getUsedProperties().contains(game::map::ShipPredictor::UsedRepair));
@@ -190,7 +191,7 @@ AFL_TEST("game.map.info.Mission:renderShipPredictorUsedProperties:towee", a)
     sh2.setName(String_t("Other Ship"));
 
     // Predict
-    game::map::ShipPredictor pred(env.univ, 99, env.scoreDefinitions, env.shipList, env.mapConfig, env.config, env.hostVersion, env.key);
+    game::map::ShipPredictor pred(env.univ, 99, env.scoreDefinitions, env.shipList, env.mapConfig, *env.config, env.hostVersion, env.key);
     pred.addTowee();
     pred.computeTurn();
     a.checkEqual("01. getNumTurns", pred.getNumTurns(), 1);

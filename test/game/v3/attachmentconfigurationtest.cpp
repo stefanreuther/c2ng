@@ -11,6 +11,7 @@
 #include "afl/test/testrunner.hpp"
 #include "game/v3/attachmentunpacker.hpp"
 
+using afl::base::Ref;
 using afl::io::ConstMemoryStream;
 using game::config::UserConfiguration;
 using game::v3::AttachmentUnpacker;
@@ -41,7 +42,8 @@ AFL_TEST("game.v3.AttachmentConfiguration:same-timestamp", a)
     AttachmentUnpacker unpacker;
     afl::sys::Log log;
     afl::string::NullTranslator tx;
-    UserConfiguration config;
+    Ref<UserConfiguration> rconfig = UserConfiguration::create();
+    UserConfiguration& config = *rconfig;
 
     // Load util.dat file
     static const uint8_t FILE[] = {
@@ -69,7 +71,8 @@ AFL_TEST("game.v3.AttachmentConfiguration:different-timestamp", a)
     // Create AttachmentUnpacker and UserConfiguration
     afl::sys::Log log;
     afl::string::NullTranslator tx;
-    UserConfiguration config;
+    Ref<UserConfiguration> rconfig = UserConfiguration::create();
+    UserConfiguration& config = *rconfig;
 
     {
         // Load first util.dat file
@@ -112,7 +115,8 @@ AFL_TEST("game.v3.AttachmentConfiguration:race-names:ask", a)
     AttachmentUnpacker unpacker;
     afl::sys::Log log;
     afl::string::NullTranslator tx;
-    UserConfiguration config;
+    Ref<UserConfiguration> rconfig = UserConfiguration::create();
+    UserConfiguration& config = *rconfig;
     config.setOption("Unpack.RaceNames", "ask", game::config::ConfigurationOption::Game);
 
     // Load util.dat file
@@ -140,7 +144,8 @@ AFL_TEST("game.v3.AttachmentConfiguration:race-names:accept", a)
     AttachmentUnpacker unpacker;
     afl::sys::Log log;
     afl::string::NullTranslator tx;
-    UserConfiguration config;
+    Ref<UserConfiguration> rconfig = UserConfiguration::create();
+    UserConfiguration& config = *rconfig;
     config.setOption("Unpack.RaceNames", "accept", game::config::ConfigurationOption::Game);
 
     // Load util.dat file
@@ -168,7 +173,8 @@ AFL_TEST("game.v3.AttachmentConfiguration:race-names:reject", a)
     AttachmentUnpacker unpacker;
     afl::sys::Log log;
     afl::string::NullTranslator tx;
-    UserConfiguration config;
+    Ref<UserConfiguration> rconfig = UserConfiguration::create();
+    UserConfiguration& config = *rconfig;
     config.setOption("Unpack.RaceNames", "reject", game::config::ConfigurationOption::Game);
 
     // Load util.dat file
@@ -194,7 +200,8 @@ AFL_TEST("game.v3.AttachmentConfiguration:empty", a)
 {
     // Create AttachmentUnpacker and UserConfiguration
     AttachmentUnpacker unpacker;
-    UserConfiguration config;
+    Ref<UserConfiguration> rconfig = UserConfiguration::create();
+    UserConfiguration& config = *rconfig;
 
     a.checkEqual("01. checkNewAttachments", checkNewAttachments(config, unpacker), true);
 }

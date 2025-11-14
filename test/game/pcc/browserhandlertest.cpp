@@ -909,11 +909,11 @@ AFL_TEST("game.pcc.BrowserHandler:loadRoot", a)
     acct->setEncoded("api_user", "user_id", false);
 
     // Config
-    UserConfiguration config;
-    config[UserConfiguration::Game_Type].set("pcc");
+    Ref<UserConfiguration> config = UserConfiguration::create();
+    (*config)[UserConfiguration::Game_Type].set("pcc");
 
     // Do it
-    Ptr<Root> result = env.handler.loadRoot(acct, gameListEntry, config);
+    Ptr<Root> result = env.handler.loadRoot(acct, gameListEntry, *config);
     a.checkNonNull("01. result", result.get());
     a.checkEqual("02. host type", result->hostVersion().getKind(), HostVersion::PHost);
     a.checkEqual("03. host vers", result->hostVersion().getVersion(), MKVERSION(4, 1, 5));

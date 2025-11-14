@@ -13,6 +13,9 @@
 #include "game/test/root.hpp"
 #include "game/test/shiplist.hpp"
 
+using afl::base::Ref;
+using game::config::HostConfiguration;
+
 /** Test "get/set" methods. */
 AFL_TEST("game.vcr.Object:basics", a)
 {
@@ -288,8 +291,8 @@ AFL_TEST("game.vcr.Object:getGuessedEngine", a)
     game::spec::Engine* en7 = engines.create(7); en7->cost().set(game::spec::Cost::Money, 100);
     game::spec::Engine* en9 = engines.create(9); en9->cost().set(game::spec::Cost::Money, 200);
 
-    game::config::HostConfiguration config;
-    config[game::config::HostConfiguration::EngineShieldBonusRate].set(15);
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    (*config)[HostConfiguration::EngineShieldBonusRate].set(15);
 
     // Success case
     {
@@ -297,7 +300,7 @@ AFL_TEST("game.vcr.Object:getGuessedEngine", a)
         obj.setMass(230);
         obj.setIsPlanet(false);
         obj.setOwner(3);
-        a.checkEqual("01", obj.getGuessedEngine(engines, &hull, true, config), 9);
+        a.checkEqual("01", obj.getGuessedEngine(engines, &hull, true, *config), 9);
     }
 
     // Success case including 360k bonus
@@ -307,7 +310,7 @@ AFL_TEST("game.vcr.Object:getGuessedEngine", a)
         obj.setIsPlanet(false);
         obj.setOwner(3);
         obj.setNumBays(1);
-        a.checkEqual("11", obj.getGuessedEngine(engines, &hull, true, config), 9);
+        a.checkEqual("11", obj.getGuessedEngine(engines, &hull, true, *config), 9);
     }
 
     // Success case including scotty bonus
@@ -316,22 +319,22 @@ AFL_TEST("game.vcr.Object:getGuessedEngine", a)
         obj.setMass(230 + 50);
         obj.setIsPlanet(false);
         obj.setOwner(1);
-        a.checkEqual("21", obj.getGuessedEngine(engines, &hull, true, config), 9);
+        a.checkEqual("21", obj.getGuessedEngine(engines, &hull, true, *config), 9);
     }
 
     // Success case: disabled ESB but experience enabled
     {
-        game::config::HostConfiguration localConfig;
-        localConfig[game::config::HostConfiguration::EngineShieldBonusRate].set(0);
-        localConfig[game::config::HostConfiguration::EModEngineShieldBonusRate].set("2,4,6,8");
-        localConfig[game::config::HostConfiguration::NumExperienceLevels].set(4);
+        Ref<HostConfiguration> localConfig = HostConfiguration::create();
+        (*localConfig)[HostConfiguration::EngineShieldBonusRate].set(0);
+        (*localConfig)[HostConfiguration::EModEngineShieldBonusRate].set("2,4,6,8");
+        (*localConfig)[HostConfiguration::NumExperienceLevels].set(4);
 
         game::vcr::Object obj;
         obj.setMass(206);
         obj.setIsPlanet(false);
         obj.setOwner(3);
         obj.setExperienceLevel(3);
-        a.checkEqual("31", obj.getGuessedEngine(engines, &hull, true, localConfig), 7);
+        a.checkEqual("31", obj.getGuessedEngine(engines, &hull, true, *localConfig), 7);
     }
 
     // Failure case: planet
@@ -340,7 +343,7 @@ AFL_TEST("game.vcr.Object:getGuessedEngine", a)
         obj.setMass(230);
         obj.setIsPlanet(true);
         obj.setOwner(3);
-        a.checkEqual("41", obj.getGuessedEngine(engines, &hull, true, config), 0);
+        a.checkEqual("41", obj.getGuessedEngine(engines, &hull, true, *config), 0);
     }
 
     // Failure case: no hull
@@ -349,7 +352,7 @@ AFL_TEST("game.vcr.Object:getGuessedEngine", a)
         obj.setMass(230);
         obj.setIsPlanet(false);
         obj.setOwner(3);
-        a.checkEqual("51", obj.getGuessedEngine(engines, 0, true, config), 0);
+        a.checkEqual("51", obj.getGuessedEngine(engines, 0, true, *config), 0);
     }
 
     // Failure case: ESB disabled
@@ -358,7 +361,7 @@ AFL_TEST("game.vcr.Object:getGuessedEngine", a)
         obj.setMass(230);
         obj.setIsPlanet(false);
         obj.setOwner(3);
-        a.checkEqual("61", obj.getGuessedEngine(engines, &hull, false, config), 0);
+        a.checkEqual("61", obj.getGuessedEngine(engines, &hull, false, *config), 0);
     }
 
     // Failure case: no 360k bonus because no fighters
@@ -367,7 +370,7 @@ AFL_TEST("game.vcr.Object:getGuessedEngine", a)
         obj.setMass(230 + 360);
         obj.setIsPlanet(false);
         obj.setOwner(3);
-        a.checkEqual("71", obj.getGuessedEngine(engines, &hull, true, config), 0);
+        a.checkEqual("71", obj.getGuessedEngine(engines, &hull, true, *config), 0);
     }
 
     // Failure case: ambiguous engines
@@ -380,7 +383,7 @@ AFL_TEST("game.vcr.Object:getGuessedEngine", a)
         obj.setMass(230);
         obj.setIsPlanet(false);
         obj.setOwner(3);
-        a.checkEqual("81", obj.getGuessedEngine(localEngines, &hull, true, config), 0);
+        a.checkEqual("81", obj.getGuessedEngine(localEngines, &hull, true, *config), 0);
     }
 }
 

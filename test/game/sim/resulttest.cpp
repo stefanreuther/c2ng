@@ -15,8 +15,8 @@ AFL_TEST("game.sim.Result", a)
 
     // Initialize
     game::sim::Configuration config;
-    game::config::HostConfiguration hostConfiguration;
-    config.setMode(config.VcrHost, 0, hostConfiguration);
+    afl::base::Ref<game::config::HostConfiguration> hostConfiguration = game::config::HostConfiguration::create();
+    config.setMode(config.VcrHost, 0, *hostConfiguration);
     result.init(config, 120);
 
     a.checkEqual("11. series_length", result.series_length, 110);

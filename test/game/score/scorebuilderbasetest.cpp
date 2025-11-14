@@ -35,12 +35,12 @@ AFL_TEST("game.score.ScoreBuilderBase", a)
     game::HostVersion host(game::HostVersion::PHost, MKVERSION(3,0,0));
 
     // - Configuration
-    game::config::HostConfiguration config;
-    config[game::config::HostConfiguration::PALDecayPerTurn].set(17);
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
+    (*config)[game::config::HostConfiguration::PALDecayPerTurn].set(17);
 
     // Scores for testing
     Publisher testee;
-    Publisher::SingleBuilder_t b(testee, scores, teams, host, config);
+    Publisher::SingleBuilder_t b(testee, scores, teams, host, *config);
     b.add("Winner", game::score::ScoreId_Score);
     b.add("Builder", game::score::ScoreId_BuildPoints);
 

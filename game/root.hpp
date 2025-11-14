@@ -198,7 +198,7 @@ namespace game {
         /** Host configuration.
             Must be initialized by the creator of the Root object.
             Downstream code can modify this as more information becomes available. */
-        game::config::HostConfiguration m_hostConfiguration;
+        afl::base::Ref<game::config::HostConfiguration> m_hostConfiguration;
 
         /** FLAK configuration.
             Must be initialized by the creator of the Root object. */
@@ -206,7 +206,7 @@ namespace game {
 
         /** User configuration (preferences).
             Must be initialized by the creator of the Root object for now. */
-        game::config::UserConfiguration m_userConfiguration;
+        afl::base::Ref<game::config::UserConfiguration> m_userConfiguration;
 
         /** Player list.
             Must be initialized by the creator of the Root object.
@@ -274,13 +274,13 @@ game::Root::charset() const
 inline game::config::HostConfiguration&
 game::Root::hostConfiguration()
 {
-    return m_hostConfiguration;
+    return *m_hostConfiguration;
 }
 
 inline const game::config::HostConfiguration&
 game::Root::hostConfiguration() const
 {
-    return m_hostConfiguration;
+    return *m_hostConfiguration;
 }
 
 // Access FLAK configuration.
@@ -300,13 +300,13 @@ game::Root::flakConfiguration() const
 inline game::config::UserConfiguration&
 game::Root::userConfiguration()
 {
-    return m_userConfiguration;
+    return *m_userConfiguration;
 }
 
 inline const game::config::UserConfiguration&
 game::Root::userConfiguration() const
 {
-    return m_userConfiguration;
+    return *m_userConfiguration;
 }
 
 // Access player list.

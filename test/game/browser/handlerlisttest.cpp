@@ -44,18 +44,18 @@ AFL_TEST("game.browser.HandlerList:simple", a)
     HandlerList testee;
     Ref<Account> acc = Account::create();
     PtrVector<Folder> result;
-    const UserConfiguration uc;
+    Ref<const UserConfiguration> uc = UserConfiguration::create();
     Ref<Directory> dir(InternalDirectory::create("test"));
     std::auto_ptr<LoadGameRootTask_t> then = std::auto_ptr<LoadGameRootTask_t>(LoadGameRootTask_t::makeStatic(dummy));
     a.check("01. handleFolderName", !testee.handleFolderName("foo", result));
     a.checkNull("02. createAccountFolder", testee.createAccountFolder(acc));
-    a.checkNull("03. loadGameRootMaybe", testee.loadGameRootMaybe(dir, uc, then).get());
+    a.checkNull("03. loadGameRootMaybe", testee.loadGameRootMaybe(dir, *uc, then).get());
     a.checkNonNull("04. then", then.get());
 
     testee.addNewHandler(new Tester());
     a.check("11. handleFolderName", !testee.handleFolderName("foo", result));
     a.checkNull("12. createAccountFolder", testee.createAccountFolder(acc));
-    a.checkNull("13. loadGameRootMaybe", testee.loadGameRootMaybe(dir, uc, then).get());
+    a.checkNull("13. loadGameRootMaybe", testee.loadGameRootMaybe(dir, *uc, then).get());
     a.checkNonNull("14. then", then.get());
 }
 
@@ -155,11 +155,11 @@ AFL_TEST("game.browser.HandlerList:success", a)
 
     // Successful loadGameRootMaybe
     Ref<Directory> dir(InternalDirectory::create("test"));
-    UserConfiguration uc;
-    uc[UserConfiguration::Game_Type].set("test-type");
+    Ref<UserConfiguration> uc = UserConfiguration::create();
+    (*uc)[UserConfiguration::Game_Type].set("test-type");
     bool flag = false;
     std::auto_ptr<LoadGameRootTask_t> then(new FlagTask(flag));
-    std::auto_ptr<Task_t> task(testee.loadGameRootMaybe(dir, uc, then));
+    std::auto_ptr<Task_t> task(testee.loadGameRootMaybe(dir, *uc, then));
     a.checkNonNull("21. loadGameRootMaybe", task.get());
     a.checkNull("22. then", then.get());
 

@@ -124,7 +124,7 @@ namespace {
         game::UnitScoreDefinitionList shipScoreDefinitions;
         game::spec::ShipList shipList;
         Configuration mapConfig;
-        HostConfiguration hostConfiguration;
+        afl::base::Ref<HostConfiguration> hostConfiguration;
         HostVersion host;
 
         GameEnvironment()
@@ -133,7 +133,7 @@ namespace {
               shipScoreDefinitions(),
               shipList(),
               mapConfig(),
-              hostConfiguration(),
+              hostConfiguration(HostConfiguration::create()),
               host(HostVersion::PHost, MKVERSION(3,0,0))
             { }
     };
@@ -281,14 +281,14 @@ namespace {
         // Environment without labels
         explicit RenderEnvironment(GameEnvironment& env)
             : viewport(env.univ, TURN_NUMBER, env.teams, 0, 0, env.shipScoreDefinitions,
-                       env.shipList, env.mapConfig, env.hostConfiguration, env.host),
+                       env.shipList, env.mapConfig, *env.hostConfiguration, env.host),
               listener()
             { viewport.setRange(Point(900, 900), Point(3100, 3100)); }
 
         // Environment with labels
         RenderEnvironment(GameEnvironment& env, LabelEnvironment& lenv)
             : viewport(env.univ, TURN_NUMBER, env.teams, &lenv.extra, 0, env.shipScoreDefinitions,
-                       env.shipList, env.mapConfig, env.hostConfiguration, env.host),
+                       env.shipList, env.mapConfig, *env.hostConfiguration, env.host),
               listener()
             { viewport.setRange(Point(900, 900), Point(3100, 3100)); }
 
@@ -512,7 +512,7 @@ AFL_TEST("game.map.Renderer:minefield:normal", a)
     GameEnvironment env;
     Minefield* mf = env.univ.minefields().create(99);
     mf->addReport(Point(1400, 2100), 7, Minefield::IsMine, Minefield::UnitsKnown, 400, TURN_NUMBER, Minefield::MinefieldScanned);
-    mf->internalCheck(TURN_NUMBER, env.host, env.hostConfiguration);
+    mf->internalCheck(TURN_NUMBER, env.host, *env.hostConfiguration);
 
     // ...and ShowMinefields enabled, FillMinefields/ShowMinefields disabled...
     RenderEnvironment renv(env);
@@ -531,7 +531,7 @@ AFL_TEST("game.map.Renderer:minefield:filled", a)
     GameEnvironment env;
     Minefield* mf = env.univ.minefields().create(99);
     mf->addReport(Point(1400, 2100), 7, Minefield::IsMine, Minefield::UnitsKnown, 400, TURN_NUMBER, Minefield::MinefieldScanned);
-    mf->internalCheck(TURN_NUMBER, env.host, env.hostConfiguration);
+    mf->internalCheck(TURN_NUMBER, env.host, *env.hostConfiguration);
     RenderEnvironment renv(env);
 
     // ...and ShowMinefields/FillMinefields enabled, ShowMinefields disabled...
@@ -550,7 +550,7 @@ AFL_TEST("game.map.Renderer:minefield:disabled", a)
     GameEnvironment env;
     Minefield* mf = env.univ.minefields().create(99);
     mf->addReport(Point(1400, 2100), 7, Minefield::IsMine, Minefield::UnitsKnown, 400, TURN_NUMBER, Minefield::MinefieldScanned);
-    mf->internalCheck(TURN_NUMBER, env.host, env.hostConfiguration);
+    mf->internalCheck(TURN_NUMBER, env.host, *env.hostConfiguration);
 
     // ...and ShowMinefields disabled...
     RenderEnvironment renv(env);
@@ -567,7 +567,7 @@ AFL_TEST("game.map.Renderer:minefield:wrap", a)
     GameEnvironment env;
     Minefield* mf = env.univ.minefields().create(99);
     mf->addReport(Point(1900, 2100), 7, Minefield::IsMine, Minefield::UnitsKnown, 400, TURN_NUMBER, Minefield::MinefieldScanned);
-    mf->internalCheck(TURN_NUMBER, env.host, env.hostConfiguration);
+    mf->internalCheck(TURN_NUMBER, env.host, *env.hostConfiguration);
     env.mapConfig.setConfiguration(Configuration::Wrapped, Point(2000, 2000), Point(1000, 1000));
 
     // ...and ShowMinefields enabled, FillMinefields/ShowMinefields disabled...
@@ -586,10 +586,10 @@ AFL_TEST("game.map.Renderer:minefield:decay", a)
 {
     // Given a map with a single minefield, MineDecayRate=5...
     GameEnvironment env;
-    env.hostConfiguration[HostConfiguration::MineDecayRate].set(5);
+    (*env.hostConfiguration)[HostConfiguration::MineDecayRate].set(5);
     Minefield* mf = env.univ.minefields().create(99);
     mf->addReport(Point(1400, 2100), 7, Minefield::IsMine, Minefield::UnitsKnown, 400, TURN_NUMBER, Minefield::MinefieldScanned);
-    mf->internalCheck(TURN_NUMBER, env.host, env.hostConfiguration);
+    mf->internalCheck(TURN_NUMBER, env.host, *env.hostConfiguration);
 
     // ...and ShowMineDecay enabled...
     RenderEnvironment renv(env);
@@ -1620,9 +1620,9 @@ AFL_TEST("game.map.Renderer:planet:warp-well", a)
 {
     // Given a map with some planet...
     GameEnvironment env;
-    env.hostConfiguration[HostConfiguration::AllowGravityWells].set(1);
-    env.hostConfiguration[HostConfiguration::RoundGravityWells].set(1);
-    env.hostConfiguration[HostConfiguration::GravityWellRange].set(3);
+    (*env.hostConfiguration)[HostConfiguration::AllowGravityWells].set(1);
+    (*env.hostConfiguration)[HostConfiguration::RoundGravityWells].set(1);
+    (*env.hostConfiguration)[HostConfiguration::GravityWellRange].set(3);
     addScannedPlanet(a, env, 30, Point(1720, 1800), 1);
 
     // ...and ShowWarpWells enabled...
@@ -1657,9 +1657,9 @@ AFL_TEST("game.map.Renderer:planet:warp-well:wrap", a)
     // Given a wrapped map with some planet...
     GameEnvironment env;
     env.mapConfig.setConfiguration(Configuration::Wrapped, Point(2000, 2000), Point(1000, 1000));
-    env.hostConfiguration[HostConfiguration::AllowGravityWells].set(1);
-    env.hostConfiguration[HostConfiguration::RoundGravityWells].set(1);
-    env.hostConfiguration[HostConfiguration::GravityWellRange].set(3);
+    (*env.hostConfiguration)[HostConfiguration::AllowGravityWells].set(1);
+    (*env.hostConfiguration)[HostConfiguration::RoundGravityWells].set(1);
+    (*env.hostConfiguration)[HostConfiguration::GravityWellRange].set(3);
     addScannedPlanet(a, env, 30, Point(1720, 1800), 1);
 
     // ...and ShowWarpWells enabled...
@@ -1678,9 +1678,9 @@ AFL_TEST("game.map.Renderer:planet:warp-well:square", a)
 {
     // Given a map with some planet, and square warp wells...
     GameEnvironment env;
-    env.hostConfiguration[HostConfiguration::AllowGravityWells].set(1);
-    env.hostConfiguration[HostConfiguration::RoundGravityWells].set(0);
-    env.hostConfiguration[HostConfiguration::GravityWellRange].set(4);
+    (*env.hostConfiguration)[HostConfiguration::AllowGravityWells].set(1);
+    (*env.hostConfiguration)[HostConfiguration::RoundGravityWells].set(0);
+    (*env.hostConfiguration)[HostConfiguration::GravityWellRange].set(4);
     addScannedPlanet(a, env, 30, Point(1720, 1800), 1);
 
     // ...and ShowWarpWells enabled...
@@ -1699,9 +1699,9 @@ AFL_TEST("game.map.Renderer:planet:warp-well:disabled", a)
 {
     // Given a map with some planet...
     GameEnvironment env;
-    env.hostConfiguration[HostConfiguration::AllowGravityWells].set(1);
-    env.hostConfiguration[HostConfiguration::RoundGravityWells].set(1);
-    env.hostConfiguration[HostConfiguration::GravityWellRange].set(3);
+    (*env.hostConfiguration)[HostConfiguration::AllowGravityWells].set(1);
+    (*env.hostConfiguration)[HostConfiguration::RoundGravityWells].set(1);
+    (*env.hostConfiguration)[HostConfiguration::GravityWellRange].set(3);
     addScannedPlanet(a, env, 30, Point(1720, 1800), 1);
 
     // ...and ShowWarpWells disbled...
@@ -1718,9 +1718,9 @@ AFL_TEST("game.map.Renderer:planet:warp-well:inactive", a)
 {
     // Given a map with some planet in a universe without warp wells...
     GameEnvironment env;
-    env.hostConfiguration[HostConfiguration::AllowGravityWells].set(0);
-    env.hostConfiguration[HostConfiguration::RoundGravityWells].set(1);
-    env.hostConfiguration[HostConfiguration::GravityWellRange].set(3);
+    (*env.hostConfiguration)[HostConfiguration::AllowGravityWells].set(0);
+    (*env.hostConfiguration)[HostConfiguration::RoundGravityWells].set(1);
+    (*env.hostConfiguration)[HostConfiguration::GravityWellRange].set(3);
     addScannedPlanet(a, env, 30, Point(1720, 1800), 1);
 
     // ...and ShowWarpWells ensbled...
@@ -1786,9 +1786,9 @@ AFL_TEST("game.map.Renderer:planet:circular-wrap", a)
 {
     // Given a wrapped map with a marked planet...
     GameEnvironment env;
-    env.hostConfiguration[HostConfiguration::AllowGravityWells].set(1);
-    env.hostConfiguration[HostConfiguration::RoundGravityWells].set(1);
-    env.hostConfiguration[HostConfiguration::GravityWellRange].set(3);
+    (*env.hostConfiguration)[HostConfiguration::AllowGravityWells].set(1);
+    (*env.hostConfiguration)[HostConfiguration::RoundGravityWells].set(1);
+    (*env.hostConfiguration)[HostConfiguration::GravityWellRange].set(3);
     env.mapConfig.setConfiguration(Configuration::Circular, Point(2000, 2000), Point(1000, 1000));
     addUnscannedPlanet(a, env, 10, Point(2000, 1050))
         .setIsMarked(true);

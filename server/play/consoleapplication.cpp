@@ -280,6 +280,6 @@ server::play::ConsoleApplication::loadRoot(const String_t& gameDir, const Parame
 
     // Check game data
     // FIXME: load correct config!
-    const game::config::UserConfiguration uc;
-    return loader.load(fs.openDirectory(gameDir), *params.gameCharset, uc, false);
+    afl::base::Ref<const game::config::UserConfiguration> uc = game::config::UserConfiguration::create();
+    return loader.load(fs.openDirectory(gameDir), *params.gameCharset, *uc, false);
 }

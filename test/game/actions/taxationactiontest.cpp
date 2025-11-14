@@ -15,6 +15,7 @@
 #include "game/test/simpleturn.hpp"
 #include "util/numberformatter.hpp"
 
+using afl::base::Ref;
 using afl::string::NullTranslator;
 using game::Element;
 using game::HostVersion;
@@ -46,7 +47,8 @@ namespace {
 AFL_TEST("game.actions.TaxationAction:empty", a)
 {
     Planet pl(42);
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     TaxationAction testee(pl, config, HostVersion());
 
     // Check initial state
@@ -91,7 +93,8 @@ AFL_TEST("game.actions.TaxationAction:normal:phost", a)
     Planet& pl = makePlanet(t);
 
     // Testee
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     TaxationAction testee(pl, config, HostVersion(HostVersion::PHost, MKVERSION(3,4,0)));
 
     // Check initial state
@@ -144,7 +147,8 @@ AFL_TEST("game.actions.TaxationAction:normal:host", a)
     Planet& pl = makePlanet(t);
 
     // Testee
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     TaxationAction testee(pl, config, HostVersion(HostVersion::Host, MKVERSION(3,22,0)));
 
     // Check initial state
@@ -176,7 +180,8 @@ AFL_TEST("game.actions.TaxationAction:MaxPlanetaryIncome", a)
     Planet& pl = makePlanet(t);
 
     // Testee
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[HostConfiguration::MaxPlanetaryIncome].set(25);
     TaxationAction testee(pl, config, HostVersion(HostVersion::PHost, MKVERSION(3,4,0)));
 
@@ -219,7 +224,8 @@ AFL_TEST("game.actions.TaxationAction:changeRevenue", a)
     pl.setCargo(Element::Colonists, 100);
 
     // Testee
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     TaxationAction testee(pl, config, HostVersion(HostVersion::PHost, MKVERSION(3,4,0)));
 
     // - initial values
@@ -247,7 +253,8 @@ AFL_TEST("game.actions.TaxationAction:revert", a)
     Planet& pl = makePlanet(t);
 
     // Testee
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     TaxationAction testee(pl, config, HostVersion(HostVersion::PHost, MKVERSION(3,4,0)));
 
     // Check initial state
@@ -281,7 +288,8 @@ AFL_TEST("game.actions.TaxationAction:setSafeTax", a)
     Planet& pl = makePlanet(t);
 
     // Testee
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     TaxationAction testee(pl, config, HostVersion(HostVersion::PHost, MKVERSION(3,4,0)));
 
     // Check initial state
@@ -309,7 +317,8 @@ AFL_TEST("game.actions.TaxationAction:setNumBuildings", a)
     Planet& pl = makePlanet(t);
 
     // Testee
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     TaxationAction testee(pl, config, HostVersion(HostVersion::PHost, MKVERSION(3,4,0)));
 
     // Check initial state
@@ -439,7 +448,8 @@ AFL_TEST("game.actions.TaxationAction:setEffectors:Hiss", a)
     pl.setColonistHappiness(91);
 
     // Testee
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[HostConfiguration::HissEffectRate].set(5);
     TaxationAction testee(pl, config, HostVersion(HostVersion::PHost, MKVERSION(3,4,0)));
 
@@ -466,7 +476,8 @@ AFL_TEST("game.actions.TaxationAction:background-modification", a)
     Planet& pl = makePlanet(t);
 
     // Testee
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     TaxationAction testee(pl, config, HostVersion(HostVersion::PHost, MKVERSION(3,4,0)));
 
     // Check initial state

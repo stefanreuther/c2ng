@@ -12,6 +12,9 @@
 #include "game/vcr/object.hpp"
 #include "util/unicodechars.hpp"
 
+using afl::base::Ref;
+using game::config::HostConfiguration;
+
 /** Test describePlanet, trivial case.
     A: prepare trivial planet (101 kt, from North Star 4 turn 43 Cyborg). Call describePlanet.
     E: verify correct result */
@@ -34,11 +37,11 @@ AFL_TEST("game.vcr.ObjectInfo:describePlanet:normal", a)
     o.setExperienceLevel(0);
     o.setIsPlanet(true);
 
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
 
     // Check
     game::vcr::PlanetInfo result;
-    describePlanet(result, o, config);
+    describePlanet(result, o, *config);
 
     // Verify
     a.checkEqual("01. isValid",         result.isValid, true);
@@ -74,11 +77,11 @@ AFL_TEST("game.vcr.ObjectInfo:describePlanet:average", a)
     o.setExperienceLevel(1);
     o.setIsPlanet(true);
 
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
 
     // Check
     game::vcr::PlanetInfo result;
-    describePlanet(result, o, config);
+    describePlanet(result, o, *config);
 
     // Verify
     a.checkEqual("01. isValid",         result.isValid, true);
@@ -114,11 +117,11 @@ AFL_TEST("game.vcr.ObjectInfo:describePlanet:complex", a)
     o.setExperienceLevel(0);
     o.setIsPlanet(true);
 
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
 
     // Check
     game::vcr::PlanetInfo result;
-    describePlanet(result, o, config);
+    describePlanet(result, o, *config);
 
     // Verify
     // PCC1 gets a formula error no this setup.
@@ -159,11 +162,11 @@ AFL_TEST("game.vcr.ObjectInfo:describePlanet:complex2", a)
     o.setExperienceLevel(0);
     o.setIsPlanet(true);
 
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
 
     // Check
     game::vcr::PlanetInfo result;
-    describePlanet(result, o, config);
+    describePlanet(result, o, *config);
 
     // Verify
     // PCC2 <= 2.0.10 reports unknown base tech but we know it cannot be over 8.
@@ -204,11 +207,11 @@ AFL_TEST("game.vcr.ObjectInfo:describePlanet:error", a)
     o.setExperienceLevel(0);
     o.setIsPlanet(true);
 
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
 
     // Check
     game::vcr::PlanetInfo result;
-    describePlanet(result, o, config);
+    describePlanet(result, o, *config);
 
     // Verify
     a.checkEqual("01. isValid", result.isValid, false);
@@ -236,11 +239,11 @@ AFL_TEST("game.vcr.ObjectInfo:describePlanet:error2", a)
     o.setExperienceLevel(0);
     o.setIsPlanet(true);
 
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
 
     // Check
     game::vcr::PlanetInfo result;
-    describePlanet(result, o, config);
+    describePlanet(result, o, *config);
 
     // Verify
     a.checkEqual("01. isValid", result.isValid, false);
@@ -269,11 +272,11 @@ AFL_TEST("game.vcr.ObjectInfo:describePlanet:not-planet", a)
     o.setExperienceLevel(0);
     o.setIsPlanet(false);
 
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
 
     // Check
     game::vcr::PlanetInfo result;
-    describePlanet(result, o, config);
+    describePlanet(result, o, *config);
 
     // Verify
     a.checkEqual("01. isValid", result.isValid, false);
@@ -309,16 +312,16 @@ AFL_TEST("game.vcr.ObjectInfo:describeShip:normal", a)
     game::test::addTranswarp(shipList);
     game::test::addAnnihilation(shipList);
 
-    game::config::HostConfiguration config;
-    config[game::config::HostConfiguration::AllowEngineShieldBonus].set(true);
-    config[game::config::HostConfiguration::EngineShieldBonusRate].set(20);
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    (*config)[HostConfiguration::AllowEngineShieldBonus].set(true);
+    (*config)[HostConfiguration::EngineShieldBonusRate].set(20);
 
     afl::string::NullTranslator tx;
     util::NumberFormatter fmt(true, true);
 
     // Action
     game::vcr::ShipInfo info;
-    describeShip(info, o, shipList, shipList.hulls().get(game::test::ANNIHILATION_HULL_ID), true, config, tx, fmt);
+    describeShip(info, o, shipList, shipList.hulls().get(game::test::ANNIHILATION_HULL_ID), true, *config, tx, fmt);
 
     // Verify
     a.checkEqual("01. primary",         info.primary.first,           "10 " UTF_TIMES " Heavy Disruptor");
@@ -375,13 +378,13 @@ AFL_TEST("game.vcr.ObjectInfo:describeShip:hull-mismatch", a)
     game::test::addTranswarp(shipList);
     game::test::addAnnihilation(shipList);
 
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     afl::string::NullTranslator tx;
     util::NumberFormatter fmt(true, true);
 
     // Action
     game::vcr::ShipInfo info;
-    describeShip(info, o, shipList, 0, true, config, tx, fmt);
+    describeShip(info, o, shipList, 0, true, *config, tx, fmt);
 
     // Verify
     a.checkEqual("01. primary",         info.primary.first,           "10 " UTF_TIMES " Heavy Phaser");

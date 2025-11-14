@@ -19,11 +19,11 @@ namespace {
         game::PlayerList players;
         game::TeamSettings teams;
         game::HostVersion host;
-        game::config::HostConfiguration config;
+        afl::base::Ref<game::config::HostConfiguration> config;
         afl::string::NullTranslator tx;
 
         TestHarness()
-            : scores(), players(), teams(), host(game::HostVersion::PHost, MKVERSION(3,0,0)), config(), tx()
+            : scores(), players(), teams(), host(game::HostVersion::PHost, MKVERSION(3,0,0)), config(game::config::HostConfiguration::create()), tx()
             {
                 // Add turns
                 game::score::TurnScoreList::Slot_t cap = scores.addSlot(game::score::ScoreId_Capital);
@@ -57,7 +57,7 @@ namespace {
 AFL_TEST("game.score.TableBuilder:basics", a)
 {
     TestHarness h;
-    game::score::TableBuilder testee(h.scores, h.players, h.teams, h.host, h.config, h.tx);
+    game::score::TableBuilder testee(h.scores, h.players, h.teams, h.host, *h.config, h.tx);
 
     // There must be variants on offer
     a.check("01. getNumVariants", testee.getNumVariants() > 0);
@@ -140,7 +140,7 @@ AFL_TEST("game.score.TableBuilder:basics", a)
 AFL_TEST("game.score.TableBuilder:setByTeam", a)
 {
     TestHarness h;
-    game::score::TableBuilder testee(h.scores, h.players, h.teams, h.host, h.config, h.tx);
+    game::score::TableBuilder testee(h.scores, h.players, h.teams, h.host, *h.config, h.tx);
 
     // Find the "capital ships" score and cross-check
     const game::score::CompoundScore capitalScore(h.scores, game::score::ScoreId_Capital, 1);

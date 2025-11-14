@@ -2192,8 +2192,8 @@ AFL_TEST("game.proxy.SimulationSetupProxy:sort:battle-order", a)
     // Configure PHost
     {
         Configuration config;
-        game::config::HostConfiguration hostConfiguration;
-        config.setMode(Configuration::VcrPHost4, 0, hostConfiguration);
+        afl::base::Ref<game::config::HostConfiguration> hostConfiguration = game::config::HostConfiguration::create();
+        config.setMode(Configuration::VcrPHost4, 0, *hostConfiguration);
         t.setConfiguration(config, Configuration::Areas_t(Configuration::MainArea));
     }
 
@@ -2213,8 +2213,8 @@ AFL_TEST("game.proxy.SimulationSetupProxy:sort:battle-order", a)
     // Configure Host
     {
         Configuration config;
-        game::config::HostConfiguration hostConfiguration;
-        config.setMode(Configuration::VcrHost, 0, hostConfiguration);
+        afl::base::Ref<game::config::HostConfiguration> hostConfiguration = game::config::HostConfiguration::create();
+        config.setMode(Configuration::VcrHost, 0, *hostConfiguration);
         t.setConfiguration(config, Configuration::Areas_t(Configuration::MainArea));
     }
 

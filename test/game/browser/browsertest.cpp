@@ -144,13 +144,13 @@ namespace {
             { }
         virtual void loadContent(afl::container::PtrVector<Folder>& /*result*/)
             { }
-        virtual bool loadConfiguration(game::config::UserConfiguration& /*config*/)
+        virtual bool loadConfiguration(UserConfiguration& /*config*/)
             { return true; }
-        virtual void saveConfiguration(const game::config::UserConfiguration& /*config*/)
+        virtual void saveConfiguration(const UserConfiguration& /*config*/)
             { }
         virtual bool setLocalDirectoryName(String_t directoryName)
             { m_local = directoryName; return true; }
-        virtual std::auto_ptr<game::Task_t> loadGameRoot(const game::config::UserConfiguration& /*config*/, std::auto_ptr<LoadGameRootTask_t> then)
+        virtual std::auto_ptr<game::Task_t> loadGameRoot(const UserConfiguration& /*config*/, std::auto_ptr<LoadGameRootTask_t> then)
             { return makeRoot(then); }
         virtual String_t getName() const
             { return m_name; }
@@ -176,7 +176,7 @@ namespace {
             { return false; }
         virtual Folder* createAccountFolder(const afl::base::Ref<Account>& /*acc*/)
             { return new TestRemoteFolder(m_local, m_name); }
-        virtual std::auto_ptr<game::Task_t> loadGameRootMaybe(afl::base::Ref<afl::io::Directory> /*dir*/, const game::config::UserConfiguration& /*config*/, std::auto_ptr<LoadGameRootTask_t>& then)
+        virtual std::auto_ptr<game::Task_t> loadGameRootMaybe(afl::base::Ref<afl::io::Directory> /*dir*/, const UserConfiguration& /*config*/, std::auto_ptr<LoadGameRootTask_t>& then)
             { return makeRoot(then); }
      private:
         String_t& m_local;
@@ -473,10 +473,10 @@ AFL_TEST("game.browser.Browser:no-handler", a)
     a.check("01. openFolder", !env.browser.openFolder("/"));
 
     // Cannot load roots (but still consumes task)
-    UserConfiguration config;
+    Ref<UserConfiguration> config = UserConfiguration::create();
     LoadTask result;
     std::auto_ptr<LoadGameRootTask_t> inTask(LoadGameRootTask_t::makeBound(&result, &LoadTask::keep));
-    std::auto_ptr<game::Task_t> outTask(env.browser.loadGameRoot(InternalDirectory::create("dir"), config, inTask));
+    std::auto_ptr<game::Task_t> outTask(env.browser.loadGameRoot(InternalDirectory::create("dir"), *config, inTask));
     a.checkNull("11. inTask", inTask.get());
     a.checkNonNull("12. outTask", outTask.get());
 

@@ -8,6 +8,7 @@
 #include <memory>
 #include "afl/base/enumerator.hpp"
 #include "afl/base/ref.hpp"
+#include "afl/base/refcounted.hpp"
 #include "afl/base/signal.hpp"
 #include "afl/container/ptrmap.hpp"
 #include "afl/string/string.hpp"
@@ -31,17 +32,23 @@ namespace game { namespace config {
         However, this implementation has the advantage of not needing a-prioriy knowledge about option types.
 
         This class is completely different from the PCC2 version, to add more flexibility. */
-    class Configuration {
+    class Configuration : public afl::base::RefCounted {
      public:
         typedef std::pair<String_t,const ConfigurationOption*> OptionInfo_t;
         typedef afl::base::Enumerator<OptionInfo_t> Enumerator_t;
 
+     protected:
         /** Constructor.
             Makes an empty configuration. */
         Configuration();
 
+     public:
+        /** Constructor.
+            Makes an empty configuration. */
+        static afl::base::Ref<Configuration> create();
+
         /** Destructor. */
-        ~Configuration();
+        virtual ~Configuration();
 
         /** Get option, given a name.
             For typed access, use the indexing operator.

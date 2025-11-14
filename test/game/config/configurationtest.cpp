@@ -9,13 +9,17 @@
 #include "game/config/integeroption.hpp"
 #include "game/config/integervalueparser.hpp"
 
+using afl::base::Ref;
+using game::config::Configuration;
+
 /** Test index-to-create. */
 AFL_TEST("game.config.Configuration:index", a)
 {
     game::config::IntegerValueParser vp;
     const game::config::IntegerOptionDescriptor one = { "one", &vp };
     const game::config::IntegerOptionDescriptor two = { "two", &vp };
-    game::config::Configuration fig;
+    Ref<Configuration> rfig = Configuration::create();
+    Configuration& fig = *rfig;
 
     // Give option an initial value
     fig.setOption("one", "99", game::config::ConfigurationOption::Default);
@@ -32,7 +36,8 @@ AFL_TEST("game.config.Configuration:index", a)
 /** Test accessing an option. */
 AFL_TEST("game.config.Configuration:getOptionByName", a)
 {
-    game::config::Configuration testee;
+    Ref<Configuration> rtestee = Configuration::create();
+    Configuration& testee = *rtestee;
     game::config::ConfigurationOption* opt = testee.getOptionByName("someoption");
     a.checkNull("01. getOptionByName", opt);
 
@@ -48,16 +53,17 @@ AFL_TEST("game.config.Configuration:getOptions", a)
     game::config::IntegerValueParser vp;
     const game::config::IntegerOptionDescriptor one = { "one", &vp };
     const game::config::IntegerOptionDescriptor two = { "two", &vp };
-    game::config::Configuration testee;
+    Ref<Configuration> rtestee = Configuration::create();
+    Configuration& testee = *rtestee;
 
     // Set first option
     testee[one].set(1);
 
     // Start enumeration
-    afl::base::Ref<game::config::Configuration::Enumerator_t> e(testee.getOptions());
+    Ref<Configuration::Enumerator_t> e(testee.getOptions());
 
     // Verify first element
-    game::config::Configuration::OptionInfo_t info;
+    Configuration::OptionInfo_t info;
     bool ok = e->getNextElement(info);
     a.check("01. getNextElement", ok);
     a.checkEqual("02. first", info.first, "one");
@@ -78,13 +84,15 @@ AFL_TEST("game.config.Configuration:merge", a)
     const game::config::IntegerOptionDescriptor three = { "three", &vp };
 
     // Make configuration a
-    game::config::Configuration ca;
+    Ref<Configuration> rca = Configuration::create();
+    Configuration& ca = *rca;
     ca[one].set(1);
     ca[one].setSource(ConfigurationOption::User);
     ca.setOption("two", "2", ConfigurationOption::Game);
 
     // Make configuration b
-    game::config::Configuration cb;
+    Ref<Configuration> rcb = Configuration::create();
+    Configuration& cb = *rcb;
     cb.setOption("one", "11", ConfigurationOption::System);
     cb.setOption("two", "22", ConfigurationOption::Default);
     cb[three].set(33);

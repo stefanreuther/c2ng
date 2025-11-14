@@ -10,6 +10,8 @@
 #include "game/config/hostconfiguration.hpp"
 #include "game/hostversion.hpp"
 
+using afl::base::Ref;
+using game::config::HostConfiguration;
 using game::map::PlanetEffectors;
 
 AFL_TEST("game.map.PlanetEffectors:basics", a)
@@ -35,37 +37,37 @@ AFL_TEST("game.map.PlanetEffectors:basics", a)
 AFL_TEST("game.map.PlanetEffectors:describe:none", a)
 {
     afl::string::NullTranslator tx;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     PlanetEffectors t;
-    a.checkEqual("describe", t.describe(tx, 3, config), "No ship effects considered");
+    a.checkEqual("describe", t.describe(tx, 3, *config), "No ship effects considered");
 }
 
 AFL_TEST("game.map.PlanetEffectors:describe:hiss", a)
 {
     afl::string::NullTranslator tx;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     PlanetEffectors t;
     t.set(PlanetEffectors::Hiss, 3);
-    a.checkEqual("describe", t.describe(tx, 3, config), "3 ships hissing (+15)");
+    a.checkEqual("describe", t.describe(tx, 3, *config), "3 ships hissing (+15)");
 }
 
 AFL_TEST("game.map.PlanetEffectors:describe:terraform", a)
 {
     afl::string::NullTranslator tx;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     PlanetEffectors t;
     t.set(PlanetEffectors::HeatsTo50, 3);
     t.set(PlanetEffectors::HeatsTo100, 2);
-    a.checkEqual("describe", t.describe(tx, 3, config), "5 ships terraforming");
+    a.checkEqual("describe", t.describe(tx, 3, *config), "5 ships terraforming");
 }
 
 AFL_TEST("game.map.PlanetEffectors:describe:hiss+terraform", a)
 {
     afl::string::NullTranslator tx;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     PlanetEffectors t;
     t.set(PlanetEffectors::Hiss, 4);
     t.set(PlanetEffectors::HeatsTo50, 3);
     t.set(PlanetEffectors::HeatsTo100, 2);
-    a.checkEqual("describe", t.describe(tx, 3, config), "4 ships hissing, 5 ships terraforming");
+    a.checkEqual("describe", t.describe(tx, 3, *config), "4 ships hissing, 5 ships terraforming");
 }

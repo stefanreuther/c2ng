@@ -15,6 +15,9 @@
 #include "game/config/markeroption.hpp"
 #include "game/types.hpp"
 
+using afl::base::Ref;
+using game::config::UserConfiguration;
+
 namespace {
     afl::io::FileSystem& prepareFS(afl::io::InternalFileSystem& fs)
     {
@@ -46,7 +49,8 @@ namespace {
     This tests initialisation. */
 AFL_TEST("game.config.UserConfiguration:defaults", a)
 {
-    game::config::UserConfiguration testee;
+    Ref<UserConfiguration> rtestee = UserConfiguration::create();
+    UserConfiguration& testee = *rtestee;
     a.checkEqual("Display_ThousandsSep", testee[testee.Display_ThousandsSep](), 1);
     a.checkEqual("Display_Clans",        testee[testee.Display_Clans](), 0);
     a.checkEqual("Vcr_Speed",            testee[testee.Vcr_Speed](), 2);
@@ -59,7 +63,8 @@ AFL_TEST("game.config.UserConfiguration:defaults", a)
 // Uninitialized. Game type must be empty.
 AFL_TEST("game.config.UserConfiguration:getGameType:uninit", a)
 {
-    game::config::UserConfiguration testee;
+    Ref<UserConfiguration> rtestee = UserConfiguration::create();
+    UserConfiguration& testee = *rtestee;
     a.checkEqual("getGameType", testee.getGameType(), "");
     a.checkNull("getOptionByName", testee.getOptionByName("game.type"));
 }
@@ -67,7 +72,8 @@ AFL_TEST("game.config.UserConfiguration:getGameType:uninit", a)
 // Name has been set
 AFL_TEST("game.config.UserConfiguration:getGameType:init", a)
 {
-    game::config::UserConfiguration testee;
+    Ref<UserConfiguration> rtestee = UserConfiguration::create();
+    UserConfiguration& testee = *rtestee;
     testee.setOption("game.type", "foo", game::config::ConfigurationOption::User);
     a.checkEqual("getGameType", testee.getGameType(), "foo");
     a.checkNonNull("getOptionByName", testee.getOptionByName("game.type"));
@@ -80,7 +86,8 @@ AFL_TEST("game.config.UserConfiguration:getGameType:init", a)
 // Defaults: thousands separators, but no clans
 AFL_TEST("game.config.UserConfiguration:format:default", a)
 {
-    game::config::UserConfiguration testee;
+    Ref<UserConfiguration> rtestee = UserConfiguration::create();
+    UserConfiguration& testee = *rtestee;
     a.checkEqual("01", testee.formatNumber(1), "1");
     a.checkEqual("02", testee.formatNumber(1000), "1,000");
     a.checkEqual("03", testee.formatNumber(-1000), "-1,000");
@@ -97,7 +104,8 @@ AFL_TEST("game.config.UserConfiguration:format:default", a)
 // No thousands separators
 AFL_TEST("game.config.UserConfiguration:format:no-thousands-separator", a)
 {
-    game::config::UserConfiguration testee;
+    Ref<UserConfiguration> rtestee = UserConfiguration::create();
+    UserConfiguration& testee = *rtestee;
     testee[testee.Display_ThousandsSep].set(0);
     a.checkEqual("21", testee.formatNumber(1), "1");
     a.checkEqual("22", testee.formatNumber(1000), "1000");
@@ -115,7 +123,8 @@ AFL_TEST("game.config.UserConfiguration:format:no-thousands-separator", a)
 // Clans
 AFL_TEST("game.config.UserConfiguration:format:clans", a)
 {
-    game::config::UserConfiguration testee;
+    Ref<UserConfiguration> rtestee = UserConfiguration::create();
+    UserConfiguration& testee = *rtestee;
     testee[testee.Display_Clans].set(1);
     a.checkEqual("41", testee.formatPopulation(33), "33c");
     a.checkEqual("42", testee.formatPopulation(334455), "334,455c");
@@ -128,7 +137,8 @@ AFL_TEST("game.config.UserConfiguration:format:clans", a)
     E: invalid index returns null; valid index returns expected value */
 AFL_TEST("game.config.UserConfiguration:getCannedMarker", a)
 {
-    game::config::UserConfiguration testee;
+    Ref<UserConfiguration> rtestee = UserConfiguration::create();
+    UserConfiguration& testee = *rtestee;
     a.checkNull("01. wrong index", testee.getCannedMarker(-1));
     a.checkNull("02. wrong index", testee.getCannedMarker(1000));
 
@@ -144,11 +154,12 @@ AFL_TEST("game.config.UserConfiguration:getCannedMarker", a)
     E: configurations should be empty. */
 AFL_TEST("game.config.UserConfiguration:save:empty", a)
 {
-    game::config::UserConfiguration testee;
+    Ref<UserConfiguration> rtestee = UserConfiguration::create();
+    UserConfiguration& testee = *rtestee;
     ProfileEnvironment env;
 
     // Save empty to directory
-    afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("game");
+    Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("game");
     testee.saveGameConfiguration(*dir, env.log, env.tx);
     testee.saveUserConfiguration(env.profile, env.log, env.tx);
 
@@ -168,11 +179,12 @@ AFL_TEST("game.config.UserConfiguration:save:empty", a)
     E: game configuration should be empty, user configuration should be populated. */
 AFL_TEST("game.config.UserConfiguration:save:previously-loaded", a)
 {
-    game::config::UserConfiguration testee;
+    Ref<UserConfiguration> rtestee = UserConfiguration::create();
+    UserConfiguration& testee = *rtestee;
     ProfileEnvironment env;
 
     // Load, then save
-    afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("game");
+    Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("game");
     testee.loadUserConfiguration(env.profile, env.log, env.tx);
     testee.loadGameConfiguration(*dir, env.log, env.tx);
     testee.saveGameConfiguration(*dir, env.log, env.tx);
@@ -194,11 +206,12 @@ AFL_TEST("game.config.UserConfiguration:save:previously-loaded", a)
     E: known items are converted, unknown items are preserved. Origin preserved for everything. */
 AFL_TEST("game.config.UserConfiguration:load", a)
 {
-    game::config::UserConfiguration testee;
+    Ref<UserConfiguration> rtestee = UserConfiguration::create();
+    UserConfiguration& testee = *rtestee;
     ProfileEnvironment env;
 
     // Set up
-    afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("game");
+    Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("game");
     dir->openFile("pcc2.ini", afl::io::FileSystem::Create)
         ->fullWrite(afl::string::toBytes("Lock.Left = planet\n"
                                          "TestGameOption = gameValue\n"));

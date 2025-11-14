@@ -16,6 +16,7 @@
 #include "game/teamsettings.hpp"
 #include "game/turn.hpp"
 
+using afl::base::Ref;
 using afl::io::xml::TagNode;
 using afl::string::NullTranslator;
 using game::TeamSettings;
@@ -64,19 +65,19 @@ namespace {
         Universe univ;
         UnitScoreDefinitionList theScores;
         UnitScoreDefinitionList::Index_t expIndex;
-        HostConfiguration config;
+        Ref<HostConfiguration> config;
 
         util::NumberFormatter fmt;
         afl::string::NullTranslator tx;
 
         ExperienceTestHarness()
-            : univ(), theScores(), expIndex(), config(), fmt(true, true), tx()
+            : univ(), theScores(), expIndex(), config(HostConfiguration::create()), fmt(true, true), tx()
             {
                 UnitScoreDefinitionList::Definition defn = { "Experience", game::ScoreId_ExpLevel, 10 };
                 expIndex = theScores.add(defn);
 
-                config[HostConfiguration::NumExperienceLevels].set(3);
-                config[HostConfiguration::ExperienceLevelNames].set("Noob,Apprentice,Wizard,God");
+                (*config)[HostConfiguration::NumExperienceLevels].set(3);
+                (*config)[HostConfiguration::ExperienceLevelNames].set("Noob,Apprentice,Wizard,God");
             }
     };
 
@@ -256,7 +257,7 @@ AFL_TEST("game.map.info.Info:renderShipExperienceSummary", a)
     // With ScriptLinkBuilder
     {
         TagNode tab("table");
-        gmi::renderShipExperienceSummary(tab, h.univ, true, h.theScores, h.config, h.fmt, h.tx, game::map::info::ScriptLinkBuilder());
+        gmi::renderShipExperienceSummary(tab, h.univ, true, h.theScores, *h.config, h.fmt, h.tx, game::map::info::ScriptLinkBuilder());
 
         a.checkEqual("01. ScriptLinkBuilder", toString(tab),
                      "<table><tr><td width=\"17\"><font color=\"white\">Ships by Experience Level</font></td><td align=\"right\" width=\"3\"/></tr>"
@@ -268,7 +269,7 @@ AFL_TEST("game.map.info.Info:renderShipExperienceSummary", a)
     // With NullLinkBuilder
     {
         TagNode tab("table");
-        gmi::renderShipExperienceSummary(tab, h.univ, true, h.theScores, h.config, h.fmt, h.tx, game::map::info::NullLinkBuilder());
+        gmi::renderShipExperienceSummary(tab, h.univ, true, h.theScores, *h.config, h.fmt, h.tx, game::map::info::NullLinkBuilder());
 
         a.checkEqual("NullLinkBuilder", toString(tab),
                      "<table><tr><td width=\"17\"><font color=\"white\">Ships by Experience Level</font></td><td align=\"right\" width=\"3\"/></tr>"
@@ -296,7 +297,7 @@ AFL_TEST("game.map.info.Info:renderPlanetExperienceSummary", a)
     // With ScriptLinkBuilder
     {
         TagNode tab("table");
-        gmi::renderPlanetExperienceSummary(tab, h.univ, h.theScores, h.config, h.fmt, h.tx, game::map::info::ScriptLinkBuilder());
+        gmi::renderPlanetExperienceSummary(tab, h.univ, h.theScores, *h.config, h.fmt, h.tx, game::map::info::ScriptLinkBuilder());
 
         a.checkEqual("01. ScriptLinkBuilder", toString(tab),
                      "<table><tr><td width=\"17\"><font color=\"white\">Planets by Experience Level</font></td><td align=\"right\" width=\"3\"/></tr>"
@@ -308,7 +309,7 @@ AFL_TEST("game.map.info.Info:renderPlanetExperienceSummary", a)
     // With NullLinkBuilder
     {
         TagNode tab("table");
-        gmi::renderPlanetExperienceSummary(tab, h.univ, h.theScores, h.config, h.fmt, h.tx, game::map::info::NullLinkBuilder());
+        gmi::renderPlanetExperienceSummary(tab, h.univ, h.theScores, *h.config, h.fmt, h.tx, game::map::info::NullLinkBuilder());
 
         a.checkEqual("11. NullLinkBuilder", toString(tab),
                      "<table><tr><td width=\"17\"><font color=\"white\">Planets by Experience Level</font></td><td align=\"right\" width=\"3\"/></tr>"

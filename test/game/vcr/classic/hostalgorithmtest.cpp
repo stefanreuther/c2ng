@@ -14,6 +14,9 @@
 #include "game/vcr/classic/statustoken.hpp"
 #include <memory>
 
+using afl::base::Ref;
+using game::config::HostConfiguration;
+
 namespace {
     void initShipList(game::spec::ShipList& list)
     {
@@ -146,12 +149,12 @@ AFL_TEST("game.vcr.classic.HostAlgorithm:freighter-vs-torper", a)
 {
     // Surroundings
     game::vcr::classic::NullVisualizer vis;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     game::spec::ShipList list;
     initShipList(list);
 
     // First fight
-    game::vcr::classic::HostAlgorithm testee(false, vis, config, list.beams(), list.launchers());
+    game::vcr::classic::HostAlgorithm testee(false, vis, *config, list.beams(), list.launchers());
     game::vcr::Object left(convertObject(battles[0].object[0]));
     game::vcr::Object right(convertObject(battles[0].object[1]));
     uint16_t seed = battles[0].seed;
@@ -189,12 +192,12 @@ AFL_TEST("game.vcr.classic.HostAlgorithm:torper-vs-torper", a)
 {
     // Surroundings
     game::vcr::classic::NullVisualizer vis;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     game::spec::ShipList list;
     initShipList(list);
 
     // Second fight
-    game::vcr::classic::HostAlgorithm testee(false, vis, config, list.beams(), list.launchers());
+    game::vcr::classic::HostAlgorithm testee(false, vis, *config, list.beams(), list.launchers());
     game::vcr::Object left(convertObject(battles[1].object[0]));
     game::vcr::Object right(convertObject(battles[1].object[1]));
     uint16_t seed = battles[1].seed;
@@ -230,12 +233,12 @@ AFL_TEST("game.vcr.classic.HostAlgorithm:torper-vs-planet", a)
 {
     // Surroundings
     game::vcr::classic::NullVisualizer vis;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     game::spec::ShipList list;
     initShipList(list);
 
     // Final recording (ship/planet)
-    game::vcr::classic::HostAlgorithm testee(false, vis, config, list.beams(), list.launchers());
+    game::vcr::classic::HostAlgorithm testee(false, vis, *config, list.beams(), list.launchers());
     game::vcr::Object left(convertObject(battles[16].object[0]));
     game::vcr::Object right(convertObject(battles[16].object[1]));
     uint16_t seed = battles[16].seed;
@@ -270,12 +273,12 @@ AFL_TEST("game.vcr.classic.HostAlgorithm:bug-emulation", a)
 {
     // Surroundings
     game::vcr::classic::NullVisualizer vis;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     game::spec::ShipList list;
     initShipList(list);
 
     // Final recording (ship/planet)
-    game::vcr::classic::HostAlgorithm testee(false, vis, config, list.beams(), list.launchers());
+    game::vcr::classic::HostAlgorithm testee(false, vis, *config, list.beams(), list.launchers());
     game::vcr::Object left(convertObject(battles[13].object[0]));
     game::vcr::Object right(convertObject(battles[13].object[1]));
     uint16_t seed = battles[13].seed;
@@ -310,12 +313,12 @@ AFL_TEST("game.vcr.classic.HostAlgorithm:rng-bug", a)
 {
     // Surroundings
     game::vcr::classic::NullVisualizer vis;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     game::spec::ShipList list;
     initShipList(list);
 
     // Final recording (ship/planet)
-    game::vcr::classic::HostAlgorithm testee(false, vis, config, list.beams(), list.launchers());
+    game::vcr::classic::HostAlgorithm testee(false, vis, *config, list.beams(), list.launchers());
     game::vcr::Object left(convertObject(battles[18].object[0]));
     game::vcr::Object right(convertObject(battles[18].object[1]));
     uint16_t seed = battles[18].seed;
@@ -351,12 +354,12 @@ AFL_TEST("game.vcr.classic.HostAlgorithm:dead-fighter-fires", a)
 {
     // Surroundings
     game::vcr::classic::NullVisualizer vis;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     game::spec::ShipList list;
     initShipList(list);
 
     // "Deadfire" fight (carrier/carrier fight)
-    game::vcr::classic::HostAlgorithm testee(false, vis, config, list.beams(), list.launchers());
+    game::vcr::classic::HostAlgorithm testee(false, vis, *config, list.beams(), list.launchers());
     game::vcr::Object left(convertObject(battles[17].object[0]));
     game::vcr::Object right(convertObject(battles[17].object[1]));
     uint16_t seed = battles[17].seed;
@@ -395,12 +398,12 @@ AFL_TEST("game.vcr.classic.HostAlgorithm:torper-vs-torper:partial", a)
 
     // Surroundings
     game::vcr::classic::NullVisualizer vis;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     game::spec::ShipList list;
     initShipList(list);
 
     // Final recording (ship/planet)
-    game::vcr::classic::HostAlgorithm testee(false, vis, config, list.beams(), list.launchers());
+    game::vcr::classic::HostAlgorithm testee(false, vis, *config, list.beams(), list.launchers());
     game::vcr::Object left(convertObject(battles[9].object[0]));
     game::vcr::Object right(convertObject(battles[9].object[1]));
     uint16_t seed = battles[9].seed;
@@ -518,7 +521,7 @@ AFL_TEST("game.vcr.classic.HostAlgorithm:firing-range-bonus", a)
 {
     // Surroundings
     game::vcr::classic::NullVisualizer vis;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     game::spec::ShipList list;
     for (int i = 1; i <= 10; ++i) {
         list.beams().create(i);
@@ -534,7 +537,7 @@ AFL_TEST("game.vcr.classic.HostAlgorithm:firing-range-bonus", a)
                       {20, 0, "Right", 0, 1000,  20, 7, 10, 0, 0, 0, 0, 0,  2, 10, 0, 1, 100, 1,1,0,1,0}}};
 
     // Final recording (ship/planet)
-    game::vcr::classic::HostAlgorithm testee(true, vis, config, list.beams(), list.launchers());
+    game::vcr::classic::HostAlgorithm testee(true, vis, *config, list.beams(), list.launchers());
     game::vcr::Object left(convertObject(def.object[0]));
     game::vcr::Object right(convertObject(def.object[1]));
     uint16_t seed = def.seed;

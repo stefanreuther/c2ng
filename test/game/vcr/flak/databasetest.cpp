@@ -432,7 +432,7 @@ namespace {
 AFL_TEST("game.vcr.flak.Database", a)
 {
     game::vcr::flak::Database testee;
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
     a.checkEqual("01. getNumBattles", testee.getNumBattles(), 0U);
     a.checkNull("02. getBattle", testee.getBattle(0));
 
@@ -451,7 +451,7 @@ AFL_TEST("game.vcr.flak.Database", a)
     // Skip header because that contains the player assignment that we do not reproduce.
     const size_t SKIP = sizeof(game::vcr::flak::structures::Header);
     afl::io::InternalStream out;
-    testee.save(out, 0, 3, config, cs);
+    testee.save(out, 0, 3, *config, cs);
     a.checkEqual("31. save size", out.getContent().size(), sizeof(FILE_CONTENT));
     a.checkEqualContent("32. content", out.getContent().subrange(SKIP), afl::base::ConstBytes_t(FILE_CONTENT).subrange(SKIP));
 }

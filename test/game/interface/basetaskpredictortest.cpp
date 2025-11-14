@@ -18,10 +18,10 @@ namespace {
         game::map::Planet planet;
         game::map::Universe univ;
         game::spec::ShipList shipList;
-        game::config::HostConfiguration config;
+        afl::base::Ref<game::config::HostConfiguration> config;
 
         TestHarness()
-            : planet(99), univ(), shipList(), config()
+            : planet(99), univ(), shipList(), config(game::config::HostConfiguration::create())
             { }
     };
 
@@ -110,7 +110,7 @@ AFL_TEST("game.interface.BaseTaskPredictor:build", a)
     h.planet.setBaseBuildOrder(o);
 
     // Action
-    game::interface::BaseTaskPredictor testee(h.planet, h.univ, h.shipList, h.config);
+    game::interface::BaseTaskPredictor testee(h.planet, h.univ, h.shipList, *h.config);
     testee.advanceTurn();
 
     // Verify
@@ -136,7 +136,7 @@ AFL_TEST("game.interface.BaseTaskPredictor:dmp", a)
     h.planet.setFriendlyCode(String_t("dmp"));
 
     // Action
-    game::interface::BaseTaskPredictor testee(h.planet, h.univ, h.shipList, h.config);
+    game::interface::BaseTaskPredictor testee(h.planet, h.univ, h.shipList, *h.config);
     testee.advanceTurn();
 
     // Verify
@@ -158,7 +158,7 @@ AFL_TEST("game.interface.BaseTaskPredictor:shipyard", a)
     h.planet.setBaseShipyardOrder(game::RecycleShipyardAction, 33);
 
     // Action
-    game::interface::BaseTaskPredictor testee(h.planet, h.univ, h.shipList, h.config);
+    game::interface::BaseTaskPredictor testee(h.planet, h.univ, h.shipList, *h.config);
     testee.advanceTurn();
 
     // Verify
@@ -182,7 +182,7 @@ AFL_TEST("game.interface.BaseTaskPredictor:predictInstruction:BuildShip", a)
     interpreter::Arguments args(seg, 0, 2);
 
     // Action
-    game::interface::BaseTaskPredictor testee(h.planet, h.univ, h.shipList, h.config);
+    game::interface::BaseTaskPredictor testee(h.planet, h.univ, h.shipList, *h.config);
     bool ok = testee.predictInstruction("BUILDSHIP", args);
     a.check("predictInstruction ok", ok);
 
@@ -207,7 +207,7 @@ AFL_TEST("game.interface.BaseTaskPredictor:predictInstruction:SetFCode", a)
     interpreter::Arguments args(seg, 0, 1);
 
     // Action
-    game::interface::BaseTaskPredictor testee(h.planet, h.univ, h.shipList, h.config);
+    game::interface::BaseTaskPredictor testee(h.planet, h.univ, h.shipList, *h.config);
     bool ok = testee.predictInstruction("SETFCODE", args);
     a.check("predictInstruction ok", ok);
 
@@ -229,7 +229,7 @@ AFL_TEST("game.interface.BaseTaskPredictor:predictInstruction:SetMission", a)
     interpreter::Arguments args(seg, 0, 1);
 
     // Action
-    game::interface::BaseTaskPredictor testee(h.planet, h.univ, h.shipList, h.config);
+    game::interface::BaseTaskPredictor testee(h.planet, h.univ, h.shipList, *h.config);
     bool ok = testee.predictInstruction("SETMISSION", args);
     a.check("predictInstruction ok", ok);
 
@@ -252,7 +252,7 @@ AFL_TEST("game.interface.BaseTaskPredictor:predictInstruction:FixShip", a)
     interpreter::Arguments args(seg, 0, 1);
 
     // Action
-    game::interface::BaseTaskPredictor testee(h.planet, h.univ, h.shipList, h.config);
+    game::interface::BaseTaskPredictor testee(h.planet, h.univ, h.shipList, *h.config);
     bool ok = testee.predictInstruction("FIXSHIP", args);
     a.check("predictInstruction ok", ok);
 

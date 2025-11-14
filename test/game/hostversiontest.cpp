@@ -9,6 +9,7 @@
 #include "afl/test/testrunner.hpp"
 #include "game/config/hostconfiguration.hpp"
 
+using afl::base::Ref;
 using game::HostVersion;
 using game::config::HostConfiguration;
 
@@ -245,7 +246,8 @@ AFL_TEST("game.HostVersion:hasCaseInsensitiveUniversalMinefieldFCodes", a)
 // getNativeTaxRateLimit
 AFL_TEST("game.HostVersion:getNativeTaxRateLimit", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[config.PlayerRace].set("1,2,3,4,5,6,7,8,9,10,11");
     a.checkEqual("01", HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).getNativeTaxRateLimit(1, config), 100);
     a.checkEqual("02", HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).getNativeTaxRateLimit(1, config), 100);
@@ -268,7 +270,8 @@ AFL_TEST("game.HostVersion:getNativeTaxRateLimit", a)
 
 AFL_TEST("game.HostVersion:getNativeTaxRateLimit:PlayerRace", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[config.PlayerRace].set("6,1,2,1");
     a.checkEqual("01", HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).getNativeTaxRateLimit(1, config), 20);
     a.checkEqual("02", HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).getNativeTaxRateLimit(2, config), 100);
@@ -278,7 +281,8 @@ AFL_TEST("game.HostVersion:getNativeTaxRateLimit:PlayerRace", a)
 // getColonistTaxRateLimit:
 AFL_TEST("game.HostVersion:getColonistTaxRateLimit", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[config.PlayerRace].set("1,2,3,4,5,6,7,8,9,10,11");
     a.checkEqual("01", HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).getColonistTaxRateLimit(1, config), 100);
     a.checkEqual("02", HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).getColonistTaxRateLimit(1, config), 100);
@@ -295,7 +299,8 @@ AFL_TEST("game.HostVersion:getColonistTaxRateLimit", a)
 
 AFL_TEST("game.HostVersion:getColonistTaxRateLimit:PlayerRace", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[config.PlayerRace].set("6,1,2,1");
     a.checkEqual("01", HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).getColonistTaxRateLimit(1, config), 100);
     a.checkEqual("02", HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).getColonistTaxRateLimit(2, config), 100);
@@ -488,7 +493,8 @@ AFL_TEST("game.HostVersion:isAlchemyRounding", a)
 // - 10000 (=100 ly) is ok for everyone
 AFL_TEST("game.HostVersion:isValidChunnelDistance2", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[config.MinimumChunnelDistance].set(100);
     a.check("01",  HostVersion(HostVersion::Unknown, MKVERSION(3,22,0)).isValidChunnelDistance2(10000, config));
     a.check("02",  HostVersion(HostVersion::Host,    MKVERSION(3,22,0)).isValidChunnelDistance2(10000, config));
@@ -538,7 +544,8 @@ AFL_TEST("game.HostVersion:hasPermissiveClimateLimits", a)
 // Base case
 AFL_TEST("game.HostVersion:setImpliedHostConfiguration:base", a)
 {
-    HostConfiguration c;
+    Ref<HostConfiguration> rc = HostConfiguration::create();
+    HostConfiguration& c = *rc;
     c.setDefaultValues();
     a.checkEqual("CPEnableShow", c[HostConfiguration::CPEnableShow](), true);
     a.checkEqual("AllowExtendedMissions", c[HostConfiguration::AllowExtendedMissions](), true);
@@ -547,7 +554,8 @@ AFL_TEST("game.HostVersion:setImpliedHostConfiguration:base", a)
 // Host
 AFL_TEST("game.HostVersion:setImpliedHostConfiguration:Host", a)
 {
-    HostConfiguration c;
+    Ref<HostConfiguration> rc = HostConfiguration::create();
+    HostConfiguration& c = *rc;
     c.setDefaultValues();
     HostVersion(HostVersion::Host, MKVERSION(3,22,0)).setImpliedHostConfiguration(c);
     a.checkEqual("CPEnableShow", c[HostConfiguration::CPEnableShow](), false);
@@ -557,7 +565,8 @@ AFL_TEST("game.HostVersion:setImpliedHostConfiguration:Host", a)
 // Old PHost
 AFL_TEST("game.HostVersion:setImpliedHostConfiguration:PHost:old", a)
 {
-    HostConfiguration c;
+    Ref<HostConfiguration> rc = HostConfiguration::create();
+    HostConfiguration& c = *rc;
     c.setDefaultValues();
     HostVersion(HostVersion::PHost, MKVERSION(3,2,5)).setImpliedHostConfiguration(c);
     a.checkEqual("CPEnableShow", c[HostConfiguration::CPEnableShow](), false);
@@ -567,7 +576,8 @@ AFL_TEST("game.HostVersion:setImpliedHostConfiguration:PHost:old", a)
 // New PHost
 AFL_TEST("game.HostVersion:setImpliedHostConfiguration:PHost:new", a)
 {
-    HostConfiguration c;
+    Ref<HostConfiguration> rc = HostConfiguration::create();
+    HostConfiguration& c = *rc;
     c.setDefaultValues();
     HostVersion(HostVersion::PHost, MKVERSION(4,1,5)).setImpliedHostConfiguration(c);
     a.checkEqual("CPEnableShow", c[HostConfiguration::CPEnableShow](), true);
@@ -577,7 +587,8 @@ AFL_TEST("game.HostVersion:setImpliedHostConfiguration:PHost:new", a)
 // ...but it's not unconditionally enabled
 AFL_TEST("game.HostVersion:setImpliedHostConfiguration:PHost:disabled", a)
 {
-    HostConfiguration c;
+    Ref<HostConfiguration> rc = HostConfiguration::create();
+    HostConfiguration& c = *rc;
     c.setDefaultValues();
     c[HostConfiguration::CPEnableShow].set(false);
     c[HostConfiguration::AllowExtendedMissions].set(false);
@@ -588,7 +599,8 @@ AFL_TEST("game.HostVersion:setImpliedHostConfiguration:PHost:disabled", a)
 
 AFL_TEST("game.HostVersion:setImpliedHostConfiguration:Host:minefields", a)
 {
-    HostConfiguration c;
+    Ref<HostConfiguration> rc = HostConfiguration::create();
+    HostConfiguration& c = *rc;
     c[HostConfiguration::UnitsPerTorpRate].set("1,2,3,4,5,6,7,8,9,10");
     HostVersion(HostVersion::Host, MKVERSION(3,22,40)).setImpliedHostConfiguration(c);
     a.checkEqual("01", c[HostConfiguration::UnitsPerTorpRate](1), 100);
@@ -601,7 +613,8 @@ AFL_TEST("game.HostVersion:setImpliedHostConfiguration:Host:minefields", a)
 
 AFL_TEST("game.HostVersion:setImpliedHostConfiguration:PHost:minefields", a)
 {
-    HostConfiguration c;
+    Ref<HostConfiguration> rc = HostConfiguration::create();
+    HostConfiguration& c = *rc;
     c[HostConfiguration::UnitsPerTorpRate].set("1,2,3,4,5,6,7,8,9,10");
     HostVersion(HostVersion::PHost, MKVERSION(3,2,5)).setImpliedHostConfiguration(c);
     a.checkEqual("01", c[HostConfiguration::UnitsPerTorpRate](1), 1);   // set above
@@ -615,7 +628,8 @@ AFL_TEST("game.HostVersion:setImpliedHostConfiguration:PHost:minefields", a)
 // Host
 AFL_TEST("game.HostVersion:setImpliedHostConfiguration:Host:fuel-usage", a)
 {
-    HostConfiguration c;
+    Ref<HostConfiguration> rc = HostConfiguration::create();
+    HostConfiguration& c = *rc;
     c.setDefaultValues();
     c[HostConfiguration::FuelUsagePerFightFor100KT].set(3);
     c[HostConfiguration::FuelUsagePerTurnFor100KT].set(2);
@@ -628,7 +642,8 @@ AFL_TEST("game.HostVersion:setImpliedHostConfiguration:Host:fuel-usage", a)
 // PHost
 AFL_TEST("game.HostVersion:setImpliedHostConfiguration:PHost:fuel-usage", a)
 {
-    HostConfiguration c;
+    Ref<HostConfiguration> rc = HostConfiguration::create();
+    HostConfiguration& c = *rc;
     c.setDefaultValues();
     c[HostConfiguration::FuelUsagePerFightFor100KT].set(3);
     c[HostConfiguration::FuelUsagePerTurnFor100KT].set(2);
@@ -641,7 +656,8 @@ AFL_TEST("game.HostVersion:setImpliedHostConfiguration:PHost:fuel-usage", a)
 // Host
 AFL_TEST("game.HostVersion:setImpliedHostConfiguration:Host:build-queue", a)
 {
-    HostConfiguration c;
+    Ref<HostConfiguration> rc = HostConfiguration::create();
+    HostConfiguration& c = *rc;
     c.setDefaultValues();
     HostVersion(HostVersion::Host, MKVERSION(3,22,48)).setImpliedHostConfiguration(c);
     a.checkEqual("isPBPGame", c.isPBPGame(), true);
@@ -650,7 +666,8 @@ AFL_TEST("game.HostVersion:setImpliedHostConfiguration:Host:build-queue", a)
 // PHost
 AFL_TEST("game.HostVersion:setImpliedHostConfiguration:PHost:build-queue", a)
 {
-    HostConfiguration c;
+    Ref<HostConfiguration> rc = HostConfiguration::create();
+    HostConfiguration& c = *rc;
     c.setDefaultValues();
     HostVersion(HostVersion::PHost, MKVERSION(4,1,0)).setImpliedHostConfiguration(c);
     // Default is PAL!

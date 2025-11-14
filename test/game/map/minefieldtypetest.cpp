@@ -9,7 +9,9 @@
 namespace gp = game::parser;
 
 namespace {
+    using afl::base::Ref;
     using game::Id_t;
+    using game::config::HostConfiguration;
     using game::map::Minefield;
     using game::map::Point;
 
@@ -57,7 +59,8 @@ AFL_TEST("game.map.MinefieldType:addMessageInformation:simple", a)
 {
     game::map::MinefieldType testee;
     game::HostVersion host;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
 
     {
         gp::MessageInformation info(gp::MessageInformation::Minefield, 30, TURN);
@@ -92,7 +95,8 @@ AFL_TEST("game.map.MinefieldType:addMessageInformation:full", a)
 {
     game::map::MinefieldType testee;
     game::HostVersion host;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
 
     {
         gp::MessageInformation info(gp::MessageInformation::Minefield, 30, TURN);
@@ -134,7 +138,8 @@ AFL_TEST("game.map.MinefieldType:addMessageInformation:min-update", a)
 {
     game::map::MinefieldType testee;
     game::HostVersion host;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
 
     testee.create(333)->addReport(Point(1444, 1555), 4, Minefield::IsMine, Minefield::UnitsKnown, 3000, TURN, Minefield::MinefieldScanned);
 
@@ -172,7 +177,8 @@ AFL_TEST("game.map.MinefieldType:addMessageInformation:min-fail", a)
 {
     game::map::MinefieldType testee;
     game::HostVersion host;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
 
     {
         gp::MessageInformation info(gp::MessageInformation::Minefield, 333, TURN);
@@ -220,7 +226,8 @@ AFL_TEST("game.map.MinefieldType:setAllMinefieldsKnown", a)
 
     game::map::MinefieldType testee;
     game::HostVersion host;
-    game::config::HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
 
     Minefield* theirOld = testee.create(101);
     theirOld->addReport(Point(1000, 1000), THEM, Minefield::IsMine, Minefield::UnitsKnown, 2000, TURN-1, Minefield::MinefieldScanned);

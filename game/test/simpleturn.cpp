@@ -15,14 +15,14 @@ using game::map::Planet;
 game::test::SimpleTurn::SimpleTurn()
     : m_turn(),
       m_interface(),
-      m_config(),
+      m_config(game::config::HostConfiguration::create()),
       m_mapConfiguration(),
       m_shipList(),
       m_version(game::HostVersion::PHost, MKVERSION(3,5,0)),
       m_position(2000, 2000),
       m_hullNr(17)
 {
-    m_config.setDefaultValues();
+    m_config->setDefaultValues();
 }
 
 game::map::Ship&

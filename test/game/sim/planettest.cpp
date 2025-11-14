@@ -91,18 +91,18 @@ AFL_TEST("game.sim.Planet:basics", a)
 /** Test hasAbility(). */
 AFL_TEST("game.sim.Planet:hasAbility", a)
 {
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
     game::spec::ShipList shipList;
     game::sim::Planet t;
     game::sim::Configuration opts;
 
     // Lizards don't...
     t.setOwner(2);
-    a.check("01. Lizard", !t.hasAbility(game::sim::TripleBeamKillAbility, opts, shipList, config));
+    a.check("01. Lizard", !t.hasAbility(game::sim::TripleBeamKillAbility, opts, shipList, *config));
 
     // ...but Pirates do have this ability.
     t.setOwner(5);
-    a.check("11. Pirate", t.hasAbility(game::sim::TripleBeamKillAbility, opts, shipList, config));
+    a.check("11. Pirate", t.hasAbility(game::sim::TripleBeamKillAbility, opts, shipList, *config));
 }
 
 /** Test getNumBaseTorpedoesAsType(). */

@@ -86,10 +86,10 @@ AFL_TEST("game.browser.RootFolder", a)
     RootFolder testee(env.browser);
 
     // Configuration
-    UserConfiguration config;
-    a.check("01. loadConfiguration", !testee.loadConfiguration(config));
+    Ref<UserConfiguration> config = UserConfiguration::create();
+    a.check("01. loadConfiguration", !testee.loadConfiguration(*config));
     a.check("02. setLocalDirectoryName", !testee.setLocalDirectoryName("/"));
-    AFL_CHECK_SUCCEEDS(a("03. saveConfiguration"), testee.saveConfiguration(config));
+    AFL_CHECK_SUCCEEDS(a("03. saveConfiguration"), testee.saveConfiguration(*config));
 
     // Names
     AFL_CHECK_SUCCEEDS(a("11. getName"), testee.getName());
@@ -112,7 +112,7 @@ AFL_TEST("game.browser.RootFolder", a)
     // loadGameRoot
     LoadTask result;
     std::auto_ptr<LoadGameRootTask_t> inTask(LoadGameRootTask_t::makeBound(&result, &LoadTask::keep));
-    std::auto_ptr<game::Task_t> outTask(testee.loadGameRoot(config, inTask));
+    std::auto_ptr<game::Task_t> outTask(testee.loadGameRoot(*config, inTask));
 
     a.checkNull("41. inTask", inTask.get());
     a.checkNonNull("42. outTask", outTask.get());

@@ -10,6 +10,13 @@
 game::config::Configuration::Configuration()
 { }
 
+// Constructor.
+afl::base::Ref<game::config::Configuration>
+game::config::Configuration::create()
+{
+    return *new Configuration();
+}
+
 // Destructor.
 game::config::Configuration::~Configuration()
 { }

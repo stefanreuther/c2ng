@@ -88,7 +88,7 @@ namespace {
 AFL_TEST("game.vcr.Overview:buildDiagram", a)
 {
     // Environment
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
     game::spec::ShipList shipList;
     game::test::initStandardBeams(shipList);
     game::test::initStandardTorpedoes(shipList);
@@ -117,7 +117,7 @@ AFL_TEST("game.vcr.Overview:buildDiagram", a)
         ->setType(game::vcr::classic::Host, 0);
 
     // Testee
-    game::vcr::Overview ov(db, config, shipList);
+    game::vcr::Overview ov(db, *config, shipList);
 
     game::vcr::Overview::Diagram diag;
     ov.buildDiagram(diag, players, tx);
@@ -181,7 +181,7 @@ AFL_TEST("game.vcr.Overview:buildDiagram", a)
 AFL_TEST("game.vcr.Overview:buildDiagram:kill", a)
 {
     // Environment
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
     game::spec::ShipList shipList;
     game::test::initStandardBeams(shipList);
     game::test::initStandardTorpedoes(shipList);
@@ -195,7 +195,7 @@ AFL_TEST("game.vcr.Overview:buildDiagram:kill", a)
         ->setType(game::vcr::classic::Host, 0);
 
     // Testee
-    game::vcr::Overview ov(db, config, shipList);
+    game::vcr::Overview ov(db, *config, shipList);
 
     game::vcr::Overview::Diagram diag;
     ov.buildDiagram(diag, players, tx);
@@ -222,7 +222,7 @@ AFL_TEST("game.vcr.Overview:buildDiagram:kill", a)
 AFL_TEST("game.vcr.Overview:buildDiagram:stalemate", a)
 {
     // Environment
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
     game::spec::ShipList shipList;
     game::test::initStandardBeams(shipList);
     game::test::initStandardTorpedoes(shipList);
@@ -236,7 +236,7 @@ AFL_TEST("game.vcr.Overview:buildDiagram:stalemate", a)
         ->setType(game::vcr::classic::Host, 0);
 
     // Testee
-    game::vcr::Overview ov(db, config, shipList);
+    game::vcr::Overview ov(db, *config, shipList);
 
     game::vcr::Overview::Diagram diag;
     ov.buildDiagram(diag, players, tx);
@@ -262,7 +262,7 @@ AFL_TEST("game.vcr.Overview:buildDiagram:stalemate", a)
 AFL_TEST("game.vcr.Overview:buildScoreSummary:kill", a)
 {
     // Environment
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
     game::spec::ShipList shipList;
     game::test::initStandardBeams(shipList);
     game::test::initStandardTorpedoes(shipList);
@@ -274,7 +274,7 @@ AFL_TEST("game.vcr.Overview:buildScoreSummary:kill", a)
         ->setType(game::vcr::classic::Host, 0);
 
     // Testee
-    game::vcr::Overview ov(db, config, shipList);
+    game::vcr::Overview ov(db, *config, shipList);
 
     game::vcr::Overview::ScoreSummary sum;
     ov.buildScoreSummary(sum);

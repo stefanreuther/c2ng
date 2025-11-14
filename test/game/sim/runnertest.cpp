@@ -174,12 +174,12 @@ AFL_TEST("game.sim.Runner:regression1", a)
     addOutrider(a, setup, 52, 1, shipList);
 
     // Host configuration
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
     game::vcr::flak::Configuration flakConfiguration;
 
     // Configuration
     game::sim::Configuration opts;
-    opts.setMode(game::sim::Configuration::VcrHost, 0, config);
+    opts.setMode(game::sim::Configuration::VcrHost, 0, *config);
 
     // Stop signal (not used)
     util::StopSignal sig;
@@ -189,7 +189,7 @@ AFL_TEST("game.sim.Runner:regression1", a)
 
     // SimpleRunner
     util::RandomNumberGenerator simpleRNG(42);
-    game::sim::SimpleRunner simpleRunner(setup, opts, shipList, config, flakConfiguration, log, simpleRNG);
+    game::sim::SimpleRunner simpleRunner(setup, opts, shipList, *config, flakConfiguration, log, simpleRNG);
     simpleRunner.init();
     a.checkEqual("01. getNumBattles", simpleRunner.resultList().getNumBattles(), 1U);
 
@@ -198,7 +198,7 @@ AFL_TEST("game.sim.Runner:regression1", a)
 
     // ParallelRunner
     util::RandomNumberGenerator parallelRNG(42);
-    game::sim::ParallelRunner parallelRunner(setup, opts, shipList, config, flakConfiguration, log, parallelRNG, 1);
+    game::sim::ParallelRunner parallelRunner(setup, opts, shipList, *config, flakConfiguration, log, parallelRNG, 1);
     parallelRunner.init();
     a.checkEqual("11. getNumBattles", parallelRunner.resultList().getNumBattles(), 1U);
 
@@ -229,12 +229,12 @@ AFL_TEST("game.sim.Runner:regression2", a)
     addOutrider(a, setup, 72, 6, shipList);
 
     // Host configuration
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
     game::vcr::flak::Configuration flakConfiguration;
 
     // Configuration
     game::sim::Configuration opts;
-    opts.setMode(game::sim::Configuration::VcrHost, 0, config);
+    opts.setMode(game::sim::Configuration::VcrHost, 0, *config);
 
     // Stop signal (not used)
     util::StopSignal sig;
@@ -244,7 +244,7 @@ AFL_TEST("game.sim.Runner:regression2", a)
 
     // SimpleRunner
     util::RandomNumberGenerator simpleRNG(77);
-    game::sim::SimpleRunner simpleRunner(setup, opts, shipList, config, flakConfiguration, log, simpleRNG);
+    game::sim::SimpleRunner simpleRunner(setup, opts, shipList, *config, flakConfiguration, log, simpleRNG);
     simpleRunner.init();
     a.checkEqual("01. getNumBattles", simpleRunner.resultList().getNumBattles(), 1U);
 
@@ -253,7 +253,7 @@ AFL_TEST("game.sim.Runner:regression2", a)
 
     // ParallelRunner
     util::RandomNumberGenerator parallelRNG(77);
-    game::sim::ParallelRunner parallelRunner(setup, opts, shipList, config, flakConfiguration, log, parallelRNG, 5);
+    game::sim::ParallelRunner parallelRunner(setup, opts, shipList, *config, flakConfiguration, log, parallelRNG, 5);
     parallelRunner.init();
     a.checkEqual("11. getNumBattles", parallelRunner.resultList().getNumBattles(), 1U);
 
@@ -281,25 +281,25 @@ AFL_TEST("game.sim.Runner:interrupt", a)
     addOutrider(a, setup, 2, 6, shipList);
 
     // Host configuration
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
     game::vcr::flak::Configuration flakConfiguration;
 
     // Configuration
     game::sim::Configuration opts;
-    opts.setMode(game::sim::Configuration::VcrHost, 0, config);
+    opts.setMode(game::sim::Configuration::VcrHost, 0, *config);
 
     // Logger (not used)
     afl::sys::Log log;
 
     // SimpleRunner
     util::RandomNumberGenerator simpleRNG(77);
-    game::sim::SimpleRunner simpleRunner(setup, opts, shipList, config, flakConfiguration, log, simpleRNG);
+    game::sim::SimpleRunner simpleRunner(setup, opts, shipList, *config, flakConfiguration, log, simpleRNG);
     simpleRunner.init();
     checkInterrupt(a("SimpleRunner"), simpleRunner);
 
     // ParallelRunner
     util::RandomNumberGenerator parallelRNG(77);
-    game::sim::ParallelRunner parallelRunner(setup, opts, shipList, config, flakConfiguration, log, parallelRNG, 5);
+    game::sim::ParallelRunner parallelRunner(setup, opts, shipList, *config, flakConfiguration, log, parallelRNG, 5);
     parallelRunner.init();
     checkInterrupt(a("ParallelRunner"), parallelRunner);
 }

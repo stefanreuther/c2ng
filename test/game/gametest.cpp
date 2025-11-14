@@ -18,6 +18,7 @@
 #include "game/turn.hpp"
 #include "util/atomtable.hpp"
 
+using afl::base::Ref;
 using game::HostVersion;
 using game::config::HostConfiguration;
 using game::score::TurnScore;
@@ -26,11 +27,15 @@ using util::AtomTable;
 
 namespace {
     struct MessageEnvironment {
-        HostConfiguration config;
+        Ref<HostConfiguration> config;
         HostVersion host;
         AtomTable atomTable;
         afl::sys::Log log;
         afl::string::NullTranslator tx;
+
+        MessageEnvironment()
+            : config(HostConfiguration::create()), host(), atomTable(), log(), tx()
+            { }
     };
 }
 
@@ -206,7 +211,7 @@ AFL_TEST("game.Game:addMessageInformation:Alliance", a)
     }
 
     MessageEnvironment env;
-    testee.addMessageInformation(info, env.config, env.host, env.atomTable, afl::base::Nothing, true, env.tx, env.log);
+    testee.addMessageInformation(info, *env.config, env.host, env.atomTable, afl::base::Nothing, true, env.tx, env.log);
 
     // Verify
     a.checkEqual("01", allies.getOffer(0)->theirOffer.get(4), Offer::Conditional);
@@ -233,15 +238,15 @@ AFL_TEST("game.Game:addMessageInformation:Configuration", a)
     info.addConfigurationValue("MaxColTempSlope", "?");            // Integer, bogus value
     info.addConfigurationValue("MaxPlanetaryIncome", "777");       // Integer
 
-    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(info, env.config, env.host, env.atomTable, afl::base::Nothing, true, env.tx, env.log));
+    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(info, *env.config, env.host, env.atomTable, afl::base::Nothing, true, env.tx, env.log));
 
-    a.checkEqual("11. config", env.config[HostConfiguration::RaceMiningRate](1), 5);
-    a.checkEqual("12. config", env.config[HostConfiguration::RaceMiningRate](4), 8);
-    a.checkEqual("13. config", env.config[HostConfiguration::RaceMiningRate](11), 8);
-    a.checkEqual("14. config", env.config[HostConfiguration::PlanetsHaveTubes](), 1);
-    a.checkEqual("15. config", env.config[HostConfiguration::CrystalSinTempBehavior](), 1);
-    a.checkEqual("16. config", env.config[HostConfiguration::MaxColTempSlope](), 1000);     // unchanged default
-    a.checkEqual("17. config", env.config[HostConfiguration::MaxPlanetaryIncome](1), 777);
+    a.checkEqual("11. config", (*env.config)[HostConfiguration::RaceMiningRate](1), 5);
+    a.checkEqual("12. config", (*env.config)[HostConfiguration::RaceMiningRate](4), 8);
+    a.checkEqual("13. config", (*env.config)[HostConfiguration::RaceMiningRate](11), 8);
+    a.checkEqual("14. config", (*env.config)[HostConfiguration::PlanetsHaveTubes](), 1);
+    a.checkEqual("15. config", (*env.config)[HostConfiguration::CrystalSinTempBehavior](), 1);
+    a.checkEqual("16. config", (*env.config)[HostConfiguration::MaxColTempSlope](), 1000);     // unchanged default
+    a.checkEqual("17. config", (*env.config)[HostConfiguration::MaxPlanetaryIncome](1), 777);
 }
 
 /** Test Explosion info.
@@ -259,7 +264,7 @@ AFL_TEST("game.Game:addMessageInformation:Explosion", a)
     info.addValue(game::parser::mi_Y, 1700);
     info.addValue(game::parser::ms_Name, "USS Bang");
 
-    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(info, env.config, env.host, env.atomTable, afl::base::Nothing, true, env.tx, env.log));
+    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(info, *env.config, env.host, env.atomTable, afl::base::Nothing, true, env.tx, env.log));
 
     game::map::Explosion* ex = testee.currentTurn().universe().explosions().getObjectByIndex(1);
     a.checkNonNull("11. ex", ex);
@@ -286,7 +291,7 @@ AFL_TEST("game.Game:addMessageInformation:IonStorm", a)
     info.addValue(game::parser::mi_Heading, 90);
     info.addValue(game::parser::mi_WarpFactor, 3);
 
-    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(info, env.config, env.host, env.atomTable, afl::base::Nothing, true, env.tx, env.log));
+    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(info, *env.config, env.host, env.atomTable, afl::base::Nothing, true, env.tx, env.log));
 
     game::map::IonStorm* st = testee.currentTurn().universe().ionStorms().get(5);
     a.checkNonNull("11. storm", st);
@@ -313,7 +318,7 @@ AFL_TEST("game.Game:addMessageInformation:IonStorm:old", a)
     info.addValue(game::parser::mi_Heading, 90);
     info.addValue(game::parser::mi_WarpFactor, 3);
 
-    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(info, env.config, env.host, env.atomTable, afl::base::Nothing, true, env.tx, env.log));
+    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(info, *env.config, env.host, env.atomTable, afl::base::Nothing, true, env.tx, env.log));
 
     game::map::IonStorm* st = testee.currentTurn().universe().ionStorms().get(5);
     a.checkNonNull("11. storm", st);
@@ -336,7 +341,7 @@ AFL_TEST("game.Game:addMessageInformation:PlayerScore", a)
     info.addScoreValue(2, 50);
     info.addScoreValue(7, 90);
 
-    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(info, env.config, env.host, env.atomTable, afl::base::Nothing, true, env.tx, env.log));
+    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(info, *env.config, env.host, env.atomTable, afl::base::Nothing, true, env.tx, env.log));
 
     // Verify score description
     const TurnScoreList& ts = testee.scores();
@@ -372,7 +377,7 @@ AFL_TEST("game.Game:addMessageInformation:PlayerScore:old", a)
     info.addScoreValue(2, 50);
     info.addScoreValue(7, 90);
 
-    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(info, env.config, env.host, env.atomTable, afl::base::Nothing, true, env.tx, env.log));
+    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(info, *env.config, env.host, env.atomTable, afl::base::Nothing, true, env.tx, env.log));
 
     // Verify score description
     const TurnScoreList& ts = testee.scores();
@@ -411,7 +416,7 @@ AFL_TEST("game.Game:addMessageInformation:Ufo", a)
     info.addValue(game::parser::mi_WarpFactor, 3);
     info.addValue(game::parser::ms_Name, "Martian");
 
-    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(info, env.config, env.host, env.atomTable, afl::base::Nothing, true, env.tx, env.log));
+    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(info, *env.config, env.host, env.atomTable, afl::base::Nothing, true, env.tx, env.log));
 
     game::map::Ufo* ufo = testee.currentTurn().universe().ufos().getUfoByIndex(1);
     a.checkNonNull("11. ufo", ufo);
@@ -434,10 +439,10 @@ AFL_TEST("game.Game:addMessageInformation:Wormhole", a)
     info.addValue(game::parser::mi_Y, 1700);
     info.addValue(game::parser::mi_Mass, 7000);
 
-    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(info, env.config, env.host, env.atomTable, afl::base::Nothing, true, env.tx, env.log));
+    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(info, *env.config, env.host, env.atomTable, afl::base::Nothing, true, env.tx, env.log));
 
     game::map::Configuration mapConfig;
-    testee.currentTurn().universe().ufos().postprocess(42, mapConfig, env.config, env.tx, env.log);
+    testee.currentTurn().universe().ufos().postprocess(42, mapConfig, *env.config, env.tx, env.log);
 
     game::map::Ufo* ufo = testee.currentTurn().universe().ufos().getUfoByIndex(1);
     a.checkNonNull("11. ufo", ufo);
@@ -450,7 +455,7 @@ AFL_TEST("game.Game:addMessageInformation:Wormhole", a)
     E: message numbers added to units */
 AFL_TEST("game.Game:message-linking", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     HostVersion host;
     AtomTable atomTable;
     afl::sys::Log log;
@@ -465,12 +470,12 @@ AFL_TEST("game.Game:message-linking", a)
     // Add planet information
     game::parser::MessageInformation i1(game::parser::MessageInformation::Planet, 99, 42);
     i1.addValue(game::parser::ms_FriendlyCode, "ppp");
-    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(i1, config, host, atomTable, 3, true, tx, log));
+    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(i1, *config, host, atomTable, 3, true, tx, log));
 
     // Add ship information
     game::parser::MessageInformation i2(game::parser::MessageInformation::Ship, 77, 42);
     i2.addValue(game::parser::ms_FriendlyCode, "sss");
-    AFL_CHECK_SUCCEEDS(a("11. addMessageInformation"), testee.addMessageInformation(i2, config, host, atomTable, 4, true, tx, log));
+    AFL_CHECK_SUCCEEDS(a("11. addMessageInformation"), testee.addMessageInformation(i2, *config, host, atomTable, 4, true, tx, log));
 
     // Verify
     a.checkEqual("21. getFriendlyCode", pl->getFriendlyCode().orElse(""), "ppp");
@@ -487,7 +492,7 @@ AFL_TEST("game.Game:message-linking", a)
     E: drawing exists in currentTurn() */
 AFL_TEST("game.Game:message:drawing", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     HostVersion host;
     AtomTable atomTable;
     afl::sys::Log log;
@@ -501,7 +506,7 @@ AFL_TEST("game.Game:message:drawing", a)
     info.addValue(game::parser::mi_Y, 3000);
     info.addValue(game::parser::mi_DrawingShape, 5);
     info.addValue(game::parser::ms_DrawingComment, "hi");
-    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(info, config, host, atomTable, afl::base::Nothing, true, tx, log));
+    AFL_CHECK_SUCCEEDS(a("01. addMessageInformation"), testee.addMessageInformation(info, *config, host, atomTable, afl::base::Nothing, true, tx, log));
 
     // Verify
     game::map::DrawingContainer& dc = testee.currentTurn().universe().drawings();

@@ -59,7 +59,7 @@ game::sim::verifyObject(afl::test::Assert a, game::sim::Object& t)
     a.checkEqual("71. getExperienceLevel", t.getExperienceLevel(), 10);
     a.check("72. isDirty", t.isDirty());
 
-    const game::config::HostConfiguration hostConfig;
+    afl::base::Ref<const game::config::HostConfiguration> hostConfig = game::config::HostConfiguration::create();
     const game::spec::ShipList shipList;
     const game::sim::Configuration opts;
 
@@ -67,12 +67,12 @@ game::sim::verifyObject(afl::test::Assert a, game::sim::Object& t)
     t.setFlags(game::sim::Object::fl_Commander);
     a.checkEqual("81. getFlags", t.getFlags(), game::sim::Object::fl_Commander);
     a.check("82. hasAnyNonstandardAbility", !t.hasAnyNonstandardAbility());     // Commander bit alone is not effective
-    a.check("83. getAbilities", t.getAbilities(opts, shipList, hostConfig).empty());
+    a.check("83. getAbilities", t.getAbilities(opts, shipList, *hostConfig).empty());
     a.check("84. isDirty", t.isDirty());
     t.setFlags(game::sim::Object::fl_Commander | game::sim::Object::fl_CommanderSet);
     a.check("85. hasAnyNonstandardAbility", t.hasAnyNonstandardAbility());
-    a.check("86. getAbilities", t.hasAbility(game::sim::CommanderAbility, opts, shipList, hostConfig));
-    a.checkEqual("87. getAbilities", t.getAbilities(opts, shipList, hostConfig), game::sim::Abilities_t(game::sim::CommanderAbility));
+    a.check("86. getAbilities", t.hasAbility(game::sim::CommanderAbility, opts, shipList, *hostConfig));
+    a.checkEqual("87. getAbilities", t.getAbilities(opts, shipList, *hostConfig), game::sim::Abilities_t(game::sim::CommanderAbility));
 
     t.markClean();
     t.setFlakRatingOverride(1342);

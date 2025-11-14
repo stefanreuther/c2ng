@@ -11,13 +11,14 @@
 #include "game/spec/beam.hpp"
 #include "game/spec/torpedolauncher.hpp"
 
+using afl::base::Ref;
 using game::config::HostConfiguration;
 using game::vcr::flak::Environment;
 
 AFL_TEST("game.vcr.flak.GameEnvironment:config", a)
 {
     // Configuration
-    HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
     static const char*const OPTIONS[][2] = {
         { "AllowAlternativeCombat", "1" },
         { "StandoffDistance", "32000" },
@@ -30,7 +31,7 @@ AFL_TEST("game.vcr.flak.GameEnvironment:config", a)
         { "PlayerRace", "1,1,1,4,5,5,5,5,5" },
     };
     for (size_t i = 0; i < countof(OPTIONS); ++i) {
-        config.setOption(OPTIONS[i][0], OPTIONS[i][1], game::config::ConfigurationOption::Game);
+        config->setOption(OPTIONS[i][0], OPTIONS[i][1], game::config::ConfigurationOption::Game);
     }
 
     // Specification (dummy)
@@ -38,7 +39,7 @@ AFL_TEST("game.vcr.flak.GameEnvironment:config", a)
     game::spec::TorpedoVector_t torps;
 
     // Testee
-    game::vcr::flak::GameEnvironment testee(config, beams, torps);
+    game::vcr::flak::GameEnvironment testee(*config, beams, torps);
 
     // Verify
     // - scalars
@@ -81,7 +82,7 @@ AFL_TEST("game.vcr.flak.GameEnvironment:config", a)
 AFL_TEST("game.vcr.flak.GameEnvironment:spec", a)
 {
     // Configuration (dummy)
-    HostConfiguration config;
+    Ref<HostConfiguration> config = HostConfiguration::create();
 
     // Specification
     game::spec::BeamVector_t beams;
@@ -99,7 +100,7 @@ AFL_TEST("game.vcr.flak.GameEnvironment:spec", a)
     tl2->setDamagePower(123);
 
     // Testee
-    game::vcr::flak::GameEnvironment testee(config, beams, torps);
+    game::vcr::flak::GameEnvironment testee(*config, beams, torps);
 
     // Verify
     // - valid indexes

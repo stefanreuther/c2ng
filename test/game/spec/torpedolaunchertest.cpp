@@ -58,7 +58,8 @@ AFL_TEST("game.spec.TorpedoLauncher:derived-information", a)
     t.torpedoCost() = game::spec::Cost::fromString("35$ 1TDM");
 
     // Host configuration using defaults
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> rconfig = game::config::HostConfiguration::create();
+    game::config::HostConfiguration& config = *rconfig;
 
     // Independant of host version
     game::spec::Cost c;

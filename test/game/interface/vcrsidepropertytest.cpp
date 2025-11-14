@@ -174,7 +174,8 @@ AFL_TEST("game.interface.VcrSideProperty", a)
     // Environment
     afl::string::NullTranslator tx;
     game::spec::ShipList shipList;
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> rconfig = game::config::HostConfiguration::create();
+    game::config::HostConfiguration& config = *rconfig;
     game::PlayerList players;
 
     initShipList(shipList);

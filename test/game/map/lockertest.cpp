@@ -17,6 +17,7 @@
 #include "game/test/registrationkey.hpp"
 
 namespace {
+    using afl::base::Ref;
     using game::Reference;
     using game::config::HostConfiguration;
     using game::map::Configuration;
@@ -354,8 +355,8 @@ AFL_TEST("game.map.Locker:findWarpWellEdge", a)
         const TestCase& c = TESTS[i];
 
         // Environment
-        HostConfiguration hostConfig;
-        hostConfig[HostConfiguration::RoundGravityWells].set(1);
+        Ref<HostConfiguration> hostConfig = HostConfiguration::create();
+        (*hostConfig)[HostConfiguration::RoundGravityWells].set(1);
         game::HostVersion hostVersion(game::HostVersion::PHost, MKVERSION(4,0,0));
         Configuration fig;
         game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
@@ -374,7 +375,7 @@ AFL_TEST("game.map.Locker:findWarpWellEdge", a)
         // Test
         Locker t(Point(c.clickedX, c.clickedY), fig);
         t.addUniverse(u, -1, 0);
-        const Point pt = t.findWarpWellEdge(Point(c.originX, c.originY), c.isHyperdriving, u, c.shipId, scoreDefinitions, shipList, hostConfig, hostVersion, key);
+        const Point pt = t.findWarpWellEdge(Point(c.originX, c.originY), c.isHyperdriving, u, c.shipId, scoreDefinitions, shipList, *hostConfig, hostVersion, key);
 
         // Verify
         a(c.info).checkEqual("X", pt.getX(), c.expectX);

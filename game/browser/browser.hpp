@@ -293,7 +293,7 @@ namespace game { namespace browser {
 
         bool m_childLoaded;
         afl::base::Ptr<Root> m_childRoot;
-        std::auto_ptr<game::config::UserConfiguration> m_childConfig;
+        afl::base::Ptr<game::config::UserConfiguration> m_childConfig;
 
         bool trySetLocalDirectoryName(afl::io::Directory& gamesDir, String_t directoryName);
         std::auto_ptr<Task_t> loadGameRoot(size_t n, std::auto_ptr<Task_t>& then);

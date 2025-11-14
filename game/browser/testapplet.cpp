@@ -125,8 +125,8 @@ game::browser::TestApplet::run(util::Application& app, afl::sys::Environment::Co
         } else if (cmd == "up") {
             b.openParent();
         } else if (cmd == "info") {
-            UserConfiguration config;
-            b.currentFolder().loadConfiguration(config);
+            Ref<UserConfiguration> config = UserConfiguration::create();
+            b.currentFolder().loadConfiguration(*config);
             Ptr<Root> root;
 
             class Task : public LoadGameRootTask_t {
@@ -139,7 +139,7 @@ game::browser::TestApplet::run(util::Application& app, afl::sys::Environment::Co
              private:
                 Ptr<Root>& m_root;
             };
-            b.currentFolder().loadGameRoot(config, std::auto_ptr<LoadGameRootTask_t>(new Task(root)))->call();
+            b.currentFolder().loadGameRoot(*config, std::auto_ptr<LoadGameRootTask_t>(new Task(root)))->call();
             if (root.get() != 0) {
                 if (root->getTurnLoader().get() != 0) {
                     out.writeLine("Turn loader present.");

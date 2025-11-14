@@ -8,6 +8,7 @@
 #include "afl/string/nulltranslator.hpp"
 #include "afl/test/testrunner.hpp"
 
+using afl::base::Ref;
 using game::HostVersion;
 using game::sim::Configuration;
 using game::config::HostConfiguration;
@@ -35,8 +36,8 @@ AFL_TEST("game.sim.Configuration:basics", a)
     a.checkEqual("12. allianceSettings", &t.allianceSettings(), &ct.allianceSettings());
 
     // Modify
-    const HostConfiguration hostConfig;
-    t.setMode(t.VcrHost, 0, hostConfig);
+    Ref<const HostConfiguration> hostConfig = HostConfiguration::create();
+    t.setMode(t.VcrHost, 0, *hostConfig);
     a.checkEqual("21. getMode", t.getMode(), t.VcrHost);
     a.check("22. hasHonorAlliances", t.hasHonorAlliances());
     a.check("23. hasOnlyOneSimulation", !t.hasOnlyOneSimulation());
@@ -91,7 +92,8 @@ AFL_TEST("game.sim.Configuration:basics", a)
 AFL_TEST("game.sim.Configuration:config:phost:all-on", a)
 {
     Configuration t;
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[config.AllowEngineShieldBonus].set(true);
     config[config.EngineShieldBonusRate].set(30);
     config[config.AllowFedCombatBonus].set(true);
@@ -108,7 +110,8 @@ AFL_TEST("game.sim.Configuration:config:phost:all-on", a)
 AFL_TEST("game.sim.Configuration:config:phost:no-esb", a)
 {
     Configuration t;
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[config.AllowEngineShieldBonus].set(false);
     config[config.EngineShieldBonusRate].set(30);
     config[config.AllowFedCombatBonus].set(true);
@@ -125,7 +128,8 @@ AFL_TEST("game.sim.Configuration:config:phost:no-esb", a)
 AFL_TEST("game.sim.Configuration:config:host:all-on", a)
 {
     Configuration t;
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[config.AllowEngineShieldBonus].set(true);
     config[config.EngineShieldBonusRate].set(30);
     config[config.AllowFedCombatBonus].set(true);
@@ -142,7 +146,8 @@ AFL_TEST("game.sim.Configuration:config:host:all-on", a)
 AFL_TEST("game.sim.Configuration:config:host:all-off", a)
 {
     Configuration t;
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     config[config.AllowEngineShieldBonus].set(false);
     config[config.EngineShieldBonusRate].set(30);
     config[config.AllowFedCombatBonus].set(false);
@@ -235,7 +240,8 @@ AFL_TEST("game.sim.Configuration:getNext:VcrMode", a)
 /** Test setModeFromHostVersion(). */
 AFL_TEST("game.sim.Configuration:setModeFromHostVersion:Host", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     Configuration t;
     t.setModeFromHostVersion(HostVersion(HostVersion::Host, MKVERSION(3,22,0)), 0, config);
     a.checkEqual("getMode", t.getMode(), Configuration::VcrHost);
@@ -243,7 +249,8 @@ AFL_TEST("game.sim.Configuration:setModeFromHostVersion:Host", a)
 
 AFL_TEST("game.sim.Configuration:setModeFromHostVersion:NuHost", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     Configuration t;
     t.setModeFromHostVersion(HostVersion(HostVersion::NuHost, MKVERSION(3,22,0)), 0, config);
     a.checkEqual("getMode", t.getMode(), Configuration::VcrNuHost);
@@ -251,7 +258,8 @@ AFL_TEST("game.sim.Configuration:setModeFromHostVersion:NuHost", a)
 
 AFL_TEST("game.sim.Configuration:setModeFromHostVersion:PHost:2", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     Configuration t;
     t.setModeFromHostVersion(HostVersion(HostVersion::PHost, MKVERSION(2,0,1)), 0, config);
     a.checkEqual("getMode", t.getMode(), Configuration::VcrPHost2);
@@ -259,7 +267,8 @@ AFL_TEST("game.sim.Configuration:setModeFromHostVersion:PHost:2", a)
 
 AFL_TEST("game.sim.Configuration:setModeFromHostVersion:PHost:3", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     Configuration t;
     t.setModeFromHostVersion(HostVersion(HostVersion::PHost, MKVERSION(3,0,0)), 0, config);
     a.checkEqual("getMode", t.getMode(), Configuration::VcrPHost3);
@@ -267,7 +276,8 @@ AFL_TEST("game.sim.Configuration:setModeFromHostVersion:PHost:3", a)
 
 AFL_TEST("game.sim.Configuration:setModeFromHostVersion:PHost:4", a)
 {
-    HostConfiguration config;
+    Ref<HostConfiguration> rconfig = HostConfiguration::create();
+    HostConfiguration& config = *rconfig;
     Configuration t;
     t.setModeFromHostVersion(HostVersion(HostVersion::PHost, MKVERSION(4,0,0)), 0, config);
     a.checkEqual("getMode", t.getMode(), Configuration::VcrPHost4);

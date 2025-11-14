@@ -106,7 +106,7 @@ AFL_TEST("game.map.BoundingBox:addUniverse", a)
 {
     game::PlayerSet_t set(1);
     game::HostVersion host(game::HostVersion::Host, MKVERSION(3,22,44));
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
     game::map::Configuration mapConfig;
     game::spec::ShipList shipList;
     shipList.hulls().create(1);
@@ -127,7 +127,7 @@ AFL_TEST("game.map.BoundingBox:addUniverse", a)
         game::map::Ship* sh = univ.ships().create(20);
         sh->addShipXYData(Point(3400, 2000), 2, 500, set);
 
-        univ.postprocess(set, set, game::map::Object::ReadOnly, mapConfig, host, config, TURN, shipList, tx, log);
+        univ.postprocess(set, set, game::map::Object::ReadOnly, mapConfig, host, *config, TURN, shipList, tx, log);
 
         // Test
         game::map::BoundingBox t;
@@ -154,7 +154,7 @@ AFL_TEST("game.map.BoundingBox:addUniverse", a)
         ufo->setPosition(Point(3500, 2000));
         ufo->setRadius(30);
 
-        univ.postprocess(set, set, game::map::Object::ReadOnly, mapConfig, host, config, TURN, shipList, tx, log);
+        univ.postprocess(set, set, game::map::Object::ReadOnly, mapConfig, host, *config, TURN, shipList, tx, log);
 
         // Test
         game::map::BoundingBox t;
@@ -175,7 +175,7 @@ AFL_TEST("game.map.BoundingBox:addUniverse", a)
 
         univ.explosions().add(game::map::Explosion(0, Point(700, 3000)));
 
-        univ.postprocess(set, set, game::map::Object::ReadOnly, mapConfig, host, config, TURN, shipList, tx, log);
+        univ.postprocess(set, set, game::map::Object::ReadOnly, mapConfig, host, *config, TURN, shipList, tx, log);
 
         // Test
         game::map::BoundingBox t;

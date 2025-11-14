@@ -32,11 +32,17 @@ namespace {
         game::map::Universe univ;
         game::map::Configuration mapConfig;
         game::HostVersion hostVersion;
-        game::config::HostConfiguration config;
+        Ref<game::config::HostConfiguration> config;
         game::UnitScoreDefinitionList shipScores;
         game::spec::ShipList shipList;
         afl::string::NullTranslator tx;
         afl::sys::Log log;
+
+        Environment()
+            : univ(), mapConfig(), hostVersion(),
+              config(HostConfiguration::create()),
+              shipScores(), shipList(), tx(), log()
+            { }
     };
 
     void addPlanet(Environment& env, int id, Point pt, int owner)
@@ -96,7 +102,7 @@ AFL_TEST("game.map.MinefieldFormula:isMinefieldEndangered", a)
 {
     Environment env;
     Minefield field(100, Point(1000, 1000), 1, false, 400);    // 20 ly
-    a.check("isMinefieldEndangered", !isMinefieldEndangered(field, env.univ, env.mapConfig, env.hostVersion, env.config));
+    a.check("isMinefieldEndangered", !isMinefieldEndangered(field, env.univ, env.mapConfig, env.hostVersion, *env.config));
 }
 
 /** Test isMinefieldEndangered(), enemy ship.
@@ -106,7 +112,7 @@ AFL_TEST("game.map.MinefieldFormula:isMinefieldEndangered:enemy", a)
     Environment env;
     addShip(env, 10, Point(1000, 1010), 2);                    // enemy ship
     Minefield field(100, Point(1000, 1000), 1, false, 400);    // 20 ly
-    a.check("isMinefieldEndangered", isMinefieldEndangered(field, env.univ, env.mapConfig, env.hostVersion, env.config));
+    a.check("isMinefieldEndangered", isMinefieldEndangered(field, env.univ, env.mapConfig, env.hostVersion, *env.config));
 }
 
 /** Test isMinefieldEndangered(), unowned planet.
@@ -116,7 +122,7 @@ AFL_TEST("game.map.MinefieldFormula:isMinefieldEndangered:unowned-planet", a)
     Environment env;
     addPlanet(env, 33, Point(1000, 1010), -1);                 // unowned planet
     Minefield field(100, Point(1000, 1000), 1, false, 400);    // 20 ly
-    a.check("isMinefieldEndangered", isMinefieldEndangered(field, env.univ, env.mapConfig, env.hostVersion, env.config));
+    a.check("isMinefieldEndangered", isMinefieldEndangered(field, env.univ, env.mapConfig, env.hostVersion, *env.config));
 }
 
 /** Test isMinefieldEndangered(), unowned planet, own ship.
@@ -127,7 +133,7 @@ AFL_TEST("game.map.MinefieldFormula:isMinefieldEndangered:unowned-planet-own-shi
     addPlanet(env, 33, Point(1000, 1010), -1);                 // unowned planet
     addShip(env, 10, Point(1000, 1010), 1);                    // own ship
     Minefield field(100, Point(1000, 1000), 1, false, 400);    // 20 ly
-    a.check("isMinefieldEndangered", !isMinefieldEndangered(field, env.univ, env.mapConfig, env.hostVersion, env.config));
+    a.check("isMinefieldEndangered", !isMinefieldEndangered(field, env.univ, env.mapConfig, env.hostVersion, *env.config));
 }
 
 /** Test isMinefieldEndangered(), unowned planet, own and enemy ship.
@@ -139,7 +145,7 @@ AFL_TEST("game.map.MinefieldFormula:isMinefieldEndangered:unowned-planet-two-shi
     addShip(env, 10, Point(1000, 1010), 1);                    // own ship
     addShip(env, 10, Point(1000, 1010), 2);                    // enemy ship
     Minefield field(100, Point(1000, 1000), 1, false, 400);    // 20 ly
-    a.check("isMinefieldEndangered", isMinefieldEndangered(field, env.univ, env.mapConfig, env.hostVersion, env.config));
+    a.check("isMinefieldEndangered", isMinefieldEndangered(field, env.univ, env.mapConfig, env.hostVersion, *env.config));
 }
 
 /** Test isMinefieldEndangered(), enemy planet, own ship.
@@ -150,7 +156,7 @@ AFL_TEST("game.map.MinefieldFormula:isMinefieldEndangered:enemy-planet-own-ship"
     addPlanet(env, 33, Point(1000, 1010), 3);                  // enemy planet
     addShip(env, 10, Point(1000, 1010), 1);                    // own ship
     Minefield field(100, Point(1000, 1000), 1, false, 400);    // 20 ly
-    a.check("isMinefieldEndangered", !isMinefieldEndangered(field, env.univ, env.mapConfig, env.hostVersion, env.config));
+    a.check("isMinefieldEndangered", !isMinefieldEndangered(field, env.univ, env.mapConfig, env.hostVersion, *env.config));
 }
 
 /** Test computeMineLayEffect(), new minefield. */

@@ -22,14 +22,14 @@ namespace {
     struct Environment {
         afl::sys::Log log;
         afl::string::NullTranslator tx;
-        game::config::Configuration config;
+        afl::base::Ref<game::config::Configuration> config;
         game::config::ConfigurationParser parser;
 
         Environment()
-            : log(), tx(), config(), parser(log, tx, config, game::config::ConfigurationOption::Game)
+            : log(), tx(), config(game::config::Configuration::create()), parser(log, tx, *config, game::config::ConfigurationOption::Game)
             {
-                config[OPTION].set(10);
-                config[OPTION].setSource(game::config::ConfigurationOption::Default);
+                (*config)[OPTION].set(10);
+                (*config)[OPTION].setSource(game::config::ConfigurationOption::Default);
             }
     };
 
@@ -58,16 +58,16 @@ AFL_TEST("game.config.ConfigurationParser:normal", a)
     env.parser.parseFile(ms);
 
     // Numeric option
-    a.checkEqual("01. option value", env.config[OPTION](), 20);
-    a.checkEqual("02. option source", env.config[OPTION].getSource(), game::config::ConfigurationOption::Game);
+    a.checkEqual("01. option value", (*env.config)[OPTION](), 20);
+    a.checkEqual("02. option source", (*env.config)[OPTION].getSource(), game::config::ConfigurationOption::Game);
 
     // String option
-    const game::config::ConfigurationOption* p = env.config.getOptionByName("other");
+    const game::config::ConfigurationOption* p = (*env.config).getOptionByName("other");
     a.checkNonNull("11. getOptionByName", p);
     a.checkEqual("12. toString", p->toString(), "x");
 
     // Must be two options
-    a.checkEqual("21. count", count(*env.config.getOptions()), 2U);
+    a.checkEqual("21. count", count(*(*env.config).getOptions()), 2U);
 }
 
 /** Test config file parsing, error/null cases. */
@@ -87,10 +87,10 @@ AFL_TEST("game.config.ConfigurationParser:errors", a)
         env.parser.parseFile(ms);
 
         // Existing option unchanged
-        a.checkEqual("01. option value", env.config[OPTION](), 10);
-        a.checkEqual("02. option source", env.config[OPTION].getSource(), game::config::ConfigurationOption::Default);
+        a.checkEqual("01. option value", (*env.config)[OPTION](), 10);
+        a.checkEqual("02. option source", (*env.config)[OPTION].getSource(), game::config::ConfigurationOption::Default);
 
         // Must still be one option
-        a.checkEqual("11. count", count(*env.config.getOptions()), 1U);
+        a.checkEqual("11. count", count(*(*env.config).getOptions()), 1U);
     }
 }

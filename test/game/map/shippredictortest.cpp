@@ -37,12 +37,12 @@ namespace {
         game::map::Configuration mapConfig;
         game::UnitScoreDefinitionList shipScores;
         game::spec::ShipList shipList;
-        game::config::HostConfiguration config;
+        afl::base::Ref<game::config::HostConfiguration> config;
         game::HostVersion hostVersion;
         game::test::RegistrationKey key;
 
         TestHarness()
-            : univ(), mapConfig(), shipScores(), shipList(), config(), hostVersion(), key(game::RegistrationKey::Unknown, 6)
+            : univ(), mapConfig(), shipScores(), shipList(), config(game::config::HostConfiguration::create()), hostVersion(), key(game::RegistrationKey::Unknown, 6)
             { }
     };
 
@@ -252,7 +252,7 @@ namespace {
                            game::map::Object::Editable,         // playability
                            t.mapConfig,                         // mapConfig
                            t.hostVersion,                       // host
-                           t.config,                            // config
+                           *t.config,                           // config
                            42,                                  // turn
                            t.shipList,                          // shipList
                            tx,                                  // translator
@@ -272,7 +272,7 @@ namespace {
 
         finish(t);
 
-        ShipPredictor testee(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+        ShipPredictor testee(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
         a.checkEqual("getWaypoint X", testee.getWaypoint().getX(), X + distance);
         a.checkEqual("getWaypoint Y", testee.getWaypoint().getY(), Y);
         testee.computeTurn();
@@ -294,11 +294,11 @@ namespace {
         Ship& s = addMerlin(t, SHIP_ID);
         s.setWaypoint(Point(X + 75, Y + 34));
         s.setCargo(Element::Neutronium, have);
-        t.config[HostConfiguration::UseAccurateFuelModel].set(true);
+        (*t.config)[HostConfiguration::UseAccurateFuelModel].set(true);
 
         finish(t);
 
-        ShipPredictor testee(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+        ShipPredictor testee(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
         a.checkEqual("getWaypoint X", testee.getWaypoint().getX(), X + 75);
         a.checkEqual("getWaypoint Y", testee.getWaypoint().getY(), Y + 34);
         testee.computeTurn();
@@ -333,7 +333,7 @@ namespace {
 
         game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
 
-        ShipPredictor testee(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, key);
+        ShipPredictor testee(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, key);
         testee.computeTurn();
 
         a(label).checkEqual("Tritanium",   testee.getCargo(Element::Tritanium),  tritaniumAfter);
@@ -369,7 +369,7 @@ namespace {
 
         game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
 
-        ShipPredictor testee(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, key);
+        ShipPredictor testee(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, key);
         testee.computeTurn();
 
         a(label).checkEqual("Tritanium",   testee.getCargo(Element::Tritanium),  tritaniumAfter);
@@ -395,7 +395,7 @@ namespace {
         s.setWaypoint(Point(X + waypointDX, Y + waypointDY));
         finish(t);
 
-        ShipPredictor testee(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+        ShipPredictor testee(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
         testee.computeTurn();
 
         a(label).checkEqual("getX", testee.getPosition().getX(), X + movedDX);
@@ -409,7 +409,7 @@ namespace {
 AFL_TEST("game.map.ShipPredictor:error:no-ship", a)
 {
     TestHarness t;
-    ShipPredictor p(t.univ, 99, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+    ShipPredictor p(t.univ, 99, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
     p.computeMovement();
     p.computeTurn();
     a.checkEqual("01. getNumTurns", p.getNumTurns(), 0);
@@ -434,11 +434,11 @@ AFL_TEST_NOARG("game.map.ShipPredictor:error:no-hull")
     s.setWarpFactor(9);
 
     {
-        ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+        ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
         p.computeMovement();
     }
     {
-        ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+        ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
         p.computeTurn();
     }
 }
@@ -666,7 +666,7 @@ AFL_TEST("game.map.ShipPredictor:movement:normal", a)
     s.setWaypoint(Point(X + 15, Y));
     s.setWarpFactor(9);
 
-    ShipPredictor p(t.univ, MOVEMENT_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+    ShipPredictor p(t.univ, MOVEMENT_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
     p.computeMovement();
 
     a.check("01. isAtTurnLimit", !p.isAtTurnLimit());
@@ -687,7 +687,7 @@ AFL_TEST("game.map.ShipPredictor:movement:timeout:warp1", a)
     s.setWaypoint(Point(X + 100, Y));
     s.setWarpFactor(1);
 
-    ShipPredictor p(t.univ, MOVEMENT_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+    ShipPredictor p(t.univ, MOVEMENT_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
     p.computeMovement();
 
     a.check("01. isAtTurnLimit", p.isAtTurnLimit());
@@ -706,7 +706,7 @@ AFL_TEST("game.map.ShipPredictor:movement:timeout:warp0", a)
     s.setWaypoint(Point(X + 100, Y));
     s.setWarpFactor(0);
 
-    ShipPredictor p(t.univ, MOVEMENT_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+    ShipPredictor p(t.univ, MOVEMENT_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
     p.computeMovement();
 
     a.check("01. isAtTurnLimit", p.isAtTurnLimit());
@@ -725,7 +725,7 @@ AFL_TEST("game.map.ShipPredictor:movement:out-of-fuel", a)
     s.setWaypoint(Point(X + 15, Y));
     s.setWarpFactor(9);
 
-    ShipPredictor p(t.univ, MOVEMENT_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+    ShipPredictor p(t.univ, MOVEMENT_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
     p.computeMovement();
 
     a.check("01. isAtTurnLimit", !p.isAtTurnLimit());
@@ -743,7 +743,7 @@ AFL_TEST("game.map.ShipPredictor:movement:out-of-fuel2", a)
     s.setWaypoint(Point(X + 15, Y));
     s.setWarpFactor(9);
 
-    ShipPredictor p(t.univ, MOVEMENT_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+    ShipPredictor p(t.univ, MOVEMENT_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
     p.computeTurn();
 
     a.checkEqual("01. getMovementFuelUsed", p.getMovementFuelUsed(), 29);
@@ -761,7 +761,7 @@ AFL_TEST("game.map.ShipPredictor:movement:training", a)
     s.setWarpFactor(9);
     s.setMission(38, 0, 0);
 
-    ShipPredictor p(t.univ, MOVEMENT_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+    ShipPredictor p(t.univ, MOVEMENT_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
     p.computeTurn();
 
     a.check("01. isAtWaypoint", !p.isAtWaypoint());
@@ -783,9 +783,9 @@ AFL_TEST("game.map.ShipPredictor:movement:cloak", a)
     s.setWarpFactor(9);
     s.addShipSpecialFunction(t.shipList.modifiedHullFunctions().getFunctionIdFromHostId(BasicHullFunction::Cloak));
     s.setMission(game::spec::Mission::msn_Cloak, 0, 0);
-    t.config[HostConfiguration::CloakFuelBurn].set(5);
+    (*t.config)[HostConfiguration::CloakFuelBurn].set(5);
 
-    ShipPredictor p(t.univ, MOVEMENT_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+    ShipPredictor p(t.univ, MOVEMENT_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
     p.computeMovement();
 
     a.check("01. isAtTurnLimit", !p.isAtTurnLimit());
@@ -805,7 +805,7 @@ AFL_TEST("game.map.ShipPredictor:movement:gravitonic", a)
     s.setWaypoint(Point(X + 150, Y));
     s.setWarpFactor(9);
 
-    ShipPredictor p(t.univ, MOVEMENT_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+    ShipPredictor p(t.univ, MOVEMENT_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
     p.computeMovement();
 
     a.check("01. isAtTurnLimit", !p.isAtTurnLimit());
@@ -863,7 +863,7 @@ AFL_TEST("game.map.ShipPredictor:damage", a)
     s.setWarpFactor(9);
     s.setDamage(50);
 
-    ShipPredictor p(t.univ, DAMAGE_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+    ShipPredictor p(t.univ, DAMAGE_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
     p.computeTurn();
 
     a.checkEqual("01. getWarpFactor", p.getWarpFactor(), 5);
@@ -881,7 +881,7 @@ AFL_TEST("game.map.ShipPredictor:damage:self-repair", a)
     s.setWarpFactor(9);
     s.setDamage(50);
 
-    ShipPredictor p(t.univ, DAMAGE_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+    ShipPredictor p(t.univ, DAMAGE_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
     p.computeTurn();
 
     a.checkEqual("01. getWarpFactor", p.getWarpFactor(), 7);
@@ -901,7 +901,7 @@ AFL_TEST("game.map.ShipPredictor:damage:self-repair:not-limited", a)
     s.setWarpFactor(9);
     s.setDamage(50);
 
-    ShipPredictor p(t.univ, DAMAGE_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+    ShipPredictor p(t.univ, DAMAGE_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
     p.computeTurn();
 
     a.checkEqual("01. getWarpFactor", p.getWarpFactor(), 9);
@@ -929,7 +929,7 @@ AFL_TEST("game.map.ShipPredictor:damage:base-repair", a)
 
     finish(t);
 
-    ShipPredictor p(t.univ, DAMAGE_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+    ShipPredictor p(t.univ, DAMAGE_SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
     p.computeTurn();
 
     a.checkEqual("01. getWarpFactor", p.getWarpFactor(), 9);
@@ -965,7 +965,7 @@ AFL_TEST("game.map.ShipPredictor:mkt", a)
 
     game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
 
-    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, key);
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, key);
     p.computeTurn();
 
     a.checkEqual("01. Torpedoes",  p.getCargo(Element::fromTorpedoType(6)), 18);  // 15 built
@@ -995,7 +995,7 @@ AFL_TEST("game.map.ShipPredictor:lay-mines", a)
 
     game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
 
-    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, key);
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, key);
     p.computeTurn();
 
     a.checkEqual("11. Torpedoes",   p.getCargo(Element::fromTorpedoType(6)), 10);  // 10 laid
@@ -1027,7 +1027,7 @@ AFL_TEST("game.map.ShipPredictor:build-fighter:robot", a)
 
     game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
 
-    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, key);
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, key);
     p.computeTurn();
 
     // 6 fighters built
@@ -1060,7 +1060,7 @@ AFL_TEST("game.map.ShipPredictor:build-fighter:robot:missing", a)
 
     game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
 
-    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, key);
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, key);
     p.computeTurn();
 
     // 6 fighters built
@@ -1075,7 +1075,7 @@ AFL_TEST("game.map.ShipPredictor:build-fighter:robot:unlimited", a)
     TestHarness t;
     game::test::initStandardTorpedoes(t.shipList);
     game::test::initStandardBeams(t.shipList);
-    t.config[HostConfiguration::ShipFighterCost].set("S0");
+    (*t.config)[HostConfiguration::ShipFighterCost].set("S0");
 
     Ship& s = addCarrier(t, SHIP_ID);
     s.setOwner(9);
@@ -1089,7 +1089,7 @@ AFL_TEST("game.map.ShipPredictor:build-fighter:robot:unlimited", a)
 
     game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
 
-    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, key);
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, key);
     p.computeTurn();
 
     // 6 fighters built
@@ -1109,7 +1109,7 @@ AFL_TEST("game.map.ShipPredictor:build-fighter:robot:limited", a)
     TestHarness t;
     game::test::initStandardTorpedoes(t.shipList);
     game::test::initStandardBeams(t.shipList);
-    t.config[HostConfiguration::ShipFighterCost].set("S0");
+    (*t.config)[HostConfiguration::ShipFighterCost].set("S0");
 
     Ship& s = addCarrier(t, SHIP_ID);
     s.setOwner(9);
@@ -1123,7 +1123,7 @@ AFL_TEST("game.map.ShipPredictor:build-fighter:robot:limited", a)
 
     game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
 
-    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, key);
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, key);
     p.computeTurn();
 
     // 6 fighters built
@@ -1157,7 +1157,7 @@ AFL_TEST("game.map.ShipPredictor:build-fighter:rebel", a)
 
     game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
 
-    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, key);
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, key);
     p.computeTurn();
 
     // 6 fighters built
@@ -1300,7 +1300,7 @@ AFL_TEST("game.map.ShipPredictor:hyperjump:normal", a)
     s.setWarpFactor(1);
     s.setFriendlyCode(String_t("HYP"));
 
-    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
     a.check("01. isHyperdriving", p.isHyperdriving());
     p.computeTurn();
 
@@ -1326,7 +1326,7 @@ AFL_TEST("game.map.ShipPredictor:hyperjump:direct", a)
     s.setWarpFactor(1);
     s.setFriendlyCode(String_t("HYP"));
 
-    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
     a.check("01. isHyperdriving", p.isHyperdriving());
     p.computeTurn();
 
@@ -1352,7 +1352,7 @@ AFL_TEST("game.map.ShipPredictor:hyperjump:error:min-dist", a)
     s.setWarpFactor(1);
     s.setFriendlyCode(String_t("HYP"));
 
-    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
     a.check("01. isHyperdriving", p.isHyperdriving());
     p.computeTurn();
 
@@ -1371,7 +1371,7 @@ AFL_TEST("game.map.ShipPredictor:hyperjump:error:damage", a)
 
     TestHarness t;
     t.hostVersion = HostVersion(HostVersion::PHost, MKVERSION(3,3,0));
-    t.config[HostConfiguration::DamageLevelForHyperjumpFail].set(15);
+    (*t.config)[HostConfiguration::DamageLevelForHyperjumpFail].set(15);
 
     Ship& s = addJumper(t, SHIP_ID);
     s.setCargo(Element::Neutronium, 60);
@@ -1380,7 +1380,7 @@ AFL_TEST("game.map.ShipPredictor:hyperjump:error:damage", a)
     s.setFriendlyCode(String_t("HYP"));
     s.setDamage(15);
 
-    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, t.config, t.hostVersion, t.key);
+    ShipPredictor p(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
     a.check("01. isHyperdriving", p.isHyperdriving());
     p.computeTurn();
 

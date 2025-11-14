@@ -19,11 +19,11 @@ namespace {
         game::PlayerList players;
         game::TeamSettings teams;
         game::HostVersion host;
-        game::config::HostConfiguration config;
+        afl::base::Ref<game::config::HostConfiguration> config;
         afl::string::NullTranslator tx;
 
         TestHarness()
-            : scores(), players(), teams(), host(game::HostVersion::PHost, MKVERSION(3,0,0)), config(), tx()
+            : scores(), players(), teams(), host(game::HostVersion::PHost, MKVERSION(3,0,0)), config(game::config::HostConfiguration::create()), tx()
             {
                 // Add turns
                 game::score::TurnScoreList::Slot_t cap = scores.addSlot(game::score::ScoreId_Capital);
@@ -62,7 +62,7 @@ namespace {
 AFL_TEST("game.score.ChartBuilder:basics", a)
 {
     TestHarness h;
-    game::score::ChartBuilder testee(h.scores, h.players, h.teams, h.host, h.config, h.tx);
+    game::score::ChartBuilder testee(h.scores, h.players, h.teams, h.host, *h.config, h.tx);
 
     // There must be variants on offer
     a.check("01. getNumVariants", testee.getNumVariants() > 0);
@@ -124,7 +124,7 @@ AFL_TEST("game.score.ChartBuilder:basics", a)
 AFL_TEST("game.score.ChartBuilder:setByTeam", a)
 {
     TestHarness h;
-    game::score::ChartBuilder testee(h.scores, h.players, h.teams, h.host, h.config, h.tx);
+    game::score::ChartBuilder testee(h.scores, h.players, h.teams, h.host, *h.config, h.tx);
 
     // Find the "total ships" score
     const game::score::CompoundScore totalScore(h.scores, game::score::CompoundScore::TotalShips);
@@ -159,7 +159,7 @@ AFL_TEST("game.score.ChartBuilder:setByTeam", a)
 AFL_TEST("game.score.ChartBuilder:setCumulativeMode", a)
 {
     TestHarness h;
-    game::score::ChartBuilder testee(h.scores, h.players, h.teams, h.host, h.config, h.tx);
+    game::score::ChartBuilder testee(h.scores, h.players, h.teams, h.host, *h.config, h.tx);
 
     // Find the "total ships" score
     const game::score::CompoundScore totalScore(h.scores, game::score::CompoundScore::TotalShips);
@@ -211,7 +211,7 @@ AFL_TEST("game.score.ChartBuilder:sparse", a)
     tc.set(fre, 5, 10);
 
     // Find the "total ships" score
-    game::score::ChartBuilder testee(h.scores, h.players, h.teams, h.host, h.config, h.tx);
+    game::score::ChartBuilder testee(h.scores, h.players, h.teams, h.host, *h.config, h.tx);
     const game::score::CompoundScore totalScore(h.scores, game::score::CompoundScore::TotalShips);
     size_t totalIndex = 0;
     a.checkNonNull("01. findVariant", testee.findVariant(totalScore, &totalIndex));

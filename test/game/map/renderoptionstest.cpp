@@ -8,6 +8,8 @@
 #include "afl/test/testrunner.hpp"
 #include "game/config/userconfiguration.hpp"
 
+using afl::base::Ref;
+using game::config::UserConfiguration;
 using game::map::RenderOptions;
 
 /** Test setOptions(), getOption(), toggleOptions(). */
@@ -31,7 +33,8 @@ AFL_TEST("game.map.RenderOptions:set", a)
 /** Test transfer to/from configuration. */
 AFL_TEST("game.map.RenderOptions:config-transfer", a)
 {
-    game::config::UserConfiguration config;
+    Ref<UserConfiguration> rconfig = UserConfiguration::create();
+    UserConfiguration& config = *rconfig;
     config.setOption("Chart.Small.Show", "mine,shipdots,ion,warpwells", game::config::ConfigurationOption::System);
     config.setOption("Chart.Small.Fill", "mine,shipdots", game::config::ConfigurationOption::System);
 

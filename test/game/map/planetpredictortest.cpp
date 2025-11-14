@@ -35,12 +35,12 @@ namespace {
     {
         game::map::Planet p(tpl);
 
-        game::config::HostConfiguration config;
-        config.setDefaultValues();
-        config[config.ClimateDeathRate].set(0);
+        afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
+        config->setDefaultValues();
+        (*config)[game::config::HostConfiguration::ClimateDeathRate].set(0);
 
         game::map::PlanetPredictor pp(p);
-        AFL_CHECK_SUCCEEDS(a, pp.computeTurn(game::map::PlanetEffectors(), game::UnitScoreDefinitionList(), config, host));
+        AFL_CHECK_SUCCEEDS(a, pp.computeTurn(game::map::PlanetEffectors(), game::UnitScoreDefinitionList(), *config, host));
         a.checkEqual("Colonists", pp.planet().getCargo(game::Element::Colonists).orElse(0), expect);
     }
 
@@ -48,12 +48,12 @@ namespace {
     {
         game::map::Planet p(tpl);
 
-        game::config::HostConfiguration config;
-        config.setDefaultValues();
-        config[config.ClimateDeathRate].set(0);
+        afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
+        config->setDefaultValues();
+        (*config)[game::config::HostConfiguration::ClimateDeathRate].set(0);
 
         game::map::PlanetPredictor pp(p);
-        AFL_CHECK_SUCCEEDS(a, pp.computeTurn(game::map::PlanetEffectors(), game::UnitScoreDefinitionList(), config, host));
+        AFL_CHECK_SUCCEEDS(a, pp.computeTurn(game::map::PlanetEffectors(), game::UnitScoreDefinitionList(), *config, host));
         a.checkEqual("Natives", pp.planet().getNatives().orElse(0), expect);
     }
 }

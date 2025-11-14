@@ -142,25 +142,25 @@ AFL_TEST("game.pcc.AccountFolder:basics", a)
     Environment env;
     AccountFolder testee(env.handler, env.acct);
 
-    UserConfiguration uc;
+    Ref<UserConfiguration> uc = UserConfiguration::create();
 
     // Accessors
     a.check         ("01. canEnter",               testee.canEnter());
     a.checkEqual    ("02. getName",                testee.getName(), "Account Name");
     a.checkDifferent("03. getText",                testee.getDescription().getText(), "");
     a.check         ("04. setLocalDirectoryName", !testee.setLocalDirectoryName("foo"));
-    a.check         ("05. loadConfiguration",     !testee.loadConfiguration(uc));
+    a.check         ("05. loadConfiguration",     !testee.loadConfiguration(*uc));
     a.checkEqual    ("06. getKind",                testee.getKind(), Folder::kAccount);
 
     // loadGameRoot
     RootReceiver recv(a("RootReceiver"));
-    std::auto_ptr<game::Task_t> t = testee.loadGameRoot(uc, std::auto_ptr<game::browser::LoadGameRootTask_t>(game::browser::LoadGameRootTask_t::makeBound(&recv, &RootReceiver::take)));
+    std::auto_ptr<game::Task_t> t = testee.loadGameRoot(*uc, std::auto_ptr<game::browser::LoadGameRootTask_t>(game::browser::LoadGameRootTask_t::makeBound(&recv, &RootReceiver::take)));
     a.checkNonNull("11. get", t.get());
     t->call();
     a.check("12. beenHere", recv.beenHere());
 
     // Dummies
-    AFL_CHECK_SUCCEEDS(a("21. saveConfiguration"), testee.saveConfiguration(uc));
+    AFL_CHECK_SUCCEEDS(a("21. saveConfiguration"), testee.saveConfiguration(*uc));
 
     a.check("31. isSame", testee.isSame(testee));
 

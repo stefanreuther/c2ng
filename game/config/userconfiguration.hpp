@@ -61,9 +61,13 @@ namespace game { namespace config {
             FlatMode
         };
 
+     private:
+        UserConfiguration();
+
+     public:
         /** Constructor.
             Makes a default configuration. */
-        UserConfiguration();
+        static afl::base::Ref<UserConfiguration> create();
 
         /** Destructor. */
         ~UserConfiguration();

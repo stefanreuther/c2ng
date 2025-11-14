@@ -58,11 +58,11 @@ AFL_TEST("game.sim.FleetCost:empty", a)
     game::sim::Configuration simConfig;
     FleetCostOptions opts;
     game::spec::ShipList shipList;
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
     game::PlayerList playerList;
     afl::string::NullTranslator tx;
 
-    computeFleetCosts(out, in, simConfig, opts, shipList, config, playerList, game::PlayerSet_t::allUpTo(20), tx);
+    computeFleetCosts(out, in, simConfig, opts, shipList, *config, playerList, game::PlayerSet_t::allUpTo(20), tx);
 
     a.checkEqual("01. getNumItems", out.getNumItems(), 0U);
 }
@@ -73,7 +73,7 @@ AFL_TEST("game.sim.FleetCost:normal", a)
     game::sim::Setup in;
     game::sim::Configuration simConfig;
     game::spec::ShipList shipList;
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
     game::PlayerList playerList;
     afl::string::NullTranslator tx;
 
@@ -95,7 +95,7 @@ AFL_TEST("game.sim.FleetCost:normal", a)
     {
         FleetCostOptions opts;
         CostSummary out;
-        computeFleetCosts(out, in, simConfig, opts, shipList, config, playerList, game::PlayerSet_t(6), tx);
+        computeFleetCosts(out, in, simConfig, opts, shipList, *config, playerList, game::PlayerSet_t(6), tx);
 
         a.checkEqual("01. getNumItems", out.getNumItems(), 3U);
 
@@ -139,7 +139,7 @@ AFL_TEST("game.sim.FleetCost:normal", a)
         opts.shipTechMode = FleetCostOptions::ShipTech;
         opts.useEngines = true;
         CostSummary out;
-        computeFleetCosts(out, in, simConfig, opts, shipList, config, playerList, game::PlayerSet_t(6), tx);
+        computeFleetCosts(out, in, simConfig, opts, shipList, *config, playerList, game::PlayerSet_t(6), tx);
 
         a.checkEqual("41. getNumItems", out.getNumItems(), 3U);
 
@@ -165,7 +165,7 @@ AFL_TEST("game.sim.FleetCost:normal", a)
     {
         FleetCostOptions opts;
         CostSummary out;
-        computeFleetCosts(out, in, simConfig, opts, shipList, config, playerList, game::PlayerSet_t(3), tx);
+        computeFleetCosts(out, in, simConfig, opts, shipList, *config, playerList, game::PlayerSet_t(3), tx);
 
         a.checkEqual("61. getNumItems", out.getNumItems(), 1U);
 
@@ -184,7 +184,7 @@ AFL_TEST("game.sim.FleetCost:normal", a)
         opts.fighterMode = FleetCostOptions::BaseFighters;
 
         CostSummary out;
-        computeFleetCosts(out, in, simConfig, opts, shipList, config, playerList, game::PlayerSet_t(3), tx);
+        computeFleetCosts(out, in, simConfig, opts, shipList, *config, playerList, game::PlayerSet_t(3), tx);
 
         a.checkEqual("81. getNumItems", out.getNumItems(), 1U);
 
@@ -201,7 +201,7 @@ AFL_TEST("game.sim.FleetCost:normal", a)
     {
         FleetCostOptions opts;
         CostSummary out;
-        computeFleetCosts(out, in, simConfig, opts, shipList, config, playerList, game::PlayerSet_t(7), tx);
+        computeFleetCosts(out, in, simConfig, opts, shipList, *config, playerList, game::PlayerSet_t(7), tx);
         a.checkEqual("101. getNumItems", out.getNumItems(), 0U);
     }
 }
@@ -214,7 +214,7 @@ AFL_TEST("game.sim.FleetCost:tech-cost", a)
     game::sim::Setup in;
     game::sim::Configuration simConfig;
     game::spec::ShipList shipList;
-    game::config::HostConfiguration config;
+    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
     game::PlayerList playerList;
     afl::string::NullTranslator tx;
 
@@ -232,7 +232,7 @@ AFL_TEST("game.sim.FleetCost:tech-cost", a)
         FleetCostOptions opts;
         opts.shipTechMode = FleetCostOptions::NoTech;
         CostSummary out;
-        computeFleetCosts(out, in, simConfig, opts, shipList, config, playerList, game::PlayerSet_t(6), tx);
+        computeFleetCosts(out, in, simConfig, opts, shipList, *config, playerList, game::PlayerSet_t(6), tx);
 
         a.checkEqual("01. getNumItems", out.getNumItems(), 2U);
 
@@ -260,7 +260,7 @@ AFL_TEST("game.sim.FleetCost:tech-cost", a)
         FleetCostOptions opts;
         opts.shipTechMode = FleetCostOptions::ShipTech;
         CostSummary out;
-        computeFleetCosts(out, in, simConfig, opts, shipList, config, playerList, game::PlayerSet_t(6), tx);
+        computeFleetCosts(out, in, simConfig, opts, shipList, *config, playerList, game::PlayerSet_t(6), tx);
 
         a.checkEqual("31. getNumItems", out.getNumItems(), 2U);
 
@@ -289,7 +289,7 @@ AFL_TEST("game.sim.FleetCost:tech-cost", a)
         FleetCostOptions opts;
         opts.shipTechMode = FleetCostOptions::PlayerTech;
         CostSummary out;
-        computeFleetCosts(out, in, simConfig, opts, shipList, config, playerList, game::PlayerSet_t(6), tx);
+        computeFleetCosts(out, in, simConfig, opts, shipList, *config, playerList, game::PlayerSet_t(6), tx);
 
         a.checkEqual("61. getNumItems", out.getNumItems(), 2U);
 
