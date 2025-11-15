@@ -140,4 +140,87 @@ namespace game { namespace map {
 
 } }
 
+inline void
+game::map::IonStorm::setName(String_t name)
+{
+    m_name = name;
+}
+
+inline void
+game::map::IonStorm::setPosition(Point pos)
+{
+    m_x = pos.getX();
+    m_y = pos.getY();
+}
+
+inline void
+game::map::IonStorm::setRadius(int r)
+{
+    m_radius = r;
+}
+
+inline void
+game::map::IonStorm::setVoltage(int voltage)
+{
+    m_voltage = voltage;
+}
+
+inline void
+game::map::IonStorm::setWarpFactor(int speed)
+{
+    m_speed = speed;
+}
+
+inline void
+game::map::IonStorm::setHeading(int heading)
+{
+    m_heading = heading;
+}
+
+inline void
+game::map::IonStorm::setIsGrowing(bool flag)
+{
+    m_isGrowing = flag;
+}
+
+inline void
+game::map::IonStorm::setParentId(int parentId)
+{
+    m_parentId = parentId;
+}
+
+inline game::IntegerProperty_t
+game::map::IonStorm::getVoltage() const
+{
+    // ex GIonStorm::getVoltage
+    return m_voltage;
+}
+
+inline game::IntegerProperty_t
+game::map::IonStorm::getHeading() const
+{
+    // ex GIonStorm::getHeading
+    return m_heading;
+}
+
+inline game::IntegerProperty_t
+game::map::IonStorm::getWarpFactor() const
+{
+    // ex GIonStorm::getSpeed
+    return m_speed;
+}
+
+inline bool
+game::map::IonStorm::isGrowing() const
+{
+    // ex GIonStorm::isGrowing
+    return m_isGrowing;
+}
+
+inline int
+game::map::IonStorm::getParentId() const
+{
+    return m_parentId;
+}
+
 #endif

@@ -185,4 +185,130 @@ namespace game { namespace spec {
 
 } }
 
+// Get external picture number.
+inline int
+game::spec::Hull::getExternalPictureNumber() const
+{
+    return m_externalPictureNumber;
+}
+
+// Set external picture number.
+inline void
+game::spec::Hull::setExternalPictureNumber(int nr)
+{
+    m_externalPictureNumber = nr;
+}
+
+// Get internal picture number.
+inline int
+game::spec::Hull::getInternalPictureNumber() const
+{
+    return m_internalPictureNumber;
+}
+
+// Set internal picture number.
+inline void
+game::spec::Hull::setInternalPictureNumber(int nr)
+{
+    m_internalPictureNumber = nr;
+}
+
+// Get fuel capacity.
+inline int
+game::spec::Hull::getMaxFuel() const
+{
+    return m_maxFuel;
+}
+
+// Set fuel capacity.
+inline void
+game::spec::Hull::setMaxFuel(int maxFuel)
+{
+    m_maxFuel = maxFuel;
+}
+
+// Get maximum crew.
+inline int
+game::spec::Hull::getMaxCrew() const
+{
+    return m_maxCrew;
+}
+
+// Set maximum crew.
+inline void
+game::spec::Hull::setMaxCrew(int maxCrew)
+{
+    m_maxCrew = maxCrew;
+}
+
+// Get number of engines.
+inline int
+game::spec::Hull::getNumEngines() const
+{
+    return m_numEngines;
+}
+
+// Set number of engines.
+inline void
+game::spec::Hull::setNumEngines(int numEngines)
+{
+    m_numEngines = numEngines;
+}
+
+// Get cargo capacity.
+inline int
+game::spec::Hull::getMaxCargo() const
+{
+    return m_maxCargo;
+}
+
+// Set cargo capacity.
+inline void
+game::spec::Hull::setMaxCargo(int maxCargo)
+{
+    m_maxCargo = maxCargo;
+}
+
+// Get number of fighter bays.
+inline int
+game::spec::Hull::getNumBays() const
+{
+    return m_numBays;
+}
+
+// Set number of fighter bays.
+inline void
+game::spec::Hull::setNumBays(int numBays)
+{
+    m_numBays = numBays;
+}
+
+// Get maximum number of torpedo launchers.
+inline int
+game::spec::Hull::getMaxLaunchers() const
+{
+    return m_maxLaunchers;
+}
+
+// Set maximum number of torpedo launchers.
+inline void
+game::spec::Hull::setMaxLaunchers(int maxTorpedoLaunchers)
+{
+    m_maxLaunchers = maxTorpedoLaunchers;
+}
+
+// Get maximum number of beams.
+inline int
+game::spec::Hull::getMaxBeams() const
+{
+    return m_maxBeams;
+}
+
+// Set maximum number of beams.
+inline void
+game::spec::Hull::setMaxBeams(int maxBeams)
+{
+    m_maxBeams = maxBeams;
+}
+
 #endif

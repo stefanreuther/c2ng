@@ -238,4 +238,108 @@ namespace game { namespace sim {
 
 } }
 
+// Get crew.
+inline int
+game::sim::Ship::getCrew() const
+{
+    // ex GSimShip::getCrew
+    return m_crew;
+}
+
+// Get hull type.
+inline int
+game::sim::Ship::getHullType() const
+{
+    // ex GSimShip::getHull
+    return m_hullType;
+}
+
+// Get mass.
+inline int
+game::sim::Ship::getMass() const
+{
+    // ex GSimShip::getMass
+    return m_mass;
+}
+
+// Get beam type.
+inline int
+game::sim::Ship::getBeamType() const
+{
+    // ex GSimShip::getBeamType
+    return m_beamType;
+}
+
+// Get number of beams.
+inline int
+game::sim::Ship::getNumBeams() const
+{
+    // ex GSimShip::getBeamCount
+    return m_numBeams;
+}
+
+// Get torpedo type.
+inline int
+game::sim::Ship::getTorpedoType() const
+{
+    // ex GSimShip::getTorpType
+    return m_torpedoType;
+}
+
+// Get number of torpedo launchers.
+inline int
+game::sim::Ship::getNumLaunchers() const
+{
+    // ex GSimShip::getTorpLauncherCount
+    return m_numLaunchers;
+}
+
+// Get number of fighter bays.
+inline int
+game::sim::Ship::getNumBays() const
+{
+    // ex GSimShip::getBayCount
+    return m_numBays;
+}
+
+// Get number of torpedoes/fighters.
+inline int
+game::sim::Ship::getAmmo() const
+{
+    // ex GSimShip::getAmmo
+    return m_ammo;
+}
+
+// Get engine type.
+inline int
+game::sim::Ship::getEngineType() const
+{
+    // ex GSimShip::getEngineType
+    return m_engineType;
+}
+
+// Get aggressiveness.
+inline int
+game::sim::Ship::getAggressiveness() const
+{
+    // ex GSimShip::getAggressiveness
+    return m_aggressiveness;
+}
+
+// Get Id for intercept-attack.
+inline int
+game::sim::Ship::getInterceptId() const
+{
+    // ex GSimShip::getInterceptId
+    return m_interceptId;
+}
+
+// Check for custom ship.
+inline bool
+game::sim::Ship::isCustomShip() const
+{
+    // ex GSimShip::isCustomShip
+    return getHullType() == 0;
+}
+
 #endif

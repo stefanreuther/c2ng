@@ -130,4 +130,93 @@ namespace game { namespace interface {
 
 } }
 
+inline void
+game::interface::ShipTaskPredictor::setMovementMode(MovementMode m)
+{
+    m_mode = m;
+}
+
+inline size_t
+game::interface::ShipTaskPredictor::getNumPositions() const
+{
+    // ex IntShipPredictor::getNumPositions
+    return m_numPositions;
+}
+
+inline size_t
+game::interface::ShipTaskPredictor::getNumFuelPositions() const
+{
+    // ex IntShipPredictor::getNumFuelPositions
+    return m_numFuelPositions;
+}
+
+inline int
+game::interface::ShipTaskPredictor::getNumTurns() const
+{
+    // ex IntShipPredictor::getNumTurns
+    return m_predictor.getNumTurns();
+}
+
+inline int
+game::interface::ShipTaskPredictor::getNumFuelTurns() const
+{
+    // ex IntShipPredictor::getNumFuelTurns
+    return m_numFuelTurns;
+}
+
+inline int
+game::interface::ShipTaskPredictor::getMovementFuel() const
+{
+    // ex IntShipPredictor::getMovementFuel
+    return m_predictor.getMovementFuelUsed();
+}
+
+inline int
+game::interface::ShipTaskPredictor::getCloakFuel() const
+{
+    // ex IntShipPredictor::getCloakFuel
+    return m_predictor.getCloakFuelUsed();
+}
+
+inline int
+game::interface::ShipTaskPredictor::getRemainingFuel() const
+{
+    // ex IntShipPredictor::getRemainingFuel
+    return m_predictor.getCargo(Element::Neutronium);
+}
+
+inline int
+game::interface::ShipTaskPredictor::getMission() const
+{
+    return m_predictor.getMission();
+}
+
+inline String_t
+game::interface::ShipTaskPredictor::getFriendlyCode() const
+{
+    // ex IntShipPredictor::getFCode
+    return m_predictor.getFriendlyCode();
+}
+
+inline int
+game::interface::ShipTaskPredictor::getWarpFactor() const
+{
+    // ex IntShipPredictor::getSpeed
+    return m_predictor.getWarpFactor();
+}
+
+inline bool
+game::interface::ShipTaskPredictor::isHyperdriving() const
+{
+    // ex IntShipPredictor::isHyperdriving
+    return m_predictor.isHyperdriving();
+}
+
+inline game::map::Point
+game::interface::ShipTaskPredictor::getPosition() const
+{
+    // ex IntShipPredictor::getPosition
+    return m_predictor.getPosition();
+}
+
 #endif

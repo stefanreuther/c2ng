@@ -102,4 +102,47 @@ namespace interpreter {
 
 }
 
+// Add a flag.
+inline interpreter::StatementCompilationContext&
+interpreter::StatementCompilationContext::withFlag(Flag flag)
+{
+    // ex IntStatementCompilationContext::withFlags
+    CompilationContext::withFlag(flag);
+    return *this;
+}
+
+// Remove a flag.
+inline interpreter::StatementCompilationContext&
+interpreter::StatementCompilationContext::withoutFlag(Flag flag)
+{
+    // ex IntStatementCompilationContext::withoutFlags
+    CompilationContext::withoutFlag(flag);
+    return *this;
+}
+
+// Set context provider.
+inline interpreter::StatementCompilationContext&
+interpreter::StatementCompilationContext::withStaticContext(StaticContext* sc)
+{
+    // ex IntStatementCompilationContext::withExecutionContext
+    m_staticContext = sc;
+    return *this;
+}
+
+// Set flags for one-line statement syntax.
+inline interpreter::StatementCompilationContext&
+interpreter::StatementCompilationContext::setOneLineSyntax()
+{
+    // ex IntStatementCompilationContext::setOneLineSyntax
+    return withFlag(RefuseBlocks).withFlag(ExpressionsAreStatements).withoutFlag(WantTerminators);
+}
+
+// Set flags for block statement syntax.
+inline interpreter::StatementCompilationContext&
+interpreter::StatementCompilationContext::setBlockSyntax()
+{
+    // ex IntStatementCompilationContext::setBlockSyntax
+    return withoutFlag(RefuseBlocks).withFlag(WantTerminators).withFlag(ExpressionsAreStatements);
+}
+
 #endif

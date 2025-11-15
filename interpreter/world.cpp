@@ -98,75 +98,12 @@ interpreter::World::enumSpecialCommands(PropertyAcceptor& acceptor) const
     }
 }
 
-// Access keymaps.
-util::KeymapTable&
-interpreter::World::keymaps()
-{
-    return m_keymaps;
-}
-
-// Access keymaps (const).
-const util::KeymapTable&
-interpreter::World::keymaps() const
-{
-    return m_keymaps;
-}
-
-// Access atoms.
-util::AtomTable&
-interpreter::World::atomTable()
-{
-    return m_atomTable;
-}
-
-// Access atoms (const).
-const util::AtomTable&
-interpreter::World::atomTable() const
-{
-    return m_atomTable;
-}
-
-// Access mutexes.
-interpreter::MutexList&
-interpreter::World::mutexList()
-{
-    return m_mutexList;
-}
-
-// Access mutexes (const).
-const interpreter::MutexList&
-interpreter::World::mutexList() const
-{
-    return m_mutexList;
-}
-
-// Access files.
-interpreter::FileTable&
-interpreter::World::fileTable()
-{
-    return m_fileTable;
-}
-
-// Access files (const).
-const interpreter::FileTable&
-interpreter::World::fileTable() const
-{
-    return m_fileTable;
-}
-
 // Add new global context.
 void
 interpreter::World::addNewGlobalContext(Context* ctx)
 {
     // ex IntExecutionContext::setNewGlobalContext, sort-of
     m_globalContexts.pushBackNew(ctx);
-}
-
-// Access global contexts.
-const afl::container::PtrVector<interpreter::Context>&
-interpreter::World::globalContexts() const
-{
-    return m_globalContexts;
 }
 
 //Set system load directory.
@@ -217,13 +154,6 @@ interpreter::World::openLoadFile(const String_t name) const
     return result;
 }
 
-// Access logger.
-afl::sys::LogListener&
-interpreter::World::logListener()
-{
-    return m_log;
-}
-
 // Log an error.
 void
 interpreter::World::logError(afl::sys::LogListener::Level level, const Error& e)
@@ -234,20 +164,6 @@ interpreter::World::logError(afl::sys::LogListener::Level level, const Error& e)
     if (!trace.empty()) {
         m_log.write(m_log.Info, "script.trace", trace);
     }
-}
-
-// Access translator.
-afl::string::Translator&
-interpreter::World::translator() const
-{
-    return m_translator;
-}
-
-// Access file system.
-afl::io::FileSystem&
-interpreter::World::fileSystem()
-{
-    return m_fileSystem;
 }
 
 // Compile a file.

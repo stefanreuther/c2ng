@@ -111,4 +111,51 @@ namespace game { namespace sim {
 
 } }
 
+// Get number of planetary defense posts.
+inline int
+game::sim::Planet::getDefense() const
+{
+    // ex GSimPlanet::getDefense
+    return m_defense;
+}
+
+// Get number of starbase defense posts.
+inline int
+game::sim::Planet::getBaseDefense() const
+{
+    // ex GSimPlanet::getBaseDefense
+    return m_baseDefense;
+}
+
+// Get starbase beam tech level.
+inline int
+game::sim::Planet::getBaseBeamTech() const
+{
+    // ex GSimPlanet::getBaseBeamTech
+    return m_beamTech;
+}
+
+// Get starbase torpedo tech level.
+inline int
+game::sim::Planet::getBaseTorpedoTech() const
+{
+    // ex GSimPlanet::getBaseTorpTech
+    return m_torpedoTech;
+}
+
+// Get number of starbase fighters.
+inline int
+game::sim::Planet::getNumBaseFighters() const
+{
+    // ex GSimPlanet::getBaseFighters
+    return m_baseFighters;
+}
+
+// Check presence of a starbase.
+inline bool
+game::sim::Planet::hasBase() const
+{
+    return getBaseBeamTech() != 0;
+}
+
 #endif

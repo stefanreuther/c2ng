@@ -183,4 +183,69 @@ namespace game { namespace map {
 
 } }
 
+// Set position.
+inline void
+game::map::Drawing::setPos(Point pos)
+{
+    // ex GDrawing::setPos
+    m_pos = pos;
+}
+
+// Set other position.
+inline void
+game::map::Drawing::setPos2(Point pos)
+{
+    // ex GDrawing::setPos2
+    m_x2 = pos.getX();
+    m_y2 = pos.getY();
+}
+
+// Set radius.
+inline void
+game::map::Drawing::setCircleRadius(int r)
+{
+    // ex GDrawing::setCircleRadius
+    m_x2 = r;
+}
+
+// Set marker kind (shape).
+inline void
+game::map::Drawing::setMarkerKind(int k)
+{
+    // ex GDrawing::setMarkerKind
+    m_x2 = k;
+}
+
+// Set marker tag.
+inline void
+game::map::Drawing::setTag(Atom_t tag)
+{
+    // ex GDrawing::setTag
+    m_tag = tag;
+}
+
+// Set color.
+inline void
+game::map::Drawing::setColor(uint8_t color)
+{
+    // ex GDrawing::setColor
+    m_color = color;
+}
+
+// Set comment.
+inline void
+game::map::Drawing::setComment(String_t comment)
+{
+    // ex GDrawing::setComment
+    m_comment = comment;
+}
+
+// Set time of expiry.
+inline void
+game::map::Drawing::setExpire(int expire)
+{
+    // ex GDrawing::setExpire
+    m_expire = expire;
+}
+
 #endif

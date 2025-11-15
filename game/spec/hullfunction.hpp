@@ -128,4 +128,74 @@ namespace game { namespace spec {
 
 } }
 
+// Set player restriction.
+inline void
+game::spec::HullFunction::setPlayers(PlayerSet_t players)
+{
+    m_players = players;
+}
+
+// Set level restriction.
+inline void
+game::spec::HullFunction::setLevels(ExperienceLevelSet_t levels)
+{
+    m_levels = levels;
+}
+
+// Set kind.
+inline void
+game::spec::HullFunction::setKind(Kind kind)
+{
+    m_kind = kind;
+}
+
+// Set host Id.
+inline void
+game::spec::HullFunction::setHostId(int hostId)
+{
+    m_hostId = hostId;
+}
+
+// Set basic function Id.
+inline void
+game::spec::HullFunction::setBasicFunctionId(int basicFunctionId)
+{
+    m_basicFunctionId = basicFunctionId;
+}
+
+// Get player restriction.
+inline game::PlayerSet_t
+game::spec::HullFunction::getPlayers() const
+{
+    return m_players;
+}
+
+// Get level restriction.
+inline game::ExperienceLevelSet_t
+game::spec::HullFunction::getLevels() const
+{
+    return m_levels;
+}
+
+// Get kind of assignment.
+inline game::spec::HullFunction::Kind
+game::spec::HullFunction::getKind() const
+{
+    return m_kind;
+}
+
+// Get host Id.
+inline int
+game::spec::HullFunction::getHostId() const
+{
+    return m_hostId;
+}
+
+// Get basic function Id.
+inline int
+game::spec::HullFunction::getBasicFunctionId() const
+{
+    return m_basicFunctionId;
+}
+
 #endif

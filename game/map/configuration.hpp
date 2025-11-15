@@ -259,4 +259,76 @@ namespace game { namespace map {
 
 } }
 
+inline game::map::Configuration::Mode
+game::map::Configuration::getMode() const
+{
+    // ex GChartConfiguration::getMode
+    return m_mode;
+}
+
+inline game::map::Point
+game::map::Configuration::getCenter() const
+{
+    // ex GChartConfiguration::getCenter
+    return m_center;
+}
+
+inline game::map::Point
+game::map::Configuration::getSize() const
+{
+    // ex GChartConfiguration::getSize
+    return m_size;
+}
+
+inline game::map::Point
+game::map::Configuration::getMinimumCoordinates() const
+{
+    // ex GChartConfiguration::getMinimumCoordinates
+    return m_min;
+}
+
+inline game::map::Point
+game::map::Configuration::getMaximumCoordinates() const
+{
+    // ex GChartConfiguration::getMaximumCoordinates
+    return m_max;
+}
+
+inline int
+game::map::Configuration::getCircularPrecision() const
+{
+    return m_circularPrecision;
+}
+
+inline int
+game::map::Configuration::getCircularExcess() const
+{
+    return m_circularExcess;
+}
+
+inline void
+game::map::Configuration::setCircularPrecision(int n)
+{
+    m_circularPrecision = n;
+}
+
+inline void
+game::map::Configuration::setCircularExcess(int n)
+{
+    m_circularExcess = n;
+}
+
+inline bool
+game::map::Configuration::isSetFromHostConfiguration() const
+{
+    // ex GChartConfiguration::isSetFromGameConfig
+    return m_fromHostConfiguration;
+}
+
+inline bool
+game::map::Configuration::operator!=(const Configuration& other) const
+{
+    return !operator==(other);
+}
+
 #endif

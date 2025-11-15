@@ -37,21 +37,6 @@ namespace {
     }
 }
 
-// Default constructor.
-gfx::FontRequest::FontRequest()
-    : m_size(0),
-      m_weight(0),
-      m_slant(0),
-      m_style(0)
-{ }
-
-// gfx::FontRequest::FontRequest(afl::base::NothingType)
-//     : m_size(),
-//       m_weight(),
-//       m_slant(),
-//       m_style()
-// { }
-
 gfx::FontRequest::FontRequest(const char* str)
     : m_size(0),
       m_weight(0),
@@ -86,38 +71,6 @@ gfx::FontRequest::addWeight(int n)
     return *this;
 }
 
-// Set size.
-gfx::FontRequest&
-gfx::FontRequest::setSize(Value_t n)
-{
-    m_size = n;
-    return *this;
-}
-
-// Set weight.
-gfx::FontRequest&
-gfx::FontRequest::setWeight(Value_t n)
-{
-    m_weight = n;
-    return *this;
-}
-
-// Set slant.
-gfx::FontRequest&
-gfx::FontRequest::setSlant(Value_t n)
-{
-    m_slant = n;
-    return *this;
-}
-
-// Set style.
-gfx::FontRequest&
-gfx::FontRequest::setStyle(Value_t n)
-{
-    m_style = n;
-    return *this;
-}
-
 // Parse request string.
 gfx::FontRequest&
 gfx::FontRequest::parse(const char* str)
@@ -132,34 +85,6 @@ gfx::FontRequest::parse(const String_t& str)
 {
     parseString(*this, afl::string::toMemory(str));
     return *this;
-}
-
-// Get size.
-gfx::FontRequest::Value_t
-gfx::FontRequest::getSize() const
-{
-    return m_size;
-}
-
-// Get weight.
-gfx::FontRequest::Value_t
-gfx::FontRequest::getWeight() const
-{
-    return m_weight;
-}
-
-// Get slant.
-gfx::FontRequest::Value_t
-gfx::FontRequest::getSlant() const
-{
-    return m_slant;
-}
-
-// Get style.
-gfx::FontRequest::Value_t
-gfx::FontRequest::getStyle() const
-{
-    return m_style;
 }
 
 // Match another FontRequest.

@@ -13,30 +13,6 @@ game::spec::TorpedoLauncher::TorpedoLauncher(int id)
       m_firingRangeBonus(0)
 { }
 
-game::spec::Cost&
-game::spec::TorpedoLauncher::torpedoCost()
-{
-    return m_torpedoCost;
-}
-
-const game::spec::Cost&
-game::spec::TorpedoLauncher::torpedoCost() const
-{
-    return m_torpedoCost;
-}
-
-void
-game::spec::TorpedoLauncher::setFiringRangeBonus(int n)
-{
-    m_firingRangeBonus = n;
-}
-
-int
-game::spec::TorpedoLauncher::getFiringRangeBonus() const
-{
-    return m_firingRangeBonus;
-}
-
 int
 game::spec::TorpedoLauncher::getRechargeTime(int forPlayer, const HostVersion& host, const game::config::HostConfiguration& config) const
 {

@@ -168,65 +168,6 @@ game::map::Configuration::Configuration()
     computeDerivedInformation();
 }
 
-game::map::Configuration::Mode
-game::map::Configuration::getMode() const
-{
-    // ex GChartConfiguration::getMode
-    return m_mode;
-}
-
-game::map::Point
-game::map::Configuration::getCenter() const
-{
-    // ex GChartConfiguration::getCenter
-    return m_center;
-}
-
-game::map::Point
-game::map::Configuration::getSize() const
-{
-    // ex GChartConfiguration::getSize
-    return m_size;
-}
-
-game::map::Point
-game::map::Configuration::getMinimumCoordinates() const
-{
-    // ex GChartConfiguration::getMinimumCoordinates
-    return m_min;
-}
-
-game::map::Point
-game::map::Configuration::getMaximumCoordinates() const
-{
-    // ex GChartConfiguration::getMaximumCoordinates
-    return m_max;
-}
-
-int
-game::map::Configuration::getCircularPrecision() const
-{
-    return m_circularPrecision;
-}
-
-int
-game::map::Configuration::getCircularExcess() const
-{
-    return m_circularExcess;
-}
-
-void
-game::map::Configuration::setCircularPrecision(int n)
-{
-    m_circularPrecision = n;
-}
-
-void
-game::map::Configuration::setCircularExcess(int n)
-{
-    m_circularExcess = n;
-}
-
 // Initialize from configuration.
 void
 game::map::Configuration::initFromConfiguration(const game::config::HostConfiguration& config,
@@ -337,14 +278,6 @@ game::map::Configuration::setConfiguration(Mode mode, Point center, Point size)
     m_size = size;
     m_fromHostConfiguration = false;
     computeDerivedInformation();
-}
-
-// Check for host configuration.
-bool
-game::map::Configuration::isSetFromHostConfiguration() const
-{
-    // ex GChartConfiguration::isSetFromGameConfig
-    return m_fromHostConfiguration;
 }
 
 // Check for point on map.
@@ -689,12 +622,6 @@ game::map::Configuration::operator==(const Configuration& other) const
         && m_fromHostConfiguration == other.m_fromHostConfiguration
         && m_circularPrecision == other.m_circularPrecision
         && m_circularExcess == other.m_circularExcess;
-}
-
-bool
-game::map::Configuration::operator!=(const Configuration& other) const
-{
-    return !operator==(other);
 }
 
 void

@@ -130,4 +130,73 @@ namespace gfx {
 
 }
 
+// Default constructor.
+inline
+gfx::FontRequest::FontRequest()
+    : m_size(0),
+      m_weight(0),
+      m_slant(0),
+      m_style(0)
+{ }
+
+// Set size.
+inline gfx::FontRequest&
+gfx::FontRequest::setSize(Value_t n)
+{
+    m_size = n;
+    return *this;
+}
+
+// Set weight.
+inline gfx::FontRequest&
+gfx::FontRequest::setWeight(Value_t n)
+{
+    m_weight = n;
+    return *this;
+}
+
+// Set slant.
+inline gfx::FontRequest&
+gfx::FontRequest::setSlant(Value_t n)
+{
+    m_slant = n;
+    return *this;
+}
+
+// Set style.
+inline gfx::FontRequest&
+gfx::FontRequest::setStyle(Value_t n)
+{
+    m_style = n;
+    return *this;
+}
+
+// Get size.
+inline gfx::FontRequest::Value_t
+gfx::FontRequest::getSize() const
+{
+    return m_size;
+}
+
+// Get weight.
+inline gfx::FontRequest::Value_t
+gfx::FontRequest::getWeight() const
+{
+    return m_weight;
+}
+
+// Get slant.
+inline gfx::FontRequest::Value_t
+gfx::FontRequest::getSlant() const
+{
+    return m_slant;
+}
+
+// Get style.
+inline gfx::FontRequest::Value_t
+gfx::FontRequest::getStyle() const
+{
+    return m_style;
+}
+
 #endif

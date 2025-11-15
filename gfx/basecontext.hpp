@@ -148,4 +148,192 @@ namespace gfx {
 
 }
 
+// Set color, raw.
+inline gfx::BaseContext&
+gfx::BaseContext::setRawColor(Color_t color)
+{
+    // ex GfxContext::setRawColor
+    m_rawColor = color;
+    return *this;
+}
+
+// Make background solid.
+inline gfx::BaseContext&
+gfx::BaseContext::setSolidBackground()
+{
+    // ex GfxContext::setSolidBackground
+    m_transparentBackground = false;
+    return *this;
+}
+
+// Make background transparent.
+inline gfx::BaseContext&
+gfx::BaseContext::setTransparentBackground()
+{
+    // ex GfxContext::setTransparentBackground
+    m_transparentBackground = true;
+    return *this;
+}
+
+// Set line thickness.
+inline gfx::BaseContext&
+gfx::BaseContext::setLineThickness(int n)
+{
+    // ex GfxContext::setLineThickness
+    m_lineThickness = n;
+    return *this;
+}
+
+// Set line pattern.
+inline gfx::BaseContext&
+gfx::BaseContext::setLinePattern(LinePattern_t pat)
+{
+    // ex GfxContext::setLinePattern
+    m_linePattern = pat;
+    return *this;
+}
+
+// Set fill pattern.
+inline gfx::BaseContext&
+gfx::BaseContext::setFillPattern(const FillPattern& pat)
+{
+    // ex GfxContext::setFillPattern
+    // FIXME: remove because we have fillPattern()?
+    m_fillPattern = pat;
+    return *this;
+}
+
+// Set alpha.
+inline gfx::BaseContext&
+gfx::BaseContext::setAlpha(Alpha_t alpha)
+{
+    // ex GfxContext::setAlpha
+    m_alpha = alpha;
+    return *this;
+}
+
+// Set cursor.
+inline gfx::BaseContext&
+gfx::BaseContext::setCursor(Point pt)
+{
+    // ex GfxContext::setCursor
+    m_cursor = pt;
+    return *this;
+}
+
+// Set text alignment.
+inline gfx::BaseContext&
+gfx::BaseContext::setTextAlign(HorizontalAlignment x, VerticalAlignment y)
+{
+    // ex GfxContext::setTextAlign
+    m_textAlign = Point(x, y);
+    return *this;
+}
+
+// Use a font.
+inline gfx::BaseContext&
+gfx::BaseContext::useFont(Font& font)
+{
+    // ex GfxContext::useFont
+    m_font = &font;
+    return *this;
+}
+
+// Use a canvas.
+inline gfx::BaseContext&
+gfx::BaseContext::useCanvas(Canvas& canvas)
+{
+    // ex GfxContext::useCanvas
+    m_canvas = &canvas;
+    return *this;
+}
+
+// Get color, raw.
+inline gfx::Color_t
+gfx::BaseContext::getRawColor() const
+{
+    // ex GfxContext::getRawColor
+    return m_rawColor;
+}
+
+// Check for transparent background.
+inline bool
+gfx::BaseContext::isTransparentBackground() const
+{
+    // ex GfxContext::isTransparentBackground
+    return m_transparentBackground;
+}
+
+// Get line thickness.
+inline int
+gfx::BaseContext::getLineThickness() const
+{
+    // ex GfxContext::getLineThickness
+    return m_lineThickness;
+}
+
+// Get line pattern.
+inline gfx::LinePattern_t
+gfx::BaseContext::getLinePattern() const
+{
+    // ex GfxContext::getLinePattern
+    return m_linePattern;
+}
+
+// Access fill pattern.
+inline gfx::FillPattern&
+gfx::BaseContext::fillPattern()
+{
+    // ex GfxContext::getFillPattern
+    return m_fillPattern;
+}
+
+// Access fill pattern.
+inline const gfx::FillPattern&
+gfx::BaseContext::fillPattern() const
+{
+    // ex GfxContext::getFillPattern
+    return m_fillPattern;
+}
+
+// Get alpha.
+inline gfx::Alpha_t
+gfx::BaseContext::getAlpha() const
+{
+    // ex GfxContext::getAlpha
+    return m_alpha;
+}
+
+// Get cursor.
+inline gfx::Point
+gfx::BaseContext::getCursor() const
+{
+    // ex GfxContext::getCursor
+    return m_cursor;
+}
+
+// Get text alignment.
+inline gfx::Point
+gfx::BaseContext::getTextAlign() const
+{
+    // ex GfxContext::getTextAlign
+    return m_textAlign;
+}
+
+// Get font.
+inline gfx::Font*
+gfx::BaseContext::getFont() const
+{
+    // ex GfxContext::getFont
+    return m_font;
+}
+
+// Access canvas.
+inline gfx::Canvas&
+gfx::BaseContext::canvas() const
+{
+    // ex GfxContext::getCanvas
+    return *m_canvas;
+}
+
 #endif

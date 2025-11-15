@@ -94,4 +94,64 @@ namespace game { namespace sim {
 
 } }
 
+inline int
+game::sim::UnitResult::getNumFightsWon() const
+{
+    return m_numFightsWon;
+}
+
+inline int
+game::sim::UnitResult::getNumFights() const
+{
+    return m_numFights;
+}
+
+inline int
+game::sim::UnitResult::getNumCaptures() const
+{
+    return m_numCaptures;
+}
+
+inline const game::sim::UnitResult::Item&
+game::sim::UnitResult::getNumTorpedoesFired() const
+{
+    return m_numTorpedoesFired;
+}
+
+inline const game::sim::UnitResult::Item&
+game::sim::UnitResult::getNumFightersLost() const
+{
+    return m_numFightersLost;
+}
+
+inline const game::sim::UnitResult::Item&
+game::sim::UnitResult::getDamage() const
+{
+    return m_damage;
+}
+
+inline const game::sim::UnitResult::Item&
+game::sim::UnitResult::getShield() const
+{
+    return m_shield;
+}
+
+inline const game::sim::UnitResult::Item&
+game::sim::UnitResult::getCrewLeftOrDefenseLost() const
+{
+    return m_crewLeftOrDefenseLost;
+}
+
+inline const game::sim::UnitResult::Item&
+game::sim::UnitResult::getNumTorpedoHits() const
+{
+    return m_numTorpedoHits;
+}
+
+inline const game::sim::UnitResult::Item&
+game::sim::UnitResult::getMinFightersAboard() const
+{
+    return m_minFightersAboard;
+}
+
 #endif

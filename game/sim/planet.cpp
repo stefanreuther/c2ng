@@ -40,14 +40,6 @@ game::sim::Planet::operator=(const Planet& other)
     return *this;
 }
 
-// Get number of planetary defense posts.
-int
-game::sim::Planet::getDefense() const
-{
-    // ex GSimPlanet::getDefense
-    return m_defense;
-}
-
 // Set number of planetary defense posts.
 void
 game::sim::Planet::setDefense(int defense)
@@ -57,14 +49,6 @@ game::sim::Planet::setDefense(int defense)
         m_defense = defense;
         markDirty();
     }
-}
-
-// Get number of starbase defense posts.
-int
-game::sim::Planet::getBaseDefense() const
-{
-    // ex GSimPlanet::getBaseDefense
-    return m_baseDefense;
 }
 
 // Set number of starbase defense posts.
@@ -78,14 +62,6 @@ game::sim::Planet::setBaseDefense(int baseDefense)
     }
 }
 
-// Get starbase beam tech level.
-int
-game::sim::Planet::getBaseBeamTech() const
-{
-    // ex GSimPlanet::getBaseBeamTech
-    return m_beamTech;
-}
-
 // Set starbase beam tech level.
 void
 game::sim::Planet::setBaseBeamTech(int beamTech)
@@ -97,14 +73,6 @@ game::sim::Planet::setBaseBeamTech(int beamTech)
     }
 }
 
-// Get starbase torpedo tech level.
-int
-game::sim::Planet::getBaseTorpedoTech() const
-{
-    // ex GSimPlanet::getBaseTorpTech
-    return m_torpedoTech;
-}
-
 // Set starbase torpedo tech level.
 void
 game::sim::Planet::setBaseTorpedoTech(int torpTech)
@@ -114,14 +82,6 @@ game::sim::Planet::setBaseTorpedoTech(int torpTech)
         m_torpedoTech = torpTech;
         markDirty();
     }
-}
-
-// Get number of starbase fighters.
-int
-game::sim::Planet::getNumBaseFighters() const
-{
-    // ex GSimPlanet::getBaseFighters
-    return m_baseFighters;
 }
 
 // Set number of starbase fighters.
@@ -156,13 +116,6 @@ game::sim::Planet::setNumBaseTorpedoes(int type, int amount)
         m_baseTorpedoes[type-1] = amount;
         markDirty();
     }
-}
-
-// Check presence of a starbase.
-bool
-game::sim::Planet::hasBase() const
-{
-    return getBaseBeamTech() != 0;
 }
 
 // Get total number of starbase torpedoes as one type.

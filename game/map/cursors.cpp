@@ -48,60 +48,6 @@ game::map::Cursors::setUniverse(Universe* univ, const Configuration* mapConfig)
     m_location.setUniverse(univ, mapConfig);
 }
 
-game::map::ObjectCursor&
-game::map::Cursors::currentShip()
-{
-    return m_currentShip;
-}
-
-game::map::ObjectCursor&
-game::map::Cursors::currentHistoryShip()
-{
-    return m_currentHistoryShip;
-}
-
-game::map::ObjectCursor&
-game::map::Cursors::currentPlanet()
-{
-    return m_currentPlanet;
-}
-
-game::map::ObjectCursor&
-game::map::Cursors::currentBase()
-{
-    return m_currentBase;
-}
-
-game::map::ObjectCursor&
-game::map::Cursors::currentFleet()
-{
-    return m_currentFleet;
-}
-
-game::map::ObjectCursor&
-game::map::Cursors::currentUfo()
-{
-    return m_currentUfo;
-}
-
-game::map::ObjectCursor&
-game::map::Cursors::currentIonStorm()
-{
-    return m_currentIonStorm;
-}
-
-game::map::ObjectCursor&
-game::map::Cursors::currentMinefield()
-{
-    return m_currentMinefield;
-}
-
-game::map::Location&
-game::map::Cursors::location()
-{
-    return m_location;
-}
-
 game::map::ObjectCursor*
 game::map::Cursors::getCursorByNumber(int nr)
 {

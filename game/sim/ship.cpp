@@ -62,14 +62,6 @@ game::sim::Ship::operator=(const Ship& other)
     return *this;
 }
 
-// Get crew.
-int
-game::sim::Ship::getCrew() const
-{
-    // ex GSimShip::getCrew
-    return m_crew;
-}
-
 // Set crew.
 void
 game::sim::Ship::setCrew(int crew)
@@ -79,14 +71,6 @@ game::sim::Ship::setCrew(int crew)
         m_crew = crew;
         markDirty();
     }
-}
-
-// Get hull type.
-int
-game::sim::Ship::getHullType() const
-{
-    // ex GSimShip::getHull
-    return m_hullType;
 }
 
 // Set hull type.
@@ -143,14 +127,6 @@ game::sim::Ship::setHullTypeOnly(int hullType)
     }
 }
 
-// Get mass.
-int
-game::sim::Ship::getMass() const
-{
-    // ex GSimShip::getMass
-    return m_mass;
-}
-
 // Set mass.
 void
 game::sim::Ship::setMass(int mass)
@@ -160,14 +136,6 @@ game::sim::Ship::setMass(int mass)
         m_mass = mass;
         markDirty();
     }
-}
-
-// Get beam type.
-int
-game::sim::Ship::getBeamType() const
-{
-    // ex GSimShip::getBeamType
-    return m_beamType;
 }
 
 // Set beam type.
@@ -181,14 +149,6 @@ game::sim::Ship::setBeamType(int beamType)
     }
 }
 
-// Get number of beams.
-int
-game::sim::Ship::getNumBeams() const
-{
-    // ex GSimShip::getBeamCount
-    return m_numBeams;
-}
-
 // Set number of beams.
 void
 game::sim::Ship::setNumBeams(int numBeams)
@@ -198,14 +158,6 @@ game::sim::Ship::setNumBeams(int numBeams)
         m_numBeams = numBeams;
         markDirty();
     }
-}
-
-// Get torpedo type.
-int
-game::sim::Ship::getTorpedoType() const
-{
-    // ex GSimShip::getTorpType
-    return m_torpedoType;
 }
 
 // Set torpedo type.
@@ -219,14 +171,6 @@ game::sim::Ship::setTorpedoType(int torpedoType)
     }
 }
 
-// Get number of torpedo launchers.
-int
-game::sim::Ship::getNumLaunchers() const
-{
-    // ex GSimShip::getTorpLauncherCount
-    return m_numLaunchers;
-}
-
 // Set number of torpedo launchers.
 void
 game::sim::Ship::setNumLaunchers(int numLaunchers)
@@ -236,14 +180,6 @@ game::sim::Ship::setNumLaunchers(int numLaunchers)
         m_numLaunchers = numLaunchers;
         markDirty();
     }
-}
-
-// Get number of fighter bays.
-int
-game::sim::Ship::getNumBays() const
-{
-    // ex GSimShip::getBayCount
-    return m_numBays;
 }
 
 // Set number of fighter bays.
@@ -257,14 +193,6 @@ game::sim::Ship::setNumBays(int numBays)
     }
 }
 
-// Get number of torpedoes/fighters.
-int
-game::sim::Ship::getAmmo() const
-{
-    // ex GSimShip::getAmmo
-    return m_ammo;
-}
-
 // Set number of torpedoes/fighters.
 void
 game::sim::Ship::setAmmo(int ammo)
@@ -274,14 +202,6 @@ game::sim::Ship::setAmmo(int ammo)
         m_ammo = ammo;
         markDirty();
     }
-}
-
-// Get engine type.
-int
-game::sim::Ship::getEngineType() const
-{
-    // ex GSimShip::getEngineType
-    return m_engineType;
 }
 
 // Set engine type.
@@ -295,14 +215,6 @@ game::sim::Ship::setEngineType(int engineType)
     }
 }
 
-// Get aggressiveness.
-int
-game::sim::Ship::getAggressiveness() const
-{
-    // ex GSimShip::getAggressiveness
-    return m_aggressiveness;
-}
-
 // Set aggressiveness.
 void
 game::sim::Ship::setAggressiveness(int aggressiveness)
@@ -312,14 +224,6 @@ game::sim::Ship::setAggressiveness(int aggressiveness)
         m_aggressiveness = aggressiveness;
         markDirty();
     }
-}
-
-// Get Id for intercept-attack.
-int
-game::sim::Ship::getInterceptId() const
-{
-    // ex GSimShip::getInterceptId
-    return m_interceptId;
 }
 
 // Set Id for intercept-attack.
@@ -345,14 +249,6 @@ void
 game::sim::Ship::setDefaultName(afl::string::Translator& tx)
 {
     setName(afl::string::Format(tx.translateString("Ship %d").c_str(), getId()));
-}
-
-// Check for custom ship.
-bool
-game::sim::Ship::isCustomShip() const
-{
-    // ex GSimShip::isCustomShip
-    return getHullType() == 0;
 }
 
 // Get range of number of beams.

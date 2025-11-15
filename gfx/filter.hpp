@@ -40,4 +40,10 @@ namespace gfx {
 
 }
 
+inline gfx::Canvas&
+gfx::Filter::parent()
+{
+    return m_parent;
+}
+
 #endif

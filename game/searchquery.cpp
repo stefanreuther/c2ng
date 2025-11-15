@@ -219,46 +219,6 @@ game::SearchQuery::SearchQuery(MatchType matchType, SearchObjects_t objs, String
 game::SearchQuery::~SearchQuery()
 { }
 
-// Set of all object types.
-game::SearchQuery::SearchObjects_t
-game::SearchQuery::allObjects()
-{
-    return SearchObjects_t()
-        + SearchShips
-        + SearchPlanets
-        + SearchBases
-        + SearchUfos
-        + SearchOthers;
-}
-
-// Set match type.
-void
-game::SearchQuery::setMatchType(MatchType matchType)
-{
-    m_matchType = matchType;
-}
-
-// Get match type.
-game::SearchQuery::MatchType
-game::SearchQuery::getMatchType() const
-{
-    return m_matchType;
-}
-
-// Set set of objects.
-void
-game::SearchQuery::setSearchObjects(SearchObjects_t objs)
-{
-    m_objects = objs;
-}
-
-// Get set of objects.
-game::SearchQuery::SearchObjects_t
-game::SearchQuery::getSearchObjects() const
-{
-    return m_objects;
-}
-
 // Set query string.
 void
 game::SearchQuery::setQuery(String_t query)
@@ -271,27 +231,6 @@ String_t
 game::SearchQuery::getQuery() const
 {
     return m_query;
-}
-
-// Get limitation to played objects.
-void
-game::SearchQuery::setPlayedOnly(bool flag)
-{
-    m_playedOnly = flag;
-}
-
-// Get limitation to played objects.
-bool
-game::SearchQuery::getPlayedOnly() const
-{
-    return m_playedOnly;
-}
-
-// Set optimisation level.
-void
-game::SearchQuery::setOptimisationLevel(int level)
-{
-    m_optimisationLevel = level;
 }
 
 // Get search objects as string.

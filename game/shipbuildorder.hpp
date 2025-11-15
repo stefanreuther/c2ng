@@ -108,4 +108,76 @@ namespace game {
 
 }
 
+inline int
+game::ShipBuildOrder::getHullIndex() const
+{
+    return m_hullIndex;
+}
+
+inline void
+game::ShipBuildOrder::setHullIndex(int n)
+{
+    m_hullIndex = n;
+}
+
+inline int
+game::ShipBuildOrder::getEngineType() const
+{
+    return m_engineType;
+}
+
+inline void
+game::ShipBuildOrder::setEngineType(int n)
+{
+    m_engineType = n;
+}
+
+inline int
+game::ShipBuildOrder::getBeamType() const
+{
+    return m_beamType;
+}
+
+inline void
+game::ShipBuildOrder::setBeamType(int n)
+{
+    m_beamType = n;
+}
+
+inline int
+game::ShipBuildOrder::getNumBeams() const
+{
+    return m_numBeams;
+}
+
+inline void
+game::ShipBuildOrder::setNumBeams(int n)
+{
+    m_numBeams = n;
+}
+
+inline int
+game::ShipBuildOrder::getTorpedoType() const
+{
+    return m_torpedoType;
+}
+
+inline void
+game::ShipBuildOrder::setTorpedoType(int n)
+{
+    m_torpedoType = n;
+}
+
+inline int
+game::ShipBuildOrder::getNumLaunchers() const
+{
+    return m_numLaunchers;
+}
+
+inline void
+game::ShipBuildOrder::setNumLaunchers(int n)
+{
+    m_numLaunchers = n;
+}
+
 #endif

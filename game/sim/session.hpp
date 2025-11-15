@@ -87,4 +87,40 @@ namespace game { namespace sim {
 
 } }
 
+inline game::sim::Setup&
+game::sim::Session::setup()
+{
+    return m_setup;
+}
+
+inline const game::sim::Setup&
+game::sim::Session::setup() const
+{
+    return m_setup;
+}
+
+inline game::sim::Configuration&
+game::sim::Session::configuration()
+{
+    return m_config;
+}
+
+inline const game::sim::Configuration&
+game::sim::Session::configuration() const
+{
+    return m_config;
+}
+
+inline void
+game::sim::Session::setUsePlayerRelations(bool flag)
+{
+    m_usePlayerRelations = flag;
+}
+
+inline bool
+game::sim::Session::isUsePlayerRelations() const
+{
+    return m_usePlayerRelations;
+}
+
 #endif

@@ -124,62 +124,6 @@ game::sim::Configuration::isExperienceEnabled(const game::config::HostConfigurat
     return false;
 }
 
-// Set engine/shield bonus.
-void
-game::sim::Configuration::setEngineShieldBonus(int n)
-{
-    m_engineShieldBonus = n;
-}
-
-// Get engine/shield bonus.
-int
-game::sim::Configuration::getEngineShieldBonus() const
-{
-    return m_engineShieldBonus;
-}
-
-// Set scotty bonus.
-void
-game::sim::Configuration::setScottyBonus(bool enable)
-{
-    m_scottyBonus = enable;
-}
-
-// Check for scotty bonus.
-bool
-game::sim::Configuration::hasScottyBonus() const
-{
-    return m_scottyBonus;
-}
-
-// Set random left/right assignment.
-void
-game::sim::Configuration::setRandomLeftRight(bool enable)
-{
-    m_randomLeftRight = enable;
-}
-
-// Check for random left/right assignment.
-bool
-game::sim::Configuration::hasRandomLeftRight() const
-{
-    return m_randomLeftRight;
-}
-
-// Set whether alliances are honored.
-void
-game::sim::Configuration::setHonorAlliances(bool enable)
-{
-    m_honorAlliances = enable;
-}
-
-// Check whether alliances are honored.
-bool
-game::sim::Configuration::hasHonorAlliances() const
-{
-    return m_honorAlliances;
-}
-
 // Set limitation to one fight.
 void
 game::sim::Configuration::setOnlyOneSimulation(bool enable)
@@ -190,13 +134,6 @@ game::sim::Configuration::setOnlyOneSimulation(bool enable)
     }
 }
 
-// Check limitation to one fight.
-bool
-game::sim::Configuration::hasOnlyOneSimulation() const
-{
-    return m_onlyOneSimulation;
-}
-
 // Set seed control.
 void
 game::sim::Configuration::setSeedControl(bool enable)
@@ -205,48 +142,6 @@ game::sim::Configuration::setSeedControl(bool enable)
     if (m_seedControl) {
         m_onlyOneSimulation = true;
     }
-}
-
-// Check for seed control.
-bool
-game::sim::Configuration::hasSeedControl() const
-{
-    return m_seedControl;
-}
-
-// Set whether friendly codes are randomized on every fight.
-void
-game::sim::Configuration::setRandomizeFCodesOnEveryFight(bool enable)
-{
-    m_randomizeFCodesOnEveryFight = enable;
-}
-
-// Check whether friendly codes are randomized on every fight.
-bool
-game::sim::Configuration::hasRandomizeFCodesOnEveryFight() const
-{
-    return m_randomizeFCodesOnEveryFight;
-}
-
-// Set balancing mode.
-void
-game::sim::Configuration::setBalancingMode(BalancingMode mode)
-{
-    m_balancingMode = mode;
-}
-
-// Get balancing mode.
-game::sim::Configuration::BalancingMode
-game::sim::Configuration::getBalancingMode() const
-{
-    return m_balancingMode;
-}
-
-// Get simulation mode (host version).
-game::sim::Configuration::VcrMode
-game::sim::Configuration::getMode() const
-{
-    return m_vcrMode;
 }
 
 // Check whether host version honors Alternative Combat settings.
@@ -265,30 +160,6 @@ game::sim::Configuration::hasAlternativeCombat() const
         return false;
     }
     return false;
-}
-
-game::PlayerBitMatrix&
-game::sim::Configuration::allianceSettings()
-{
-    return m_allianceSettings;
-}
-
-const game::PlayerBitMatrix&
-game::sim::Configuration::allianceSettings() const
-{
-    return m_allianceSettings;
-}
-
-game::PlayerBitMatrix&
-game::sim::Configuration::enemySettings()
-{
-    return m_enemySettings;
-}
-
-const game::PlayerBitMatrix&
-game::sim::Configuration::enemySettings() const
-{
-    return m_enemySettings;
 }
 
 String_t

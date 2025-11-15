@@ -411,4 +411,88 @@ interpreter::World::planetProperties() const
     return m_planetProperties;
 }
 
+// Access keymaps.
+inline util::KeymapTable&
+interpreter::World::keymaps()
+{
+    return m_keymaps;
+}
+
+// Access keymaps (const).
+inline const util::KeymapTable&
+interpreter::World::keymaps() const
+{
+    return m_keymaps;
+}
+
+// Access atoms.
+inline util::AtomTable&
+interpreter::World::atomTable()
+{
+    return m_atomTable;
+}
+
+// Access atoms (const).
+inline const util::AtomTable&
+interpreter::World::atomTable() const
+{
+    return m_atomTable;
+}
+
+// Access mutexes.
+inline interpreter::MutexList&
+interpreter::World::mutexList()
+{
+    return m_mutexList;
+}
+
+// Access mutexes (const).
+inline const interpreter::MutexList&
+interpreter::World::mutexList() const
+{
+    return m_mutexList;
+}
+
+// Access files.
+inline interpreter::FileTable&
+interpreter::World::fileTable()
+{
+    return m_fileTable;
+}
+
+// Access files (const).
+inline const interpreter::FileTable&
+interpreter::World::fileTable() const
+{
+    return m_fileTable;
+}
+
+// Access global contexts.
+inline const afl::container::PtrVector<interpreter::Context>&
+interpreter::World::globalContexts() const
+{
+    return m_globalContexts;
+}
+
+// Access logger.
+inline afl::sys::LogListener&
+interpreter::World::logListener()
+{
+    return m_log;
+}
+
+// Access translator.
+inline afl::string::Translator&
+interpreter::World::translator() const
+{
+    return m_translator;
+}
+
+// Access file system.
+inline afl::io::FileSystem&
+interpreter::World::fileSystem()
+{
+    return m_fileSystem;
+}
+
 #endif

@@ -211,7 +211,199 @@ namespace game {
         int m_usedESBRate;                ///< Used Engine-Shield bonus. Set if m_combatMass includes ESB. ex used_esb.
         int m_damage;                     ///< Damage. Zero if not known. ex damage.
     };
-    
+
+}
+
+// Compare for inequality.
+inline bool
+game::ShipQuery::operator!=(const ShipQuery& other) const
+{
+    return !operator==(other);
+}
+
+// Get hull type.
+inline int
+game::ShipQuery::getHullType() const
+{
+    // ex GShipQuery::getHullId
+    return m_hullType;
+}
+
+// Set hull type.
+inline void
+game::ShipQuery::setHullType(int id)
+{
+    // ex GShipQuery::setHullId
+    m_hullType = id;
+}
+
+// Get ship Id.
+inline game::Id_t
+game::ShipQuery::getShipId() const
+{
+    // ex GShipQuery::getShipId
+    return m_shipId;
+}
+
+// Set ship Id.
+inline void
+game::ShipQuery::setShipId(Id_t id)
+{
+    // ex GShipQuery::setShipId
+    m_shipId = id;
+}
+
+// Get experience level filter.
+inline game::ExperienceLevelSet_t
+game::ShipQuery::getLevelFilterSet() const
+{
+    // ex GShipQuery::getLevelFilterSet
+    return m_levelFilterSet;
+}
+
+// Set experience level filter.
+inline void
+game::ShipQuery::setLevelFilterSet(ExperienceLevelSet_t set)
+{
+    // ex GShipQuery::setLevelFilterSet
+    m_levelFilterSet = set;
+}
+
+// Get display level set.
+inline game::ExperienceLevelSet_t
+game::ShipQuery::getLevelDisplaySet() const
+{
+    // ex GShipQuery::getLevelDisplaySet
+    return m_levelDisplaySet;
+}
+
+// Set display level set.
+inline void
+game::ShipQuery::setLevelDisplaySet(ExperienceLevelSet_t set)
+{
+    // ex GShipQuery::setLevelDisplaySet
+    m_levelDisplaySet = set;
+}
+
+// Get player filter.
+inline game::PlayerSet_t
+game::ShipQuery::getPlayerFilterSet() const
+{
+    // ex GShipQuery::getPlayerFilterSet
+    return m_playerFilterSet;
+}
+
+// Set player filter.
+inline void
+game::ShipQuery::setPlayerFilterSet(PlayerSet_t set)
+{
+    // ex GShipQuery::setPlayerFilterSet
+    m_playerFilterSet = set;
+}
+
+// Get display player set.
+inline game::PlayerSet_t
+game::ShipQuery::getPlayerDisplaySet() const
+{
+    // ex GShipQuery::getPlayerDisplaySet
+    return m_playerDisplaySet;
+}
+
+// Set display player set.
+inline void
+game::ShipQuery::setPlayerDisplaySet(PlayerSet_t set)
+{
+    // ex GShipQuery::setPlayerDisplaySet
+    m_playerDisplaySet = set;
+}
+
+// Get engine type.
+inline int
+game::ShipQuery::getEngineType() const
+{
+    // ex GShipQuery::getEngineId
+    return m_engineType;
+}
+
+// Set engine type.
+inline void
+game::ShipQuery::setEngineType(int type)
+{
+    // ex GShipQuery::setEngineId
+    m_engineType = type;
+}
+
+// Get combat mass.
+inline int
+game::ShipQuery::getCombatMass() const
+{
+    // ex GShipQuery::getCombatMass
+    return m_combatMass;
+}
+
+// Get used engine shield bonus rate.
+inline int
+game::ShipQuery::getUsedESBRate() const
+{
+    // ex GShipQuery::getUsedESB
+    return m_usedESBRate;
+}
+
+// Set combat mass parameters.
+inline void
+game::ShipQuery::setCombatMass(int mass, int usedESB)
+{
+    // ex GShipQuery::setCombatMass
+    m_combatMass = mass;
+    m_usedESBRate = usedESB;
+}
+
+// Get crew size.
+inline int
+game::ShipQuery::getCrew() const
+{
+    // ex GShipQuery::getCrew
+    return m_crew;
+}
+
+// Set crew size.
+inline void
+game::ShipQuery::setCrew(int crew)
+{
+    // ex GShipQuery::setCrew
+    m_crew = crew;
+}
+
+// Get owner.
+inline int
+game::ShipQuery::getOwner() const
+{
+    // ex GShipQuery::getOwner
+    return m_owner;
+}
+
+// Set owner.
+inline void
+game::ShipQuery::setOwner(int id)
+{
+    // ex GShipQuery::setOwner
+    m_owner = id;
+}
+
+// Get damage.
+inline int
+game::ShipQuery::getDamage() const
+{
+    // ex GShipQuery::getDamage
+    return m_damage;
+}
+
+// Set damage.
+inline void
+game::ShipQuery::setDamage(int damage)
+{
+    // ex GShipQuery::setDamage
+    m_damage = damage;
 }
 
 #endif

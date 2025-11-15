@@ -83,4 +83,28 @@ namespace game { namespace spec {
 
 } }
 
+inline game::spec::Cost&
+game::spec::TorpedoLauncher::torpedoCost()
+{
+    return m_torpedoCost;
+}
+
+inline const game::spec::Cost&
+game::spec::TorpedoLauncher::torpedoCost() const
+{
+    return m_torpedoCost;
+}
+
+inline void
+game::spec::TorpedoLauncher::setFiringRangeBonus(int n)
+{
+    m_firingRangeBonus = n;
+}
+
+inline int
+game::spec::TorpedoLauncher::getFiringRangeBonus() const
+{
+    return m_firingRangeBonus;
+}
+
 #endif

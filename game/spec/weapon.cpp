@@ -12,34 +12,6 @@ game::spec::Weapon::Weapon(ComponentNameProvider::Type type, int id)
       m_damagePower(0)
 { }
 
-// Get kill power.
-int
-game::spec::Weapon::getKillPower() const
-{
-    return m_killPower;
-}
-
-// Set kill power.
-void
-game::spec::Weapon::setKillPower(int killPower)
-{
-    m_killPower = killPower;
-}
-
-// Get damage power.
-int
-game::spec::Weapon::getDamagePower() const
-{
-    return m_damagePower;
-}
-
-// Set damage power.
-void
-game::spec::Weapon::setDamagePower(int damagePower)
-{
-    m_damagePower = damagePower;
-}
-
 // Check for death ray.
 bool
 game::spec::Weapon::isDeathRay(const HostVersion& host) const

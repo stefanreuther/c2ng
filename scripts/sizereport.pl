@@ -142,7 +142,7 @@ sub parseName {
             push @result, maybeSplitUnderscores($1), '::';
         } elsif ($name =~ /\G::/sgci) {
             push @result, '::';
-        } elsif ($name =~ /\G([0-9a-z_.]+)($|(?=[*&@]))/sgci) {
+        } elsif ($name =~ /\G([0-9a-z_.]+)($|(?=[*&@\[]))/sgci) {
             push @result, maybeSplitUnderscores($1);
         } elsif ($name =~ /\G(vtable|typeinfo name|typeinfo|VTT|guard variable) for (.*)/sgci) {
             my $what = $1;
@@ -197,6 +197,8 @@ sub parseName {
         } elsif ($name =~ /\G(@\S+)\s*/sgci) {
             push @result, $1;
         } elsif ($name =~ /\G\s*(\[clone.*?\])/sgci) {
+            push @result, $1;
+        } elsif ($name =~ /\G\s*(\[abi:.*?\])/sgci) {
             push @result, $1;
         } elsif ($name =~ /\G\s*[&*]\s*/sgci) {
             # Means we saw a return type until here; discard everything we saw to far

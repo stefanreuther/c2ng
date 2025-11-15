@@ -48,4 +48,32 @@ namespace game { namespace spec {
 
 } }
 
+// Get kill power.
+inline int
+game::spec::Weapon::getKillPower() const
+{
+    return m_killPower;
+}
+
+// Set kill power.
+inline void
+game::spec::Weapon::setKillPower(int killPower)
+{
+    m_killPower = killPower;
+}
+
+// Get damage power.
+inline int
+game::spec::Weapon::getDamagePower() const
+{
+    return m_damagePower;
+}
+
+// Set damage power.
+inline void
+game::spec::Weapon::setDamagePower(int damagePower)
+{
+    m_damagePower = damagePower;
+}
+
 #endif

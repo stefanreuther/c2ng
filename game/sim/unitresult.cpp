@@ -29,66 +29,6 @@ game::sim::UnitResult::UnitResult()
     : m_numFightsWon(0), m_numFights(0), m_numCaptures(0)
 { }
 
-int
-game::sim::UnitResult::getNumFightsWon() const
-{
-    return m_numFightsWon;
-}
-
-int
-game::sim::UnitResult::getNumFights() const
-{
-    return m_numFights;
-}
-
-int
-game::sim::UnitResult::getNumCaptures() const
-{
-    return m_numCaptures;
-}
-
-const game::sim::UnitResult::Item&
-game::sim::UnitResult::getNumTorpedoesFired() const
-{
-    return m_numTorpedoesFired;
-}
-
-const game::sim::UnitResult::Item&
-game::sim::UnitResult::getNumFightersLost() const
-{
-    return m_numFightersLost;
-}
-
-const game::sim::UnitResult::Item&
-game::sim::UnitResult::getDamage() const
-{
-    return m_damage;
-}
-
-const game::sim::UnitResult::Item&
-game::sim::UnitResult::getShield() const
-{
-    return m_shield;
-}
-
-const game::sim::UnitResult::Item&
-game::sim::UnitResult::getCrewLeftOrDefenseLost() const
-{
-    return m_crewLeftOrDefenseLost;
-}
-
-const game::sim::UnitResult::Item&
-game::sim::UnitResult::getNumTorpedoHits() const
-{
-    return m_numTorpedoHits;
-}
-
-const game::sim::UnitResult::Item&
-game::sim::UnitResult::getMinFightersAboard() const
-{
-    return m_minFightersAboard;
-}
-
 // Change weight of this unit result.
 void
 game::sim::UnitResult::changeWeight(int32_t oldWeight, int32_t newWeight)

@@ -54,9 +54,3 @@ gfx::Filter::convertCanvas(afl::base::Ref<Canvas> orig)
 {
     return orig;
 }
-
-gfx::Canvas&
-gfx::Filter::parent()
-{
-    return m_parent;
-}

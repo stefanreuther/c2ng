@@ -280,4 +280,92 @@ namespace game { namespace sim {
 
 } }
 
+// Get object Id.
+inline game::Id_t
+game::sim::Object::getId() const
+{
+    // ex GSimObject::getId
+    return m_id;
+}
+
+// Get damage.
+inline int
+game::sim::Object::getDamage() const
+{
+    // ex GSimObject::getDamage
+    return m_damage;
+}
+
+// Get shield level.
+inline int
+game::sim::Object::getShield() const
+{
+    // ex GSimObject::getShield
+    return m_shield;
+}
+
+// Get owner.
+inline int
+game::sim::Object::getOwner() const
+{
+    // ex GSimObject::getOwner
+    return m_owner;
+}
+
+// Get experience level.
+inline int
+game::sim::Object::getExperienceLevel() const
+{
+    // ex GSimObject::getExperienceLevel
+    return m_experienceLevel;
+}
+
+// Get flags.
+inline int32_t
+game::sim::Object::getFlags() const
+{
+    // ex GSimObject::getFlags
+    return m_flags;
+}
+
+// Get FLAK rating override.
+inline int32_t
+game::sim::Object::getFlakRatingOverride() const
+{
+    // ex GSimObject::getFlakRatingOverride
+    return m_flakRatingOverride;
+}
+
+// Get FLAK compensation override.
+inline int
+game::sim::Object::getFlakCompensationOverride() const
+{
+    // ex GSimObject::getFlakCompensationOverride
+    return m_flakCompensationOverride;
+}
+
+// Mark dirty.
+inline void
+game::sim::Object::markDirty()
+{
+    // ex GSimObject::setChanged
+    m_changed = true;
+}
+
+// Mark clean.
+inline void
+game::sim::Object::markClean()
+{
+    // ex GSimObject::setUnchanged
+    m_changed = false;
+}
+
+// Check dirtiness.
+inline bool
+game::sim::Object::isDirty() const
+{
+    // ex GSimObject::isChanged
+    return m_changed;
+}
+
 #endif

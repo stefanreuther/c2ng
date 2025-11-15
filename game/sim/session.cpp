@@ -16,30 +16,6 @@ game::sim::Session::Session()
 game::sim::Session::~Session()
 { }
 
-game::sim::Setup&
-game::sim::Session::setup()
-{
-    return m_setup;
-}
-
-const game::sim::Setup&
-game::sim::Session::setup() const
-{
-    return m_setup;
-}
-
-game::sim::Configuration&
-game::sim::Session::configuration()
-{
-    return m_config;
-}
-
-const game::sim::Configuration&
-game::sim::Session::configuration() const
-{
-    return m_config;
-}
-
 void
 game::sim::Session::setNewGameInterface(GameInterface* gi)
 {
@@ -50,18 +26,6 @@ game::sim::GameInterface*
 game::sim::Session::getGameInterface() const
 {
     return m_gameInterface.get();
-}
-
-void
-game::sim::Session::setUsePlayerRelations(bool flag)
-{
-    m_usePlayerRelations = flag;
-}
-
-bool
-game::sim::Session::isUsePlayerRelations() const
-{
-    return m_usePlayerRelations;
 }
 
 void

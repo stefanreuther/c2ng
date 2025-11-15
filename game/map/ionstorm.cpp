@@ -118,56 +118,6 @@ game::map::IonStorm::getRadiusSquared() const
     }
 }
 
-// IonStorm:
-void
-game::map::IonStorm::setName(String_t name)
-{
-    m_name = name;
-}
-
-void
-game::map::IonStorm::setPosition(Point pos)
-{
-    m_x = pos.getX();
-    m_y = pos.getY();
-}
-
-void
-game::map::IonStorm::setRadius(int r)
-{
-    m_radius = r;
-}
-
-void
-game::map::IonStorm::setVoltage(int voltage)
-{
-    m_voltage = voltage;
-}
-
-void
-game::map::IonStorm::setWarpFactor(int speed)
-{
-    m_speed = speed;
-}
-
-void
-game::map::IonStorm::setHeading(int heading)
-{
-    m_heading = heading;
-}
-
-void
-game::map::IonStorm::setIsGrowing(bool flag)
-{
-    m_isGrowing = flag;
-}
-
-void
-game::map::IonStorm::setParentId(int parentId)
-{
-    m_parentId = parentId;
-}
-
 String_t
 game::map::IonStorm::getName(afl::string::Translator& tx) const
 {
@@ -192,46 +142,12 @@ game::map::IonStorm::getClass() const
     }
 }
 
-game::IntegerProperty_t
-game::map::IonStorm::getVoltage() const
-{
-    // ex GIonStorm::getVoltage
-    return m_voltage;
-}
-
-game::IntegerProperty_t
-game::map::IonStorm::getHeading() const
-{
-    // ex GIonStorm::getHeading
-    return m_heading;
-}
-
-game::IntegerProperty_t
-game::map::IonStorm::getWarpFactor() const
-{
-    // ex GIonStorm::getSpeed
-    return m_speed;
-}
-
-bool
-game::map::IonStorm::isGrowing() const
-{
-    // ex GIonStorm::isGrowing
-    return m_isGrowing;
-}
-
 bool
 game::map::IonStorm::isActive() const
 {
     int volt;
     return getVoltage().get(volt)
         && volt > 0;
-}
-
-int
-game::map::IonStorm::getParentId() const
-{
-    return m_parentId;
 }
 
 void

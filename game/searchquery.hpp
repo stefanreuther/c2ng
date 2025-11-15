@@ -142,4 +142,65 @@ namespace game {
 
 }
 
+// Set of all object types.
+inline game::SearchQuery::SearchObjects_t
+game::SearchQuery::allObjects()
+{
+    return SearchObjects_t()
+        + SearchShips
+        + SearchPlanets
+        + SearchBases
+        + SearchUfos
+        + SearchOthers;
+}
+
+// Set match type.
+inline void
+game::SearchQuery::setMatchType(MatchType matchType)
+{
+    m_matchType = matchType;
+}
+
+// Get match type.
+inline game::SearchQuery::MatchType
+game::SearchQuery::getMatchType() const
+{
+    return m_matchType;
+}
+
+// Set set of objects.
+inline void
+game::SearchQuery::setSearchObjects(SearchObjects_t objs)
+{
+    m_objects = objs;
+}
+
+// Get set of objects.
+inline game::SearchQuery::SearchObjects_t
+game::SearchQuery::getSearchObjects() const
+{
+    return m_objects;
+}
+
+// Get limitation to played objects.
+inline void
+game::SearchQuery::setPlayedOnly(bool flag)
+{
+    m_playedOnly = flag;
+}
+
+// Get limitation to played objects.
+inline bool
+game::SearchQuery::getPlayedOnly() const
+{
+    return m_playedOnly;
+}
+
+// Set optimisation level.
+inline void
+game::SearchQuery::setOptimisationLevel(int level)
+{
+    m_optimisationLevel = level;
+}
+
 #endif

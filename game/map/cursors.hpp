@@ -122,4 +122,58 @@ namespace game { namespace map {
 
 } }
 
+inline game::map::ObjectCursor&
+game::map::Cursors::currentShip()
+{
+    return m_currentShip;
+}
+
+inline game::map::ObjectCursor&
+game::map::Cursors::currentHistoryShip()
+{
+    return m_currentHistoryShip;
+}
+
+inline game::map::ObjectCursor&
+game::map::Cursors::currentPlanet()
+{
+    return m_currentPlanet;
+}
+
+inline game::map::ObjectCursor&
+game::map::Cursors::currentBase()
+{
+    return m_currentBase;
+}
+
+inline game::map::ObjectCursor&
+game::map::Cursors::currentFleet()
+{
+    return m_currentFleet;
+}
+
+inline game::map::ObjectCursor&
+game::map::Cursors::currentUfo()
+{
+    return m_currentUfo;
+}
+
+inline game::map::ObjectCursor&
+game::map::Cursors::currentIonStorm()
+{
+    return m_currentIonStorm;
+}
+
+inline game::map::ObjectCursor&
+game::map::Cursors::currentMinefield()
+{
+    return m_currentMinefield;
+}
+
+inline game::map::Location&
+game::map::Cursors::location()
+{
+    return m_location;
+}
+
 #endif

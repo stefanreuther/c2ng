@@ -50,100 +50,11 @@ game::interface::ShipTaskPredictor::ShipTaskPredictor(const game::map::Universe&
 game::interface::ShipTaskPredictor::~ShipTaskPredictor()
 { }
 
-void
-game::interface::ShipTaskPredictor::setMovementMode(MovementMode m)
-{
-    m_mode = m;
-}
-
-size_t
-game::interface::ShipTaskPredictor::getNumPositions() const
-{
-    // ex IntShipPredictor::getNumPositions
-    return m_numPositions;
-}
-
-size_t
-game::interface::ShipTaskPredictor::getNumFuelPositions() const
-{
-    // ex IntShipPredictor::getNumFuelPositions
-    return m_numFuelPositions;
-}
-
-int
-game::interface::ShipTaskPredictor::getNumTurns() const
-{
-    // ex IntShipPredictor::getNumTurns
-    return m_predictor.getNumTurns();
-}
-
-int
-game::interface::ShipTaskPredictor::getNumFuelTurns() const
-{
-    // ex IntShipPredictor::getNumFuelTurns
-    return m_numFuelTurns;
-}
-
-int
-game::interface::ShipTaskPredictor::getMovementFuel() const
-{
-    // ex IntShipPredictor::getMovementFuel
-    return m_predictor.getMovementFuelUsed();
-}
-
-int
-game::interface::ShipTaskPredictor::getCloakFuel() const
-{
-    // ex IntShipPredictor::getCloakFuel
-    return m_predictor.getCloakFuelUsed();
-}
-
-int
-game::interface::ShipTaskPredictor::getRemainingFuel() const
-{
-    // ex IntShipPredictor::getRemainingFuel
-    return m_predictor.getCargo(Element::Neutronium);
-}
-
-int
-game::interface::ShipTaskPredictor::getMission() const
-{
-    return m_predictor.getMission();
-}
-
-String_t
-game::interface::ShipTaskPredictor::getFriendlyCode() const
-{
-    // ex IntShipPredictor::getFCode
-    return m_predictor.getFriendlyCode();
-}
-
-int
-game::interface::ShipTaskPredictor::getWarpFactor() const
-{
-    // ex IntShipPredictor::getSpeed
-    return m_predictor.getWarpFactor();
-}
-
-bool
-game::interface::ShipTaskPredictor::isHyperdriving() const
-{
-    // ex IntShipPredictor::isHyperdriving
-    return m_predictor.isHyperdriving();
-}
-
 game::map::Point
 game::interface::ShipTaskPredictor::getPosition(size_t index) const
 {
     // ex IntShipPredictor::getPosition
     return index < MAX_XYS ? m_positions[index] : game::map::Point();
-}
-
-game::map::Point
-game::interface::ShipTaskPredictor::getPosition() const
-{
-    // ex IntShipPredictor::getPosition
-    return m_predictor.getPosition();
 }
 
 void

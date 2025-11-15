@@ -90,14 +90,6 @@ game::sim::Object::operator=(const Object& other)
     return *this;
 }
 
-// Get object Id.
-game::Id_t
-game::sim::Object::getId() const
-{
-    // ex GSimObject::getId
-    return m_id;
-}
-
 // Set object Id.
 void
 game::sim::Object::setId(Id_t id)
@@ -145,14 +137,6 @@ game::sim::Object::setFriendlyCode(String_t fcode)
     }
 }
 
-// Get damage.
-int
-game::sim::Object::getDamage() const
-{
-    // ex GSimObject::getDamage
-    return m_damage;
-}
-
 // Set damage.
 void
 game::sim::Object::setDamage(int damage)
@@ -161,14 +145,6 @@ game::sim::Object::setDamage(int damage)
     if (Updater().set(m_damage, damage)) {
         markDirty();
     }
-}
-
-// Get shield level.
-int
-game::sim::Object::getShield() const
-{
-    // ex GSimObject::getShield
-    return m_shield;
 }
 
 // Set shield level.
@@ -181,14 +157,6 @@ game::sim::Object::setShield(int shield)
     }
 }
 
-// Get owner.
-int
-game::sim::Object::getOwner() const
-{
-    // ex GSimObject::getOwner
-    return m_owner;
-}
-
 // Set owner.
 void
 game::sim::Object::setOwner(int owner)
@@ -197,14 +165,6 @@ game::sim::Object::setOwner(int owner)
     if (Updater().set(m_owner, owner)) {
         markDirty();
     }
-}
-
-// Get experience level.
-int
-game::sim::Object::getExperienceLevel() const
-{
-    // ex GSimObject::getExperienceLevel
-    return m_experienceLevel;
 }
 
 // Set experience level.
@@ -217,14 +177,6 @@ game::sim::Object::setExperienceLevel(int experienceLevel)
     }
 }
 
-// Get flags.
-int32_t
-game::sim::Object::getFlags() const
-{
-    // ex GSimObject::getFlags
-    return m_flags;
-}
-
 // Set flags.
 void
 game::sim::Object::setFlags(int32_t flags)
@@ -235,14 +187,6 @@ game::sim::Object::setFlags(int32_t flags)
     }
 }
 
-// Get FLAK rating override.
-int32_t
-game::sim::Object::getFlakRatingOverride() const
-{
-    // ex GSimObject::getFlakRatingOverride
-    return m_flakRatingOverride;
-}
-
 // Set FLAK rating override.
 void
 game::sim::Object::setFlakRatingOverride(int32_t r)
@@ -251,14 +195,6 @@ game::sim::Object::setFlakRatingOverride(int32_t r)
     if (Updater().set(m_flakRatingOverride, r)) {
         markDirty();
     }
-}
-
-// Get FLAK compensation override.
-int
-game::sim::Object::getFlakCompensationOverride() const
-{
-    // ex GSimObject::getFlakCompensationOverride
-    return m_flakCompensationOverride;
 }
 
 // Set FLAK compensation override.
@@ -345,30 +281,6 @@ game::sim::Object::getAbilities(const Configuration& opts, const game::spec::Shi
         }
     }
     return result;
-}
-
-// Mark dirty.
-void
-game::sim::Object::markDirty()
-{
-    // ex GSimObject::setChanged
-    m_changed = true;
-}
-
-// Mark clean.
-void
-game::sim::Object::markClean()
-{
-    // ex GSimObject::setUnchanged
-    m_changed = false;
-}
-
-// Check dirtiness.
-bool
-game::sim::Object::isDirty() const
-{
-    // ex GSimObject::isChanged
-    return m_changed;
 }
 
 game::sim::Object::AbilityInfo
