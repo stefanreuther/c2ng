@@ -33,6 +33,10 @@ namespace util {
             \param s stream to read from */
         void parseFile(afl::io::Stream& s);
 
+        /** Parse a text file.
+            \param textFile text file to read from */
+        void parseTextFile(afl::io::TextFile& textFile);
+
         /** Parse an optional file.
             \param dir Directory
             \param fileName File name

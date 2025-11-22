@@ -84,6 +84,21 @@ game::config::Configuration::merge(const Configuration& other)
     }
 }
 
+// Mark options unset if they match another Configuration.
+void
+game::config::Configuration::subtract(const Configuration& other)
+{
+    for (Map_t::const_iterator i = m_options.begin(), e = m_options.end(); i != e; ++i) {
+        if (i->second->wasSet()) {
+            if (const ConfigurationOption* otherValue = other.getOptionByName(i->first.toString())) {
+                if (i->second->toString() == otherValue->toString()) {
+                    i->second->setSource(ConfigurationOption::Default);
+                }
+            }
+        }
+    }
+}
+
 // Mark all options unset.
 void
 game::config::Configuration::markAllOptionsUnset()

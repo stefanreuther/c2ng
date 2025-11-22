@@ -390,6 +390,7 @@ CreateKeymap BaseLock(Base, Starchart)
 
 CreateKeymap RaceScreen(Global)
 CreateKeymap ShipBuildScreen(Global)
+CreateKeymap Simulator(Global)
 
 CreateKeymap SelectionDialog(Global)
 CreateKeymap ShipSelectionDialog(SelectionDialog)
@@ -698,6 +699,7 @@ Bind RaceScreen       "alt-e"  := "CC$EditCommands"
 Bind RaceScreen       "g"      := "UI.GlobalActions"
 Bind RaceScreen       "h"      := "UI.Help 'pcc2:racescreen'"
 Bind RaceScreen       "alt-h"  := "UI.Help 'pcc2:racescreen'"
+Bind RaceScreen       "c-l"    := "CCUI.LoadConfig"
 Bind RaceScreen       "i"      := "CC$ImperialStats"
 Bind RaceScreen       "m"      := "CC$ViewInbox"
 Bind RaceScreen       "alt-m"  := "CCUI.Messages.ViewFile"
@@ -712,6 +714,9 @@ Bind RaceScreen       "v"      := "CC$ViewCombat"
 Bind RaceScreen       "alt-v"  := "CCUI.VCR.ViewFile"
 Bind RaceScreen       "w"      := "CC$SendMessage"
 Bind RaceScreen       "find"   := "UI.Search"
+
+% Simulator Bindings
+Bind Simulator        "c-l"    := "CCUI.LoadConfig"
 
 % Selection Dialog Bindings
 % ex WObjectSelectionControl::handleEvent

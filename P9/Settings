@@ -12,7 +12,9 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/vcr/classic/standardscheduler.cpp \
+FILES_gamelib = game/interface/configurationcontext.cpp \
+    game/interface/configurationcontext.hpp \
+    game/vcr/classic/standardscheduler.cpp \
     game/vcr/classic/standardscheduler.hpp \
     game/vcr/classic/interleavedscheduler.cpp \
     game/vcr/classic/interleavedscheduler.hpp \
@@ -1842,7 +1844,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/client/vcr/playbackcontrolwidgettest.cpp \
+FILES_testsuite = test/game/interface/configurationcontexttest.cpp \
+    test/client/vcr/playbackcontrolwidgettest.cpp \
     test/client/vcr/configurationtest.cpp \
     test/game/vcr/classic/interleavedschedulertest.cpp \
     test/game/vcr/classic/standardschedulertest.cpp \

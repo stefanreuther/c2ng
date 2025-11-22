@@ -5,6 +5,7 @@
 
 #include "game/interface/globalproperty.hpp"
 #include "game/game.hpp"
+#include "game/interface/configurationcontext.hpp"
 #include "game/registrationkey.hpp"
 #include "game/root.hpp"
 #include "game/turn.hpp"
@@ -168,6 +169,21 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
         } else {
             return 0;
         }
+     case igpSystemCfg:
+        /* @q System.Cfg:Config (Global Property)
+           Access host configuration.
+
+           Using this property, you can access the set of host configuration options and their values.
+           Modifying this will directly affect PCC2.
+
+           @see Configuration(), Cfg(), AddConfig
+
+           @since PCC2 2.41.5 */
+        if (Root* root = session.getRoot().get()) {
+            return new ConfigurationContext(session, root->hostConfiguration());
+        } else {
+            return 0;
+        }
      case igpSystemLanguage:
         /* @q System.Language:Str (Global Property)
            Language code.
@@ -175,6 +191,20 @@ game::interface::getGlobalProperty(GlobalProperty igp, Session& session)
            usually in the form of a two-letter ISO 639 code ("en" = English).
            @since PCC2 1.99.25 */
         return makeStringValue(getLanguageCode(session.translator()));
+     case igpSystemPref:
+        /* @q System.Pref:Config (Global Property)
+           Access user preferences.
+
+           Using this property, you can access the set of user preferences and their values.
+           Modifying this will directly affect PCC2.
+
+           @see Configuration(), Pref(), AddPref
+           @since PCC2 2.41.5 */
+        if (Root* root = session.getRoot().get()) {
+            return new ConfigurationContext(session, root->userConfiguration());
+        } else {
+            return 0;
+        }
      case igpSystemProgram:
         /* @q System.Program:Str (Global Property)
            Name of the program executing the script.

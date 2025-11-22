@@ -23,8 +23,12 @@
 #include "game/v3/genextra.hpp"
 #include "game/v3/genfile.hpp"
 #include "game/vcr/test/database.hpp"
+#include "interpreter/arguments.hpp"
 #include "interpreter/error.hpp"
+#include "interpreter/indexablevalue.hpp"
+#include "interpreter/test/contextverifier.hpp"
 #include "interpreter/test/valueverifier.hpp"
+#include "interpreter/values.hpp"
 #include "version.hpp"
 #include <stdexcept>
 
@@ -33,6 +37,27 @@ using interpreter::test::verifyNewBoolean;
 using interpreter::test::verifyNewInteger;
 using interpreter::test::verifyNewNull;
 using interpreter::test::verifyNewString;
+using interpreter::test::ContextVerifier;
+
+namespace {
+    void verifyConfiguration(afl::test::Assert a, game::Session& session, game::interface::GlobalProperty igp, String_t keyName, String_t stringifiedValue)
+    {
+        std::auto_ptr<afl::data::Value> value(getGlobalProperty(igp, session));
+        interpreter::Context* ctx = dynamic_cast<interpreter::Context*>(value.get());
+        a.checkNonNull("must have non-null context", ctx);
+
+        std::auto_ptr<afl::data::Value> get(ContextVerifier(*ctx, a("context must have 'GET' function")).getValue("GET"));
+        interpreter::IndexableValue* idx = dynamic_cast<interpreter::IndexableValue*>(get.get());
+        a.checkNonNull("'GET' must be indexable", idx);
+
+        afl::data::Segment seg;
+        seg.pushBackString(keyName);
+        interpreter::Arguments args(seg, 0, 1);
+        std::auto_ptr<afl::data::Value> result(idx->get(args));
+        a.checkNonNull("'GET' must produce result", result.get());
+        a.checkEqual("expected value of option", interpreter::toString(result.get(), true), stringifiedValue);
+    }
+}
 
 /** Test behaviour with fully-populated session.
     All optional objects are present. */
@@ -143,6 +168,8 @@ AFL_TEST("game.interface.GlobalProperty:full", a)
                                                   std::auto_ptr<afl::charset::Charset>(new afl::charset::Utf8Charset()),
                                                   game::Root::Actions_t());
     r->setTurnLoader(new Loader());
+    r->hostConfiguration()[game::config::HostConfiguration::GameName].set("-name-");
+    r->userConfiguration()[game::config::UserConfiguration::Game_Host].set("=host=");
     session.setRoot(r);
 
     // Verify
@@ -171,6 +198,10 @@ AFL_TEST("game.interface.GlobalProperty:full", a)
     verifyNewString (a("igpTurnDate"),          getGlobalProperty(game::interface::igpTurnDate,          session), "12-24-2022");
     verifyNewBoolean(a("igpTurnIsNew"),         getGlobalProperty(game::interface::igpTurnIsNew,         session), true);
     verifyNewString (a("igpTurnTime"),          getGlobalProperty(game::interface::igpTurnTime,          session), "13:20:15");
+
+    // Configuration
+    verifyConfiguration(a("igpSystemCfg"),  session, game::interface::igpSystemCfg, "gamename", "\"-name-\"");
+    verifyConfiguration(a("igpSystemPref"), session, game::interface::igpSystemPref, "game.host", "\"=host=\"");
 }
 
 /** Test behaviour with half-populated session.
@@ -257,6 +288,8 @@ AFL_TEST("game.interface.GlobalProperty:empty", a)
     verifyNewNull   (a("igpTurnDate"),          getGlobalProperty(game::interface::igpTurnDate,          session));
     verifyNewNull   (a("igpTurnIsNew"),         getGlobalProperty(game::interface::igpTurnIsNew,         session));
     verifyNewNull   (a("igpTurnTime"),          getGlobalProperty(game::interface::igpTurnTime,          session));
+    verifyNewNull   (a("igpSystemCfg"),         getGlobalProperty(game::interface::igpSystemCfg,         session));
+    verifyNewNull   (a("igpSystemPref"),        getGlobalProperty(game::interface::igpSystemPref,        session));
 }
 
 /** Test setGlobalProperty(). */

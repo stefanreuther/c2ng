@@ -61,6 +61,7 @@ namespace {
         { "SHIPS.TOTAL",           game::interface::iplTotalShips,        MyPlayerPropertyDomain, interpreter::thInt },
         // SYSTEM.EGG
         // SYSTEM.ERR -> global variable (localizable!)
+        { "SYSTEM.CFG",            game::interface::igpSystemCfg,         GlobalPropertyDomain,   interpreter::thNone },
         { "SYSTEM.GAMEDIRECTORY",  game::interface::igpGameDirectory,     GlobalPropertyDomain,   interpreter::thString },
         { "SYSTEM.GAMETYPE",       game::interface::igpRegSharewareText,  GlobalPropertyDomain,   interpreter::thString },
         { "SYSTEM.GAMETYPE$",      game::interface::igpRegSharewareFlag,  GlobalPropertyDomain,   interpreter::thBool },
@@ -71,6 +72,7 @@ namespace {
         { "SYSTEM.HOSTVERSION",    game::interface::igpSystemHostVersion, GlobalPropertyDomain,   interpreter::thInt },
         { "SYSTEM.LANGUAGE",       game::interface::igpSystemLanguage,    GlobalPropertyDomain,   interpreter::thString },
         { "SYSTEM.LOCAL",          game::interface::igpFileFormatLocal,   GlobalPropertyDomain,   interpreter::thString },
+        { "SYSTEM.PREF",           game::interface::igpSystemPref,        GlobalPropertyDomain,   interpreter::thNone },
         { "SYSTEM.PROGRAM",        game::interface::igpSystemProgram,     GlobalPropertyDomain,   interpreter::thString },
         { "SYSTEM.RANDOMSEED",     game::interface::igpRandomSeed,        GlobalPropertyDomain,   interpreter::thInt },
         { "SYSTEM.REGSTR1",        game::interface::igpRegStr1,           GlobalPropertyDomain,   interpreter::thString },

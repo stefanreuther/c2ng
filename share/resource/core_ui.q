@@ -2022,6 +2022,47 @@ Sub CCUI.VCR.ViewFile
   EndIf
 EndSub
 
+% @since PCC2 2.41.5
+Sub CCUI.LoadConfig
+  Local System.Err, fd, fname, conf, num, title, UI.Result
+
+  title := Translate("Load Configuration from File")
+
+  UI.FileWindow title, "*.src"
+  If IsEmpty(UI.Result) Then Return
+  fname := UI.Result
+
+  fd := FreeFile()
+  Try
+    Open fname For Input As #fd
+  Else
+    UI.Message Format("%s: %s", fname, System.Err), title
+    Return
+  EndTry
+
+  conf := Configuration(1)
+  Try
+    Call conf->Load, #fd, "phost", 1
+  Else
+    Close #fd
+    UI.Message Format("%s: %s", fname, System.Err), title
+    Return
+  EndTry
+
+  Close #fd
+  Call conf->Subtract, System.Cfg
+  num := Count(conf->Entry, Source)
+
+  If num Then
+    UI.Message Format(Translate("This configuration file contains %d change%!1{s%} to the current game configuration.\n\nNote that loading wrong configuration can cause PCC2 to show wrong predictions and, in worst case, produce invalid turns.\n\nDo you want to apply the new configuration?"), num), title, Translate("Yes No")
+    If UI.Result=1 Then
+      Call System.Cfg->Merge, conf
+    EndIf
+  Else
+    UI.Message Translate("This configuration file contains no changes to the current game configuration."), title
+  EndIf
+EndSub
+
 
 %
 %  Menus

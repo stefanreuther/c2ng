@@ -983,6 +983,14 @@ For example, {If()} will only evaluate the second or third argument, but never b
 These special properties are only available for elementary functions and commands.
 You cannot write functions or subroutines that take <em>Expr</em> parameters.
 --------------------------------------------------------------------------------
+@type Config
+A configuration object represents the content of a configuration file ("ini file").
+You can call {@group Configuration Command|commands} and {@group Configuration Function|functions} on it.
+--------------------------------------------------------------------------------
+@type ConfigEntry
+A configuration entry represents an entry to a configuration file,
+and allows accessing its {@group Configuration Entry Property|properties}.
+--------------------------------------------------------------------------------
 @type File
 Files are referenced by numbers in PCC.
 You normally use the {FreeFile()} function to obtain a currently-unused file number.
@@ -1114,6 +1122,7 @@ The following overview applies to PCC2 and, where appropriate, also for 1.x.
  <tr><td>{UnknownPlanetLock (Keymap)|UnknownPlanetLock}(PlanetLock)</td> <td>Active when an unknown planet is selected in the starchart.</td></tr>
  <tr><td>{BaseLock (Keymap)|BaseLock}(Base, Starchart)</td>              <td>Active when a base is selected in the starchart.</td></tr>
  <tr><td>{RaceScreen (Keymap)|RaceScreen}(Global)</td>                   <td>Active on race screen.</td></tr>
+ <tr><td>{Simulator (Keymap)|Simulator}(Global)</td>                     <td>Active on battle simulator.</td></tr>
  <!--<tr><td>ShipBuildScreen(Global)</td>                                <td>Active on ship build screen.</td></tr>-->
 </table>
 --------------------------------------------------------------------------------
@@ -1254,6 +1263,21 @@ Widgets are created using {@group Widget Function|Widget Functions}.
 This section describes all beam weapon properties.
 These can be accessed using <tt>{Beam (Function)|Beam}(id).FIELD</tt>, where the Id number is an integer between 1 and 10.
 The beam number is the position of the beam in the selection list. {Beam$} in ship context yields a beam Id.
+--------------------------------------------------------------------------------
+@group Configuration Command
+
+This section lists all commands that can be called on a {@type Config|configuration object}.
+Such objects can be created using {Configuration()}, or accessed as {System.Cfg}, {System.Pref}.
+--------------------------------------------------------------------------------
+@group Configuration Entry Property
+
+This section lists properties of configuration entries
+that can be accessed using the {Entry (Configuration Function)|Entry()} function.
+--------------------------------------------------------------------------------
+@group Configuration Function
+
+This section lists all functions that can be called on a {@type Config|configuration object}.
+Such objects can be created using {Configuration()}, or accessed as {System.Cfg}, {System.Pref}.
 --------------------------------------------------------------------------------
 @group Combat Property
 
@@ -1640,6 +1664,8 @@ and {@group Global Command|global commands}.
 ===  Versions
 ===
 
+--------------------------------------------------------------------------------
+@version PCC2 2.41.5
 --------------------------------------------------------------------------------
 @version PCC2 2.41.4
 --------------------------------------------------------------------------------
@@ -2581,4 +2607,12 @@ Keys on this {int:index:type:keymap|keymap} are active on the <a href="pcc2:unit
 
 This keymap includes (derives from) {SelectionDialog (Keymap)|SelectionDialog}.
 @since PCC2 2.40.13
+--------------------------------------------------------------------------------
+@q Simulator:Keymap (Keymap)
+@noproto
+| Bind Simulator key := command
+Keys on this {int:index:type:keymap|keymap} are active on the <a href="pcc2:bsim">battle simulator</a>.
+
+This keymap includes (derives from) {Global (Keymap)|Global}.
+@since PCC2 2.41.5
 --------------------------------------------------------------------------------

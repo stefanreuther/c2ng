@@ -117,3 +117,39 @@ AFL_TEST("game.config.Configuration:merge", a)
     a.checkEqual("22. toString", p3->toString(), "33");
     a.checkEqual("23. getSource", p3->getSource(), ConfigurationOption::User);
 }
+
+/** Test subtract. */
+AFL_TEST("game.config.Configuration:subtract", a)
+{
+    using game::config::ConfigurationOption;
+
+    // Make configuration a
+    Ref<Configuration> ca = Configuration::create();
+    ca->setOption("one", "1a", ConfigurationOption::User);
+    ca->setOption("two", "2a", ConfigurationOption::User);
+    ca->setOption("three", "3a", ConfigurationOption::User);
+
+    // Make configuration b
+    Ref<Configuration> cb = Configuration::create();
+    cb->setOption("One", "1a", ConfigurationOption::User);
+    cb->setOption("two", "2b", ConfigurationOption::User);
+
+    // Merge
+    ca->subtract(*cb);
+
+    // Verify
+    ConfigurationOption* p1 = ca->getOptionByName("one");
+    a.checkNonNull("01. getOptionByName one", p1);
+    a.checkEqual("02. toString", p1->toString(), "1a");
+    a.checkEqual("03. getSource", p1->getSource(), ConfigurationOption::Default);
+
+    ConfigurationOption* p2 = ca->getOptionByName("two");
+    a.checkNonNull("11. getOptionByName two", p2);
+    a.checkEqual("12. toString", p2->toString(), "2a");
+    a.checkEqual("13. getSource", p2->getSource(), ConfigurationOption::User);
+
+    ConfigurationOption* p3 = ca->getOptionByName("three");
+    a.checkNonNull("21. getOptionByName three", p3);
+    a.checkEqual("22. toString", p3->toString(), "3a");
+    a.checkEqual("23. getSource", p3->getSource(), ConfigurationOption::User);
+}

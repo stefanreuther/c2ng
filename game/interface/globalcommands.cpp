@@ -7,13 +7,10 @@
 #include "afl/data/vector.hpp"
 #include "afl/data/vectorvalue.hpp"
 #include "game/actions/preconditions.hpp"
-#include "game/config/booleanvalueparser.hpp"
-#include "game/config/integeroption.hpp"
-#include "game/config/integervalueparser.hpp"
 #include "game/config/markeroption.hpp"
-#include "game/config/stringoption.hpp"
 #include "game/exception.hpp"
 #include "game/game.hpp"
+#include "game/interface/configurationcontext.hpp"
 #include "game/limits.hpp"
 #include "game/root.hpp"
 #include "game/turn.hpp"
@@ -101,35 +98,6 @@ namespace {
         drawing->setExpire(expire);
 
         t.universe().drawings().addNew(drawing.release());
-    }
-
-    void createConfigOption(game::config::Configuration& config, interpreter::Arguments& args)
-    {
-        // Parse args
-        String_t key;
-        String_t type;
-        if (!checkStringArg(key, args.getNext()) || !checkStringArg(type, args.getNext())) {
-            return;
-        }
-
-        // Create the option by indexing with an appropriate descriptor
-        if (type == "str" || type == "string") {
-            game::config::StringOptionDescriptor desc;
-            desc.m_name = key.c_str();
-            config[desc];
-        } else if (type == "int" || type == "integer") {
-            game::config::IntegerOptionDescriptor desc;
-            desc.m_name = key.c_str();
-            desc.m_parser = &game::config::IntegerValueParser::instance;
-            config[desc];
-        } else if (type == "bool" || type == "boolean") {
-            game::config::IntegerOptionDescriptor desc;
-            desc.m_name = key.c_str();
-            desc.m_parser = &game::config::BooleanValueParser::instance;
-            config[desc];
-        } else {
-            throw interpreter::Error::rangeError();
-        }
     }
 }
 
@@ -219,34 +187,16 @@ game::interface::makePlayerSet(PlayerSet_t set)
    @change Whereas PCC and PCC2 only accept options they know in this command, PCC2ng will accept all names.
    A previously-undefined name will produce a new option of type "string".
 
-   @see CreateConfigOption
+   This command is the same as
+   | Call System.Cfg->Add line
+
+   @see CreateConfigOption, Add (Configuration Command)
    @since PCC 1.1.4, PCC2 1.99.25, PCC2 2.40.1 */
 void
-game::interface::IFAddConfig(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
+game::interface::IFAddConfig(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args)
 {
     // ex int/if/globalif.h:IFAddConfig, globint.pas:Global_AddConfig
-    // Parse args
-    args.checkArgumentCount(1);
-    String_t text;
-    if (!checkStringArg(text, args.getNext())) {
-        return;
-    }
-
-    // Must have a turn
-    Root& r = game::actions::mustHaveRoot(session);
-
-    // Parse
-    String_t::size_type n = text.find('=');
-    if (n == String_t::npos) {
-        throw interpreter::Error("Invalid configuration setting");
-    }
-
-    // Assign the option.
-    // We need not verify that this option exists, it will be created.
-    r.hostConfiguration().setOption(afl::string::strTrim(String_t(text, 0, n)),
-                                    afl::string::strTrim(String_t(text, n+1)),
-                                    game::config::ConfigurationOption::User);
-    r.hostConfiguration().setDependantOptions();
+    IFConfiguration_Add(ConfigurationContext::Data(session, game::actions::mustHaveRoot(session).hostConfiguration()), proc, args);
 }
 
 /* @q AddFCode line:Str (Global Command)
@@ -301,32 +251,15 @@ game::interface::IFAddFCode(game::Session& session, interpreter::Process& /*proc
    If the option you're setting has not be defined before, this command will produce a new option of type "string".
    (In PCC2, the command will fail for unknown options.)
 
-   @see CreatePrefOption
+   This command is the same as
+   | Call System.Pref->Add line
+
+   @see CreatePrefOption, Add (Configuration Command)
    @since PCC2 2.40.1, PCC2 2.0.12 */
 void
-game::interface::IFAddPref(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
+game::interface::IFAddPref(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args)
 {
-    // Parse args
-    args.checkArgumentCount(1);
-    String_t text;
-    if (!checkStringArg(text, args.getNext())) {
-        return;
-    }
-
-    // Must have a turn
-    Root& r = game::actions::mustHaveRoot(session);
-
-    // Parse
-    String_t::size_type n = text.find('=');
-    if (n == String_t::npos) {
-        throw interpreter::Error("Invalid configuration setting");
-    }
-
-    // Assign the option.
-    // We need not verify that this option exists, it will be created.
-    r.userConfiguration().setOption(afl::string::strTrim(String_t(text, 0, n)),
-                                    afl::string::strTrim(String_t(text, n+1)),
-                                    game::config::ConfigurationOption::User);
+    IFConfiguration_Add(ConfigurationContext::Data(session, game::actions::mustHaveRoot(session).userConfiguration()), proc, args);
 }
 
 /* @q AuthPlayer player:Int, password:Str (Global Command)
@@ -447,13 +380,15 @@ game::interface::IFCCHistoryShowTurn(game::Session& session, interpreter::Proces
    - "bool"/"boolean": a boolean value (yes/no)
    The type affects acceptable values for the option, and the return type produced by {Cfg()}.
 
-   @see AddConfig, Cfg(), CreatePrefOption
+   This command is the same as
+   | Call System.Cfg->Create key, type
+
+   @see AddConfig, Cfg(), CreatePrefOption, Create (Configuration Command)
    @since PCC2 2.40.1 */
 void
-game::interface::IFCreateConfigOption(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
+game::interface::IFCreateConfigOption(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args)
 {
-    args.checkArgumentCount(2);
-    createConfigOption(game::actions::mustHaveRoot(session).hostConfiguration(), args);
+    IFConfiguration_Create(ConfigurationContext::Data(session, game::actions::mustHaveRoot(session).hostConfiguration()), proc, args);
 }
 
 /* @q CreatePrefOption key:Str, type:Str (Global Command)
@@ -469,13 +404,15 @@ game::interface::IFCreateConfigOption(game::Session& session, interpreter::Proce
    - "bool"/"boolean": a boolean value (yes/no)
    The type affects acceptable values for the option, and the return type produced by {Pref()}.
 
-   @see AddPref, Pref(), CreateConfigOption
+   This command is the same as
+   | Call System.Pref->Create key, type
+
+   @see AddPref, Pref(), CreateConfigOption, Create (Configuration Command)
    @since PCC2 2.40.1 */
 void
-game::interface::IFCreatePrefOption(game::Session& session, interpreter::Process& /*proc*/, interpreter::Arguments& args)
+game::interface::IFCreatePrefOption(game::Session& session, interpreter::Process& proc, interpreter::Arguments& args)
 {
-    args.checkArgumentCount(2);
-    createConfigOption(game::actions::mustHaveRoot(session).userConfiguration(), args);
+    IFConfiguration_Create(ConfigurationContext::Data(session, game::actions::mustHaveRoot(session).userConfiguration()), proc, args);
 }
 
 /* @q Export array, fields:Str, file:Str, type:Str, Optional charset:Str (Global Command)

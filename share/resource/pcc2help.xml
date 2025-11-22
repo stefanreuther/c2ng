@@ -442,6 +442,7 @@
         <ki key="Alt-Left, Alt-Right">Next/previous selection layer;</ki>
         <ki key="Backspace">Go to previous screen;</ki>
         <ki key="Alt-Backspace">Show list of previous screens;</ki>
+        <ki key="Ctrl-L"><a href="pcc2:loadconfig">Load configuration file</a>;</ki>
         <ki key="Ctrl-O"><a href="pcc2:settings">Settings</a>;</ki>
         <ki key="Ctrl-S">Save game without exiting;</ki>
         <ki key="ESC">Save and exit.</ki>
@@ -528,6 +529,36 @@
       <h2>Reference</h2>
       <dl>
         <di term="Keys:"> backup options on <a href="pcc2:settings">settings dialog</a></di>
+      </dl>
+    </page>
+
+    <!-- Load configuration -->
+    <page id="pcc2:loadconfig">
+      <h1>Load Configuration</h1>
+
+      <p>VGA Planets&#x2122; games are configurable.
+        PCC2 will automatically read configuration from messages (HConfig, HOST), or <tt>pconfig.src</tt> (PHost).</p>
+
+      <p>For experiments, you can load alternative configuration files, and load them using this function.
+        This will affect PCC2's predictions.
+        The main use case is for battle simulation, where you can examine different versions of a configuration without having to exit and re-enter PCC2.
+        However, all other predictions are affected as well.</p>
+
+      <p>The file should contain assigments in "Key=Value" format,
+        e.g. <tt>AllowAlternativeCombat=Yes</tt>.</p>
+
+      <p>If you want to change only a single configuration option,
+        you can use the <a href="int:name:addconfig">AddConfig</a> command on the <a href="pcc2:console">console</a>.</p>
+
+      <p><font color="red"><b>Note:</b></font> not all screens automatically redraw when you change configuration.
+        Exit to race screen and re-enter the screen in this case.</p>
+
+      <p><font color="red"><b>Warning:</b></font> use this functionality with care.
+        Changing some options may cause PCC2 to generate turns that host considers invalid (e.g. <tt>StarbaseCost</tt>).</p>
+
+      <h2>Reference</h2>
+      <dl>
+        <di term="Keys:"> <kbd>Ctrl-C</kbd> on <a href="pcc2:racescreen">race screen</a> and <a href="pcc2:bsim">battle simulator</a>.</di>
       </dl>
     </page>
 
@@ -2170,6 +2201,7 @@
         <ki key="Ctrl-W">Write all unit's simulation data to game;</ki>
         <ki key="Ctrl-A"><a href="pcc2:simallies">Edit alliance relations</a>;</ki>
         <ki key="Ctrl-C"><a href="pcc2:fleetcost">Fleet cost comparison</a>;</ki>
+        <ki key="Ctrl-L"><a href="pcc2:loadconfig">Load configuration file</a>;</ki>
         <ki key="Ctrl-O">Edit <a href="pcc2:simopts">options</a>;</ki>
         <ki key="Ctrl-R">Read saved simulation from a file (.ccb);</ki>
         <ki key="Ctrl-S">Save simulation setup to file.</ki>
@@ -2178,6 +2210,7 @@
       <h2>Reference</h2>
       <dl>
         <di term="Keys:"> <kbd>B</kbd> from <a href="pcc2:racescreen">race screen</a></di>
+        <di term="Keymap:"> <a href="int:name:simulator">Simulator</a>;</di>
       </dl>
     </page>
 

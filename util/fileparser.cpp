@@ -25,8 +25,14 @@ util::FileParser::parseFile(afl::io::Stream& s)
 {
     afl::io::TextFile textFile(s);
     configureTextFile(textFile);
+    parseTextFile(textFile);
+}
 
-    String_t name = s.getName();
+// Parse a text file.
+void
+util::FileParser::parseTextFile(afl::io::TextFile& textFile)
+{
+    String_t name = textFile.getName();
     String_t line;
     while (textFile.readLine(line)) {
         String_t::size_type n = 0;

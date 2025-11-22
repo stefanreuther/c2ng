@@ -55,5 +55,4 @@ namespace game { namespace interface {
 
 } }
 
-
 #endif

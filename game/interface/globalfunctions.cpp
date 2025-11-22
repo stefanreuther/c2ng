@@ -5,14 +5,13 @@
 
 #include <cmath>
 #include "game/interface/globalfunctions.hpp"
-#include "afl/base/optional.hpp"
 #include "afl/base/staticassert.hpp"
 #include "afl/data/floatvalue.hpp"
 #include "afl/data/scalarvalue.hpp"
 #include "afl/data/stringvalue.hpp"
 #include "afl/string/format.hpp"
-#include "game/config/booleanvalueparser.hpp"
 #include "game/game.hpp"
+#include "game/interface/configurationcontext.hpp"
 #include "game/interface/missionlistcontext.hpp"
 #include "game/interface/taskeditorcontext.hpp"
 #include "game/map/circularobject.hpp"
@@ -31,97 +30,6 @@ using interpreter::makeBooleanValue;
 using interpreter::makeFloatValue;
 using interpreter::makeIntegerValue;
 using interpreter::makeStringValue;
-
-namespace {
-    afl::data::Value* makeScalarValue(int32_t value, const game::config::ValueParser& parser)
-    {
-        if ((value == 0 || value == 1) && (dynamic_cast<const game::config::BooleanValueParser*>(&parser) != 0)) {
-            return makeBooleanValue(value);
-        } else {
-            return makeIntegerValue(value);
-        }
-    }
-
-    afl::data::Value* getConfigValue(game::Session& session, game::config::Configuration& config, const String_t& optName, afl::base::Optional<int32_t> player, bool isHostConfig)
-    {
-        // Fetch option
-        // (Unlike PCC2, resolve the alias first, so we automatically deal with badly-configured aliases.)
-        const game::config::ConfigurationOption* opt = config.getOptionByName(optName);
-        if (const game::config::AliasOption* alias = dynamic_cast<const game::config::AliasOption*>(opt)) {
-            opt = alias->getForwardedOption();
-        }
-        if (!opt) {
-            throw interpreter::Error(isHostConfig
-                                     ? "Invalid first argument to \"Cfg\""
-                                     : "Invalid first argument to \"Pref\"");
-        }
-        const char*const fn = isHostConfig ? "Cfg" : "Pref";
-
-        if (const game::config::GenericIntegerArrayOption* bopt = dynamic_cast<const game::config::GenericIntegerArrayOption*>(opt)) {
-            // Integers; optional player
-            int index;
-            if (!player.get(index)) {
-                /* Possible limits are
-                   2    NewNativesPopulationRange
-                   4    WraparoundRectangle
-                   8    MeteorShowerOreRanges
-                   9    NewNativesRaceRate
-                   10   ConfigExpOption, e.g. EModBayRechargeRate
-                   11   ConfigStdOption, e.g. RaceMiningRate
-                   \change c2ng has MAX_PLAYERS instead of 11, but otherwise, the logic remains the same. */
-                game::Game* g = session.getGame().get();
-                if (isHostConfig && bopt->getArray().size() == size_t(game::MAX_PLAYERS) && g != 0) {
-                    index = g->getViewpointPlayer();
-                } else {
-                    throw interpreter::Error::tooFewArguments(fn);
-                }
-            }
-            if (const int32_t* p = bopt->getArray().at(index - 1)) {
-                return makeScalarValue(*p, bopt->parser());
-            } else {
-                throw interpreter::Error::rangeError();
-            }
-        } else if (const game::config::IntegerOption* intopt = dynamic_cast<const game::config::IntegerOption*>(opt)) {
-            // single int, no player. Example: NumShips
-            if (player.isValid()) {
-                throw interpreter::Error::tooManyArguments(fn);
-            }
-            return makeScalarValue((*intopt)(), intopt->parser());
-        } else if (const game::config::CostArrayOption* costopt = dynamic_cast<const game::config::CostArrayOption*>(opt)) {
-            // Array of costs. Example: StarbaseCost
-            int index;
-            if (!player.get(index)) {
-                game::Game* g = session.getGame().get();
-                if (isHostConfig && g != 0) {
-                    index = g->getViewpointPlayer();
-                } else {
-                    throw interpreter::Error::tooFewArguments(fn);
-                }
-            }
-            if (index <= 0 || index >= game::MAX_PLAYERS) {
-                throw interpreter::Error::rangeError();
-            }
-            return makeStringValue((*costopt)(index).toCargoSpecString());
-        } else if (const game::config::StringArrayOption* saopt = dynamic_cast<const game::config::StringArrayOption*>(opt)) {
-            // String array, applies to Language, ExperienceLevelNames. Parameter must be given.
-            int index;
-            if (player.get(index)) {
-                if (index < saopt->getFirstIndex() || index >= saopt->getFirstIndex() + saopt->getNumSlots()) {
-                    throw interpreter::Error::rangeError();
-                }
-                return makeStringValue((*saopt)(index));
-            } else {
-                return makeStringValue((*saopt).toString());
-            }
-        } else {
-            // Anything else (including StringOption): just return the value.
-            if (player.isValid()) {
-                throw interpreter::Error::tooManyArguments(fn);
-            }
-            return makeStringValue(opt->toString());
-        }
-    }
-}
 
 /* @q AutoTask(type:Int, Id:Int):Obj (Function)
    Access auto-task.
@@ -203,31 +111,11 @@ game::interface::IFCfg(game::Session& session, interpreter::Arguments& args)
     // ex int/if/globalif.h:IFCfgGet
     // ex ccexpr.pas:op_CFG_func
     args.checkArgumentCount(1, 2);
-
-    // Config key
-    String_t optName;
-    if (!checkStringArg(optName, args.getNext())) {
+    if (Root* root = session.getRoot().get()) {
+        return IFConfiguration_Get(ConfigurationContext::Data(session, root->hostConfiguration()), args);
+    } else {
         return 0;
     }
-
-    // Player number
-    afl::base::Optional<int32_t> player;
-    if (args.getNumArgs() > 0) {
-        int p;
-        if (!checkIntegerArg(p, args.getNext())) {
-            return 0;
-        }
-        player = p;
-    }
-
-    // Available?
-    Root* root = session.getRoot().get();
-    if (!root) {
-        return 0;
-    }
-
-    // Do it
-    return getConfigValue(session, root->hostConfiguration(), optName, player, true);
 }
 
 
@@ -605,31 +493,11 @@ afl::data::Value*
 game::interface::IFPref(game::Session& session, interpreter::Arguments& args)
 {
     args.checkArgumentCount(1, 2);
-
-    // Config key
-    String_t optName;
-    if (!checkStringArg(optName, args.getNext())) {
+    if (Root* root = session.getRoot().get()) {
+        return IFConfiguration_Get(ConfigurationContext::Data(session, root->userConfiguration()), args);
+    } else {
         return 0;
     }
-
-    // Index
-    afl::base::Optional<int32_t> index;
-    if (args.getNumArgs() > 0) {
-        int p;
-        if (!checkIntegerArg(p, args.getNext())) {
-            return 0;
-        }
-        index = p;
-    }
-
-    // Available?
-    Root* root = session.getRoot().get();
-    if (!root) {
-        return 0;
-    }
-
-    // Do it
-    return getConfigValue(session, root->userConfiguration(), optName, index, false);
 }
 
 /* @q Quote(val:Any):Str (Function)

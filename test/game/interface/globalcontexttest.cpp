@@ -138,6 +138,7 @@ AFL_TEST("game.interface.GlobalContext:empty", a)
     // - Global Property
     verif.verifyNull("TURN");
     verif.verifyNull("GLOBAL.TURN");
+    verif.verifyNull("SYSTEM.PREF");
 
     // - Player Property
     verif.verifyNull("MY.RACE$");

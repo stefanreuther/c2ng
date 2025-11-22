@@ -18,6 +18,7 @@
 #include "client/downlink.hpp"
 #include "client/si/outputstate.hpp"
 #include "client/widgets/helpwidget.hpp"
+#include "client/widgets/keymapwidget.hpp"
 #include "client/widgets/simulationlist.hpp"
 #include "client/widgets/simulationobjectinfo.hpp"
 #include "client/widgets/stoppablebusyindicator.hpp"
@@ -433,6 +434,10 @@ SimulatorDialog::run()
     m_keyDispatcher.add(util::Key_F2,                         this, &SimulatorDialog::onGoToPlanet);
     m_keyDispatcher.add(util::Key_F3,                         this, &SimulatorDialog::onGoToBase);
     m_keyDispatcher.add(util::Key_F4,                         this, &SimulatorDialog::onGoToMap);
+
+    client::widgets::KeymapWidget& keys = del.addNew(new client::widgets::KeymapWidget(m_gameSender, m_root.engine().dispatcher(), *this));
+    keys.setKeymapName("SIMULATOR");
+    win.add(keys);
 
     win.pack();
     m_root.centerWidget(win);

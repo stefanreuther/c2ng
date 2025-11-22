@@ -68,6 +68,19 @@ AFL_TEST("util.FileParser:basics", a)
     t.checkFinish();
 }
 
+/** Simple functionality test with TextFile signature. */
+AFL_TEST("util.FileParser:TextFile", a)
+{
+    TesterMock t(a);
+    t.expectCall("handleLine(<memory>,1,line)");
+
+    afl::io::ConstMemoryStream ms(afl::string::toBytes("line\n"));
+    afl::io::TextFile tf(ms);
+    a.checkEqual("getName", ms.getName(), "<memory>");  // not contractual, but embedded in above expectations
+    t.parseFile(ms);
+    t.checkFinish();
+}
+
 /** Functionality test using charset. */
 AFL_TEST("util.FileParser:setCharsetNew", a)
 {

@@ -97,6 +97,15 @@ namespace game { namespace config {
             \param other Other options */
         void merge(const Configuration& other);
 
+        /** Mark options unset if they match another Configuration.
+            If this set contains an option that has the same value as the same option in \c other, marks it unset.
+            A subsequent merge() operation will then ignore it.
+
+            Therefore, <tt>a.merge(b);</tt> will have the same result as <tt>b.subtract(a); a.merge(b);</tt>,
+            but the intermediate result will give a better prediction of what changes.
+            \param other Other options */
+        void subtract(const Configuration& other);
+
         /** Mark all options unset (default). */
         void markAllOptionsUnset();
 
