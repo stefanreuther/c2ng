@@ -10,7 +10,7 @@
 #include "afl/sys/log.hpp"
 #include "afl/test/testrunner.hpp"
 #include "interpreter/arguments.hpp"
-#include "interpreter/taskeditor.hpp"
+#include "interpreter/basetaskeditor.hpp"
 #include "interpreter/values.hpp"
 #include "interpreter/world.hpp"
 
@@ -48,11 +48,10 @@ namespace {
         afl::string::NullTranslator tx;
         afl::io::NullFileSystem fs;
         interpreter::World world;
-        interpreter::Process process;
-        interpreter::TaskEditor editor;
+        interpreter::BaseTaskEditor editor;
 
         TestHarness()
-            : log(), tx(), fs(), world(log, tx, fs), process(world, "pro", 99), editor(process, false)
+            : log(), tx(), fs(), world(log, tx, fs), editor()
             { }
     };
 }

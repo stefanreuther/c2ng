@@ -27,6 +27,7 @@
 #include "game/hostversion.hpp"
 #include "game/map/reverter.hpp"
 #include "game/interface/basetaskbuildcommandparser.hpp"
+#include "interpreter/basetaskeditor.hpp"
 
 using afl::string::Format;
 using game::map::Planet;
@@ -167,11 +168,12 @@ game::actions::ChangeBuildQueue::addPlannedBuilds(const interpreter::ProcessList
                     afl::data::StringList_t statements;
                     size_t pc = 0;
                     try {
-                        if (interpreter::TaskEditor* ed = dynamic_cast<interpreter::TaskEditor*>(p.getFreezer())) {
+                        if (interpreter::BaseTaskEditor* ed = dynamic_cast<interpreter::BaseTaskEditor*>(p.getFreezer())) {
                             ed->getAll(statements);
                             pc = ed->getPC();
                         } else {
-                            interpreter::TaskEditor tmpEd(p, false);
+                            interpreter::BaseTaskEditor tmpEd;
+                            tmpEd.load(p);
                             tmpEd.getAll(statements);
                             pc = tmpEd.getPC();
                         }
