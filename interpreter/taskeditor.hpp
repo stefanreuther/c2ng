@@ -24,8 +24,9 @@ namespace interpreter {
     class TaskEditor : public BaseTaskEditor, public Process::Freezer {
      public:
         /** Constructor.
-            \param proc Process. Needs to be suspended and not already have a TaskEditor */
-        explicit TaskEditor(Process& proc);
+            \param proc Process. Needs to be suspended and not already have a TaskEditor
+            \param salvageable Whether task should be salvageable (=have a CC$AutoSalvage command) */
+        TaskEditor(Process& proc, bool salvageable);
 
         /** Destructor.
             This will update the process and mark it suspended again. */
@@ -37,8 +38,7 @@ namespace interpreter {
 
      private:
         Process& m_process;
-
-
+        bool m_salvageable;
     };
 
 }

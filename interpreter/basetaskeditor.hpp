@@ -121,7 +121,7 @@ namespace interpreter {
             and re-executing it.
 
             \param proc Process */
-        void save(Process& proc) const;
+        void save(Process& proc, bool salvageable) const;
 
         /** Update command list.
             Replace \c nold lines starting at \c pos by new \c lines.

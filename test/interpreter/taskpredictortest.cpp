@@ -52,7 +52,7 @@ namespace {
         interpreter::TaskEditor editor;
 
         TestHarness()
-            : log(), tx(), fs(), world(log, tx, fs), process(world, "pro", 99), editor(process)
+            : log(), tx(), fs(), world(log, tx, fs), process(world, "pro", 99), editor(process, false)
             { }
     };
 }

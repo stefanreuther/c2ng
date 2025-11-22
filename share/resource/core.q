@@ -275,6 +275,18 @@ Sub CC$AutoTerminate
   End
 EndSub
 
+% @q CC$AutoSalvage:void (Internal)
+% Prevent auto-task from being discarded.
+% This command just waits one turn (as {WaitOneTurn}), deferring the termination of the auto task.
+% This command is implicitly appended to every auto task,
+% and thus prevents tasks from getting lost when you accidentally leave the auto-task editor.
+% @since PCC2 2.41.5
+Sub CC$AutoSalvage
+  % This local variable allows PCC2 to recognize that this function is active,
+  % and not show the task as active.
+  Local CC$AutoSalvageActive = 1
+  WaitOneTurn
+EndSub
 
 %%% Internals
 

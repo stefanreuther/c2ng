@@ -7,9 +7,10 @@
 #include "interpreter/error.hpp"
 
 // Constructor.
-interpreter::TaskEditor::TaskEditor(Process& proc)
+interpreter::TaskEditor::TaskEditor(Process& proc, bool salvageable)
     : BaseTaskEditor(),
-      m_process(proc)
+      m_process(proc),
+      m_salvageable(salvageable)
 {
     m_process.freeze(*this);
     if (!load(m_process)) {
@@ -21,7 +22,7 @@ interpreter::TaskEditor::TaskEditor(Process& proc)
 interpreter::TaskEditor::~TaskEditor()
 {
     if (isChanged()) {
-        save(m_process);
+        save(m_process, m_salvageable);
     }
     m_process.unfreeze();
 }

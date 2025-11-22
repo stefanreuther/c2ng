@@ -42,7 +42,7 @@ AFL_TEST("interpreter.TaskEditor:empty", a)
 
     // Create and destroy editor
     {
-        interpreter::TaskEditor testee(h.proc);
+        interpreter::TaskEditor testee(h.proc, false);
         a.checkEqual("11. process", &testee.process(), &h.proc);
         a.checkEqual("12. changed", testee.isChanged(), false);
     }
@@ -61,7 +61,7 @@ AFL_TEST("interpreter.TaskEditor:add-to-empty", a)
     a.checkEqual("01. getNumActiveFrames", h.proc.getNumActiveFrames(), 0U);
 
     // Use TaskEditor to add a line of code
-    interpreter::TaskEditor(h.proc).addAtEnd(Commands_t::fromSingleObject("whatever"));
+    interpreter::TaskEditor(h.proc, false).addAtEnd(Commands_t::fromSingleObject("whatever"));
 
     // Verify process content: must be one frame
     a.checkEqual("11. getNumActiveFrames", h.proc.getNumActiveFrames(), 1U);
@@ -79,7 +79,7 @@ AFL_TEST("interpreter.TaskEditor:roundtrip", a)
 
     // Use TaskEditor to add some code
     {
-        interpreter::TaskEditor ed(h.proc);
+        interpreter::TaskEditor ed(h.proc, false);
         ed.addAtEnd(Commands_t::fromSingleObject("one"));
         ed.addAtEnd(Commands_t::fromSingleObject("two"));
         ed.addAtEnd(Commands_t::fromSingleObject("restart"));
@@ -95,7 +95,7 @@ AFL_TEST("interpreter.TaskEditor:roundtrip", a)
     a.check("23. getOutermostFrame", h.proc.getOutermostFrame()->bco->getNumInstructions() > 0);
 
     // Create another TaskEditor and verify its content
-    interpreter::TaskEditor testee(h.proc);
+    interpreter::TaskEditor testee(h.proc, false);
     a.checkEqual("31. getNumInstructions", testee.getNumInstructions(), 3U);
     a.checkEqual("32. content", testee[0], "one");
     a.checkEqual("33. content", testee[1], "two");
@@ -112,18 +112,18 @@ AFL_TEST("interpreter.TaskEditor:conflict", a)
     TestHarness h;
 
     // Create TaskEditor
-    interpreter::TaskEditor ed(h.proc);
+    interpreter::TaskEditor ed(h.proc, false);
 
     // Another one cannot be made
     std::auto_ptr<interpreter::TaskEditor> other;
-    AFL_CHECK_THROWS(a, other.reset(new interpreter::TaskEditor(h.proc)), interpreter::Error);
+    AFL_CHECK_THROWS(a, other.reset(new interpreter::TaskEditor(h.proc, false)), interpreter::Error);
 }
 
 /** Test move(): forward. */
 AFL_TEST("interpreter.TaskEditor:move:forward", a)
 {
     TestHarness h;
-    interpreter::TaskEditor ed(h.proc);
+    interpreter::TaskEditor ed(h.proc, false);
     ed.addAtEnd(Commands_t::fromSingleObject("one"));
     ed.addAtEnd(Commands_t::fromSingleObject("two"));
     ed.addAtEnd(Commands_t::fromSingleObject("three"));
@@ -154,7 +154,7 @@ AFL_TEST("interpreter.TaskEditor:move:forward", a)
 AFL_TEST("interpreter.TaskEditor:move:forward-counter", a)
 {
     TestHarness h;
-    interpreter::TaskEditor ed(h.proc);
+    interpreter::TaskEditor ed(h.proc, false);
     ed.addAtEnd(Commands_t::fromSingleObject("one"));
     ed.addAtEnd(Commands_t::fromSingleObject("two"));
     ed.addAtEnd(Commands_t::fromSingleObject("three"));
@@ -187,7 +187,7 @@ AFL_TEST("interpreter.TaskEditor:move:forward-counter", a)
 AFL_TEST("interpreter.TaskEditor:move:forward-limit", a)
 {
     TestHarness h;
-    interpreter::TaskEditor ed(h.proc);
+    interpreter::TaskEditor ed(h.proc, false);
     ed.addAtEnd(Commands_t::fromSingleObject("one"));
     ed.addAtEnd(Commands_t::fromSingleObject("two"));
     ed.addAtEnd(Commands_t::fromSingleObject("three"));
@@ -218,7 +218,7 @@ AFL_TEST("interpreter.TaskEditor:move:forward-limit", a)
 AFL_TEST("interpreter.TaskEditor:move:backward", a)
 {
     TestHarness h;
-    interpreter::TaskEditor ed(h.proc);
+    interpreter::TaskEditor ed(h.proc, false);
     ed.addAtEnd(Commands_t::fromSingleObject("one"));
     ed.addAtEnd(Commands_t::fromSingleObject("two"));
     ed.addAtEnd(Commands_t::fromSingleObject("three"));
@@ -249,7 +249,7 @@ AFL_TEST("interpreter.TaskEditor:move:backward", a)
 AFL_TEST("interpreter.TaskEditor:move:backward:pc", a)
 {
     TestHarness h;
-    interpreter::TaskEditor ed(h.proc);
+    interpreter::TaskEditor ed(h.proc, false);
     ed.addAtEnd(Commands_t::fromSingleObject("one"));
     ed.addAtEnd(Commands_t::fromSingleObject("two"));
     ed.addAtEnd(Commands_t::fromSingleObject("three"));
@@ -274,7 +274,7 @@ AFL_TEST("interpreter.TaskEditor:move:backward:pc", a)
 AFL_TEST("interpreter.TaskEditor:move:range:from", a)
 {
     TestHarness h;
-    interpreter::TaskEditor ed(h.proc);
+    interpreter::TaskEditor ed(h.proc, false);
     ed.addAtEnd(Commands_t::fromSingleObject("one"));
     ed.addAtEnd(Commands_t::fromSingleObject("two"));
 
@@ -289,7 +289,7 @@ AFL_TEST("interpreter.TaskEditor:move:range:from", a)
 AFL_TEST("interpreter.TaskEditor:move:range:to", a)
 {
     TestHarness h;
-    interpreter::TaskEditor ed(h.proc);
+    interpreter::TaskEditor ed(h.proc, false);
     ed.addAtEnd(Commands_t::fromSingleObject("one"));
     ed.addAtEnd(Commands_t::fromSingleObject("two"));
 
@@ -314,5 +314,5 @@ AFL_TEST("interpreter.TaskEditor:process-format", a)
 
     // Creating a TaskEditor will fail
     std::auto_ptr<interpreter::TaskEditor> ed;
-    AFL_CHECK_THROWS(a, ed.reset(new interpreter::TaskEditor(h.proc)), interpreter::Error);
+    AFL_CHECK_THROWS(a, ed.reset(new interpreter::TaskEditor(h.proc, false)), interpreter::Error);
 }

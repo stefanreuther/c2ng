@@ -103,6 +103,14 @@ namespace {
         }
         return addr;
     }
+
+    void addTaskInstruction(BytecodeObject& bco, const String_t& command)
+    {
+        afl::data::StringValue sv(command);
+        bco.addPushLiteral(&sv);
+        bco.addInstruction(Opcode::maPush, Opcode::sNamedShared, bco.addName("CC$AUTOEXEC"));
+        bco.addInstruction(Opcode::maIndirect, Opcode::miIMCall, 1);
+    }
 }
 
 interpreter::BaseTaskEditor::BaseTaskEditor()
@@ -115,6 +123,7 @@ interpreter::BaseTaskEditor::BaseTaskEditor()
 
 interpreter::BaseTaskEditor::~BaseTaskEditor()
 { }
+
 // Check whether task was changed.
 bool
 interpreter::BaseTaskEditor::isChanged() const
@@ -506,6 +515,16 @@ interpreter::BaseTaskEditor::load(const Process& proc)
         clearContent();
         return false;
     }
+
+    // Remove Salvage command
+    if (!m_code.empty() && afl::string::strCaseCompare(m_code.back(), "CC$AutoSalvage") == 0) {
+        m_code.pop_back();
+        if (m_PC >= m_code.size()) {
+            m_PC = m_code.size();
+            m_localPC = 0;
+        }
+    }
+
     m_cursor = m_code.size();
 
     return true;
@@ -513,7 +532,7 @@ interpreter::BaseTaskEditor::load(const Process& proc)
 
 // Save to process.
 void
-interpreter::BaseTaskEditor::save(Process& proc) const
+interpreter::BaseTaskEditor::save(Process& proc, bool salvageable) const
 {
     // ex IntAutoTaskEditor::saveToProcess
     try {
@@ -535,16 +554,18 @@ interpreter::BaseTaskEditor::save(Process& proc) const
                 bco->addInstruction(Opcode::maJump, Opcode::jAlways, 0);
             } else {
                 // Encode normal operation
-                afl::data::StringValue sv(m_code[i]);
-                bco->addPushLiteral(&sv);
-                bco->addInstruction(Opcode::maPush, Opcode::sNamedShared, bco->addName("CC$AUTOEXEC"));
-                bco->addInstruction(Opcode::maIndirect, Opcode::miIMCall, 1);
+                addTaskInstruction(*bco, m_code[i]);
             }
         }
 
         // PC could be after end of task
         if (m_PC == m_code.size()) {
             new_pc = bco->getNumInstructions();
+        }
+
+        // Add salvage command
+        if (salvageable && bco->getNumInstructions() != 0) {
+            addTaskInstruction(*bco, "CC$AutoSalvage");
         }
 
         // Check active frames

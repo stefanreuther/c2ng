@@ -535,7 +535,7 @@ AFL_TEST("game.interface.BuildCommandParser:loadLimit", a)
     innerFrame.localValues.setNew(innerAddr, interpreter::makeIntegerValue(5));
 
     // TaskEditor
-    TaskEditor edit(proc);
+    TaskEditor edit(proc, false);
     a.checkEqual("01. getNumInstructions", edit.getNumInstructions(), 1U);
     a.checkEqual("02. getPC",              edit.getNumInstructions(), 1U);
     a.checkEqual("03. isInSubroutineCall", edit.isInSubroutineCall(), true);

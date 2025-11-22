@@ -58,7 +58,7 @@ AFL_TEST("interpreter.BaseTaskEditor:save-too-large", a)
     afl::io::NullFileSystem fs;
     interpreter::World world(log, tx, fs);
     interpreter::Process proc(world, "proc", 99);
-    AFL_CHECK_SUCCEEDS(a("21. save"), ed.save(proc));
+    AFL_CHECK_SUCCEEDS(a("21. save"), ed.save(proc, false));
     a.check("22. isChanged", !ed.isChanged());
 }
 

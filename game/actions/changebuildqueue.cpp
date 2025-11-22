@@ -171,7 +171,7 @@ game::actions::ChangeBuildQueue::addPlannedBuilds(const interpreter::ProcessList
                             ed->getAll(statements);
                             pc = ed->getPC();
                         } else {
-                            interpreter::TaskEditor tmpEd(p);
+                            interpreter::TaskEditor tmpEd(p, false);
                             tmpEd.getAll(statements);
                             pc = tmpEd.getPC();
                         }

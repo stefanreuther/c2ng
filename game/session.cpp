@@ -367,11 +367,15 @@ game::Session::getAutoTaskEditor(Id_t id, interpreter::Process::ProcessKind kind
 
     // Try to create (re-use) editor
     try {
+        bool salvageable = m_root.get() != 0
+            ? m_root->userConfiguration()[game::config::UserConfiguration::Task_Salvage]() != 0
+            : false;
+
         TaskEditor* ed = dynamic_cast<TaskEditor*>(proc->getFreezer());
         if (ed != 0) {
             return ed;
         } else {
-            return new TaskEditor(*proc);
+            return new TaskEditor(*proc, salvageable);
         }
     }
     catch (interpreter::Error& err) {
@@ -441,7 +445,13 @@ game::Session::getTaskStatus(const game::map::Object* obj, interpreter::Process:
                         if (msg != 0 && !m_notifications.isMessageConfirmed(msg)) {
                             return WaitingTask;
                         } else {
-                            return ActiveTask;
+                            std::auto_ptr<afl::data::Value> salvaging(proc->getVariable("CC$AUTOSALVAGEACTIVE"));
+                            if (salvaging.get() != 0) {
+                                // Task is executing CC$AutoSalvage, which means it is essentially complete.
+                                return NoTask;
+                            } else {
+                                return ActiveTask;
+                            }
                         }
                     }
                 }

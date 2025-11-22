@@ -222,6 +222,7 @@ namespace game { namespace config {
         // Task screen
         static const IntegerOptionDescriptor Task_PredictToEnd;
         static const IntegerOptionDescriptor Task_ShowDistances;
+        static const IntegerOptionDescriptor Task_Salvage;
 
         // Simulation
         static const IntegerOptionDescriptor Sim_NumThreads;

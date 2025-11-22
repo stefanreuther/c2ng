@@ -158,6 +158,7 @@ namespace game { namespace config {
     // Task screen
     const IntegerOptionDescriptor UserConfiguration::Task_PredictToEnd  = { "Task.PredictToEnd",  &BooleanValueParser::instance };
     const IntegerOptionDescriptor UserConfiguration::Task_ShowDistances = { "Task.ShowDistances", &BooleanValueParser::instance };
+    const IntegerOptionDescriptor UserConfiguration::Task_Salvage       = { "Task.Salvage",       &BooleanValueParser::instance };
 
     // Simulation
     const IntegerOptionDescriptor UserConfiguration::Sim_NumThreads        = { "Sim.NumThreads",        &IntegerValueParser::instance };
@@ -298,6 +299,7 @@ game::config::UserConfiguration::setDefaultValues()
     // Task screen
     me[Task_PredictToEnd].set(0);
     me[Task_ShowDistances].set(1);
+    me[Task_Salvage].set(1);
 
     // Simulation
     me[Sim_NumThreads].set(0);
