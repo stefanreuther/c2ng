@@ -57,15 +57,16 @@ namespace {
 
     class LocalOutboxReader : public game::v3::OutboxReader {
      public:
-        LocalOutboxReader(Outbox& outbox, int sender)
-            : m_outbox(outbox), m_sender(sender)
+        LocalOutboxReader(game::Turn& turn, game::v3::Loader& loader, int sender)
+            : m_turn(turn), m_loader(loader), m_sender(sender)
             { }
 
         virtual void addMessage(String_t text, PlayerSet_t receivers)
-            { m_outbox.addMessageFromFile(m_sender, text, receivers); }
+            { m_loader.addMessage(m_turn, text, m_sender, receivers); }
 
      private:
-        Outbox& m_outbox;
+        game::Turn& m_turn;
+        game::v3::Loader& m_loader;
         int m_sender;
     };
 
@@ -439,12 +440,12 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Game& game, int player, Root& root,
     {
         Ptr<Stream> s = dir.openFileNT(Format("mess35%d.dat", player), FileSystem::OpenRead);
         if (s.get() != 0) {
-            LocalOutboxReader(turn.outbox(), player).loadOutbox35(*s, *m_charset, tx);
+            LocalOutboxReader(turn, ldr, player).loadOutbox35(*s, *m_charset, tx);
             m_playersWithDosOutbox -= player;
         } else {
             s = dir.openFileNT(Format("mess%d.dat", player), FileSystem::OpenRead);
             if (s.get() != 0) {
-                LocalOutboxReader(turn.outbox(), player).loadOutbox(*s, *m_charset, tx);
+                LocalOutboxReader(turn, ldr, player).loadOutbox(*s, *m_charset, tx);
                 m_playersWithDosOutbox += player;
             }
         }

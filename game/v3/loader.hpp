@@ -247,12 +247,25 @@ namespace game { namespace v3 {
             \param dir Directory to read from */
         void loadConfiguration(Root& root, afl::io::Directory& dir);
 
+        /** Add message from message file.
+            This decides whether the message is a command message or a normal message,
+            and places it in the appropriate part of the game turn object (outbox, command list).
+
+            \param turn        Turn
+            \param text        Message text (decoded)
+            \param sender      Sender of message
+            \param receivers   Receivers of message
+
+            \note This only recognizes messages to one receiver as command messages.
+            It is possible (but unlikely) that someone sends a message to theirselves and someone else.
+            Our Maketurn will make sure that the message comes out as a real text message.
+            However, with Winplan's maketurn, the message will be interpreted by PHost.  */
+        void addMessage(Turn& turn, String_t text, int sender, PlayerSet_t receivers) const;
+
      private:
         afl::charset::Charset& m_charset;
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
-
-        void addMessage(Turn& turn, String_t text, int sender, PlayerSet_t receivers) const;
     };
 
 } }
