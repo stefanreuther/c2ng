@@ -1079,6 +1079,7 @@ game::v3::Loader::loadConfiguration(Root& root, afl::io::Directory& dir)
     if (file.get() != 0) {
         // OK, PHost
         loadPConfig(root, *file, dir.openFileNT("shiplist.txt", FileSystem::OpenRead), ConfigurationOption::Game);
+        config[game::config::HostConfiguration::ConfigSource].set("pconfig");
     } else {
         // SRace
         file = root.gameDirectory().openFileNT("friday.dat", FileSystem::OpenRead);
@@ -1090,6 +1091,7 @@ game::v3::Loader::loadConfiguration(Root& root, afl::io::Directory& dir)
         file = dir.openFileNT("hconfig.hst", FileSystem::OpenRead);
         if (file.get() != 0) {
             loadHConfig(root, *file, ConfigurationOption::Game);
+            config[game::config::HostConfiguration::ConfigSource].set("hconfig");
         } else {
             m_log.write(LogListener::Warn, LOG_NAME, m_translator("No host configuration file found, using defaults"));
         }

@@ -1342,6 +1342,9 @@ const game::config::AliasOptionDescriptor game::config::HostConfiguration::Nativ
     "NativeGovFrequencies",
     "NewNativesGovernmentRate",
 };
+const game::config::StringOptionDescriptor game::config::HostConfiguration::ConfigSource = {
+    "ConfigSource",
+};
 
 
 
@@ -1705,6 +1708,8 @@ game::config::HostConfiguration::setDefaultValues()
     me[NativeClansRange];
     me[NativeTypeFrequencies];
     me[NativeGovFrequencies];
+
+    me[ConfigSource].set("");
 
     markAllOptionsUnset();
 }

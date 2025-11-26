@@ -796,6 +796,7 @@ AFL_TEST("game.v3.Loader:game-name:pconfig", a)
 
     // Verify
     a.checkEqual("GameName", h.root.hostConfiguration()[game::config::HostConfiguration::GameName](), "testGameNamePConfig");
+    a.checkEqual("ConfigSource", h.root.hostConfiguration()[game::config::HostConfiguration::ConfigSource](), "pconfig");
 }
 
 /** Test loadConfiguration(), set game name from directory name. */
@@ -812,6 +813,7 @@ AFL_TEST("game.v3.Loader:game-name:from-directory", a)
 
     // Verify
     a.checkEqual("GameName", h.root.hostConfiguration()[game::config::HostConfiguration::GameName](), "vpwork3");
+    a.checkEqual("ConfigSource", h.root.hostConfiguration()[game::config::HostConfiguration::ConfigSource](), "");
 }
 
 /** Test loadConfiguration(), set game name from gamestat.dat file. */

@@ -378,6 +378,9 @@ namespace game { namespace config {
         static const AliasOptionDescriptor                NativeTypeFrequencies;
         static const AliasOptionDescriptor                NativeGovFrequencies;
 
+        // Extra keys
+        static const StringOptionDescriptor               ConfigSource;
+
 
      private:
         HostConfiguration();

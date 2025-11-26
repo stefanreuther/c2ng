@@ -92,6 +92,11 @@ game::interface::IFAutoTask(game::Session& session, interpreter::Arguments& args
    In addition, settings from the <tt>game</tt> object will be available as "nu.game.X" (e.g. <tt>Cfg("nu.game.name")</tt> for the game name).
    Settings from the <tt>settings</tt> object will be available as "nu.X" (e.g. <tt>Cfg("nu.cloakfail")</tt> for the cloak failure rate).
 
+   Since 2.41.5, the special key "ConfigSource" contains the value "pconfig" or "hconfig"
+   if the configuration has been loaded from the given file.
+   It contains the empty string if no configuration file has been loaded
+   (in this case, configuration options can still have values if they have been read from messages).
+
    @diff This function was available with a different, more complicated definition in PCC 0.98.5 up to 1.0.8,
    under the names %Cfg and %CfgL.
 
