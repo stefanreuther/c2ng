@@ -2228,3 +2228,13 @@ On ShipFleetMenu Do
     AddItem Atom("CCUI.Ship.AddAllToFleet"),   Translate("Add all to fleet")
   EndIf
 EndOn
+
+On Load Do
+  % ex MaybeRequestPConfig
+  If System.Host='PHost' And Not InStr(Cfg('ConfigSource'), 'pconfig') Then
+    If IsEmpty(GetCommand("send config")) Then
+      AddCommand "send config"
+      AddNotify Translate("This game seems to use PHost, but you do not have PCONFIG.SRC. PCC2 has requested this file for you using a command message.")
+    EndIf
+  EndIf
+EndOn
