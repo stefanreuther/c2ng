@@ -11,14 +11,6 @@ game::config::ConfigurationOption::ConfigurationOption()
       m_changed(false)
 { }
 
-// Get source of this option (place where it was set).
-game::config::ConfigurationOption::Source
-game::config::ConfigurationOption::getSource() const
-{
-    // ex ConfigOption::getSource
-    return m_source;
-}
-
 // Set source of this option.
 void
 game::config::ConfigurationOption::setSource(Source source)
@@ -29,14 +21,6 @@ game::config::ConfigurationOption::setSource(Source source)
         m_source = source;
         markChanged();
     }
-}
-
-// Check whether option was set.
-bool
-game::config::ConfigurationOption::wasSet() const
-{
-    // ex ConfigOption::wasSet
-    return m_source != Default;
 }
 
 // Mark this option updated.
@@ -60,20 +44,6 @@ game::config::ConfigurationOption::setAndMarkUpdated(String_t value, Source sour
         markUpdated(source);
         markChanged();
     }
-}
-
-// Mark this option changed.
-void
-game::config::ConfigurationOption::markChanged(bool state)
-{
-    m_changed = state;
-}
-
-// Check whether this option was changed.
-bool
-game::config::ConfigurationOption::isChanged() const
-{
-    return m_changed;
 }
 
 // Remove comment from an option value.

@@ -148,6 +148,18 @@ namespace game { namespace actions {
 
 } }
 
+inline bool
+game::actions::BaseBuildAction::isValid()
+{
+    return getStatus() == Success;
+}
+
+inline bool
+game::actions::BaseBuildAction::isUseTechUpgrade() const
+{
+    return m_useTechUpgrades;
+}
+
 inline const game::actions::CargoCostAction&
 game::actions::BaseBuildAction::costAction() const
 {

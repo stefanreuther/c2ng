@@ -110,4 +110,34 @@ inline
 game::config::ConfigurationOption::~ConfigurationOption()
 { }
 
+// Get source of this option (place where it was set).
+inline game::config::ConfigurationOption::Source
+game::config::ConfigurationOption::getSource() const
+{
+    // ex ConfigOption::getSource
+    return m_source;
+}
+
+// Check whether option was set.
+inline bool
+game::config::ConfigurationOption::wasSet() const
+{
+    // ex ConfigOption::wasSet
+    return m_source != Default;
+}
+
+// Mark this option changed.
+inline void
+game::config::ConfigurationOption::markChanged(bool state)
+{
+    m_changed = state;
+}
+
+// Check whether this option was changed.
+inline bool
+game::config::ConfigurationOption::isChanged() const
+{
+    return m_changed;
+}
+
 #endif

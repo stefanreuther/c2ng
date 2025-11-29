@@ -192,30 +192,6 @@ game::spec::Cost::getMaxAmount(const int32_t orderedAmount, const Cost& itemCost
     return result;
 }
 
-// Set component.
-void
-game::spec::Cost::set(Type type, int32_t n)
-{
-    // ex GCost::set
-    m_amounts[type] = n;
-}
-
-// Get component.
-int32_t
-game::spec::Cost::get(Type type) const
-{
-    // ex GCost::get
-    return m_amounts[type];
-}
-
-// Add component.
-void
-game::spec::Cost::add(Type type, int32_t n)
-{
-    // ex GCost::add
-    set(type, get(type) + n);
-}
-
 // Clear this cost.
 void
 game::spec::Cost::clear()

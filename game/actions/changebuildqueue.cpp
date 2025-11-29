@@ -87,52 +87,57 @@ class game::actions::ChangeBuildQueue::Sorter {
     Sorter(const ChangeBuildQueue& parent)
         : m_parent(parent)
         { }
-    bool operator()(const LocalInfo& a, const LocalInfo& b) const
-        {
-            // Planned goes last
-            bool planA = (a.plannedHullId != 0);
-            bool planB = (b.plannedHullId != 0);
-            if (planA != planB) {
-                return planA < planB;
-            }
+    bool operator()(const LocalInfo& a, const LocalInfo& b) const;
 
-            // Check priorities only for not planned
-            if (!planA) {
-                // Parse friendly codes
-                int valA = checkPriorityCode(a.friendlyCode, m_parent.m_host);
-                int valB = checkPriorityCode(b.friendlyCode, m_parent.m_host);
-
-                // Prioritized goes before unprioritized
-                bool priA = (valA != 0);
-                bool priB = (valB != 0);
-                if (priA != priB) {
-                    return priA > priB;
-                }
-
-                if (priA) {
-                    // Two priorized orders: lower values go first
-                    if (valA != valB) {
-                        return valA < valB;
-                    }
-                } else {
-                    // Unpriorized: use queue order if known
-                    int knownA = a.queuePosition != 0;
-                    int knownB = b.queuePosition != 0;
-                    if (knownA != knownB) {
-                        return knownA > knownB;
-                    }
-                    if (a.queuePosition != b.queuePosition) {
-                        return a.queuePosition < b.queuePosition;
-                    }
-                }
-            }
-
-            // Use Id as tie-breaker
-            return a.planetId < b.planetId;
-        }
  private:
     const ChangeBuildQueue& m_parent;
 };
+
+bool
+game::actions::ChangeBuildQueue::Sorter::operator()(const LocalInfo& a, const LocalInfo& b) const
+{
+    // Planned goes last
+    bool planA = (a.plannedHullId != 0);
+    bool planB = (b.plannedHullId != 0);
+    if (planA != planB) {
+        return planA < planB;
+    }
+
+    // Check priorities only for not planned
+    if (!planA) {
+        // Parse friendly codes
+        int valA = checkPriorityCode(a.friendlyCode, m_parent.m_host);
+        int valB = checkPriorityCode(b.friendlyCode, m_parent.m_host);
+
+        // Prioritized goes before unprioritized
+        bool priA = (valA != 0);
+        bool priB = (valB != 0);
+        if (priA != priB) {
+            return priA > priB;
+        }
+
+        if (priA) {
+            // Two priorized orders: lower values go first
+            if (valA != valB) {
+                return valA < valB;
+            }
+        } else {
+            // Unpriorized: use queue order if known
+            int knownA = a.queuePosition != 0;
+            int knownB = b.queuePosition != 0;
+            if (knownA != knownB) {
+                return knownA > knownB;
+            }
+            if (a.queuePosition != b.queuePosition) {
+                return a.queuePosition < b.queuePosition;
+            }
+        }
+    }
+
+    // Use Id as tie-breaker
+    return a.planetId < b.planetId;
+}
+
 
 // Constructor.
 game::actions::ChangeBuildQueue::ChangeBuildQueue(game::map::Universe& univ,

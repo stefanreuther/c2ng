@@ -367,12 +367,6 @@ game::actions::BaseBuildAction::getStatus()
     }
 }
 
-bool
-game::actions::BaseBuildAction::isValid()
-{
-    return getStatus() == Success;
-}
-
 void
 game::actions::BaseBuildAction::commit()
 {
@@ -405,12 +399,6 @@ game::actions::BaseBuildAction::commit()
 
     // Update again; this will reconnect signals
     update();
-}
-
-bool
-game::actions::BaseBuildAction::isUseTechUpgrade() const
-{
-    return m_useTechUpgrades;
 }
 
 void

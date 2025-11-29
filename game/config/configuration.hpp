@@ -162,7 +162,7 @@ game::config::Configuration::operator[](const Descriptor& desc)
 
 // Access by descriptor.
 template<typename Descriptor>
-const typename Descriptor::OptionType_t&
+inline const typename Descriptor::OptionType_t&
 game::config::Configuration::operator[](const Descriptor& desc) const
 {
     return (*const_cast<Configuration*>(this))[desc];
