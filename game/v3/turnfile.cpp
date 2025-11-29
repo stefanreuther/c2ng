@@ -908,7 +908,7 @@ game::v3::TurnFile::getNumFiles() const
     return n;
 }
 
-// /** Get position of turn data in TacCom container. */
+// Get relative position of turn data in Taccom file.
 size_t
 game::v3::TurnFile::getTaccomTurnPlace() const
 {

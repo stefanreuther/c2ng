@@ -1,14 +1,15 @@
 /**
   *  \file gfx/font.cpp
+  *  \brief Class gfx::Font
   */
 
 #include <algorithm>
 #include "gfx/font.hpp"
-#include "gfx/context.hpp"
 #include "afl/charset/utf8.hpp"
-#include "gfx/colorscheme.hpp"
-#include "gfx/rectangle.hpp"
 #include "gfx/basecolorscheme.hpp"
+#include "gfx/colorscheme.hpp"
+#include "gfx/context.hpp"
+#include "gfx/rectangle.hpp"
 
 int
 gfx::Font::getEmWidth()
@@ -40,6 +41,9 @@ gfx::Font::getMaxTextWidth(const afl::functional::Mapping<int,String_t>& tab)
     return result;
 }
 
+/*
+ *  Globals
+ */
 
 void
 gfx::outText(BaseContext& ctx, Point pt, String_t text)
@@ -56,30 +60,12 @@ gfx::outText(BaseContext& ctx, Point pt, String_t text)
     }
 }
 
-// /** Output Text, using Alignment Parameters.
-//     \overload */
 void
 gfx::outText(BaseContext& ctx, Point pt, const char* text)
 {
     outText(ctx, pt, String_t(text));
 }
 
-// /** Output Text with fixed maximum width. Outputs the text so that it
-//     occupies at most maxWidth pixels on the screen. When non-transparent output
-//     is used, draws appropriate boxes so that exactly the specified area is
-//     covered. Otherwise like outText().
-
-//     This function moves the graphics cursor, depending on the text
-//     justification:
-//     - when using left-justified text, the cursor is set to just after
-//       the output text;
-//     - when using right-justified text, the cursor is set to just before
-//       the output text;
-//     - when using centered text, the cursor is set to (x,y)
-
-//     The rationale is that (when not using centered output) one can do
-//     several outText()s in a row and always know the correct place without
-//     explicitly having to compute the width. */
 void
 gfx::outTextF(BaseContext& ctx, BaseColorScheme& cs, Point pt, int maxWidth, String_t text)
 {
@@ -142,13 +128,6 @@ gfx::outTextF(BaseContext& ctx, BaseColorScheme& cs, Point pt, int maxWidth, Str
     }
 }
 
-// // /** Output Text with fixed maximum width. \overload */
-// void
-// gfx::outTextF(BaseContext& ctx, Point pt, int maxWidth, const char* text)
-// {
-//     outTextF(ctx, pt, maxWidth, String_t(text));
-// }
-
 void
 gfx::outTextF(BaseContext& ctx, BaseColorScheme& cs, const Rectangle& area, String_t text)
 {
@@ -175,10 +154,3 @@ gfx::outTextF(BaseContext& ctx, BaseColorScheme& cs, const Rectangle& area, Stri
         outTextF(ctx, cs, Point(area.getLeftX() + ctx.getTextAlign().getX() * area.getWidth() / 2, originY), area.getWidth(), text);
     }
 }
-
-// // /** Output Text with fixed area. \overload */
-// void
-// gfx::outTextF(BaseContext& ctx, const Rectangle& area, const char* text)
-// {
-//     outTextF(ctx, area, String_t(text));
-// }

@@ -1,5 +1,6 @@
 /**
   *  \file gfx/rectangleset.hpp
+  *  \brief Class gfx::RectangleSet
   */
 #ifndef C2NG_GFX_RECTANGLESET_HPP
 #define C2NG_GFX_RECTANGLESET_HPP
@@ -41,46 +42,35 @@ namespace gfx {
             \post contains(r) */
         void add(const Rectangle& r);
 
+        /** Add RectangleSet to set.
+            \param r other RectangleSet */
         void add(const RectangleSet& r);
 
         /** Remove rectangle from set.
             \param r rectangle
             \post r.contains(x,y) => !contains(x,y) */
         void remove(const Rectangle& r);
+
+        /** Clear this rectangle set. */
         void clear()
             { m_list.clear(); }
-
-        // FIXME: retire
-        //    bool contains(int x, int y) const;
 
         /** Check if point is in set.
             \param pt point
             \returns true iff point is in this set. */
         bool contains(const Point pt) const;
 
-        /** Check if rectangle in set.
-            \param r rectangle
-            \return true iff r is completely contained in *this. */
-        bool contains(const Rectangle& r) const;
-
-        /** Compute bounding rectangle.
-            \returns the smallest possible rectangle which entirely contains this rectangle set */
-        Rectangle getBoundingRectangle() const;
-
         /** Iterator interface: get iterator to first element. */
         Iterator_t begin() const
             { return m_list.begin(); }
+
         /** Iterator interface: get iterator to last element. */
         Iterator_t end() const
             { return m_list.end(); }
+
         /** Check whether this set is empty. */
         bool empty() const
             { return m_list.empty(); }
-
-        // FIXME: retire
-        // /** Get number of rectangles in this rectangle set. */
-        // size_t getNumRectangles() const
-        //     { return m_list.size(); }
 
      private:
         List_t m_list;

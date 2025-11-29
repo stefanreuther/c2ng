@@ -1,5 +1,6 @@
 /**
   *  \file gfx/rectangleset.cpp
+  *  \brief Class gfx::RectangleSet
   */
 
 #include "gfx/rectangleset.hpp"
@@ -20,7 +21,6 @@ gfx::RectangleSet::RectangleSet(const Rectangle& r)
 void
 gfx::RectangleSet::intersect(const Rectangle& r)
 {
-    // FIXME: this is more efficient to do in-place
     List_t other;
     for (Iterator_t i = m_list.begin(); i != m_list.end(); ++i) {
         Rectangle q(*i);
@@ -47,6 +47,7 @@ gfx::RectangleSet::add(const Rectangle& r)
     m_list.splice(m_list.end(), l2);
 }
 
+// Add RectangleSet to set.
 void
 gfx::RectangleSet::add(const RectangleSet& r)
 {
@@ -76,32 +77,6 @@ gfx::RectangleSet::contains(Point pt) const
         }
     }
     return false;
-}
-
-// Check if rectangle in set.
-bool
-gfx::RectangleSet::contains(const Rectangle& r) const
-{
-    List_t l2;
-    l2.push_back(r);
-    for (Iterator_t i = begin(); i != end(); ++i) {
-        List_t result;
-        doSubtract(*i, result, l2);
-        l2.swap(result);
-    }
-
-    return !l2.empty();
-}
-
-// Compute bounding rectangle.
-gfx::Rectangle
-gfx::RectangleSet::getBoundingRectangle() const
-{
-    Rectangle br;
-    for (Iterator_t i = begin(); i != end(); ++i) {
-        br.include(*i);
-    }
-    return br;
 }
 
 /** Rectangle Set Subtraction. Constructs in \c l2 the set of rectangles

@@ -5,6 +5,7 @@
 
 #include "gfx/font.hpp"
 
+#include "afl/functional/stringtable.hpp"
 #include "afl/test/testrunner.hpp"
 #include "gfx/basecontext.hpp"
 #include "gfx/canvas.hpp"
@@ -152,4 +153,32 @@ AFL_TEST("gfx.Font:outTextF:area", a)
         9,9,9,9,9,9,9,9,9,9,
     };
     a.checkEqualContent<uint8_t>("31. pixels", pix->pixels(), EXPECTED);
+}
+
+/** Test getMaxTextWidth. */
+AFL_TEST("gfx.Font:getMaxTextWidth", a)
+{
+    String_t lines[] = { "a", "bcd", "e" };
+    TestFont t;
+
+    a.checkEqual("getMaxTextWidth", t.getMaxTextWidth(afl::functional::createStringTable(lines)), 3);
+}
+
+/** Test getMaxTextWidth, empty list. */
+AFL_TEST("gfx.Font:getMaxTextWidth:empty", a)
+{
+    class Empty : public afl::functional::Mapping<int,String_t> {
+     public:
+        bool getFirstKey(int&) const
+            { return false; }
+        bool getNextKey(int&) const
+            { return false; }
+        String_t get(int) const
+            { return ""; }
+    };
+
+    TestFont t;
+    Empty e;
+
+    a.checkEqual("getMaxTextWidth", t.getMaxTextWidth(e), 0);
 }

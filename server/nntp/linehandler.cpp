@@ -340,9 +340,10 @@ server::nntp::LineHandler::handlePostData(String_t /*line*/, afl::net::line::Lin
     return false;
 }
 
-// /** Check authentication.
-//     \retval true Authentication succeeded, command processing can proceed
-//     \retval false Not authenticated. An error message has been sent, command processing must abort */
+/** Check authentication.
+    \param response Receiver for potential error message
+    \retval true Authentication succeeded, command processing can proceed
+    \retval false Not authenticated. An error message has been sent, command processing must abort */
 bool
 server::nntp::LineHandler::checkAuth(afl::net::line::LineSink& response)
 {
@@ -357,9 +358,10 @@ server::nntp::LineHandler::checkAuth(afl::net::line::LineSink& response)
     }
 }
 
-// /** Fill cache containing newsgroups.
-//     \retval true Cache is available, proceed
-//     \retval false Error. An error message has been sent, command processing must abort */
+/** Fill cache containing newsgroups.
+    \param response Receiver for potential error message
+    \retval true Cache is available, proceed
+    \retval false Error. An error message has been sent, command processing must abort */
 bool
 server::nntp::LineHandler::fillGroupListCache(afl::net::line::LineSink& response)
 {
@@ -610,24 +612,27 @@ server::nntp::LineHandler::handleArticle(String_t args, bool header, bool body, 
     }
 }
 
-// /** AUTHINFO command.
-//     - References: RFC 2980
-//     - Syntax: AUTHINFO USER user
-//     - Syntax: AUTHINFO PASS pass
-//     - Syntax: AUTHINFO SIMPLE
-//     - Syntax: AUTHINFO GENERIC args
+/** Implementation of AUTHINFO command.
+    - References: RFC 2980
+    - Syntax: AUTHINFO USER user
+    - Syntax: AUTHINFO PASS pass
+    - Syntax: AUTHINFO SIMPLE
+    - Syntax: AUTHINFO GENERIC args
 
-//     Responses:
-//     - 281 Authentication accepted
-//     - 381 More authentication information required
-//     - 480 Authentication required
-//     - 482 Authentication rejected
-//     - 502 No permission
+    Responses:
+    - 281 Authentication accepted
+    - 381 More authentication information required
+    - 480 Authentication required
+    - 482 Authentication rejected
+    - 502 No permission
 
-//     USER/PASS is the simplest scheme and is implemented here.
-//     tin uses AUTHINFO GENERIC as a first guess, passing us the log-in name.
-//     That would probably work in a trusted setup with identd,
-//     but there's no way to make use of that for our application. */
+    USER/PASS is the simplest scheme and is implemented here.
+    tin uses AUTHINFO GENERIC as a first guess, passing us the log-in name.
+    That would probably work in a trusted setup with identd,
+    but there's no way to make use of that for our application.
+
+    \param args Parameters
+    \param response Receiver of result */
 void
 server::nntp::LineHandler::handleAuthinfo(String_t args, afl::net::line::LineSink& response)
 {
@@ -668,14 +673,17 @@ server::nntp::LineHandler::handleAuthinfo(String_t args, afl::net::line::LineSin
     }
 }
 
-// /** GROUP command.
-//     - References: RFC 977, RFC 3977, hamsrv
-//     - Indicating capability: READER
-//     - Syntax: GROUP groupname
+/** Implementation of GROUP command.
+    - References: RFC 977, RFC 3977, hamsrv
+    - Indicating capability: READER
+    - Syntax: GROUP groupname
 
-//     Responses:
-//     - 211 num-articles first last sequence groupname
-//     - 411 No such newsgroup */
+    Responses:
+    - 211 num-articles first last sequence groupname
+    - 411 No such newsgroup
+
+    \param args Parameters
+    \param response Receiver of result */
 void
 server::nntp::LineHandler::handleGroup(String_t args, afl::net::line::LineSink& response)
 {
@@ -708,8 +716,11 @@ server::nntp::LineHandler::handleGroup(String_t args, afl::net::line::LineSink& 
     }
 }
 
-// /** LIST command.
-//     Dispatches to various sub-commands. */
+/** Implementation of LIST command.
+    Dispatches to various sub-commands.
+
+    \param args Parameters
+    \param response Receiver of result */
 void
 server::nntp::LineHandler::handleList(String_t args, afl::net::line::LineSink& response)
 {
@@ -732,16 +743,18 @@ server::nntp::LineHandler::handleList(String_t args, afl::net::line::LineSink& r
     }
 }
 
-// /** LIST / LIST ACTIVE command.
-//     - References: RFC 977, RFC 3977, RFC 2980, hamsrv
-//     - Indicating capability: READER
-//     - Syntax: LIST
-//     - Syntax: LIST ACTIVE [wildmat]
+/** Implementation of LIST / LIST ACTIVE command.
+    - References: RFC 977, RFC 3977, RFC 2980, hamsrv
+    - Indicating capability: READER
+    - Syntax: LIST
+    - Syntax: LIST ACTIVE [wildmat]
 
-//     Responses:
-//     - 215 (multiline, followed by "newsgroup lastSeq firstSeq postingAllowedFlag")
+    Responses:
+    - 215 (multiline, followed by "newsgroup lastSeq firstSeq postingAllowedFlag")
 
-//     FIXME: wildmat is not implemented. */
+    FIXME: wildmat is not implemented.
+
+    \param response Receiver of result */
 void
 server::nntp::LineHandler::handleListActive(afl::net::line::LineSink& response)
 {
@@ -765,16 +778,18 @@ server::nntp::LineHandler::handleListActive(afl::net::line::LineSink& response)
     response.handleLine(".");
 }
 
-// /** LIST NEWSGROUPS command.
-//     - References: RFC 2980, RFC 3977, hamsrv
-//     - Indicating capability: READER
-//     - Syntax: LIST NEWSGROUPS [wildmat]
+/** Implementation of LIST NEWSGROUPS command.
+    - References: RFC 2980, RFC 3977, hamsrv
+    - Indicating capability: READER
+    - Syntax: LIST NEWSGROUPS [wildmat]
 
-//     Responses:
-//     - 215 information follows (multiline, followed by newsgroup/description pairs)
-//     - 503 program error, function not performed
+    Responses:
+    - 215 information follows (multiline, followed by newsgroup/description pairs)
+    - 503 program error, function not performed
 
-//     FIXME: wildmat is not implemented. */
+    FIXME: wildmat is not implemented.
+
+    \param response Receiver of result */
 void
 server::nntp::LineHandler::handleListNewsgroups(afl::net::line::LineSink& response)
 {
@@ -799,13 +814,15 @@ server::nntp::LineHandler::handleListNewsgroups(afl::net::line::LineSink& respon
     response.handleLine(".");
 }
 
-// /** LIST SUBSCRIPTIONS command.
-//     - References: RFC 2980
-//     - Syntax: LIST SUBSCRIPTIONS
+/** Implementation of LIST SUBSCRIPTIONS command.
+    - References: RFC 2980
+    - Syntax: LIST SUBSCRIPTIONS
 
-//     Response codes:
-//     - 215 information follows (multi-line, list of newsgroups follows)
-//     - 503 program error, function not performed */
+    Response codes:
+    - 215 information follows (multi-line, list of newsgroups follows)
+    - 503 program error, function not performed
+
+    \param response Receiver of result */
 void
 server::nntp::LineHandler::handleListSubscriptions(afl::net::line::LineSink& response)
 {
@@ -829,14 +846,16 @@ server::nntp::LineHandler::handleListSubscriptions(afl::net::line::LineSink& res
     response.handleLine(".");
 }
 
-// /** LIST OVERVIEW.FMT command.
-//     - References: RFC 3977, RFC 2980, hamsrv
-//     - Indicating capability: OVER
-//     - Syntax: LIST OVERVIEW.FMT
+/** Implementation of LIST OVERVIEW.FMT command.
+    - References: RFC 3977, RFC 2980, hamsrv
+    - Indicating capability: OVER
+    - Syntax: LIST OVERVIEW.FMT
 
-//     Responses:
-//     - 215 Information follows (multi-line)
-//     - 503 program error, function not performed */
+    Responses:
+    - 215 Information follows (multi-line)
+    - 503 program error, function not performed
+
+    \param response Receiver of result */
 void
 server::nntp::LineHandler::handleListOverviewFormat(afl::net::line::LineSink& response)
 {
@@ -853,18 +872,21 @@ server::nntp::LineHandler::handleListOverviewFormat(afl::net::line::LineSink& re
     response.handleLine(".");
 }
 
-// /** LISTGROUP command.
-//     - References: RFC 3977, RFC 2980, hamsrv
-//     - Indicating capability: READER
-//     - Syntax: LISTGROUP [group [range]]
+/** Implementation of LISTGROUP command.
+    - References: RFC 3977, RFC 2980, hamsrv
+    - Indicating capability: READER
+    - Syntax: LISTGROUP [group [range]]
 
-//     Responses:
-//     - 211 number low high group Article numbers follow (multi-line)
-//     - 411 No such newsgroup
-//     - 412 No newsgroup selected
+    Responses:
+    - 211 number low high group Article numbers follow (multi-line)
+    - 411 No such newsgroup
+    - 412 No newsgroup selected
 
-//     Actions: same as GROUP (select the group, reset current article),
-//     and list sequence numbers. */
+    Actions: same as GROUP (select the group, reset current article),
+    and list sequence numbers.
+
+    \param args Parameters
+    \param response Receiver of result */
 void
 server::nntp::LineHandler::handleListGroup(String_t args, afl::net::line::LineSink& response)
 {
@@ -916,12 +938,14 @@ server::nntp::LineHandler::handleListGroup(String_t args, afl::net::line::LineSi
     response.handleLine(".");
 }
 
-// /** HELP command.
-//     - References: RFC 977, RFC 3977
-//     - Syntax: HELP
+/** Implementation of HELP command.
+    - References: RFC 977, RFC 3977
+    - Syntax: HELP
 
-//     Responses:
-//     - 100 help follows (multi-line) */
+    Responses:
+    - 100 help follows (multi-line)
+
+    \param response Receiver of result */
 void
 server::nntp::LineHandler::handleHelp(afl::net::line::LineSink& response)
 {
@@ -932,7 +956,7 @@ server::nntp::LineHandler::handleHelp(afl::net::line::LineSink& response)
     response.handleLine(".");
 }
 
-/** OVER / XOVER command.
+/** Implementation of OVER / XOVER command.
     - References: RFC 3977, RFC 2980, hamsrv
     - Syntax: OVER [range]
     - Syntax: OVER <msgid>

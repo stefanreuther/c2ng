@@ -817,9 +817,6 @@ AFL_TEST("game.vcr.flak.Algorithm:clone", a)
     // Create a status token
     std::auto_ptr<game::vcr::flak::Algorithm::StatusToken> tok(algo.createStatusToken());
 
-    // // Clone the token
-    // std::auto_ptr<game::vcr::flak::Algorithm::StatusToken> tok2(new game::vcr::flak::Algorithm::StatusToken(*tok));
-
     // Complete the original
     while (algo.playCycle(env.env, vis))
         ;
@@ -844,14 +841,6 @@ AFL_TEST("game.vcr.flak.Algorithm:clone", a)
     a.checkEqual("31. getTime",           algo.getTime(), 352);
     a.checkEqual("32. getDamage 6",       algo.getDamage(6),      103);
     a.checkEqual("33. getNumTorpedoes 6", algo.getNumTorpedoes(6), 76);
-
-    // Rewind to second status token and complete
-    // tok2->storeTo(algo);
-    // while (algo.playCycle(env.env, vis))
-    //     ;
-    // a.checkEqual("41. getTime", algo.getTime(), 352);
-    // a.checkEqual("42. getDamage 6", algo.getDamage(6),   103);
-    // a.checkEqual("43. getNumTorpedoes 6", algo.getNumTorpedoes(6),   76);
 }
 
 /** Test setup of a battle involving capture-back.

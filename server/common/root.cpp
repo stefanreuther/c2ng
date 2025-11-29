@@ -43,10 +43,7 @@ server::common::Root::defaultProfile()
     return afl::net::redis::HashKey(m_db, DEFAULT_PROFILE);
 }
 
-// /** Map login name to user Id.
-//     \param login Login name
-//     \return user Id; empty string if invalid */
-// FIXME: here? Give it an Optional<String_t> or return-bool style interface?
+// Map login name to user Id.
 String_t
 server::common::Root::getUserIdFromLogin(String_t login)
 {
@@ -64,6 +61,7 @@ server::common::Root::getUserIdFromLogin(String_t login)
     return userId;
 }
 
+// Access user-by-name field.
 afl::net::redis::StringKey
 server::common::Root::userByName(String_t simplifiedName)
 {

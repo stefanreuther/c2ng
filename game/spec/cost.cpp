@@ -224,7 +224,7 @@ game::spec::Cost::isNonNegative() const
     }
     return true;
 }
-    
+
 // Check whether this cost is empty.
 bool
 game::spec::Cost::isZero() const

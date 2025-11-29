@@ -1,5 +1,6 @@
 /**
   *  \file server/common/util.cpp
+  *  \brief Common Server Utilities
   */
 
 #include "server/common/util.hpp"

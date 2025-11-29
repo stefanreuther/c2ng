@@ -1844,7 +1844,9 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/game/interface/configurationcontexttest.cpp \
+FILES_testsuite = test/ui/widgets/keydispatchertest.cpp \
+    test/gfx/rectanglesettest.cpp test/client/screenhistorytest.cpp \
+    test/game/interface/configurationcontexttest.cpp \
     test/client/vcr/playbackcontrolwidgettest.cpp \
     test/client/vcr/configurationtest.cpp \
     test/game/vcr/classic/interleavedschedulertest.cpp \

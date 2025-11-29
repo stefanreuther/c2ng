@@ -322,7 +322,7 @@ AFL_TEST("server.interface.TalkForumServer:roundtrip", a)
     server::interface::TalkForumServer level3(level2);
     server::interface::TalkForumClient level4(level3);
 
-    // // add/FORUMADD
+    // add/FORUMADD
     mock.expectCall("add()");
     mock.provideReturnValue<int32_t>(7);
     a.checkEqual("01. add", level4.add(afl::base::Nothing), 7);

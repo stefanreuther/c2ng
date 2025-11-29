@@ -52,7 +52,18 @@ namespace ui {
     };
     extern const WindowStyle BLUE_WINDOW, BLUE_BLACK_WINDOW, BLUE_DARK_WINDOW, RED_WINDOW, GREEN_WINDOW;
 
+    /** Draw "up" frame. Like drawRectangle(), but the rectangle is colored
+        to give the effect of a 3D raised panel.
+
+        \param ctx Context (prepared with a ui::ColorScheme)
+        \param r   Rectangle */
     void drawFrameUp(gfx::Context<uint8_t>& ctx, gfx::Rectangle r);
+
+    /** Draw "down" frame. Like drawRectangle(), but the rectangle is colored
+        to give the effect of a 3D lowered panel.
+
+        \param ctx Context (prepared with a ui::ColorScheme)
+        \param r   Rectangle */
     void drawFrameDown(gfx::Context<uint8_t>& ctx, gfx::Rectangle r);
 
     /** Tile area with pixmap.
@@ -68,6 +79,14 @@ namespace ui {
                       interesting. */
     void drawTiledArea(gfx::Context<uint8_t>& ctx, gfx::Rectangle r, const afl::base::Ptr<gfx::Canvas>& pix, uint8_t color, int alter);
 
+    /** Draw a window. Available as static function to be callable from
+        outside (widgets that look like windows but aren't, like the VCR screen)
+
+        \param ctx      Context (prepared with a ui::ColorScheme)
+        \param extent   Window size
+        \param provider ResourceProvider (for texture pixmap)
+        \param style    Window style
+        \param name     Window title */
     void drawWindow(gfx::Context<uint8_t>& ctx,
                     const gfx::Rectangle& extent,
                     gfx::ResourceProvider& provider,

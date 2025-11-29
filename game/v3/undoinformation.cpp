@@ -232,7 +232,7 @@ game::v3::UndoInformation::getSuppliesAllowedToBuy() const
     return m_suppliesAllowedToBuy;
 }
 
-// /** Get minimum tech level permitted on base. */
+// Get minimum tech level permitted.
 int
 game::v3::UndoInformation::getMinTechLevel(TechLevel level) const
 {

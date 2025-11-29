@@ -108,9 +108,6 @@ const ui::WindowStyle ui::RED_WINDOW        = { "winred",   GRAY_COLOR_SET };
 const ui::WindowStyle ui::GREEN_WINDOW      = { "wingreen", GRAY_COLOR_SET };
 
 
-// /** Draw "up" frame. Like drawRectangle(), but the rectangle is colored
-//     to give the effect of a 3D raised panel. */
-// Precondition: ctx prepared with a ui::ColorScheme
 void
 ui::drawFrameUp(gfx::Context<uint8_t>& ctx, gfx::Rectangle r)
 {
@@ -126,9 +123,6 @@ ui::drawFrameUp(gfx::Context<uint8_t>& ctx, gfx::Rectangle r)
     ctx.canvas().drawVLine(Point(x2, r.getTopY()),             y2+1-r.getTopY(), ctx.getRawColor(), gfx::SOLID_LINE, gfx::OPAQUE_ALPHA);
 }
 
-// /** Draw "down" frame. Like drawRectangle(), but the rectangle is colored
-//     to give the effect of a 3D lowered panel. */
-// Precondition: ctx prepared with a ui::ColorScheme
 void
 ui::drawFrameDown(gfx::Context<uint8_t>& ctx, gfx::Rectangle r)
 {
@@ -156,10 +150,6 @@ ui::drawTiledArea(gfx::Context<uint8_t>& ctx, gfx::Rectangle r, const afl::base:
 }
 
 
-// /** Draw a window. Available as static function to be callable from
-//     outside (widgets that look like windows but aren't, like the VCR
-//     screen) */
-// Precondition: ctx prepared with a ui::ColorScheme.
 void
 ui::drawWindow(gfx::Context<uint8_t>& ctx,
                const gfx::Rectangle& extent,

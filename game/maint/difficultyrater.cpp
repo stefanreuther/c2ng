@@ -101,7 +101,6 @@ game::maint::DifficultyRater::OptionValue::OptionValue()
 { }
 
 
-// /** Constructor. */
 game::maint::DifficultyRater::DifficultyRater()
     : config_known(),
       shiplist_known(false),

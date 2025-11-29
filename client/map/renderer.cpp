@@ -667,7 +667,7 @@ client::map::Renderer::getCrossSize() const
     }
 }
 
-// /** Convert screen point to game point. */
+// Convert screen point to game point.
 game::map::Point
 client::map::Renderer::unscale(gfx::Point pt) const
 {
@@ -677,7 +677,7 @@ client::map::Renderer::unscale(gfx::Point pt) const
                             unscale(screenCenter.getY() - pt.getY()) + m_center.getY());
 }
 
-// /** Unscale. Convert screen distance into game distance. */
+// Unscale. Convert screen distance into game distance.
 int
 client::map::Renderer::unscale(int r) const
 {

@@ -373,7 +373,7 @@ game::v3::check::Checker::checkTimestamp(uint8_t (&ts)[18])
 
 /***************************** Loading Stuff *****************************/
 
-// { open a game file, game directory only }
+// Open a game file, game directory only
 afl::base::Ref<afl::io::Stream>
 game::v3::check::Checker::openGameFile(const String_t& name) const
 {
@@ -381,7 +381,7 @@ game::v3::check::Checker::openGameFile(const String_t& name) const
     return gamedir.openFile(name, afl::io::FileSystem::OpenRead);
 }
 
-// { open a spec file, game or root directory }
+// Open a spec file, game or root directory
 afl::base::Ref<afl::io::Stream>
 game::v3::check::Checker::openSpecFile(const String_t& name) const
 {

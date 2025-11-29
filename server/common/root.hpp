@@ -48,8 +48,14 @@ namespace server { namespace common {
             \return default profile */
         afl::net::redis::HashKey defaultProfile();
 
+        /** Map login name to user Id.
+            \param login Login name
+            \return user Id; empty string if invalid */
         String_t getUserIdFromLogin(String_t login);
 
+        /** Access user-by-name field.
+            \param simplifiedName Simplified name (see simplifyUserName())
+            \return key that should contain the user Id */
         afl::net::redis::StringKey userByName(String_t simplifiedName);
 
      private:

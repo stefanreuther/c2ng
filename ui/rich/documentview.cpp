@@ -38,8 +38,7 @@ ui::rich::DocumentView::getDocument() const
 }
 
 
-// /** Handle document update. Must be called when the document was updated
-//     while the widget is displayed. */
+// Handle document update.
 void
 ui::rich::DocumentView::handleDocumentUpdate()
 {

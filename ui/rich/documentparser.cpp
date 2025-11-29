@@ -86,7 +86,8 @@ ui::rich::DocumentParser::hadLoadingImages() const
     return m_hadLoadingImages;
 }
 
-// /** Output line to document if present. Clears it afterwards. */
+/** Output line to document if present. Clears it afterwards.
+    \param line [in,out] Current line */
 void
 ui::rich::DocumentParser::flushLine(util::rich::Text& line)
 {
@@ -98,15 +99,15 @@ ui::rich::DocumentParser::flushLine(util::rich::Text& line)
     }
 }
 
-// /** Parse a block-level element.
-//     - h1/h2/h3 headings
-//     - p paragraphs
-//     - ul/ol/kl/dl lists
+/** Parse a block-level element.
+    - h1/h2/h3 headings
+    - p paragraphs
+    - ul/ol/kl/dl lists
 
-//     Upon call, we're looking at the opening tag.
-//     Upon exit, we're looking at the next element after the block element.
+    Upon call, we're looking at the opening tag.
+    Upon exit, we're looking at the next element after the block element.
 
-//     \param listLevel list nesting level */
+    \param listLevel list nesting level */
 void
 ui::rich::DocumentParser::parseBlock(int listLevel)
 {
@@ -199,9 +200,10 @@ ui::rich::DocumentParser::parseBlock(int listLevel)
     }
 }
 
-// /** Parse bullet list.
-//     Upon call, we're looking at the first token of the content.
-//     Upon exit, we're looking at the closing tag. */
+/** Parse bullet list.
+    Upon call, we're looking at the first token of the content.
+    Upon exit, we're looking at the closing tag.
+    \param listLevel 0-based nesting level */
 void
 ui::rich::DocumentParser::parseBulletList(int listLevel)
 {
@@ -248,7 +250,8 @@ ui::rich::DocumentParser::parseBulletList(int listLevel)
     }
 }
 
-// /** Parse counted list. */
+/** Parse counted list.
+    \param listLevel 0-based nesting level */
 void
 ui::rich::DocumentParser::parseCountedList(int listLevel)
 {
@@ -287,7 +290,8 @@ ui::rich::DocumentParser::parseCountedList(int listLevel)
     }
 }
 
-// /** Parse key list. */
+/** Parse key list.
+    \param listLevel 0-based nesting level */
 void
 ui::rich::DocumentParser::parseKeyList(int listLevel)
 {
@@ -325,7 +329,8 @@ ui::rich::DocumentParser::parseKeyList(int listLevel)
     }
 }
 
-// /** Parse definition list. */
+/** Parse definition list.
+    \param listLevel 0-based nesting level */
 void
 ui::rich::DocumentParser::parseDefinitionList(int listLevel)
 {
@@ -361,9 +366,10 @@ ui::rich::DocumentParser::parseDefinitionList(int listLevel)
     }
 }
 
-// /** Parse list item.
-//     Upon call, we're looking at the first token of the content.
-//     Upon exit, we're looking at the closing tag of the list item. */
+/** Parse list item.
+    Upon call, we're looking at the first token of the content.
+    Upon exit, we're looking at the closing tag of the list item.
+    \param listLevel 0-based nesting level */
 void
 ui::rich::DocumentParser::parseListItem(int listLevel)
 {
@@ -446,8 +452,9 @@ ui::rich::DocumentParser::parseListItem(int listLevel)
     }
 }
 
-// /** Parse image. Upon entry, the "img" tag has been read. Upon exit,
-//     we're looking at the closing tag. */
+/** Parse image.
+    Upon entry, the "img" tag has been read.
+    Upon exit, we're looking at the closing tag. */
 void
 ui::rich::DocumentParser::parseImage()
 {
@@ -487,8 +494,9 @@ ui::rich::DocumentParser::parseImage()
     }
 }
 
-// /** Parse table. Upon entry, the "table" tag has been read. Upon exit,
-//     we're looking at the closing tag. */
+/** Parse table.
+    Upon entry, the "table" tag has been read.
+    Upon exit, we're looking at the closing tag. */
 void
 ui::rich::DocumentParser::parseTable()
 {

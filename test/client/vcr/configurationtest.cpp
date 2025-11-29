@@ -129,7 +129,7 @@ AFL_TEST("client.vcr.Configuration:load:out-of-range", a)
 }
 
 /* Check save. */
-AFL_TEST("client.vcr.Configuration:load:normal", a)
+AFL_TEST("client.vcr.Configuration:save", a)
 {
     // Create session
     game::test::SessionThread h;

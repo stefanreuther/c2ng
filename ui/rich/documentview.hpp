@@ -9,13 +9,11 @@
 
 namespace ui { namespace rich {
 
-    // /** Rich document widget. Displays a RichDocument and allows the user
-    //     to interact with it. Since the RichDocument stores preformatted text,
-    //     there are two ways to fill the document:
-    //     - after doing layout, but before showing the widget, populate the
-    //       document normally
-    //     - while the widget is active, manipulate the document and finally
-    //       call handleDocumentUpdate(). */
+    /** Rich document widget.
+        Displays a Document and allows the user to interact with it.
+        Since the Document stores preformatted text, there are two ways to fill the document:
+        - after doing layout, but before showing the widget, populate the document normally;
+        - while the widget is active, manipulate the document and finally call handleDocumentUpdate(). */
     class DocumentView : public ScrollableWidget {
      public:
         enum {

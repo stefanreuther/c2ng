@@ -60,14 +60,6 @@ namespace ui { namespace res {
         \param first   Race number. */
     extern const char VCR_FIGHTER[];
 
-    // FIXME:
-    // /** Picture: ship.rotated(hull, angle). */
-    // extern const char SHIP_ROTATED[] = "ship.rotated";
-
-    // FIXME:
-    // /** Sound: vcr.beam(type), vcr.tlaun(type). vcr.beam0 is fighter beam. */
-    // extern const char VCR_BEAM[] = "vcr.beam", VCR_LAUNCH[] = "vcr.tlaun";
-
 
     /** Make resource Id from prefix and one integer.
         \param prefix Prefix

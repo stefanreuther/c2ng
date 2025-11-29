@@ -46,18 +46,7 @@ ui::res::WinplanVcrProvider::loadImage(String_t name, Manager& mgr)
     // OK, we have it
     afl::io::LimitedStream s(m_file, position-1, size);
     s.setPos(0);
-
-    afl::base::Ptr<gfx::Canvas> result = mgr.loadImage(s);
-    if (result.get() != 0) {
-        // FIXME: port this (colorkey)
-        // /* I was cropping the image here, but I think that is
-        //    counter-productive. It messes up relations between
-        //    images, which would be nice to preserve for FLAK. */
-        // // FIXME: can we assume this color-keying? I hope, yes. It fails if someone
-        // // makes a Cube that fills out its complete bitmap.
-        // pix->setColorKey(pix->getPixel(GfxPoint(0, 0)));
-    }
-    return result;
+    return mgr.loadImage(s);
 }
 
 void

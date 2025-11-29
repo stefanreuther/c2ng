@@ -97,11 +97,3 @@ gfx::ClipFilter::isClipped(Rectangle r)
 {
     return computeClipRect(r) != r;
 }
-
-// FIXME: remove
-// bool
-// GfxClipRect::computeOffset(GfxCanvas& other, GfxPoint& pt)
-// {
-//     return this == &other
-//         || parent.computeOffset(other, pt);
-// }

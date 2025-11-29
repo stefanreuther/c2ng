@@ -277,27 +277,6 @@ client::widgets::FileListbox::handleMouse(gfx::Point pt, MouseButtons_t pressedB
         }
         return true;
     } else {
-        // FIXME: port this?
-        // /* We're focused, and nobody is interested in this mouse
-        //    click: check whether it's just above our first
-        //    displayed item, or just below our last displayed item,
-        //    to allow mouse scrolling. */
-        // if (event.mouse.x >= extent.x && event.mouse.x <= extent.x + current_column_width
-        //     && event.mouse.y < extent.y && event.mouse.y >= extent.y - font_heights[FONT_NORMAL])
-        // {
-        //     setSelectedWidget();
-        //     scrollTo(getTop() - 1, -1);
-        //     return true;
-        // }
-        // if (event.mouse.x >= extent.getRightX() - current_column_width
-        //     && event.mouse.x < extent.getRightX()
-        //     && event.mouse.y >= extent.getBottomY()
-        //     && event.mouse.y < extent.getBottomY() + font_heights[FONT_NORMAL])
-        // {
-        //     setSelectedWidget();
-        //     scrollTo(getTop() + getPageSize(), +1);
-        //     return true;
-        // }
         return false;
     }
 }

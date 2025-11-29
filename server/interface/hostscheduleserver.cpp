@@ -170,8 +170,6 @@ server::interface::HostScheduleServer::handleCommand(const String_t& upcasedComm
     }
 }
 
-// /** Pack a schedule into an object.
-//     \param sch "game:GID:schedule:ID" object */
 server::Value_t*
 server::interface::HostScheduleServer::packSchedule(const HostSchedule::Schedule& sch)
 {
@@ -216,10 +214,6 @@ server::interface::HostScheduleServer::packSchedule(const HostSchedule::Schedule
     return new HashValue(h);
 }
 
-
-/** Parse commands for a SCHEDULESET/ADD/MOD command.
-    \param args [in] Arguments received from user
-    \return schedule */
 server::interface::HostSchedule::Schedule
 server::interface::HostScheduleServer::parseSchedule(interpreter::Arguments& args)
 {

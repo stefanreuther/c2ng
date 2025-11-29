@@ -201,18 +201,15 @@ namespace {
 }
 
 
-// /** Construct blank VCR database. */
 game::vcr::classic::Database::Database()
     : m_battles()
 {
     // ex GClassicVcrDatabase::GClassicVcrDatabase
 }
 
-// /** Destructor. */
 game::vcr::classic::Database::~Database()
 { }
 
-// /** Load a file. */
 void
 game::vcr::classic::Database::load(afl::io::Stream& file,
                                    const game::config::HostConfiguration& config,

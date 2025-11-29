@@ -9,22 +9,6 @@
 #include "gfx/complex.hpp"
 #include "ui/widgets/inputline.hpp"
 
-// FIXME: port this? Ignore current marker for locking purposes.
-// void
-// WMoveMarkerChartMode::doChartLock(GChartLocation& loc, TLockMode lm, bool marked)
-// {
-//     GPoint pt = loc.getLocation();
-//     GLockData locker(pt, marked);
-//     if (*drawing) {
-//         locker.setIgnore(*drawing);
-//     }
-//     findItem(getDisplayedTurn().getCurrentUniverse(), locker, lm);
-//     if (const GMapObject* obj = locker.getObject()) {
-//         loc.setCurrentObject(*obj);
-//     }
-//     loc.setLocation(locker.getPoint().getSimpleNearestAlias(loc.getLocation()));
-// }
-
 
 client::map::MoveMarkerOverlay::MoveMarkerOverlay(ui::Root& root,
                                                   afl::string::Translator& tx,

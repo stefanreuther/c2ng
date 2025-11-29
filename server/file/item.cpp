@@ -1,11 +1,10 @@
 /**
   *  \file server/file/item.cpp
+  *  \brief Class server::file::Item
   */
 
 #include "server/file/item.hpp"
 
-// /** Constructor.
-//     \param name Name of this object (basename) */
 server::file::Item::Item(String_t name)
     : m_name(name)
 {

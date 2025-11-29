@@ -10,12 +10,12 @@
 
 namespace ui { namespace res {
 
-    // /* Winplan Resource Provider
+    /* Winplan Resource Provider
 
-    //   This resource provider provides access to a Winplan "bmp" directory.
-    //   It reads the ship pictures.
+       This resource provider provides access to a Winplan "bmp" directory.
+       It reads the ship pictures.
 
-    //   Provides res::ship(n). */
+       Provides res::ship(n). */
     class WinplanBitmapProvider : public Provider {
      public:
         WinplanBitmapProvider(afl::base::Ref<afl::io::Directory> dir);

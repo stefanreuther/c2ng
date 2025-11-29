@@ -1,10 +1,10 @@
 /**
   *  \file ui/widgets/keydispatcher.cpp
+  *  \brief Class ui::widgets::KeyDispatcher
   */
 
 #include "ui/widgets/keydispatcher.hpp"
 
-// /** Constructor. Makes a blank UIKeyTranslator which doesn't yet translate any keys. */
 ui::widgets::KeyDispatcher::KeyDispatcher()
     : m_keys()
 {

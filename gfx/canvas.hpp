@@ -126,12 +126,14 @@ namespace gfx {
         /** Get number of bits used per pixel. */
         virtual int getBitsPerPixel() = 0;
 
-        // /** Check if rectangle is visible. A rectangle is visible if at least
-        //     one pixel of it can be seen. */
+        /** Check if rectangle is visible.
+            A rectangle is visible if at least one pixel of it can be seen.
+            \param r Rectangle */
         virtual bool isVisible(Rectangle r) = 0;
 
-        // /** Check if rectangle is clipped. If it is not clipped, it is completely
-        //     visible. */
+        /** Check if rectangle is clipped.
+            If it is not clipped, it is completely visible.
+            \param r Rectangle */
         virtual bool isClipped(Rectangle r) = 0;
 
         /** Define palette colors.
