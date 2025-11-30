@@ -100,14 +100,11 @@ ui::Widget::setState(State st, bool enable)
     }
 
     if (raise) {
-        // FIXME: (do we need to) port this?
-    // // propagate selection loss
-    // if ((bits & st_Selected) && !enabled) {
-    //     if (selected_child != 0) {
-    //         selected_child->setState(st_Selected, false);
-    //         selected_child = 0;
-    //     }
-    // }
+        // propagate activity loss
+        if (st == ActiveState && !enable && m_activeChild != 0) {
+            m_activeChild->setState(ActiveState, false);
+            m_activeChild = 0;
+        }
 
         // propagate focus gain/loss
         if (st == FocusedState) {
