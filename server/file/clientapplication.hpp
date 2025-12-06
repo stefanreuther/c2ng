@@ -10,6 +10,8 @@
 #include "afl/net/tunnel/tunnelablenetworkstack.hpp"
 #include "afl/sys/commandlineparser.hpp"
 #include "afl/sys/environment.hpp"
+#include "server/file/ca/objectid.hpp"
+#include "server/file/ca/root.hpp"
 #include "util/application.hpp"
 
 namespace server { namespace file {
@@ -38,10 +40,13 @@ namespace server { namespace file {
         void doClear(afl::sys::CommandLineParser& cmdl);
         void doServe(afl::sys::CommandLineParser& cmdl);
         void doGC(afl::sys::CommandLineParser& cmdl);
+        void doSnapshot(afl::sys::CommandLineParser& cmdl);
         void help();
 
         afl::net::NetworkStack& m_serverNetworkStack;
         afl::net::tunnel::TunnelableNetworkStack m_networkStack;
+
+        server::file::ca::ObjectId resolveObjectId(server::file::ca::Root& root, const String_t& name);
     };
 
 } }

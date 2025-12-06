@@ -10,14 +10,64 @@
 #include "server/file/ca/objectstore.hpp"
 #include "server/file/directoryhandler.hpp"
 
+using server::file::DirectoryHandler;
+using server::file::ca::ObjectId;
+using server::file::ca::ObjectStore;
+
 namespace {
-    server::file::DirectoryHandler* getCreateDirectory(server::file::DirectoryHandler& parent, String_t name)
+    DirectoryHandler* getCreateDirectory(DirectoryHandler& parent, String_t name)
     {
-        server::file::DirectoryHandler::Info info;
-        if (!parent.findItem(name, info) || info.type != server::file::DirectoryHandler::IsDirectory) {
+        DirectoryHandler::Info info;
+        if (!parent.findItem(name, info) || info.type != DirectoryHandler::IsDirectory) {
             info = parent.createDirectory(name);
         }
         return parent.getDirectory(info);
+    }
+
+    /* Read commit ID from a file.
+       Returns commit ID on success, otherwise nothing. */
+    afl::base::Optional<ObjectId> readCommitId(DirectoryHandler& dir, const String_t& fileName)
+    {
+        DirectoryHandler::Info info;
+        afl::base::Optional<ObjectId> commitId;
+        if (dir.findItem(fileName, info)) {
+            afl::base::Ref<afl::io::FileMapping> p(dir.getFile(info));
+            afl::base::ConstBytes_t bytes(p->get());
+            bytes.trim(2*sizeof(ObjectId));
+
+            String_t objName = afl::string::fromBytes(bytes);
+            ObjectId id = ObjectId::fromHex(objName);
+            if (id.toHex() == objName) {
+                // Accept
+                commitId = id;
+            }
+        }
+        return commitId;
+    }
+
+    /* Write commit ID to a file. */
+    void writeCommitId(DirectoryHandler& dir, const String_t& fileName, const ObjectId& objId)
+    {
+        String_t id = objId.toHex();
+        id += '\n';
+        dir.createFile(fileName, afl::string::toBytes(id));
+    }
+
+    void updateCommitId(DirectoryHandler& dir, const String_t& fileName, const ObjectId& objId, ObjectStore& objStore)
+    {
+        // Read old value
+        afl::base::Optional<ObjectId> commitId = readCommitId(dir, fileName);
+
+        // Update new reference
+        objStore.linkObject(objId);
+
+        // Update commit
+        writeCommitId(dir, fileName, objId);
+
+        // Update old reference
+        if (const ObjectId* p = commitId.get()) {
+            objStore.unlinkObject(ObjectStore::CommitObject, *p);
+        }
     }
 }
 
@@ -40,9 +90,7 @@ class server::file::ca::Root::RootUpdater : public server::file::ca::ReferenceUp
             ObjectId commitId = m_parent.m_store->addObject(ObjectStore::CommitObject, out);
 
             // Update master
-            String_t id = commitId.toHex();
-            id += '\n';
-            m_parent.m_refsHeads->createFile("master", afl::string::toBytes(id));
+            writeCommitId(*m_parent.m_refsHeads, "master", commitId);
 
             // Update link count
             m_parent.m_store->unlinkObject(ObjectStore::CommitObject, m_commitId);
@@ -62,6 +110,7 @@ server::file::ca::Root::Root(server::file::DirectoryHandler& root)
     : m_root(root),
       m_refs(),
       m_refsHeads(),
+      m_refsTags(),
       m_objects(),
       m_store()
 {
@@ -76,22 +125,77 @@ server::file::ca::Root::~Root()
 server::file::ca::ObjectId
 server::file::ca::Root::getMasterCommitId()
 {
-    DirectoryHandler::Info info;
-    ObjectId masterCommitId = ObjectId::nil;
-    if (m_refsHeads->findItem("master", info)) {
-        afl::base::Ref<afl::io::FileMapping> p(m_refsHeads->getFile(info));
-        afl::base::ConstBytes_t bytes(p->get());
-        bytes.trim(2*sizeof(ObjectId));
+    return readCommitId(*m_refsHeads, "master").orElse(ObjectId::nil);
+}
 
-        String_t name = afl::string::fromBytes(bytes);
+// Set ObjectId of the `master` commit.
+void
+server::file::ca::Root::setMasterCommitId(const ObjectId& objId)
+{
+    updateCommitId(*m_refsHeads, "master", objId, *m_store);
+}
 
-        ObjectId id = ObjectId::fromHex(name);
-        if (id.toHex() == name) {
-            // Accept
-            masterCommitId = id;
+// Get ObjectId of a commit.
+afl::base::Optional<server::file::ca::ObjectId>
+server::file::ca::Root::getSnapshotCommitId(String_t snapshotName)
+{
+    return readCommitId(*m_refsTags, snapshotName);
+}
+
+// Set ObjectId of a snapshot.
+void
+server::file::ca::Root::setSnapshotCommitId(String_t snapshotName, const ObjectId& objId)
+{
+    updateCommitId(*m_refsTags, snapshotName, objId, *m_store);
+}
+
+// Remove a snapshot.
+void
+server::file::ca::Root::removeSnapshot(String_t snapshotName)
+{
+    afl::base::Optional<ObjectId> commitId = readCommitId(*m_refsTags, snapshotName);
+    if (const ObjectId* p = commitId.get()) {
+        m_refsTags->removeFile(snapshotName);
+        m_store->unlinkObject(ObjectStore::CommitObject, *p);
+    }
+}
+
+// Get list of snapshots.
+void
+server::file::ca::Root::listSnapshots(afl::data::StringList_t& list)
+{
+    class Callback : public DirectoryHandler::Callback {
+     public:
+        Callback(afl::data::StringList_t& list)
+            : m_list(list)
+            { }
+        virtual void addItem(const DirectoryHandler::Info& info)
+            {
+                if (!info.name.empty() && info.name[0] != '.' && info.type == DirectoryHandler::IsFile) {
+                    m_list.push_back(info.name);
+                }
+            }
+     private:
+        afl::data::StringList_t& m_list;
+    };
+    Callback cb(list);
+    m_refsTags->readContent(cb);
+}
+
+// Get list of root objects.
+void
+server::file::ca::Root::listRoots(std::vector<ObjectId>& list)
+{
+    list.push_back(getMasterCommitId());
+
+    afl::data::StringList_t snapshotNames;
+    listSnapshots(snapshotNames);
+    for (size_t i = 0; i < snapshotNames.size(); ++i) {
+        afl::base::Optional<ObjectId> optId = getSnapshotCommitId(snapshotNames[i]);
+        if (const ObjectId* p = optId.get()) {
+            list.push_back(*p);
         }
     }
-    return masterCommitId;
 }
 
 // Create DirectoryHandler for root directory.
@@ -122,6 +226,7 @@ server::file::ca::Root::init()
     // Create directories
     m_refs.reset(getCreateDirectory(m_root, "refs"));
     m_refsHeads.reset(getCreateDirectory(*m_refs, "heads"));
+    m_refsTags.reset(getCreateDirectory(*m_refs, "tags"));
     m_objects.reset(getCreateDirectory(m_root, "objects"));
 
     // Create HEAD file

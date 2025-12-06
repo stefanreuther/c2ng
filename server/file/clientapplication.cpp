@@ -3,6 +3,7 @@
   *  \brief Class server::file::ClientApplication
   */
 
+#include <algorithm>
 #include "server/file/clientapplication.hpp"
 #include "afl/net/http/pagedispatcher.hpp"
 #include "afl/net/http/protocolhandler.hpp"
@@ -69,6 +70,8 @@ server::file::ClientApplication::appMain()
         doServe(commandLine);
     } else if (*pCommand == "gc") {
         doGC(commandLine);
+    } else if (*pCommand == "snapshot") {
+        doSnapshot(commandLine);
     } else {
         errorExit(afl::string::Format(tx("invalid command '%s'. Use '%s -h' for help.").c_str(), *pCommand, environment().getInvocationName()));
     }
@@ -346,7 +349,12 @@ server::file::ClientApplication::doGC(afl::sys::CommandLineParser& cmdl)
 #ifdef MALLOC_STATS
     int prevMem = mallinfo().arena;
 #endif
-    gc.addCommit(root.getMasterCommitId());
+    std::vector<server::file::ca::ObjectId> roots;
+    root.listRoots(roots);
+    for (size_t i = 0; i < roots.size(); ++i) {
+        gc.addCommit(roots[i]);
+    }
+
     size_t n = 0;
     while (gc.checkObject()) {
         if (++n % 512 == 0) {
@@ -375,6 +383,85 @@ server::file::ClientApplication::doGC(afl::sys::CommandLineParser& cmdl)
 }
 
 void
+server::file::ClientApplication::doSnapshot(afl::sys::CommandLineParser& cmdl)
+{
+    // Parse parameters
+    afl::string::Translator& tx = translator();
+    std::vector<String_t> args;
+
+    String_t p;
+    bool opt;
+    bool longFormat = false;
+    while (cmdl.getNext(opt, p)) {
+        if (opt) {
+            if (p == "l") {
+                longFormat = true;
+            } else {
+                errorExit(afl::string::Format(tx("invalid option specified. Use '%s -h' for help."), environment().getInvocationName()));
+            }
+        } else {
+            args.push_back(p);
+        }
+    }
+
+    if (args.size() < 2) {
+        errorExit(afl::string::Format(tx("too few parameters. Use '%s -h' for help."), environment().getInvocationName()));
+    }
+
+    // Objects
+    // (Intentionally do not use DirectoryHandlerFactory; we don't want to use 'ca:DIR' here.)
+    FileSystemHandler handler(fileSystem(), args[0]);
+    server::file::ca::Root root(handler);
+
+    if (args[1] == "ls") {
+        afl::data::StringList_t list;
+        root.listSnapshots(list);
+        std::sort(list.begin(), list.end());
+        for (size_t i = 0; i < list.size(); ++i) {
+            if (longFormat) {
+                afl::base::Optional<server::file::ca::ObjectId> objId = root.getSnapshotCommitId(list[i]);
+                String_t objName = objId.isValid() ? objId.get()->toHex() : "-";
+                standardOutput().writeLine(afl::string::Format("%-4s %-40s %10s  %s", "SNAP", objName, "-", list[i]));
+            } else {
+                standardOutput().writeLine(list[i]);
+            }
+        }
+    } else if (args[1] == "add" || args[1] == "create") {
+        if (args.size() < 3) {
+            errorExit(afl::string::Format(tx("too few parameters. Use '%s -h' for help."), environment().getInvocationName()));
+        }
+        for (size_t i = 2; i < args.size(); ++i) {
+            root.setSnapshotCommitId(args[i], root.getMasterCommitId());
+        }
+    } else if (args[1] == "rm" || args[1] == "delete") {
+        if (args.size() < 3) {
+            errorExit(afl::string::Format(tx("too few parameters. Use '%s -h' for help."), environment().getInvocationName()));
+        }
+        for (size_t i = 2; i < args.size(); ++i) {
+            root.removeSnapshot(args[i]);
+        }
+    } else if (args[1] == "cp" || args[1] == "copy") {
+        if (args.size() < 4) {
+            errorExit(afl::string::Format(tx("too few parameters. Use '%s -h' for help."), environment().getInvocationName()));
+        }
+        server::file::ca::ObjectId objId = resolveObjectId(root, args[2]);
+        for (size_t i = 3; i < args.size(); ++i) {
+            root.setSnapshotCommitId(args[i], objId);
+        }
+    } else if (args[1] == "restore") {
+        if (args.size() < 3) {
+            errorExit(afl::string::Format(tx("too few parameters. Use '%s -h' for help."), environment().getInvocationName()));
+        }
+        if (args.size() > 3) {
+            errorExit(afl::string::Format(tx("too many parameters. Use '%s -h' for help."), environment().getInvocationName()));
+        }
+        root.setMasterCommitId(resolveObjectId(root, args[2]));
+    } else {
+        errorExit(afl::string::Format(tx("invalid command '%s'. Use '%s -h' for help."), args[1], environment().getInvocationName()));
+    }
+}
+
+void
 server::file::ClientApplication::help()
 {
     afl::string::Translator& tx = translator();
@@ -398,6 +485,16 @@ server::file::ClientApplication::help()
                                          "                      Serve SOURCE via HTTP for testing\n"
                                          "  %$0s gc [-n] [-f] PATH\n"
                                          "                      Garbage-collect a CA file system\n"
+                                         "  %$0s snapshot PATH ls [-l]\n"
+                                         "                      List snapshots (tags) on CA file system\n"
+                                         "  %$0s snapshot PATH add NAME...\n"
+                                         "                      Create snapshots (tags) on CA file system\n"
+                                         "  %$0s snapshot PATH rm NAME...\n"
+                                         "                      Remove snapshots (tags) on CA file system\n"
+                                         "  %$0s snapshot PATH cp OLD NEW...\n"
+                                         "                      Copy snapshots (tags) on CA file system\n"
+                                         "  %$0s snapshot PATH restore NAME\n"
+                                         "                      Restore from snapshot (tag) on CA file system\n"
                                          "\n"
                                          "Command Options:\n"
                                          "  -f                  Force garbage-collection even on error\n"
@@ -417,4 +514,15 @@ server::file::ClientApplication::help()
                                       environment().getInvocationName()));
     out.flush();
     exit(0);
+}
+
+server::file::ca::ObjectId
+server::file::ClientApplication::resolveObjectId(server::file::ca::Root& root, const String_t& name)
+{
+    afl::base::Optional<server::file::ca::ObjectId> objId = root.getSnapshotCommitId(name);
+    server::file::ca::ObjectId* p = objId.get();
+    if (p == 0) {
+        errorExit(afl::string::Format(translator()("unable to resolve snapshot Id '%s'"), name));
+    }
+    return *p;
 }

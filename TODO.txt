@@ -28,9 +28,6 @@ MESSAGES. Can we integrate all messages (in-game messages, PMs, activities, foru
 - Cannot load everything locally, only in-game messages.
 - .rss parser for update notifications?
 
-FILER NG.
-- Add transaction support: upload many files at once and commit at the end; fork dataspace for backup.
-
 SDL2/ANDROID.
 - Touch events!
 

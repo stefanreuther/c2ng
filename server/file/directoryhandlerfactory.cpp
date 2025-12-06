@@ -47,7 +47,12 @@ namespace {
     {
         // Perform GC
         server::file::ca::GarbageCollector gc(root.objectStore(), log);
-        gc.addCommit(root.getMasterCommitId());
+        std::vector<server::file::ca::ObjectId> roots;
+        root.listRoots(roots);
+        for (size_t i = 0; i < roots.size(); ++i) {
+            gc.addCommit(roots[i]);
+        }
+
         log.write(LogListener::Info, LOG_NAME, "Garbage collection...");
         while (gc.checkObject())
             ;

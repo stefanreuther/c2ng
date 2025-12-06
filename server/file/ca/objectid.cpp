@@ -1,5 +1,6 @@
 /**
   *  \file server/file/ca/objectid.cpp
+  *  \brief Structure server::file::ca::ObjectId
   */
 
 #include <cstring>

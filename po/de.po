@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-11-27 17:28+0100\n"
+"PO-Revision-Date: 2025-12-10 22:27+0100\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:390
@@ -2169,7 +2169,7 @@ msgstr "Liste blättern (Tab)"
 msgid "Build"
 msgstr "Bauen"
 
-#: game/actions/changebuildqueue.cpp:251
+#: game/actions/changebuildqueue.cpp:256
 msgid "Build %s"
 msgstr "Baue ein %s"
 
@@ -2703,7 +2703,7 @@ msgstr "Tarnung"
 msgid "Clone"
 msgstr "Klonen"
 
-#: game/actions/changebuildqueue.cpp:261
+#: game/actions/changebuildqueue.cpp:266
 msgid "Clone %s"
 msgstr "Klone %s"
 
@@ -3765,7 +3765,7 @@ msgstr "Neue Notiz"
 msgid "Enter new comment for %s"
 msgstr "Neue Notiz für %s"
 
-#: client/map/movemarkeroverlay.cpp:137
+#: client/map/movemarkeroverlay.cpp:121
 msgid "Enter new comment for this marker"
 msgstr "Neue Notiz für diesen Marker"
 
@@ -6045,7 +6045,7 @@ msgstr "Marker"
 msgid "Marker %d"
 msgstr "Marker %d"
 
-#: client/map/movemarkeroverlay.cpp:137
+#: client/map/movemarkeroverlay.cpp:121
 msgid "Marker Comment"
 msgstr "Marker-Notiz"
 
@@ -6492,7 +6492,7 @@ msgstr "Bewege in Richtung"
 msgid "Move down"
 msgstr "Nach unten"
 
-#: client/map/movemarkeroverlay.cpp:48
+#: client/map/movemarkeroverlay.cpp:32
 msgid "Move marker, end with [ESC]."
 msgstr "Bewege den Marker, Ende mit [ESC]."
 
@@ -7257,7 +7257,7 @@ msgstr "PCC2 Dokumentations-Manager v%s - (c) 2021-2025 Stefan Reuther"
 msgid "PCC2 Export v%s - (c) 2017-2025 Stefan Reuther"
 msgstr "PCC2 Export v%s - (c) 2017-2025 Stefan Reuther"
 
-#: server/file/clientapplication.cpp:382
+#: server/file/clientapplication.cpp:469
 msgid "PCC2 File Client v%s - (c) 2017-2025 Stefan Reuther"
 msgstr "PCC2 Datei-Client v%s - (c) 2017-2025 Stefan Reuther"
 
@@ -7384,7 +7384,7 @@ msgstr "Plündern-Mission"
 msgid "Plan"
 msgstr "Geplant"
 
-#: game/actions/changebuildqueue.cpp:243
+#: game/actions/changebuildqueue.cpp:248
 msgid "Plan %s"
 msgstr "Plane ein %s"
 
@@ -8694,7 +8694,7 @@ msgstr "Schilde: %d%%"
 msgid "Ship"
 msgstr "Schiff"
 
-#: client/map/starchartoverlay.cpp:234 game/actions/changebuildqueue.cpp:259
+#: client/map/starchartoverlay.cpp:234 game/actions/changebuildqueue.cpp:264
 #: game/map/ship.cpp:429 game/map/universe.cpp:41
 #: game/proxy/simulationsetupproxy.cpp:145 game/reference.cpp:56
 #: game/vcr/overview.cpp:36 share/resource/core_game.q:465
@@ -10043,7 +10043,9 @@ msgstr ""
 msgid ""
 "This game seems to use PHost, but you do not have PCONFIG.SRC. PCC2 has "
 "requested this file for you using a command message."
-msgstr "Dieses Spiel scheint PHost zu benutzen, aber du hast keine PCONFIG.SRC. PCC2 hat diese Datei für dich mit einer Kommandonachricht angefordert."
+msgstr ""
+"Dieses Spiel scheint PHost zu benutzen, aber du hast keine PCONFIG.SRC. PCC2 "
+"hat diese Datei für dich mit einer Kommandonachricht angefordert."
 
 #: client/dialogs/scriptcommanddialog.cpp:132
 msgid "This is not a valid auto task command."
@@ -11175,7 +11177,7 @@ msgstr ""
 "%s\n"
 "Fehler bitte melden an <Streu@gmx.de>"
 
-#: server/file/clientapplication.cpp:384
+#: server/file/clientapplication.cpp:471
 msgid ""
 "Usage:\n"
 "  %s [-h]\n"
@@ -11194,6 +11196,16 @@ msgid ""
 "                      Serve SOURCE via HTTP for testing\n"
 "  %$0s gc [-n] [-f] PATH\n"
 "                      Garbage-collect a CA file system\n"
+"  %$0s snapshot PATH ls [-l]\n"
+"                      List snapshots (tags) on CA file system\n"
+"  %$0s snapshot PATH add NAME...\n"
+"                      Create snapshots (tags) on CA file system\n"
+"  %$0s snapshot PATH rm NAME...\n"
+"                      Remove snapshots (tags) on CA file system\n"
+"  %$0s snapshot PATH cp OLD NEW...\n"
+"                      Copy snapshots (tags) on CA file system\n"
+"  %$0s snapshot PATH restore NAME\n"
+"                      Restore from snapshot (tag) on CA file system\n"
 "\n"
 "Command Options:\n"
 "  -f                  Force garbage-collection even on error\n"
@@ -11230,6 +11242,16 @@ msgstr ""
 "                      QUELLE via HTTP bereitstellen\n"
 "  %$0s gc [-n] [-f] PFAD\n"
 "                      Garbage-Collection in einem CA-Dateisystem\n"
+"  %$0s snapshot PATH ls [-l]\n"
+"                      Snapshots (Tags) eines CA-Dateisystems auflisten\n"
+"  %$0s snapshot PATH add NAME...\n"
+"                      Snapshots (Tags) auf einem CA-Dateisystems erzeugen\n"
+"  %$0s snapshot PATH rm NAME...\n"
+"                      Snapshots (Tags) von einem CA-Dateisystems löschen\n"
+"  %$0s snapshot PATH cp OLD NEW...\n"
+"                      Snapshots (Tags) auf einem CA-Dateisystems kopieren\n"
+"  %$0s snapshot PATH restore NAME\n"
+"                      Zustand eines CA-Dateisystems aus Snapshot (Tag) wiederherstellen\n"
 "\n"
 "Befehlsoptionen:\n"
 "  -f                  Garbage-Collection auch bei Fehler erzwingen\n"
@@ -11240,8 +11262,7 @@ msgstr ""
 "\n"
 "Dateinamen:\n"
 "  PFAD                Dateien in einem nicht verwalteten Dateisystem\n"
-"  [PFAD@]ca:SPEC      Dateien in einem nicht verwalteten, content-"
-"addressierten Dateisystem\n"
+"  [PFAD@]ca:SPEC      Dateien in einem nicht verwalteten, content-addressierten Dateisystem\n"
 "  [PFAD@]int:[UNIQ]   Interne Ablage (Arbeitsspeicher, nicht persistent)\n"
 "  c2file://[NUTZER@]HOST:PORT/PFAD\n"
 "                      Zugriff auf verwaltetes Dateisystem (c2file-Server)\n"
@@ -12723,7 +12744,8 @@ msgstr "Ungültiges Argument zu \"-value=\""
 msgid "invalid command \"%s\" specified. Use \"%s -h\" for help"
 msgstr "Ungültiger Befehl \"%s\" angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 
-#: server/file/clientapplication.cpp:73 util/resourcefileapplication.cpp:328
+#: server/file/clientapplication.cpp:460 server/file/clientapplication.cpp:76
+#: util/resourcefileapplication.cpp:328
 msgid "invalid command '%s'. Use '%s -h' for help."
 msgstr "Ungültiger Befehl '%s'. Mit '%s -h' erhalten Sie Hilfe."
 
@@ -12781,10 +12803,10 @@ msgstr "Ungültige Option angegeben. Mit '%s -h' erhalten Sie Hilfe."
 #: game/maint/messagesearchapplication.cpp:544
 #: server/console/consoleapplication.cpp:195
 #: server/dbexport/exportapplication.cpp:50
-#: server/file/clientapplication.cpp:128 server/file/clientapplication.cpp:164
-#: server/file/clientapplication.cpp:240 server/file/clientapplication.cpp:269
-#: server/file/clientapplication.cpp:325 server/file/clientapplication.cpp:45
-#: server/file/clientapplication.cpp:94
+#: server/file/clientapplication.cpp:131 server/file/clientapplication.cpp:167
+#: server/file/clientapplication.cpp:243 server/file/clientapplication.cpp:272
+#: server/file/clientapplication.cpp:328 server/file/clientapplication.cpp:400
+#: server/file/clientapplication.cpp:46 server/file/clientapplication.cpp:97
 msgid "invalid option specified. Use '%s -h' for help."
 msgstr "Ungültige Option angegeben. Mit '%s -h' erhalten Sie Hilfe."
 
@@ -12908,12 +12930,12 @@ msgstr "fehlendes Trennzeichen"
 msgid "missing directory name"
 msgstr "fehlender Verzeichnisname"
 
-#: server/file/clientapplication.cpp:248
+#: server/file/clientapplication.cpp:251
 msgid "missing directory name to clear. Use '%s -h' for help."
 msgstr ""
 "Name des zu löschenden Verzeichnisses fehlt. Mit '%s -h' erhalten Sie Hilfe."
 
-#: server/file/clientapplication.cpp:172
+#: server/file/clientapplication.cpp:175
 msgid "missing directory name to list. Use '%s -h' for help."
 msgstr ""
 "Name des aufzulistenden Verzeichnisses fehlt. Mit '%s -h' erhalten Sie Hilfe."
@@ -12956,7 +12978,7 @@ msgstr "nahe %s (#%d)"
 msgid "near %s (Planet #%d)"
 msgstr "nahe %s (Planet #%d)"
 
-#: server/file/clientapplication.cpp:108 server/file/clientapplication.cpp:142
+#: server/file/clientapplication.cpp:111 server/file/clientapplication.cpp:145
 msgid "need two directory names (source, destination). Use '%s -h' for help."
 msgstr ""
 "benötige zwei Verzeichnisnamen (Quelle, Ziel). Mit '%s -h' erhalten Sie "
@@ -13000,7 +13022,7 @@ msgstr "kein Befehl angegeben"
 msgid "no command specified. Use \"%s -h\" for help"
 msgstr "kein Befehl angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 
-#: server/file/clientapplication.cpp:56 util/resourcefileapplication.cpp:314
+#: server/file/clientapplication.cpp:57 util/resourcefileapplication.cpp:314
 msgid "no command specified. Use '%s -h' for help."
 msgstr "kein Befehl angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 
@@ -13437,7 +13459,10 @@ msgstr "Dieses Spiel enthält keine Objekte des Typs '%s'"
 msgid "timestamp must be 18 characters in length"
 msgstr "Zeitstempel muss 18 Zeichen haben"
 
-#: server/file/clientapplication.cpp:282 server/file/clientapplication.cpp:336
+#: server/file/clientapplication.cpp:285 server/file/clientapplication.cpp:339
+#: server/file/clientapplication.cpp:408 server/file/clientapplication.cpp:431
+#: server/file/clientapplication.cpp:438 server/file/clientapplication.cpp:445
+#: server/file/clientapplication.cpp:453
 msgid "too few parameters. Use '%s -h' for help."
 msgstr "zu wenig Parameter. Nutze '%s -h' für Hilfe."
 
@@ -13454,11 +13479,12 @@ msgstr "zu lange"
 msgid "too many arguments"
 msgstr "zu viele Parameter"
 
-#: server/file/clientapplication.cpp:102 server/file/clientapplication.cpp:136
+#: server/file/clientapplication.cpp:105 server/file/clientapplication.cpp:139
 msgid "too many directory names specified. Use '%s -h' for help."
 msgstr "zu viele Verzeichnisnamen angegeben. Nutze '%s -h' für Hilfe."
 
-#: server/file/clientapplication.cpp:275 server/file/clientapplication.cpp:330
+#: server/file/clientapplication.cpp:278 server/file/clientapplication.cpp:333
+#: server/file/clientapplication.cpp:456
 msgid "too many parameters. Use '%s -h' for help."
 msgstr "zu viele Parameter. Nutze '%s -h' für Hilfe."
 
@@ -13505,6 +13531,10 @@ msgstr "Kann Zug nicht laden"
 #: util/doc/application.cpp:268
 msgid "unable to resolve node: \"%s\""
 msgstr "Knoten kann nicht gefunden werden: \"%s\""
+
+#: server/file/clientapplication.cpp:525
+msgid "unable to resolve snapshot Id '%s'"
+msgstr "Snapshot kann nicht gefunden werden: \"%s\""
 
 #: game/tables/happinessname.cpp:21
 msgid "unhappy"

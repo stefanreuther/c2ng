@@ -74,6 +74,9 @@ AFL_TEST("server.file.ca.Root:preloaded", a)
         std::auto_ptr<DirectoryHandler> refs(rootHandler.getDirectory(rootHandler.createDirectory("refs")));
         std::auto_ptr<DirectoryHandler> heads(refs->getDirectory(refs->createDirectory("heads")));
         heads->createFile("master", afl::string::toBytes("1ec5873554c8cd604036b4b6c0221a5ded967637\n"));
+
+        std::auto_ptr<DirectoryHandler> tags(refs->getDirectory(refs->createDirectory("tags")));
+        tags->createFile("snapshot", afl::string::toBytes("1ec5873554c8cd604036b4b6c0221a5ded967637\n"));
     }
     {
         std::auto_ptr<DirectoryHandler> objs(rootHandler.getDirectory(rootHandler.createDirectory("objects")));
@@ -150,6 +153,15 @@ AFL_TEST("server.file.ca.Root:preloaded", a)
     fi = di->findFile("file");
     a.checkNonNull("21. findFile", fi);
     a.check("22. file content", rootItem.getFileContent(*fi)->get().equalContent(afl::string::toBytes("blub\n")));
+
+    // Snapshots
+    afl::data::StringList_t snapshotList;
+    t.listSnapshots(snapshotList);
+    a.checkEqual("31. num snapshots", snapshotList.size(), 1U);
+    a.checkEqual("32. snapshot name", snapshotList[0], "snapshot");
+
+    a.checkEqual("33. snapshot content", t.getSnapshotCommitId("snapshot").orElse(server::file::ca::ObjectId::nil).toHex(), "1ec5873554c8cd604036b4b6c0221a5ded967637");
+    a.checkEqual("34. missing snapshot", t.getSnapshotCommitId("other").isValid(), false);
 }
 
 /** Test garbage cleanup. */
@@ -181,4 +193,142 @@ AFL_TEST("server.file.ca.Root:garbage", a)
     // Update other file. This will merge again.
     dir1->createFile("a", afl::string::toBytes("newcontent"));
     a.checkEqual("21", countObjects(rootHandler), 4U);
+}
+
+/** Test creating/garbage-collecting snapshots. */
+AFL_TEST("server.file.ca.Root:garbage:snapshot:remove", a)
+{
+    using server::file::DirectoryHandler;
+
+    // Storage
+    server::file::InternalDirectoryHandler::Directory rootDir("");
+    server::file::InternalDirectoryHandler rootHandler("root", rootDir);
+    server::file::ca::Root testee(rootHandler);
+
+    // Create stuff
+    std::auto_ptr<DirectoryHandler> root(testee.createRootHandler());
+    std::auto_ptr<DirectoryHandler> dir1(root->getDirectory(root->createDirectory("dir1")));
+    std::auto_ptr<DirectoryHandler> dir2(root->getDirectory(root->createDirectory("dir2")));
+    dir1->createFile("a", afl::string::toBytes("content"));
+    dir2->createFile("a", afl::string::toBytes("content"));
+
+    // Verify content.
+    // 'objects' must have one DataObject, two TreeObject's, and one CommitObject.
+    a.checkEqual("01", countObjects(rootHandler), 4U);
+
+    // Create a snapshot
+    testee.setSnapshotCommitId("t", testee.getMasterCommitId());
+    a.checkEqual("02", countObjects(rootHandler), 4U);
+
+    // Update a file.
+    // Must now have two DataObject's, four TreeObject's, and two CommitObject's.
+    dir2->createFile("a", afl::string::toBytes("newcontent"));
+    a.checkEqual("11", countObjects(rootHandler), 8U);
+
+    // Update other file. This will merge again, but keep the old data.
+    dir1->createFile("a", afl::string::toBytes("newcontent"));
+    a.checkEqual("21", countObjects(rootHandler), 8U);
+
+    // Must have two roots here (master and tag)
+    std::vector<server::file::ca::ObjectId> roots;
+    testee.listRoots(roots);
+    a.checkEqual("22", roots.size(), 2U);
+
+    // Remove the snapshot. This will remove old stuff.
+    testee.removeSnapshot("t");
+    a.checkEqual("31", countObjects(rootHandler), 4U);
+}
+
+/** Test creating/garbage-collecting snapshots.
+    Same thing as previous, but instead of removing the snapshot, point it to master. */
+AFL_TEST("server.file.ca.Root:garbage:snapshot:change", a)
+{
+    using server::file::DirectoryHandler;
+
+    // Storage
+    server::file::InternalDirectoryHandler::Directory rootDir("");
+    server::file::InternalDirectoryHandler rootHandler("root", rootDir);
+    server::file::ca::Root testee(rootHandler);
+
+    // Create stuff
+    std::auto_ptr<DirectoryHandler> root(testee.createRootHandler());
+    std::auto_ptr<DirectoryHandler> dir1(root->getDirectory(root->createDirectory("dir1")));
+    std::auto_ptr<DirectoryHandler> dir2(root->getDirectory(root->createDirectory("dir2")));
+    dir1->createFile("a", afl::string::toBytes("content"));
+    dir2->createFile("a", afl::string::toBytes("content"));
+
+    // Verify content.
+    // 'objects' must have one DataObject, two TreeObject's, and one CommitObject.
+    a.checkEqual("01", countObjects(rootHandler), 4U);
+
+    // Create a snapshot
+    testee.setSnapshotCommitId("t", testee.getMasterCommitId());
+    a.checkEqual("02", countObjects(rootHandler), 4U);
+
+    // Update a file.
+    // Must now have two DataObject's, four TreeObject's, and two CommitObject's.
+    dir2->createFile("a", afl::string::toBytes("newcontent"));
+    a.checkEqual("11", countObjects(rootHandler), 8U);
+
+    // Update other file. This will merge again, but keep the old data.
+    dir1->createFile("a", afl::string::toBytes("newcontent"));
+    a.checkEqual("21", countObjects(rootHandler), 8U);
+
+    // Move the snapshot. This will remove old stuff.
+    testee.setSnapshotCommitId("t", testee.getMasterCommitId());
+
+    // Verify content
+    afl::base::Ref<afl::io::FileMapping> content1 = dir1->getFileByName("a");
+    a.checkEqualContent("42", content1->get(), afl::string::toBytes("newcontent"));
+    a.checkEqual("31", countObjects(rootHandler), 4U);
+}
+
+/** Test reverting the master commit. */
+AFL_TEST("server.file.ca.Root:garbage:snapshot:change-revert", a)
+{
+    using server::file::DirectoryHandler;
+
+    // Storage
+    server::file::InternalDirectoryHandler::Directory rootDir("");
+    server::file::InternalDirectoryHandler rootHandler("root", rootDir);
+    server::file::ca::Root testee(rootHandler);
+
+    // Create stuff
+    std::auto_ptr<DirectoryHandler> root(testee.createRootHandler());
+    std::auto_ptr<DirectoryHandler> dir1(root->getDirectory(root->createDirectory("dir1")));
+    std::auto_ptr<DirectoryHandler> dir2(root->getDirectory(root->createDirectory("dir2")));
+    dir1->createFile("a", afl::string::toBytes("content"));
+    dir2->createFile("a", afl::string::toBytes("content"));
+
+    // Verify content.
+    // 'objects' must have one DataObject, two TreeObject's, and one CommitObject.
+    a.checkEqual("01", countObjects(rootHandler), 4U);
+
+    // Create a snapshot
+    server::file::ca::ObjectId oldMaster = testee.getMasterCommitId();
+    testee.setSnapshotCommitId("t", oldMaster);
+    a.checkEqual("02", countObjects(rootHandler), 4U);
+
+    // Update a file.
+    // Must now have two DataObject's, four TreeObject's, and two CommitObject's.
+    dir2->createFile("a", afl::string::toBytes("newcontent"));
+    a.checkEqual("11", countObjects(rootHandler), 8U);
+
+    // Update other file. This will merge again, but keep the old data.
+    dir1->createFile("a", afl::string::toBytes("newcontent"));
+    a.checkEqual("21", countObjects(rootHandler), 8U);
+
+    // Move master commit. This will remove old stuff.
+    testee.setMasterCommitId(oldMaster);
+    a.checkEqual("31", countObjects(rootHandler), 4U);
+
+    // Verify content
+    // Recreate all the objects because live-change of master may not be supported.
+    std::auto_ptr<DirectoryHandler> newRoot(testee.createRootHandler());
+    DirectoryHandler::Info dir1Info;
+    a.check("41", newRoot->findItem("dir1", dir1Info));
+
+    std::auto_ptr<DirectoryHandler> newDir1(newRoot->getDirectory(dir1Info));
+    afl::base::Ref<afl::io::FileMapping> content1 = newDir1->getFileByName("a");
+    a.checkEqualContent("42", content1->get(), afl::string::toBytes("content"));
 }

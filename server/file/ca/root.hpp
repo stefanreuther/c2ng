@@ -7,6 +7,8 @@
 
 #include <memory>
 #include "afl/base/deletable.hpp"
+#include "afl/base/optional.hpp"
+#include "afl/data/stringlist.hpp"
 #include "server/file/ca/objectid.hpp"
 #include "server/file/directoryhandler.hpp"
 
@@ -33,6 +35,37 @@ namespace server { namespace file { namespace ca {
             @see ObjectStore::getCommit */
         ObjectId getMasterCommitId();
 
+        /** Set ObjectId of the `master` commit.
+            Note that this operation must not be used on a Root that also has a live root handler (createRootHandler()).
+            The root handler and objects created by it will cache information that would be invalidated by this call.
+            @param objId Object Id */
+        void setMasterCommitId(const ObjectId& objId);
+
+        /** Get ObjectId of a snapshot.
+            @param snapshotName Snapshot name (lower-case alphanumeric)
+            @return commit Id referring to a commit object, if any */
+        afl::base::Optional<ObjectId> getSnapshotCommitId(String_t snapshotName);
+
+        /** Set ObjectId of a snapshot.
+            @param snapshotName Snapshot name (lower-case alphanumeric)
+            @param objId   Object Id, referring to a commit object (e.g. from getMasterCommitId(), getSnapshotCommitId()) */
+        void setSnapshotCommitId(String_t snapshotName, const ObjectId& objId);
+
+        /** Remove a snapshot.
+            This will potentially delete objects.
+            @param snapshotName Snapshot name (lower-case alphanumeric) */
+        void removeSnapshot(String_t snapshotName);
+
+        /** Get list of snapshots.
+            @param list [out]  Snapshots */
+        void listSnapshots(afl::data::StringList_t& list);
+
+        /** Get list of root objects.
+            Enumerates all commits that must be treated as roots, and not be deleted.
+            This function makes no attempt to remove duplicates.
+            @param list [out] List of ObjectId's pointing at commit objects */
+        void listRoots(std::vector<ObjectId>& list);
+
         /** Create DirectoryHandler for root directory.
             This DirectoryHandler supports all operations.
             @return newly-allocated DirectoryHandler */
@@ -57,6 +90,9 @@ namespace server { namespace file { namespace ca {
 
         /** Directory m_root/refs/heads. */
         std::auto_ptr<server::file::DirectoryHandler> m_refsHeads;
+
+        /** Directory m_root/refs/tags. */
+        std::auto_ptr<server::file::DirectoryHandler> m_refsTags;
 
         /** Directory m_root/objects. */
         std::auto_ptr<server::file::DirectoryHandler> m_objects;
