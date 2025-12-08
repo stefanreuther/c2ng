@@ -5,11 +5,12 @@
 
 #include <stdexcept>
 #include "server/file/ca/directoryhandler.hpp"
-#include "server/file/ca/objectstore.hpp"
+#include "afl/except/fileproblemexception.hpp"
+#include "afl/string/format.hpp"
+#include "afl/string/messages.hpp"
 #include "server/errors.hpp"
 #include "server/file/ca/directoryentry.hpp"
-#include "afl/string/format.hpp"
-#include "afl/except/fileproblemexception.hpp"
+#include "server/file/ca/objectstore.hpp"
 
 namespace {
     const char TYPE_MISMATCH[] = "405 Type mismatch";
@@ -19,7 +20,7 @@ namespace {
 
 class server::file::ca::DirectoryHandler::ContentUpdater : public server::file::ca::ReferenceUpdater {
  public:
-    ContentUpdater(ObjectStore& store, const ObjectId& id, const String_t& name, afl::base::Ref<ReferenceUpdater> updater);
+    ContentUpdater(ObjectStore& store, const ObjectId& id, const String_t& name, const afl::base::Ptr<ReferenceUpdater>& updater);
 
     ObjectStore& store();
     const ObjectId& getId() const;
@@ -30,21 +31,28 @@ class server::file::ca::DirectoryHandler::ContentUpdater : public server::file::
 
     virtual void updateDirectoryReference(const String_t& name, const ObjectId& newId);
 
-    void updateDirectoryEntry(const String_t& name, const ObjectId& newId, Type type, bool allowReplace);
-    void removeDirectoryEntry(const String_t& name, Type type);
+    ReferenceUpdater& verifyWritable();
+    bool isWritable() const;
+
+    void updateDirectoryEntry(ReferenceUpdater& upd, const String_t& name, const ObjectId& newId, Type type, bool allowReplace);
+    void removeDirectoryEntry(ReferenceUpdater& upd, const String_t& name, Type type);
 
  private:
-    void replaceDirectory(afl::base::ConstBytes_t newBytes);
+    void replaceDirectory(ReferenceUpdater& upd, afl::base::ConstBytes_t newBytes);
 
     ObjectStore& m_store;
     ObjectId m_id;
     const String_t m_name;
-    const afl::base::Ref<ReferenceUpdater> m_updater;
+
+    /* Normal functions do not access this directly.
+       Instead, use verifyWritable() as early as possible to detect non-writable situations,
+       and use the result produced by it. */
+    const afl::base::Ptr<ReferenceUpdater> m_updater;
 };
 
 /***************************** ContentUpdater ****************************/
 
-server::file::ca::DirectoryHandler::ContentUpdater::ContentUpdater(ObjectStore& store, const ObjectId& id, const String_t& name, afl::base::Ref<ReferenceUpdater> updater)
+server::file::ca::DirectoryHandler::ContentUpdater::ContentUpdater(ObjectStore& store, const ObjectId& id, const String_t& name, const afl::base::Ptr<ReferenceUpdater>& updater)
     : m_store(store),
       m_id(id),
       m_name(name),
@@ -85,12 +93,27 @@ void
 server::file::ca::DirectoryHandler::ContentUpdater::updateDirectoryReference(const String_t& name, const ObjectId& newId)
 {
     if (newId != m_id) {
-        updateDirectoryEntry(name, newId, IsDirectory, true);
+        updateDirectoryEntry(verifyWritable(), name, newId, IsDirectory, true);
     }
 }
 
+server::file::ca::ReferenceUpdater&
+server::file::ca::DirectoryHandler::ContentUpdater::verifyWritable()
+{
+    if (m_updater.get() == 0) {
+        throw afl::except::FileProblemException(m_name, afl::string::Messages::cannotWrite());
+    }
+    return *m_updater;
+}
+
+inline bool
+server::file::ca::DirectoryHandler::ContentUpdater::isWritable() const
+{
+    return m_updater.get() != 0;
+}
+
 void
-server::file::ca::DirectoryHandler::ContentUpdater::updateDirectoryEntry(const String_t& name, const ObjectId& newId, Type type, bool allowReplace)
+server::file::ca::DirectoryHandler::ContentUpdater::updateDirectoryEntry(ReferenceUpdater& upd, const String_t& name, const ObjectId& newId, Type type, bool allowReplace)
 {
     // Prepare blobs
     afl::base::Ref<afl::io::FileMapping> oldContent = getTreeObject();
@@ -137,11 +160,11 @@ server::file::ca::DirectoryHandler::ContentUpdater::updateDirectoryEntry(const S
     }
 
     // Create new object
-    replaceDirectory(newBytes);
+    replaceDirectory(upd, newBytes);
 }
 
 void
-server::file::ca::DirectoryHandler::ContentUpdater::removeDirectoryEntry(const String_t& name, Type type)
+server::file::ca::DirectoryHandler::ContentUpdater::removeDirectoryEntry(ReferenceUpdater& upd, const String_t& name, Type type)
 {
     // Prepare blobs
     afl::base::Ref<afl::io::FileMapping> oldContent = getTreeObject();
@@ -176,23 +199,23 @@ server::file::ca::DirectoryHandler::ContentUpdater::removeDirectoryEntry(const S
     }
 
     // Create new object
-    replaceDirectory(newBytes);
+    replaceDirectory(upd, newBytes);
 }
 
 void
-server::file::ca::DirectoryHandler::ContentUpdater::replaceDirectory(afl::base::ConstBytes_t newBytes)
+server::file::ca::DirectoryHandler::ContentUpdater::replaceDirectory(ReferenceUpdater& upd, afl::base::ConstBytes_t newBytes)
 {
     // There is no need to unlink the previous tree object.
     // That one is still referenced by the parent, up to the root commit.
     // The root ReferenceUpdater can decide whether to keep or unlink it.
     const ObjectId newDirId = m_store.addObject(ObjectStore::TreeObject, newBytes);
-    m_updater->updateDirectoryReference(m_name, newDirId);
+    upd.updateDirectoryReference(m_name, newDirId);
     m_id = newDirId;
 }
 
 /**************************** DirectoryHandler ***************************/
 
-server::file::ca::DirectoryHandler::DirectoryHandler(ObjectStore& store, const ObjectId& id, const String_t& name, afl::base::Ref<ReferenceUpdater> updater)
+server::file::ca::DirectoryHandler::DirectoryHandler(ObjectStore& store, const ObjectId& id, const String_t& name, afl::base::Ptr<ReferenceUpdater> updater)
     : m_content(*new ContentUpdater(store, id, name, updater))
 { }
 
@@ -238,8 +261,10 @@ server::file::ca::DirectoryHandler::getFileByName(String_t name)
 server::file::DirectoryHandler::Info
 server::file::ca::DirectoryHandler::createFile(String_t name, afl::base::ConstBytes_t content)
 {
+    ReferenceUpdater& upd = m_content->verifyWritable();
+
     ObjectId id = m_content->store().addObject(ObjectStore::DataObject, content);
-    m_content->updateDirectoryEntry(name, id, IsFile, true);
+    m_content->updateDirectoryEntry(upd, name, id, IsFile, true);
 
     Info result(name, IsFile);
     result.contentId = id.toHex();
@@ -250,7 +275,9 @@ server::file::ca::DirectoryHandler::createFile(String_t name, afl::base::ConstBy
 void
 server::file::ca::DirectoryHandler::removeFile(String_t name)
 {
-    m_content->removeDirectoryEntry(name, IsFile);
+    ReferenceUpdater& upd = m_content->verifyWritable();
+
+    m_content->removeDirectoryEntry(upd, name, IsFile);
 }
 
 afl::base::Optional<server::file::DirectoryHandler::Info>
@@ -279,9 +306,12 @@ server::file::ca::DirectoryHandler::copyFile(ReadOnlyDirectoryHandler& source, c
         return afl::base::Nothing;
     }
 
+    // Writable?
+    ReferenceUpdater& upd = m_content->verifyWritable();
+
     // All preconditions fulfilled, do it
     m_content->store().linkObject(id);
-    m_content->updateDirectoryEntry(name, id, IsFile, true);
+    m_content->updateDirectoryEntry(upd, name, id, IsFile, true);
 
     Info result(name, IsFile);
     result.contentId = sourceInfo.contentId;
@@ -315,7 +345,7 @@ server::file::ca::DirectoryHandler::getDirectory(const Info& info)
     DirectoryEntry entry;
     while (entry.parse(bytes)) {
         if (entry.getName() == info.name && entry.getType() == IsDirectory) {
-            return new DirectoryHandler(m_content->store(), entry.getId(), entry.getName(), m_content);
+            return new DirectoryHandler(m_content->store(), entry.getId(), entry.getName(), m_content->isWritable() ? m_content.asPtr() : 0);
         }
     }
     throw afl::except::FileProblemException(m_content->getChildName(info.name), FILE_NOT_FOUND);
@@ -324,8 +354,10 @@ server::file::ca::DirectoryHandler::getDirectory(const Info& info)
 server::file::DirectoryHandler::Info
 server::file::ca::DirectoryHandler::createDirectory(String_t name)
 {
+    ReferenceUpdater& upd = m_content->verifyWritable();
+
     ObjectId id = m_content->store().addObject(ObjectStore::TreeObject, afl::base::Nothing);
-    m_content->updateDirectoryEntry(name, id, IsDirectory, false);
+    m_content->updateDirectoryEntry(upd, name, id, IsDirectory, false);
 
     return Info(name, IsDirectory);
 }
@@ -333,5 +365,6 @@ server::file::ca::DirectoryHandler::createDirectory(String_t name)
 void
 server::file::ca::DirectoryHandler::removeDirectory(String_t name)
 {
-    m_content->removeDirectoryEntry(name, IsDirectory);
+    ReferenceUpdater& upd = m_content->verifyWritable();
+    m_content->removeDirectoryEntry(upd, name, IsDirectory);
 }

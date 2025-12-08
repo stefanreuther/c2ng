@@ -70,7 +70,7 @@ AFL_TEST("server.file.ca.DirectoryHandler:file", a)
     ObjectStore store(rootHandler);
 
     // Testee
-    server::file::ca::DirectoryHandler testee(store, ObjectId::nil, a.getLocation(), *new NullReferenceUpdater());
+    server::file::ca::DirectoryHandler testee(store, ObjectId::nil, a.getLocation(), new NullReferenceUpdater());
 
     // Store and retrieve a file
     afl::base::ConstBytes_t content = afl::string::toBytes("content");
@@ -91,7 +91,7 @@ AFL_TEST("server.file.ca.DirectoryHandler:dir", a)
     ObjectStore store(rootHandler);
 
     // Testee
-    server::file::ca::DirectoryHandler testee(store, ObjectId::nil, "testSimple", *new NullReferenceUpdater());
+    server::file::ca::DirectoryHandler testee(store, ObjectId::nil, "testSimple", new NullReferenceUpdater());
 
     // Create two directories
     DirectoryHandler::Info dirInfo1 = testee.createDirectory("one");
@@ -161,7 +161,7 @@ AFL_TEST("server.file.ca.DirectoryHandler:tree", a)
     a.checkEqual("31. add root", store.addObject(ObjectStore::TreeObject, TREE9A).toHex(), "9aa7c49a27dd00dd2bdb9ce354f9a68cf04396b9");
 
     // Test
-    server::file::ca::DirectoryHandler testee(store, ObjectId::fromHex("9aa7c49a27dd00dd2bdb9ce354f9a68cf04396b9"), "root", *new NullReferenceUpdater());
+    server::file::ca::DirectoryHandler testee(store, ObjectId::fromHex("9aa7c49a27dd00dd2bdb9ce354f9a68cf04396b9"), "root", new NullReferenceUpdater());
 
     // Read the root directory
     class Callback : public DirectoryHandler::Callback, public afl::test::CallReceiver {
@@ -216,7 +216,7 @@ AFL_TEST("server.file.ca.DirectoryHandler:sort-order", a)
     server::file::InternalDirectoryHandler::Directory rootDir("");
     server::file::InternalDirectoryHandler rootHandler("root", rootDir);
     ObjectStore store(rootHandler);
-    afl::base::Ref<NullReferenceUpdater> ref(*new NullReferenceUpdater());
+    afl::base::Ptr<NullReferenceUpdater> ref(new NullReferenceUpdater());
 
     // Testee
     server::file::ca::DirectoryHandler testee(store, ObjectId::nil, "root", ref);
@@ -263,7 +263,7 @@ AFL_TEST("server.file.ca.DirectoryHandler:ref-count", a)
     server::file::InternalDirectoryHandler::Directory rootDir("");
     server::file::InternalDirectoryHandler rootHandler("root", rootDir);
     ObjectStore store(rootHandler);
-    afl::base::Ref<RootReferenceUpdater> ref(*new RootReferenceUpdater(ObjectId::nil, store));
+    afl::base::Ptr<RootReferenceUpdater> ref(new RootReferenceUpdater(ObjectId::nil, store));
 
     // Testee
     server::file::ca::DirectoryHandler testee(store, ObjectId::nil, "root", ref);
@@ -288,7 +288,7 @@ AFL_TEST("server.file.ca.DirectoryHandler:subdirectories", a)
     server::file::InternalDirectoryHandler::Directory rootDir("");
     server::file::InternalDirectoryHandler rootHandler("root", rootDir);
     ObjectStore store(rootHandler);
-    afl::base::Ref<RootReferenceUpdater> ref(*new RootReferenceUpdater(ObjectId::nil, store));
+    afl::base::Ptr<RootReferenceUpdater> ref(new RootReferenceUpdater(ObjectId::nil, store));
 
     // Testee
     server::file::ca::DirectoryHandler testee(store, ObjectId::nil, "root", ref);
@@ -320,7 +320,7 @@ AFL_TEST("server.file.ca.DirectoryHandler:copyFile", a)
     ObjectStore store(rootHandler);
 
     // Testee
-    server::file::ca::DirectoryHandler testee(store, ObjectId::nil, "root", *new NullReferenceUpdater());
+    server::file::ca::DirectoryHandler testee(store, ObjectId::nil, "root", new NullReferenceUpdater());
 
     // Create a file
     static const uint8_t CONTENT[] = {'a'};
@@ -348,7 +348,7 @@ AFL_TEST("server.file.ca.DirectoryHandler:copyFile", a)
         server::file::InternalDirectoryHandler::Directory otherDir("");
         server::file::InternalDirectoryHandler otherHandler("root", otherDir);
         ObjectStore otherStore(otherHandler);
-        server::file::ca::DirectoryHandler other(otherStore, ObjectId::nil, "root", *new NullReferenceUpdater());
+        server::file::ca::DirectoryHandler other(otherStore, ObjectId::nil, "root", new NullReferenceUpdater());
         a.check("22. copyFile", !other.copyFile(testee, aa, "x").isValid());
     }
 }

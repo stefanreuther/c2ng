@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-12-10 22:27+0100\n"
+"PO-Revision-Date: 2025-12-11 12:27+0100\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:390
@@ -11218,6 +11218,9 @@ msgid ""
 "  PATH                Access files within unmanaged file system\n"
 "  [PATH@]ca:SPEC      Access files within unmanaged content-addressable file "
 "system\n"
+"  [PATH@]snapshot:NAME:SPEC\n"
+"                      Access files from a CA file system snapshot (read-"
+"only)\n"
 "  [PATH@]int:[UNIQ]   Internal (RAM, not persistent) file space\n"
 "  c2file://[USER@]HOST:PORT/PATH\n"
 "                      Access in a remote managed file system (c2file "
@@ -11263,6 +11266,8 @@ msgstr ""
 "Dateinamen:\n"
 "  PFAD                Dateien in einem nicht verwalteten Dateisystem\n"
 "  [PFAD@]ca:SPEC      Dateien in einem nicht verwalteten, content-addressierten Dateisystem\n"
+"  [PFAD@]snapshot:NAME:SPEC\n"
+"                      Zugriff auf einen Snapshot in einem CA-Dateisystem (nur lesen)\n"
 "  [PFAD@]int:[UNIQ]   Interne Ablage (Arbeitsspeicher, nicht persistent)\n"
 "  c2file://[NUTZER@]HOST:PORT/PFAD\n"
 "                      Zugriff auf verwaltetes Dateisystem (c2file-Server)\n"
@@ -13532,7 +13537,7 @@ msgstr "Kann Zug nicht laden"
 msgid "unable to resolve node: \"%s\""
 msgstr "Knoten kann nicht gefunden werden: \"%s\""
 
-#: server/file/clientapplication.cpp:525
+#: server/file/clientapplication.cpp:527
 msgid "unable to resolve snapshot Id '%s'"
 msgstr "Snapshot kann nicht gefunden werden: \"%s\""
 

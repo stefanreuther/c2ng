@@ -16,6 +16,7 @@
 #include "afl/sys/thread.hpp"
 #include "afl/test/commandhandler.hpp"
 #include "afl/test/testrunner.hpp"
+#include "server/file/ca/root.hpp"
 #include "server/file/directoryhandler.hpp"
 #include <memory>
 
@@ -338,4 +339,61 @@ AFL_TEST("server.file.DirectoryHandlerFactory:createDirectoryHandler:ca:error:mi
     // but this is not contractual.
     server::file::DirectoryHandler& c = testee.createDirectoryHandler("ca:int:", log);
     AFL_CHECK_THROWS(a, c.getFileByName("f"), afl::except::FileProblemException);
+}
+
+/** Test access to CA snapshot.
+    A: create a CA tree with snapshot. Access using "ca:" and "snapshot:" URLs.
+    E: Snapshot has correct content and is not writable */
+AFL_TEST("server.file.DirectoryHandlerFactory:createDirectoryHandler:snapshot", a)
+{
+    // Create and preload a file system
+    afl::io::NullFileSystem fs;
+    afl::net::NullNetworkStack net;
+    afl::sys::Log log;
+    DirectoryHandlerFactory testee(fs, net);
+    testee.setGarbageCollection(false);
+
+    // - Root
+    server::file::ca::Root root(testee.createDirectoryHandler("int:", log));
+    std::auto_ptr<server::file::DirectoryHandler> rootDir(root.createRootHandler());
+
+    // - Store one file, take snapshot
+    rootDir->createFile("f", afl::string::toBytes("original content"));
+    root.setSnapshotCommitId("s", root.getMasterCommitId());
+
+    // - Update file
+    rootDir->createFile("f", afl::string::toBytes("new content"));
+
+    // Verify read access through DirectoryHandlerFactory
+    server::file::DirectoryHandler& liveHandler = testee.createDirectoryHandler("ca:int:", log);
+    a.checkEqual("live read access", afl::string::fromBytes(liveHandler.getFileByName("f")->get()), "new content");
+
+    server::file::DirectoryHandler& snapHandler = testee.createDirectoryHandler("snapshot:s:int:", log);
+    a.checkEqual("snapshot read access", afl::string::fromBytes(snapHandler.getFileByName("f")->get()), "original content");
+
+    // Verify write access
+    AFL_CHECK_SUCCEEDS(a("live write access"), liveHandler.createFile("n", afl::string::toBytes("data...")));
+    AFL_CHECK_THROWS(a("snapshot write access"), snapHandler.createFile("n", afl::string::toBytes("data...")), afl::except::FileProblemException);
+}
+
+/** Test access to CA snapshot, error case.
+    A: create a CA tree. Try to access with "snapshot:" URL for missing snapshot.
+    E: Creation is rejected */
+AFL_TEST("server.file.DirectoryHandlerFactory:createDirectoryHandler:snapshot:error", a)
+{
+    // Create and preload a file system
+    afl::io::NullFileSystem fs;
+    afl::net::NullNetworkStack net;
+    afl::sys::Log log;
+    DirectoryHandlerFactory testee(fs, net);
+    testee.setGarbageCollection(false);
+
+    server::file::ca::Root root(testee.createDirectoryHandler("int:", log));
+    std::auto_ptr<server::file::DirectoryHandler> rootDir(root.createRootHandler());
+    rootDir->createFile("f", afl::string::toBytes("content"));
+
+    // Try to access snapshot
+    AFL_CHECK_THROWS(a("nonexistant snapshot"), testee.createDirectoryHandler("snapshot:s:int:", log), afl::except::FileProblemException);
+    AFL_CHECK_THROWS(a("syntax error"),         testee.createDirectoryHandler("snapshot:x",      log), afl::except::FileProblemException);
+    AFL_CHECK_THROWS(a("nonexistant path"),     testee.createDirectoryHandler("snapshot:s:/foo", log), afl::except::FileProblemException);
 }

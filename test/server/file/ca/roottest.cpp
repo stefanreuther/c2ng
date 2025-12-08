@@ -5,6 +5,7 @@
 
 #include "server/file/ca/root.hpp"
 
+#include "afl/except/fileproblemexception.hpp"
 #include "afl/io/internaldirectory.hpp"
 #include "afl/test/testrunner.hpp"
 #include "server/file/directoryitem.hpp"
@@ -331,4 +332,38 @@ AFL_TEST("server.file.ca.Root:garbage:snapshot:change-revert", a)
     std::auto_ptr<DirectoryHandler> newDir1(newRoot->getDirectory(dir1Info));
     afl::base::Ref<afl::io::FileMapping> content1 = newDir1->getFileByName("a");
     a.checkEqualContent("42", content1->get(), afl::string::toBytes("content"));
+}
+
+/** Test tree access. */
+AFL_TEST("server.file.ca.Root:tree-access", a)
+{
+    using server::file::DirectoryHandler;
+
+    // Storage
+    server::file::InternalDirectoryHandler::Directory rootDir("");
+    server::file::InternalDirectoryHandler rootHandler("root", rootDir);
+    server::file::ca::Root testee(rootHandler);
+
+    // Create stuff
+    std::auto_ptr<DirectoryHandler> root(testee.createRootHandler());
+    root->createFile("a", afl::string::toBytes("first"));
+    testee.setSnapshotCommitId("t", testee.getMasterCommitId());
+    root->createFile("a", afl::string::toBytes("second"));
+
+    // Must have 6 items (2 commits, 2 trees, 2 blobs)
+    a.checkEqual("01", countObjects(rootHandler), 6U);
+
+    // Access tag data
+    afl::base::Optional<server::file::ca::ObjectId> snapId = testee.getSnapshotCommitId("t");
+    a.check("11", snapId.isValid());
+    std::auto_ptr<DirectoryHandler> snap(testee.createSnapshotHandler(*snapId.get()));
+    afl::base::Ref<afl::io::FileMapping> snapContent = snap->getFileByName("a");
+    a.checkEqualContent("12", snapContent->get(), afl::string::toBytes("first"));
+    AFL_CHECK_THROWS(a("13. createDirectory"), snap->createDirectory("x"), afl::except::FileProblemException);
+
+    // Access master data
+    std::auto_ptr<DirectoryHandler> master(testee.createSnapshotHandler(testee.getMasterCommitId()));
+    afl::base::Ref<afl::io::FileMapping> masterContent = master->getFileByName("a");
+    a.checkEqualContent("21", masterContent->get(), afl::string::toBytes("second"));
+    AFL_CHECK_THROWS(a("22. createDirectory"), master->createDirectory("x"), afl::except::FileProblemException);
 }

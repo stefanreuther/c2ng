@@ -17,6 +17,7 @@
 #include "server/file/filesystemhandler.hpp"
 #include "server/file/internaldirectoryhandler.hpp"
 #include "server/interface/baseclient.hpp"
+#include "util/string.hpp"
 
 using afl::string::Format;
 using afl::sys::LogListener;
@@ -157,15 +158,38 @@ server::file::DirectoryHandlerFactory::createDirectoryHandler(const String_t& st
             }
         } else {
             // Just a path or URL
-            if (str.size() > 3 && str.compare(0, 3, "ca:", 3) == 0) {
+            if (const char* path = util::strStartsWith(str, "ca:")) {
                 // Content-addressable
-                DirectoryHandler& backend = createDirectoryHandler(str.substr(3), log);
+                DirectoryHandler& backend = createDirectoryHandler(path, log);
                 server::file::ca::Root& root = m_deleter.addNew(new server::file::ca::Root(backend));
                 if (m_gcEnabled) {
-                    doGarbageCollection(root, log, str.substr(3));
+                    doGarbageCollection(root, log, path);
                 }
                 result = &m_deleter.addNew(root.createRootHandler());
-            } else if (str.size() >= 4 && str.compare(0, 4, "int:", 4) == 0) {
+            } else if (const char* path = util::strStartsWith(str, "snapshot:")) {
+                // Content-addressable snapshot
+                String_t pathStr(path);
+                String_t::size_type sep = pathStr.find(':');
+                if (sep == 0 || sep == String_t::npos) {
+                    throw afl::except::FileProblemException(str, "Missing snapshot name");
+                }
+
+                String_t rootPath = pathStr.substr(sep+1);
+                String_t snapName = pathStr.substr(0, sep);
+
+                DirectoryHandler& backend = createDirectoryHandler(rootPath, log);
+                server::file::ca::Root& root = m_deleter.addNew(new server::file::ca::Root(backend));
+                if (m_gcEnabled) {
+                    doGarbageCollection(root, log, rootPath);
+                }
+
+                afl::base::Optional<server::file::ca::ObjectId> snapId = root.getSnapshotCommitId(snapName);
+                if (snapId.get() == 0) {
+                    throw afl::except::FileProblemException(str, "Snapshot not found");
+                }
+
+                result = &m_deleter.addNew(root.createSnapshotHandler(*snapId.get()));
+            } else if (util::strStartsWith(str, "int:") != 0) {
                 // Internal
                 InternalRoot& root = m_deleter.addNew(new InternalRoot());
                 result = &root.handler;

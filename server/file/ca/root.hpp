@@ -71,6 +71,11 @@ namespace server { namespace file { namespace ca {
             @return newly-allocated DirectoryHandler */
         server::file::DirectoryHandler* createRootHandler();
 
+        /** Create read-only DirectoryHandler for a commit (snapshot, master).
+            @param commitId Object Id
+            @return newly-allocated DirectoryHandler */
+        server::file::DirectoryHandler* createSnapshotHandler(ObjectId commitId);
+
         /** Access the ObjectStore instance.
             @return ObjectStore instance */
         ObjectStore& objectStore();

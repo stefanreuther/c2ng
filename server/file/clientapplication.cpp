@@ -506,6 +506,8 @@ server::file::ClientApplication::help()
                                          "File specifications:\n"
                                          "  PATH                Access files within unmanaged file system\n"
                                          "  [PATH@]ca:SPEC      Access files within unmanaged content-addressable file system\n"
+                                         "  [PATH@]snapshot:NAME:SPEC\n"
+                                         "                      Access files from a CA file system snapshot (read-only)\n"
                                          "  [PATH@]int:[UNIQ]   Internal (RAM, not persistent) file space\n"
                                          "  c2file://[USER@]HOST:PORT/PATH\n"
                                          "                      Access in a remote managed file system (c2file server)\n"

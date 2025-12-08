@@ -5,10 +5,11 @@
 #ifndef C2NG_SERVER_FILE_CA_DIRECTORYHANDLER_HPP
 #define C2NG_SERVER_FILE_CA_DIRECTORYHANDLER_HPP
 
-#include "server/file/directoryhandler.hpp"
-#include "server/file/ca/objectid.hpp"
+#include "afl/base/ptr.hpp"
 #include "afl/base/ref.hpp"
+#include "server/file/ca/objectid.hpp"
 #include "server/file/ca/referenceupdater.hpp"
+#include "server/file/directoryhandler.hpp"
 
 namespace server { namespace file { namespace ca {
 
@@ -32,8 +33,8 @@ namespace server { namespace file { namespace ca {
             \param store Object store
             \param id Initial object Id
             \param name Directory name
-            \param updater ReferenceUpdater instance */
-        DirectoryHandler(ObjectStore& store, const ObjectId& id, const String_t& name, afl::base::Ref<ReferenceUpdater> updater);
+            \param updater ReferenceUpdater instance. Null to make this a read-only DirectoryHandler. */
+        DirectoryHandler(ObjectStore& store, const ObjectId& id, const String_t& name, afl::base::Ptr<ReferenceUpdater> updater);
 
         /** Destructor. */
         ~DirectoryHandler();

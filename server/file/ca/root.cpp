@@ -209,7 +209,15 @@ server::file::ca::Root::createRootHandler()
     ObjectId masterTreeId = m_store->getCommit(masterCommitId);
 
     // Create root directory item
-    return new DirectoryHandler(*m_store, masterTreeId, "(ca-root)", *new RootUpdater(*this, masterCommitId));
+    return new DirectoryHandler(*m_store, masterTreeId, "(ca-root)", new RootUpdater(*this, masterCommitId));
+}
+
+// Create read-only DirectoryHandler for a snapshot.
+server::file::DirectoryHandler*
+server::file::ca::Root::createSnapshotHandler(ObjectId commitId)
+{
+    ObjectId treeId = m_store->getCommit(commitId);
+    return new DirectoryHandler(*m_store, treeId, "(ca-snapshot)", 0);
 }
 
 // Access the ObjectStore instance.
