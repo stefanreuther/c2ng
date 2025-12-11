@@ -54,4 +54,5 @@ AFL_TEST("server.file.CommandHandler", a)
     AFL_CHECK_THROWS(a("42. ls"),      testee.callVoid(Segment().pushBackString("LS").pushBackString("bar")), std::exception);
     AFL_CHECK_THROWS(a("43. lsreg"),   testee.callVoid(Segment().pushBackString("LSREG").pushBackString("bar")), std::exception);
     AFL_CHECK_THROWS(a("44. lsgamet"), testee.callVoid(Segment().pushBackString("LSGAME").pushBackString("bar")), std::exception);
+    AFL_CHECK_THROWS(a("45. snapshotls"), testee.callVoid(Segment().pushBackString("SNAPSHOTLS")), std::exception);
 }

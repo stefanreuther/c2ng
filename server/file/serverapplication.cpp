@@ -46,6 +46,7 @@ namespace {
         virtual DirectoryHandler* getDirectory(const Info& info);
         virtual Info createDirectory(String_t name);
         virtual void removeDirectory(String_t name);
+        virtual SnapshotHandler* getSnapshotHandler();
      private:
         server::file::DirectoryHandler& m_impl;
     };
@@ -109,6 +110,12 @@ void
 ProxyDirectoryHandler::removeDirectory(String_t name)
 {
     m_impl.removeDirectory(name);
+}
+
+server::file::DirectoryHandler::SnapshotHandler*
+ProxyDirectoryHandler::getSnapshotHandler()
+{
+    return m_impl.getSnapshotHandler();
 }
 
 /************************* ServerApplication *************************/

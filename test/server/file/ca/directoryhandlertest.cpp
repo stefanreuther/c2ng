@@ -51,6 +51,19 @@ namespace {
         ObjectStore& m_store;
     };
 
+    // Simple SnapshotHandler
+    class NullSnapshotHandler : public DirectoryHandler::SnapshotHandler {
+     public:
+        virtual void createSnapshot(String_t /*name*/)
+            { }
+        virtual void copySnapshot(String_t /*oldName*/, String_t /*newName*/)
+            { }
+        virtual void removeSnapshot(String_t /*name*/)
+            { }
+        virtual void listSnapshots(afl::data::StringList_t& /*out*/)
+            { }
+    };
+
     size_t countObjects(server::file::InternalDirectoryHandler::Directory& dir)
     {
         size_t count = 0;
@@ -68,9 +81,10 @@ AFL_TEST("server.file.ca.DirectoryHandler:file", a)
     server::file::InternalDirectoryHandler::Directory rootDir("");
     server::file::InternalDirectoryHandler rootHandler("root", rootDir);
     ObjectStore store(rootHandler);
+    NullSnapshotHandler snap;
 
     // Testee
-    server::file::ca::DirectoryHandler testee(store, ObjectId::nil, a.getLocation(), new NullReferenceUpdater());
+    server::file::ca::DirectoryHandler testee(store, ObjectId::nil, a.getLocation(), new NullReferenceUpdater(), &snap);
 
     // Store and retrieve a file
     afl::base::ConstBytes_t content = afl::string::toBytes("content");
@@ -80,6 +94,7 @@ AFL_TEST("server.file.ca.DirectoryHandler:file", a)
     afl::base::Ref<afl::io::FileMapping> map2 = testee.getFileByName("foo");
     a.check("02. content", map1->get().equalContent(content));
     a.check("03. content", map2->get().equalContent(content));
+    a.checkEqual("04. snap", testee.getSnapshotHandler(), &snap);
 }
 
 /** Test directory handling. */
@@ -91,7 +106,7 @@ AFL_TEST("server.file.ca.DirectoryHandler:dir", a)
     ObjectStore store(rootHandler);
 
     // Testee
-    server::file::ca::DirectoryHandler testee(store, ObjectId::nil, "testSimple", new NullReferenceUpdater());
+    server::file::ca::DirectoryHandler testee(store, ObjectId::nil, "testSimple", new NullReferenceUpdater(), 0);
 
     // Create two directories
     DirectoryHandler::Info dirInfo1 = testee.createDirectory("one");
@@ -102,6 +117,8 @@ AFL_TEST("server.file.ca.DirectoryHandler:dir", a)
     a.checkEqual("02. type", dirInfo1.type, DirectoryHandler::IsDirectory);
     a.checkEqual("03. name", dirInfo2.name, "two");
     a.checkEqual("04. type", dirInfo2.type, DirectoryHandler::IsDirectory);
+
+    a.checkNull("05. snap", testee.getSnapshotHandler());
 
     // Create a file "a" in both
     afl::base::ConstBytes_t content = afl::string::toBytes("text a");
@@ -161,7 +178,7 @@ AFL_TEST("server.file.ca.DirectoryHandler:tree", a)
     a.checkEqual("31. add root", store.addObject(ObjectStore::TreeObject, TREE9A).toHex(), "9aa7c49a27dd00dd2bdb9ce354f9a68cf04396b9");
 
     // Test
-    server::file::ca::DirectoryHandler testee(store, ObjectId::fromHex("9aa7c49a27dd00dd2bdb9ce354f9a68cf04396b9"), "root", new NullReferenceUpdater());
+    server::file::ca::DirectoryHandler testee(store, ObjectId::fromHex("9aa7c49a27dd00dd2bdb9ce354f9a68cf04396b9"), "root", new NullReferenceUpdater(), 0);
 
     // Read the root directory
     class Callback : public DirectoryHandler::Callback, public afl::test::CallReceiver {
@@ -219,7 +236,7 @@ AFL_TEST("server.file.ca.DirectoryHandler:sort-order", a)
     afl::base::Ptr<NullReferenceUpdater> ref(new NullReferenceUpdater());
 
     // Testee
-    server::file::ca::DirectoryHandler testee(store, ObjectId::nil, "root", ref);
+    server::file::ca::DirectoryHandler testee(store, ObjectId::nil, "root", ref, 0);
 
     // Create files.
     // git wants these files ordered as
@@ -266,7 +283,7 @@ AFL_TEST("server.file.ca.DirectoryHandler:ref-count", a)
     afl::base::Ptr<RootReferenceUpdater> ref(new RootReferenceUpdater(ObjectId::nil, store));
 
     // Testee
-    server::file::ca::DirectoryHandler testee(store, ObjectId::nil, "root", ref);
+    server::file::ca::DirectoryHandler testee(store, ObjectId::nil, "root", ref, 0);
 
     // Test setup
     static const uint8_t CONTENT[] = {'a'};
@@ -291,7 +308,7 @@ AFL_TEST("server.file.ca.DirectoryHandler:subdirectories", a)
     afl::base::Ptr<RootReferenceUpdater> ref(new RootReferenceUpdater(ObjectId::nil, store));
 
     // Testee
-    server::file::ca::DirectoryHandler testee(store, ObjectId::nil, "root", ref);
+    server::file::ca::DirectoryHandler testee(store, ObjectId::nil, "root", ref, 0);
 
     // Create subdirectory
     std::auto_ptr<DirectoryHandler> sub(testee.getDirectory(testee.createDirectory("sub")));
@@ -320,7 +337,7 @@ AFL_TEST("server.file.ca.DirectoryHandler:copyFile", a)
     ObjectStore store(rootHandler);
 
     // Testee
-    server::file::ca::DirectoryHandler testee(store, ObjectId::nil, "root", new NullReferenceUpdater());
+    server::file::ca::DirectoryHandler testee(store, ObjectId::nil, "root", new NullReferenceUpdater(), 0);
 
     // Create a file
     static const uint8_t CONTENT[] = {'a'};
@@ -348,7 +365,7 @@ AFL_TEST("server.file.ca.DirectoryHandler:copyFile", a)
         server::file::InternalDirectoryHandler::Directory otherDir("");
         server::file::InternalDirectoryHandler otherHandler("root", otherDir);
         ObjectStore otherStore(otherHandler);
-        server::file::ca::DirectoryHandler other(otherStore, ObjectId::nil, "root", new NullReferenceUpdater());
+        server::file::ca::DirectoryHandler other(otherStore, ObjectId::nil, "root", new NullReferenceUpdater(), 0);
         a.check("22. copyFile", !other.copyFile(testee, aa, "x").isValid());
     }
 }

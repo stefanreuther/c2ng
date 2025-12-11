@@ -1259,7 +1259,12 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/talk/nulllinkparser.cpp \
+FILES_serverlib = server/file/filesnapshot.cpp server/file/filesnapshot.hpp \
+    server/interface/filesnapshotserver.cpp \
+    server/interface/filesnapshotserver.hpp \
+    server/interface/filesnapshotclient.cpp \
+    server/interface/filesnapshotclient.hpp \
+    server/interface/filesnapshot.hpp server/talk/nulllinkparser.cpp \
     server/talk/nulllinkparser.hpp server/talk/linkparser.hpp \
     server/play/imperialstatspacker.cpp server/play/imperialstatspacker.hpp \
     server/talk/notifier.hpp server/talk/notificationthread.cpp \
@@ -1844,8 +1849,12 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/ui/widgets/keydispatchertest.cpp \
-    test/gfx/rectanglesettest.cpp test/client/screenhistorytest.cpp \
+FILES_testsuite = test/server/file/filesnapshottest.cpp \
+    test/server/interface/filesnapshotservertest.cpp \
+    test/server/interface/filesnapshotclienttest.cpp \
+    test/server/interface/filesnapshottest.cpp \
+    test/ui/widgets/keydispatchertest.cpp test/gfx/rectanglesettest.cpp \
+    test/client/screenhistorytest.cpp \
     test/game/interface/configurationcontexttest.cpp \
     test/client/vcr/playbackcontrolwidgettest.cpp \
     test/client/vcr/configurationtest.cpp \

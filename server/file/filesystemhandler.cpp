@@ -124,3 +124,9 @@ server::file::FileSystemHandler::removeDirectory(String_t name)
 {
     m_fileSystem.openDirectory(m_name)->erase(name);
 }
+
+server::file::DirectoryHandler::SnapshotHandler*
+server::file::FileSystemHandler::getSnapshotHandler()
+{
+    return 0;
+}

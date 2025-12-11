@@ -83,6 +83,7 @@ namespace server { namespace file { namespace ca {
      private:
         /** Implementation of ReferenceUpdater for root directory */
         class RootUpdater;
+        class SnapshotHandler;
 
         /** Initialize. */
         void init();
@@ -104,6 +105,9 @@ namespace server { namespace file { namespace ca {
 
         /** ObjectStore instance. Never null during lifetime of this object. */
         std::auto_ptr<ObjectStore> m_store;
+
+        /** Snapshot Handler. */
+        std::auto_ptr<SnapshotHandler> m_snapshotHandler;
     };
 
 } } }

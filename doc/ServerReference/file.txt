@@ -50,6 +50,11 @@ As of c2ng, the file service supports three modes of operation:
   We implement only parts of the git storage, so git can read it but should better not write it.
 - in-memory storage. This is mainly used for testing.
 
+When content-addressable storage is used, the file server supports snapshots (implemented as git tags).
+Snapshots can be managed through the command interface, but their content is not available for now.
+Only the command-line utility <tt>c2fileclient</tt> can access the content of a snapshot,
+and reset the storage content to a snapshot.
+
 The "hostfile" instance is now only accessed by the {Host (Service)|Host service},
 the web interface uses appropriate commands to have Host map the path names and perform access checking.
 

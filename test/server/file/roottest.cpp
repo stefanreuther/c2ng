@@ -37,6 +37,8 @@ AFL_TEST("server.file.Root", a)
             { return Info(); }
         virtual void removeDirectory(String_t /*name*/)
             { }
+        virtual SnapshotHandler* getSnapshotHandler()
+            { return 0; }
     };
     server::file::DirectoryItem item("(root)", 0, std::auto_ptr<server::file::DirectoryHandler>(new NullDirectoryHandler()));
 

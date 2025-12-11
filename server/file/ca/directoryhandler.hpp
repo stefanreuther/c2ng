@@ -33,8 +33,9 @@ namespace server { namespace file { namespace ca {
             \param store Object store
             \param id Initial object Id
             \param name Directory name
-            \param updater ReferenceUpdater instance. Null to make this a read-only DirectoryHandler. */
-        DirectoryHandler(ObjectStore& store, const ObjectId& id, const String_t& name, afl::base::Ptr<ReferenceUpdater> updater);
+            \param updater ReferenceUpdater instance. Null to make this a read-only DirectoryHandler.
+            \param sh SnapshotHandler; can be null */
+        DirectoryHandler(ObjectStore& store, const ObjectId& id, const String_t& name, afl::base::Ptr<ReferenceUpdater> updater, SnapshotHandler* sh);
 
         /** Destructor. */
         ~DirectoryHandler();
@@ -52,6 +53,8 @@ namespace server { namespace file { namespace ca {
         virtual Info createDirectory(String_t name);
         virtual void removeDirectory(String_t name);
 
+        virtual SnapshotHandler* getSnapshotHandler();
+
      private:
         /** Local ReferenceUpdater descendant.
             Because a child DirectoryHandler may live longer than this one,
@@ -59,6 +62,7 @@ namespace server { namespace file { namespace ca {
         class ContentUpdater;
 
         afl::base::Ref<ContentUpdater> m_content;
+        SnapshotHandler* m_snapshotHandler;
     };
 
 } } }

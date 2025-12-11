@@ -472,6 +472,13 @@ server::file::DirectoryItem::computeTotals(Root& root, int32_t& numFiles, int32_
     }
 }
 
+// Access SnapshotHandler.
+server::file::DirectoryHandler::SnapshotHandler*
+server::file::DirectoryItem::getSnapshotHandler()
+{
+    return m_handler->getSnapshotHandler();
+}
+
 /** Load control file. */
 void
 server::file::DirectoryItem::loadControlFile()

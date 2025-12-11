@@ -127,6 +127,12 @@ server::file::ClientDirectoryHandler::copyFile(ReadOnlyDirectoryHandler& source,
     }
 }
 
+server::file::DirectoryHandler::SnapshotHandler*
+server::file::ClientDirectoryHandler::getSnapshotHandler()
+{
+    return 0;
+}
+
 String_t
 server::file::ClientDirectoryHandler::makePath(String_t userPath)
 {

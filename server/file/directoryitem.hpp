@@ -232,6 +232,10 @@ namespace server { namespace file {
             \param [out] totalKBytes Disk usage of files, rounding up to full kilobytes for each file */
         void computeTotals(Root& root, int32_t& numFiles, int32_t& totalKBytes);
 
+        /** Access SnapshotHandler.
+            \return SnapshotHandler as provided by DirectoryHandler::getSnapshotHandler(); can be null */
+        DirectoryHandler::SnapshotHandler* getSnapshotHandler();
+
      private:
         typedef std::map<String_t, String_t> ControlInfo_t;
         DirectoryItem* m_parent;

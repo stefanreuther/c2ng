@@ -12,6 +12,8 @@
 #include "server/file/internaldirectoryhandler.hpp"
 #include "server/file/root.hpp"
 
+using server::file::DirectoryHandler;
+
 namespace {
     size_t countObjects(server::file::InternalDirectoryHandler& dir)
     {
@@ -64,8 +66,6 @@ AFL_TEST("server.file.ca.Root:empty", a)
 /** Test operation with a preloaded image. */
 AFL_TEST("server.file.ca.Root:preloaded", a)
 {
-    using server::file::DirectoryHandler;
-
     // Storage
     server::file::InternalDirectoryHandler::Directory rootDir("");
     server::file::InternalDirectoryHandler rootHandler("root", rootDir);
@@ -168,8 +168,6 @@ AFL_TEST("server.file.ca.Root:preloaded", a)
 /** Test garbage cleanup. */
 AFL_TEST("server.file.ca.Root:garbage", a)
 {
-    using server::file::DirectoryHandler;
-
     // Storage
     server::file::InternalDirectoryHandler::Directory rootDir("");
     server::file::InternalDirectoryHandler rootHandler("root", rootDir);
@@ -199,8 +197,6 @@ AFL_TEST("server.file.ca.Root:garbage", a)
 /** Test creating/garbage-collecting snapshots. */
 AFL_TEST("server.file.ca.Root:garbage:snapshot:remove", a)
 {
-    using server::file::DirectoryHandler;
-
     // Storage
     server::file::InternalDirectoryHandler::Directory rootDir("");
     server::file::InternalDirectoryHandler rootHandler("root", rootDir);
@@ -244,8 +240,6 @@ AFL_TEST("server.file.ca.Root:garbage:snapshot:remove", a)
     Same thing as previous, but instead of removing the snapshot, point it to master. */
 AFL_TEST("server.file.ca.Root:garbage:snapshot:change", a)
 {
-    using server::file::DirectoryHandler;
-
     // Storage
     server::file::InternalDirectoryHandler::Directory rootDir("");
     server::file::InternalDirectoryHandler rootHandler("root", rootDir);
@@ -287,8 +281,6 @@ AFL_TEST("server.file.ca.Root:garbage:snapshot:change", a)
 /** Test reverting the master commit. */
 AFL_TEST("server.file.ca.Root:garbage:snapshot:change-revert", a)
 {
-    using server::file::DirectoryHandler;
-
     // Storage
     server::file::InternalDirectoryHandler::Directory rootDir("");
     server::file::InternalDirectoryHandler rootHandler("root", rootDir);
@@ -334,11 +326,41 @@ AFL_TEST("server.file.ca.Root:garbage:snapshot:change-revert", a)
     a.checkEqualContent("42", content1->get(), afl::string::toBytes("content"));
 }
 
+/** Test snapshot handling interface. */
+AFL_TEST("server.file.ca.Root:garbage:snapshot:handler", a)
+{
+    // Storage
+    server::file::InternalDirectoryHandler::Directory rootDir("");
+    server::file::InternalDirectoryHandler rootHandler("root", rootDir);
+    server::file::ca::Root testee(rootHandler);
+
+    // Create stuff
+    std::auto_ptr<DirectoryHandler> root(testee.createRootHandler());
+    std::auto_ptr<DirectoryHandler> dir(root->getDirectory(root->createDirectory("dir1")));
+
+    // Access snapshot handler: root has one, dir has none
+    DirectoryHandler::SnapshotHandler* rootSnap = root->getSnapshotHandler();
+    DirectoryHandler::SnapshotHandler* dirSnap = dir->getSnapshotHandler();
+    a.checkNonNull("01. root snap", rootSnap);
+    a.checkNull("02. dir snap", dirSnap);
+
+    // Exercise methods
+    rootSnap->createSnapshot("a");
+    rootSnap->copySnapshot("a", "b");
+    rootSnap->removeSnapshot("a");
+
+    afl::data::StringList_t list;
+    rootSnap->listSnapshots(list);
+    a.checkEqual("11. num snaps", list.size(), 1U);
+    a.checkEqual("12. snap name", list[0], "b");
+
+    // Error case: snapshot not found
+    AFL_CHECK_THROWS(a("21. bad snap"), rootSnap->copySnapshot("x", "y"), std::runtime_error);
+}
+
 /** Test tree access. */
 AFL_TEST("server.file.ca.Root:tree-access", a)
 {
-    using server::file::DirectoryHandler;
-
     // Storage
     server::file::InternalDirectoryHandler::Directory rootDir("");
     server::file::InternalDirectoryHandler rootHandler("root", rootDir);

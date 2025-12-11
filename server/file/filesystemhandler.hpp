@@ -27,6 +27,8 @@ namespace server { namespace file {
         virtual Info createDirectory(String_t name);
         virtual void removeDirectory(String_t name);
 
+        virtual SnapshotHandler* getSnapshotHandler();
+
      private:
         afl::io::FileSystem& m_fileSystem;
         const String_t m_name;

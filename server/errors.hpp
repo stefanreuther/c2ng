@@ -31,6 +31,7 @@ namespace server {
     const char*const INVALID_VALUE               = "400 Invalid value";
     const char*const BAD_TOKEN_TYPE              = "400 Bad token type";
     const char*const INVALID_KEY                 = "400 Invalid key";
+    const char*const INVALID_SNAPSHOT            = "400 Bad snapshot name";
 
     // 401 Unauthorized
     const char*const INVALID_USERNAME            = "401 Invalid user name or password";
@@ -58,6 +59,7 @@ namespace server {
     const char*const USER_NOT_FOUND              = "404 Not found";
     const char*const BLOB_NOT_FOUND              = "404 Not found";
     const char*const NODE_NOT_FOUND              = "404 Not found";
+    const char*const SNAPSHOT_NOT_FOUND          = "404 Not found";
 
     // 405 Method not allowed
     const char*const NOT_A_DIRECTORY             = "405 Not a directory";
@@ -104,6 +106,7 @@ namespace server {
     // 500 Internal server error
     const char*const DATABASE_ERROR              = "500 Database error";
     const char*const INTERNAL_ERROR              = "500 Internal error";
+    const char*const SNAPSHOTTING_NOT_AVAILABLE  = "500 Snapshotting not available";
 
     // 600+
     const char*const GAME_IN_USE                 = "600 Game in use";

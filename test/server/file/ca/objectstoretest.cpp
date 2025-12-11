@@ -51,6 +51,8 @@ namespace {
             { return m_impl->createDirectory(name); }
         virtual void removeDirectory(String_t name)
             { m_impl->removeDirectory(name); }
+        virtual SnapshotHandler* getSnapshotHandler()
+            { return m_impl->getSnapshotHandler(); }
      private:
         size_t& m_count;
         std::auto_ptr<DirectoryHandler> m_impl;

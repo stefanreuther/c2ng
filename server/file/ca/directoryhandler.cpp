@@ -215,8 +215,9 @@ server::file::ca::DirectoryHandler::ContentUpdater::replaceDirectory(ReferenceUp
 
 /**************************** DirectoryHandler ***************************/
 
-server::file::ca::DirectoryHandler::DirectoryHandler(ObjectStore& store, const ObjectId& id, const String_t& name, afl::base::Ptr<ReferenceUpdater> updater)
-    : m_content(*new ContentUpdater(store, id, name, updater))
+server::file::ca::DirectoryHandler::DirectoryHandler(ObjectStore& store, const ObjectId& id, const String_t& name, afl::base::Ptr<ReferenceUpdater> updater, SnapshotHandler* sh)
+    : m_content(*new ContentUpdater(store, id, name, updater)),
+      m_snapshotHandler(sh)
 { }
 
 server::file::ca::DirectoryHandler::~DirectoryHandler()
@@ -345,7 +346,7 @@ server::file::ca::DirectoryHandler::getDirectory(const Info& info)
     DirectoryEntry entry;
     while (entry.parse(bytes)) {
         if (entry.getName() == info.name && entry.getType() == IsDirectory) {
-            return new DirectoryHandler(m_content->store(), entry.getId(), entry.getName(), m_content->isWritable() ? m_content.asPtr() : 0);
+            return new DirectoryHandler(m_content->store(), entry.getId(), entry.getName(), m_content->isWritable() ? m_content.asPtr() : 0, 0);
         }
     }
     throw afl::except::FileProblemException(m_content->getChildName(info.name), FILE_NOT_FOUND);
@@ -367,4 +368,10 @@ server::file::ca::DirectoryHandler::removeDirectory(String_t name)
 {
     ReferenceUpdater& upd = m_content->verifyWritable();
     m_content->removeDirectoryEntry(upd, name, IsDirectory);
+}
+
+server::file::DirectoryHandler::SnapshotHandler*
+server::file::ca::DirectoryHandler::getSnapshotHandler()
+{
+    return m_snapshotHandler;
 }

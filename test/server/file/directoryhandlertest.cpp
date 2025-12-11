@@ -33,6 +33,8 @@ AFL_TEST_NOARG("server.file.DirectoryHandler")
             { return Info(); }
         virtual void removeDirectory(String_t /*name*/)
             { }
+        virtual SnapshotHandler* getSnapshotHandler()
+            { return 0; }
     };
     Tester t;
 }

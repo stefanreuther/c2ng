@@ -5,6 +5,7 @@
 #ifndef C2NG_SERVER_FILE_DIRECTORYHANDLER_HPP
 #define C2NG_SERVER_FILE_DIRECTORYHANDLER_HPP
 
+#include "afl/data/stringlist.hpp"
 #include "server/file/readonlydirectoryhandler.hpp"
 
 namespace server { namespace file {
@@ -19,6 +20,29 @@ namespace server { namespace file {
         This interface extends ReadOnlyDirectoryHandler to add modifying operations. */
     class DirectoryHandler : public ReadOnlyDirectoryHandler {
      public:
+        /** Interface for dealing with snapshots.
+            A DirectoryHandler can have an optional SnapshotHandler. */
+        class SnapshotHandler : public afl::base::Deletable {
+         public:
+            /** Create a snapshot.
+                @param name Name of snapshot */
+            virtual void createSnapshot(String_t name) = 0;
+
+            /** Copy snapshot.
+                @param oldName Old (existing) name
+                @param newName New (copy) name */
+            virtual void copySnapshot(String_t oldName, String_t newName) = 0;
+
+            /** Remove snapshot.
+                @param name Name of snapshot */
+            virtual void removeSnapshot(String_t name) = 0;
+
+            /** Get names of snapshot.
+                @param [out] out Result */
+            virtual void listSnapshots(afl::data::StringList_t& out) = 0;
+        };
+
+
         /*
          *  Files
          */
@@ -83,6 +107,17 @@ namespace server { namespace file {
             \param name Name of subdirectory to remove
             \throw std::runtime_error on errors (conditions and exception type depending on actual derived class) */
         virtual void removeDirectory(String_t name) = 0;
+
+
+        /*
+         *  Snapshots
+         */
+
+        /** Get SnapshotHandler.
+            If this is (the root directory of) a snapshottable file system, returns a handler for managing snapshots.
+            Otherwise, returns null.
+            \return SnapshotHandler owned by DirectoryHandler, or null */
+        virtual SnapshotHandler* getSnapshotHandler() = 0;
     };
 
 } }

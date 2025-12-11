@@ -10,10 +10,12 @@
 #include "server/errors.hpp"
 #include "server/file/filebase.hpp"
 #include "server/file/filegame.hpp"
+#include "server/file/filesnapshot.hpp"
 #include "server/file/root.hpp"
 #include "server/file/session.hpp"
 #include "server/interface/filebaseserver.hpp"
 #include "server/interface/filegameserver.hpp"
+#include "server/interface/filesnapshotserver.hpp"
 #include "server/types.hpp"
 
 server::file::CommandHandler::CommandHandler(Root& root, Session& session)
@@ -61,6 +63,11 @@ server::file::CommandHandler::handleCommand(const String_t& upcasedCommand, inte
         FileGame game(m_session, m_root);
         ok = server::interface::FileGameServer(game).handleCommand(upcasedCommand, args, result);
     }
+    if (!ok) {
+        // SNAPSHOT commands
+        FileSnapshot snap(m_session, m_root);
+        ok = server::interface::FileSnapshotServer(snap).handleCommand(upcasedCommand, args, result);
+    }
     // @change PCC2 returns 405 here
     return ok;
 }
@@ -93,6 +100,10 @@ server::file::CommandHandler::getHelp()
         "SETPERM dir user perms\n"
         "LSPERM dir\n"
         "FTEST file...\n"
+        "SNAPSHOTADD name\n"
+        "SNAPSHOTCP old new\n"
+        "SNAPSHOTRM name\n"
+        "SNAPSHOTLIST\n"
         "This is c2file-ng\n";
 }
 

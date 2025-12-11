@@ -4,6 +4,8 @@
   */
 
 #include "server/file/ca/root.hpp"
+#include "afl/except/fileproblemexception.hpp"
+#include "afl/string/messages.hpp"
 #include "server/file/ca/commit.hpp"
 #include "server/file/ca/directoryhandler.hpp"
 #include "server/file/ca/objectid.hpp"
@@ -102,6 +104,34 @@ class server::file::ca::Root::RootUpdater : public server::file::ca::ReferenceUp
 };
 
 /*
+ *  SnapshotHandler
+ */
+
+class server::file::ca::Root::SnapshotHandler : public server::file::DirectoryHandler::SnapshotHandler {
+ public:
+    SnapshotHandler(Root& parent)
+        : m_parent(parent)
+        { }
+    virtual void createSnapshot(String_t name)
+        { m_parent.setSnapshotCommitId(name, m_parent.getMasterCommitId()); }
+    virtual void copySnapshot(String_t oldName, String_t newName)
+        {
+            afl::base::Optional<ObjectId> commitId = m_parent.getSnapshotCommitId(oldName);
+            if (!commitId.isValid()) {
+                throw afl::except::FileProblemException(oldName, afl::string::Messages::fileNotFound());
+            }
+            m_parent.setSnapshotCommitId(newName, *commitId.get());
+        }
+    virtual void removeSnapshot(String_t name)
+        { m_parent.removeSnapshot(name); }
+    virtual void listSnapshots(afl::data::StringList_t& out)
+        { m_parent.listSnapshots(out); }
+ private:
+    Root& m_parent;
+};
+
+
+/*
  *  Root
  */
 
@@ -112,9 +142,11 @@ server::file::ca::Root::Root(server::file::DirectoryHandler& root)
       m_refsHeads(),
       m_refsTags(),
       m_objects(),
-      m_store()
+      m_store(),
+      m_snapshotHandler()
 {
     init();
+    m_snapshotHandler.reset(new SnapshotHandler(*this));
 }
 
 // Destructor.
@@ -209,7 +241,7 @@ server::file::ca::Root::createRootHandler()
     ObjectId masterTreeId = m_store->getCommit(masterCommitId);
 
     // Create root directory item
-    return new DirectoryHandler(*m_store, masterTreeId, "(ca-root)", new RootUpdater(*this, masterCommitId));
+    return new DirectoryHandler(*m_store, masterTreeId, "(ca-root)", new RootUpdater(*this, masterCommitId), m_snapshotHandler.get());
 }
 
 // Create read-only DirectoryHandler for a snapshot.
@@ -217,7 +249,7 @@ server::file::DirectoryHandler*
 server::file::ca::Root::createSnapshotHandler(ObjectId commitId)
 {
     ObjectId treeId = m_store->getCommit(commitId);
-    return new DirectoryHandler(*m_store, treeId, "(ca-snapshot)", 0);
+    return new DirectoryHandler(*m_store, treeId, "(ca-snapshot)", 0, 0);
 }
 
 // Access the ObjectStore instance.

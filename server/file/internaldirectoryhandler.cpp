@@ -129,6 +129,12 @@ server::file::InternalDirectoryHandler::copyFile(ReadOnlyDirectoryHandler& /*sou
     return afl::base::Nothing;
 }
 
+server::file::DirectoryHandler::SnapshotHandler*
+server::file::InternalDirectoryHandler::getSnapshotHandler()
+{
+    return 0;
+}
+
 server::file::InternalDirectoryHandler::File*
 server::file::InternalDirectoryHandler::findFile(const String_t& name)
 {

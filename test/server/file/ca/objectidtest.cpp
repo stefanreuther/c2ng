@@ -29,6 +29,8 @@ AFL_TEST("server.file.ca.ObjectId:basics", a)
     a.check("14", bb != dd);
 
     a.check("21", aa != ObjectId::nil);
+
+    a.checkEqual("31", makePrintable(aa), "0102030405060708090a0b0c0d0e0f1011121314");
 }
 
 /** Test interaction with hash. */
