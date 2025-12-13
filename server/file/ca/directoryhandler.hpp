@@ -54,6 +54,7 @@ namespace server { namespace file { namespace ca {
         virtual void removeDirectory(String_t name);
 
         virtual SnapshotHandler* getSnapshotHandler();
+        virtual afl::base::Ptr<afl::io::Directory> getDirectory();
 
      private:
         /** Local ReferenceUpdater descendant.

@@ -4,7 +4,14 @@
   */
 
 #include "server/file/ca/root.hpp"
+
+#include <map>
+
 #include "afl/except/fileproblemexception.hpp"
+#include "afl/io/constmemorystream.hpp"
+#include "afl/io/directoryentry.hpp"
+#include "afl/io/textfile.hpp"
+#include "afl/string/format.hpp"
 #include "afl/string/messages.hpp"
 #include "server/file/ca/commit.hpp"
 #include "server/file/ca/directoryhandler.hpp"
@@ -12,11 +19,15 @@
 #include "server/file/ca/objectstore.hpp"
 #include "server/file/directoryhandler.hpp"
 
+using afl::string::Format;
+using afl::sys::LogListener;
 using server::file::DirectoryHandler;
 using server::file::ca::ObjectId;
 using server::file::ca::ObjectStore;
 
 namespace {
+    const char*const LOG_NAME = "file.ca";
+
     DirectoryHandler* getCreateDirectory(DirectoryHandler& parent, String_t name)
     {
         DirectoryHandler::Info info;
@@ -53,6 +64,18 @@ namespace {
         String_t id = objId.toHex();
         id += '\n';
         dir.createFile(fileName, afl::string::toBytes(id));
+    }
+
+    /* Write commit ID to a file if that file does not exist */
+    bool writeCommitIdIfMissing(DirectoryHandler& dir, const String_t& fileName, const ObjectId& objId)
+    {
+        DirectoryHandler::Info info;
+        if (!dir.findItem(fileName, info)) {
+            writeCommitId(dir, fileName, objId);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     void updateCommitId(DirectoryHandler& dir, const String_t& fileName, const ObjectId& objId, ObjectStore& objStore)
@@ -136,7 +159,7 @@ class server::file::ca::Root::SnapshotHandler : public server::file::DirectoryHa
  */
 
 // Constructor.
-server::file::ca::Root::Root(server::file::DirectoryHandler& root)
+server::file::ca::Root::Root(server::file::DirectoryHandler& root, afl::sys::LogListener& log)
     : m_root(root),
       m_refs(),
       m_refsHeads(),
@@ -145,7 +168,7 @@ server::file::ca::Root::Root(server::file::DirectoryHandler& root)
       m_store(),
       m_snapshotHandler()
 {
-    init();
+    init(log);
     m_snapshotHandler.reset(new SnapshotHandler(*this));
 }
 
@@ -261,7 +284,7 @@ server::file::ca::Root::objectStore()
 
 // Initialize.
 void
-server::file::ca::Root::init()
+server::file::ca::Root::init(afl::sys::LogListener& log)
 {
     // Create directories
     m_refs.reset(getCreateDirectory(m_root, "refs"));
@@ -275,4 +298,114 @@ server::file::ca::Root::init()
 
     // Create object store
     m_store.reset(new ObjectStore(*m_objects));
+
+    // Load packs
+    loadPackFiles(log);
+
+    // Unpack packed-refs file
+    unpackPackedRefs(log);
+}
+
+// Load pack files.
+void
+server::file::ca::Root::loadPackFiles(afl::sys::LogListener& log)
+{
+    // Do we have a "pack" directory?
+    DirectoryHandler::Info info;
+    if (!m_objects->findItem("pack", info) || info.type != DirectoryHandler::IsDirectory) {
+        return;
+    }
+    std::auto_ptr<server::file::DirectoryHandler> packDirHandler(m_objects->getDirectory(info));
+
+    // Is it an actual directory?
+    afl::base::Ptr<afl::io::Directory> packDir = packDirHandler->getDirectory();
+    if (packDir.get() == 0) {
+        return;
+    }
+
+    // Read directory
+    const int HavePack = 1;
+    const int HaveIndex = 2;
+    std::map<String_t, int> packs;
+    afl::base::Ref<afl::base::Enumerator<afl::base::Ptr<afl::io::DirectoryEntry> > > iter = packDir->getDirectoryEntries();
+    afl::base::Ptr<afl::io::DirectoryEntry> entry;
+    while (iter->getNextElement(entry)) {
+        if (entry.get() != 0 && entry->getFileType() == afl::io::DirectoryEntry::tFile) {
+            const String_t name = entry->getTitle();
+            if (name.size() > 5 && name.compare(name.size()-5, 5, ".pack") == 0) {
+                packs[name.substr(0, name.size()-5)] |= HavePack;
+            } else if (name.size() > 4 && name.compare(name.size()-4, 4, ".idx") == 0) {
+                packs[name.substr(0, name.size()-4)] |= HaveIndex;
+            } else {
+                // ignore
+            }
+        }
+    }
+
+    // Load packs
+    for (std::map<String_t, int>::const_iterator it = packs.begin(), e = packs.end(); it != e; ++it) {
+        if (it->second == (HavePack + HaveIndex)) {
+            // Ignore failing packs (which could be originating in a pack operation crashed midway?)
+            try {
+                m_store->addNewPackFile(new PackFile(*packDir, it->first));
+                log.write(LogListener::Trace, LOG_NAME, Format("added pack \"%s\"", it->first));
+            }
+            catch (std::exception& e) {
+                log.write(LogListener::Warn, LOG_NAME, Format("failed to add pack \"%s\"", it->first));
+            }
+        } else {
+            log.write(LogListener::Trace, LOG_NAME, Format("incomplete pack \"%s\" has been ignored", it->first));
+        }
+    }
+}
+
+// Unpack packed-refs file.
+void
+server::file::ca::Root::unpackPackedRefs(afl::sys::LogListener& log)
+{
+    // Does this file exist?
+    DirectoryHandler::Info info;
+    if (!m_root.findItem("packed-refs", info) || info.type != DirectoryHandler::IsFile) {
+        return;
+    }
+
+    // Load it
+    const size_t HASH_SIZE = 2*sizeof(ObjectId);
+    afl::base::Ref<afl::io::FileMapping> content = m_root.getFile(info);
+    afl::io::ConstMemoryStream contentStream(content->get());
+    afl::io::TextFile contentReader(contentStream);
+    String_t line;
+    while (contentReader.readLine(line)) {
+        if (line.empty() || line[0] == '#') {
+            // Comment; ignore
+        } else if (line.size() > HASH_SIZE && line[HASH_SIZE] == ' ') {
+            // Possible ref
+            String_t refName = line.substr(HASH_SIZE+1);
+            String_t objName = line.substr(0, HASH_SIZE);
+            ObjectId objId = ObjectId::fromHex(objName);
+            bool did;
+            if (objId.toHex() == objName) {
+                if (refName.compare(0, 11, "refs/heads/") == 0 && refName.find('/', 11) == String_t::npos) {
+                    did = writeCommitIdIfMissing(*m_refsHeads, refName.substr(11), objId);
+                } else if (refName.compare(0, 10, "refs/tags/") == 0 && refName.find('/', 10) == String_t::npos) {
+                    did = writeCommitIdIfMissing(*m_refsTags, refName.substr(10), objId);
+                } else {
+                    // Unsupported reference
+                    did = false;
+                }
+            } else {
+                // Invalid object Id
+                did = false;
+            }
+            if (!did) {
+                log.write(LogListener::Warn, LOG_NAME, Format("packed ref \"%s\" = \"%s\" has been ignored", refName, objName));
+            }
+        } else {
+            // Invalid
+            log.write(LogListener::Warn, LOG_NAME, Format("packed ref line \"%s\" cannot be interpreted", line));
+        }
+    }
+
+    // Delete packed-refs file
+    m_root.removeFile("packed-refs");
 }

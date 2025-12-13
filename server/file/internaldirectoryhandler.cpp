@@ -135,6 +135,12 @@ server::file::InternalDirectoryHandler::getSnapshotHandler()
     return 0;
 }
 
+afl::base::Ptr<afl::io::Directory>
+server::file::InternalDirectoryHandler::getDirectory()
+{
+    return 0;
+}
+
 server::file::InternalDirectoryHandler::File*
 server::file::InternalDirectoryHandler::findFile(const String_t& name)
 {

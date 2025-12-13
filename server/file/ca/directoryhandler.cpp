@@ -375,3 +375,9 @@ server::file::ca::DirectoryHandler::getSnapshotHandler()
 {
     return m_snapshotHandler;
 }
+
+afl::base::Ptr<afl::io::Directory>
+server::file::ca::DirectoryHandler::getDirectory()
+{
+    return 0;
+}

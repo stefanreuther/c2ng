@@ -9,6 +9,7 @@
 #include "afl/base/deletable.hpp"
 #include "afl/base/optional.hpp"
 #include "afl/data/stringlist.hpp"
+#include "afl/sys/loglistener.hpp"
 #include "server/file/ca/objectid.hpp"
 #include "server/file/directoryhandler.hpp"
 
@@ -23,8 +24,9 @@ namespace server { namespace file { namespace ca {
     class Root : public afl::base::Deletable {
      public:
         /** Constructor.
-            @param root DirectoryHandler to work on */
-        explicit Root(server::file::DirectoryHandler& root);
+            @param root DirectoryHandler to work on
+            @param log  Logger (must live for duration of initialisation; logs initialisation) */
+        Root(server::file::DirectoryHandler& root, afl::sys::LogListener& log);
 
         /** Destructor. */
         ~Root();
@@ -86,7 +88,19 @@ namespace server { namespace file { namespace ca {
         class SnapshotHandler;
 
         /** Initialize. */
-        void init();
+        void init(afl::sys::LogListener& log);
+
+        /** Load pack files.
+            Iterate the objects/pack directory (if any) and add all found packs.
+            @param log Logger */
+        void loadPackFiles(afl::sys::LogListener& log);
+
+        /** Unpack packed-refs file.
+            When using "git gc" for packing a repository, it will combine all branches and tags into a packed-refs file.
+            Although an unpacked ref always has precedence over packed-refs, this would interfere with deleting snapshots.
+            We therefore unpack and delete this file.
+            @param log Logger */
+        void unpackPackedRefs(afl::sys::LogListener& log);
 
         /** DirectoryHandler as given to constructor. */
         server::file::DirectoryHandler& m_root;

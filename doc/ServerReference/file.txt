@@ -55,6 +55,9 @@ Snapshots can be managed through the command interface, but their content is not
 Only the command-line utility <tt>c2fileclient</tt> can access the content of a snapshot,
 and reset the storage content to a snapshot.
 
+The content-addressable storage supports both loose objects, as well as git packfiles (v2).
+A content-addressable storage can be compacted using <tt>git gc</tt>.
+
 The "hostfile" instance is now only accessed by the {Host (Service)|Host service},
 the web interface uses appropriate commands to have Host map the path names and perform access checking.
 

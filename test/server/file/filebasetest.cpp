@@ -7,6 +7,7 @@
 
 #include "afl/data/access.hpp"
 #include "afl/io/internaldirectory.hpp"
+#include "afl/sys/log.hpp"
 #include "afl/test/testrunner.hpp"
 #include "server/file/ca/root.hpp"
 #include "server/file/directoryhandler.hpp"
@@ -1222,7 +1223,8 @@ AFL_TEST("server.file.FileBase:copyFile:underlay", a)
     // CA backend allows underlay copies, so build one.
     server::file::InternalDirectoryHandler::Directory underDir("");
     server::file::InternalDirectoryHandler underHandler("underlay", underDir);
-    server::file::ca::Root underRoot(underHandler);
+    afl::sys::Log log;
+    server::file::ca::Root underRoot(underHandler, log);
     server::file::DirectoryItem rootDirectory("root", 0, std::auto_ptr<server::file::DirectoryHandler>(underRoot.createRootHandler()));
 
     // Server root

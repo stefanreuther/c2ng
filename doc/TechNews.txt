@@ -7,6 +7,32 @@ PCC2ng NEWS FILE - Technical Version
   manual.
 
 
+2.41.5
+------
+
+## c2file-server
+
+  The content-addressable backend now supports snapshots (tags) and
+  packfiles.
+
+  The snapshot feature is intended to address a problem with backing
+  up a live instance: if the filespace is modified while being backed
+  up, the "refs/heads/master" file might be archived at a different
+  time than the commit it points to; at that time, the commit might
+  already have been deleted. By creating a snapshot (SNAPSHOTADD
+  command), a commit is pinpointed and will be guaranteed to be valid
+  after unpacking.
+
+  The packfile feature is intended to provide more efficient storage.
+  The default loose-objects format requires many inodes on the host
+  file system. Packfiles can be created by running "git gc" or "git
+  repack". c2file-server should support v2 packfile format with all
+  its variations, including deltified objects. git will also create a
+  "packed-refs" file. c2file-server cannot natively deal with that,
+  and will unpack and delete it.
+
+
+
 2.41.4
 ------
 

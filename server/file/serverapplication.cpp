@@ -47,6 +47,7 @@ namespace {
         virtual Info createDirectory(String_t name);
         virtual void removeDirectory(String_t name);
         virtual SnapshotHandler* getSnapshotHandler();
+        virtual afl::base::Ptr<afl::io::Directory> getDirectory();
      private:
         server::file::DirectoryHandler& m_impl;
     };
@@ -116,6 +117,12 @@ server::file::DirectoryHandler::SnapshotHandler*
 ProxyDirectoryHandler::getSnapshotHandler()
 {
     return m_impl.getSnapshotHandler();
+}
+
+afl::base::Ptr<afl::io::Directory>
+ProxyDirectoryHandler::getDirectory()
+{
+    return m_impl.getDirectory();
 }
 
 /************************* ServerApplication *************************/

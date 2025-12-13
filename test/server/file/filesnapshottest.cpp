@@ -6,13 +6,14 @@
 #include <algorithm>
 #include "server/file/filesnapshot.hpp"
 
-#include "afl/test/testrunner.hpp"
 #include "afl/io/internaldirectory.hpp"
-#include "server/file/session.hpp"
-#include "server/file/internaldirectoryhandler.hpp"
+#include "afl/sys/log.hpp"
+#include "afl/test/testrunner.hpp"
 #include "server/file/ca/root.hpp"
 #include "server/file/directoryitem.hpp"
+#include "server/file/internaldirectoryhandler.hpp"
 #include "server/file/root.hpp"
+#include "server/file/session.hpp"
 
 using server::file::Session;
 using server::file::FileSnapshot;
@@ -20,6 +21,7 @@ using server::file::FileSnapshot;
 namespace {
     /* Environment with a CA-backed service */
     struct Environment {
+        afl::sys::Log log;
         server::file::InternalDirectoryHandler::Directory dir;
         server::file::InternalDirectoryHandler dirHandler;
         server::file::ca::Root caRoot;
@@ -27,9 +29,10 @@ namespace {
         server::file::Root serviceRoot;
 
         Environment()
-            : dir("root"),
+            : log(),
+              dir("root"),
               dirHandler("root", dir),
-              caRoot(dirHandler),
+              caRoot(dirHandler, log),
               caItem("root", 0, std::auto_ptr<server::file::DirectoryHandler>(caRoot.createRootHandler())),
               serviceRoot(caItem, afl::io::InternalDirectory::create("spec"))
             { }

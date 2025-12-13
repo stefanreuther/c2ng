@@ -6,15 +6,16 @@
 #define C2NG_SERVER_FILE_CA_OBJECTSTORE_HPP
 
 #include <memory>
-#include "server/file/directoryhandler.hpp"
 #include "afl/base/growablememory.hpp"
 #include "afl/base/memory.hpp"
-#include "afl/container/ptrvector.hpp"
-#include "afl/base/types.hpp"
-#include "server/file/ca/objectid.hpp"
 #include "afl/base/ref.hpp"
-#include "afl/io/filemapping.hpp"
+#include "afl/base/types.hpp"
 #include "afl/base/uncopyable.hpp"
+#include "afl/container/ptrvector.hpp"
+#include "afl/io/filemapping.hpp"
+#include "server/file/ca/objectid.hpp"
+#include "server/file/ca/packfile.hpp"
+#include "server/file/directoryhandler.hpp"
 
 namespace server { namespace file { namespace ca {
 
@@ -29,6 +30,7 @@ namespace server { namespace file { namespace ca {
 
         This class also aggregates optional features:
         - data and metadata caching
+        - pack files (read-only objects)
         - reference counting
 
         Reference counting enables removal of objects that become unused.
@@ -51,6 +53,11 @@ namespace server { namespace file { namespace ca {
 
         /** Destructor. */
         ~ObjectStore();
+
+        /** Add a new pack file.
+            This file is used to resolve object references.
+            \param p Newly-allocated PackFile. Must not be null. Ownership is taken by ObjectStore. */
+        void addNewPackFile(PackFile* p);
 
         /** Get object content.
             \param id Object Id
@@ -113,7 +120,8 @@ namespace server { namespace file { namespace ca {
         DirectoryHandler* getObjectDirectory(size_t prefix);
 
      private:
-        bool loadObject(const ObjectId& id, Type expectedType, size_t* pSize, afl::base::Ptr<afl::io::FileMapping>* pContent);
+        bool loadObject(const ObjectId& id, Type expectedType, size_t maxLevel, size_t* pSize, afl::base::Ptr<afl::io::FileMapping>* pContent);
+        bool loadObjectFromPackFile(const ObjectId& id, Type expectedType, size_t maxLevel, size_t* pSize, afl::base::Ptr<afl::io::FileMapping>* pContent);
         void readDirectory();
         void unlinkContent(Type type, afl::base::ConstBytes_t data);
 
@@ -122,6 +130,9 @@ namespace server { namespace file { namespace ca {
 
         // DirectoryHandler's for the 256 first-byte directories.
         afl::container::PtrVector<DirectoryHandler> m_subdirectories;
+
+        // Pack files
+        afl::container::PtrVector<PackFile> m_packFiles;
 
         // ReferenceCounter
         std::auto_ptr<ReferenceCounter> m_refCounter;

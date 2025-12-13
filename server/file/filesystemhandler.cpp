@@ -130,3 +130,9 @@ server::file::FileSystemHandler::getSnapshotHandler()
 {
     return 0;
 }
+
+afl::base::Ptr<afl::io::Directory>
+server::file::FileSystemHandler::getDirectory()
+{
+    return m_fileSystem.openDirectory(m_name).asPtr();
+}

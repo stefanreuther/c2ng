@@ -133,6 +133,12 @@ server::file::ClientDirectoryHandler::getSnapshotHandler()
     return 0;
 }
 
+afl::base::Ptr<afl::io::Directory>
+server::file::ClientDirectoryHandler::getDirectory()
+{
+    return 0;
+}
+
 String_t
 server::file::ClientDirectoryHandler::makePath(String_t userPath)
 {

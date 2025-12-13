@@ -1259,7 +1259,9 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/file/filesnapshot.cpp server/file/filesnapshot.hpp \
+FILES_serverlib = server/file/ca/packfile.cpp server/file/ca/packfile.hpp \
+    server/file/ca/indexfile.cpp server/file/ca/indexfile.hpp \
+    server/file/filesnapshot.cpp server/file/filesnapshot.hpp \
     server/interface/filesnapshotserver.cpp \
     server/interface/filesnapshotserver.hpp \
     server/interface/filesnapshotclient.cpp \
@@ -1849,7 +1851,9 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/server/file/filesnapshottest.cpp \
+FILES_testsuite = test/server/file/ca/packfiletest.cpp \
+    test/server/file/ca/indexfiletest.cpp \
+    test/server/file/filesnapshottest.cpp \
     test/server/interface/filesnapshotservertest.cpp \
     test/server/interface/filesnapshotclienttest.cpp \
     test/server/interface/filesnapshottest.cpp \

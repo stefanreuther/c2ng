@@ -342,7 +342,7 @@ server::file::ClientApplication::doGC(afl::sys::CommandLineParser& cmdl)
     // Objects
     // (Intentionally do not use DirectoryHandlerFactory; we don't want to use 'ca:DIR' here.)
     FileSystemHandler handler(fileSystem(), *pDir);
-    server::file::ca::Root root(handler);
+    server::file::ca::Root root(handler, log());
     server::file::ca::GarbageCollector gc(root.objectStore(), log());
 
     // Do it!
@@ -411,7 +411,7 @@ server::file::ClientApplication::doSnapshot(afl::sys::CommandLineParser& cmdl)
     // Objects
     // (Intentionally do not use DirectoryHandlerFactory; we don't want to use 'ca:DIR' here.)
     FileSystemHandler handler(fileSystem(), args[0]);
-    server::file::ca::Root root(handler);
+    server::file::ca::Root root(handler, log());
 
     if (args[1] == "ls") {
         afl::data::StringList_t list;

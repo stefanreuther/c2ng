@@ -22,7 +22,8 @@ namespace {
             \+ g "text"     f3a34851d44d6b97c90fbb99dd3d18c261b9a237 */
     void createSomeFiles(afl::test::Assert a, server::file::InternalDirectoryHandler& rootHandler)
     {
-        server::file::ca::Root t(rootHandler);
+        afl::sys::Log log;
+        server::file::ca::Root t(rootHandler, log);
         a.checkEqual("createSomeFiles > getMasterCommitId", t.getMasterCommitId(), server::file::ca::ObjectId::nil);
 
         server::file::DirectoryItem rootItem("(ca-root)", 0, std::auto_ptr<server::file::DirectoryHandler>(t.createRootHandler()));
@@ -50,7 +51,8 @@ namespace {
        instance of ca::Root and its children is active. */
     void modifyFiles(afl::test::Assert a, server::file::InternalDirectoryHandler& rootHandler)
     {
-        server::file::ca::Root t(rootHandler);
+        afl::sys::Log log;
+        server::file::ca::Root t(rootHandler, log);
         modifyFiles(a, t);
     }
 
@@ -70,7 +72,8 @@ namespace {
     /* Check file content */
     void checkFileContent(afl::test::Assert a, server::file::InternalDirectoryHandler& rootHandler, const char* fContent, const char* gContent)
     {
-        server::file::ca::Root t(rootHandler);
+        afl::sys::Log log;
+        server::file::ca::Root t(rootHandler, log);
         server::file::DirectoryItem rootItem("(ca-root)", 0, std::auto_ptr<server::file::DirectoryHandler>(t.createRootHandler()));
         server::file::Root serverRoot(rootItem, afl::io::InternalDirectory::create("<spec>"));
         rootItem.readContent(serverRoot);
@@ -119,7 +122,7 @@ AFL_TEST("server.file.ca.GarbageCollector:normal", a)
     // Garbage collector
     {
         afl::sys::Log log;
-        server::file::ca::Root t(rootHandler);
+        server::file::ca::Root t(rootHandler, log);
         server::file::ca::GarbageCollector testee(t.objectStore(), log);
 
         // Add master commit
@@ -169,7 +172,7 @@ AFL_TEST("server.file.ca.GarbageCollector:garbage", a)
     // Garbage collector
     {
         afl::sys::Log log;
-        server::file::ca::Root t(rootHandler);
+        server::file::ca::Root t(rootHandler, log);
         server::file::ca::GarbageCollector testee(t.objectStore(), log);
         runGC(a, t, testee);
 
@@ -201,7 +204,7 @@ AFL_TEST("server.file.ca.GarbageCollector:sliced", a)
     // Garbage collector
     {
         afl::sys::Log log;
-        server::file::ca::Root t(rootHandler);
+        server::file::ca::Root t(rootHandler, log);
         server::file::ca::GarbageCollector testee(t.objectStore(), log);
 
         int n = 0;
@@ -238,7 +241,7 @@ AFL_TEST("server.file.ca.GarbageCollector:sliced-modified", a)
     // Garbage collector
     {
         afl::sys::Log log;
-        server::file::ca::Root t(rootHandler);
+        server::file::ca::Root t(rootHandler, log);
         server::file::ca::GarbageCollector testee(t.objectStore(), log);
 
         int n = 0;
@@ -285,7 +288,7 @@ AFL_TEST("server.file.ca.GarbageCollector:error:missing-commit", a)
     // Garbage collector
     {
         afl::sys::Log log;
-        server::file::ca::Root t(rootHandler);
+        server::file::ca::Root t(rootHandler, log);
         server::file::ca::GarbageCollector testee(t.objectStore(), log);
 
         runGC(a, t, testee);
@@ -320,7 +323,7 @@ AFL_TEST("server.file.ca.GarbageCollector:error:missing-tree", a)
     // Garbage collector
     {
         afl::sys::Log log;
-        server::file::ca::Root t(rootHandler);
+        server::file::ca::Root t(rootHandler, log);
         server::file::ca::GarbageCollector testee(t.objectStore(), log);
 
         runGC(a, t, testee);

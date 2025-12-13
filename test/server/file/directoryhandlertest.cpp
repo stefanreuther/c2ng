@@ -35,6 +35,8 @@ AFL_TEST_NOARG("server.file.DirectoryHandler")
             { }
         virtual SnapshotHandler* getSnapshotHandler()
             { return 0; }
+        virtual afl::base::Ptr<afl::io::Directory> getDirectory()
+            { return 0; }
     };
     Tester t;
 }

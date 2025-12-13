@@ -6,6 +6,7 @@
 #define C2NG_SERVER_FILE_DIRECTORYHANDLER_HPP
 
 #include "afl/data/stringlist.hpp"
+#include "afl/io/directory.hpp"
 #include "server/file/readonlydirectoryhandler.hpp"
 
 namespace server { namespace file {
@@ -118,6 +119,17 @@ namespace server { namespace file {
             Otherwise, returns null.
             \return SnapshotHandler owned by DirectoryHandler, or null */
         virtual SnapshotHandler* getSnapshotHandler() = 0;
+
+        /** Get underlying directory.
+            If this DirectoryHandler is backed by a file system directory, returns a handler to that.
+            Otherwise, returns null.
+
+            This function is intended to provide access to Directory/Stream's abilities for partial file access,
+            and shall only return pre-existing directories.
+            If a DirectoryHandler is not backed by a Directory instance, this function shall not try to emulate it.
+
+            \return Directory or null */
+        virtual afl::base::Ptr<afl::io::Directory> getDirectory() = 0;
     };
 
 } }

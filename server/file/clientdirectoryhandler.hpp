@@ -40,6 +40,7 @@ namespace server { namespace file {
         virtual void removeDirectory(String_t name);
         virtual afl::base::Optional<Info> copyFile(ReadOnlyDirectoryHandler& source, const Info& sourceInfo, String_t name);
         virtual SnapshotHandler* getSnapshotHandler();
+        virtual afl::base::Ptr<afl::io::Directory> getDirectory();
 
      private:
         String_t makePath(String_t userPath);

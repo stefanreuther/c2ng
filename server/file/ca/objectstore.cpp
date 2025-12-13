@@ -1,5 +1,6 @@
 /**
   *  \file server/file/ca/objectstore.cpp
+  *  \brief Class server::file::ca::ObjectStore
   */
 
 #include <stdexcept>
@@ -14,10 +15,10 @@
 #include "server/errors.hpp"
 #include "server/file/ca/commit.hpp"
 #include "server/file/ca/directoryentry.hpp"
-#include "server/file/ca/internalreferencecounter.hpp"
-#include "server/file/ca/referencecounter.hpp"
-#include "server/file/ca/objectcache.hpp"
 #include "server/file/ca/internalobjectcache.hpp"
+#include "server/file/ca/internalreferencecounter.hpp"
+#include "server/file/ca/objectcache.hpp"
+#include "server/file/ca/referencecounter.hpp"
 
 namespace {
     const char*const BAD_HASH = "500 Bad hash";
@@ -27,6 +28,11 @@ namespace {
     const char*const BAD_COMMIT = "500 Bad commit";
     const char*const MISSING_OBJECT = "500 Missing object";
     const char*const HASH_COLLISION = "500 Hash collision";
+
+
+    /** Maximum level of nested objects for delta encoding.
+        git uses --depth=50 by default; give it some margin to compensate for different implementation. */
+    const size_t MAX_LEVEL = 55;
 
 
     const char KEYWORDS[][8] = { "blob ", "tree ", "commit " };
@@ -113,6 +119,7 @@ namespace {
 server::file::ca::ObjectStore::ObjectStore(DirectoryHandler& dir)
     : m_directory(dir),
       m_subdirectories(),
+      m_packFiles(),
       m_refCounter(new InternalReferenceCounter()),
       m_cache(new InternalObjectCache())
 {
@@ -123,12 +130,19 @@ server::file::ca::ObjectStore::ObjectStore(DirectoryHandler& dir)
 server::file::ca::ObjectStore::~ObjectStore()
 { }
 
+// Add a new pack file.
+void
+server::file::ca::ObjectStore::addNewPackFile(PackFile* p)
+{
+    m_packFiles.pushBackNew(p);
+}
+
 // Get object content.
 afl::base::Ref<afl::io::FileMapping>
 server::file::ca::ObjectStore::getObject(const ObjectId& id, Type expectedType)
 {
     afl::base::Ptr<afl::io::FileMapping> result;
-    if (!loadObject(id, expectedType, 0, &result) || result.get() == 0) {
+    if (!loadObject(id, expectedType, MAX_LEVEL, 0, &result) || result.get() == 0) {
         throw afl::except::FileProblemException(id.toHex(), MISSING_OBJECT);
     }
     return *result;
@@ -158,7 +172,7 @@ size_t
 server::file::ca::ObjectStore::getObjectSize(const ObjectId& id, Type expectedType)
 {
     size_t n = 0;
-    if (!loadObject(id, expectedType, &n, 0)) {
+    if (!loadObject(id, expectedType, MAX_LEVEL, &n, 0)) {
         throw afl::except::FileProblemException(id.toHex(), MISSING_OBJECT);
     }
     return n;
@@ -184,7 +198,7 @@ server::file::ca::ObjectStore::addObject(Type type, afl::base::ConstBytes_t data
 
     // Verify object content
     afl::base::Ptr<afl::io::FileMapping> existingContent;
-    if (loadObject(id, type, 0, &existingContent) && existingContent.get() != 0) {
+    if (loadObject(id, type, MAX_LEVEL, 0, &existingContent) && existingContent.get() != 0) {
         // Check hash collision
         if (!existingContent->get().equalContent(data)) {
             throw afl::except::FileProblemException(id.toHex(), HASH_COLLISION);
@@ -280,13 +294,14 @@ server::file::ca::ObjectStore::getObjectDirectory(size_t prefix)
 /** Load an object, internal.
     \param id Object Id
     \param expectedType Expected type
+    \param maxLevel Maximum recursion in delta object resolution
     \param pSize [optional,out] Object size
     \param pContent [optional,out] Object content
     \retval true Object loaded successfully
     \retval false Object does not exist
     \throw afl::except::FileProblemException Object is damaged */
 bool
-server::file::ca::ObjectStore::loadObject(const ObjectId& id, Type expectedType, size_t* pSize, afl::base::Ptr<afl::io::FileMapping>* pContent)
+server::file::ca::ObjectStore::loadObject(const ObjectId& id, Type expectedType, size_t maxLevel, size_t* pSize, afl::base::Ptr<afl::io::FileMapping>* pContent)
 {
     const uint8_t firstChar = id.m_bytes[0];
     if (id == ObjectId::nil) {
@@ -309,6 +324,9 @@ server::file::ca::ObjectStore::loadObject(const ObjectId& id, Type expectedType,
         if (pSize != 0) {
             *pSize = (*pContent)->get().size();
         }
+        return true;
+    } else if (loadObjectFromPackFile(id, expectedType, maxLevel, pSize, pContent)) {
+        // Found in pack file
         return true;
     } else if (firstChar >= m_subdirectories.size() || m_subdirectories[firstChar] == 0) {
         // Directory does not exist
@@ -381,6 +399,53 @@ server::file::ca::ObjectStore::loadObject(const ObjectId& id, Type expectedType,
         // Success
         return true;
     }
+}
+
+/** Load object from PackFile, internal.
+    Parameters are the same as for loadObject().
+    \param id Object Id
+    \param expectedType Expected type
+    \param maxLevel Maximum recursion in delta object resolution
+    \param pSize [optional,out] Object size
+    \param pContent [optional,out] Object content
+    \retval true Object loaded successfully
+    \retval false Object does not exist
+    \throw afl::except::FileProblemException Object is damaged */
+bool
+server::file::ca::ObjectStore::loadObjectFromPackFile(const ObjectId& id, Type expectedType, size_t maxLevel, size_t* pSize, afl::base::Ptr<afl::io::FileMapping>* pContent)
+{
+    class Requester : public PackFile::ObjectRequester {
+     public:
+        Requester(ObjectStore& parent, Type expectedType)
+            : m_parent(parent), m_expectedType(expectedType)
+            { }
+        virtual afl::base::Ref<afl::io::FileMapping> getObject(const ObjectId& id, size_t maxLevel)
+            {
+                afl::base::Ptr<afl::io::FileMapping> data;
+                if (!m_parent.loadObject(id, m_expectedType, maxLevel, 0, &data) || data.get() == 0) {
+                    throw afl::except::FileProblemException(id.toHex(), MISSING_OBJECT);
+                }
+                return *data;
+            }
+     private:
+        ObjectStore& m_parent;
+        Type m_expectedType;
+    };
+
+    Requester req(*this, expectedType);
+    for (size_t i = 0; i < m_packFiles.size(); ++i) {
+        afl::base::Ptr<afl::io::FileMapping> result = m_packFiles[i]->getObject(id, req, maxLevel);
+        if (result.get() != 0) {
+            if (pSize != 0) {
+                *pSize = result->get().size();
+            }
+            if (pContent != 0) {
+                *pContent = result;
+            }
+            return true;
+        }
+    }
+    return false;
 }
 
 /** Read directory.

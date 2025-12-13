@@ -39,6 +39,8 @@ AFL_TEST("server.file.Root", a)
             { }
         virtual SnapshotHandler* getSnapshotHandler()
             { return 0; }
+        virtual afl::base::Ptr<afl::io::Directory> getDirectory()
+            { return 0; }
     };
     server::file::DirectoryItem item("(root)", 0, std::auto_ptr<server::file::DirectoryHandler>(new NullDirectoryHandler()));
 

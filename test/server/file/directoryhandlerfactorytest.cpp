@@ -354,7 +354,7 @@ AFL_TEST("server.file.DirectoryHandlerFactory:createDirectoryHandler:snapshot", 
     testee.setGarbageCollection(false);
 
     // - Root
-    server::file::ca::Root root(testee.createDirectoryHandler("int:", log));
+    server::file::ca::Root root(testee.createDirectoryHandler("int:", log), log);
     std::auto_ptr<server::file::DirectoryHandler> rootDir(root.createRootHandler());
 
     // - Store one file, take snapshot
@@ -388,7 +388,7 @@ AFL_TEST("server.file.DirectoryHandlerFactory:createDirectoryHandler:snapshot:er
     DirectoryHandlerFactory testee(fs, net);
     testee.setGarbageCollection(false);
 
-    server::file::ca::Root root(testee.createDirectoryHandler("int:", log));
+    server::file::ca::Root root(testee.createDirectoryHandler("int:", log), log);
     std::auto_ptr<server::file::DirectoryHandler> rootDir(root.createRootHandler());
     rootDir->createFile("f", afl::string::toBytes("content"));
 

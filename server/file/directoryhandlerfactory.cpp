@@ -161,7 +161,7 @@ server::file::DirectoryHandlerFactory::createDirectoryHandler(const String_t& st
             if (const char* path = util::strStartsWith(str, "ca:")) {
                 // Content-addressable
                 DirectoryHandler& backend = createDirectoryHandler(path, log);
-                server::file::ca::Root& root = m_deleter.addNew(new server::file::ca::Root(backend));
+                server::file::ca::Root& root = m_deleter.addNew(new server::file::ca::Root(backend, log));
                 if (m_gcEnabled) {
                     doGarbageCollection(root, log, path);
                 }
@@ -178,7 +178,7 @@ server::file::DirectoryHandlerFactory::createDirectoryHandler(const String_t& st
                 String_t snapName = pathStr.substr(0, sep);
 
                 DirectoryHandler& backend = createDirectoryHandler(rootPath, log);
-                server::file::ca::Root& root = m_deleter.addNew(new server::file::ca::Root(backend));
+                server::file::ca::Root& root = m_deleter.addNew(new server::file::ca::Root(backend, log));
                 if (m_gcEnabled) {
                     doGarbageCollection(root, log, rootPath);
                 }

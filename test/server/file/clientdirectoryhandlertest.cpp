@@ -29,6 +29,7 @@ AFL_TEST("server.file.ClientDirectoryHandler", a)
     // Inquiry
     a.checkEqual("01. getName", testee.getName(), "b");
     a.checkNull("02. snap", testee.getSnapshotHandler());
+    a.checkNull("03. dir", testee.getDirectory().get());
 
     // Read content
     {

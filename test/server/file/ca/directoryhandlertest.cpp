@@ -95,6 +95,7 @@ AFL_TEST("server.file.ca.DirectoryHandler:file", a)
     a.check("02. content", map1->get().equalContent(content));
     a.check("03. content", map2->get().equalContent(content));
     a.checkEqual("04. snap", testee.getSnapshotHandler(), &snap);
+    a.checkNull("05. dir", testee.getDirectory().get());
 }
 
 /** Test directory handling. */
@@ -119,6 +120,7 @@ AFL_TEST("server.file.ca.DirectoryHandler:dir", a)
     a.checkEqual("04. type", dirInfo2.type, DirectoryHandler::IsDirectory);
 
     a.checkNull("05. snap", testee.getSnapshotHandler());
+    a.checkNull("06. dir", testee.getDirectory().get());
 
     // Create a file "a" in both
     afl::base::ConstBytes_t content = afl::string::toBytes("text a");
