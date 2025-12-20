@@ -36,8 +36,6 @@
   */
 
 #include "interpreter/vmio/filesavecontext.hpp"
-#include "afl/base/growablememory.hpp"
-#include "afl/bits/pack.hpp"
 #include "afl/io/nullstream.hpp"
 #include "afl/tmp/ifthenelse.hpp"
 #include "afl/tmp/issametype.hpp"
@@ -45,32 +43,12 @@
 #include "interpreter/savevisitor.hpp"
 #include "interpreter/structuretype.hpp"
 #include "interpreter/structurevalue.hpp"
+#include "interpreter/vmio/chunkfile.hpp"
 #include "interpreter/vmio/processsavecontext.hpp"
 #include "interpreter/vmio/structures.hpp"
 
 namespace {
     using interpreter::vmio::structures::UInt32_t;
-
-    class SaveObject {
-     public:
-        explicit SaveObject(afl::io::Stream& s);
-        void start(uint32_t type, uint32_t id, uint32_t nprop);
-        void end();
-        void startProperty(uint32_t count);
-        void endProperty();
-
-     private:
-        afl::io::Stream& m_stream;
-
-        interpreter::vmio::structures::ObjectHeader m_header;
-        afl::io::Stream::FileSize_t m_headerPosition;
-
-        uint32_t m_propertyIndex;
-        afl::io::Stream::FileSize_t m_thisPropertyPosition;
-        afl::base::GrowableMemory<UInt32_t> m_properties;
-
-        void writeHeader();
-    };
 
     // Format a uint32_t.
     inline uint32_t toWord(uint32_t value)
@@ -121,67 +99,6 @@ namespace {
         }
         return result;
     }
-}
-
-SaveObject::SaveObject(afl::io::Stream& s)
-    : m_stream(s),
-      m_header(),
-      m_headerPosition(0),
-      m_propertyIndex(0),
-      m_thisPropertyPosition(0),
-      m_properties()
-{ }
-
-void
-SaveObject::writeHeader()
-{
-    m_stream.fullWrite(afl::base::fromObject(m_header));
-    m_stream.fullWrite(m_properties.toBytes());
-}
-
-void
-SaveObject::start(uint32_t type, uint32_t id, uint32_t nprop)
-{
-    ++nprop;
-    m_header.type = type;
-    m_header.id = id;
-    m_header.size = 0;
-    m_header.numProperties = nprop;
-    m_headerPosition = m_stream.getPos();
-    m_properties.clear();
-    m_properties.resize(2*nprop);
-    m_properties.fill(UInt32_t());
-    m_propertyIndex = 1;
-    writeHeader();
-}
-
-void
-SaveObject::end()
-{
-    //ASSERT(m_propertyIndex == obj_header[3]);
-    afl::io::Stream::FileSize_t end_pos = m_stream.getPos();
-    m_header.size = uint32_t(end_pos - m_headerPosition - 4*4);
-    m_stream.setPos(m_headerPosition);
-    writeHeader();
-    m_stream.setPos(end_pos);
-}
-
-void
-SaveObject::startProperty(uint32_t count)
-{
-    m_thisPropertyPosition = m_stream.getPos();
-    if (UInt32_t* p = m_properties.at(2*m_propertyIndex)) {
-        *p = count;
-    }
-}
-
-void
-SaveObject::endProperty()
-{
-    if (UInt32_t* p = m_properties.at(2*m_propertyIndex + 1)) {
-        *p = uint32_t(m_stream.getPos() - m_thisPropertyPosition);
-    }
-    ++m_propertyIndex;
 }
 
 /**************************** FileSaveContext ****************************/
@@ -237,16 +154,7 @@ interpreter::vmio::FileSaveContext::addProcess(const Process& proc)
 void
 interpreter::vmio::FileSaveContext::saveObjectFile(afl::io::Stream& out, uint32_t entry)
 {
-    // Save header
-    structures::ObjectFileHeader header;
-    std::memcpy(header.magic, structures::OBJECT_FILE_MAGIC, sizeof(header.magic));
-    header.version = structures::OBJECT_FILE_VERSION;
-    header.zero = 0;
-    header.headerSize = structures::OBJECT_FILE_HEADER_SIZE;
-    header.entry = entry;
-    out.fullWrite(afl::base::fromObject(header));
-
-    // Save content
+    ChunkFile::writeObjectFileHeader(out, entry);
     save(out);
 }
 
@@ -405,7 +313,7 @@ void
 interpreter::vmio::FileSaveContext::saveBCO(afl::io::Stream& out, const BytecodeObject& bco, uint32_t id)
 {
     // ex IntVMSaveContext::saveBCO
-    SaveObject so(out);
+    ChunkFile::Writer so(out);
     so.start(structures::otyp_Bytecode, id, 8);
 
     // Property 1: header (num_labels, flags, min_args, max_args)
@@ -473,7 +381,7 @@ void
 interpreter::vmio::FileSaveContext::saveHash(afl::io::Stream& out, const afl::data::Hash& hash, uint32_t id)
 {
     // ex IntVMSaveContext::saveHash
-    SaveObject so(out);
+    ChunkFile::Writer so(out);
     so.start(structures::otyp_DataHash, id, 2);
 
     // Property 1: names
@@ -496,7 +404,7 @@ void
 interpreter::vmio::FileSaveContext::saveArray(afl::io::Stream& out, const ArrayData& array, uint32_t id)
 {
     // ex IntVMSaveContext::saveArray
-    SaveObject so(out);
+    ChunkFile::Writer so(out);
     so.start(structures::otyp_DataArray, id, 2);
 
     // Property 1: dimensions
@@ -519,7 +427,7 @@ void
 interpreter::vmio::FileSaveContext::saveStructureType(afl::io::Stream& out, const StructureTypeData& type, uint32_t id)
 {
     // ex IntVMSaveContext::saveStructureType
-    SaveObject so(out);
+    ChunkFile::Writer so(out);
     so.start(structures::otyp_DataStructType, id, 1);
 
     // Property 1: name list
@@ -536,7 +444,7 @@ void
 interpreter::vmio::FileSaveContext::saveStructureValue(afl::io::Stream& out, const StructureValueData& value, uint32_t id)
 {
     // ex IntVMSaveContext::saveStructureValue
-    SaveObject so(out);
+    ChunkFile::Writer so(out);
     so.start(structures::otyp_DataStructValue, id, 2);
 
     // Property 1: header
@@ -560,7 +468,7 @@ void
 interpreter::vmio::FileSaveContext::saveFrame(afl::io::Stream& out, const Process::Frame& fr)
 {
     // ex IntVMSaveContext::saveFrame
-    SaveObject so(out);
+    ChunkFile::Writer so(out);
 
     // We don't actually need the frame_sp here (it will be ignored and
     // reconstructed upon load), but it doesn't hurt.
@@ -598,7 +506,7 @@ interpreter::vmio::FileSaveContext::saveProcess(afl::io::Stream& out, const Proc
     ProcessSaveContext childContext(*this, proc);
 
     // Start the object
-    SaveObject so(out);
+    ChunkFile::Writer so(out);
     so.start(structures::otyp_Process, 0, 6);
 
     // Property 1: header
@@ -620,7 +528,6 @@ interpreter::vmio::FileSaveContext::saveProcess(afl::io::Stream& out, const Proc
     so.startProperty(convertSize(numFrames));
     for (size_t i = 0; i < numFrames; ++i) {
         if (const Process::Frame* f = proc.getFrame(i)) {
-            // FIXME: do we need to use childContext here?
             saveFrame(out, *f);
         }
     }

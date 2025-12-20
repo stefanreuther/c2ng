@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/interface/configurationcontext.cpp \
+FILES_gamelib = interpreter/vmio/chunkfile.hpp \
+    interpreter/vmio/chunkfile.cpp game/interface/configurationcontext.cpp \
     game/interface/configurationcontext.hpp \
     game/vcr/classic/standardscheduler.cpp \
     game/vcr/classic/standardscheduler.hpp \
@@ -1851,7 +1852,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/server/file/ca/packfiletest.cpp \
+FILES_testsuite = test/interpreter/vmio/chunkfiletest.cpp \
+    test/server/file/ca/packfiletest.cpp \
     test/server/file/ca/indexfiletest.cpp \
     test/server/file/filesnapshottest.cpp \
     test/server/interface/filesnapshotservertest.cpp \

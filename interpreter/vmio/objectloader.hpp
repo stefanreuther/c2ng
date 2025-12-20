@@ -16,6 +16,7 @@
 #include "interpreter/structuretype.hpp"
 #include "interpreter/structurevalue.hpp"
 #include "interpreter/subroutinevalue.hpp"
+#include "interpreter/vmio/chunkfile.hpp"
 #include "interpreter/vmio/loadcontext.hpp"
 
 namespace interpreter { namespace vmio {
@@ -90,8 +91,6 @@ namespace interpreter { namespace vmio {
         afl::base::Ref<StructureTypeData> getStructureType(uint32_t id);
 
      private:
-        class ChunkLoader;
-
         // LoadContext:
         virtual afl::data::Value* loadBCO(uint32_t id);
         virtual afl::data::Value* loadArray(uint32_t id);
@@ -109,12 +108,12 @@ namespace interpreter { namespace vmio {
         afl::container::PtrMap<uint32_t, StructureValue> m_StructureValueById;
         afl::container::PtrMap<uint32_t, StructureType> m_StructureTypeById;
 
-        void loadBCO(ChunkLoader& ldr, uint32_t id);
-        void loadHash(ChunkLoader& ldr, uint32_t id);
-        void loadArray(ChunkLoader& ldr, uint32_t id);
-        void loadStructureValue(ChunkLoader& ldr, uint32_t id);
-        void loadStructureType(ChunkLoader& ldr, uint32_t id);
-        void loadProcess(ChunkLoader& ldr, afl::io::Stream& outerStream);
+        void loadBCO(ChunkFile::Loader& ldr, uint32_t id);
+        void loadHash(ChunkFile::Loader& ldr, uint32_t id);
+        void loadArray(ChunkFile::Loader& ldr, uint32_t id);
+        void loadStructureValue(ChunkFile::Loader& ldr, uint32_t id);
+        void loadStructureType(ChunkFile::Loader& ldr, uint32_t id);
+        void loadProcess(ChunkFile::Loader& ldr, afl::io::Stream& outerStream);
         void loadFrames(Process& proc, LoadContext& ctx, afl::io::Stream& s, uint32_t count);
 
         afl::charset::Charset& m_charset;

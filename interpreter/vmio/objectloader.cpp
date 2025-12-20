@@ -5,13 +5,7 @@
 
 #include "interpreter/vmio/objectloader.hpp"
 #include "afl/base/growablememory.hpp"
-#include "afl/bits/int16le.hpp"
-#include "afl/bits/int32le.hpp"
-#include "afl/bits/uint32le.hpp"
-#include "afl/bits/value.hpp"
 #include "afl/except/fileformatexception.hpp"
-#include "afl/except/filetooshortexception.hpp"
-#include "afl/io/limitedstream.hpp"
 #include "interpreter/vmio/processloadcontext.hpp"
 #include "interpreter/vmio/structures.hpp"
 #include "interpreter/vmio/valueloader.hpp"
@@ -150,124 +144,6 @@ namespace {
     }
 }
 
-/*
- *  ChunkLoader: Load an object consisting of property chunks
- */
-
-class interpreter::vmio::ObjectLoader::ChunkLoader {
- public:
-    ChunkLoader(Stream& s, afl::string::Translator& tx)
-        : m_stream(s),
-          m_translator(tx),
-          m_objectSize(0),
-          m_propertyStream(),
-          m_nextProperty(0),
-          m_propertyId(0),
-          m_nextObject(s.getPos()),
-          m_properties()
-        { }
-
-    /** Read an object.
-        \param [out] type Object type
-        \param [out] id   Object Id
-        \return true on success; false on EOF */
-    bool readObject(uint32_t& type, uint32_t& id);
-
-    /** Read a property.
-        \param [out] id    Property Id
-        \param [out] count Number of elements (property-specific)
-        \return stream (usable with afl::base::Ref) to read property content; null if no more properties */
-    Stream* readProperty(uint32_t& id, uint32_t& count);
-
- private:
-    Stream& m_stream;
-    afl::string::Translator& m_translator;
-    uint32_t m_objectSize;
-    afl::base::Ptr<Stream> m_propertyStream;
-    Stream::FileSize_t m_nextProperty;
-    uint32_t m_propertyId;
-    Stream::FileSize_t m_nextObject;
-    afl::base::GrowableMemory<UInt32_t> m_properties;
-
-    void consumeObjectSize(uint32_t needed);
-};
-
-void
-interpreter::vmio::ObjectLoader::ChunkLoader::consumeObjectSize(uint32_t needed)
-{
-    // ex ObjectLoader::checkObjSize
-    if (needed > m_objectSize) {
-        throw afl::except::FileFormatException(m_stream, m_translator("Invalid size"));
-    }
-    m_objectSize -= needed;
-}
-
-bool
-interpreter::vmio::ObjectLoader::ChunkLoader::readObject(uint32_t& type, uint32_t& id)
-{
-    // Read header
-    structures::ObjectHeader header;
-
-    m_stream.setPos(m_nextObject);
-    const size_t n = m_stream.read(afl::base::fromObject(header));
-    if (n == 0) {
-        return false;
-    }
-    if (n != sizeof(header)) {
-        throw afl::except::FileTooShortException(m_stream);
-    }
-
-    const uint32_t objectType  = header.type;
-    const uint32_t objectId    = header.id;
-    m_objectSize  = header.size;
-    const uint32_t numProperties = header.numProperties;
-    m_nextObject += sizeof(header) + m_objectSize;
-
-    /* Validate */
-    consumeObjectSize(numProperties * 8);
-
-    // Read property headers
-    m_properties.resize(2 * numProperties);
-    m_stream.fullRead(m_properties.toBytes());
-
-    // Initialize properties and skip first one
-    m_nextProperty = m_stream.getPos();
-    m_propertyId = 0;
-
-    uint32_t tmp;
-    readProperty(tmp, tmp);
-
-    type = objectType;
-    id = objectId;
-    return true;
-}
-
-Stream*
-interpreter::vmio::ObjectLoader::ChunkLoader::readProperty(uint32_t& id, uint32_t& count)
-{
-    // Do we have another property?
-    UInt32_t* pCount = m_properties.at(2 * m_propertyId);
-    UInt32_t* pSize  = m_properties.at(2 * m_propertyId + 1);
-    if (!pCount || !pSize) {
-        return 0;
-    }
-
-    // Check property
-    uint32_t propertySize = *pSize;
-    uint32_t propertyId = m_propertyId++;
-    uint32_t propertyCount = *pCount;
-    consumeObjectSize(propertySize);
-
-    // Initialize content
-    m_propertyStream = new afl::io::LimitedStream(m_stream, m_nextProperty, propertySize);
-    m_nextProperty += propertySize;
-
-    // Produce result
-    id = propertyId;
-    count = propertyCount;
-    return m_propertyStream.get();
-}
-
 
 /*
  *  ObjectLoader
@@ -294,24 +170,13 @@ interpreter::BCORef_t
 interpreter::vmio::ObjectLoader::loadObjectFile(afl::base::Ref<afl::io::Stream> s)
 {
     // Read header
-    structures::ObjectFileHeader header;
-    s->fullRead(afl::base::fromObject(header));
-    if (std::memcmp(header.magic, structures::OBJECT_FILE_MAGIC, sizeof(header.magic)) != 0
-        || header.version != structures::OBJECT_FILE_VERSION
-        || header.zero != 0
-        || header.headerSize < structures::OBJECT_FILE_HEADER_SIZE)
-    {
-        throw afl::except::FileFormatException(*s, m_translator("Invalid file header"));
-    }
-
-    // Adjust file pointer
-    s->setPos(s->getPos() + header.headerSize - structures::OBJECT_FILE_HEADER_SIZE);
+    uint32_t entryId = ChunkFile::loadObjectFileHeader(s, m_translator);
 
     // Read
     load(s);
 
     // Produce result
-    return getBCO(header.entry);
+    return getBCO(entryId);
 }
 
 // Load virtual-machine file.
@@ -319,9 +184,7 @@ void
 interpreter::vmio::ObjectLoader::load(afl::base::Ref<afl::io::Stream> s)
 {
     // ex IntVMLoadContext::load
-    // FIXME: the parameter must be a Ref<> because the stream will eventually end up in a LimitedStream
-    // which requires a Ref<>. However, actually the LimitedStream should be fixed to not need a Ref<>.
-    ChunkLoader ldr(*s, m_translator);
+    ChunkFile::Loader ldr(s, m_translator);
     uint32_t objType, objId;
     while (ldr.readObject(objType, objId)) {
         switch (objType) {
@@ -467,10 +330,10 @@ interpreter::vmio::ObjectLoader::finishProcess(Process& proc)
 }
 
 /** Load bytecode object.
-    \param ldr ChunkLoader that has just read the object header
+    \param ldr ChunkFile::Loader that has just read the object header
     \param id Id of object */
 void
-interpreter::vmio::ObjectLoader::loadBCO(ChunkLoader& ldr, uint32_t id)
+interpreter::vmio::ObjectLoader::loadBCO(ChunkFile::Loader& ldr, uint32_t id)
 {
     // ex IntVMLoadContext::loadBCO
     /* Note: when implementing the merge-loaded-BCO-with-existing-identical
@@ -543,10 +406,10 @@ interpreter::vmio::ObjectLoader::loadBCO(ChunkLoader& ldr, uint32_t id)
 }
 
 /** Load hash object.
-    \param ldr ChunkLoader that has just read the object header
+    \param ldr ChunkFile::Loader that has just read the object header
     \param id Id of object */
 void
-interpreter::vmio::ObjectLoader::loadHash(ChunkLoader& ldr, uint32_t id)
+interpreter::vmio::ObjectLoader::loadHash(ChunkFile::Loader& ldr, uint32_t id)
 {
     // ex IntVMLoadContext::loadHash
     // Load
@@ -578,10 +441,10 @@ interpreter::vmio::ObjectLoader::loadHash(ChunkLoader& ldr, uint32_t id)
 }
 
 /** Load array object.
-    \param ldr ChunkLoader that has just read the object header
+    \param ldr ChunkFile::Loader that has just read the object header
     \param id Id of object */
 void
-interpreter::vmio::ObjectLoader::loadArray(ChunkLoader& ldr, uint32_t id)
+interpreter::vmio::ObjectLoader::loadArray(ChunkFile::Loader& ldr, uint32_t id)
 {
     // ex IntVMLoadContext::loadArray
     afl::base::Ref<ArrayData> array = getArray(id);
@@ -607,10 +470,10 @@ interpreter::vmio::ObjectLoader::loadArray(ChunkLoader& ldr, uint32_t id)
 }
 
 /** Load structure value.
-    \param ldr ChunkLoader that has just read the object header
+    \param ldr ChunkFile::Loader that has just read the object header
     \param id Id of object */
 void
-interpreter::vmio::ObjectLoader::loadStructureValue(ChunkLoader& ldr, uint32_t id)
+interpreter::vmio::ObjectLoader::loadStructureValue(ChunkFile::Loader& ldr, uint32_t id)
 {
     // ex IntVMLoadContext::loadStructureValue
     afl::base::Ref<StructureValueData> value = getStructureValue(id);
@@ -638,10 +501,10 @@ interpreter::vmio::ObjectLoader::loadStructureValue(ChunkLoader& ldr, uint32_t i
 }
 
 /** Load structure type.
-    \param ldr ChunkLoader that has just read the object header
+    \param ldr ChunkFile::Loader that has just read the object header
     \param id Id of object */
 void
-interpreter::vmio::ObjectLoader::loadStructureType(ChunkLoader& ldr, uint32_t id)
+interpreter::vmio::ObjectLoader::loadStructureType(ChunkFile::Loader& ldr, uint32_t id)
 {
     // ex IntVMLoadContext::loadStructureType
     afl::base::Ref<StructureTypeData> type = getStructureType(id);
@@ -661,10 +524,10 @@ interpreter::vmio::ObjectLoader::loadStructureType(ChunkLoader& ldr, uint32_t id
 
 /** Load process.
     The process will be created in runnable state on success.
-    \param ldr ChunkLoader that has just read the object header
+    \param ldr ChunkFile::Loader that has just read the object header
     \param outerStream Outer stream (for generating error messages) */
 void
-interpreter::vmio::ObjectLoader::loadProcess(ChunkLoader& ldr, afl::io::Stream& outerStream)
+interpreter::vmio::ObjectLoader::loadProcess(ChunkFile::Loader& ldr, afl::io::Stream& outerStream)
 {
     // ex IntVMLoadContext::loadProcess
     // Create process
@@ -764,8 +627,7 @@ void
 interpreter::vmio::ObjectLoader::loadFrames(Process& proc, LoadContext& ctx, afl::io::Stream& s, uint32_t count)
 {
     // ex IntVMLoadContext::loadFrames
-    // FIXME: does this need to be a method?
-    ChunkLoader ldr(s, m_translator);
+    ChunkFile::Loader ldr(s, m_translator);
     while (count-- > 0) {
         // Read frame object
         uint32_t objType, objId;
