@@ -14,7 +14,9 @@ section('Options');
 subsect('Actions',
         paragraph_default_help(';'),
         paragraph_detail(text_option('--compile', '', '-c', ''),     paragraph_text('<i>Compile</i> the given scripts into object code (<fn>*.qc</fn> files, default);')),
-        paragraph_detail(text_option('--disassemble', '', '-S', ''), paragraph_text('Compile the given scripts into assembler code (<fn>*.qs</fn> files).')));
+        paragraph_detail(text_option('--disassemble', '', '-S', ''), paragraph_text('Compile the given scripts into assembler code (<fn>*.qs</fn> files);')),
+        paragraph_detail(text_option('--size'),                      paragraph_text('Show size of <fn>*.qc</fn> files;')),
+        paragraph_detail(text_option('--strip'),                     paragraph_text('Remove line number information from <fn>*.qc</fn>.')));
 
 subsect('Options',
         paragraph_detail(text_option('-g'),
@@ -23,12 +25,15 @@ subsect('Options',
                          paragraph_text('(compile) Disable debug information;')),
         paragraph_detail(text_option('-o', 'FILE'),
                          paragraph_text('(compile) Save output in the given file.',
-                                        '#If this option is not specified, and input is one or more files, output is produced for each individual input file in a separated <fn>*.qc</fn> file.',
+                                        'If this option is not specified, and input is one or more files, output is produced for each individual input file in a separated <fn>*.qc</fn> file.',
                                         'If this option is specified, and input is multiple files, all input files are linked together to a single <fn>*.qc</fn> file.'),
                          paragraph_text('(disassemble) Save output in the given file.',
                                         'Disassemble mode always links all input files linked together.',
                                         'If this option is specified, output is produced in the specified file.',
-                                        'Otherwise, output is produced on stdout;')),
+                                        'Otherwise, output is produced on stdout.'),
+                         paragraph_text('(strip) Save result in the given file.',
+                                        'This option can only be used if exactly one input file is specified.',
+                                        'If this option is not given, input files are replaced by the stripped version;')),
         paragraph_detail(text_option('-I', 'PATH'),
                          paragraph_text('Add load path.',
                                         'The <cmd>Load</cmd> and <cmd>TryLoad</cmd> statements are resolved against this path.',
@@ -64,6 +69,16 @@ subsect('Disassemble Mode',
                        'This means input to disassemble mode can be object files as easily as textual scripts.'),
         paragraph_text('However, there are obscure script constructs that can be represented in the internal form and in object files,',
                        'but not in a textual assembler file.'));
+
+subsect('Size Mode',
+        paragraph_text('In size mode (<b>--size</b>), takes a number of object files (<fn>*.qc</fn>) as input,',
+                       "and prints a summary of each file's content, broken down into size of code and literals for each bytecode object."));
+
+subsect('Strip Mode',
+        paragraph_text('In strip mode (<b>--strip</b>), removes line number information from the files, reducing their size.',
+                       '(Incidentally, this removes slightly more data than the compiler option <b>-s</b> omits.)'),
+        paragraph_text('By default, each file is replaced by its stripped version.',
+                       'If only a single file is requested, you can specify an output file name using <b>-o</b>.'));
 
 section('Environment', paragraph_default_environment());
 

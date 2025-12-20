@@ -1852,7 +1852,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/interpreter/vmio/chunkfiletest.cpp \
+FILES_testsuite = test/interpreter/consoleapplicationtest.cpp \
+    test/interpreter/vmio/chunkfiletest.cpp \
     test/server/file/ca/packfiletest.cpp \
     test/server/file/ca/indexfiletest.cpp \
     test/server/file/filesnapshottest.cpp \

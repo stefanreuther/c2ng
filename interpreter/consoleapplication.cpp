@@ -11,6 +11,7 @@
 #include "afl/charset/codepage.hpp"
 #include "afl/charset/codepagecharset.hpp"
 #include "afl/except/fileproblemexception.hpp"
+#include "afl/io/directoryentry.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/io/multidirectory.hpp"
 #include "afl/io/textfile.hpp"
@@ -41,7 +42,9 @@
 
 using afl::base::Optional;
 using afl::base::Ref;
+using afl::io::Directory;
 using afl::io::FileSystem;
+using afl::io::Stream;
 using afl::string::Format;
 using afl::string::Translator;
 using afl::sys::Environment;
@@ -52,8 +55,10 @@ using interpreter::ConsoleApplication;
 
 struct interpreter::ConsoleApplication::Parameters {
     enum Mode {
-        CompileMode,       //   --compile, -c      Produce "*.qc" files
-        DisassembleMode    //   --disassemble, -S  Produce "*.qs" files
+        CompileMode,            //   --compile, -c      Produce "*.qc" files
+        DisassembleMode,        //   --disassemble, -S  Produce "*.qs" files
+        SizeMode,               //   --size             Show size of "*.qc" files
+        StripMode               //   --strip            Remove line number information from "*.qc" files
     };
 
     Optional<String_t> arg_output;                     // -o
@@ -114,7 +119,7 @@ namespace {
             for (size_t i = 0, n = params.job.size(); i < n; ++i) {
                 FileSystem& fs = world.fileSystem();
                 String_t ext = util::getFileNameExtension(fs, params.job[i]);
-                Ref<afl::io::Stream> stream(fs.openFile(params.job[i], FileSystem::OpenRead));
+                Ref<Stream> stream(fs.openFile(params.job[i], FileSystem::OpenRead));
                 if (ext == ".qc") {
                     // Load object file
                     interpreter::vmio::NullLoadContext lc;
@@ -185,7 +190,7 @@ namespace {
         log.write(LogListener::Debug, LOG_NAME, Format(tx("Writing '%s', %d object%!1{s%}...").c_str(), fileName, fsc.getNumPreparedObjects()));
 
         // Create output file
-        Ref<afl::io::Stream> file = fs.openFile(fileName, FileSystem::Create);
+        Ref<Stream> file = fs.openFile(fileName, FileSystem::Create);
         fsc.saveObjectFile(*file, bcoID);
     }
 
@@ -198,6 +203,147 @@ namespace {
         asc.addBCO(*bco);
         asc.save(out);
     }
+
+    /* Print size information for a file */
+    void printSize(afl::io::TextWriter& out, FileSystem& fs, const String_t& fileName, afl::charset::Charset& cs, Translator& tx)
+    {
+        Ref<Stream> file = fs.openFile(fileName, FileSystem::OpenRead);
+        uint32_t entry = interpreter::vmio::ChunkFile::loadObjectFileHeader(file, tx);
+
+        interpreter::vmio::ChunkFile::Loader loader(file, tx);
+        out.writeLine(Format(tx("Content of %s:"), fileName));
+        out.writeLine(Format(tx("  Code    Literals    Total   Routine")));
+
+        // File totals
+        uint64_t totalCodeSize = 0;
+        uint64_t totalLiteralSize = 0;
+        uint64_t totalSize = 0;
+        uint64_t totalDebugSize = 0;
+        uint64_t totalDataSize = 0;
+
+        // Read each object
+        uint32_t thisId = 0;
+        uint32_t thisType = 0;
+        while (loader.readObject(thisType, thisId)) {
+            uint32_t thisPropertyId = 0;
+            uint32_t thisPropertyCount = 0;
+            if (thisType == interpreter::vmio::structures::otyp_Bytecode) {
+                // Bytecode
+                uint32_t thisCodeSize = 0;
+                uint32_t thisLiteralSize = 0;
+                uint32_t thisSize = 0;
+                String_t thisName;
+                while (Stream* p = loader.readProperty(thisPropertyId, thisPropertyCount)) {
+                    uint32_t propertySize = static_cast<uint32_t>(p->getSize());
+                    if (thisPropertyId == 2) {
+                        // Data
+                        thisLiteralSize += propertySize;
+                        totalLiteralSize += propertySize;
+                    }
+                    if (thisPropertyId == 4) {
+                        // Code
+                        thisCodeSize += propertySize;
+                        totalCodeSize += propertySize;
+                    }
+                    if (thisPropertyId == 6) {
+                        // Name
+                        uint8_t bufferBytes[128];
+                        afl::base::Bytes_t buffer(bufferBytes);
+                        buffer.trim(p->read(buffer));
+                        thisName = cs.decode(buffer);
+                    }
+                    if (thisPropertyId == 7 || thisPropertyId == 8) {
+                        // File name, line numbers
+                        totalDebugSize += propertySize;
+                    }
+                    thisSize += propertySize;
+                    totalSize += propertySize;
+                }
+
+                if (thisName.empty()) {
+                    thisName = (thisId == entry ? "(entry)" : "(unnamed)");
+                }
+                out.writeLine(Format("%8d  %8d  %8d  %s", thisCodeSize, thisLiteralSize, thisSize, thisName));
+            } else {
+                // Not bytecode, e.g. structure definition
+                while (Stream* p = loader.readProperty(thisPropertyId, thisPropertyCount)) {
+                    totalDataSize += static_cast<uint32_t>(p->getSize());
+                }
+            }
+        }
+        out.writeLine(Format("%8d  %8d  %8d  %s", totalCodeSize, totalLiteralSize, totalSize, tx("-> Total")));
+        if (totalDebugSize != 0) {
+            out.writeLine(Format(tx("%d bytes debug information"), totalDebugSize));
+        }
+        if (totalDataSize != 0) {
+            out.writeLine(Format(tx("%d bytes data"), totalDataSize));
+        }
+    }
+
+    /* Check whether a property shall be stripped */
+    bool shouldStripProperty(const interpreter::vmio::ChunkFile::Loader& loader, uint32_t objectType, uint32_t propertyId)
+    {
+        // Strip empty properties, or 7/8 of a bytecode object
+        return (objectType == interpreter::vmio::structures::otyp_Bytecode
+                && (propertyId == 7 || propertyId == 8))
+            || (loader.getPropertySize(propertyId) == 0 && loader.getPropertyCount(propertyId) == 0);
+    }
+
+    /* Strip a single file */
+    void stripFile(const Ref<Stream>& in, const Ref<Stream>& out, Translator& tx)
+    {
+        // Copy header
+        uint32_t entryId = interpreter::vmio::ChunkFile::loadObjectFileHeader(in, tx);
+        interpreter::vmio::ChunkFile::writeObjectFileHeader(*out, entryId);
+
+        // Copy objects
+        uint32_t type = 0, id = 0;
+        interpreter::vmio::ChunkFile::Loader loader(in, tx);
+        interpreter::vmio::ChunkFile::Writer writer(*out);
+        while (loader.readObject(type, id)) {
+            // Limit properties
+            uint32_t numProp = loader.getNumProperties();
+            while (numProp > 0 && shouldStripProperty(loader, type, numProp)) {
+                --numProp;
+            }
+
+            // Copy properties
+            uint32_t propId = 0, propCount = 0;
+            writer.start(type, id, numProp);
+            while (afl::io::Stream* propStream = loader.readProperty(propId, propCount)) {
+                if (propId <= numProp) {
+                    if (shouldStripProperty(loader, type, propId)) {
+                        writer.startProperty(0);
+                        writer.endProperty();
+                    } else {
+                        writer.startProperty(propCount);
+                        out->copyFrom(*propStream);
+                        writer.endProperty();
+                    }
+                }
+            }
+            writer.end();
+        }
+    }
+
+    /* Create a temporary file */
+    Ref<Stream> createTempFile(Directory& dir, String_t& tempName)
+    {
+        int i = 0;
+        while (1) {
+            try {
+                tempName = Format("_%d.tmp", i);
+                return dir.openFile(tempName, FileSystem::Create);
+            }
+            catch (afl::except::FileProblemException&) {
+                if (i > 100) {
+                    throw;
+                }
+            }
+            ++i;
+        }
+    }
+
 
     /*
      *  Compile Mode
@@ -248,12 +394,65 @@ namespace {
         String_t output;
         if (params.arg_output.get(output)) {
             // Save to file
-            Ref<afl::io::Stream> file = world.fileSystem().openFile(output, FileSystem::Create);
+            Ref<Stream> file = world.fileSystem().openFile(output, FileSystem::Create);
             afl::io::TextFile text(*file);
             saveAssemblerSource(text, bco, params);
         } else {
             // Send to console
             saveAssemblerSource(standardOutput, bco, params);
+        }
+        return 0;
+    }
+
+    /*
+     *  Size
+     */
+    int doSizeMode(interpreter::World& world, const ConsoleApplication::Parameters& params, afl::io::TextWriter& standardOutput)
+    {
+        int result = 0;
+        for (size_t i = 0; i < params.job.size(); ++i) {
+            const String_t& fileName = params.job[i];
+            try {
+                printSize(standardOutput, world.fileSystem(), fileName, *params.gameCharset, world.translator());
+            }
+            catch (std::exception& e) {
+                world.logListener().write(afl::sys::LogListener::Warn, LOG_NAME, fileName, e);
+                result = 1;
+            }
+        }
+        return result;
+    }
+
+    /*
+     *  Strip
+     */
+    int doStripMode(interpreter::World& world, const ConsoleApplication::Parameters& params)
+    {
+        FileSystem& fs = world.fileSystem();
+        if (const String_t* outName = params.arg_output.get()) {
+            // If '-o' is used, only a single file can be processed
+            if (params.job.size() != 1) {
+                world.logListener().write(LogListener::Error, LOG_NAME, world.translator()("only one input file allowed if output file ('-o FILE') is given"));
+                return 1;
+            } else {
+                Ref<Stream> in = fs.openFile(params.job[0], FileSystem::OpenRead);
+                Ref<Stream> out = fs.openFile(*outName, FileSystem::Create);
+                stripFile(in, out, world.translator());
+            }
+        } else {
+            // Strip each into a temporary file; then rename
+            for (size_t i = 0; i < params.job.size(); ++i) {
+                Ref<Directory> dir = fs.openDirectory(fs.getDirectoryName(params.job[i]));
+                String_t baseName = fs.getFileName(params.job[i]);
+                String_t tempName;
+                {
+                    Ref<Stream> in = dir->openFile(baseName, FileSystem::OpenRead);
+                    Ref<Stream> out = createTempFile(*dir, tempName);
+                    stripFile(in, out, world.translator());
+                }
+                dir->erase(baseName);
+                dir->getDirectoryEntryByName(tempName)->renameTo(baseName);
+            }
         }
         return 0;
     }
@@ -302,6 +501,13 @@ interpreter::ConsoleApplication::appMain()
         consoleLogger().setConfiguration("*@Warn+=raw:*=drop", translator());
         result = doDisassembleMode(world, params, standardOutput());
         break;
+     case Parameters::StripMode:
+        result = doStripMode(world, params);
+        break;
+     case Parameters::SizeMode:
+        consoleLogger().setConfiguration("*@Warn+=raw:*=drop", translator());
+        result = doSizeMode(world, params, standardOutput());
+        break;
     }
     exit(result);
 }
@@ -321,6 +527,10 @@ interpreter::ConsoleApplication::parseParameters(Parameters& params)
                 params.mode = Parameters::CompileMode;
             } else if (p == "disassemble" || p == "S") {
                 params.mode = Parameters::DisassembleMode;
+            } else if (p == "strip") {
+                params.mode = Parameters::StripMode;
+            } else if (p == "size") {
+                params.mode = Parameters::SizeMode;
             } else if (p == "g") {
                 params.opt_debug = true;
             } else if (p == "s") {
@@ -386,6 +596,8 @@ interpreter::ConsoleApplication::help()
         util::formatOptions(tx("Actions:\n"
                                "--compile, -c\tCompile to \"*.qc\" files (default)\n"
                                "--disassemble, -S\tDisassemble to \"*.qs\" files\n"
+                               "--size\tShow size of \"*.qc\" files\n"
+                               "--strip\tRemove line number information from \"*.qc\" files\n"
                                "\n"
                                "Options:\n"
                                "-g\tEnable debug info (default)\n"
