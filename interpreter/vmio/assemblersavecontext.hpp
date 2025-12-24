@@ -38,11 +38,11 @@ namespace interpreter { namespace vmio {
         ~AssemblerSaveContext();
 
         // SaveContext:
-        virtual uint32_t addBCO(const interpreter::BytecodeObject& bco);
-        virtual uint32_t addHash(const afl::data::Hash& hash);
-        virtual uint32_t addArray(const interpreter::ArrayData& array);
-        virtual uint32_t addStructureType(const interpreter::StructureTypeData& type);
-        virtual uint32_t addStructureValue(const interpreter::StructureValueData& value);
+        virtual uint32_t addBCO(const BCORef_t& bco);
+        virtual uint32_t addHash(const afl::data::Hash::Ref_t& hash);
+        virtual uint32_t addArray(const ArrayData::Ref_t& array);
+        virtual uint32_t addStructureType(const interpreter::StructureTypeData::Ref_t& type);
+        virtual uint32_t addStructureValue(const interpreter::StructureValueData::Ref_t& value);
         virtual bool isCurrentProcess(const interpreter::Process* p);
 
         /** Generate output.

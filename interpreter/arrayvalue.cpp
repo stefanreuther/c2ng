@@ -108,7 +108,7 @@ interpreter::ArrayValue::store(TagNode& out, afl::io::DataSink& /*aux*/, SaveCon
 {
     // ex IntArray::store
     out.tag   = TagNode::Tag_Array;
-    out.value = ctx.addArray(*m_data);
+    out.value = ctx.addArray(m_data);
 }
 
 // Inquiry

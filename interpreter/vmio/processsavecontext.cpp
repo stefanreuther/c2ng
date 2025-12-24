@@ -11,31 +11,31 @@ interpreter::vmio::ProcessSaveContext::ProcessSaveContext(SaveContext& parent, c
 { }
 
 uint32_t
-interpreter::vmio::ProcessSaveContext::addBCO(const BytecodeObject& bco)
+interpreter::vmio::ProcessSaveContext::addBCO(const BCORef_t& bco)
 {
     return m_parent.addBCO(bco);
 }
 
 uint32_t
-interpreter::vmio::ProcessSaveContext::addHash(const afl::data::Hash& hash)
+interpreter::vmio::ProcessSaveContext::addHash(const afl::data::Hash::Ref_t& hash)
 {
     return m_parent.addHash(hash);
 }
 
 uint32_t
-interpreter::vmio::ProcessSaveContext::addArray(const ArrayData& array)
+interpreter::vmio::ProcessSaveContext::addArray(const ArrayData::Ref_t& array)
 {
     return m_parent.addArray(array);
 }
 
 uint32_t
-interpreter::vmio::ProcessSaveContext::addStructureType(const StructureTypeData& type)
+interpreter::vmio::ProcessSaveContext::addStructureType(const StructureTypeData::Ref_t& type)
 {
     return m_parent.addStructureType(type);
 }
 
 uint32_t
-interpreter::vmio::ProcessSaveContext::addStructureValue(const StructureValueData& value)
+interpreter::vmio::ProcessSaveContext::addStructureValue(const StructureValueData::Ref_t& value)
 {
     return m_parent.addStructureValue(value);
 }

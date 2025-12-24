@@ -36,7 +36,7 @@ AFL_TEST("interpreter.vmio.AssemblerSaveContext:BytecodeObject", a)
 
     // Save it
     interpreter::vmio::AssemblerSaveContext testee;
-    testee.addBCO(*bco);
+    testee.addBCO(bco);
 
     afl::io::InternalTextWriter out;
     testee.save(out);
@@ -61,8 +61,8 @@ AFL_TEST("interpreter.vmio.AssemblerSaveContext:BytecodeObject:duplicate-name", 
 
     // Save them
     interpreter::vmio::AssemblerSaveContext testee;
-    testee.addBCO(*bco1);
-    testee.addBCO(*bco2);
+    testee.addBCO(bco1);
+    testee.addBCO(bco2);
 
     afl::io::InternalTextWriter out;
     testee.save(out);
@@ -96,7 +96,7 @@ AFL_TEST("interpreter.vmio.AssemblerSaveContext:BytecodeObject:options", a)
 
     // Save it
     interpreter::vmio::AssemblerSaveContext testee;
-    testee.addBCO(*bco);
+    testee.addBCO(bco);
     testee.setDebugInformation(true);
 
     afl::io::InternalTextWriter out;
@@ -131,7 +131,7 @@ AFL_TEST("interpreter.vmio.AssemblerSaveContext:BytecodeObject:bad-varargs", a)
 
     // Save it
     interpreter::vmio::AssemblerSaveContext testee;
-    testee.addBCO(*bco);
+    testee.addBCO(bco);
     testee.setDebugInformation(true);
 
     afl::io::InternalTextWriter out;
@@ -165,7 +165,7 @@ AFL_TEST("interpreter.vmio.AssemblerSaveContext:BytecodeObject:bad-args", a)
 
     // Save it
     interpreter::vmio::AssemblerSaveContext testee;
-    testee.addBCO(*bco);
+    testee.addBCO(bco);
     testee.setDebugInformation(true);
 
     afl::io::InternalTextWriter out;
@@ -199,7 +199,7 @@ AFL_TEST("interpreter.vmio.AssemblerSaveContext:BytecodeObject:circular-link", a
 
     // Save them
     interpreter::vmio::AssemblerSaveContext testee;
-    testee.addBCO(*bco1);
+    testee.addBCO(bco1);
 
     afl::io::InternalTextWriter out;
     testee.save(out);
@@ -227,7 +227,7 @@ AFL_TEST("interpreter.vmio.AssemblerSaveContext:StructureTypeData", a)
 
     // Save it
     interpreter::vmio::AssemblerSaveContext testee;
-    testee.addStructureType(*sd);
+    testee.addStructureType(sd);
 
     afl::io::InternalTextWriter out;
     testee.save(out);
@@ -256,7 +256,7 @@ AFL_TEST("interpreter.vmio.AssemblerSaveContext:BytecodeObject:literals", a)
 
     // Save it
     interpreter::vmio::AssemblerSaveContext testee;
-    testee.addBCO(*bco);
+    testee.addBCO(bco);
 
     afl::io::InternalTextWriter out;
     testee.save(out);
@@ -296,7 +296,7 @@ AFL_TEST("interpreter.vmio.AssemblerSaveContext:BytecodeObject:parameters", a)
 
     // Save it
     interpreter::vmio::AssemblerSaveContext testee;
-    testee.addBCO(*bco);
+    testee.addBCO(bco);
 
     afl::io::InternalTextWriter out;
     testee.save(out);

@@ -36,15 +36,15 @@ AFL_TEST("interpreter.SubroutineValue", a)
     {
         class TestSaveContext : public interpreter::SaveContext {
          public:
-            virtual uint32_t addBCO(const interpreter::BytecodeObject& /*bco*/)
+            virtual uint32_t addBCO(const interpreter::BCORef_t& /*bco*/)
                 { return 12345; }
-            virtual uint32_t addHash(const afl::data::Hash& /*hash*/)
+            virtual uint32_t addHash(const afl::data::Hash::Ref_t& /*hash*/)
                 { throw std::runtime_error("addHash unexpected"); }
-            virtual uint32_t addArray(const interpreter::ArrayData& /*array*/)
+            virtual uint32_t addArray(const interpreter::ArrayData::Ref_t& /*array*/)
                 { throw std::runtime_error("addArray unexpected"); }
-            virtual uint32_t addStructureType(const interpreter::StructureTypeData& /*type*/)
+            virtual uint32_t addStructureType(const interpreter::StructureTypeData::Ref_t& /*type*/)
                 { throw std::runtime_error("addStructureType unexpected"); }
-            virtual uint32_t addStructureValue(const interpreter::StructureValueData& /*value*/)
+            virtual uint32_t addStructureValue(const interpreter::StructureValueData::Ref_t& /*value*/)
                 { throw std::runtime_error("addStructureValue unexpected"); }
             virtual bool isCurrentProcess(const interpreter::Process* /*p*/)
                 { return false; }

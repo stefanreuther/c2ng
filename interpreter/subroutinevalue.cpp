@@ -70,7 +70,7 @@ interpreter::SubroutineValue::store(TagNode& out, afl::io::DataSink& /*aux*/, Sa
 {
     // ex IntSubroutineValue::store
     out.tag   = TagNode::Tag_BCO;
-    out.value = ctx.addBCO(*m_bco);
+    out.value = ctx.addBCO(m_bco);
 }
 
 interpreter::SubroutineValue*

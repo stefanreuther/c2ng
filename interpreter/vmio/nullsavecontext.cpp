@@ -14,31 +14,31 @@ namespace {
 }
 
 uint32_t
-interpreter::vmio::NullSaveContext::addBCO(const BytecodeObject& /*bco*/)
+interpreter::vmio::NullSaveContext::addBCO(const BCORef_t& /*bco*/)
 {
     return fail();
 }
 
 uint32_t
-interpreter::vmio::NullSaveContext::addHash(const afl::data::Hash& /*hash*/)
+interpreter::vmio::NullSaveContext::addHash(const afl::data::Hash::Ref_t& /*hash*/)
 {
     return fail();
 }
 
 uint32_t
-interpreter::vmio::NullSaveContext::addArray(const ArrayData& /*array*/)
+interpreter::vmio::NullSaveContext::addArray(const ArrayData::Ref_t& /*array*/)
 {
     return fail();
 }
 
 uint32_t
-interpreter::vmio::NullSaveContext::addStructureType(const StructureTypeData& /*type*/)
+interpreter::vmio::NullSaveContext::addStructureType(const StructureTypeData::Ref_t& /*type*/)
 {
     return fail();
 }
 
 uint32_t
-interpreter::vmio::NullSaveContext::addStructureValue(const StructureValueData& /*value*/)
+interpreter::vmio::NullSaveContext::addStructureValue(const StructureValueData::Ref_t& /*value*/)
 {
     return fail();
 }

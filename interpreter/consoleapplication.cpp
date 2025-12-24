@@ -186,7 +186,7 @@ namespace {
         // Prepare save
         interpreter::vmio::FileSaveContext fsc(*params.gameCharset);
         fsc.setDebugInformation(params.opt_debug);
-        uint32_t bcoID = fsc.addBCO(*bco);
+        uint32_t bcoID = fsc.addBCO(bco);
         log.write(LogListener::Debug, LOG_NAME, Format(tx("Writing '%s', %d object%!1{s%}...").c_str(), fileName, fsc.getNumPreparedObjects()));
 
         // Create output file
@@ -200,7 +200,7 @@ namespace {
     {
         interpreter::vmio::AssemblerSaveContext asc;
         asc.setDebugInformation(params.opt_debug);
-        asc.addBCO(*bco);
+        asc.addBCO(bco);
         asc.save(out);
     }
 

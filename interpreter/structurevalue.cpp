@@ -31,7 +31,7 @@ interpreter::StructureValue::store(TagNode& out, afl::io::DataSink& /*aux*/, Sav
 {
     // ex IntStructureValue::store
     out.tag   = TagNode::Tag_Struct;
-    out.value = ctx.addStructureValue(*m_value);
+    out.value = ctx.addStructureValue(m_value);
 }
 
 // Value:

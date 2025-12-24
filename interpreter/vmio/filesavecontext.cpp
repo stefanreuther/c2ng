@@ -170,22 +170,22 @@ interpreter::vmio::FileSaveContext::save(afl::io::Stream& out)
 
 // SaveContext:
 uint32_t
-interpreter::vmio::FileSaveContext::addBCO(const BytecodeObject& bco)
+interpreter::vmio::FileSaveContext::addBCO(const BCORef_t& bco)
 {
     // ex IntVMSaveContext::addBCO
     class BCOSaver : public Saver {
      public:
-        BCOSaver(const BytecodeObject& bco, uint32_t id)
+        BCOSaver(const BCORef_t& bco, uint32_t id)
             : m_bco(bco), m_id(id)
             { }
         virtual void save(afl::io::Stream& out, FileSaveContext& parent)
-            { parent.saveBCO(out, m_bco, m_id); }
+            { parent.saveBCO(out, *m_bco, m_id); }
      private:
-        const BytecodeObject& m_bco;
+        const BCORef_t m_bco;
         uint32_t m_id;
     };
 
-    uint32_t& id = m_objectToId[&bco];
+    uint32_t& id = m_objectToId[&*bco];
     if (id == 0) {
         id = ++m_objectIdCounter;
         addPlanNew(new BCOSaver(bco, id));
@@ -194,22 +194,22 @@ interpreter::vmio::FileSaveContext::addBCO(const BytecodeObject& bco)
 }
 
 uint32_t
-interpreter::vmio::FileSaveContext::addHash(const afl::data::Hash& hash)
+interpreter::vmio::FileSaveContext::addHash(const afl::data::Hash::Ref_t& hash)
 {
     // ex IntVMSaveContext::addHash
     class HashSaver : public Saver {
      public:
-        HashSaver(const afl::data::Hash& hash, uint32_t id)
+        HashSaver(const afl::data::Hash::Ref_t& hash, uint32_t id)
             : m_hash(hash), m_id(id)
             { }
         virtual void save(afl::io::Stream& out, FileSaveContext& parent)
-            { parent.saveHash(out, m_hash, m_id); }
+            { parent.saveHash(out, *m_hash, m_id); }
      private:
-        const afl::data::Hash& m_hash;
+        const afl::data::Hash::Ref_t m_hash;
         uint32_t m_id;
     };
 
-    uint32_t& id = m_objectToId[&hash];
+    uint32_t& id = m_objectToId[&*hash];
     if (id == 0) {
         id = ++m_objectIdCounter;
         addPlanNew(new HashSaver(hash, id));
@@ -218,22 +218,22 @@ interpreter::vmio::FileSaveContext::addHash(const afl::data::Hash& hash)
 }
 
 uint32_t
-interpreter::vmio::FileSaveContext::addArray(const ArrayData& array)
+interpreter::vmio::FileSaveContext::addArray(const ArrayData::Ref_t& array)
 {
     // ex IntVMSaveContext::addArray
     class ArraySaver : public Saver {
      public:
-        ArraySaver(const ArrayData& array, uint32_t id)
+        ArraySaver(const ArrayData::Ref_t& array, uint32_t id)
             : m_array(array), m_id(id)
             { }
         virtual void save(afl::io::Stream& out, FileSaveContext& parent)
-            { parent.saveArray(out, m_array, m_id); }
+            { parent.saveArray(out, *m_array, m_id); }
      private:
-        const ArrayData& m_array;
+        const ArrayData::Ref_t m_array;
         uint32_t m_id;
     };
 
-    uint32_t& id = m_objectToId[&array];
+    uint32_t& id = m_objectToId[&*array];
     if (id == 0) {
         id = ++m_objectIdCounter;
         addPlanNew(new ArraySaver(array, id));
@@ -242,22 +242,22 @@ interpreter::vmio::FileSaveContext::addArray(const ArrayData& array)
 }
 
 uint32_t
-interpreter::vmio::FileSaveContext::addStructureType(const StructureTypeData& type)
+interpreter::vmio::FileSaveContext::addStructureType(const StructureTypeData::Ref_t& type)
 {
     // ex IntVMSaveContext::addStructureType
     class StructureTypeSaver : public Saver {
      public:
-        StructureTypeSaver(const StructureTypeData& type, uint32_t id)
+        StructureTypeSaver(const StructureTypeData::Ref_t& type, uint32_t id)
             : m_type(type), m_id(id)
             { }
         virtual void save(afl::io::Stream& out, FileSaveContext& parent)
-            { parent.saveStructureType(out, m_type, m_id); }
+            { parent.saveStructureType(out, *m_type, m_id); }
      private:
-        const StructureTypeData& m_type;
+        const StructureTypeData::Ref_t m_type;
         uint32_t m_id;
     };
 
-    uint32_t& id = m_objectToId[&type];
+    uint32_t& id = m_objectToId[&*type];
     if (id == 0) {
         id = ++m_objectIdCounter;
         addPlanNew(new StructureTypeSaver(type, id));
@@ -266,22 +266,22 @@ interpreter::vmio::FileSaveContext::addStructureType(const StructureTypeData& ty
 }
 
 uint32_t
-interpreter::vmio::FileSaveContext::addStructureValue(const StructureValueData& value)
+interpreter::vmio::FileSaveContext::addStructureValue(const StructureValueData::Ref_t& value)
 {
     // ex IntVMSaveContext::addStructureValue
     class StructureValueSaver : public Saver {
      public:
-        StructureValueSaver(const StructureValueData& value, uint32_t id)
+        StructureValueSaver(const StructureValueData::Ref_t& value, uint32_t id)
             : m_value(value), m_id(id)
             { }
         virtual void save(afl::io::Stream& out, FileSaveContext& parent)
-            { parent.saveStructureValue(out, m_value, m_id); }
+            { parent.saveStructureValue(out, *m_value, m_id); }
      private:
-        const StructureValueData& m_value;
+        const StructureValueData::Ref_t m_value;
         uint32_t m_id;
     };
 
-    uint32_t& id = m_objectToId[&value];
+    uint32_t& id = m_objectToId[&*value];
     if (id == 0) {
         id = ++m_objectIdCounter;
         addPlanNew(new StructureValueSaver(value, id));
@@ -477,7 +477,7 @@ interpreter::vmio::FileSaveContext::saveFrame(afl::io::Stream& out, const Proces
     // Property 1: header
     so.startProperty(0);
     structures::FrameHeader header;
-    header.bcoRef = addBCO(*fr.bco);
+    header.bcoRef = addBCO(fr.bco);
     header.pc = convertSize(fr.pc);
     header.contextSP = convertSize(fr.contextSP);
     header.exceptionSP = convertSize(fr.exceptionSP);

@@ -6,8 +6,9 @@
 #define C2NG_INTERPRETER_ARRAYDATA_HPP
 
 #include <vector>
-#include "afl/base/types.hpp"
+#include "afl/base/ref.hpp"
 #include "afl/base/refcounted.hpp"
+#include "afl/base/types.hpp"
 #include "afl/data/segment.hpp"
 
 namespace interpreter {
@@ -18,6 +19,8 @@ namespace interpreter {
         Consists of a set of dimensions, plus a Segment containing the array data. */
     class ArrayData : public afl::base::RefCounted {
      public:
+        typedef afl::base::Ref<ArrayData> Ref_t;
+
         /** Constructor.
             Makes an empty array with no dimensions. */
         ArrayData();

@@ -22,7 +22,7 @@
 AFL_TEST("interpreter.vmio.NullSaveContext:addBCO", a)
 {
     interpreter::vmio::NullSaveContext testee;
-    interpreter::BytecodeObject bco;
+    interpreter::BCORef_t bco = interpreter::BytecodeObject::create(false);
     AFL_CHECK_THROWS(a, testee.addBCO(bco), interpreter::Error);
 }
 
@@ -30,27 +30,27 @@ AFL_TEST("interpreter.vmio.NullSaveContext:addHash", a)
 {
     interpreter::vmio::NullSaveContext testee;
     afl::data::Hash::Ref_t hash = afl::data::Hash::create();
-    AFL_CHECK_THROWS(a, testee.addHash(*hash), interpreter::Error);
+    AFL_CHECK_THROWS(a, testee.addHash(hash), interpreter::Error);
 }
 
 AFL_TEST("interpreter.vmio.NullSaveContext:addArray", a)
 {
     interpreter::vmio::NullSaveContext testee;
-    interpreter::ArrayData array;
+    interpreter::ArrayData::Ref_t array = *new interpreter::ArrayData();
     AFL_CHECK_THROWS(a, testee.addArray(array), interpreter::Error);
 }
 
 AFL_TEST("interpreter.vmio.NullSaveContext:addStructureType", a)
 {
     interpreter::vmio::NullSaveContext testee;
-    interpreter::StructureTypeData type;
+    interpreter::StructureTypeData::Ref_t type = *new interpreter::StructureTypeData();
     AFL_CHECK_THROWS(a, testee.addStructureType(type), interpreter::Error);
 }
 
 AFL_TEST("interpreter.vmio.NullSaveContext:addStructureValue", a)
 {
     interpreter::vmio::NullSaveContext testee;
-    interpreter::StructureValueData value(*new interpreter::StructureTypeData());
+    interpreter::StructureValueData::Ref_t value = *new interpreter::StructureValueData(*new interpreter::StructureTypeData());
     AFL_CHECK_THROWS(a, testee.addStructureValue(value), interpreter::Error);
 }
 

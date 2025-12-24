@@ -54,10 +54,10 @@ interpreter::vmio::AssemblerSaveContext::~AssemblerSaveContext()
 { }
 
 uint32_t
-interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObject& bco)
+interpreter::vmio::AssemblerSaveContext::addBCO(const BCORef_t& bco)
 {
     struct BytecodeMetaObject : public MetaObject {
-        BytecodeMetaObject(const interpreter::BytecodeObject& bco)
+        BytecodeMetaObject(const BCORef_t& bco)
             : m_bco(bco)
             { }
         virtual void writeDeclaration(AssemblerSaveContext& /*asc*/, afl::io::TextWriter& out)
@@ -67,20 +67,20 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
         virtual void writeBody(AssemblerSaveContext& asc, afl::io::TextWriter& out)
             {
                 // Fetch references
-                const afl::data::NameMap& locals = m_bco.localVariables();
+                const afl::data::NameMap& locals = m_bco->localVariables();
 
                 // Prototype
-                String_t keyword = (m_bco.isProcedure() ? "Sub" : "Function");
+                String_t keyword = (m_bco->isProcedure() ? "Sub" : "Function");
                 size_t declareFrom;
                 bool declareArgs;
                 bool declareVarargs;
-                if (m_bco.getMinArgs() == 0 && m_bco.getMaxArgs() == 0 && !m_bco.isVarargs()) {
+                if (m_bco->getMinArgs() == 0 && m_bco->getMaxArgs() == 0 && !m_bco->isVarargs()) {
                     // Nullary function
                     out.writeLine(Format("%s %s", keyword, name));
                     declareFrom = 0;
                     declareArgs = false;
                     declareVarargs = true;
-                } else if (m_bco.getMaxArgs() < m_bco.getMinArgs() || locals.getNumNames() < m_bco.getMaxArgs()) {
+                } else if (m_bco->getMaxArgs() < m_bco->getMinArgs() || locals.getNumNames() < m_bco->getMaxArgs()) {
                     // Invalid
                     out.writeLine(Format("%s %s", keyword, name));
                     declareFrom = 0;
@@ -89,28 +89,28 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
                 } else {
                     // Regular parameterized function
                     out.writeText(Format("%s %s (", keyword, name));
-                    for (size_t i = 0, n = m_bco.getMaxArgs(); i < n; ++i) {
+                    for (size_t i = 0, n = m_bco->getMaxArgs(); i < n; ++i) {
                         // Separator
                         if (i != 0) {
                             out.writeText(", ");
                         }
 
                         // Optional?
-                        if (i == m_bco.getMinArgs()) {
+                        if (i == m_bco->getMinArgs()) {
                             out.writeText("Optional ");
                         }
 
                         // Name
                         out.writeText(locals.getNameByIndex(i));
                     }
-                    declareFrom = m_bco.getMaxArgs();
+                    declareFrom = m_bco->getMaxArgs();
                     declareArgs = false;
 
-                    if (m_bco.isVarargs() && locals.getNumNames() > m_bco.getMaxArgs()) {
-                        if (m_bco.getMaxArgs() != 0) {
+                    if (m_bco->isVarargs() && locals.getNumNames() > m_bco->getMaxArgs()) {
+                        if (m_bco->getMaxArgs() != 0) {
                             out.writeText(", ");
                         }
-                        out.writeText(locals.getNameByIndex(m_bco.getMaxArgs()));
+                        out.writeText(locals.getNameByIndex(m_bco->getMaxArgs()));
                         out.writeText("()");
                         declareVarargs = false;
                         ++declareFrom;
@@ -121,27 +121,27 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
                     out.writeLine(")");
 
                 }
-                if (name != m_bco.getSubroutineName()) {
-                    out.writeLine(Format("  .name %s", quoteName(m_bco.getSubroutineName())));
+                if (name != m_bco->getSubroutineName()) {
+                    out.writeLine(Format("  .name %s", quoteName(m_bco->getSubroutineName())));
                 }
 
                 // Locals
                 for (size_t i = declareFrom, n = locals.getNumNames(); i < n; ++i) {
                     out.writeLine(Format("  .local %s", quoteName(locals.getNameByIndex(i))));
                 }
-                if (declareVarargs && m_bco.isVarargs()) {
+                if (declareVarargs && m_bco->isVarargs()) {
                     out.writeLine("  .varargs");
                 }
 
                 // Argument limits
                 if (declareArgs) {
-                    out.writeLine(Format("  .min_args %d", m_bco.getMinArgs()));
-                    out.writeLine(Format("  .max_args %d", m_bco.getMaxArgs()));
+                    out.writeLine(Format("  .min_args %d", m_bco->getMinArgs()));
+                    out.writeLine(Format("  .max_args %d", m_bco->getMaxArgs()));
                 }
 
                 // Debug information: File name
-                if (asc.isDebugInformationEnabled() && !m_bco.getFileName().empty()) {
-                    out.writeLine(Format("  .file %s", m_bco.getFileName()));
+                if (asc.isDebugInformationEnabled() && !m_bco->getFileName().empty()) {
+                    out.writeLine(Format("  .file %s", m_bco->getFileName()));
                 }
 
                 // Debug information: Line numbers
@@ -149,7 +149,7 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
                 // If the debug information is well-formed, this will Just Work[tm].
                 // If the debug information is not well-formed (i.e. non-continguous), write out the excess at the end.
                 // If debug information is disabled, just pretend that we already processed everything.
-                const std::vector<uint32_t>& lineNumbers = m_bco.lineNumbers();
+                const std::vector<uint32_t>& lineNumbers = m_bco->lineNumbers();
                 size_t lineLimit = lineNumbers.size() & ~1;
                 size_t lineIndex = (asc.isDebugInformationEnabled() ? 0 : lineLimit);
 
@@ -157,8 +157,8 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
                 // Labels are for the benefit of the user only and not needed for re-assembling,
                 // thus it's not an error if we see an out-of-bounds label (and it's not the end of the world if we miss one).
                 std::set<size_t> labels;
-                for (size_t i = 0, n = m_bco.getNumInstructions(); i < n; ++i) {
-                    const Opcode& insn = m_bco(i);
+                for (size_t i = 0, n = m_bco->getNumInstructions(); i < n; ++i) {
+                    const Opcode& insn = (*m_bco)(i);
                     if (insn.isJumpOrCatch() && (insn.minor & Opcode::jSymbolic) == 0 && insn.arg <= n) {
                         labels.insert(insn.arg);
                     }
@@ -166,7 +166,7 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
 
                 // Assembler code
                 std::set<size_t>::const_iterator labelIt = labels.begin();
-                for (size_t i = 0, n = m_bco.getNumInstructions(); i < n; ++i) {
+                for (size_t i = 0, n = m_bco->getNumInstructions(); i < n; ++i) {
                     // Label
                     if (labelIt != labels.end() && *labelIt == i) {
                         out.writeLine(Format("  label%d:", i));
@@ -178,9 +178,9 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
                         lineIndex += 2;
                     }
                     // Instruction
-                    Opcode opc = m_bco(i);
+                    Opcode opc = (*m_bco)(i);
                     opc.major = opc.getExternalMajor();
-                    out.writeLine(asc.formatInstruction(opc, m_bco));
+                    out.writeLine(asc.formatInstruction(opc, *m_bco));
                 }
 
                 // Potential label at end of subroutine
@@ -197,20 +197,20 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
                 out.writeLine(Format("End%s", keyword));
                 out.writeLine();
             }
-        const interpreter::BytecodeObject& m_bco;
+        const BCORef_t m_bco;
     };
 
 
-    Map_t::iterator it = m_metadata.find(&bco);
+    Map_t::iterator it = m_metadata.find(&*bco);
     if (it == m_metadata.end()) {
         MetaObject* p = new BytecodeMetaObject(bco);
-        m_metadata.insertNew(&bco, p);
+        m_metadata.insertNew(&*bco, p);
 
         // Save preconditions
         {
             afl::io::NullStream null;
             afl::charset::Utf8Charset cs;
-            SaveVisitor::save(null, bco.literals(), bco.literals().size(), cs, *this);
+            SaveVisitor::save(null, bco->literals(), bco->literals().size(), cs, *this);
         }
 
         // Sequence it
@@ -218,8 +218,8 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
         p->isSequenced = true;
 
         // Assign a name
-        if (Tokenizer::isValidUppercaseIdentifier(bco.getSubroutineName()) && m_usedNames.find(bco.getSubroutineName()) == m_usedNames.end()) {
-            p->name = bco.getSubroutineName();
+        if (Tokenizer::isValidUppercaseIdentifier(bco->getSubroutineName()) && m_usedNames.find(bco->getSubroutineName()) == m_usedNames.end()) {
+            p->name = bco->getSubroutineName();
         } else {
             do {
                 p->name = Format("BCO%d", ++m_counter);
@@ -235,24 +235,24 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const interpreter::BytecodeObjec
 }
 
 uint32_t
-interpreter::vmio::AssemblerSaveContext::addHash(const afl::data::Hash& hash)
+interpreter::vmio::AssemblerSaveContext::addHash(const afl::data::Hash::Ref_t& hash)
 {
     (void) hash;
     return 0;
 }
 
 uint32_t
-interpreter::vmio::AssemblerSaveContext::addArray(const interpreter::ArrayData& array)
+interpreter::vmio::AssemblerSaveContext::addArray(const ArrayData::Ref_t& array)
 {
     (void) array;
     return 0;
 }
 
 uint32_t
-interpreter::vmio::AssemblerSaveContext::addStructureType(const interpreter::StructureTypeData& type)
+interpreter::vmio::AssemblerSaveContext::addStructureType(const interpreter::StructureTypeData::Ref_t& type)
 {
     struct StructureTypeMetaObject : public MetaObject {
-        StructureTypeMetaObject(const interpreter::StructureTypeData& type)
+        StructureTypeMetaObject(const interpreter::StructureTypeData::Ref_t& type)
             : m_type(type)
             { }
         virtual void writeDeclaration(AssemblerSaveContext& /*asc*/, afl::io::TextWriter& out)
@@ -265,7 +265,7 @@ interpreter::vmio::AssemblerSaveContext::addStructureType(const interpreter::Str
                 out.writeLine(Format("Struct %s", name));
 
                 // Content
-                const afl::data::NameMap& names = m_type.names();
+                const afl::data::NameMap& names = m_type->names();
                 for (afl::data::NameMap::Index_t i = 0, n = names.getNumNames(); i < n; ++i) {
                     out.writeLine(Format("    .field %s", names.getNameByIndex(i)));
                 }
@@ -274,13 +274,13 @@ interpreter::vmio::AssemblerSaveContext::addStructureType(const interpreter::Str
                 out.writeLine("EndStruct");
                 out.writeLine();
             }
-        const interpreter::StructureTypeData& m_type;
+        const interpreter::StructureTypeData::Ref_t m_type;
     };
 
-    Map_t::iterator it = m_metadata.find(&type);
+    Map_t::iterator it = m_metadata.find(&*type);
     if (it == m_metadata.end()) {
         MetaObject* p = new StructureTypeMetaObject(type);
-        m_metadata.insertNew(&type, p);
+        m_metadata.insertNew(&*type, p);
 
         // Sequence it
         m_sequence.push_back(p);
@@ -300,7 +300,7 @@ interpreter::vmio::AssemblerSaveContext::addStructureType(const interpreter::Str
 }
 
 uint32_t
-interpreter::vmio::AssemblerSaveContext::addStructureValue(const interpreter::StructureValueData& value)
+interpreter::vmio::AssemblerSaveContext::addStructureValue(const interpreter::StructureValueData::Ref_t& value)
 {
     (void) value;
     return 0;

@@ -24,15 +24,15 @@ AFL_TEST("interpreter.vmio.ProcessSaveContext", a)
     // Parent
     class TestParent : public interpreter::SaveContext {
      public:
-        virtual uint32_t addBCO(const interpreter::BytecodeObject& /*bco*/)
+        virtual uint32_t addBCO(const interpreter::BCORef_t& /*bco*/)
             { return 10; }
-        virtual uint32_t addHash(const afl::data::Hash& /*hash*/)
+        virtual uint32_t addHash(const afl::data::Hash::Ref_t& /*hash*/)
             { return 20; }
-        virtual uint32_t addArray(const interpreter::ArrayData& /*array*/)
+        virtual uint32_t addArray(const interpreter::ArrayData::Ref_t& /*array*/)
             { return 30; }
-        virtual uint32_t addStructureType(const interpreter::StructureTypeData& /*type*/)
+        virtual uint32_t addStructureType(const interpreter::StructureTypeData::Ref_t& /*type*/)
             { return 40; }
-        virtual uint32_t addStructureValue(const interpreter::StructureValueData& /*value*/)
+        virtual uint32_t addStructureValue(const interpreter::StructureValueData::Ref_t& /*value*/)
             { return 50; }
         virtual bool isCurrentProcess(const interpreter::Process* /*p*/)
             { return false; }
@@ -55,22 +55,22 @@ AFL_TEST("interpreter.vmio.ProcessSaveContext", a)
 
     // Test method passing (for coverage only)
     {
-        interpreter::BytecodeObject bco;
+        interpreter::BCORef_t bco = interpreter::BytecodeObject::create(false);
         a.checkEqual("11. addBCO", testee.addBCO(bco), 10U);
     }
     {
-        a.checkEqual("12. addHash", testee.addHash(*afl::data::Hash::create()), 20U);
+        a.checkEqual("12. addHash", testee.addHash(afl::data::Hash::create()), 20U);
     }
     {
-        interpreter::ArrayData data;
+        interpreter::ArrayData::Ref_t data = *new interpreter::ArrayData();
         a.checkEqual("13. addArray", testee.addArray(data), 30U);
     }
     {
-        interpreter::StructureTypeData type;
+        interpreter::StructureTypeData::Ref_t type = *new interpreter::StructureTypeData();
         a.checkEqual("14. addStructureType", testee.addStructureType(type), 40U);
     }
     {
-        interpreter::StructureValueData value(*new interpreter::StructureTypeData());
+        interpreter::StructureValueData::Ref_t value = *new interpreter::StructureValueData(*new interpreter::StructureTypeData());
         a.checkEqual("15. addStructureValue", testee.addStructureValue(value), 50U);
     }
 }

@@ -21,11 +21,11 @@ namespace interpreter { namespace vmio {
         ProcessSaveContext(SaveContext& parent, const Process& process);
 
         // SaveContext:
-        virtual uint32_t addBCO(const BytecodeObject& bco);
-        virtual uint32_t addHash(const afl::data::Hash& hash);
-        virtual uint32_t addArray(const ArrayData& array);
-        virtual uint32_t addStructureType(const StructureTypeData& type);
-        virtual uint32_t addStructureValue(const StructureValueData& value);
+        virtual uint32_t addBCO(const BCORef_t& bco);
+        virtual uint32_t addHash(const afl::data::Hash::Ref_t& hash);
+        virtual uint32_t addArray(const ArrayData::Ref_t& array);
+        virtual uint32_t addStructureType(const StructureTypeData::Ref_t& type);
+        virtual uint32_t addStructureValue(const StructureValueData::Ref_t& value);
         virtual bool isCurrentProcess(const Process* p);
 
      private:

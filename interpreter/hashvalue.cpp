@@ -172,7 +172,7 @@ interpreter::HashValue::store(TagNode& out, afl::io::DataSink& /*aux*/, SaveCont
 {
     // ex IntHash::store
     out.tag = TagNode::Tag_Hash;
-    out.value = ctx.addHash(*m_data);
+    out.value = ctx.addHash(m_data);
 }
 
 // Value:

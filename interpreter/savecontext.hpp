@@ -8,13 +8,13 @@
 #include "afl/base/deletable.hpp"
 #include "afl/base/types.hpp"
 #include "afl/data/hash.hpp"
+#include "interpreter/arraydata.hpp"
+#include "interpreter/bytecodeobject.hpp"
+#include "interpreter/structuretypedata.hpp"
+#include "interpreter/structurevaluedata.hpp"
 
 namespace interpreter {
 
-    class BytecodeObject;
-    class ArrayData;
-    class StructureTypeData;
-    class StructureValueData;
     class Process;
 
     /** Save context, base class.
@@ -36,31 +36,31 @@ namespace interpreter {
             \param bco bytecode object
             \return value for Tag_BCO tag
             \throw Error BCO cannot be saved */
-        virtual uint32_t addBCO(const BytecodeObject& bco) = 0;
+        virtual uint32_t addBCO(const BCORef_t& bco) = 0;
 
         /** Add hash.
             \param hash hash value object
             \return value for Tag_Hash tag
             \throw Error hash cannot be saved */
-        virtual uint32_t addHash(const afl::data::Hash& hash) = 0;
+        virtual uint32_t addHash(const afl::data::Hash::Ref_t& hash) = 0;
 
         /** Add array.
             \param array array data object
             \return value for Tag_Array tag
             \throw Error array cannot be saved */
-        virtual uint32_t addArray(const ArrayData& array) = 0;
+        virtual uint32_t addArray(const ArrayData::Ref_t& array) = 0;
 
         /** Add structure type object.
             \param type structure type object
             \return value for Tag_StructType tag
             \throw Error structure type cannot be saved */
-        virtual uint32_t addStructureType(const StructureTypeData& type) = 0;
+        virtual uint32_t addStructureType(const StructureTypeData::Ref_t& type) = 0;
 
         /** Add structure value object.
             \param value structure value
             \return value for Tag_Struct tag
             \throw Error value cannot be saved */
-        virtual uint32_t addStructureValue(const StructureValueData& value) = 0;
+        virtual uint32_t addStructureValue(const StructureValueData::Ref_t& value) = 0;
 
         /** Check for current process.
             This function is used to serialize mutexes that are part of a process' stack frames.
