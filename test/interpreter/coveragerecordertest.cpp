@@ -115,6 +115,10 @@ AFL_TEST("interpreter.CoverageRecorder:recursive", a)
                  "DA:10,1\n"
                  "DA:20,0\n"
                  "end_of_record\n");
+
+    // Clean up for valgrind
+    bco1->literals().clear();
+    bco2->literals().clear();
 }
 
 /** Test multiple files.

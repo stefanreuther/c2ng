@@ -239,4 +239,7 @@ AFL_TEST("interpreter.ArrayValue:toString:recursive", a)
     // String
     a.checkEqual("21. toString", testee.toString(false).substr(0, 2), "#<");
     a.checkEqual("22. toString", testee.toString(true).substr(0, 2), "#<");
+
+    // Clean up for valgrind
+    content->content().clear();
 }
