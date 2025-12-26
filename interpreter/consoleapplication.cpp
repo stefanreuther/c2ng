@@ -39,6 +39,7 @@
 #include "util/io.hpp"
 #include "util/string.hpp"
 #include "version.hpp"
+#include "interpreter/assembler.hpp"
 
 using afl::base::Optional;
 using afl::base::Ref;
@@ -87,8 +88,8 @@ struct interpreter::ConsoleApplication::Parameters {
 namespace {
     const char LOG_NAME[] = "script";
 
-    /* Compile the given job into a list of BCOs. */
-    void doCompile(interpreter::World& world, const ConsoleApplication::Parameters& params, std::vector<BCOPtr_t>& result)
+    /* Compile commands into a BCORef_t */
+    BCORef_t doCompileCommands(interpreter::World& world, const ConsoleApplication::Parameters& params)
     {
         // Default parameters
         interpreter::DefaultStatementCompilationContext scc(world);
@@ -99,65 +100,81 @@ namespace {
             scc.withFlag(scc.PreexecuteLoad);
         }
 
-        // Commands or files?
-        if (params.opt_commands) {
-            // Commands: compile everything into one single BCO
-            BCORef_t bco = interpreter::BytecodeObject::create(true);
-            interpreter::MemoryCommandSource cs;
-            for (size_t i = 0, n = params.job.size(); i < n; ++i) {
-                cs.addLine(params.job[i]);
-            }
+        // Commands: compile everything into one single BCO
+        BCORef_t bco = interpreter::BytecodeObject::create(true);
+        interpreter::MemoryCommandSource cs;
+        for (size_t i = 0, n = params.job.size(); i < n; ++i) {
+            cs.addLine(params.job[i]);
+        }
 
-            interpreter::StatementCompiler sc(cs);
-            sc.setOptimisationLevel(params.optimisationLevel);
-            sc.compileList(*bco, scc);
-            sc.finishBCO(*bco, scc);
-            result.push_back(bco.asPtr());
-            world.logListener().write(LogListener::Debug, LOG_NAME, Format(world.translator()("Compiled %d command%!1{s%}.").c_str(), params.job.size()));
+        interpreter::StatementCompiler sc(cs);
+        sc.setOptimisationLevel(params.optimisationLevel);
+        sc.compileList(*bco, scc);
+        sc.finishBCO(*bco, scc);
+        world.logListener().write(LogListener::Debug, LOG_NAME, Format(world.translator()("Compiled %d command%!1{s%}.").c_str(), params.job.size()));
+
+        return bco;
+    }
+
+    /* Compile a file. */
+    BCORef_t doCompileFile(interpreter::World& world, const ConsoleApplication::Parameters& params, const String_t& fileName, interpreter::SaveContext& ctx)
+    {
+        // Default parameters
+        interpreter::DefaultStatementCompilationContext scc(world);
+        scc.withFlag(scc.ExpressionsAreStatements);
+        scc.withFlag(scc.LinearExecution);
+        scc.withFlag(scc.LocalContext);
+        if (params.opt_preexecLoad) {
+            scc.withFlag(scc.PreexecuteLoad);
+        }
+
+        FileSystem& fs = world.fileSystem();
+        String_t ext = util::getFileNameExtension(fs, fileName);
+        Ref<Stream> stream(fs.openFile(fileName, FileSystem::OpenRead));
+        if (ext == ".qc") {
+            // Load object file
+            interpreter::vmio::NullLoadContext lc;
+            interpreter::vmio::ObjectLoader loader(*params.gameCharset, world.translator(), lc);
+            return loader.loadObjectFile(stream);
         } else {
-            // Files: compile files into individual BCOs
-            for (size_t i = 0, n = params.job.size(); i < n; ++i) {
-                FileSystem& fs = world.fileSystem();
-                String_t ext = util::getFileNameExtension(fs, params.job[i]);
-                Ref<Stream> stream(fs.openFile(params.job[i], FileSystem::OpenRead));
-                if (ext == ".qc") {
-                    // Load object file
-                    interpreter::vmio::NullLoadContext lc;
-                    interpreter::vmio::ObjectLoader loader(*params.gameCharset, world.translator(), lc);
-                    result.push_back(loader.loadObjectFile(stream).asPtr());
+            // Textual source
+            afl::io::TextFile tf(*stream);
+            try {
+                if (ext == ".qs") {
+                    // Assemble
+                    interpreter::Assembler as(tf);
+                    as.compile();
+                    as.finish(world.logListener(), world.translator());
+                    return as.saveTo(ctx);
                 } else {
                     // Compile source file
                     BCORef_t bco = interpreter::BytecodeObject::create(true);
-                    afl::io::TextFile tf(*stream);
-                    interpreter::FileCommandSource cs(tf);
-                    bco->setFileName(params.job[i]);
+                    bco->setFileName(fileName);
 
-                    try {
-                        interpreter::StatementCompiler sc(cs);
-                        sc.setOptimisationLevel(params.optimisationLevel);
-                        sc.compileList(*bco, scc);
-                        sc.finishBCO(*bco, scc);
-                        result.push_back(bco.asPtr());
-                    }
-                    catch (interpreter::Error& e) {
-                        // Compiler error. Convert this exception to a FileProblemException; framework will log it in "prog: file: line: msg" format.
-                        // For a normal error in the file-given-on-command-line, this will log
-                        //     c2script: file-given-on-command-line.q: line NN: Whatever
-                        // which is what we want. For an included file (-fpreexec-load), this causes the report to look like
-                        //     c2script: file-given-on-command-line.q: line NN: Whatever
-                        //     in file 'loaded-file.q', line N
-                        // This is suboptimal, but the best we can do for now.
-                        String_t msg = Format(world.translator()("line %d: %s").c_str(), cs.getLineNumber(), e.what());
-                        String_t trace = e.getTrace();
-                        if (!trace.empty()) {
-                            msg += "\n";
-                            msg += trace;
-                        }
-                        throw afl::except::FileProblemException(tf.getName(), msg);
-                    }
+                    interpreter::FileCommandSource cs(tf);
+                    interpreter::StatementCompiler sc(cs);
+                    sc.setOptimisationLevel(params.optimisationLevel);
+                    sc.compileList(*bco, scc);
+                    sc.finishBCO(*bco, scc);
+                    return bco;
                 }
             }
-            world.logListener().write(LogListener::Debug, LOG_NAME, Format(world.translator()("Compiled %d file%!1{s%}.").c_str(), params.job.size()));
+            catch (interpreter::Error& e) {
+                // Compiler error. Convert this exception to a FileProblemException; framework will log it in "prog: file: line: msg" format.
+                // For a normal error in the file-given-on-command-line, this will log
+                //     c2script: file-given-on-command-line.q: line NN: Whatever
+                // which is what we want. For an included file (-fpreexec-load), this causes the report to look like
+                //     c2script: file-given-on-command-line.q: line NN: Whatever
+                //     in file 'loaded-file.q', line N
+                // This is suboptimal, but the best we can do for now.
+                String_t msg = Format(world.translator()("line %d: %s").c_str(), tf.getLineNumber(), e.what());
+                String_t trace = e.getTrace();
+                if (!trace.empty()) {
+                    msg += "\n";
+                    msg += trace;
+                }
+                throw afl::except::FileProblemException(tf.getName(), msg);
+            }
         }
     }
 
@@ -181,27 +198,15 @@ namespace {
 
     /* Save an object file, starting with a given BCO.
        Saves the transitive closure of that BCO. */
-    void saveObjectFile(LogListener& log, FileSystem& fs, String_t fileName, BCORef_t bco, const ConsoleApplication::Parameters& params, Translator& tx)
+    void saveObjectFile(LogListener& log, FileSystem& fs, String_t fileName, interpreter::vmio::FileSaveContext& fsc, uint32_t bcoID, const ConsoleApplication::Parameters& params, Translator& tx)
     {
         // Prepare save
-        interpreter::vmio::FileSaveContext fsc(*params.gameCharset);
         fsc.setDebugInformation(params.opt_debug);
-        uint32_t bcoID = fsc.addBCO(bco);
         log.write(LogListener::Debug, LOG_NAME, Format(tx("Writing '%s', %d object%!1{s%}...").c_str(), fileName, fsc.getNumPreparedObjects()));
 
         // Create output file
         Ref<Stream> file = fs.openFile(fileName, FileSystem::Create);
         fsc.saveObjectFile(*file, bcoID);
-    }
-
-    /* Save assembler source, starting with a given BCO.
-       Saves the transitive closure of that BCO. */
-    void saveAssemblerSource(afl::io::TextWriter& out, BCORef_t bco, const ConsoleApplication::Parameters& params)
-    {
-        interpreter::vmio::AssemblerSaveContext asc;
-        asc.setDebugInformation(params.opt_debug);
-        asc.addBCO(bco);
-        asc.save(out);
     }
 
     /* Print size information for a file */
@@ -355,26 +360,38 @@ namespace {
         FileSystem& fs = world.fileSystem();
 
         // Compile
-        std::vector<BCOPtr_t> result;
-        doCompile(world, params, result);
-
-        // Produce output
-        String_t output;
-        if (params.arg_output.get(output)) {
+        if (const String_t* pOutput = params.arg_output.get()) {
             // Single output file given. If we have multiple BCO's, merge.
-            BCORef_t bco = mergeByteCodeObjects(result);
-            saveObjectFile(log, fs, output, bco, params, world.translator());
-            return 0;
-        } else if (params.opt_commands) {
-            // No output file given, input is commands
-            log.write(LogListener::Error, LOG_NAME, world.translator()("must specify an output file ('-o FILE') if input is commands"));
-            return 1;
-        } else {
-            // No output file given, input is files. Generate output file names.
-            for (size_t i = 0; i < result.size() && i < params.job.size(); ++i) {
-                saveObjectFile(log, fs, getOutputFileName(fs, params.job[i], ".qc"), *result[i], params, world.translator());
+            // Note that a SaveContext does not keep its target objects alive, so we must give the resulting objects a name!
+            interpreter::vmio::FileSaveContext fsc(*params.gameCharset);
+            uint32_t bcoID;
+            if (params.opt_commands) {
+                bcoID = fsc.addBCO(doCompileCommands(world, params));
+            } else {
+                std::vector<BCOPtr_t> result;
+                for (size_t i = 0, n = params.job.size(); i < n; ++i) {
+                    result.push_back(doCompileFile(world, params, params.job[i], fsc).asPtr());
+                }
+                bcoID = fsc.addBCO(mergeByteCodeObjects(result));
+                world.logListener().write(LogListener::Debug, LOG_NAME, Format(world.translator()("Compiled %d file%!1{s%}."), params.job.size()));
             }
+            saveObjectFile(log, fs, *pOutput, fsc, bcoID, params, world.translator());
             return 0;
+        } else {
+            // No output file given
+            if (params.opt_commands) {
+                // No output file given, input is commands
+                log.write(LogListener::Error, LOG_NAME, world.translator()("must specify an output file ('-o FILE') if input is commands"));
+                return 1;
+            } else {
+                // No output file given, input is files. Generate output file names.
+                for (size_t i = 0, n = params.job.size(); i < n; ++i) {
+                    interpreter::vmio::FileSaveContext fsc(*params.gameCharset);
+                    uint32_t bcoID = fsc.addBCO(doCompileFile(world, params, params.job[i], fsc));
+                    saveObjectFile(log, fs, getOutputFileName(fs, params.job[i], ".qc"), fsc, bcoID, params, world.translator());
+                }
+                return 0;
+            }
         }
     }
 
@@ -384,11 +401,19 @@ namespace {
     int doDisassembleMode(interpreter::World& world, const ConsoleApplication::Parameters& params, afl::io::TextWriter& standardOutput)
     {
         // Compile
+        interpreter::vmio::AssemblerSaveContext asc;
+        asc.setDebugInformation(params.opt_debug);
         std::vector<BCOPtr_t> result;
-        doCompile(world, params, result);
+        if (params.opt_commands) {
+            result.push_back(doCompileCommands(world, params).asPtr());
+        } else {
+            for (size_t i = 0, n = params.job.size(); i < n; ++i) {
+                result.push_back(doCompileFile(world, params, params.job[i], asc).asPtr());
+            }
+        }
 
         // Merge everything
-        BCORef_t bco = mergeByteCodeObjects(result);
+        asc.addBCO(mergeByteCodeObjects(result));
 
         // Produce output
         String_t output;
@@ -396,10 +421,10 @@ namespace {
             // Save to file
             Ref<Stream> file = world.fileSystem().openFile(output, FileSystem::Create);
             afl::io::TextFile text(*file);
-            saveAssemblerSource(text, bco, params);
+            asc.save(text);
         } else {
             // Send to console
-            saveAssemblerSource(standardOutput, bco, params);
+            asc.save(standardOutput);
         }
         return 0;
     }

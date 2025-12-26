@@ -106,7 +106,7 @@ AFL_TEST("interpreter.vmio.AssemblerSaveContext:BytecodeObject:options", a)
     a.checkEqual("result", afl::string::fromMemory(out.getContent()),
                  "Sub S (M, Optional O, A())\n"
                  "  .local B\n"
-                 "  .file t.q\n"
+                 "  .file \"t.q\"\n"
                  "  label0:\n"
                  "    .line 20\n"
                  "    ssuspend\n"
@@ -141,7 +141,7 @@ AFL_TEST("interpreter.vmio.AssemblerSaveContext:BytecodeObject:bad-varargs", a)
     a.checkEqual("result", afl::string::fromMemory(out.getContent()),
                  "Sub S (M, Optional O)\n"
                  "  .varargs\n"
-                 "  .file t.q\n"
+                 "  .file \"t.q\"\n"
                  "  label0:\n"
                  "    .line 20\n"
                  "    ssuspend\n"
@@ -176,7 +176,7 @@ AFL_TEST("interpreter.vmio.AssemblerSaveContext:BytecodeObject:bad-args", a)
                  "Sub S\n"
                  "  .min_args 1\n"
                  "  .max_args 2\n"
-                 "  .file t.q\n"
+                 "  .file \"t.q\"\n"
                  "  label0:\n"
                  "    .line 20\n"
                  "    ssuspend\n"

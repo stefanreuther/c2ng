@@ -111,7 +111,7 @@ sub paragraph_default_optimizer {
                                                     '-O1', '(normal optimisation, default);',
                                                     '-O2', '(enable more expensive optimisations);',
                                                     '-O3', '(enable optimisations that may change behaviour in boundary case, e.g. generate different error messages than normal);',
-                                                    '-O-1', '(generate most naive code possible. This setting is not intended for normal use, but as a way out if I broke something and optimisation breaks your script.)'.$sep));
+                                                    '-O-1', '(generate most naive code possible. This setting is not intended for normal use, but as a way out if I broke something and optimisation breaks your script)'.$sep));
 }
 
 sub paragraph_default_command {

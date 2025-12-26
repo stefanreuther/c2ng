@@ -246,6 +246,11 @@ namespace interpreter {
             \param label Label to place (from makeLabel()) */
         void addJump(uint8_t flags, Label_t label);
 
+        /** Add a literal.
+            \param literal Literal to push
+            \return Index into literal table */
+        uint16_t addLiteral(const afl::data::Value* literal);
+
         /** Add push-literal instruction.
             Selects the optimum instruction for creating the given literal.
             \param literal Literal to push */

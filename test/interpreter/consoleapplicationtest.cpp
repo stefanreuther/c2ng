@@ -5,6 +5,7 @@
 
 #include "interpreter/consoleapplication.hpp"
 
+#include "afl/except/fileproblemexception.hpp"
 #include "afl/io/filemapping.hpp"
 #include "afl/io/internalfilesystem.hpp"
 #include "afl/io/internalstream.hpp"
@@ -117,6 +118,7 @@ AFL_TEST("interpreter.ConsoleApplication:compile", a)
     InternalEnvironment env;
 
     afl::data::StringList_t args;
+    args.push_back("-c");              // no-op coverage farming
     args.push_back("-k");
     args.push_back("print 5");
     args.push_back("-o");
@@ -148,6 +150,32 @@ AFL_TEST("interpreter.ConsoleApplication:compile:file-to-file", a)
     AFL_CHECK_SUCCEEDS(a("expect output to exist"), fs.openFile("/x.qc", FileSystem::OpenRead));
 }
 
+/* Compile multiple sources to one file */
+AFL_TEST("interpreter.ConsoleApplication:compile:multiple", a)
+{
+    InternalFileSystem fs;
+    InternalEnvironment env;
+
+    fs.openFile("/a.q", FileSystem::Create)
+        ->fullWrite(afl::string::toBytes("print 'a'\n"));
+    fs.openFile("/b.q", FileSystem::Create)
+        ->fullWrite(afl::string::toBytes("print 'b'\n"));
+
+    afl::data::StringList_t args;
+    args.push_back("a.q");
+    args.push_back("b.q");
+    args.push_back("-o");
+    args.push_back("x.qc");
+    env.setCommandLine(args);
+
+    int ret = interpreter::ConsoleApplication(env, fs).run();
+    a.checkEqual("expect success return", ret, 0);
+
+    AFL_CHECK_SUCCEEDS(a("expect output to exist"), fs.openFile("/x.qc", FileSystem::OpenRead));
+    AFL_CHECK_THROWS(a("must not have a.qc"), fs.openFile("/a.qc", FileSystem::OpenRead), afl::except::FileProblemException);
+    AFL_CHECK_THROWS(a("must not have b.qc"), fs.openFile("/b.qc", FileSystem::OpenRead), afl::except::FileProblemException);
+}
+
 /* Error case: commands given, but no output file name */
 AFL_TEST("interpreter.ConsoleApplication:compile:error:no-output", a)
 {
@@ -165,6 +193,54 @@ AFL_TEST("interpreter.ConsoleApplication:compile:error:no-output", a)
     int ret = interpreter::ConsoleApplication(env, fs).run();
     a.checkDifferent("expect success return", ret, 0);
     a.checkDifferent("expect nonempty error output", out->getContent().size(), 0U);
+}
+
+/* Compile, syntax error in script */
+AFL_TEST("interpreter.ConsoleApplication:compile:error", a)
+{
+    InternalFileSystem fs;
+    InternalEnvironment env;
+
+    Ptr<InternalStream> err = new InternalStream();
+    env.setChannelStream(Environment::Error, err);
+    env.setInvocationName("c2compiler");
+
+    fs.openFile("/x.q", FileSystem::Create)
+        ->fullWrite(afl::string::toBytes("sub foo\n(\n"));
+
+    afl::data::StringList_t args;
+    args.push_back("x.q");
+    env.setCommandLine(args);
+
+    int ret = interpreter::ConsoleApplication(env, fs).run();
+    a.checkEqual("expect success return", ret, 1);
+    a.checkEqual("expect error output", afl::string::fromBytes(err->getContent()).substr(0, 25), "c2compiler: /x.q: line 2:");
+
+    AFL_CHECK_THROWS(a("expect output to not exist"), fs.openFile("/x.qc", FileSystem::OpenRead), afl::except::FileProblemException);
+}
+
+/* Compile, syntax error in assembly language */
+AFL_TEST("interpreter.ConsoleApplication:compile:error:asm", a)
+{
+    InternalFileSystem fs;
+    InternalEnvironment env;
+
+    Ptr<InternalStream> err = new InternalStream();
+    env.setChannelStream(Environment::Error, err);
+    env.setInvocationName("c2compiler");
+
+    fs.openFile("/x.qs", FileSystem::Create)
+        ->fullWrite(afl::string::toBytes("sub foo\n(\n"));
+
+    afl::data::StringList_t args;
+    args.push_back("x.qs");
+    env.setCommandLine(args);
+
+    int ret = interpreter::ConsoleApplication(env, fs).run();
+    a.checkEqual("expect success return", ret, 1);
+    a.checkEqual("expect error output", afl::string::fromBytes(err->getContent()).substr(0, 26), "c2compiler: /x.qs: line 2:");
+
+    AFL_CHECK_THROWS(a("expect output to not exist"), fs.openFile("/x.qc", FileSystem::OpenRead), afl::except::FileProblemException);
 }
 
 /*
@@ -263,7 +339,7 @@ AFL_TEST("interpreter.ConsoleApplication:disassemble:file-to-file", a)
     String_t expect =
         "Sub BCO1\n"
         "  .name -\n"
-        "  .file f.q\n"
+        "  .file \"f.q\"\n"
         "    .line 1\n"
         "    pushint         5\n"
         "    sprint\n"
@@ -308,6 +384,171 @@ AFL_TEST("interpreter.ConsoleApplication:disassemble:file-to-file:nondebug", a)
     a.checkEqual("expected output", output, expect);
 }
 
+/* Assemble/disassemble to standard output */
+AFL_TEST("interpreter.ConsoleApplication:disassemble:asm", a)
+{
+    InternalFileSystem fs;
+    InternalEnvironment env;
+
+    Ptr<InternalStream> out = new InternalStream();
+    env.setChannelStream(Environment::Output, out);
+
+    fs.openFile("/t.qs", FileSystem::Create)
+        ->fullWrite(afl::string::toBytes("sub test\n"
+                                         "  pushint 1\n"
+                                         "  sprint\n"
+                                         "endsub"));
+
+    afl::data::StringList_t args;
+    args.push_back("t.qs");
+    args.push_back("-S");
+    env.setCommandLine(args);
+
+    int ret = interpreter::ConsoleApplication(env, fs).run();
+    a.checkEqual("expect success return", ret, 0);
+
+    String_t output = util::normalizeLinefeeds(out->getContent());
+    String_t expect =
+        "Sub TEST\n"
+        "    pushint         1\n"
+        "    sprint\n"
+        "EndSub\n"
+        "\n";
+    a.checkEqual("expected output", output, expect);
+}
+
+/* Assemble/disassemble to standard output, multiple things. */
+AFL_TEST("interpreter.ConsoleApplication:disassemble:asm:multi", a)
+{
+    InternalFileSystem fs;
+    InternalEnvironment env;
+
+    Ptr<InternalStream> out = new InternalStream();
+    env.setChannelStream(Environment::Output, out);
+
+    // In this piece of code, "struct a" and "function b" are unreferenced.
+    // They will therefore be discarded after load.
+    // Loading the "*.qc" file will not show them.
+    fs.openFile("/t.qs", FileSystem::Create)
+        ->fullWrite(afl::string::toBytes("struct a\n"
+                                         ".field afield\n"
+                                         "endstruct\n"
+                                         "function b\n"
+                                         "endfunction\n"
+                                         "sub c\n"
+                                         "endsub"));
+
+    afl::data::StringList_t args;
+    args.push_back("t.qs");
+    args.push_back("-S");
+    env.setCommandLine(args);
+
+    int ret = interpreter::ConsoleApplication(env, fs).run();
+    a.checkEqual("expect success return", ret, 0);
+
+    String_t output = util::normalizeLinefeeds(out->getContent());
+    String_t expect =
+        "Struct TYPE1\n"
+        "    .field AFIELD\n"
+        "EndStruct\n"
+        "\n"
+        "Function B\n"
+        "EndFunction\n"
+        "\n"
+        "Sub C\n"
+        "EndSub\n"
+        "\n";
+    a.checkEqual("expected output", output, expect);
+}
+
+/* Disassemble to standard output, input is object file. */
+AFL_TEST("interpreter.ConsoleApplication:disassemble:object", a)
+{
+    InternalFileSystem fs;
+    InternalEnvironment env;
+
+    Ptr<InternalStream> out = new InternalStream();
+    env.setChannelStream(Environment::Output, out);
+
+    fs.openFile("/t.qc", FileSystem::Create)
+        ->fullWrite(STRIPPED_FILE);
+
+    afl::data::StringList_t args;
+    args.push_back("t.qc");
+    args.push_back("-S");
+    env.setCommandLine(args);
+
+    int ret = interpreter::ConsoleApplication(env, fs).run();
+    a.checkEqual("expect success return", ret, 0);
+
+    String_t output = util::normalizeLinefeeds(out->getContent());
+    String_t expect =
+        "Struct TYPE1\n"
+        "    .field X\n"
+        "    .field Y\n"
+        "    .field Z\n"
+        "EndStruct\n"
+        "\n"
+        "Function NARF\n"
+        "    pushlit         TYPE1\n"
+        "    sinstance\n"
+        "    sreturn         1\n"
+        "EndFunction\n"
+        "\n"
+        "Sub BCO2\n"
+        "  .name -\n"
+        "    pushlit         NARF\n"
+        "    sdefsub         NARF                % name #0\n"
+        "EndSub\n"
+        "\n";
+    a.checkEqual("expected output", output, expect);
+}
+
+/* Test "-fpreexec-load" and "-I" */
+AFL_TEST("interpreter.ConsoleApplication:disassemble:preexec-load", a)
+{
+    InternalFileSystem fs;
+    InternalEnvironment env;
+
+    fs.createDirectory("/libdir");
+    fs.openFile("/a.q", FileSystem::Create)
+        ->fullWrite(afl::string::toBytes("load 'b.q'\n"));
+    fs.openFile("/libdir/b.q", FileSystem::Create)
+        ->fullWrite(afl::string::toBytes("print 5\n"));
+
+    Ptr<InternalStream> out = new InternalStream();
+    env.setChannelStream(Environment::Output, out);
+
+    afl::data::StringList_t args;
+    args.push_back("-S");
+    args.push_back("-fpreexec-load");
+    args.push_back("-Ilibdir");
+    args.push_back("a.q");
+    env.setCommandLine(args);
+
+    int ret = interpreter::ConsoleApplication(env, fs).run();
+    a.checkEqual("expect success return", ret, 0);
+
+    String_t output = util::normalizeLinefeeds(out->getContent());
+    String_t expect =
+        "Sub BCO1\n"
+        "  .name -\n"
+        "  .file \"/libdir/b.q\"\n"
+        "    .line 1\n"
+        "    pushint         5\n"
+        "    sprint\n"
+        "EndSub\n"
+        "\n"
+        "Sub BCO2\n"
+        "  .name -\n"
+        "  .file \"a.q\"\n"
+        "    .line 1\n"
+        "    pushlit         BCO1\n"
+        "    callind         0\n"
+        "EndSub\n"
+        "\n";
+    a.checkEqual("expected output", output, expect);
+}
 
 /*
  *  Size

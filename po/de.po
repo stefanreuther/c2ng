@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-12-21 22:37+0100\n"
+"PO-Revision-Date: 2025-12-27 14:50+0100\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:390
@@ -112,7 +112,7 @@ msgstr ""
 "Applets:\n"
 "%s"
 
-#: interpreter/consoleapplication.cpp:215
+#: interpreter/consoleapplication.cpp:220
 msgid "  Code    Literals    Total   Routine"
 msgstr "  Code    Literale    Total   Routine"
 
@@ -286,11 +286,11 @@ msgstr "%d Startrampe%!1{n%}, %d Raumjäger%!1{n%}"
 msgid "%d beam%!1{s%}"
 msgstr "%d Geschütz%!1{e%}"
 
-#: interpreter/consoleapplication.cpp:279
+#: interpreter/consoleapplication.cpp:284
 msgid "%d bytes data"
 msgstr "%d Bytes Daten"
 
-#: interpreter/consoleapplication.cpp:276
+#: interpreter/consoleapplication.cpp:281
 msgid "%d bytes debug information"
 msgstr "%d Bytes Debug-Information"
 
@@ -1241,7 +1241,7 @@ msgstr ""
 "ENV=WERT\tSetze Script-Umgebungsvariable\n"
 "KOMMANDO...\tAuszuführender Befehl (interaktiv wenn keiner angegeben)"
 
-#: interpreter/consoleapplication.cpp:274
+#: interpreter/consoleapplication.cpp:279
 msgid "-> Total"
 msgstr "-> Gesamt"
 
@@ -1621,7 +1621,7 @@ msgstr ""
 msgid "Actions..."
 msgstr "Aktionen..."
 
-#: interpreter/consoleapplication.cpp:596
+#: interpreter/consoleapplication.cpp:621
 msgid ""
 "Actions:\n"
 "--compile, -c\tCompile to \"*.qc\" files (default)\n"
@@ -2981,12 +2981,12 @@ msgid "Compensation"
 msgstr "Kompensation"
 
 #: game/interface/scriptapplication.cpp:128
-#: interpreter/consoleapplication.cpp:116
+#: interpreter/consoleapplication.cpp:114
 msgid "Compiled %d command%!1{s%}."
 msgstr "%d Befehl%!1{e%} übersetzt."
 
 #: game/interface/scriptapplication.cpp:172
-#: interpreter/consoleapplication.cpp:160
+#: interpreter/consoleapplication.cpp:376
 msgid "Compiled %d file%!1{s%}."
 msgstr "%d Datei%!1{en%} übersetzt."
 
@@ -3039,7 +3039,7 @@ msgstr "Konsole"
 msgid "Console: %s"
 msgstr "Konsole: %s"
 
-#: interpreter/consoleapplication.cpp:214
+#: interpreter/consoleapplication.cpp:219
 msgid "Content of %s"
 msgstr "Inhalt von %s"
 
@@ -3686,7 +3686,7 @@ msgstr "Ende-X"
 msgid "End Y"
 msgstr "Ende-Y"
 
-#: interpreter/process.cpp:2031
+#: interpreter/process.cpp:2049
 msgid "Ended"
 msgstr "Beendet"
 
@@ -3935,6 +3935,10 @@ msgstr ""
 "Fehler beim Schließen von Dateien; möglicherweise sind Daten "
 "verlorengegangen."
 
+#: interpreter/assembler.cpp:656
+msgid "Error: \"%s\" declared but not defined"
+msgstr "Fehler: \"%s\" deklariert aber nicht definiert"
+
 #: client/tiles/tilefactory.cpp:678
 msgid "Error: unknown layout \"%s\""
 msgstr "Fehler: unbekanntes Layout \"%s\""
@@ -4144,7 +4148,7 @@ msgstr "VON: %s"
 msgid "Factories"
 msgstr "Fabriken"
 
-#: interpreter/process.cpp:2033
+#: interpreter/process.cpp:2051
 msgid "Failed"
 msgstr "Fehlgeschlagen"
 
@@ -4553,7 +4557,7 @@ msgstr "Von"
 msgid "From storage: %s"
 msgstr "Lagerbestand: %s"
 
-#: interpreter/process.cpp:2027
+#: interpreter/process.cpp:2045
 msgid "Frozen"
 msgstr "Eingefroren"
 
@@ -7325,7 +7329,7 @@ msgstr "PCC2 Ressourcendatei-Werkzeug v%s - (c) 2023-2025 Stefan Reuther"
 msgid "PCC2 Result File Unpacker v%s - (c) 2010-2025 Stefan Reuther"
 msgstr "PCC2 Result-Entpacker v%s - (c) 2010-2025 Stefan Reuther"
 
-#: interpreter/consoleapplication.cpp:617
+#: interpreter/consoleapplication.cpp:642
 msgid "PCC2 Script Compiler v%s - (c) 2017-2025 Stefan Reuther"
 msgstr "PCC2 Script-Compiler v%s - (c) 2017-2025 Stefan Reuther"
 
@@ -8188,11 +8192,11 @@ msgstr "Rund (kreisförmig, PWrap)"
 msgid "Run"
 msgstr "Ausführen"
 
-#: interpreter/process.cpp:2028
+#: interpreter/process.cpp:2046
 msgid "Runnable"
 msgstr "Auszuführen"
 
-#: interpreter/process.cpp:2029
+#: interpreter/process.cpp:2047
 msgid "Running"
 msgstr "Läuft"
 
@@ -9428,7 +9432,7 @@ msgstr "Überlebt"
 msgid "Suspend"
 msgstr "Anhalten"
 
-#: interpreter/process.cpp:2026
+#: interpreter/process.cpp:2044
 msgid "Suspended"
 msgstr "Angehalten"
 
@@ -9634,7 +9638,7 @@ msgstr "Zwischenspeicher #%d"
 msgid "Terminate"
 msgstr "Beenden"
 
-#: interpreter/process.cpp:2032
+#: interpreter/process.cpp:2050
 msgid "Terminated"
 msgstr "Beendet"
 
@@ -11301,7 +11305,7 @@ msgstr ""
 "\n"
 "Fehler bitte melden an <Streu@gmx.de>"
 
-#: interpreter/consoleapplication.cpp:619
+#: interpreter/consoleapplication.cpp:644
 msgid ""
 "Usage:\n"
 "  %s [-h]\n"
@@ -11755,7 +11759,7 @@ msgstr ""
 msgid "Wait One Turn"
 msgstr "Warte einen Zug"
 
-#: interpreter/process.cpp:2030
+#: interpreter/process.cpp:2048
 msgid "Waiting"
 msgstr "Wartet"
 
@@ -12006,7 +12010,7 @@ msgstr "Schreibe %s Daten..."
 msgid "Writing %s turn file (%d command%!1{s%})..."
 msgstr "Schreibe %s Turn-Datei (%d Kommando%!1{s%})..."
 
-#: interpreter/consoleapplication.cpp:190
+#: interpreter/consoleapplication.cpp:205
 msgid "Writing '%s', %d object%!1{s%}..."
 msgstr "Schreibe '%s', %d Objekt%!1{e%}..."
 
@@ -12445,7 +12449,7 @@ msgstr "fragen"
 msgid "at %d"
 msgstr "bei %d"
 
-#: interpreter/process.cpp:648
+#: interpreter/process.cpp:657
 msgid "at %s"
 msgstr "bei %s"
 
@@ -12492,19 +12496,19 @@ msgstr "nach Spieler"
 msgid "by team"
 msgstr "nach Team"
 
-#: interpreter/process.cpp:590
+#: interpreter/process.cpp:599
 msgid "called by %s"
 msgstr "aufgerufen von %s"
 
-#: interpreter/process.cpp:589
+#: interpreter/process.cpp:598
 msgid "called by %s, file '%s', line %d"
 msgstr "aufgerufen von %s, Datei '%s', Zeile %d"
 
-#: interpreter/process.cpp:588
+#: interpreter/process.cpp:597
 msgid "called by file '%s'"
 msgstr "aufgerufen aus Datei '%s'"
 
-#: interpreter/process.cpp:587
+#: interpreter/process.cpp:596
 msgid "called by file '%s', line %d"
 msgstr "aufgerufen aus Datei '%s', Zeile %d"
 
@@ -12747,19 +12751,19 @@ msgstr "Host, alle Spieler"
 msgid "hyperjump"
 msgstr "Hypersprung"
 
-#: interpreter/process.cpp:584
+#: interpreter/process.cpp:593
 msgid "in %s"
 msgstr "in %s"
 
-#: interpreter/process.cpp:583
+#: interpreter/process.cpp:592
 msgid "in %s, file '%s', line %d"
 msgstr "in %s, Datei '%s', Zeile %d"
 
-#: interpreter/process.cpp:582
+#: interpreter/process.cpp:591
 msgid "in file '%s'"
 msgstr "in Datei '%s'"
 
-#: interpreter/filecommandsource.cpp:40 interpreter/process.cpp:581
+#: interpreter/filecommandsource.cpp:40 interpreter/process.cpp:590
 msgid "in file '%s', line %d"
 msgstr "in Datei '%s', Zeile %d"
 
@@ -12810,8 +12814,8 @@ msgid "invalid number of threads, '%s'"
 msgstr "Ungültige Anzahl Threads, '%s'"
 
 #: game/interface/scriptapplication.cpp:402 game/sim/consoleapplication.cpp:335
-#: interpreter/consoleapplication.cpp:543
-#: interpreter/consoleapplication.cpp:582
+#: interpreter/consoleapplication.cpp:568
+#: interpreter/consoleapplication.cpp:607
 #: server/play/consoleapplication.cpp:120 util/resourcefileapplication.cpp:303
 #: util/resourcefileapplication.cpp:86
 msgid "invalid option '%s' specified. Use '%s -h' for help."
@@ -12910,7 +12914,7 @@ msgid "light"
 msgstr "leicht"
 
 #: game/interface/scriptapplication.cpp:162
-#: interpreter/consoleapplication.cpp:150
+#: interpreter/consoleapplication.cpp:170
 msgid "line %d: %s"
 msgstr "Zeile %d: %s"
 
@@ -12996,7 +13000,7 @@ msgstr "mäßig"
 msgid "mostly stable (<30%)"
 msgstr "fast stabil (<30%)"
 
-#: interpreter/consoleapplication.cpp:370
+#: interpreter/consoleapplication.cpp:384
 msgid "must specify an output file ('-o FILE') if input is commands"
 msgstr ""
 "wenn die Eingabe Befehle sind, muss eine Ausgabedatei angegeben werden ('-o "
@@ -13059,7 +13063,7 @@ msgid "no command specified. Use '%s -h' for help."
 msgstr "kein Befehl angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 
 #: game/interface/scriptapplication.cpp:299
-#: interpreter/consoleapplication.cpp:483
+#: interpreter/consoleapplication.cpp:508
 msgid "no commands specified. Use '%s -h' for help."
 msgstr "keine Befehle angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 
@@ -13100,7 +13104,7 @@ msgid "no input files specified"
 msgstr "keine Eingabedateien angegeben"
 
 #: game/interface/scriptapplication.cpp:301
-#: interpreter/consoleapplication.cpp:485
+#: interpreter/consoleapplication.cpp:510
 msgid "no input files specified. Use '%s -h' for help."
 msgstr "keine Eingabedateien angegeben. Mit '%s -h' erhalten Sie Hilfe."
 
@@ -13235,9 +13239,11 @@ msgstr "einmal pro Schiff"
 msgid "one"
 msgstr "einer"
 
-#: interpreter/consoleapplication.cpp:435
+#: interpreter/consoleapplication.cpp:460
 msgid "only one input file allowed if output file ('-o FILE') is given"
-msgstr "nur eine Eingabedatei erlaubt, wenn eine Ausgabedatei ('-o DATEI') angegeben ist"
+msgstr ""
+"nur eine Eingabedatei erlaubt, wenn eine Ausgabedatei ('-o DATEI') angegeben "
+"ist"
 
 #: server/play/consoleapplication.cpp:126
 msgid "only one player number allowed"
@@ -13252,7 +13258,7 @@ msgid "option '-C' needs an argument (the character set)"
 msgstr "Option '-C' benötigt ein Argument (den Zeichensatz)"
 
 #: game/interface/scriptapplication.cpp:377
-#: interpreter/consoleapplication.cpp:563
+#: interpreter/consoleapplication.cpp:588
 msgid "option '-O' needs a number between %d and %d as parameter"
 msgstr "Option '-O' benötigt eine Zahl zwischen %d und %d als Parameter"
 
@@ -13324,7 +13330,7 @@ msgid "parameter to '--%s' must be 'yes' or 'no'"
 msgstr "Parameter zu '--%s' muss 'yes' oder 'no' sein"
 
 #: game/interface/scriptapplication.cpp:389 game/sim/consoleapplication.cpp:291
-#: interpreter/consoleapplication.cpp:575
+#: interpreter/consoleapplication.cpp:600
 msgid "parameter to '--log' is not valid"
 msgstr "Parameter zu '--log' ist nicht gültig"
 
@@ -13473,7 +13479,7 @@ msgstr "für das gewählte Format muss eine Ausgabedatei angegeben werden ('-o')
 #: game/interface/scriptapplication.cpp:367
 #: game/maint/messagesearchapplication.cpp:516
 #: game/sim/consoleapplication.cpp:213 game/v3/trn/dumperapplication.cpp:71
-#: interpreter/consoleapplication.cpp:553
+#: interpreter/consoleapplication.cpp:578
 #: interpreter/exporter/configuration.cpp:84
 #: server/play/consoleapplication.cpp:102 util/doc/application.cpp:433
 msgid "the specified character set is not known"

@@ -326,6 +326,20 @@ interpreter::BytecodeObject::addJump(uint8_t flags, Label_t label)
     addInstruction(Opcode::maJump, flags | Opcode::jSymbolic, label);
 }
 
+// Add a literal.
+uint16_t
+interpreter::BytecodeObject::addLiteral(const afl::data::Value* literal)
+{
+    uint16_t existing;
+    if (findLiteral(m_literals, literal).get(existing)) {
+        // Recycle existing literal
+        return existing;
+    } else {
+        m_literals.pushBack(literal);
+        return packIndex(m_literals.size()-1);
+    }
+}
+
 // Add push-literal instruction.
 void
 interpreter::BytecodeObject::addPushLiteral(const afl::data::Value* literal)
@@ -354,14 +368,7 @@ interpreter::BytecodeObject::addPushLiteral(const afl::data::Value* literal)
     }
 
     // None of the above, so use general way
-    uint16_t existing;
-    if (findLiteral(m_literals, literal).get(existing)) {
-        // Recycle existing literal
-        addInstruction(Opcode::maPush, Opcode::sLiteral, existing);
-    } else {
-        m_literals.pushBack(literal);
-        addInstruction(Opcode::maPush, Opcode::sLiteral, packIndex(m_literals.size()-1));
-    }
+    addInstruction(Opcode::maPush, Opcode::sLiteral, addLiteral(literal));
 }
 
 // Add name (symbol) for later reference.

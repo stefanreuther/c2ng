@@ -141,7 +141,7 @@ interpreter::vmio::AssemblerSaveContext::addBCO(const BCORef_t& bco)
 
                 // Debug information: File name
                 if (asc.isDebugInformationEnabled() && !m_bco->getFileName().empty()) {
-                    out.writeLine(Format("  .file %s", m_bco->getFileName()));
+                    out.writeLine(Format("  .file \"%s\"", m_bco->getFileName()));
                 }
 
                 // Debug information: Line numbers
