@@ -107,6 +107,7 @@ client::loadHelpPage(game::Session& session,
                 file->setPos(nodes[i]->pos);
 
                 Reader rdr(*file, eh, csFactory);
+                rdr.setWhitespaceMode(Reader::AllWS);  // Must preserve whitespace; NodeReader will remove it later if needed
                 rdr.readNext();            // This will skip "<page"
 
                 Parser(rdr).parseNodes(result);
