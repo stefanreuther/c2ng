@@ -1666,6 +1666,8 @@ and {@group Global Command|global commands}.
 
 --------------------------------------------------------------------------------
 @version PCC2 2.41.5
+- {Load (Elementary Command)|Load} and {TryLoad} can load binary files (<tt>*.qc</tt>) that can be created
+  using the <tt>c2compiler</tt> utility.
 --------------------------------------------------------------------------------
 @version PCC2 2.41.4
 --------------------------------------------------------------------------------

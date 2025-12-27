@@ -1744,6 +1744,11 @@ interpreter::StatementCompiler::compileLoad(BytecodeObject& bco, const Statement
        (whereas <tt>Try Load file</tt> would "swallow" all errors).
        This makes it ideal for loading optional files.
 
+       By convention, script files end in ".q".
+       Since PCC2 2.41.5, this command can also load compiled binary files ending in ".qc" ("object files").
+       An object file is loaded if explicitly requested by giving a name ending in ".qc",
+       or if a requested ".q" files does not exist, whereas a matching ".qc" exists.
+
        @since PCC2 1.99.9, PCC 1.0.6 */
 
     /*      <expr>

@@ -39,8 +39,6 @@ HOST PREDICTION. We can do history, doing prediction should be possible.
 
 MORE HOSTS. Are there any left?
 
-OBJECT FILE (*.qc) SUPPORT.
-
 PCC1 FEATURES MISSING IN PCC2.
 - data transmissions (VPA, Informer).
 - data transmission settings.

@@ -40,6 +40,8 @@
 #include "interpreter/tokenizer.hpp"
 #include "interpreter/unaryexecution.hpp"
 #include "interpreter/values.hpp"
+#include "interpreter/vmio/nullloadcontext.hpp"
+#include "interpreter/vmio/objectloader.hpp"
 #include "interpreter/world.hpp"
 #include "util/translation.hpp"
 
@@ -54,6 +56,13 @@ namespace {
             throw Error::typeError(Error::ExpectProcedure);
         if ((minor & Opcode::miIMRefuseProcedures) != 0 && isProcedure)
             throw Error::typeError(Error::ExpectIndexable);
+    }
+
+    bool endsWith(const String_t& str, const char* end)
+    {
+        size_t n = std::strlen(end);
+        return str.size() >= n
+            && afl::string::strCaseCompare(str.substr(str.size()-n), end) == 0;
     }
 }
 
@@ -1609,12 +1618,21 @@ interpreter::Process::handleLoad(String_t name, const String_t& origin)
 {
     // ex IntExecutionContext::handleLoad
     afl::base::Ptr<afl::io::Stream> file = m_world.openLoadFile(name);
+    if (file.get() == 0 && endsWith(name, ".q")) {
+        name += "c";
+        file = m_world.openLoadFile(name);
+    }
     if (file.get() == 0) {
         // Failure
         return false;
     } else {
         // Make new frame
-        pushFrame(m_world.compileFile(*file, origin, StatementCompiler::DEFAULT_OPTIMISATION_LEVEL), false);
+        if (endsWith(name, ".qc")) {
+            interpreter::vmio::NullLoadContext ctx;
+            pushFrame(interpreter::vmio::ObjectLoader(m_world.fileTable().getFileCharset(), m_world.translator(), ctx).loadObjectFile(*file), false);
+        } else {
+            pushFrame(m_world.compileFile(*file, origin, StatementCompiler::DEFAULT_OPTIMISATION_LEVEL), false);
+        }
         return true;
     }
 }

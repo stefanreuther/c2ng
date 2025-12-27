@@ -396,6 +396,26 @@ namespace {
         bco->addInstruction(Opcode::maPush, Opcode::sInteger, 300);
         return bco;
     }
+
+    // An object file that defines LOADED_SUB
+    // Created using
+    //   c2compiler -c -o test.qc -k 'sub loaded_sub' 'endsub'
+    //   c2compiler --strip test.qc
+    static const uint8_t OBJECT_FILE[] = {
+        0x43, 0x43, 0x6f, 0x62, 0x6a, 0x1a, 0x64, 0x00, 0x04, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00,
+        0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x4a, 0x00, 0x00, 0x00, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x0a, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4c, 0x4f,
+        0x41, 0x44, 0x45, 0x44, 0x5f, 0x53, 0x55, 0x42, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+        0x49, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00,
+        0x01, 0x00, 0x00, 0x00, 0x0b, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00,
+        0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0x02, 0x00, 0x00, 0x00, 0x0a, 0x4c,
+        0x4f, 0x41, 0x44, 0x45, 0x44, 0x5f, 0x53, 0x55, 0x42, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x09,
+        0x0b
+    };
 }
 
 
@@ -2382,24 +2402,57 @@ AFL_TEST("interpreter.Process:run:sdefplanetp:error:name", a)
     a.check("32. isError", isError(env));
 }
 
+namespace {
+    /* Common test for load instruction:
+       - store fileContent in fileName
+       - try to load fileToLoad
+       - as result, LOADED_SUB must be defined */
+    void doLoadTest(afl::test::Assert a, String_t fileToLoad, String_t fileName, afl::base::ConstBytes_t fileContent, bool checkName)
+    {
+        afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("dir");
+        afl::base::Ref<afl::io::Stream> file = *new afl::io::ConstMemoryStream(fileContent);
+        dir->addStream(fileName, file);
+
+        Environment env;
+        env.world.setSystemLoadDirectory(dir.asPtr());
+        env.proc.pushNewValue(interpreter::makeStringValue(fileToLoad));
+        runInstruction(env, Opcode::maSpecial, Opcode::miSpecialLoad, 0);
+        a.checkEqual("01. getState", env.proc.getState(), Process::Ended);
+
+        SubroutineValue* subv = dynamic_cast<SubroutineValue*>(env.world.globalValues().get(env.world.globalPropertyNames().getIndexByName("LOADED_SUB")));
+        a.check("11. SubroutineValue", subv);
+        if (checkName) {
+            a.checkEqual("12. getFileName", subv->getBytecodeObject()->getFileName(), file->getName());
+        }
+    }
+}
+
 /** Test instruction: sload.
-    Good case: file found. Define a subroutine and check that it got defined. */
+    Good case: loading script source file */
 AFL_TEST("interpreter.Process:run:sload", a)
 {
-    static const char CODE[] = "sub loaded_sub\nendsub\n";
-    afl::base::Ref<afl::io::InternalDirectory> dir = afl::io::InternalDirectory::create("dir");
-    afl::base::Ref<afl::io::Stream> file = *new afl::io::ConstMemoryStream(afl::string::toBytes(CODE));
-    dir->addStream("loaded.q", file);
+    doLoadTest(a, "loaded.q", "loaded.q", afl::string::toBytes("sub loaded_sub\nendsub\n"), true);
+}
 
-    Environment env;
-    env.world.setSystemLoadDirectory(dir.asPtr());
-    env.proc.pushNewValue(interpreter::makeStringValue("loaded.q"));
-    runInstruction(env, Opcode::maSpecial, Opcode::miSpecialLoad, 0);
-    a.checkEqual("01. getState", env.proc.getState(), Process::Ended);
+/** Test instruction: sload.
+    Good case: request to load script source file, load object file instead. */
+AFL_TEST("interpreter.Process:run:sload:object:script", a)
+{
+    doLoadTest(a, "loaded.q", "loaded.qc", OBJECT_FILE, false);
+}
 
-    SubroutineValue* subv = dynamic_cast<SubroutineValue*>(env.world.globalValues().get(env.world.globalPropertyNames().getIndexByName("LOADED_SUB")));
-    a.check("11. SubroutineValue", subv);
-    a.checkEqual("12. getFileName", subv->getBytecodeObject()->getFileName(), file->getName());
+/** Test instruction: sload.
+    Good case: loading object file. */
+AFL_TEST("interpreter.Process:run:sload:object:direct", a)
+{
+    doLoadTest(a, "loaded.qc", "loaded.qc", OBJECT_FILE, false);
+}
+
+/** Test instruction: sload.
+    Good case: variation, upper-case names. */
+AFL_TEST("interpreter.Process:run:sload:object:case", a)
+{
+    doLoadTest(a, "LOADED.Q", "LOADED.Qc", OBJECT_FILE, false);
 }
 
 /** Test instruction: sload.
