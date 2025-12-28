@@ -11,6 +11,7 @@ my @manpages = qw(
     c2dbexport
     c2docmanager
     c2doc-server
+    c2dump
     c2export
     c2fileclient
     c2file-server

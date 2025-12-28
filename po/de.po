@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-12-27 14:50+0100\n"
+"PO-Revision-Date: 2025-12-29 11:20+0100\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:390
@@ -888,6 +888,10 @@ msgstr "%s: unbekannter Dateityp"
 msgid "%s: compressed file"
 msgstr "%s: komprimierte Datei"
 
+#: game/maint/dump/application.cpp:93
+msgid "%s: file matches multiple types, use '-tTYPE' to specify correct one"
+msgstr "%s: mehrere passende Dateitypen; nutze '-tTYP', um korrekten Typ anzugeben"
+
 #: util/net.cpp:35
 msgid "%s: network access exceeded limit"
 msgstr "%s: Limit überschritten (network access exceeded limit)"
@@ -912,6 +916,14 @@ msgstr "%s: nicht gefunden"
 #: util/net.cpp:63
 msgid "%s: received invalid data from network"
 msgstr "%s: ungültige Daten vom Netzwerk empfangen"
+
+#: game/maint/dump/application.cpp:87
+msgid "%s: type '%s' is unknown"
+msgstr "%s: Typ '%s' ist nicht bekannt"
+
+#: game/maint/dump/application.cpp:89
+msgid "%s: unable to auto-detect type"
+msgstr "%s: Typ kann nicht automatisch erkannt werden"
 
 #: game/maint/messagesearchapplication.cpp:632
 msgid "%s: unknown file format"
@@ -6738,6 +6750,10 @@ msgstr "Keine Daten zu exportieren"
 msgid "No fighter bays"
 msgstr "Keine Startrampen"
 
+#: game/maint/dump/application.cpp:122
+msgid "No file names specified. Use \"%s -h\" for help"
+msgstr "keine Dateinamen angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
+
 #: game/v3/specificationloader.cpp:234
 msgid "No function selected for assignment"
 msgstr "Keine zuzuweisende Funktion gewählt"
@@ -7132,6 +7148,20 @@ msgstr ""
 "-a\tLösche Dateien aller Spieler\n"
 "-x\tMehr Konsolenausgaben"
 
+#: game/maint/dump/application.cpp:139
+msgid ""
+"Options:\n"
+"-tTYPE\tSelect type to use to interpret following files\n"
+"-p\tAutodetect player files\n"
+"-m\tAutodetect host files\n"
+"-CCHARSET\tSet character set"
+msgstr ""
+"Optionen:\n"
+"-tTYP\tWähle Typ der folgenden Dateien\n"
+"-p\tAutomatische Erkennung erkennt Spielerdateien\n"
+"-m\tAutomatische Erkennung erkennt Host-Dateien\n"
+"-CCHARSET\tZeichensatz festlegen"
+
 #: game/v3/unpackapplication.cpp:222
 msgid ""
 "Options:\n"
@@ -7288,6 +7318,10 @@ msgstr "PCC2 Export v%s - (c) 2017-2025 Stefan Reuther"
 #: server/file/clientapplication.cpp:469
 msgid "PCC2 File Client v%s - (c) 2017-2025 Stefan Reuther"
 msgstr "PCC2 Datei-Client v%s - (c) 2017-2025 Stefan Reuther"
+
+#: game/maint/dump/application.cpp:131
+msgid "PCC2 File Dump Utility %s - (c) 2010-2025 Stefan Reuther"
+msgstr "PCC2 File Dump Utility %s - (c) 2010-2025 Stefan Reuther"
 
 #: game/maint/raterapplication.cpp:107
 msgid "PCC2 Game Difficulty Rater v%s - (c) 2012-2025 Stefan Reuther"
@@ -11530,6 +11564,20 @@ msgstr ""
 "Schiffsliste).\n"
 "Fehler bitte melden an <Streu@gmx.de>"
 
+#: game/maint/dump/application.cpp:133
+msgid ""
+"Usage:\n"
+"  %s [-tTYPE] FILE [[-tTYPE] FILE...]\n"
+"\n"
+"%s\n"
+"Report bugs to <Streu@gmx.de>"
+msgstr ""
+"Aufruf:\n"
+"  %s [-tTYP] DATEI [[-tTYP] DATEI...]\n"
+"\n"
+"%s\n"
+"Fehler bitte melden an <Streu@gmx.de>"
+
 #: server/dbexport/exportapplication.cpp:98
 msgid ""
 "Usage: c2dbexport [--config=FILE] [-DKEY=VALUE] COMMAND [ARGS...]\n"
@@ -12702,7 +12750,7 @@ msgstr "flach"
 msgid "friendly code too long; truncated"
 msgstr "Kommandocode war zu lang und wurde gekürzt"
 
-#: client/help.cpp:117
+#: client/help.cpp:118
 msgid "from %s"
 msgstr "aus %s"
 
@@ -12826,12 +12874,13 @@ msgid "invalid option specified"
 msgstr "Ungültige Option angegeben."
 
 #: game/maint/configurationapplication.cpp:148
-#: game/maint/raterapplication.cpp:74 game/maint/sweepapplication.cpp:65
-#: game/v3/maketurnapplication.cpp:72 game/v3/trn/dumperapplication.cpp:99
-#: game/v3/unpackapplication.cpp:96 gfx/gen/application.cpp:240
-#: gfx/gen/application.cpp:306 gfx/gen/application.cpp:366
-#: gfx/gen/application.cpp:416 gfx/gen/application.cpp:461
-#: gfx/gen/application.cpp:497 util/doc/application.cpp:717
+#: game/maint/dump/application.cpp:60 game/maint/raterapplication.cpp:74
+#: game/maint/sweepapplication.cpp:65 game/v3/maketurnapplication.cpp:72
+#: game/v3/trn/dumperapplication.cpp:99 game/v3/unpackapplication.cpp:96
+#: gfx/gen/application.cpp:240 gfx/gen/application.cpp:306
+#: gfx/gen/application.cpp:366 gfx/gen/application.cpp:416
+#: gfx/gen/application.cpp:461 gfx/gen/application.cpp:497
+#: util/doc/application.cpp:717
 msgid "invalid option specified. Use \"%s -h\" for help"
 msgstr "Ungültige Option angegeben. Mit '%s -h' erhalten Sie Hilfe."
 
@@ -13476,7 +13525,7 @@ msgid "the selected format needs an output file name ('-o')"
 msgstr "für das gewählte Format muss eine Ausgabedatei angegeben werden ('-o')"
 
 #: game/interface/exportapplication.cpp:73
-#: game/interface/scriptapplication.cpp:367
+#: game/interface/scriptapplication.cpp:367 game/maint/dump/application.cpp:57
 #: game/maint/messagesearchapplication.cpp:516
 #: game/sim/consoleapplication.cpp:213 game/v3/trn/dumperapplication.cpp:71
 #: interpreter/consoleapplication.cpp:578
