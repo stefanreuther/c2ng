@@ -12,15 +12,16 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/maint/dump/textoutput.cpp \
-    game/maint/dump/textoutput.hpp game/maint/dump/input.cpp \
-    game/maint/dump/parsers.cpp game/maint/dump/parsers.hpp \
-    game/maint/dump/typedetector.cpp game/maint/dump/typedetector.hpp \
-    game/maint/dump/output.cpp game/maint/dump/output.hpp \
-    game/maint/dump/input.hpp game/maint/dump/application.cpp \
-    game/maint/dump/application.hpp interpreter/assembler.cpp \
-    interpreter/assembler.hpp interpreter/vmio/chunkfile.hpp \
-    interpreter/vmio/chunkfile.cpp game/interface/configurationcontext.cpp \
+FILES_gamelib = game/v3/passwordapplet.cpp game/v3/passwordapplet.hpp \
+    game/maint/dump/textoutput.cpp game/maint/dump/textoutput.hpp \
+    game/maint/dump/input.cpp game/maint/dump/parsers.cpp \
+    game/maint/dump/parsers.hpp game/maint/dump/typedetector.cpp \
+    game/maint/dump/typedetector.hpp game/maint/dump/output.cpp \
+    game/maint/dump/output.hpp game/maint/dump/input.hpp \
+    game/maint/dump/application.cpp game/maint/dump/application.hpp \
+    interpreter/assembler.cpp interpreter/assembler.hpp \
+    interpreter/vmio/chunkfile.hpp interpreter/vmio/chunkfile.cpp \
+    game/interface/configurationcontext.cpp \
     game/interface/configurationcontext.hpp \
     game/vcr/classic/standardscheduler.cpp \
     game/vcr/classic/standardscheduler.hpp \
@@ -1864,7 +1865,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/game/maint/dump/applicationtest.cpp \
+FILES_testsuite = test/game/v3/passwordapplettest.cpp \
+    test/game/maint/dump/applicationtest.cpp \
     test/game/maint/dump/parserstest.cpp \
     test/game/maint/dump/typedetectortest.cpp \
     test/game/maint/dump/inputtest.cpp \

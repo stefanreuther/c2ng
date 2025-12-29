@@ -8,6 +8,7 @@
 #include "afl/sys/environment.hpp"
 #include "game/browser/testapplet.hpp"
 #include "game/parser/testapplet.hpp"
+#include "game/v3/passwordapplet.hpp"
 #include "game/v3/scannerapplet.hpp"
 #include "game/vcr/classic/testapplet.hpp"
 #include "game/vcr/flak/testapplet.hpp"
@@ -23,6 +24,7 @@ int main(int, char** argv)
 
     return util::Applet::Runner("PCC2 Test Applets", env, fs)
         .addNew("browser",    "Game browser test",       new game::browser::TestApplet(net))
+        .addNew("crack",      "Show passwords",          new game::v3::PasswordApplet())
         .addNew("dirbrowser", "Directory browser test",  new util::DirectoryBrowserApplet())
         .addNew("msgparse",   "Message parser test",     new game::parser::TestApplet())
         .addNew("overview",   "Directory overview test", new game::v3::ScannerApplet())
