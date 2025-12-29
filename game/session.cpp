@@ -438,7 +438,7 @@ game::Session::getTaskStatus(const game::map::Object* obj, interpreter::Process:
                      || proc->getState() == Process::Frozen)
                     && proc->getInvokingObject() == obj)
                 {
-                    any = true;
+                    bool considerThis = true;
                     if (proc->getProcessKind() == kind) {
                         // Found the auto task
                         const NotificationStore::Message* msg = m_notifications.findMessageByProcessId(proc->getProcessId());
@@ -448,11 +448,15 @@ game::Session::getTaskStatus(const game::map::Object* obj, interpreter::Process:
                             std::auto_ptr<afl::data::Value> salvaging(proc->getVariable("CC$AUTOSALVAGEACTIVE"));
                             if (salvaging.get() != 0) {
                                 // Task is executing CC$AutoSalvage, which means it is essentially complete.
-                                return NoTask;
+                                // Treat it as non-existant.
+                                considerThis = false;
                             } else {
                                 return ActiveTask;
                             }
                         }
+                    }
+                    if (considerThis) {
+                        any = true;
                     }
                 }
             }
