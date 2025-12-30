@@ -73,88 +73,18 @@ game::spec::Mission::Mission(int number, String_t descriptionLine)
 game::spec::Mission::~Mission()
 { }
 
-int
-game::spec::Mission::getNumber() const
-{
-    // ex GMission::getNumber
-    return m_number;
-}
-
-game::PlayerSet_t
-game::spec::Mission::getRaceMask() const
-{
-    // ex GMission::getRaceMask
-    return m_raceMask;
-}
-
 void
-game::spec::Mission::setRaceMask(PlayerSet_t mask)
-{
-    // ex GMission::setRaceMask
-    m_raceMask = mask;
-}
-
-game::spec::Mission::FlagSet_t
-game::spec::Mission::getFlags() const
-{
-    // ex GMission::getFlags
-    return m_flags;
-}
-
-bool
-game::spec::Mission::hasFlag(Flag flag) const
-{
-    // ex GMission::hasFlag
-    return m_flags.contains(flag);
-}
-
-void
-game::spec::Mission::setFlags(FlagSet_t flags)
-{
-    // ex GMission::setFlags
-    m_flags = flags;
-}
-
-String_t
-game::spec::Mission::getName() const
-{
-    // ex GMission::getName
-    return m_name;
-}
-
-void
-game::spec::Mission::setName(String_t name)
+game::spec::Mission::setName(const String_t& name)
 {
     // ex GMission::setName
     m_name = name;
 }
 
-String_t
-game::spec::Mission::getShortName() const
-{
-    // ex GMission::getShortName
-    return m_shortName;
-}
-
 void
-game::spec::Mission::setShortName(String_t shortName)
+game::spec::Mission::setShortName(const String_t& shortName)
 {
     // ex GMission::setShortName
     this->m_shortName = shortName;
-}
-
-char
-game::spec::Mission::getHotkey() const
-{
-    // ex GMission::getHotkey
-    return m_hotkey;
-}
-
-void
-game::spec::Mission::setHotkey(char c)
-{
-    // ex GMission::setHotkey
-    m_hotkey = c;
 }
 
 
@@ -205,7 +135,7 @@ game::spec::Mission::getParameterName(MissionParameter p) const
 }
 
 void
-game::spec::Mission::setParameterName(MissionParameter p, String_t name)
+game::spec::Mission::setParameterName(MissionParameter p, const String_t& name)
 {
     // ex GMission::setParameterName
     m_parameterNames[p] = name;
@@ -216,57 +146,29 @@ game::spec::Mission::setParameterName(MissionParameter p, String_t name)
  *  Script accessors
  */
 
-String_t
-game::spec::Mission::getConditionExpression() const
-{
-    // ex GMission::getConditionExpression
-    return m_conditionExpression;
-}
-
 void
-game::spec::Mission::setConditionExpression(String_t cond)
+game::spec::Mission::setConditionExpression(const String_t& cond)
 {
     // ex GMission::setConditionExpression
     m_conditionExpression = cond;
 }
 
-String_t
-game::spec::Mission::getWarningExpression() const
-{
-    // ex GMission::getWarningExpression
-    return m_warningExpression;
-}
-
 void
-game::spec::Mission::setWarningExpression(String_t warning)
+game::spec::Mission::setWarningExpression(const String_t& warning)
 {
     // ex GMission::setWarningExpression
     m_warningExpression = warning;
 }
 
-String_t
-game::spec::Mission::getLabelExpression() const
-{
-    // ex GMission::getLabelExpression
-    return m_labelExpression;
-}
-
 void
-game::spec::Mission::setLabelExpression(String_t label)
+game::spec::Mission::setLabelExpression(const String_t& label)
 {
     // ex GMission::setLabelExpression
     m_labelExpression = label;
 }
 
-String_t
-game::spec::Mission::getSetCommand() const
-{
-    // ex GMission::getSetCommand
-    return m_setCommand;
-}
-
 void
-game::spec::Mission::setSetCommand(String_t cmd)
+game::spec::Mission::setSetCommand(const String_t& cmd)
 {
     // ex GMission::setSetCommand
     m_setCommand = cmd;

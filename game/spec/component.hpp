@@ -83,7 +83,7 @@ namespace game { namespace spec {
 
         /** Get description/flavor text.
             \return text */
-        String_t getDescription() const;
+        const String_t& getDescription() const;
 
         /** Set description/flavor text.
             \param text New text. Can contain "\n" for newline. */
@@ -168,7 +168,7 @@ game::spec::Component::getShortName(const ComponentNameProvider& provider) const
 }
 
 // Get description/flavor text.
-inline String_t
+inline const String_t&
 game::spec::Component::getDescription() const
 {
     return m_description;

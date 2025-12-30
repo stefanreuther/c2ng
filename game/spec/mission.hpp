@@ -103,20 +103,20 @@ namespace game { namespace spec {
         /** Get mission name.
             This name should be displayed in selection lists.
             \return name */
-        String_t getName() const;
+        const String_t& getName() const;
 
         /** Set mission name.
             \param name Name */
-        void setName(String_t name);
+        void setName(const String_t& name);
 
         /** Get short mission name.
             This name is used when space is tight.
             \return name */
-        String_t getShortName() const;
+        const String_t& getShortName() const;
 
         /** Set short mission name.
             \param shortName Name */
-        void setShortName(String_t shortName);
+        void setShortName(const String_t& shortName);
 
         /** Get hot-key.
             The hot-key is a US-ASCII character for a key to select this mission.
@@ -159,7 +159,7 @@ namespace game { namespace spec {
         /** Set parameter name.
             \param p Which parameter
             \param name Name; can be blank to invoke default */
-        void setParameterName(MissionParameter p, String_t name);
+        void setParameterName(MissionParameter p, const String_t& name);
 
         /*
          *  Script accessors
@@ -167,38 +167,38 @@ namespace game { namespace spec {
 
         /** Get condition expression.
             \return expression */
-        String_t getConditionExpression() const;
+        const String_t& getConditionExpression() const;
 
         /** Set condition expression.
             This condition verifies whether the mission is allowed to be set (hard condition).
             \param cond Condition */
-        void setConditionExpression(String_t cond);
+        void setConditionExpression(const String_t& cond);
 
         /** Get warning expression.
             \return expression */
-        String_t getWarningExpression() const;
+        const String_t& getWarningExpression() const;
 
         /** Set warning expression.
             This condition verifies whether the mission will work (soft condition) or a warning shall be shown. */
-        void setWarningExpression(String_t warning);
+        void setWarningExpression(const String_t& warning);
 
         /** Get label expression.
             \return expression */
-        String_t getLabelExpression() const;
+        const String_t& getLabelExpression() const;
 
         /** Set label expression.
             This expression produces a string to display when the mission is set on a ship.
             \return expression */
-        void setLabelExpression(String_t label);
+        void setLabelExpression(const String_t& label);
 
         /** Get "on-set" command.
             \return command */
-        String_t getSetCommand() const;
+        const String_t& getSetCommand() const;
 
         /** Set "on-set" command.
             This command is invoked after the mission is set via the user-interface.
             \param cmd Command */
-        void setSetCommand(String_t cmd);
+        void setSetCommand(const String_t& cmd);
 
         /** Get group.
             \return group; comma-separated list of names */
@@ -289,5 +289,103 @@ namespace game { namespace spec {
     };
 
 } }
+
+inline int
+game::spec::Mission::getNumber() const
+{
+    // ex GMission::getNumber
+    return m_number;
+}
+
+inline game::PlayerSet_t
+game::spec::Mission::getRaceMask() const
+{
+    // ex GMission::getRaceMask
+    return m_raceMask;
+}
+
+inline void
+game::spec::Mission::setRaceMask(PlayerSet_t mask)
+{
+    // ex GMission::setRaceMask
+    m_raceMask = mask;
+}
+
+inline game::spec::Mission::FlagSet_t
+game::spec::Mission::getFlags() const
+{
+    // ex GMission::getFlags
+    return m_flags;
+}
+
+inline bool
+game::spec::Mission::hasFlag(Flag flag) const
+{
+    // ex GMission::hasFlag
+    return m_flags.contains(flag);
+}
+
+inline void
+game::spec::Mission::setFlags(FlagSet_t flags)
+{
+    // ex GMission::setFlags
+    m_flags = flags;
+}
+
+inline const String_t&
+game::spec::Mission::getName() const
+{
+    // ex GMission::getName
+    return m_name;
+}
+
+inline const String_t&
+game::spec::Mission::getShortName() const
+{
+    // ex GMission::getShortName
+    return m_shortName;
+}
+
+inline char
+game::spec::Mission::getHotkey() const
+{
+    // ex GMission::getHotkey
+    return m_hotkey;
+}
+
+inline void
+game::spec::Mission::setHotkey(char c)
+{
+    // ex GMission::setHotkey
+    m_hotkey = c;
+}
+
+inline const String_t&
+game::spec::Mission::getConditionExpression() const
+{
+    // ex GMission::getConditionExpression
+    return m_conditionExpression;
+}
+
+inline const String_t&
+game::spec::Mission::getWarningExpression() const
+{
+    // ex GMission::getWarningExpression
+    return m_warningExpression;
+}
+
+inline const String_t&
+game::spec::Mission::getLabelExpression() const
+{
+    // ex GMission::getLabelExpression
+    return m_labelExpression;
+}
+
+inline const String_t&
+game::spec::Mission::getSetCommand() const
+{
+    // ex GMission::getSetCommand
+    return m_setCommand;
+}
 
 #endif
