@@ -1,0 +1,29 @@
+/*!
+     \namespace ui::reshack
+     \brief ResHack Resource Editor
+
+     This directory contains c2reshack, a resource editor.
+
+     PCC 1.x had its pictures in custom file formats (.cc, .cd, .gfx).
+     Those were optimized to the color situations in PCC 1.x (16 colors or 256 colors),
+     in particular, the palette restrictions imposed by those, and of course needed a custom editor.
+     PCC2 continues to support a variation of these formats,
+     although the almost universal availability of truecolor makes the palette tricks obsolete.
+
+     PCC 1.x also has a custom font format which continues almost unchanged in PCC2.
+     I have a few DOS-based editors for the format, but they aren't really suited for editing anything other than DOS-codepage fonts.
+
+     c2reshack can edit pictures as well as fonts.
+     Editing fonts will probably be its main occupation.
+
+     c2reshack is not part of the end-user package.
+
+     Note that c2reshack is optimized for simplicity, not efficiency.
+     In particular, this means we do not implement a proper UI/backend thread split;
+     at many places, we do I/O from the GUI thread.
+
+     <b>Entry points:</b>
+
+     - ui::reshack::Application
+     - ui::reshack::Editor
+ */

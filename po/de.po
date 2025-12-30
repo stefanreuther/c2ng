@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-12-29 11:20+0100\n"
+"PO-Revision-Date: 2026-01-25 19:52+0100\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:390
@@ -140,6 +140,10 @@ msgstr " (+%d kt Tarnung)"
 msgid " (+%d kt)"
 msgstr " (+%d kt)"
 
+#: ui/reshack/fonteditor.cpp:601
+msgid " (font, height %d pixels)"
+msgstr " (Font, Höhe %d Pixel)"
+
 #: client/dialogs/ufoinfo.cpp:385
 msgid " (from planet)"
 msgstr " (vom Planet aus)"
@@ -214,7 +218,7 @@ msgstr "Die Option \"-D\" muss das Format \"-DNAME=VALUE\" haben"
 msgid "# - Extended Mission"
 msgstr "# - Erweiterte Mission"
 
-#: client/dialogs/imperialstats.cpp:135
+#: client/dialogs/imperialstats.cpp:136
 msgid "# - Options"
 msgstr "# - Optionen"
 
@@ -298,6 +302,10 @@ msgstr "%d Bytes Debug-Information"
 msgid "%d capital ship%!1{s%}"
 msgstr "%d Kampfschiff%!1{e%}"
 
+#: ui/reshack/win32import.cpp:204
+msgid "%d characters imported successfully, %d errors."
+msgstr "%d Zeichen erfolgreich importiert, %d Fehler."
+
 #: game/map/planetinfo.cpp:456
 msgid "%d clan%1{ survives%|s survive%}."
 msgstr "%d Clan%1{ überlebt%|s überleben%}."
@@ -353,7 +361,7 @@ msgstr "%d Raumjäger bereit"
 msgid "%d file%!1{s%} removed."
 msgstr "%d Datei%!1{en%} gelöscht."
 
-#: game/proxy/maintenanceproxy.cpp:211
+#: game/proxy/maintenanceproxy.cpp:210
 msgid "%d file%1{ has%|s have%} been deleted."
 msgstr "%d Datei%1{ wurde%|en wurden%} gelöscht."
 
@@ -847,6 +855,10 @@ msgstr "%s Schiffstypen"
 msgid "%s starship"
 msgstr "%s Raumschiff"
 
+#: ui/reshack/dialogs.cpp:550
+msgid "%s to Unicode"
+msgstr "%s nach Unicode"
+
 #: game/vcr/battle.cpp:45
 msgid "%s vs. %s"
 msgstr "%s vs. %s"
@@ -866,6 +878,10 @@ msgstr "%s, %d Clan%!1{s%}"
 #: share/resource/core_game.q:142
 msgid "%s. Do you want to load this file?"
 msgstr "%s. Möchtest du diese Datei laden?"
+
+#: ui/reshack/dialogs.cpp:88
+msgid "%s: %d missing"
+msgstr "%s: %d fehlen"
 
 #: game/map/planetinfo.cpp:287
 msgid "%s: %d%% (%d mc)"
@@ -890,7 +906,8 @@ msgstr "%s: komprimierte Datei"
 
 #: game/maint/dump/application.cpp:93
 msgid "%s: file matches multiple types, use '-tTYPE' to specify correct one"
-msgstr "%s: mehrere passende Dateitypen; nutze '-tTYP', um korrekten Typ anzugeben"
+msgstr ""
+"%s: mehrere passende Dateitypen; nutze '-tTYP', um korrekten Typ anzugeben"
 
 #: util/net.cpp:35
 msgid "%s: network access exceeded limit"
@@ -1500,7 +1517,7 @@ msgstr "=== Entpacke Spieler %d... ==="
 msgid ">%d turns"
 msgstr ">%d Züge"
 
-#: game/proxy/browserproxy.cpp:122
+#: game/proxy/browserproxy.cpp:121
 msgid "A %s game"
 msgstr "Ein %s-Spiel"
 
@@ -1509,7 +1526,7 @@ msgstr "Ein %s-Spiel"
 msgid "A - Auto"
 msgstr "A - Auto"
 
-#: client/dialogs/imperialstats.cpp:157
+#: client/dialogs/imperialstats.cpp:158
 msgid "A - Starchart"
 msgstr "A - Sternenkarte"
 
@@ -1690,6 +1707,14 @@ msgstr "Planet hinzufügen"
 #: client/dialogs/simulator.cpp:359
 msgid "Add Ship"
 msgstr "Schiff hinzufügen"
+
+#: ui/reshack/pictureeditor.cpp:240
+msgid "Add X aux line"
+msgstr "X-Hilfslinie hinzufügen"
+
+#: ui/reshack/pictureeditor.cpp:241
+msgid "Add Y aux line"
+msgstr "Y-Hilfslinie hinzufügen"
 
 #: share/resource/core_ui.q:2228
 msgid "Add all to fleet"
@@ -1887,7 +1912,7 @@ msgstr "Änderungen übernehmen?"
 msgid "Apply turn files?"
 msgstr "Turn-Dateien anwenden?"
 
-#: game/proxy/maintenanceproxy.cpp:158
+#: game/proxy/maintenanceproxy.cpp:157
 msgid "Applying %d turn file command%!1{s%}..."
 msgstr "Führe %d Befehl%!1{e%} aus Turn-Datei aus..."
 
@@ -1996,6 +2021,10 @@ msgstr "Bau-Ziel"
 msgid "Auto-Build Goals"
 msgstr "Bau-Ziele"
 
+#: ui/reshack/dialogs.cpp:499 ui/reshack/dialogs.cpp:532
+msgid "Auto-Generate Character"
+msgstr "Zeichen automatisch erzeugen"
+
 #: game/spec/info/info.cpp:415
 msgid "Auto-build"
 msgstr "Automatisch bauen"
@@ -2044,7 +2073,7 @@ msgstr "Durchschnitts-Temperator: %d°F"
 msgid "Avian"
 msgstr "Avian"
 
-#: client/dialogs/imperialstats.cpp:154
+#: client/dialogs/imperialstats.cpp:155
 msgid "B - Starbases"
 msgstr "B - Sternenbasen"
 
@@ -2096,7 +2125,7 @@ msgstr "Basen"
 msgid "Battle %d"
 msgstr "Kampf %d"
 
-#: game/proxy/vcrdatabaseproxy.cpp:495
+#: game/proxy/vcrdatabaseproxy.cpp:494
 msgid "Battle %d of %d"
 msgstr "Kampf %d von %d"
 
@@ -2172,6 +2201,10 @@ msgstr "Davor"
 msgid "Bidirectional"
 msgstr "Bidirektional"
 
+#: ui/reshack/colorselector.cpp:124
+msgid "Blue"
+msgstr "Blau"
+
 #: game/vcr/classic/utils.cpp:77
 msgid "Both are disabled."
 msgstr "Beide sind kampfunfähig."
@@ -2179,6 +2212,10 @@ msgstr "Beide sind kampfunfähig."
 #: game/vcr/classic/utils.cpp:75
 msgid "Both were destroyed."
 msgstr "Beide wurden zerstört."
+
+#: ui/reshack/dialogs.cpp:391
+msgid "Bottom"
+msgstr "Unten"
 
 #: client/dialogs/keymapdialog.cpp:200 client/dialogs/keymapdialog.cpp:206
 msgid "Bound in keymap %s."
@@ -2195,6 +2232,10 @@ msgstr "Ordner auf diesem Computer durchsuchen"
 #: client/widgets/chartmouseconfig.cpp:40
 msgid "Browse list (Tab)"
 msgstr "Liste blättern (Tab)"
+
+#: ui/reshack/brushtool.cpp:10
+msgid "Brush"
+msgstr "Pinsel"
 
 #: client/dialogs/buildqueuesummary.cpp:333
 #: client/widgets/hullspecificationsheet.cpp:87
@@ -2338,7 +2379,7 @@ msgstr "Raumjäger gebaut"
 msgid "C - Cancel Build"
 msgstr "C - Bau abbrechen"
 
-#: client/dialogs/imperialstats.cpp:156
+#: client/dialogs/imperialstats.cpp:157
 msgid "C - Capital"
 msgstr "C - Kampfschiffe"
 
@@ -2495,7 +2536,7 @@ msgstr "Fracht-Zusammenfassung (Vorhersage)"
 #: client/dialogs/cargotransferdialog.cpp:75
 #: client/dialogs/multitransfer.cpp:523 client/dialogs/multitransfer.cpp:728
 #: client/dialogs/multitransfer.cpp:735 client/dialogs/multitransfer.cpp:739
-#: client/si/commands.cpp:2755 share/resource/core_ui.q:336
+#: client/si/commands.cpp:2754 share/resource/core_ui.q:336
 msgid "Cargo Transfer"
 msgstr "Fracht-Transfer"
 
@@ -2556,11 +2597,15 @@ msgstr "Siegchange im Bodenkampf: %d%%"
 msgid "Change Character Set"
 msgstr "Zeichensatz ändern"
 
+#: ui/reshack/dialogs.cpp:554
+msgid "Change Encoding"
+msgstr "Kodierung ändern"
+
 #: client/dialogs/export.cpp:471
 msgid "Change File Type"
 msgstr "Dateityp ändern"
 
-#: client/si/commands.cpp:4252
+#: client/si/commands.cpp:4251
 msgid "Change Friendly Code"
 msgstr "Kommandocode ändern"
 
@@ -2608,6 +2653,10 @@ msgstr "Namen unseres Volkes ändern..."
 #: share/resource/core_config.q:69
 msgid "Changes will get effective next turn."
 msgstr "Änderungen werden nächsten Zug wirksam."
+
+#: ui/reshack/dialogs.cpp:119
+msgid "Character Coverage"
+msgstr "Zeichensatz-Abdeckung"
 
 #: client/dialogs/folderconfigdialog.cpp:152
 msgid "Character Set"
@@ -2658,13 +2707,17 @@ msgid "Choose player slots to clean"
 msgstr "Wähle aufzuräumende Spieler:"
 
 #: client/dialogs/navchartdialog.cpp:675 client/dialogs/navchartdialog.cpp:684
-#: client/si/commands.cpp:1514
+#: client/si/commands.cpp:1513
 msgid "Chunnel"
 msgstr "Chunnel"
 
 #: game/proxy/chunnelproxy.cpp:128
 msgid "Chunnel is impossible"
 msgstr "Chunnel nicht möglich"
+
+#: ui/reshack/circletool.cpp:12
+msgid "Circle"
+msgstr "Kreis"
 
 #: client/dialogs/newdrawing.cpp:74
 msgid "Circle centered here"
@@ -2765,7 +2818,7 @@ msgstr "Klone, und baue ein %s"
 #: client/dialogs/flakvcrobject.cpp:177 client/dialogs/globalactions.cpp:184
 #: client/dialogs/helpdialog.cpp:166 client/dialogs/hullfunctionview.cpp:215
 #: client/dialogs/hullspecification.cpp:188
-#: client/dialogs/imperialstats.cpp:278 client/dialogs/ionstormforecast.cpp:149
+#: client/dialogs/imperialstats.cpp:279 client/dialogs/ionstormforecast.cpp:149
 #: client/dialogs/ionstorminfo.cpp:149 client/dialogs/keymapdialog.cpp:145
 #: client/dialogs/minefieldinfo.cpp:220 client/dialogs/planetinfodialog.cpp:107
 #: client/dialogs/pluginmanager.cpp:124 client/dialogs/preferences.cpp:590
@@ -2775,7 +2828,8 @@ msgstr "Klone, und baue ein %s"
 #: client/dialogs/simulationfleetcost.cpp:160
 #: client/dialogs/simulationresult.cpp:479 client/dialogs/simulator.cpp:374
 #: client/dialogs/specbrowserdialog.cpp:321 client/dialogs/ufoinfo.cpp:180
-#: client/vcr/flak/playbackscreen.cpp:147
+#: client/vcr/flak/playbackscreen.cpp:147 ui/reshack/dialogs.cpp:232
+#: ui/reshack/fonteditor.cpp:224 ui/reshack/pictureeditor.cpp:213
 msgid "Close"
 msgstr "Schließen"
 
@@ -2897,8 +2951,10 @@ msgid ""
 "bmp:PATH.bmp\tBitmap file\n"
 "plain8:PATH.cd, custom:PATH.cd\tPlain 8-bit custom codec\n"
 "plain4:PATH.cc\tPlain 4-bit custom codec\n"
+"raw:PATH.gfx\tRaw 8-bit pixel data\n"
 "packed8:PATH.cd\tPacked 8-bit custom codec\n"
-"packed4:PATH.cc\tPacked 4-bit custom codec"
+"packed4:PATH.cc\tPacked 4-bit custom codec\n"
+"packedraw:PATH.gfx\tPacked raw 8-bit pixel data"
 msgstr ""
 "Befehle:\n"
 "  convert EINGABE AUSGABE\n"
@@ -2909,8 +2965,10 @@ msgstr ""
 "bmp:PFAD.bmp\tBitmap-Datei\n"
 "plain8:PFAD.cd, custom:PFAD.cd\tNormale Datei, 8-bit-Codec\n"
 "plain4:PFAD.cc\tNormale Datei, 4-bit-Codec\n"
+"raw:PATH.gfx\t8-bit Pixeldaten\n"
 "packed8:PFAD.cd\tGepackte Datei, 8-bit-Codec\n"
-"packed4:PFAD.cc\tGepackte Datei, 4-bit-Codec"
+"packed4:PFAD.cc\tGepackte Datei, 4-bit-Codec\n"
+"packedraw:PATH.gfx\tGepackte Datei, 8-bit-Pixeldaten"
 
 #: game/parser/messagevalue.cpp:137
 msgid "Comment"
@@ -3071,6 +3129,14 @@ msgstr "Scanner in Kontrollbildschirmen"
 msgid "Controlled by"
 msgstr "Gesteuert von"
 
+#: ui/reshack/clipboard.cpp:16
+msgid "Copy"
+msgstr "Kopieren"
+
+#: ui/reshack/fonteditor.cpp:361
+msgid "Copy From Character"
+msgstr "Kopiere von Zeichen"
+
 #: client/dialogs/buildstructuresdialog.cpp:447
 #: client/dialogs/buildstructuresdialog.cpp:522 game/spec/info/info.cpp:177
 #: game/spec/info/info.cpp:314 game/spec/info/info.cpp:346
@@ -3093,7 +3159,7 @@ msgstr "Anzahl"
 msgid "Course"
 msgstr "Kurs"
 
-#: game/proxy/maintenanceproxy.cpp:99
+#: game/proxy/maintenanceproxy.cpp:98
 msgid "Created %d turn file%!1{s%}."
 msgstr "%d Turn-Datei%!1{en%} erstellt."
 
@@ -3130,7 +3196,7 @@ msgstr "Strg-R"
 msgid "Ctrl-S"
 msgstr "Strg-S"
 
-#: client/dialogs/imperialstats.cpp:266
+#: client/dialogs/imperialstats.cpp:267
 msgid "Ctrl-S - Save"
 msgstr "Strg-S - Speichern"
 
@@ -3157,6 +3223,10 @@ msgstr "Selbstdefiniertes Schiff"
 #: client/widgets/chartmouseconfig.cpp:41
 msgid "Cycle units (PgUp/PgDn)"
 msgstr "Einheiten blättern (Bild\\u2193/\\u2191)"
+
+#: ui/reshack/fonteditor.cpp:521
+msgid "Cyrillic (CP866)"
+msgstr "Kyrillisch (CP866)"
 
 #: util/charsetfactory.cpp:70
 msgid "Cyrillic (KOI8-R)"
@@ -3281,6 +3351,10 @@ msgstr "Entf"
 msgid "Delete"
 msgstr "Löschen"
 
+#: ui/reshack/fonteditor.cpp:346
+msgid "Delete Character"
+msgstr "Zeichen löschen"
+
 #: client/dialogs/minefieldinfo.cpp:499
 msgid "Delete Minefield"
 msgstr "Minenfeld löschen"
@@ -3296,6 +3370,10 @@ msgstr "Die Dateien dieser Spieler löschen?"
 #: share/resource/core_ui.q:1692
 msgid "Delete this auto task?"
 msgstr "Diese Aufgabe löschen?"
+
+#: ui/reshack/fonteditor.cpp:346
+msgid "Delete this character?"
+msgstr "Dieses Zeichen löschen?"
 
 #: client/dialogs/commandlistdialog.cpp:215
 msgid "Delete this command?"
@@ -3451,6 +3529,10 @@ msgstr "Soll diese Ebene gelöscht werden?"
 #: share/resource/core_ui.q:35
 msgid "Do you want to exit PCC2?"
 msgstr "Möchtest du PCC2 verlassen?"
+
+#: ui/reshack/application.cpp:378
+msgid "Do you want to exit? There are unsaved changes."
+msgstr "Möchtest du beenden? Es gibt ungespeicherte Änderungen."
 
 #: client/dialogs/pluginmanager.cpp:322 util/plugin/dialogapplication.cpp:95
 msgid "Do you want to install plugin \"%s\" (%s)?)"
@@ -3627,7 +3709,7 @@ msgstr "Ost-West"
 msgid "Economy"
 msgstr "Wirtschaft"
 
-#: client/tiles/basetasktile.cpp:31
+#: client/tiles/basetasktile.cpp:31 ui/reshack/application.cpp:294
 msgid "Edit"
 msgstr "Bearbeiten"
 
@@ -3685,6 +3767,14 @@ msgstr "Ausweichend"
 #: game/spec/info/browser.cpp:433
 msgid "Email address"
 msgstr "Email-Adresse"
+
+#: ui/reshack/fonteditor.cpp:517
+msgid "Encoding"
+msgstr "Kodierung"
+
+#: ui/reshack/fonteditor.cpp:372
+msgid "Encoding Information"
+msgstr "Kodierungs-Informationen"
 
 #: client/dialogs/buildship.cpp:297
 msgid "End"
@@ -3826,6 +3916,16 @@ msgstr "Neue Priorität"
 msgid "Enter new warp factor and confirm with ENTER"
 msgstr "Bitte neuen Warpfaktor eingeben und mit ENTER bestätigen"
 
+#: ui/reshack/dialogs.cpp:398
+msgid ""
+"Enter number of pixels to add at top/bottom. Negative numbers can be used to "
+"remove pixels. Maximum you can remove without clipping from the top is %d "
+"pixels on the top, %d pixels at the bottom."
+msgstr ""
+"Gib die Anzahl Pixel ein, die oben/unten hinzuzufügen sind. Negative Zahlen "
+"entfernen Pixel. Maximal können oben %d Pixel, unten %d Pixel entfernt "
+"werden, ohne Zeichen abzuschneiden."
+
 #: client/dialogs/helpdialog.cpp:229
 msgid "Enter page name"
 msgstr "Seitenname:"
@@ -3867,8 +3967,10 @@ msgstr "Datei %s gelöscht."
 
 #: client/dialogs/labelconfig.cpp:279
 #: client/dialogs/scriptcommanddialog.cpp:132 client/help.cpp:103
-#: client/help.cpp:89 game/proxy/maintenanceproxy.cpp:102
-#: game/proxy/maintenanceproxy.cpp:174 game/proxy/maintenanceproxy.cpp:214
+#: client/help.cpp:89 game/proxy/maintenanceproxy.cpp:101
+#: game/proxy/maintenanceproxy.cpp:173 game/proxy/maintenanceproxy.cpp:213
+#: ui/reshack/fonteditor.cpp:628 ui/reshack/fonteditor.cpp:631
+#: ui/reshack/pictureeditor.cpp:341 ui/reshack/pictureeditor.cpp:344
 msgid "Error"
 msgstr "Fehler"
 
@@ -3987,7 +4089,7 @@ msgstr "Ausführen"
 msgid "Execution of file \"%s\" failed: %s"
 msgstr "Ausführen der Datei \"%s\" fehlgeschlagen: %s"
 
-#: client/screens/browserscreen.cpp:216
+#: client/screens/browserscreen.cpp:216 ui/reshack/application.cpp:297
 msgid "Exit"
 msgstr "Ende"
 
@@ -4188,7 +4290,7 @@ msgstr "Föderation Crew-Bonus"
 msgid "Feudal"
 msgstr "Feudal"
 
-#: game/proxy/buildammoproxy.cpp:154 game/spec/info/info.cpp:482
+#: game/proxy/buildammoproxy.cpp:153 game/spec/info/info.cpp:482
 msgid "Fighter"
 msgstr "Raumjäger"
 
@@ -4240,8 +4342,7 @@ msgstr "Raumjäger verl."
 msgid "Fighters: %d"
 msgstr "Raumjäger: %d"
 
-#: client/dialogs/fileselectiondialog.cpp:359
-#: game/v3/attachmentunpacker.cpp:568
+#: game/v3/attachmentunpacker.cpp:568 ui/dialogs/fileselectiondialog.cpp:360
 msgid "File"
 msgstr "Datei"
 
@@ -4275,6 +4376,14 @@ msgstr ""
 #: game/v3/maketurn.cpp:153
 msgid "File '%s' does not match current turn; skipping"
 msgstr "Datei '%s' gehört nicht zum aktuellen Zug; übersprungen"
+
+#: ui/reshack/pictureeditor.cpp:123
+msgid "File Format"
+msgstr "Dateiformat"
+
+#: ui/reshack/fonteditor.cpp:511 ui/reshack/pictureeditor.cpp:120
+msgid "File Name"
+msgstr "Dateiname"
 
 #: client/dialogs/pluginmanager.cpp:233
 msgid ""
@@ -4325,7 +4434,7 @@ msgstr ""
 msgid "File contains one selection from current turn"
 msgstr "Datei enthält eine Auswahl aus dem aktuellen Zug"
 
-#: gfx/bitmapfont.cpp:178
+#: gfx/bitmapfont.cpp:185
 msgid "File does not contain required font"
 msgstr "Datei enthält nicht die erforderliche Schrift"
 
@@ -4365,7 +4474,7 @@ msgstr "In Datei fehlt ein erforderlicher Bereich"
 #: game/db/loader.cpp:182 game/interface/selectionfunctions.cpp:286
 #: game/maint/messagesearchapplication.cpp:412 game/score/loader.cpp:54
 #: game/sim/loader.cpp:82 game/teamsettings.cpp:408
-#: game/vcr/flak/database.cpp:28 gfx/bitmapfont.cpp:173
+#: game/vcr/flak/database.cpp:28 gfx/bitmapfont.cpp:180
 #: gfx/threed/model.cpp:272 util/resourcefilereader.cpp:56
 msgid "File is missing required signature"
 msgstr "Datei hat nicht die erforderliche Kennung"
@@ -4395,7 +4504,7 @@ msgstr "Datei zu kurz"
 msgid "File type"
 msgstr "Dateityp"
 
-#: client/si/commands.cpp:2478
+#: client/si/commands.cpp:2477
 msgid "File..."
 msgstr "Datei..."
 
@@ -4477,6 +4586,22 @@ msgstr "Ordner-Konfiguration"
 #: client/vcr/cameracontrolwidget.cpp:132
 msgid "Follow fleet"
 msgstr "Flotte verfolgen"
+
+#: ui/reshack/fonteditor.cpp:425
+msgid "Font Editor"
+msgstr "Font-Editor"
+
+#: ui/reshack/application.cpp:427
+msgid "Font Height"
+msgstr "Font-Höhe"
+
+#: ui/reshack/win32import.cpp:204
+msgid "Font Import"
+msgstr "Font-Import"
+
+#: ui/reshack/fonteditor.cpp:514
+msgid "Font Name"
+msgstr "Font-Name"
 
 #: share/resource/core_global.q:76
 msgid "Forbid remote control for all affected ships?"
@@ -4707,6 +4832,10 @@ msgstr ""
 "--get=OPTION\tWert einer Option abfragen\n"
 "--save-hconfig=DATEI\tBinäre HConfig-Datei speichern"
 
+#: ui/reshack/dialogs.cpp:482
+msgid "Generate this character from the following?"
+msgstr "Dieses Zeichen aus den folgenden generieren?"
+
 #: game/pcc/turnloader.cpp:271 game/v3/resultloader.cpp:343
 msgid "Generating turn commands..."
 msgstr "Erzeuge Turn-Kommandos..."
@@ -4866,6 +4995,10 @@ msgstr "Gehe zu X/Y"
 msgid "Go to"
 msgstr "Gehe zu"
 
+#: ui/reshack/fonteditor.cpp:378
+msgid "Go to Character"
+msgstr "Gehe zu Zeichen"
+
 #: share/resource/core_ui.q:2216
 msgid "Go to fleet leader"
 msgstr "Zum Flotten-Führer wechseln"
@@ -4897,6 +5030,10 @@ msgstr "Grav. %s"
 #: game/map/info/info.cpp:1125
 msgid "Gravitonic accel"
 msgstr "Gravitonenbeschleuniger"
+
+#: ui/reshack/colorselector.cpp:122
+msgid "Green"
+msgstr "Grün"
 
 #: client/vcr/cameracontrolwidget.cpp:135
 msgid "Grid"
@@ -4956,6 +5093,10 @@ msgstr "Teile auf Lager"
 msgid "Heading"
 msgstr "Kurs"
 
+#: ui/reshack/application.cpp:173
+msgid "Height"
+msgstr "Höhe"
+
 #: client/dialogs/alliancedialog.cpp:151
 #: client/dialogs/buildqueuesummary.cpp:161 client/dialogs/buildship.cpp:95
 #: client/dialogs/buildshipmain.cpp:290 client/dialogs/buildshiporder.cpp:51
@@ -4964,7 +5105,7 @@ msgstr "Kurs"
 #: client/dialogs/flakvcrobject.cpp:175
 #: client/dialogs/friendlycodedialog.cpp:87 client/dialogs/goaldialog.cpp:272
 #: client/dialogs/helpdialog.cpp:154 client/dialogs/hullfunctionview.cpp:214
-#: client/dialogs/imperialstats.cpp:277 client/dialogs/inboxdialog.cpp:91
+#: client/dialogs/imperialstats.cpp:278 client/dialogs/inboxdialog.cpp:91
 #: client/dialogs/ionstorminfo.cpp:152 client/dialogs/keymapdialog.cpp:150
 #: client/dialogs/messageeditor.cpp:197 client/dialogs/minefieldinfo.cpp:223
 #: client/dialogs/newdrawing.cpp:84 client/dialogs/newdrawingtag.cpp:98
@@ -5096,6 +5237,10 @@ msgstr "Hyperdrive, warp %d"
 msgid "I - Invert"
 msgstr "I - Invertieren"
 
+#: ui/reshack/dialogs.cpp:532
+msgid "I do not know how to generate this character."
+msgstr "Ich kann dieses Zeichen nicht generieren."
+
 #: game/sim/consoleapplication.cpp:472
 msgid ""
 "ID# Pl  Type             Name             Eng  Beams   T/F  Ammo  Dam%  Lvl"
@@ -5138,7 +5283,7 @@ msgstr ""
 "Wenn ein Spieler (Zeile) einem anderen (Spalte) eine Allianz bietet, werden "
 "seine Einheiten die des Alliierten nicht angreifen."
 
-#: ui/defaultresourceprovider.cpp:171
+#: ui/defaultresourceprovider.cpp:177
 msgid "Image \"%s\" not found"
 msgstr "Bild \"%s\" nicht gefunden"
 
@@ -5150,13 +5295,21 @@ msgstr "Immun gegen Angriff von Planeten, wenn kein Treibstoff"
 msgid "Imperial Assault!"
 msgstr "Imperial Assault!"
 
-#: client/dialogs/imperialstats.cpp:260
+#: client/dialogs/imperialstats.cpp:261
 msgid "Imperial Statistics"
 msgstr "Imperiums-Statistik"
 
 #: client/screens/playerscreen.cpp:136
 msgid "Imperial Stats"
 msgstr "Imperiums-Statistik"
+
+#: ui/reshack/win32import.cpp:105
+msgid "Import Font"
+msgstr "Font importieren"
+
+#: ui/reshack/application.cpp:395
+msgid "Import system font"
+msgstr "System-Font importieren"
 
 #: game/map/info/info.cpp:1120
 msgid "In free space"
@@ -5315,15 +5468,15 @@ msgstr "Intercept-Nummer"
 msgid "Intercept-Att."
 msgstr "Intercept-Att."
 
-#: game/proxy/searchproxy.cpp:95
+#: game/proxy/searchproxy.cpp:94
 msgid "Internal error: query stopped in wrong state"
 msgstr "Interner Fehler: Abfrage endet in falschem Zustand"
 
-#: game/proxy/searchproxy.cpp:87
+#: game/proxy/searchproxy.cpp:86
 msgid "Internal error: search failed unexpectedly: %s"
 msgstr "Interner Fehler: Abfrage unerwartet fehlgeschlagen: %s"
 
-#: game/proxy/searchproxy.cpp:72
+#: game/proxy/searchproxy.cpp:71
 msgid "Internal error: search query produced unexpected result"
 msgstr "Interner Fehler: Anfrage produzierte unerwartetes Ergebnis"
 
@@ -5380,7 +5533,7 @@ msgstr "Ungültiger Ausdruck"
 msgid "Invalid file block"
 msgstr "Ungültiger Block in Datei"
 
-#: gfx/codec/custom.cpp:497
+#: gfx/codec/custom.cpp:531
 msgid "Invalid file format"
 msgstr "Ungültiges Dateiformat"
 
@@ -5538,7 +5691,7 @@ msgstr "Ungültige Spielernummer"
 msgid "Invalid player number %d, entry has been ignored"
 msgstr "Ungültige Spielernummer %d, Eintrag wurde ignoriert"
 
-#: game/proxy/searchproxy.cpp:193
+#: game/proxy/searchproxy.cpp:192
 msgid "Invalid search query: %s"
 msgstr "Ungültige Suchanfrage: %s"
 
@@ -5789,12 +5942,16 @@ msgstr "Links/Rechts-Ausgleich"
 msgid "Level %d"
 msgstr "Stufe %d"
 
-#: client/si/commands.cpp:4456
+#: ui/reshack/linetool.cpp:9
+msgid "Line"
+msgstr "Linie"
+
+#: client/si/commands.cpp:4455
 msgid "List Fleets"
 msgstr "Flotten-Liste"
 
 #: client/dialogs/navchartdialog.cpp:513
-#: client/dialogs/visualscandialog.cpp:1079 client/si/commands.cpp:4631
+#: client/dialogs/visualscandialog.cpp:1079 client/si/commands.cpp:4630
 msgid "List Ships"
 msgstr "Schiffe"
 
@@ -5803,6 +5960,8 @@ msgid "List units..."
 msgstr "Einheiten..."
 
 #: client/dialogs/export.cpp:167 client/dialogs/simulator.cpp:362
+#: ui/reshack/application.cpp:245 ui/reshack/application.cpp:280
+#: ui/reshack/application.cpp:295 ui/reshack/application.cpp:341
 msgid "Load"
 msgstr "Laden"
 
@@ -5844,7 +6003,7 @@ msgstr "Laden von Plugin \"%s\" fehlgeschlagen: %s"
 msgid "Load torpedoes onto ships"
 msgstr "Schiffe mit Torpedos beladen"
 
-#: ui/defaultresourceprovider.cpp:173
+#: ui/defaultresourceprovider.cpp:179
 msgid "Loaded \"%s\""
 msgstr "\"%s\" geladen"
 
@@ -5982,7 +6141,7 @@ msgstr "M - Bestätigen"
 msgid "M - Merge"
 msgstr "M - Hinzufügen"
 
-#: client/dialogs/imperialstats.cpp:151
+#: client/dialogs/imperialstats.cpp:152
 msgid "M - Minerals"
 msgstr "M - Mineralien"
 
@@ -6170,7 +6329,7 @@ msgstr "Teil von Flotte #%d"
 msgid "Merge Selection"
 msgstr "Auswahl hinzufügen"
 
-#: client/si/commands.cpp:4738 client/si/commands.cpp:854
+#: client/si/commands.cpp:4737 client/si/commands.cpp:853
 #: share/resource/core.q:59
 msgid "Message"
 msgstr "Nachricht"
@@ -6219,7 +6378,7 @@ msgid "Message too big"
 msgstr "Nachricht zu groß"
 
 #: client/dialogs/visualscandialog.cpp:433 client/screens/playerscreen.cpp:142
-#: client/si/commands.cpp:251
+#: client/si/commands.cpp:250
 msgid "Messages"
 msgstr "Nachrichten"
 
@@ -6449,6 +6608,10 @@ msgstr "Modus"
 msgid "Modified %s"
 msgstr "Geänderte %s"
 
+#: ui/reshack/pictureeditor.cpp:174
+msgid "Modify"
+msgstr "Ändern"
+
 #: client/tiles/shipcargotile.cpp:111 client/widgets/costsummarylist.cpp:154
 #: share/resource/core_tiles.q:1003 share/resource/core_tiles.q:1166
 #: share/resource/core_tiles.q:800
@@ -6654,9 +6817,21 @@ msgstr "Neutronium"
 msgid "Neutronium Density"
 msgstr "Neutronium-Dichte"
 
-#: client/dialogs/processlistdialog.cpp:341
+#: client/dialogs/processlistdialog.cpp:341 ui/reshack/application.cpp:231
 msgid "New"
 msgstr "Neu"
+
+#: ui/reshack/application.cpp:393 ui/reshack/application.cpp:427
+msgid "New Font"
+msgstr "Neuer Font"
+
+#: ui/reshack/application.cpp:169 ui/reshack/application.cpp:389
+msgid "New Picture"
+msgstr "Neues Bild"
+
+#: ui/reshack/application.cpp:391
+msgid "New Picture from Clipboard"
+msgstr "Neues Bild aus Zwischenablage"
 
 #: client/dialogs/preferences.cpp:525 share/resource/core_config.q:258
 msgid "New Value"
@@ -6674,6 +6849,10 @@ msgstr "Neuer Status: %s (%d)"
 #: client/map/starchartoverlay.cpp:610
 msgid "New marker"
 msgstr "Neuer Marker"
+
+#: ui/reshack/dialogs.cpp:229
+msgid "Next"
+msgstr "Nächster"
 
 #: client/dialogs/referencesortorder.cpp:47
 msgid "Next Position"
@@ -6790,7 +6969,7 @@ msgstr "Keine Locks im System aktiv."
 msgid "No matching ship found."
 msgstr "Kein passendes Schiff gefunden."
 
-#: client/si/commands.cpp:252
+#: client/si/commands.cpp:251
 msgid "No messages"
 msgstr "Keine Nachrichten"
 
@@ -6798,7 +6977,7 @@ msgstr "Keine Nachrichten"
 msgid "No messages for this ship"
 msgstr "Keine Nachrichten für dieses Schiff"
 
-#: client/si/commands.cpp:2504
+#: client/si/commands.cpp:2503
 msgid "No messages sent so far"
 msgstr "Keine Nachrichten gesendet bisher"
 
@@ -6947,7 +7126,7 @@ msgstr "Anzahl Torpedorohre"
 msgid "Number of crewmen that defect when the ship is boarded"
 msgstr "Anzahl überlaufender Crewmitglieder, wenn das Schiff geentert wird"
 
-#: client/dialogs/imperialstats.cpp:153
+#: client/dialogs/imperialstats.cpp:154
 msgid "O - Colony"
 msgstr "O - Kolonie"
 
@@ -6971,9 +7150,9 @@ msgstr "O - Optionen"
 #: client/dialogs/shipspeeddialog.cpp:67 client/dialogs/taxationdialog.cpp:607
 #: client/dialogs/turnlistdialog.cpp:113
 #: client/dialogs/visualscandialog.cpp:1080
-#: client/dialogs/visualscandialog.cpp:915 client/si/commands.cpp:2018
-#: client/si/commands.cpp:4455 client/si/commands.cpp:4519
-#: client/si/commands.cpp:4630 client/si/commands.cpp:4739
+#: client/dialogs/visualscandialog.cpp:915 client/si/commands.cpp:2017
+#: client/si/commands.cpp:4454 client/si/commands.cpp:4518
+#: client/si/commands.cpp:4629 client/si/commands.cpp:4738
 #: client/widgets/markercolorselector.cpp:80 share/resource/core.q:87
 #: share/resource/core_config.q:72 share/resource/core_ui.q:1056
 #: share/resource/core_ui.q:1228 share/resource/core_ui.q:1235
@@ -7228,6 +7407,10 @@ msgstr "unser Angebot"
 msgid "Out of fuel in turn %d"
 msgstr "Treibstoff alle in Zug %d"
 
+#: ui/reshack/fonteditor.cpp:390
+msgid "Overlay Character"
+msgstr "Zeichen überlagern"
+
 #: client/dialogs/cargotransferdialog.cpp:44
 msgid "Overload mode"
 msgstr "Überlast-Modus"
@@ -7266,7 +7449,7 @@ msgstr "Eigene Schiffe"
 msgid "Owner"
 msgstr "Besitzer"
 
-#: client/dialogs/imperialstats.cpp:152
+#: client/dialogs/imperialstats.cpp:153
 msgid "P - Planets"
 msgstr "P - Planeten"
 
@@ -7402,6 +7585,10 @@ msgstr "PHost 3"
 msgid "PHost 4"
 msgstr "PHost 4"
 
+#: ui/reshack/colorselector.cpp:102
+msgid "Palette"
+msgstr "Palette"
+
 #: gfx/windowparameters.cpp:30
 msgid "Parameter to \"-bpp\" must be 8, 16 or 32"
 msgstr "Parameter zu \"-bpp\" muss 8, 16 oder 32 sein"
@@ -7422,9 +7609,17 @@ msgstr "Participatory"
 msgid "Passive Ship"
 msgstr "Passives Schiff"
 
+#: ui/reshack/clipboard.cpp:75
+msgid "Paste"
+msgstr "Einfügen"
+
 #: game/map/planetinfo.cpp:50
 msgid "Pay additional supplies"
 msgstr "Zahlen zusätzliche Vorräte"
+
+#: ui/reshack/penciltool.cpp:9
+msgid "Pencil"
+msgstr "Bleistift"
 
 #: client/dialogs/scores.cpp:290
 msgid "Percentages"
@@ -7442,6 +7637,10 @@ msgstr "Pillage max. %d %1{Zug%|Züge%}"
 msgid "Pillage mission"
 msgstr "Plündern-Mission"
 
+#: ui/reshack/pipettetool.cpp:10
+msgid "Pipette"
+msgstr "Pipette"
+
 #: client/dialogs/buildqueuesummary.cpp:335
 msgid "Plan"
 msgstr "Geplant"
@@ -7453,7 +7652,7 @@ msgstr "Plane ein %s"
 #: client/dialogs/planetinfodialog.cpp:223
 #: client/widgets/simulationobjectinfo.cpp:164
 #: client/widgets/simulationobjectinfo.cpp:245 game/map/planetstorage.cpp:42
-#: game/proxy/vcrdatabaseproxy.cpp:98 game/ref/sortby.cpp:431
+#: game/proxy/vcrdatabaseproxy.cpp:97 game/ref/sortby.cpp:431
 #: game/sim/fleetcost.cpp:143
 msgid "Planet"
 msgstr "Planet"
@@ -7574,7 +7773,7 @@ msgstr "Spieler"
 msgid "Players..."
 msgstr "Spieler..."
 
-#: client/si/commands.cpp:1509
+#: client/si/commands.cpp:1508
 msgid "Please fix the following problems to make the chunnel work"
 msgstr "Bitte behebe die folgenden Probleme, damit der Chunnel funktioniert"
 
@@ -7674,7 +7873,7 @@ msgstr "Vorhersage bis Cursor"
 msgid "Predict to end"
 msgstr "Vorhersage bis Ende"
 
-#: client/si/commands.cpp:2014
+#: client/si/commands.cpp:2013
 msgid "Prediction Details"
 msgstr "Vorhersage-Details"
 
@@ -7749,6 +7948,14 @@ msgstr "Drücke die Leertaste, um ein Feld zu ändern."
 #: client/dialogs/keymapdialog.cpp:157
 msgid "Press the key for which you want information."
 msgstr "Drücke die Taste, für die du Information wünschst."
+
+#: ui/reshack/dialogs.cpp:223
+msgid "Preview"
+msgstr "Vorschau"
+
+#: ui/reshack/dialogs.cpp:230
+msgid "Previous"
+msgstr "Voriges"
 
 #: client/dialogs/processlistdialog.cpp:305
 msgid "Pri"
@@ -7964,7 +8171,7 @@ msgstr "Datensatz %d, %d Byte%!1{s%}"
 msgid "Record type %d, part %d"
 msgstr "Datensatz %d, Teil %d"
 
-#: client/dialogs/newdrawing.cpp:73
+#: client/dialogs/newdrawing.cpp:73 ui/reshack/rectangletool.cpp:11
 msgid "Rectangle"
 msgstr "Rechteck"
 
@@ -7987,6 +8194,10 @@ msgstr "Verschrotte %s"
 #: game/map/info/info.cpp:986
 msgid "Recycling a ship"
 msgstr "Verschrottet ein Raumschiff"
+
+#: ui/reshack/colorselector.cpp:120
+msgid "Red"
+msgstr "Rot"
 
 #: game/spec/racialabilitylist.cpp:212
 msgid "Reduced %s"
@@ -8056,6 +8267,14 @@ msgstr "Fernsteuerungsstatus"
 #: client/dialogs/export.cpp:154 client/dialogs/pluginmanager.cpp:122
 msgid "Remove"
 msgstr "Löschen"
+
+#: ui/reshack/pictureeditor.cpp:242
+msgid "Remove X aux line"
+msgstr "X-Hilfslinie entfernen"
+
+#: ui/reshack/pictureeditor.cpp:243
+msgid "Remove Y aux line"
+msgstr "Y-Hilfslinie entfernen"
 
 #: share/resource/core_ui.q:1073
 msgid "Remove leader from fleet?"
@@ -8150,6 +8369,11 @@ msgstr "Recherche"
 msgid "Reset Location"
 msgstr "Position zurücksetzen"
 
+#: ui/reshack/application.cpp:290 ui/reshack/application.cpp:378
+#: ui/reshack/application.cpp:468 ui/reshack/application.cpp:486
+msgid "Resource Editor"
+msgstr "Ressourcen-Editor"
+
 #: util/plugin/plugin.cpp:258
 msgid "Resource configuration file"
 msgstr "Ressourcen-Konfigurationsdatei"
@@ -8182,11 +8406,11 @@ msgstr "Ergebnisse nach %d Simulation%!1{en%}"
 msgid "Return to race selection"
 msgstr "Zurück zur Spielauswahl"
 
-#: client/dialogs/outboxdialog.cpp:355 client/si/commands.cpp:2502
+#: client/dialogs/outboxdialog.cpp:355 client/si/commands.cpp:2501
 msgid "Revise Messages"
 msgstr "Nachrichten überarbeiten"
 
-#: client/si/commands.cpp:2475
+#: client/si/commands.cpp:2474
 msgid "Revise..."
 msgstr "Überarbeiten..."
 
@@ -8248,7 +8472,7 @@ msgstr "S - Vorräte verk."
 msgid "S - Series"
 msgstr "S - Serie"
 
-#: client/dialogs/imperialstats.cpp:155
+#: client/dialogs/imperialstats.cpp:156
 msgid "S - Starships"
 msgstr "S - Raumschiffe"
 
@@ -8265,7 +8489,7 @@ msgid "Sample hull"
 msgstr "Beispiel-Typ"
 
 #: client/dialogs/simulator.cpp:363 client/dialogs/vcrselection.cpp:292
-#: client/dialogs/vcrselection.cpp:299
+#: client/dialogs/vcrselection.cpp:299 ui/reshack/application.cpp:296
 msgid "Save"
 msgstr "Speichern"
 
@@ -8281,7 +8505,15 @@ msgstr "Alle Nachrichten speichern"
 msgid "Save All Selections"
 msgstr "Alle Auswahlen speichern"
 
-#: client/dialogs/imperialstats.cpp:384 client/dialogs/imperialstats.cpp:392
+#: ui/reshack/fonteditor.cpp:504
+msgid "Save Font"
+msgstr "Font speichern"
+
+#: ui/reshack/pictureeditor.cpp:112
+msgid "Save Image"
+msgstr "Bild speichern"
+
+#: client/dialogs/imperialstats.cpp:385 client/dialogs/imperialstats.cpp:393
 msgid "Save Page"
 msgstr "Seite speichern"
 
@@ -8406,13 +8638,13 @@ msgstr "Suche"
 msgid "Search Object"
 msgstr "Objekt suchen"
 
-#: game/proxy/searchproxy.cpp:80
+#: game/proxy/searchproxy.cpp:79
 msgid "Search failed: query did not produce a result (script called \"End\")"
 msgstr ""
 "Suche fehlgeschlagen: Abfrage hat kein Ergebnis erzeugt (Script hat \"End\" "
 "aufgerufen)"
 
-#: game/proxy/searchproxy.cpp:51
+#: game/proxy/searchproxy.cpp:50
 msgid "Search failed: query suspended unexpectedly (script called \"Stop\")"
 msgstr ""
 "Suche fehlgeschlagen: Abfrage unerwartet angehalten (Skript hat \"Stop\" "
@@ -8430,7 +8662,7 @@ msgstr "Suche nach Schiff"
 msgid "Search in messages"
 msgstr "Suche in Nachrichten"
 
-#: game/proxy/searchproxy.cpp:183
+#: game/proxy/searchproxy.cpp:182
 msgid "Search query"
 msgstr "Suchanfrage"
 
@@ -8492,7 +8724,7 @@ msgstr "Raumschiff auswählen"
 msgid "Select Starbase"
 msgstr "Sternenbasis auswählen"
 
-#: client/si/commands.cpp:1542
+#: client/si/commands.cpp:1541
 msgid "Select Waypoint"
 msgstr "Wähle Zielpunkt"
 
@@ -8534,7 +8766,7 @@ msgstr "Semikolon-getrennte Werte"
 msgid "Send"
 msgstr "Senden"
 
-#: client/si/commands.cpp:2470
+#: client/si/commands.cpp:2469
 msgid "Send Message"
 msgstr "Nachricht senden"
 
@@ -8543,7 +8775,7 @@ msgid "Send file with TRN (will echo back with next RST, PHost 4.0+)"
 msgstr ""
 "Datei mit dem TRN übertragen (wird mit dem RST zurückgesendet, PHost 4.0+)"
 
-#: client/si/commands.cpp:2512 client/si/commands.cpp:2516
+#: client/si/commands.cpp:2511 client/si/commands.cpp:2515
 msgid "Send message to file"
 msgstr "Nachricht in Datei senden"
 
@@ -8566,6 +8798,10 @@ msgstr "Sensoren"
 #: game/pcc/gamefolder.cpp:108
 msgid "Server-side game directory"
 msgstr "Spielverzeichnis auf Server"
+
+#: ui/reshack/dialogs.cpp:231
+msgid "Set"
+msgstr "Setzen"
 
 #: client/dialogs/simulator.cpp:1019
 msgid "Set Aggressiveness"
@@ -8693,6 +8929,10 @@ msgstr "Setze Kurs"
 msgid "Set circle size with [+]/[-], end with [ESC]."
 msgstr "Größe des Kreises festlegen mit [+]/[-], Ende mit [ESC]."
 
+#: ui/reshack/pictureeditor.cpp:239
+msgid "Set height"
+msgstr "Setze Höhe"
+
 #: share/resource/core_config.q:130 share/resource/core_config.q:150
 msgid "Set message detail..."
 msgstr "Detailgrad für Nachrichten..."
@@ -8712,6 +8952,10 @@ msgstr "Passwort für Result-Datei..."
 #: client/screens/browserscreen.cpp:76
 msgid "Set up for playing"
 msgstr "Einrichten für Spiel"
+
+#: ui/reshack/pictureeditor.cpp:238
+msgid "Set width"
+msgstr "Setze Breite"
 
 #: client/dialogs/preferences.cpp:573
 msgid "Settings"
@@ -8823,7 +9067,7 @@ msgstr "Schiffs-Liste"
 msgid "Ship Mission"
 msgstr "Schiffs-Mission"
 
-#: client/si/commands.cpp:4520
+#: client/si/commands.cpp:4519
 msgid "Ship Prediction"
 msgstr "Schiffs-Vorhersage"
 
@@ -8976,7 +9220,7 @@ msgstr "Raster anzeigen"
 msgid "Show minefield to an ally"
 msgstr "Minenfeld einem Verbündeten zeigen"
 
-#: client/si/commands.cpp:1918
+#: client/si/commands.cpp:1917
 msgid "Show minefield to..."
 msgstr "Zeige Minenfeld..."
 
@@ -9032,7 +9276,7 @@ msgstr "Zeige nur Torpedos"
 msgid "Show planet to an ally"
 msgstr "Planet einem Verbündeten zeigen"
 
-#: client/si/commands.cpp:1914
+#: client/si/commands.cpp:1913
 msgid "Show planet to..."
 msgstr "Zeige Planet..."
 
@@ -9040,7 +9284,7 @@ msgstr "Zeige Planet..."
 msgid "Show ship to an ally"
 msgstr "Schiff einem Verbündeten zeigen"
 
-#: client/si/commands.cpp:1916
+#: client/si/commands.cpp:1915
 msgid "Show ship to..."
 msgstr "Zeige Schiff..."
 
@@ -9080,6 +9324,10 @@ msgstr "Größe"
 #: client/widgets/chartdisplayconfig.cpp:122
 msgid "Small starchart"
 msgstr "Kleine Sternenkarte"
+
+#: ui/reshack/rectangletool.cpp:11
+msgid "Solid Bar"
+msgstr "Balken"
 
 #: client/widgets/filterdisplay.cpp:294
 msgid "Sort"
@@ -9251,6 +9499,10 @@ msgstr "Stabilität"
 #: game/vcr/classic/utils.cpp:41
 msgid "Stalemate."
 msgstr "Beide sind kampfunfähig."
+
+#: ui/reshack/clipboard.cpp:75
+msgid "Stamp"
+msgstr "Stempel"
 
 #: game/alliance/hosthandler.cpp:41
 msgid "Standard alliance"
@@ -9502,6 +9754,14 @@ msgstr "Syntax-Fehler"
 msgid "Syntax error, line has been ignored"
 msgstr "Syntaxfehler, Zeile wurde ignoriert"
 
+#: ui/reshack/fonteditor.cpp:520
+msgid "System"
+msgstr "System"
+
+#: ui/reshack/dialogs.cpp:349
+msgid "System Fonts"
+msgstr "System-Fonts"
+
 #: client/widgets/configstoragecontrol.cpp:25
 msgid "System configuration file"
 msgstr "System-Konfigurationsdatei"
@@ -9516,7 +9776,7 @@ msgstr "T - Inhalt"
 msgid "T - Taxes"
 msgstr "T - Steuern"
 
-#: client/dialogs/imperialstats.cpp:150
+#: client/dialogs/imperialstats.cpp:151
 msgid "T - Totals"
 msgstr "T - Gesamt"
 
@@ -9815,6 +10075,10 @@ msgstr ""
 "Die Statistik-Datei im Spielverzeichnis wurde von einer neueren Version von "
 "PCC2 geschrieben; Änderungen werden nicht gespeichert."
 
+#: ui/reshack/dialogs.cpp:461
+msgid "The values you entered make the new font have a height of 0 or less."
+msgstr "Mit den eingegebenen Werten ist der Font 0 Pixel oder weniger hoch."
+
 #: client/widgets/alliancelevelgrid.cpp:36
 msgid "Their offer"
 msgstr "ihr Angebot"
@@ -10108,6 +10372,14 @@ msgid ""
 msgstr ""
 "Dieses Spiel scheint PHost zu benutzen, aber du hast keine PCONFIG.SRC. PCC2 "
 "hat diese Datei für dich mit einer Kommandonachricht angefordert."
+
+#: ui/reshack/info.cpp:461
+msgid ""
+"This is an ASCII character.\n"
+"C encoding: '\\%03o', '\\x%0$02X'"
+msgstr ""
+"Dies ist ein ASCII-Zeichen.\n"
+"C-Kodierung: '\\%03o', '\\x%0$02X'"
 
 #: client/dialogs/scriptcommanddialog.cpp:132
 msgid "This is not a valid auto task command."
@@ -10415,6 +10687,10 @@ msgstr ""
 msgid "Too many objects in file"
 msgstr "Zu viele Objekte in Datei"
 
+#: ui/reshack/dialogs.cpp:389
+msgid "Top"
+msgstr "Oben"
+
 #: game/map/info/info.cpp:685 game/map/info/info.cpp:744
 msgid "Top %d %s Planets"
 msgstr "Top %d %s-Planeten"
@@ -10555,7 +10831,7 @@ msgstr "Frachttransfer zu..."
 msgid "Transfer cash/ammo to foreign ship"
 msgstr "Geld/Munition auf fremdes Schiff laden"
 
-#: client/si/commands.cpp:2755
+#: client/si/commands.cpp:2754
 msgid "Transfer which cargo?"
 msgstr "Welches Frachtgut übertragen?"
 
@@ -10745,6 +11021,10 @@ msgstr "Datei kann nicht angelegt werden"
 msgid "Unable to create file %s: %s"
 msgstr "Datei %s kann nicht erzeugt werden: %s"
 
+#: ui/reshack/win32import.cpp:105
+msgid "Unable to create system objects."
+msgstr "Systemobjekte können nicht angelegt werden."
+
 #: client/widgets/vcrobjectinfo.cpp:152
 msgid "Unable to determine derived information."
 msgstr "Abgeleitete Informationen nicht ermittelbar."
@@ -10764,6 +11044,10 @@ msgstr "Plugin kann nicht installiert werden."
 #: client/dialogs/messageeditor.cpp:293 share/resource/core_ui.q:1532
 msgid "Unable to load %s: %s"
 msgstr "%s kann nicht geladen werden: %s"
+
+#: ui/reshack/application.cpp:280
+msgid "Unable to load file: %s"
+msgstr "Datei kann nicht geladen werden: %s"
 
 #: game/interface/privatefunctions.cpp:314
 msgid "Unable to load scripts and auto-tasks"
@@ -10793,6 +11077,10 @@ msgstr ""
 msgid "Unable to open file %s: %s"
 msgstr "%s kann nicht geöffnet werden: %s"
 
+#: ui/reshack/application.cpp:245
+msgid "Unable to open file: %s"
+msgstr "Datei kann nicht geöffnet werden: %s"
+
 #: client/application.cpp:135
 msgid "Unable to open profile directory"
 msgstr "Profil-Verzeichnis kann nicht geöffnet werden"
@@ -10801,12 +11089,17 @@ msgstr "Profil-Verzeichnis kann nicht geöffnet werden"
 msgid "Unable to save %s: %s"
 msgstr "%s kann nicht gespeichert werden: %s"
 
-#: client/si/commands.cpp:431 game/pcc/turnloader.cpp:128
+#: ui/reshack/fonteditor.cpp:628 ui/reshack/fonteditor.cpp:631
+#: ui/reshack/pictureeditor.cpp:341 ui/reshack/pictureeditor.cpp:344
+msgid "Unable to save file %s: %s"
+msgstr "Datei kann nicht gespeichert werden: %s"
+
+#: client/si/commands.cpp:430 game/pcc/turnloader.cpp:128
 #: game/v3/directoryloader.cpp:233 game/v3/resultloader.cpp:122
 msgid "Unable to save game"
 msgstr "Spiel kann nicht gespeichert werden"
 
-#: client/si/commands.cpp:2516
+#: client/si/commands.cpp:2515
 msgid "Unable to save message: %s"
 msgstr "Nachricht kann nicht gespeichert werden: %s"
 
@@ -10864,7 +11157,13 @@ msgstr "Unklassifiziert"
 msgid "Undo Supply Sale"
 msgstr "Vorräte Verkaufen - Rückgängig"
 
-#: afl/string/messages.hpp:302 game/proxy/attachmentproxy.cpp:73
+#: ui/reshack/fonteditor.cpp:425
+msgid "Undo changes to this character and restore previous content?"
+msgstr ""
+"Bearbeitung dieses Zeichens rückgängig machen und vorigen Inhalt "
+"wiederherstellen?"
+
+#: afl/string/messages.hpp:302 game/proxy/attachmentproxy.cpp:72
 msgid "Unexpected error"
 msgstr "Unerwarteter Fehler"
 
@@ -10872,13 +11171,21 @@ msgstr "Unerwarteter Fehler"
 msgid "Unexpected object"
 msgstr "Unerwartetes Objekt"
 
-#: ui/defaultresourceprovider.cpp:180
+#: ui/defaultresourceprovider.cpp:186
 msgid "Unhandled exception while loading \"%s\""
 msgstr "Unbehandelte Ausnahme beim Laden von \"%s\""
+
+#: ui/reshack/fonteditor.cpp:522
+msgid "Unicode"
+msgstr "Unicode"
 
 #: util/charsetfactory.cpp:62
 msgid "Unicode (UTF-8)"
 msgstr "Unicode (UTF-8)"
+
+#: ui/reshack/info.cpp:458
+msgid "Unicode: U+%04X (%0$0d)"
+msgstr "Unicode: U+%04X (%0$0d)"
 
 #: client/dialogs/pluginmanager.cpp:366
 msgid "Uninstall Plugin"
@@ -10936,7 +11243,7 @@ msgstr "Unbekannt"
 msgid "Unknown PHost"
 msgstr "Unbekannter PHost"
 
-#: client/applicationparameters.cpp:62
+#: client/applicationparameters.cpp:62 ui/reshack/application.cpp:530
 msgid "Unknown command line parameter \"-%s\""
 msgstr "Unbekannter Kommandozeilenparameter \"-%s\""
 
@@ -10971,7 +11278,7 @@ msgstr "Unbekannter Datensatz."
 msgid "Unknown reference target in record definition."
 msgstr "Unbekanntes Verweisziel in Datensatzdefinition."
 
-#: game/proxy/vcrdatabaseproxy.cpp:111
+#: game/proxy/vcrdatabaseproxy.cpp:110
 msgid "Unknown ship type"
 msgstr "Unbekannter Schiffstype"
 
@@ -11015,6 +11322,10 @@ msgstr "Markierung gefundener Objekte aufheben"
 #: client/dialogs/buildqueuesummary.cpp:195
 msgid "Unmark these starbases"
 msgstr "Markierung dieser Sternenbasen aufheben"
+
+#: ui/reshack/fonteditor.cpp:592 ui/reshack/pictureeditor.cpp:301
+msgid "Unnamed"
+msgstr "Unbenannt"
 
 #: game/map/info/info.cpp:1319
 msgid "Unowned Planets"
@@ -11065,7 +11376,7 @@ msgstr "%d Anh%1{ang%|änge%} entpackt."
 msgid "Unpacked %d planet%!1{s%}."
 msgstr "%d Planet%!1{en%} entpackt."
 
-#: game/proxy/maintenanceproxy.cpp:165
+#: game/proxy/maintenanceproxy.cpp:164
 msgid "Unpacked %d result file%!1{s%}."
 msgstr "%d Result-Datei%!1{en%} entpackt."
 
@@ -11097,7 +11408,7 @@ msgstr "Schiffs-Positionsdatei mit %d Einträgen entpackt."
 msgid "Unpacked version 3.5 object file (kore)."
 msgstr "Version-3.5-Objekt-Datei (kore) entpackt."
 
-#: game/proxy/maintenanceproxy.cpp:152
+#: game/proxy/maintenanceproxy.cpp:151
 msgid "Unpacking player %d: %s"
 msgstr "Entpacke Spieler %d: %s"
 
@@ -11724,6 +12035,10 @@ msgstr "SEHR gefährlich"
 msgid "Verification succeeded"
 msgstr "Prüfung erfolgreich"
 
+#: ui/reshack/dialogs.cpp:386 ui/reshack/dialogs.cpp:461
+msgid "Vertical Alignment"
+msgstr "Vertikale Ausrichtung"
+
 #: gfx/sdl/engine.cpp:297
 msgid "Video driver: %s (%dk%s)"
 msgstr "Video-Treiber: %s (%dk%s)"
@@ -11792,7 +12107,7 @@ msgstr "Sichtungen"
 msgid "Voltage"
 msgstr "Ladung"
 
-#: client/dialogs/imperialstats.cpp:158
+#: client/dialogs/imperialstats.cpp:159
 msgid "W - Weapons"
 msgstr "W - Waffen"
 
@@ -12003,7 +12318,7 @@ msgstr "Was möchtest du in die Sternenkarte zeichnen?"
 msgid "Where"
 msgstr "Wo"
 
-#: client/dialogs/export.cpp:156
+#: client/dialogs/export.cpp:156 ui/reshack/application.cpp:171
 msgid "Width"
 msgstr "Breite"
 
@@ -12029,8 +12344,8 @@ msgstr ""
 "Maketurn zurückbringen. Ansonsten bringt dich das Entpacken deines Results "
 "zum Anfang des aktuellen Zuges zurück."
 
-#: client/dialogs/labelconfig.cpp:109 client/downlink.cpp:11
-#: client/downlink.cpp:19 client/si/userside.cpp:95
+#: client/dialogs/labelconfig.cpp:109 client/si/userside.cpp:95
+#: ui/waitindicator.cpp:11
 msgid "Working..."
 msgstr "Arbeitet..."
 
@@ -12192,7 +12507,7 @@ msgstr ""
 "Du kannst dieses Schiff nicht klonen, da du nicht genug Geld hast, um die "
 "benötigte Technologie zu kaufen."
 
-#: client/dialogs/fileselectiondialog.cpp:220
+#: ui/dialogs/fileselectiondialog.cpp:221
 msgid ""
 "You cannot create files here. Please choose a place (drive, partition) first."
 msgstr ""
@@ -12425,14 +12740,12 @@ msgstr "[Dieses Verzeichnis wählen]"
 msgid "[Directory content]"
 msgstr "[Verzeichnis anzeigen]"
 
-#: client/dialogs/fileselectiondialog.cpp:59
-#: client/screens/browserscreen.cpp:930
+#: client/screens/browserscreen.cpp:930 ui/dialogs/fileselectiondialog.cpp:60
 msgid "[Go up one level]"
 msgstr "[Eine Ebene aufwärts]"
 
 #: client/dialogs/directoryselectiondialog.cpp:58
-#: client/dialogs/fileselectiondialog.cpp:77
-#: client/screens/browserscreen.cpp:925
+#: client/screens/browserscreen.cpp:925 ui/dialogs/fileselectiondialog.cpp:78
 msgid "[Places]"
 msgstr "[Orte]"
 
@@ -12608,7 +12921,7 @@ msgstr "Befehl erfordert mindestens 2 Parameter"
 msgid "common"
 msgstr "viel"
 
-#: client/dialogs/simulationconfiguration.cpp:74
+#: client/dialogs/simulationconfiguration.cpp:74 ui/reshack/dialogs.cpp:92
 msgid "complete"
 msgstr "vollständig"
 
@@ -13025,7 +13338,7 @@ msgid "missing directory name to list. Use '%s -h' for help."
 msgstr ""
 "Name des aufzulistenden Verzeichnisses fehlt. Mit '%s -h' erhalten Sie Hilfe."
 
-#: gfx/codec/application.cpp:150 gfx/codec/application.cpp:243
+#: gfx/codec/application.cpp:152 gfx/codec/application.cpp:245
 msgid "missing input file name"
 msgstr "fehlender Eingabedateiname"
 
@@ -13033,7 +13346,7 @@ msgstr "fehlender Eingabedateiname"
 msgid "missing node Id"
 msgstr "fehlende Knoten-Id"
 
-#: gfx/codec/application.cpp:155 gfx/codec/application.cpp:185
+#: gfx/codec/application.cpp:157 gfx/codec/application.cpp:187
 msgid "missing output file name"
 msgstr "fehlender Ausgabedatei-Name"
 
@@ -13564,7 +13877,7 @@ msgstr "zu lange"
 
 #: game/interface/exportapplication.cpp:118 game/maint/sweepapplication.cpp:78
 #: game/v3/maketurnapplication.cpp:79 game/v3/trn/dumperapplication.cpp:104
-#: game/v3/unpackapplication.cpp:111 gfx/codec/application.cpp:160
+#: game/v3/unpackapplication.cpp:111 gfx/codec/application.cpp:162
 #: server/play/consoleapplication.cpp:134 util/doc/application.cpp:441
 #: util/doc/application.cpp:635
 msgid "too many arguments"
@@ -13688,11 +14001,11 @@ msgstr "unbesetzter Planet"
 msgid "unpacked"
 msgstr "entpackt"
 
-#: gfx/codec/application.cpp:166 gfx/codec/application.cpp:204
+#: gfx/codec/application.cpp:168 gfx/codec/application.cpp:206
 msgid "unrecognized input file name: %s"
 msgstr "Eingabedateiname nicht erkannt: %s"
 
-#: gfx/codec/application.cpp:173
+#: gfx/codec/application.cpp:175
 msgid "unrecognized output file name: %s"
 msgstr "Ausgabedateiname nicht erkannt: %s"
 
@@ -13853,6 +14166,9 @@ msgstr "▶ Gesamt"
 #: client/dialogs/scores.cpp:1386
 msgid "▶▶ Totals"
 msgstr "▶▶ Gesamt"
+
+#~ msgid "Not in any codepage."
+#~ msgstr "Nicht auf einer Codeseite."
 
 #~ msgid "Classic VCR Effects"
 #~ msgstr "Effekte für klassischen VCR"

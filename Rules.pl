@@ -61,7 +61,7 @@ my $bindir;
 my $prefix = get_variable('prefix');
 
 # Targets (previously maintained in P9/Settings as 'TARGETS' variable)
-my @GUI_APPS     = qw(c2ng c2pluginw);
+my @GUI_APPS     = qw(c2ng c2pluginw c2reshack);
 my @SERVER_APPS  = qw(c2file-server c2format-server c2host-server c2talk-server c2fileclient c2mailin c2console c2dbexport c2nntp-server c2mailout-server c2monitor-server c2play-server c2router-server c2doc-server c2user-server c2logger);
 my @CONSOLE_APPS = qw(c2check c2compiler c2configtool c2docmanager c2dump c2export c2mgrep c2mkturn c2plugin c2rater c2restool c2script c2simtool c2sweep c2unpack c2untrn c2gfxgen c2gfxcodec);
 my @LIBS         = qw(guilib serverlib gamelib);
@@ -133,6 +133,7 @@ if (get_variable('ENABLE_BUILD')) {
     } elsif ($V{TARGET} =~ /Win(32|64)/i) {
         add_to_variable(CXXFLAGS => "-DTARGET_OS_WIN32");
         add_variable(EXE_SUFFIX => '.exe');
+        add_to_variable(LIBS => "-lgdi32 -lcomdlg32");
         $bindir = "$prefix";
     } else {
         die "Error: the specified target '$V{TARGET}' is not known; provide correct 'TARGET=' option";

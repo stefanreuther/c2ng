@@ -51,6 +51,10 @@ namespace ui {
             \param invalidateCache true to invalidate the image cache after this request */
         void postNewManagerRequest(util::Request<ui::res::Manager>* req, bool invalidateCache);
 
+        /** Access font list.
+            \return font list */
+        const gfx::FontList& fontList() const;
+
         // ResourceProvider:
         virtual afl::base::Ptr<gfx::Canvas> getImage(String_t name, bool* status = 0);
         virtual afl::base::Ref<gfx::Font> getFont(gfx::FontRequest req);

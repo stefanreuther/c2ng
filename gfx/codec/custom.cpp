@@ -532,3 +532,9 @@ gfx::codec::Custom::load(afl::io::Stream& stream)
     }
     return *result;
 }
+
+afl::base::Memory<const gfx::ColorQuad_t>
+gfx::codec::Custom::getPalette()
+{
+    return PALETTE;
+}

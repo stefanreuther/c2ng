@@ -14,7 +14,6 @@ using gfx::Color_t;
 using gfx::codec::Custom;
 
 /* Tests for loading are in CCImageLoader. */
-
 AFL_TEST("gfx.codec.Custom:save", a)
 {
     // Create a palettized pixmap.
@@ -35,6 +34,10 @@ AFL_TEST("gfx.codec.Custom:save", a)
     a.checkEqual("01. color", colors[0], 0U);
     a.checkEqual("02. color", colors[1], 1U);
     a.checkEqual("03. color", colors[2], 2U);
+
+    // Palette
+    a.checkGreaterEqual("05. palette", gfx::codec::Custom::getPalette().size(), 100U);
+    a.checkLessEqual("06. palette", gfx::codec::Custom::getPalette().size(), 192U);
 
     // Draw some pixels
     can->drawBar(gfx::Rectangle(0, 0, 100, 100), 0, 0, gfx::FillPattern::SOLID, gfx::OPAQUE_ALPHA);

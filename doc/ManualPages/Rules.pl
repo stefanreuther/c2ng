@@ -31,6 +31,7 @@ my @manpages = qw(
     c2plugin
     c2pluginw
     c2rater
+    c2reshack
     c2restool
     c2router-server
     c2script

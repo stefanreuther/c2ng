@@ -37,6 +37,7 @@ subsect('Developer Utilities',
         paragraph_detail('<link>c2compiler(6)</link>',       paragraph_text('Compiler for PCC2 scripts (<fn>*.q</fn>);')),
         paragraph_detail('<link>c2gfxcodec(6)</link>',       paragraph_text('PCC2 graphics codecs;')),
         paragraph_detail('<link>c2gfxgen(6)</link>',         paragraph_text('Procedural generation of graphics;')),
+        paragraph_detail('<link>c2reshack(6)</link>',        paragraph_text('Edit image and font files;')),
         paragraph_detail('<link>c2restool(6)</link>',        paragraph_text('Manipulate resource files;')),
         paragraph_detail('<link>c2untrn(6)</link>',          paragraph_text('Decode and manipulate turn files.'))
     );

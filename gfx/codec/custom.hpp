@@ -44,6 +44,9 @@ namespace gfx { namespace codec {
         virtual void save(Canvas& can, afl::io::Stream& stream);
         virtual afl::base::Ref<Canvas> load(afl::io::Stream& stream);
 
+        // Palette access
+        static afl::base::Memory<const ColorQuad_t> getPalette();
+
      private:
         Mode m_mode;
         bool m_compressed;

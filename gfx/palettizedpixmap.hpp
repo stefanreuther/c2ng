@@ -54,6 +54,11 @@ namespace gfx {
             \param [out] colorDefinitions Color definitions */
         void getPalette(uint8_t start, afl::base::Memory<ColorQuad_t> colorDefinitions) const;
 
+        /** Copy palette.
+            Copies the palette from another PalettizedPixmap.
+            \param [in] from Other PalettizedPixmap */
+        void copyPalette(const PalettizedPixmap& from);
+
         /** Find nearest color, given a ColorQuad_t.
             \param def Color
             \return nearest palette entry. If multiple entries are equally close, returns the numerically lowest one. */

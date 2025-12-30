@@ -12,17 +12,17 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = util/waitindicator.cpp util/waitindicator.hpp \
-    game/v3/passwordapplet.cpp game/v3/passwordapplet.hpp \
-    game/maint/dump/textoutput.cpp game/maint/dump/textoutput.hpp \
-    game/maint/dump/input.cpp game/maint/dump/parsers.cpp \
-    game/maint/dump/parsers.hpp game/maint/dump/typedetector.cpp \
-    game/maint/dump/typedetector.hpp game/maint/dump/output.cpp \
-    game/maint/dump/output.hpp game/maint/dump/input.hpp \
-    game/maint/dump/application.cpp game/maint/dump/application.hpp \
-    interpreter/assembler.cpp interpreter/assembler.hpp \
-    interpreter/vmio/chunkfile.hpp interpreter/vmio/chunkfile.cpp \
-    game/interface/configurationcontext.cpp \
+FILES_gamelib = util/characternamelist.cpp util/characternamelist.hpp \
+    util/waitindicator.cpp util/waitindicator.hpp game/v3/passwordapplet.cpp \
+    game/v3/passwordapplet.hpp game/maint/dump/textoutput.cpp \
+    game/maint/dump/textoutput.hpp game/maint/dump/input.cpp \
+    game/maint/dump/parsers.cpp game/maint/dump/parsers.hpp \
+    game/maint/dump/typedetector.cpp game/maint/dump/typedetector.hpp \
+    game/maint/dump/output.cpp game/maint/dump/output.hpp \
+    game/maint/dump/input.hpp game/maint/dump/application.cpp \
+    game/maint/dump/application.hpp interpreter/assembler.cpp \
+    interpreter/assembler.hpp interpreter/vmio/chunkfile.hpp \
+    interpreter/vmio/chunkfile.cpp game/interface/configurationcontext.cpp \
     game/interface/configurationcontext.hpp \
     game/vcr/classic/standardscheduler.cpp \
     game/vcr/classic/standardscheduler.hpp \
@@ -828,21 +828,44 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = ui/dialogs/fileselectiondialog.cpp \
+FILES_guilib = ui/reshack/win32import.cpp ui/reshack/win32import.hpp \
+    ui/reshack/fontutil.cpp ui/reshack/fontutil.hpp ui/reshack/dialogs.cpp \
+    ui/reshack/dialogs.hpp ui/reshack/info.cpp ui/reshack/info.hpp \
+    ui/reshack/charactergrid.cpp ui/reshack/charactergrid.hpp \
+    ui/reshack/characternamelistbox.cpp ui/reshack/characternamelistbox.hpp \
+    ui/reshack/characternamewidget.cpp ui/reshack/characternamewidget.hpp \
+    ui/reshack/fontcolorselector.cpp ui/reshack/fontcolorselector.hpp \
+    ui/reshack/fonteditor.cpp ui/reshack/fonteditor.hpp \
+    ui/reshack/clipboard.cpp ui/reshack/clipboard.hpp \
+    ui/reshack/pipettetool.cpp ui/reshack/pipettetool.hpp \
+    ui/reshack/circletool.cpp ui/reshack/circletool.hpp \
+    ui/reshack/rectangletool.cpp ui/reshack/rectangletool.hpp \
+    ui/reshack/linetool.cpp ui/reshack/linetool.hpp ui/reshack/brushtool.cpp \
+    ui/reshack/brushtool.hpp ui/reshack/colorselector.cpp \
+    ui/reshack/colorselector.hpp ui/reshack/zoomselector.cpp \
+    ui/reshack/zoomselector.hpp ui/reshack/toolselector.cpp \
+    ui/reshack/toolselector.hpp ui/reshack/modeselector.cpp \
+    ui/reshack/modeselector.hpp ui/reshack/pictureeditor.cpp \
+    ui/reshack/pictureeditor.hpp ui/reshack/painter.cpp \
+    ui/reshack/painter.hpp ui/reshack/penciltool.cpp \
+    ui/reshack/penciltool.hpp ui/reshack/tool.cpp ui/reshack/tool.hpp \
+    ui/reshack/palette.cpp ui/reshack/palette.hpp ui/reshack/session.hpp \
+    ui/reshack/application.cpp ui/reshack/application.hpp \
+    ui/reshack/editor.hpp ui/dialogs/fileselectiondialog.cpp \
     ui/dialogs/fileselectiondialog.hpp ui/widgets/filelistbox.cpp \
     ui/widgets/filelistbox.hpp ui/widgets/busyindicator.cpp \
-    ui/widgets/busyindicator.hpp ui/waitindicator.cpp \
-    ui/waitindicator.hpp client/dialogs/vcroptions.cpp \
-    client/dialogs/vcroptions.hpp client/vcr/configuration.cpp \
-    client/vcr/configuration.hpp gfx/threed/modelapplet.cpp \
-    gfx/threed/modelapplet.hpp gfx/threed/renderapplet.cpp \
-    gfx/threed/renderapplet.hpp client/widgets/testapplet.cpp \
-    client/widgets/testapplet.hpp ui/widgets/testapplet.cpp \
-    ui/widgets/testapplet.hpp gfx/applet.cpp gfx/applet.hpp \
-    client/dialogs/missionselection.cpp client/dialogs/missionselection.hpp \
-    gfx/codec/custom.cpp gfx/codec/custom.hpp gfx/codec/application.cpp \
-    gfx/codec/application.hpp gfx/codec/bmp.cpp gfx/codec/bmp.hpp \
-    gfx/codec/codec.hpp gfx/colorquantizer.cpp gfx/colorquantizer.hpp \
+    ui/widgets/busyindicator.hpp ui/waitindicator.cpp ui/waitindicator.hpp \
+    client/dialogs/vcroptions.cpp client/dialogs/vcroptions.hpp \
+    client/vcr/configuration.cpp client/vcr/configuration.hpp \
+    gfx/threed/modelapplet.cpp gfx/threed/modelapplet.hpp \
+    gfx/threed/renderapplet.cpp gfx/threed/renderapplet.hpp \
+    client/widgets/testapplet.cpp client/widgets/testapplet.hpp \
+    ui/widgets/testapplet.cpp ui/widgets/testapplet.hpp gfx/applet.cpp \
+    gfx/applet.hpp client/dialogs/missionselection.cpp \
+    client/dialogs/missionselection.hpp gfx/codec/custom.cpp \
+    gfx/codec/custom.hpp gfx/codec/application.cpp gfx/codec/application.hpp \
+    gfx/codec/bmp.cpp gfx/codec/bmp.hpp gfx/codec/codec.hpp \
+    gfx/colorquantizer.cpp gfx/colorquantizer.hpp \
     gfx/threed/colortransformation.cpp gfx/threed/colortransformation.hpp \
     gfx/threed/positionlist.cpp gfx/threed/positionlist.hpp \
     gfx/threed/model.cpp gfx/threed/model.hpp \
@@ -1864,10 +1887,23 @@ FILES_c2ng = main/c2ng.cpp
 TYPE_c2ng = guiapp
 DEPEND_c2ng = guilib gamelib afl
 
+TARGETS += c2reshack
+FILES_c2reshack = main/c2reshack.cpp
+TYPE_c2reshack = guiapp
+DEPEND_c2reshack = guilib gamelib afl
+
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/ui/waitindicatortest.cpp \
-    test/util/waitindicatortest.cpp test/game/v3/passwordapplettest.cpp \
+FILES_testsuite = test/ui/reshack/sessiontest.cpp \
+    test/ui/reshack/rectangletooltest.cpp \
+    test/ui/reshack/pipettetooltest.cpp test/ui/reshack/penciltooltest.cpp \
+    test/ui/reshack/palettetest.cpp test/ui/reshack/linetooltest.cpp \
+    test/ui/reshack/infotest.cpp test/ui/reshack/fontutiltest.cpp \
+    test/ui/reshack/clipboardtest.cpp test/ui/reshack/circletooltest.cpp \
+    test/ui/reshack/brushtooltest.cpp test/ui/reshack/editortest.cpp \
+    test/ui/reshack/tooltest.cpp test/util/characternamelisttest.cpp \
+    test/ui/waitindicatortest.cpp test/util/waitindicatortest.cpp \
+    test/game/v3/passwordapplettest.cpp \
     test/game/maint/dump/applicationtest.cpp \
     test/game/maint/dump/parserstest.cpp \
     test/game/maint/dump/typedetectortest.cpp \

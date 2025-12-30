@@ -55,6 +55,35 @@ gfx::FontList::findFont(FontRequest req) const
     return result;
 }
 
+// Get number of fonts.
+size_t
+gfx::FontList::getNumFonts() const
+{
+    return m_fonts.size();
+}
+
+// Get font, given an index.
+afl::base::Ptr<gfx::Font>
+gfx::FontList::getFontByIndex(size_t index) const
+{
+    if (index < m_fonts.size()) {
+        return m_fonts[index].font;
+    } else {
+        return 0;
+    }
+}
+
+// Get definition of a font, given an index.
+gfx::FontRequest
+gfx::FontList::getFontDefinitionByIndex(size_t index) const
+{
+    if (index < m_fonts.size()) {
+        return m_fonts[index].definition;
+    } else {
+        return FontRequest();
+    }
+}
+
 afl::base::Ptr<gfx::Font>
 gfx::FontList::find(FontRequest req) const
 {

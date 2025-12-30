@@ -30,6 +30,9 @@ AFL_TEST("gfx.FontList:empty", a)
     a.checkNull("04", testee.findFont(makeRequest(0,0,1,0)).get());
     a.checkNull("05", testee.findFont(makeRequest(0,0,0,1)).get());
     a.checkNull("06", testee.findFont(makeRequest(1,1,1,1)).get());
+
+    a.checkEqual("11", testee.getNumFonts(), 0U);
+    a.checkNull("12", testee.getFontByIndex(0).get());
 }
 
 /** Test one-element list. */
@@ -45,6 +48,11 @@ AFL_TEST("gfx.FontList:unit", a)
     a.checkEqual("04", testee.findFont(makeRequest(0,0,1,0)).get(), &*f);
     a.checkEqual("05", testee.findFont(makeRequest(0,0,0,1)).get(), &*f);
     a.checkEqual("06", testee.findFont(makeRequest(1,1,1,1)).get(), &*f);
+
+    a.checkEqual("11", testee.getNumFonts(), 1U);
+    a.checkEqual("12", testee.getFontByIndex(0).get(), &*f);
+    a.checkNull("13", testee.getFontByIndex(1).get());
+    a.checkEqual("12", testee.getFontDefinitionByIndex(0).getSize().orElse(-99), 1);
 }
 
 /** Test populated list. */

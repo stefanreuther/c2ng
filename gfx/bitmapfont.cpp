@@ -124,6 +124,13 @@ gfx::BitmapFont::getHeight() const
     return height;
 }
 
+// Set font height.
+void
+gfx::BitmapFont::setHeight(int n)
+{
+    height = n;
+}
+
 namespace {
     struct FileHeader {
         char signature[2];
@@ -155,7 +162,7 @@ namespace {
 
     struct Hint {
         afl::bits::Value<afl::bits::UInt16LE> x;
-        afl::bits::Value<afl::bits::UInt16LE> y;       
+        afl::bits::Value<afl::bits::UInt16LE> y;
     };
     static_assert(sizeof(Hint) == 4, "sizeof Hint");
 }
@@ -308,7 +315,7 @@ gfx::BitmapFont::getTextWidth(String_t text)
         }
     }
     return total;
-    
+
 }
 
 int
@@ -316,4 +323,3 @@ gfx::BitmapFont::getTextHeight(String_t /*text*/)
 {
     return height;
 }
-

@@ -12,7 +12,7 @@ class gfx::PalettizedPixmap::TraitsImpl {
  public:
     typedef uint8_t Pixel_t;
     typedef uint8_t Data_t;
-        
+
     Data_t* get(int x, int y) const
         { return m_pix.row(y).at(x); }
     static inline Pixel_t peek(Data_t* ptr)
@@ -116,6 +116,13 @@ gfx::PalettizedPixmap::getPalette(uint8_t start, afl::base::Memory<ColorQuad_t> 
         colorDefinitions.split(amountCopied);
         start = 0;
     }
+}
+
+// Copy palette.
+void
+gfx::PalettizedPixmap::copyPalette(const PalettizedPixmap& from)
+{
+    afl::base::Memory<ColorQuad_t>(m_palette).copyFrom(from.m_palette);
 }
 
 // Find nearest color, given a ColorQuad_t.

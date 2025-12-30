@@ -34,6 +34,20 @@ namespace gfx {
             \return found font. Null if no font matches (only happens if the list is empty) */
         afl::base::Ptr<Font> findFont(FontRequest req) const;
 
+        /** Get number of fonts.
+            \return number */
+        size_t getNumFonts() const;
+
+        /** Get font, given an index.
+            \param index Index
+            \return font; null if index out of range */
+        afl::base::Ptr<Font> getFontByIndex(size_t index) const;
+
+        /** Get definition of a font, given an index.
+            \param index Index
+            \return definition; default if index out of range */
+        FontRequest getFontDefinitionByIndex(size_t index) const;
+
      private:
         struct Element {
             FontRequest definition;

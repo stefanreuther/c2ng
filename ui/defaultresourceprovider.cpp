@@ -62,6 +62,12 @@ ui::DefaultResourceProvider::postNewManagerRequest(util::Request<ui::res::Manage
     m_loaderWake.post();
 }
 
+const gfx::FontList&
+ui::DefaultResourceProvider::fontList() const
+{
+    return m_fontList;
+}
+
 // Get image.
 afl::base::Ptr<gfx::Canvas>
 ui::DefaultResourceProvider::getImage(String_t name, bool* status)

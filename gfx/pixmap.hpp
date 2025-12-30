@@ -35,6 +35,8 @@ namespace gfx {
 
         int getHeight() const;
 
+        void copyPixels(Point pos, const Pixmap<T>& from);
+
      private:
         int m_width;
         int m_height;
@@ -144,6 +146,40 @@ inline int
 gfx::Pixmap<T>::getHeight() const
 {
     return m_height;
+}
+
+template<typename T>
+void
+gfx::Pixmap<T>::copyPixels(Point pos, const Pixmap<T>& from)
+{
+    Point fromSize = from.getSize();
+    Point outSize = getSize();
+
+    for (int y = 0; y < fromSize.getY(); ++y) {
+        const int outY = y + pos.getY();
+        if (outY >= 0 && outY < outSize.getY()) {
+            int x = 0;
+            int outX = pos.getX();
+            while (x < fromSize.getX()) {
+                if (outX < 0) {
+                    x -= outX;
+                    outX = 0;
+                } else if (outX >= outSize.getX()) {
+                    x = fromSize.getX();
+                } else {
+                    int leftInput = fromSize.getX() - x;
+                    int leftOutput = outSize.getX() - outX;
+                    int todo = std::min(leftInput, leftOutput);
+
+                    row(outY).subrange(outX, todo)
+                        .copyFrom(from.row(y).subrange(x, todo));
+
+                    x += todo;
+                    outX += todo;
+                }
+            }
+        }
+    }
 }
 
 #endif

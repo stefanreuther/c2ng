@@ -51,6 +51,12 @@ namespace gfx {
             \return height in pixels */
         int getHeight() const;
 
+        /** Set font height.
+            This function is not normally needed; height is set automatically when final glyphs are added.
+            It may be required if glyphs are modified.
+            \param n New height in pixels */
+        void setHeight(int n);
+
         /** Load bitmap font from "FN" file.
             This is a custom font file format, used by PCC 1.x as well as PCC2.
             \param s Stream

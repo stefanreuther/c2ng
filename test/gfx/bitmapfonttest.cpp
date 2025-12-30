@@ -125,6 +125,14 @@ AFL_TEST("gfx.BitmapFont:addNewGlyph", a)
     a.checkEqual("52. getCurrentCharacterLimit", testee.getCurrentCharacterLimit(), 0xE101U);
 }
 
+/** Test setHeight. */
+AFL_TEST("gfx.BitmapFont:setHeight", a)
+{
+    gfx::BitmapFont testee;
+    testee.setHeight(7);
+    a.checkEqual("01. getHeight", testee.getHeight(), 7);
+}
+
 /** Test invalid files. */
 
 // File too short

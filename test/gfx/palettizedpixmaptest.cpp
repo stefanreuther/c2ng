@@ -120,3 +120,31 @@ AFL_TEST("gfx.PalettizedPixmap", a)
     };
     a.checkEqualContent<uint8_t>("71. content", testee->pixels(), EXPECTED_CONTENT);
 }
+
+/** Simple test. */
+AFL_TEST("gfx.PalettizedPixmap:copyPalette", a)
+{
+    // Set palette in a pixmap
+    afl::base::Ref<gfx::PalettizedPixmap> one = gfx::PalettizedPixmap::create(5, 7);
+    static const gfx::ColorQuad_t COLORS[] = {
+        COLORQUAD_FROM_RGBA(0, 0, 0, 0),      // 0
+        COLORQUAD_FROM_RGBA(0, 0, 42, 0),     // 1
+        COLORQUAD_FROM_RGBA(170, 0, 0, 0),    // 2
+        COLORQUAD_FROM_RGBA(255, 0, 0, 0),    // 3
+        COLORQUAD_FROM_RGBA(0, 85, 0, 0),     // 4
+        COLORQUAD_FROM_RGBA(0, 170, 0, 0),    // 5
+        COLORQUAD_FROM_RGBA(0, 255, 0, 0),    // 6
+    };
+    one->setPalette(0, COLORS);
+
+    // Create another pixmap and copy palette
+    afl::base::Ref<gfx::PalettizedPixmap> two = gfx::PalettizedPixmap::create(3, 9);
+    two->copyPalette(*one);
+
+    // Read palette
+    gfx::ColorQuad_t resultColors[3];
+    two->getPalette(0, resultColors);
+    a.checkEqual("01. getPalette", resultColors[0], COLORS[0]);
+    a.checkEqual("02. getPalette", resultColors[1], COLORS[1]);
+    a.checkEqual("03. getPalette", resultColors[2], COLORS[2]);
+}
