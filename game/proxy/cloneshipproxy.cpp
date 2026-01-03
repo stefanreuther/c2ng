@@ -9,7 +9,6 @@
 #include "game/exception.hpp"
 #include "game/game.hpp"
 #include "game/map/universe.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/turn.hpp"
 
 using game::map::Planet;
@@ -87,7 +86,7 @@ game::proxy::CloneShipProxy::~CloneShipProxy()
 { }
 
 void
-game::proxy::CloneShipProxy::getStatus(WaitIndicator& ind, Status& st)
+game::proxy::CloneShipProxy::getStatus(util::WaitIndicator& ind, Status& st)
 {
     class Task : public util::Request<Trampoline> {
      public:

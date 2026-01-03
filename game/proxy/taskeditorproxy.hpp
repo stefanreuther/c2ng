@@ -7,7 +7,6 @@
 
 #include "afl/base/signal.hpp"
 #include "afl/data/stringlist.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "game/types.hpp"
 #include "interpreter/process.hpp"
@@ -15,6 +14,7 @@
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -97,7 +97,7 @@ namespace game { namespace proxy {
         /** Get status, synchronously.
             \param [in,out] ind  WaitIndicator
             \param [out]    out  Status */
-        void getStatus(WaitIndicator& ind, Status& out);
+        void getStatus(util::WaitIndicator& ind, Status& out);
 
         /** Set cursor.
             \param newCursor New cursor (0-based line number) */

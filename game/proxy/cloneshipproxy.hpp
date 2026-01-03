@@ -9,10 +9,9 @@
 #include "game/session.hpp"
 #include "game/types.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Proxy for a CloneShip action.
 
@@ -68,7 +67,7 @@ namespace game { namespace proxy {
         /** Retrieve status.
             @param [in,out] ind WaitIndicator for UI synchronisation
             @param [out]    st  Status */
-        void getStatus(WaitIndicator& ind, Status& st);
+        void getStatus(util::WaitIndicator& ind, Status& st);
 
         /** Commit action.
             @see game::actions::CloneShip::commit() */

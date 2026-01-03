@@ -5,7 +5,7 @@
 
 #include "client/imageloader.hpp"
 #include "afl/base/signalconnection.hpp"
-#include "client/widgets/busyindicator.hpp"
+#include "ui/widgets/busyindicator.hpp"
 
 // Constructor.
 client::ImageLoader::ImageLoader(ui::Root& root, afl::string::Translator& tx)
@@ -32,7 +32,7 @@ client::ImageLoader::wait()
 {
     if (!m_unloadedImages.empty()) {
         afl::base::SignalConnection conn(m_root.provider().sig_imageChange.add(this, &ImageLoader::onImageChange));
-        client::widgets::BusyIndicator indicator(m_root, m_translator("Loading..."));
+        ui::widgets::BusyIndicator indicator(m_root, m_translator("Loading..."));
         indicator.setExtent(gfx::Rectangle(gfx::Point(), indicator.getLayoutInfo().getPreferredSize()));
         indicator.sig_quit.add(this, &ImageLoader::onQuit);
         m_root.moveWidgetToEdge(indicator, gfx::CenterAlign, gfx::BottomAlign, 10);

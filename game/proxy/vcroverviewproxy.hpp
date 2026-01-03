@@ -5,10 +5,10 @@
 #ifndef C2NG_GAME_PROXY_VCROVERVIEWPROXY_HPP
 #define C2NG_GAME_PROXY_VCROVERVIEWPROXY_HPP
 
-#include "util/requestsender.hpp"
 #include "game/proxy/vcrdatabaseadaptor.hpp"
 #include "game/vcr/overview.hpp"
-#include "game/proxy/waitindicator.hpp"
+#include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -28,13 +28,13 @@ namespace game { namespace proxy {
             \param [in]  ind  UI synchronisation
             \param [out] out  Diagram
             \see game::vcr::Overview::buildDiagram */
-        void buildDiagram(WaitIndicator& ind, game::vcr::Overview::Diagram& out);
+        void buildDiagram(util::WaitIndicator& ind, game::vcr::Overview::Diagram& out);
 
         /** Build score summary.
             \param [in]  ind  UI synchronisation
             \param [out] out  Summary
             \see game::vcr::Overview::buildScoreSummary */
-        void buildScoreSummary(WaitIndicator& ind, game::vcr::Overview::ScoreSummary& out);
+        void buildScoreSummary(util::WaitIndicator& ind, game::vcr::Overview::ScoreSummary& out);
 
      private:
         class Trampoline;

@@ -13,10 +13,9 @@
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Proxy for managing plugins.
         - bidirectional, asynchronous access to util::plugin::Manager
@@ -157,25 +156,25 @@ namespace game { namespace proxy {
             @see util::plugin::Installer::prepareInstall
             @see util::plugin::Installer::checkInstallAmbiguity
             @see util::plugin::Installer::checkInstallPreconditions */
-        InstallInfo prepareInstall(WaitIndicator& ind, const String_t& fileName);
+        InstallInfo prepareInstall(util::WaitIndicator& ind, const String_t& fileName);
 
         /** Perform installation.
             Must be called after prepareInstall().
             @param [in,out] ind        WaitIndicator for UI synchronisation
             @see util::plugin::Installer::doInstall */
-        InstallResult doInstall(WaitIndicator& ind);
+        InstallResult doInstall(util::WaitIndicator& ind);
 
         /** Prepare uninstallation.
             This checks whether the plugin can be removed.
             @param [in,out] ind        WaitIndicator for UI synchronisation
             @param [in]     id         Plugin Id */
-        RemoveResult prepareRemove(WaitIndicator& ind, const String_t& id);
+        RemoveResult prepareRemove(util::WaitIndicator& ind, const String_t& id);
 
         /** Perform uninstallation.
             Should be called after prepareRemove().
             @param [in,out] ind        WaitIndicator for UI synchronisation
             @param [in]     id         Plugin Id */
-        RemoveResult doRemove(WaitIndicator& ind, const String_t& id);
+        RemoveResult doRemove(util::WaitIndicator& ind, const String_t& id);
 
         /** Cancel installation.
             Call after prepareInstall() if you decide that you don't wish to proceed with the installation.

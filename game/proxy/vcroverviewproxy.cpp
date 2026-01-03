@@ -58,7 +58,7 @@ game::proxy::VcrOverviewProxy::~VcrOverviewProxy()
 { }
 
 void
-game::proxy::VcrOverviewProxy::buildDiagram(WaitIndicator& ind, game::vcr::Overview::Diagram& out)
+game::proxy::VcrOverviewProxy::buildDiagram(util::WaitIndicator& ind, game::vcr::Overview::Diagram& out)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -75,7 +75,7 @@ game::proxy::VcrOverviewProxy::buildDiagram(WaitIndicator& ind, game::vcr::Overv
 }
 
 void
-game::proxy::VcrOverviewProxy::buildScoreSummary(WaitIndicator& ind, game::vcr::Overview::ScoreSummary& out)
+game::proxy::VcrOverviewProxy::buildScoreSummary(util::WaitIndicator& ind, game::vcr::Overview::ScoreSummary& out)
 {
     class Task : public util::Request<Trampoline> {
      public:

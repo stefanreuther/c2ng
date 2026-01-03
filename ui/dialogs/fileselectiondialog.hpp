@@ -1,24 +1,24 @@
 /**
-  *  \file client/dialogs/fileselectiondialog.hpp
-  *  \brief Class client::dialogs::FileSelectionDialog
+  *  \file ui/dialogs/fileselectiondialog.hpp
+  *  \brief Class ui::dialogs::FileSelectionDialog
   */
-#ifndef C2NG_CLIENT_DIALOGS_FILESELECTIONDIALOG_HPP
-#define C2NG_CLIENT_DIALOGS_FILESELECTIONDIALOG_HPP
+#ifndef C2NG_UI_DIALOGS_FILESELECTIONDIALOG_HPP
+#define C2NG_UI_DIALOGS_FILESELECTIONDIALOG_HPP
 
 #include "afl/data/stringlist.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/string/string.hpp"
 #include "afl/string/translator.hpp"
-#include "client/downlink.hpp"
-#include "client/widgets/filelistbox.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/root.hpp"
+#include "ui/waitindicator.hpp"
+#include "ui/widgets/filelistbox.hpp"
 #include "ui/widgets/inputline.hpp"
 #include "ui/widgets/simpleiconbox.hpp"
 #include "util/directorybrowser.hpp"
 #include "util/requestsender.hpp"
 
-namespace client { namespace dialogs {
+namespace ui { namespace dialogs {
 
     /** File selection dialog.
         Asks the user to choose a file.
@@ -41,7 +41,7 @@ namespace client { namespace dialogs {
             \param tx     Translator
             \param fs     Access to afl::io::FileSystem
             \param title  Window title */
-        FileSelectionDialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<afl::io::FileSystem> fs, String_t title);
+        FileSelectionDialog(Root& root, afl::string::Translator& tx, util::RequestSender<afl::io::FileSystem> fs, String_t title);
         ~FileSelectionDialog();
 
         /** Set initial folder name.
@@ -73,7 +73,7 @@ namespace client { namespace dialogs {
             If you use this call, the dialog will contain a "Help" button that dispatches to this widget.
             \param helpWidget Widget; must outlive the FileSelectionDialog instance
             \see ui::widgets::StandardDialogButtons::addHelp */
-        void setHelpWidget(ui::Widget& helpWidget);
+        void setHelpWidget(Widget& helpWidget);
 
         /** Get selected path name.
             \return path name */
@@ -85,7 +85,7 @@ namespace client { namespace dialogs {
         bool run();
 
      private:
-        ui::Root& m_root;
+        Root& m_root;
         afl::string::Translator& m_translator;
         util::RequestSender<afl::io::FileSystem> m_fileSystem;
         String_t m_title;
@@ -95,13 +95,13 @@ namespace client { namespace dialogs {
         String_t m_defaultExtension;
         size_t m_contentOffset;
 
-        ui::Widget* m_pHelpWidget;
+        Widget* m_pHelpWidget;
         ui::widgets::InputLine m_input;
         ui::widgets::SimpleIconBox m_crumbTrail;
-        client::widgets::FileListbox m_fileList;
+        ui::widgets::FileListbox m_fileList;
 
-        ui::EventLoop m_loop;
-        Downlink m_link;
+        EventLoop m_loop;
+        WaitIndicator m_link;
 
         String_t m_result;
 

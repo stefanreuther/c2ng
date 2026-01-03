@@ -50,7 +50,7 @@ namespace {
      public:
         FleetCostDialog(ui::Root& root, game::proxy::SimulationSetupProxy& setupProxy, util::RequestSender<game::Session> gameSender, util::NumberFormatter fmt, afl::string::Translator& tx);
 
-        bool init(game::proxy::WaitIndicator& link);
+        bool init(util::WaitIndicator& link);
         void run();
 
      private:
@@ -75,7 +75,7 @@ namespace {
         int m_currentPlayer;
         int m_currentTeam;
 
-        void render(game::proxy::WaitIndicator& link);
+        void render(util::WaitIndicator& link);
         void onEditOptions();
         void onNext();
         void onPrevious();
@@ -105,7 +105,7 @@ FleetCostDialog::FleetCostDialog(ui::Root& root,
 { }
 
 bool
-FleetCostDialog::init(game::proxy::WaitIndicator& link)
+FleetCostDialog::init(util::WaitIndicator& link)
 {
     // ex WFleetCostDialog::init (part)
     // Player list
@@ -201,7 +201,7 @@ FleetCostDialog::run()
 }
 
 void
-FleetCostDialog::render(game::proxy::WaitIndicator& link)
+FleetCostDialog::render(util::WaitIndicator& link)
 {
     game::spec::CostSummary content;
     if (m_teamsActive) {

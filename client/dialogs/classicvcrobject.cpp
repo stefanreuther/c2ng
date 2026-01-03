@@ -34,7 +34,7 @@ using ui::widgets::FrameGroup;
 namespace {
     class ClassicVcrObjectDialog : public gfx::KeyEventConsumer {
      public:
-        ClassicVcrObjectDialog(ui::Root& root, util::NumberFormatter fmt, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, VcrDatabaseProxy& proxy, size_t side, game::proxy::WaitIndicator& ind);
+        ClassicVcrObjectDialog(ui::Root& root, util::NumberFormatter fmt, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, VcrDatabaseProxy& proxy, size_t side, util::WaitIndicator& ind);
 
         bool run(ui::Root& root);
         void onSideUpdate(const VcrDatabaseProxy::SideInfo& info);
@@ -61,7 +61,7 @@ namespace {
         ui::EventLoop m_loop;
 
         VcrDatabaseProxy& m_proxy;
-        game::proxy::WaitIndicator& m_indicator;
+        util::WaitIndicator& m_indicator;
         afl::string::Translator& m_translator;
         ui::Root& m_root;
         util::RequestSender<game::Session> m_gameSender;
@@ -76,7 +76,7 @@ namespace {
     };
 }
 
-ClassicVcrObjectDialog::ClassicVcrObjectDialog(ui::Root& root, util::NumberFormatter fmt, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, VcrDatabaseProxy& proxy, size_t side, game::proxy::WaitIndicator& ind)
+ClassicVcrObjectDialog::ClassicVcrObjectDialog(ui::Root& root, util::NumberFormatter fmt, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, VcrDatabaseProxy& proxy, size_t side, util::WaitIndicator& ind)
     : m_nameWidget(String_t(), util::SkinColor::Static, "+", root.provider()),
       m_subtitleWidget(String_t(), util::SkinColor::Static, gfx::FontRequest(), root.provider()),
       m_hullList(root.provider(), root.colorScheme()),
@@ -311,7 +311,7 @@ client::dialogs::doClassicVcrObjectInfoDialog(ui::Root& root, afl::string::Trans
 }
 
 void
-client::dialogs::addToSimulation(game::proxy::WaitIndicator& ind,
+client::dialogs::addToSimulation(util::WaitIndicator& ind,
                                  game::proxy::VcrDatabaseProxy& proxy,
                                  int hullNr,
                                  bool after,

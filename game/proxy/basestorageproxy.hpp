@@ -13,10 +13,9 @@
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Bidirectional proxy for starbase component storage.
         Provides access to names, status and amounts of starship components on a starbase.
@@ -70,7 +69,7 @@ namespace game { namespace proxy {
             \param [in]  ind     WaitIndicator
             \param [in]  level   Area to retrieve information for
             \param [out] result  Part information */
-        void getParts(WaitIndicator& ind, TechLevel level, Parts_t& result);
+        void getParts(util::WaitIndicator& ind, TechLevel level, Parts_t& result);
 
         /** Check all-hulls status.
             If true, reports all hulls; if false, only those buildable on this base

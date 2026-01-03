@@ -7,10 +7,10 @@
 
 #include "afl/base/signal.hpp"
 #include "game/map/planet.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "game/spec/cost.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -69,7 +69,7 @@ namespace game { namespace proxy {
             \param [in] link WaitIndicator
             \param [in] id Planet Id
             \param [out] info Header information */
-        void init(WaitIndicator& link, Id_t id, HeaderInfo& info);
+        void init(util::WaitIndicator& link, Id_t id, HeaderInfo& info);
 
         /** Request an update.
             Causes sig_statusChange to be raised. */

@@ -8,17 +8,15 @@
 #include <vector>
 #include "afl/base/ptr.hpp"
 #include "afl/base/signal.hpp"
+#include "game/proxy/simulationadaptor.hpp"
 #include "game/proxy/vcrdatabaseadaptor.hpp"
 #include "game/sim/resultlist.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
 #include "util/stopsignal.hpp"
-#include "game/proxy/simulationadaptor.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Simulation runner proxy.
         Proxies a game::sim::Runner instance.

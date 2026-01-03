@@ -5,10 +5,10 @@
 #ifndef C2NG_GAME_PROXY_SHIPSPEEDPROXY_HPP
 #define C2NG_GAME_PROXY_SHIPSPEEDPROXY_HPP
 
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "game/types.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -49,7 +49,7 @@ namespace game { namespace proxy {
         /** Get current status.
             \param link WaitIndicator
             \return current parameters/status */
-        Status getStatus(WaitIndicator& link);
+        Status getStatus(util::WaitIndicator& link);
 
         /** Set warp factor.
             This will trigger a regular object change callback asynchronously.

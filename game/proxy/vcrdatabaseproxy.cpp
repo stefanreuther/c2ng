@@ -6,7 +6,6 @@
 #include "game/proxy/vcrdatabaseproxy.hpp"
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/string/format.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/sim/transfer.hpp"
 #include "game/vcr/battle.hpp"
 #include "game/vcr/classic/database.hpp"
@@ -296,7 +295,7 @@ game::proxy::VcrDatabaseProxy::~VcrDatabaseProxy()
 { }
 
 void
-game::proxy::VcrDatabaseProxy::getStatus(WaitIndicator& ind, Status& status)
+game::proxy::VcrDatabaseProxy::getStatus(util::WaitIndicator& ind, Status& status)
 {
     // Query status from game side
     class Task : public util::Request<Trampoline> {
@@ -317,7 +316,7 @@ game::proxy::VcrDatabaseProxy::getStatus(WaitIndicator& ind, Status& status)
 }
 
 void
-game::proxy::VcrDatabaseProxy::getTeamSettings(WaitIndicator& ind, TeamSettings& teams)
+game::proxy::VcrDatabaseProxy::getTeamSettings(util::WaitIndicator& ind, TeamSettings& teams)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -339,7 +338,7 @@ game::proxy::VcrDatabaseProxy::getTeamSettings(WaitIndicator& ind, TeamSettings&
 }
 
 game::PlayerArray<String_t>
-game::proxy::VcrDatabaseProxy::getPlayerNames(WaitIndicator& ind, Player::Name which)
+game::proxy::VcrDatabaseProxy::getPlayerNames(util::WaitIndicator& ind, Player::Name which)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -388,7 +387,7 @@ game::proxy::VcrDatabaseProxy::setHullType(int hullType)
 }
 
 game::proxy::VcrDatabaseProxy::AddResult
-game::proxy::VcrDatabaseProxy::addToSimulation(WaitIndicator& ind, int hullType, bool after)
+game::proxy::VcrDatabaseProxy::addToSimulation(util::WaitIndicator& ind, int hullType, bool after)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -412,7 +411,7 @@ game::proxy::VcrDatabaseProxy::addToSimulation(WaitIndicator& ind, int hullType,
 }
 
 bool
-game::proxy::VcrDatabaseProxy::save(WaitIndicator& ind, String_t fileName, size_t first, size_t num, String_t& errorMessage)
+game::proxy::VcrDatabaseProxy::save(util::WaitIndicator& ind, String_t fileName, size_t first, size_t num, String_t& errorMessage)
 {
     class Task : public util::Request<Trampoline> {
      public:

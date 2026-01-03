@@ -476,7 +476,7 @@ game::proxy::DrawingProxy::~DrawingProxy()
 { }
 
 void
-game::proxy::DrawingProxy::getStatus(WaitIndicator& ind, Status_t& status)
+game::proxy::DrawingProxy::getStatus(util::WaitIndicator& ind, Status_t& status)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -494,7 +494,7 @@ game::proxy::DrawingProxy::getStatus(WaitIndicator& ind, Status_t& status)
 }
 
 void
-game::proxy::DrawingProxy::getTagList(WaitIndicator& ind, util::StringList& list)
+game::proxy::DrawingProxy::getTagList(util::WaitIndicator& ind, util::StringList& list)
 {
     class Task : public util::Request<Trampoline> {
      public:

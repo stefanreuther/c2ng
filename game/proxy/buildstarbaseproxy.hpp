@@ -5,11 +5,11 @@
 #ifndef C2NG_GAME_PROXY_BUILDSTARBASEPROXY_HPP
 #define C2NG_GAME_PROXY_BUILDSTARBASEPROXY_HPP
 
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "game/spec/cost.hpp"
 #include "game/types.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -56,13 +56,13 @@ namespace game { namespace proxy {
             \param [in]  link   WaitIndicator
             \param [in]  id     Planet Id
             \param [out] status Transaction status */
-        void init(WaitIndicator& link, Id_t id, Status& status);
+        void init(util::WaitIndicator& link, Id_t id, Status& status);
 
         /** Commit.
             Call if the previous init() reported a success status, i.e. CanBuild or CanCancel.
             Call is ignored if preconditions are not fulfilled.
             \param [in]  link   WaitIndicator */
-        void commit(WaitIndicator& link);
+        void commit(util::WaitIndicator& link);
 
      private:
         struct Trampoline;

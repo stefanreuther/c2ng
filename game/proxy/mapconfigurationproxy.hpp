@@ -25,7 +25,7 @@ namespace game { namespace proxy {
             Retrieves the current map configuration, which was built from UserConfiguration, HostConfiguration, and HostVersion.
             @param [in,out] ind     WaitIndicator
             @param [out]    config  Map configuration */
-        void getMapConfiguration(WaitIndicator& ind, game::map::Configuration& config);
+        void getMapConfiguration(util::WaitIndicator& ind, game::map::Configuration& config);
 
         /** Set map configuration.
             Updates UserConfiguration to represent the given map configuration.
@@ -37,7 +37,7 @@ namespace game { namespace proxy {
             @param [in,out] ind     WaitIndicator
             @param [in]     a       Area
             @return Render options for that area */
-        game::map::RenderOptions getRenderOptions(WaitIndicator& ind, game::map::RenderOptions::Area a);
+        game::map::RenderOptions getRenderOptions(util::WaitIndicator& ind, game::map::RenderOptions::Area a);
 
         /** Set render options for an area.
             @param area  Area
@@ -47,7 +47,7 @@ namespace game { namespace proxy {
         /** Get all marker templates (canned marker) configuration.
             @param [in,out] ind     WaitIndicator
             @param [out]    config  Marker templates */
-        void getMarkerConfiguration(WaitIndicator& ind, std::vector<game::config::MarkerOption::Data>& config);
+        void getMarkerConfiguration(util::WaitIndicator& ind, std::vector<game::config::MarkerOption::Data>& config);
 
         /** Set marker template (canned marker) configuration.
             @param [in] index  Index (zero-based index into getMarkerConfiguration() result). Call is ignored if this is out-of-range.

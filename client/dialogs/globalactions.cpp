@@ -51,7 +51,7 @@ namespace {
      public:
         Dialog(client::si::UserSide& us, OutputState& outputState, game::ref::List& searchResult, const VariableReference& ref);
 
-        void init(game::proxy::WaitIndicator& ind);
+        void init(util::WaitIndicator& ind);
         void run();
 
         // Control:
@@ -134,7 +134,7 @@ Dialog::Dialog(client::si::UserSide& us, OutputState& outputState, game::ref::Li
 }
 
 void
-Dialog::init(game::proxy::WaitIndicator& ind)
+Dialog::init(util::WaitIndicator& ind)
 {
     util::TreeList list;
     game::proxy::GlobalActionProxy(interface().gameSender()).getActions(ind, list, m_ref);

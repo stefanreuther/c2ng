@@ -11,10 +11,9 @@
 #include "game/proxy/maintenanceadaptor.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Directory Maintenance Proxy.
         This bidirectional proxy allows controlling directory maintenance operations: maketurn, unpack, sweep.
@@ -84,7 +83,7 @@ namespace game { namespace proxy {
         /** Prepare "maketurn" operation.
             @param ind WaitIndicator for UI synchronisation
             @return MaketurnStatus structure */
-        MaketurnStatus prepareMaketurn(WaitIndicator& ind);
+        MaketurnStatus prepareMaketurn(util::WaitIndicator& ind);
 
         /** Start "maketurn" operation.
             The operation's completion will be signalled using sig_actionComplete.
@@ -94,7 +93,7 @@ namespace game { namespace proxy {
         /** Prepare "unpack" operation.
             @param ind WaitIndicator for UI synchronisation
             @return UnpackStatus structure */
-        UnpackStatus prepareUnpack(WaitIndicator& ind);
+        UnpackStatus prepareUnpack(util::WaitIndicator& ind);
 
         /** Start "unpack" operation.
             The operation's completion will be signalled using sig_actionComplete.
@@ -105,7 +104,7 @@ namespace game { namespace proxy {
         /** Prepare "sweep" operation.
             @param ind WaitIndicator for UI synchronisation
             @return SweepStatus structure */
-        SweepStatus prepareSweep(WaitIndicator& ind);
+        SweepStatus prepareSweep(util::WaitIndicator& ind);
 
         /** Start "sweep" operation.
             The operation's completion will be signalled using sig_actionComplete.

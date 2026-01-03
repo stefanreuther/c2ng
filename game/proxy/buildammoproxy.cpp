@@ -10,7 +10,6 @@
 #include "game/game.hpp"
 #include "game/map/planetstorage.hpp"
 #include "game/map/shipstorage.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/registrationkey.hpp"
 #include "game/turn.hpp"
 
@@ -249,7 +248,7 @@ game::proxy::BuildAmmoProxy::~BuildAmmoProxy()
 { }
 
 void
-game::proxy::BuildAmmoProxy::getStatus(WaitIndicator& ind, Status& result)
+game::proxy::BuildAmmoProxy::getStatus(util::WaitIndicator& ind, Status& result)
 {
     class Task : public util::Request<Trampoline> {
      public:

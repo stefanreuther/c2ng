@@ -13,10 +13,9 @@
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Bidirectional proxy for tech upgrades.
         Proxies a game::actions::TechUpgrade.
@@ -65,7 +64,7 @@ namespace game { namespace proxy {
         /** Get status, synchronously.
             \param [in,out] ind    WaitIndicator for UI synchronisation
             \param [out]    result Result */
-        void getStatus(WaitIndicator& ind, Status& result);
+        void getStatus(util::WaitIndicator& ind, Status& result);
 
         /** Set all levels at once.
             This is not guaranteed to be atomic, but still saves roundtrip times.

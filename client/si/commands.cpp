@@ -32,7 +32,6 @@
 #include "client/dialogs/entercoordinates.hpp"
 #include "client/dialogs/exitconfirmation.hpp"
 #include "client/dialogs/export.hpp"
-#include "client/dialogs/fileselectiondialog.hpp"
 #include "client/dialogs/fleetlist.hpp"
 #include "client/dialogs/friendlycodedialog.hpp"
 #include "client/dialogs/globalactions.hpp"

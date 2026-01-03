@@ -10,10 +10,9 @@
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Attachment Reception Proxy.
         This bidirectional proxy allows reception of result file attachments.
@@ -62,7 +61,7 @@ namespace game { namespace proxy {
             @param [out] result     Result is produced here
             @param [out] proceed    If true, suggest to proceed silently; otherwise, ask user.
             @see game::v3::AttachmentUnpacker::loadDirectory(), game::v3::checkNewAttachments() */
-        void loadDirectory(WaitIndicator& ind, PlayerSet_t players, bool autoSelect, Infos_t& result, bool& proceed);
+        void loadDirectory(util::WaitIndicator& ind, PlayerSet_t players, bool autoSelect, Infos_t& result, bool& proceed);
 
         /** Select or unselect attachment for reception (configure).
             Identifies the attachment by its name.

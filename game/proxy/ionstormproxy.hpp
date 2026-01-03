@@ -13,7 +13,6 @@
 #include "game/map/objectcursor.hpp"
 #include "game/map/point.hpp"
 #include "game/proxy/objectobserver.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "game/types.hpp"
 #include "util/requestreceiver.hpp"

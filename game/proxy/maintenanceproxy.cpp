@@ -10,7 +10,6 @@
 #include "game/limits.hpp"
 #include "game/maint/directorywrapper.hpp"
 #include "game/maint/sweeper.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/v3/directoryscanner.hpp"
 #include "game/v3/maketurn.hpp"
 #include "game/v3/resultfile.hpp"
@@ -275,7 +274,7 @@ game::proxy::MaintenanceProxy::~MaintenanceProxy()
 { }
 
 game::proxy::MaintenanceProxy::MaketurnStatus
-game::proxy::MaintenanceProxy::prepareMaketurn(WaitIndicator& ind)
+game::proxy::MaintenanceProxy::prepareMaketurn(util::WaitIndicator& ind)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -298,7 +297,7 @@ game::proxy::MaintenanceProxy::startMaketurn(PlayerSet_t players)
 }
 
 game::proxy::MaintenanceProxy::UnpackStatus
-game::proxy::MaintenanceProxy::prepareUnpack(WaitIndicator& ind)
+game::proxy::MaintenanceProxy::prepareUnpack(util::WaitIndicator& ind)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -321,7 +320,7 @@ game::proxy::MaintenanceProxy::startUnpack(PlayerSet_t players, bool uncompileTu
 }
 
 game::proxy::MaintenanceProxy::SweepStatus
-game::proxy::MaintenanceProxy::prepareSweep(WaitIndicator& ind)
+game::proxy::MaintenanceProxy::prepareSweep(util::WaitIndicator& ind)
 {
     class Task : public util::Request<Trampoline> {
      public:

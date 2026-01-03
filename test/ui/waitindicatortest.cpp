@@ -1,9 +1,9 @@
 /**
-  *  \file test/client/downlinktest.cpp
-  *  \brief Test for client::Downlink
+  *  \file test/ui/waitindicatortest.cpp
+  *  \brief Test for ui::WaitIndicator
   */
 
-#include "client/downlink.hpp"
+#include "ui/waitindicator.hpp"
 
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
@@ -19,7 +19,7 @@ namespace {
     };
 }
 
-AFL_TEST("client.Downlink", a)
+AFL_TEST("ui.WaitIndicator", a)
 {
     // UI side
     gfx::NullEngine engine;
@@ -29,7 +29,7 @@ AFL_TEST("client.Downlink", a)
     // Worker side
     afl::sys::Log log;
     afl::string::NullTranslator tx;
-    util::RequestThread thread("TestClientDownlink", log, tx);
+    util::RequestThread thread("ui.WaitIndicator", log, tx);
     T object = {42};
     util::RequestReceiver<T> receiver(thread, object);
 
@@ -39,7 +39,7 @@ AFL_TEST("client.Downlink", a)
         void handle(T& i)
             { ++i.i; }
     };
-    client::Downlink testee(root, tx);
+    ui::WaitIndicator testee(root, tx);
     Task t;
     bool ok = testee.call(receiver.getSender(), t);
 

@@ -6,10 +6,10 @@
 #define C2NG_GAME_PROXY_BUILDQUEUEPROXY_HPP
 
 #include "game/actions/changebuildqueue.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -49,7 +49,7 @@ namespace game { namespace proxy {
             \param link [in] WaitIndicator
             \param data [out] Current status
             \param global [out] Global status */
-        void getStatus(WaitIndicator& link, Infos_t& data, GlobalInfo& global);
+        void getStatus(util::WaitIndicator& link, Infos_t& data, GlobalInfo& global);
 
         /** Set priority of a build order.
             Will produce a sig_update callback with new status.

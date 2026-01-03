@@ -11,7 +11,6 @@
 #include "game/map/shiputils.hpp"
 #include "game/map/universe.hpp"
 #include "game/proxy/viewpointstarbaseadaptor.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/registrationkey.hpp"
 #include "game/turn.hpp"
 
@@ -247,7 +246,7 @@ game::proxy::BuildShipProxy::~BuildShipProxy()
 { }
 
 void
-game::proxy::BuildShipProxy::getStatus(WaitIndicator& ind, Status& result)
+game::proxy::BuildShipProxy::getStatus(util::WaitIndicator& ind, Status& result)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -264,7 +263,7 @@ game::proxy::BuildShipProxy::getStatus(WaitIndicator& ind, Status& result)
 }
 
 void
-game::proxy::BuildShipProxy::getCostSummary(WaitIndicator& ind, game::spec::CostSummary& result)
+game::proxy::BuildShipProxy::getCostSummary(util::WaitIndicator& ind, game::spec::CostSummary& result)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -281,7 +280,7 @@ game::proxy::BuildShipProxy::getCostSummary(WaitIndicator& ind, game::spec::Cost
 }
 
 game::ShipQuery
-game::proxy::BuildShipProxy::getQuery(WaitIndicator& ind)
+game::proxy::BuildShipProxy::getQuery(util::WaitIndicator& ind)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -301,7 +300,7 @@ game::proxy::BuildShipProxy::getQuery(WaitIndicator& ind)
 }
 
 String_t
-game::proxy::BuildShipProxy::toScriptCommand(WaitIndicator& ind, String_t verb)
+game::proxy::BuildShipProxy::toScriptCommand(util::WaitIndicator& ind, String_t verb)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -322,7 +321,7 @@ game::proxy::BuildShipProxy::toScriptCommand(WaitIndicator& ind, String_t verb)
 }
 
 bool
-game::proxy::BuildShipProxy::findShipCloningHere(WaitIndicator& ind, Id_t& id, String_t& name)
+game::proxy::BuildShipProxy::findShipCloningHere(util::WaitIndicator& ind, Id_t& id, String_t& name)
 {
     class Task : public util::Request<Trampoline> {
      public:

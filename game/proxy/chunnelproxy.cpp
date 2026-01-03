@@ -228,7 +228,7 @@ game::proxy::ChunnelProxy::postCandidateRequest(Id_t shipId)
 
 // Synchronous request for possible chunnel targets.
 void
-game::proxy::ChunnelProxy::getCandidates(WaitIndicator& link, Id_t shipId, game::map::Point pos, game::ref::UserList& list)
+game::proxy::ChunnelProxy::getCandidates(util::WaitIndicator& link, Id_t shipId, game::map::Point pos, game::ref::UserList& list)
 {
     class Query : public util::Request<Session> {
      public:
@@ -251,7 +251,7 @@ game::proxy::ChunnelProxy::getCandidates(WaitIndicator& link, Id_t shipId, game:
 
 // Synchronous request to set up a chunnel.
 afl::data::StringList_t
-game::proxy::ChunnelProxy::setupChunnel(WaitIndicator& link, Id_t fromShipId, Id_t toShipId)
+game::proxy::ChunnelProxy::setupChunnel(util::WaitIndicator& link, Id_t fromShipId, Id_t toShipId)
 {
     class Query : public util::Request<Session> {
      public:

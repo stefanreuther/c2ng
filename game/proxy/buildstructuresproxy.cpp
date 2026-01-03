@@ -131,7 +131,7 @@ game::proxy::BuildStructuresProxy::~BuildStructuresProxy()
 { }
 
 void
-game::proxy::BuildStructuresProxy::init(WaitIndicator& link, Id_t id, HeaderInfo& info)
+game::proxy::BuildStructuresProxy::init(util::WaitIndicator& link, Id_t id, HeaderInfo& info)
 {
     class Task : public util::Request<Trampoline> {
      public:

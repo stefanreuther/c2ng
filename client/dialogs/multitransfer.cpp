@@ -130,7 +130,7 @@ namespace {
     /* Dialog main entry point */
     class MultiTransferDialog : public gfx::KeyEventConsumer {
      public:
-        MultiTransferDialog(ui::Root& root, afl::string::Translator& tx, NumberFormatter fmt, Element::Type type, util::RequestSender<game::Session> gameSender, game::proxy::WaitIndicator& ind, CargoTransferProxy& proxy);
+        MultiTransferDialog(ui::Root& root, afl::string::Translator& tx, NumberFormatter fmt, Element::Type type, util::RequestSender<game::Session> gameSender, util::WaitIndicator& ind, CargoTransferProxy& proxy);
 
         void run(String_t title);
         void loadMoreParticipants();
@@ -166,7 +166,7 @@ namespace {
         NumberFormatter m_formatter;
         Element::Type m_type;
         util::RequestSender<game::Session> m_gameSender;
-        game::proxy::WaitIndicator& m_link;
+        util::WaitIndicator& m_link;
         CargoTransferProxy& m_proxy;
         ui::EventLoop m_loop;
 
@@ -363,7 +363,7 @@ MultiTransferList::hasRoomForHold(int32_t holdAmount, size_t extension) const
  *  MultiTransferDialog
  */
 
-MultiTransferDialog::MultiTransferDialog(ui::Root& root, afl::string::Translator& tx, NumberFormatter fmt, Element::Type type, util::RequestSender<game::Session> gameSender, game::proxy::WaitIndicator& ind, CargoTransferProxy& proxy)
+MultiTransferDialog::MultiTransferDialog(ui::Root& root, afl::string::Translator& tx, NumberFormatter fmt, Element::Type type, util::RequestSender<game::Session> gameSender, util::WaitIndicator& ind, CargoTransferProxy& proxy)
     : m_list(root, tx, fmt),
       m_holdInfo(String_t(), SkinColor::Static, "+", root.provider()),
       m_unitInfo1(String_t(), SkinColor::Faded, gfx::FontRequest(), root.provider()),

@@ -17,7 +17,6 @@ namespace client { namespace widgets {
         static TestApplet* makePlayerList(bool flow);
         static TestApplet* makeAllianceStatusList();
         static TestApplet* makeReferenceList();
-        static TestApplet* makeFileList();
     };
 
 } }

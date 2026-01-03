@@ -10,7 +10,6 @@
 #include "game/game.hpp"
 #include "game/map/planet.hpp"
 #include "game/map/planetstorage.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/turn.hpp"
 
 using game::spec::ShipList;
@@ -166,7 +165,7 @@ game::proxy::TechUpgradeProxy::~TechUpgradeProxy()
 { }
 
 void
-game::proxy::TechUpgradeProxy::getStatus(WaitIndicator& ind, Status& result)
+game::proxy::TechUpgradeProxy::getStatus(util::WaitIndicator& ind, Status& result)
 {
     class Task : public util::Request<Trampoline> {
      public:

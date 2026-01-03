@@ -165,7 +165,7 @@ namespace {
         return text;
     }
 
-    void getEffectorLabels(game::proxy::WaitIndicator& ind, util::RequestSender<game::Session> gameSender, EffectorLabels& labels)
+    void getEffectorLabels(util::WaitIndicator& ind, util::RequestSender<game::Session> gameSender, EffectorLabels& labels)
     {
         class Task : public util::Request<game::Session> {
          public:

@@ -7,7 +7,6 @@
 #include "game/game.hpp"
 #include "game/map/cursors.hpp"
 #include "game/map/location.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/turn.hpp"
 
 using game::map::Configuration;
@@ -204,7 +203,7 @@ game::proxy::MapLocationProxy::browse(game::map::Location::BrowseFlags_t flags)
 }
 
 afl::base::Optional<game::map::Point>
-game::proxy::MapLocationProxy::getOtherPosition(WaitIndicator& ind, game::Id_t shipId)
+game::proxy::MapLocationProxy::getOtherPosition(util::WaitIndicator& ind, game::Id_t shipId)
 {
     class Task : public util::Request<Trampoline> {
      public:

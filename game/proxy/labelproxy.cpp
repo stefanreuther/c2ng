@@ -139,7 +139,7 @@ game::proxy::LabelProxy::LabelProxy(util::RequestSender<Session> gameSender, uti
 
 // Get active configuration.
 void
-game::proxy::LabelProxy::getConfiguration(WaitIndicator& ind, String_t& shipExpr, String_t& planetExpr)
+game::proxy::LabelProxy::getConfiguration(util::WaitIndicator& ind, String_t& shipExpr, String_t& planetExpr)
 {
     class Task : public util::Request<Trampoline> {
      public:

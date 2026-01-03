@@ -60,7 +60,7 @@ namespace {
         game::proxy::ReferenceListProxy& m_proxy;
     };
 
-    bool solveConflicts(game::proxy::WaitIndicator& ind, ui::Root& root, afl::string::Translator& tx, game::proxy::CargoTransferSetupProxy& setupProxy)
+    bool solveConflicts(util::WaitIndicator& ind, ui::Root& root, afl::string::Translator& tx, game::proxy::CargoTransferSetupProxy& setupProxy)
     {
         while (const game::proxy::CargoTransferSetupProxy::ConflictInfo* info = setupProxy.getConflictInfo()) {
             if (!ui::dialogs::MessageBox(afl::string::Format(tx("Ship %s (#%d) is currently transferring to %s (#%d). "

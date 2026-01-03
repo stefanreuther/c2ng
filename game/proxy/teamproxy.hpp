@@ -5,10 +5,10 @@
 #ifndef C2NG_GAME_PROXY_TEAMPROXY_HPP
 #define C2NG_GAME_PROXY_TEAMPROXY_HPP
 
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "game/teamsettings.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -32,7 +32,7 @@ namespace game { namespace proxy {
         /** Initialize.
             \param [in]  link  WaitIndicator
             \param [out] out   TeamSettings object */
-        void init(WaitIndicator& link, TeamSettings& out);
+        void init(util::WaitIndicator& link, TeamSettings& out);
 
         /** Write back.
             This copies a TeamSettings object into the game session.

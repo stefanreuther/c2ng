@@ -79,7 +79,7 @@ namespace {
 
     class BuildPartsDialog {
      public:
-        BuildPartsDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, BuildPartsProxy& proxy, afl::string::Translator& tx, util::NumberFormatter fmt, game::proxy::WaitIndicator& ind)
+        BuildPartsDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, BuildPartsProxy& proxy, afl::string::Translator& tx, util::NumberFormatter fmt, util::WaitIndicator& ind)
             : m_root(root),
               m_gameSender(gameSender),
               m_proxy(proxy),
@@ -107,7 +107,7 @@ namespace {
         BuildPartsProxy& m_proxy;
         afl::string::Translator& m_translator;
         util::NumberFormatter m_formatter;
-        game::proxy::WaitIndicator& m_waitIndicator;
+        util::WaitIndicator& m_waitIndicator;
         ui::EventLoop m_loop;
 
         // Widgets

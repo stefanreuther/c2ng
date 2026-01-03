@@ -6,9 +6,9 @@
 #define C2NG_GAME_PROXY_EXPRESSIONLISTPROXY_HPP
 
 #include "game/config/expressionlists.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -28,7 +28,7 @@ namespace game { namespace proxy {
             \param [in]  ind WaitIndicator
             \param [out] out Result
             \see game::config::ExpressionLists::pack() */
-        void getList(WaitIndicator& ind, game::config::ExpressionLists::Items_t& out);
+        void getList(util::WaitIndicator& ind, game::config::ExpressionLists::Items_t& out);
 
         /** Add new least-recently-used item.
             Parameters describe the item, see util::ExpressionList::Item for details.

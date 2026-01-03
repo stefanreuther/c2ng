@@ -1,27 +1,27 @@
 /**
-  *  \file client/widgets/busyindicator.cpp
+  *  \file ui/widgets/busyindicator.cpp
   */
 
-#include "client/widgets/busyindicator.hpp"
+#include "ui/widgets/busyindicator.hpp"
 #include "gfx/complex.hpp"
 #include "gfx/context.hpp"
 #include "ui/draw.hpp"
 
-client::widgets::BusyIndicator::BusyIndicator(ui::Root& root, String_t text)
+ui::widgets::BusyIndicator::BusyIndicator(Root& root, String_t text)
     : m_root(root),
       m_text(text),
       m_keys(),
       m_quit(false)
 { }
 void
-client::widgets::BusyIndicator::draw(gfx::Canvas& can)
+ui::widgets::BusyIndicator::draw(gfx::Canvas& can)
 {
     gfx::Context<uint8_t> ctx(can, m_root.colorScheme());
     gfx::Rectangle r(getExtent());
-    drawSolidBar(ctx, r, ui::Color_Shield + 2);
-    ui::drawFrameUp(ctx, r);
+    drawSolidBar(ctx, r, Color_Shield + 2);
+    drawFrameUp(ctx, r);
 
-    ctx.setColor(ui::Color_White);
+    ctx.setColor(Color_White);
     r.grow(-2, -2);
     afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest().addSize(1));
     ctx.useFont(*font);
@@ -29,24 +29,24 @@ client::widgets::BusyIndicator::draw(gfx::Canvas& can)
 }
 
 void
-client::widgets::BusyIndicator::handleStateChange(State /*st*/, bool /*enable*/)
+ui::widgets::BusyIndicator::handleStateChange(State /*st*/, bool /*enable*/)
 { }
 
 void
-client::widgets::BusyIndicator::handlePositionChange()
+ui::widgets::BusyIndicator::handlePositionChange()
 {
     requestRedraw();
 }
 
 ui::layout::Info
-client::widgets::BusyIndicator::getLayoutInfo() const
+ui::widgets::BusyIndicator::getLayoutInfo() const
 {
     afl::base::Ref<gfx::Font> font = m_root.provider().getFont(gfx::FontRequest().addSize(1));
     return gfx::Point(font->getTextWidth(m_text) + 4, font->getTextHeight(m_text) + 4);
 }
 
 bool
-client::widgets::BusyIndicator::handleKey(util::Key_t key, int /*prefix*/)
+ui::widgets::BusyIndicator::handleKey(util::Key_t key, int /*prefix*/)
 {
     if (key == util::KeyMod_Ctrl + util::Key_Pause) {
         // Break
@@ -67,13 +67,13 @@ client::widgets::BusyIndicator::handleKey(util::Key_t key, int /*prefix*/)
 }
 
 bool
-client::widgets::BusyIndicator::handleMouse(gfx::Point /*pt*/, MouseButtons_t /*pressedButtons*/)
+ui::widgets::BusyIndicator::handleMouse(gfx::Point /*pt*/, MouseButtons_t /*pressedButtons*/)
 {
     return true;
 }
 
 void
-client::widgets::BusyIndicator::replayEvents()
+ui::widgets::BusyIndicator::replayEvents()
 {
     while (!m_keys.empty()) {
         m_root.ungetKeyEvent(m_keys.back(), 0);

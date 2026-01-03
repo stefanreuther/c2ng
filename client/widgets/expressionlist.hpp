@@ -8,6 +8,7 @@
 #include "afl/string/string.hpp"
 #include "game/proxy/expressionlistproxy.hpp"
 #include "ui/root.hpp"
+#include "util/waitindicator.hpp"
 
 namespace client { namespace widgets {
 
@@ -23,7 +24,7 @@ namespace client { namespace widgets {
         \retval true User chose an item; value/flags have been set
         \retval false User canceled */
     bool doExpressionListPopup(ui::Root& root,
-                               game::proxy::WaitIndicator& ind,
+                               util::WaitIndicator& ind,
                                game::proxy::ExpressionListProxy& proxy,
                                gfx::Point anchor,
                                String_t& value,

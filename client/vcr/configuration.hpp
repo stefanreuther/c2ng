@@ -28,7 +28,7 @@ namespace client { namespace vcr {
         /** Load from ConfigurationProxy.
             @param link  WaitIndicator
             @param proxy Proxy */
-        void load(game::proxy::WaitIndicator& link, game::proxy::ConfigurationProxy& proxy);
+        void load(util::WaitIndicator& link, game::proxy::ConfigurationProxy& proxy);
 
         /** Save to ConfigurationProxy.
             @param proxy Proxy */

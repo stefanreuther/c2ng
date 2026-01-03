@@ -5,14 +5,13 @@
 
 #include "game/proxy/globalactionproxy.hpp"
 #include "game/interface/globalactioncontext.hpp"
-#include "game/proxy/waitindicator.hpp"
 
 game::proxy::GlobalActionProxy::GlobalActionProxy(util::RequestSender<Session> gameSender)
     : m_gameSender(gameSender)
 { }
 
 void
-game::proxy::GlobalActionProxy::getActions(WaitIndicator& ind, util::TreeList& result, interpreter::VariableReference ref)
+game::proxy::GlobalActionProxy::getActions(util::WaitIndicator& ind, util::TreeList& result, interpreter::VariableReference ref)
 {
     class Task : public util::Request<Session> {
      public:

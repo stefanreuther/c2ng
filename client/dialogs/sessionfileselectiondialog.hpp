@@ -5,9 +5,9 @@
 #ifndef C2NG_CLIENT_DIALOGS_SESSIONFILESELECTIONDIALOG_HPP
 #define C2NG_CLIENT_DIALOGS_SESSIONFILESELECTIONDIALOG_HPP
 
-#include "client/dialogs/fileselectiondialog.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
+#include "ui/dialogs/fileselectiondialog.hpp"
+#include "util/waitindicator.hpp"
 
 namespace client { namespace dialogs {
 
@@ -22,7 +22,7 @@ namespace client { namespace dialogs {
         - configure as usual
         - use runDefault() to run with default integration
           (but using the normal run() to use only the parts you're interested in is supported). */
-    class SessionFileSelectionDialog : public FileSelectionDialog {
+    class SessionFileSelectionDialog : public ui::dialogs::FileSelectionDialog {
      public:
         /** Constructor.
             \param root        Root
@@ -35,7 +35,7 @@ namespace client { namespace dialogs {
         /** Set folder from the session's UI.DIRECTORY.
             Call before run().
             \param ind WaitIndicator for UI synchronisation */
-        void setFolderFromSession(game::proxy::WaitIndicator& ind);
+        void setFolderFromSession(util::WaitIndicator& ind);
 
         /** Store current folder in the session's UI.DIRECTORY.
             Call after run(). */
@@ -46,7 +46,7 @@ namespace client { namespace dialogs {
             \param ind WaitIndicator for UI synchronisation
             \return true if user chose OK, false on cancel
             \see FileSelectionDialog::run */
-        bool runDefault(game::proxy::WaitIndicator& ind);
+        bool runDefault(util::WaitIndicator& ind);
 
      private:
         util::RequestSender<game::Session> m_gameSender;

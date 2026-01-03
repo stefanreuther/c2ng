@@ -12,7 +12,6 @@
 #include "afl/string/string.hpp"
 #include "game/map/point.hpp"
 #include "game/proxy/simulationadaptor.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "game/sim/ability.hpp"
 #include "game/sim/configuration.hpp"
@@ -23,6 +22,7 @@
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
 #include "util/vector.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -213,14 +213,14 @@ namespace game { namespace proxy {
         /** Retrieve list of units.
             \param [in]  ind WaitIndicator for UI synchronisation
             \param [out] out List produced here  */
-        void getList(WaitIndicator& ind, ListItems_t& out);
+        void getList(util::WaitIndicator& ind, ListItems_t& out);
 
         /** Add a planet.
             The sig_listChange callback including this new planet is guaranteed to arrive before this function returns.
             \param ind WaitIndicator for UI synchronisation
             \return Slot number with the planet
             \see game::sim::Setup::addPlanet */
-        Slot_t addPlanet(WaitIndicator& ind);
+        Slot_t addPlanet(util::WaitIndicator& ind);
 
         /** Add (N copies of a) ship.
             The sig_listChange callback including this new ship(s) is guaranteed to arrive before this function returns.
@@ -229,7 +229,7 @@ namespace game { namespace proxy {
             \param count Number of repetitions
             \return Slot number of last ship added
             \see game::sim::Setup::addShip, game::sim::Setup::duplicateShip */
-        Slot_t addShip(WaitIndicator& ind, Slot_t slot, int count);
+        Slot_t addShip(util::WaitIndicator& ind, Slot_t slot, int count);
 
         /** Swap ships.
             The sig_listChange callback with the new list content will arrive asynchronously.
@@ -260,7 +260,7 @@ namespace game { namespace proxy {
             \param to Index of first unit not to copy
             \return number of succeeded/failed units
             \see game::sim::Setup::copyToGame */
-        game::sim::Setup::Status copyToGame(WaitIndicator& ind, Slot_t from, Slot_t to);
+        game::sim::Setup::Status copyToGame(util::WaitIndicator& ind, Slot_t from, Slot_t to);
 
         /** Copy from game using a GameInterface.
             \param ind WaitIndicator for UI synchronisation
@@ -268,7 +268,7 @@ namespace game { namespace proxy {
             \param to Index of first unit not to copy
             \return number of succeeded/failed units
             \see game::sim::Setup::copyToGame */
-        game::sim::Setup::Status copyFromGame(WaitIndicator& ind, Slot_t from, Slot_t to);
+        game::sim::Setup::Status copyFromGame(util::WaitIndicator& ind, Slot_t from, Slot_t to);
 
         /** Load setup from file.
             The sig_listChange callback with the new list content will arrive asynchronously.
@@ -276,19 +276,19 @@ namespace game { namespace proxy {
             \param [in]  fileName      File name to load
             \param [out] errorMessage  Error message
             \return true on success, false on error (message set) */
-        bool load(WaitIndicator& ind, String_t fileName, String_t& errorMessage);
+        bool load(util::WaitIndicator& ind, String_t fileName, String_t& errorMessage);
 
         /** Save setup to file.
             \param [in]  ind           WaitIndicator for UI synchronisation
             \param [in]  fileName      File name to save
             \param [out] errorMessage  Error message
             \return true on success, false on error (message set) */
-        bool save(WaitIndicator& ind, String_t fileName, String_t& errorMessage);
+        bool save(util::WaitIndicator& ind, String_t fileName, String_t& errorMessage);
 
         /** Check for matching ship list.
             \param [in]  ind           WaitIndicator for UI synchronisation
             \return false if mismatch detected; otherwise, true */
-        bool isMatchingShipList(WaitIndicator& ind);
+        bool isMatchingShipList(util::WaitIndicator& ind);
 
 
         /*
@@ -310,7 +310,7 @@ namespace game { namespace proxy {
             \param [in]  slot Slot number
             \param [out] info Object information
             \return true on success, false on error (info not set) */
-        bool getObject(WaitIndicator& ind, Slot_t slot, ObjectInfo& info);
+        bool getObject(util::WaitIndicator& ind, Slot_t slot, ObjectInfo& info);
 
         /** Check for duplicate Id.
             Use to check an Id before setting it to avoid setting duplicates.
@@ -319,13 +319,13 @@ namespace game { namespace proxy {
             \param candidate Candidate Id
             \retval true  candidate Id already exists on another object of the same type
             \retval false Id can be set */
-        bool isDuplicateId(WaitIndicator& ind, Slot_t slot, Id_t candidate);
+        bool isDuplicateId(util::WaitIndicator& ind, Slot_t slot, Id_t candidate);
 
         /** Get base torpedoes.
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [in]  slot   Slot number
             \param [out] result List of amount,name pairs */
-        void getNumBaseTorpedoes(WaitIndicator& ind, Slot_t slot, Elements_t& result);
+        void getNumBaseTorpedoes(util::WaitIndicator& ind, Slot_t slot, Elements_t& result);
 
 
         /*
@@ -551,72 +551,72 @@ namespace game { namespace proxy {
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [in]  slot   Slot number
             \param [out] result Result */
-        void getAbilityChoices(WaitIndicator& ind, Slot_t slot, AbilityChoices& result);
+        void getAbilityChoices(util::WaitIndicator& ind, Slot_t slot, AbilityChoices& result);
 
         /** Get choices for setFriendlyCode() (special friendly codes).
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [in]  slot   Slot number
             \param [out] result Result */
-        void getFriendlyCodeChoices(WaitIndicator& ind, Slot_t slot, game::spec::FriendlyCodeList::Infos_t& result);
+        void getFriendlyCodeChoices(util::WaitIndicator& ind, Slot_t slot, game::spec::FriendlyCodeList::Infos_t& result);
 
         /** Get choices for setOwner().
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [out] result Result (player Id/name pairs) */
-        void getOwnerChoices(WaitIndicator& ind, Elements_t& result);
+        void getOwnerChoices(util::WaitIndicator& ind, Elements_t& result);
 
         /** Get choices for setExperienceLevel().
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [out] result Result (experience level/name pairs) */
-        void getExperienceLevelChoices(WaitIndicator& ind, Elements_t& result);
+        void getExperienceLevelChoices(util::WaitIndicator& ind, Elements_t& result);
 
         /** Get choices for setHullType().
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [out] result Result (hull number/name pairs) */
-        void getHullTypeChoices(WaitIndicator& ind, Elements_t& result);
+        void getHullTypeChoices(util::WaitIndicator& ind, Elements_t& result);
 
         /** Get choices for setBeamType(), setNumBeams().
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [in]  slot   Slot number
             \param [out] result Result */
-        void getPrimaryChoices(WaitIndicator& ind, Slot_t slot, PrimaryChoices& result);
+        void getPrimaryChoices(util::WaitIndicator& ind, Slot_t slot, PrimaryChoices& result);
 
         /** Get choices for setTorpedoType(), setNumLaunchers(), setNumBays(), setAmmo().
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [in]  slot   Slot number
             \param [out] result Result */
-        void getSecondaryChoices(WaitIndicator& ind, Slot_t slot, SecondaryChoices& result);
+        void getSecondaryChoices(util::WaitIndicator& ind, Slot_t slot, SecondaryChoices& result);
 
         /** Get choices for setEngineType().
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [out] result Result (engine type/name pairs) */
-        void getEngineTypeChoices(WaitIndicator& ind, Elements_t& result);
+        void getEngineTypeChoices(util::WaitIndicator& ind, Elements_t& result);
 
         /** Get choices for setAggressiveness().
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [out] result Result (aggressiveness/label pairs) */
-        void getAggressivenessChoices(WaitIndicator& ind, Elements_t& result);
+        void getAggressivenessChoices(util::WaitIndicator& ind, Elements_t& result);
 
         /** Get choices for setBaseBeamTech().
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [out] result Result (level/label pairs) */
-        void getBaseBeamLevelChoices(WaitIndicator& ind, Elements_t& result);
+        void getBaseBeamLevelChoices(util::WaitIndicator& ind, Elements_t& result);
 
         /** Get choices for setBaseTorpedoTech().
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [out] result Result (level/label pairs) */
-        void getBaseTorpedoLevelChoices(WaitIndicator& ind, Elements_t& result);
+        void getBaseTorpedoLevelChoices(util::WaitIndicator& ind, Elements_t& result);
 
         /** Get choices for setId() for planets.
             Setting the Id will implicitly set the name.
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [out] result Result (Id/name pairs) */
-        void getPlanetNameChoices(WaitIndicator& ind, Elements_t& result);
+        void getPlanetNameChoices(util::WaitIndicator& ind, Elements_t& result);
 
         /** Get choices for setPopulation().
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [in]  slot   Slot number
             \param [out] result Result */
-        void getPopulationChoices(WaitIndicator& ind, Slot_t slot, PopulationChoices& result);
+        void getPopulationChoices(util::WaitIndicator& ind, Slot_t slot, PopulationChoices& result);
 
 
         /*
@@ -627,43 +627,43 @@ namespace game { namespace proxy {
             \param ind  WaitIndicator for UI synchronisation
             \param slot Slot number (decides ship/planet range)
             \return range */
-        Range_t getIdRange(WaitIndicator& ind, Slot_t slot);
+        Range_t getIdRange(util::WaitIndicator& ind, Slot_t slot);
 
         /** Get range for setDamage().
             \param ind  WaitIndicator for UI synchronisation
             \param slot Slot number (decides range depending on owner)
             \return range */
-        Range_t getDamageRange(WaitIndicator& ind, Slot_t slot);
+        Range_t getDamageRange(util::WaitIndicator& ind, Slot_t slot);
 
         /** Get range for setShield().
             \param ind  WaitIndicator for UI synchronisation
             \param slot Slot number (decides range depending on damage)
             \return range */
-        Range_t getShieldRange(WaitIndicator& ind, Slot_t slot);
+        Range_t getShieldRange(util::WaitIndicator& ind, Slot_t slot);
 
         /** Get range for setCrew().
             \param ind  WaitIndicator for UI synchronisation
             \param slot Slot number (decides range)
             \return range */
-        Range_t getCrewRange(WaitIndicator& ind, Slot_t slot);
+        Range_t getCrewRange(util::WaitIndicator& ind, Slot_t slot);
 
         /** Get range for setInterceptId().
             \param ind  WaitIndicator for UI synchronisation
             \param slot Slot number
             \return range */
-        Range_t getInterceptIdRange(WaitIndicator& ind, Slot_t slot);
+        Range_t getInterceptIdRange(util::WaitIndicator& ind, Slot_t slot);
 
         /** Get range for setBaseDefense().
             \param ind  WaitIndicator for UI synchronisation
             \param slot Slot number (decides range depending on owner)
             \return range */
-        Range_t getBaseDefenseRange(WaitIndicator& ind, Slot_t slot);
+        Range_t getBaseDefenseRange(util::WaitIndicator& ind, Slot_t slot);
 
         /** Get range for setNumBaseFighters().
             \param ind  WaitIndicator for UI synchronisation
             \param slot Slot number (decides range depending on owner)
             \return range */
-        Range_t getNumBaseFightersRange(WaitIndicator& ind, Slot_t slot);
+        Range_t getNumBaseFightersRange(util::WaitIndicator& ind, Slot_t slot);
 
 
         /*
@@ -673,7 +673,7 @@ namespace game { namespace proxy {
         /** Get configuration.
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [out] config Configuration */
-        void getConfiguration(WaitIndicator& ind, game::sim::Configuration& config);
+        void getConfiguration(util::WaitIndicator& ind, game::sim::Configuration& config);
 
         /** Set configuration.
             \param config Configuration
@@ -686,7 +686,7 @@ namespace game { namespace proxy {
             \param [in]  ind  WaitIndicator for UI synchronisation
             \param [out] rel  Relations
             \see game::sim::Session::getPlayerRelations() */
-        void getPlayerRelations(WaitIndicator& ind, PlayerRelations& rel);
+        void getPlayerRelations(util::WaitIndicator& ind, PlayerRelations& rel);
 
         /** Configure use of game's player relations.
             If enabled, usePlayerRelations() will use the actual game's relations;
@@ -738,13 +738,13 @@ namespace game { namespace proxy {
         void setProperty(Slot_t slot, void (Object::*set)(Property), Property value, uint32_t update);
 
         template<typename Object, typename Result>
-        void getChoices(WaitIndicator& ind, void (Object::*get)(Result&), Result& result);
+        void getChoices(util::WaitIndicator& ind, void (Object::*get)(Result&), Result& result);
 
         template<typename Object>
-        Range_t getRange(WaitIndicator& ind, Range_t (Object::*get)(Slot_t), Slot_t slot);
+        Range_t getRange(util::WaitIndicator& ind, Range_t (Object::*get)(Slot_t), Slot_t slot);
 
         template<typename Object>
-        game::sim::Setup::Status copyGame(WaitIndicator& ind, Slot_t from, Slot_t to, game::sim::Setup::Status (Object::*copy)(Slot_t, Slot_t));
+        game::sim::Setup::Status copyGame(util::WaitIndicator& ind, Slot_t from, Slot_t to, game::sim::Setup::Status (Object::*copy)(Slot_t, Slot_t));
     };
 
 } }

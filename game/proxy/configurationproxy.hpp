@@ -8,10 +8,10 @@
 #include "game/config/integeroption.hpp"
 #include "game/config/markeroption.hpp"
 #include "game/config/stringoption.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "util/numberformatter.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -26,25 +26,25 @@ namespace game { namespace proxy {
         /** Get number formatter.
             Obtain a formatter to format numbers and population counts according to user's choice.
             \param link Synchronisation */
-        util::NumberFormatter getNumberFormatter(WaitIndicator& link);
+        util::NumberFormatter getNumberFormatter(util::WaitIndicator& link);
 
         /** Get integer option.
             \param link Synchronisation
             \param desc Option descriptor
             \return option value */
-        int32_t getOption(WaitIndicator& link, const game::config::IntegerOptionDescriptor& desc);
+        int32_t getOption(util::WaitIndicator& link, const game::config::IntegerOptionDescriptor& desc);
 
         /** Get string option.
             \param link Synchronisation
             \param desc Option descriptor
             \return option value */
-        String_t getOption(WaitIndicator& link, const game::config::StringOptionDescriptor& desc);
+        String_t getOption(util::WaitIndicator& link, const game::config::StringOptionDescriptor& desc);
 
         /** Get marker option.
             \param link Synchronisation
             \param desc Option descriptor
             \return option value */
-        game::config::MarkerOption::Data getOption(WaitIndicator& link, const game::config::MarkerOptionDescriptor& desc);
+        game::config::MarkerOption::Data getOption(util::WaitIndicator& link, const game::config::MarkerOptionDescriptor& desc);
 
         /** Set integer option.
             \param desc Option descriptor
@@ -69,7 +69,7 @@ namespace game { namespace proxy {
         util::RequestSender<Session> m_gameSender;
 
         template<typename Desc, typename Value>
-        void getOptionTemplate(WaitIndicator& link, const Desc& desc, Value& result);
+        void getOptionTemplate(util::WaitIndicator& link, const Desc& desc, Value& result);
 
         template<typename Desc, typename Value>
         void setOptionTemplate(const Desc& desc, const Value& value);

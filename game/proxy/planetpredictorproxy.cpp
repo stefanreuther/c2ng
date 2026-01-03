@@ -217,7 +217,7 @@ game::proxy::PlanetPredictorProxy::~PlanetPredictorProxy()
 }
 
 game::map::PlanetEffectors
-game::proxy::PlanetPredictorProxy::getEffectors(WaitIndicator& ind)
+game::proxy::PlanetPredictorProxy::getEffectors(util::WaitIndicator& ind)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -237,7 +237,7 @@ game::proxy::PlanetPredictorProxy::getEffectors(WaitIndicator& ind)
 }
 
 void
-game::proxy::PlanetPredictorProxy::getStatus(WaitIndicator& ind, Status& out)
+game::proxy::PlanetPredictorProxy::getStatus(util::WaitIndicator& ind, Status& out)
 {
     class Task : public util::Request<Trampoline> {
      public:

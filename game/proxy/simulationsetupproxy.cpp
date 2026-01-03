@@ -1513,7 +1513,7 @@ game::proxy::SimulationSetupProxy::SimulationSetupProxy(util::RequestSender<Simu
 { }
 
 void
-game::proxy::SimulationSetupProxy::getList(WaitIndicator& ind, ListItems_t& out)
+game::proxy::SimulationSetupProxy::getList(util::WaitIndicator& ind, ListItems_t& out)
 {
     class Task : public Trampoline::Request_t {
      public:
@@ -1531,7 +1531,7 @@ game::proxy::SimulationSetupProxy::getList(WaitIndicator& ind, ListItems_t& out)
 }
 
 game::proxy::SimulationSetupProxy::Slot_t
-game::proxy::SimulationSetupProxy::addPlanet(WaitIndicator& ind)
+game::proxy::SimulationSetupProxy::addPlanet(util::WaitIndicator& ind)
 {
     class Task : public Trampoline::Request_t {
      public:
@@ -1557,7 +1557,7 @@ game::proxy::SimulationSetupProxy::addPlanet(WaitIndicator& ind)
 }
 
 game::proxy::SimulationSetupProxy::Slot_t
-game::proxy::SimulationSetupProxy::addShip(WaitIndicator& ind, Slot_t slot, int count)
+game::proxy::SimulationSetupProxy::addShip(util::WaitIndicator& ind, Slot_t slot, int count)
 {
     class Task : public Trampoline::Request_t {
      public:
@@ -1608,19 +1608,19 @@ game::proxy::SimulationSetupProxy::sortShips(SortOrder order)
 }
 
 game::sim::Setup::Status
-game::proxy::SimulationSetupProxy::copyToGame(WaitIndicator& ind, Slot_t from, Slot_t to)
+game::proxy::SimulationSetupProxy::copyToGame(util::WaitIndicator& ind, Slot_t from, Slot_t to)
 {
     return copyGame(ind, from, to, &Trampoline::copyToGame);
 }
 
 game::sim::Setup::Status
-game::proxy::SimulationSetupProxy::copyFromGame(WaitIndicator& ind, Slot_t from, Slot_t to)
+game::proxy::SimulationSetupProxy::copyFromGame(util::WaitIndicator& ind, Slot_t from, Slot_t to)
 {
     return copyGame(ind, from, to, &Trampoline::copyFromGame);
 }
 
 bool
-game::proxy::SimulationSetupProxy::load(WaitIndicator& ind, String_t fileName, String_t& errorMessage)
+game::proxy::SimulationSetupProxy::load(util::WaitIndicator& ind, String_t fileName, String_t& errorMessage)
 {
     class Task : public Trampoline::Request_t {
      public:
@@ -1643,7 +1643,7 @@ game::proxy::SimulationSetupProxy::load(WaitIndicator& ind, String_t fileName, S
 }
 
 bool
-game::proxy::SimulationSetupProxy::save(WaitIndicator& ind, String_t fileName, String_t& errorMessage)
+game::proxy::SimulationSetupProxy::save(util::WaitIndicator& ind, String_t fileName, String_t& errorMessage)
 {
     class Task : public Trampoline::Request_t {
      public:
@@ -1666,7 +1666,7 @@ game::proxy::SimulationSetupProxy::save(WaitIndicator& ind, String_t fileName, S
 }
 
 bool
-game::proxy::SimulationSetupProxy::isMatchingShipList(WaitIndicator& ind)
+game::proxy::SimulationSetupProxy::isMatchingShipList(util::WaitIndicator& ind)
 {
     class Task : public Trampoline::Request_t {
      public:
@@ -1693,7 +1693,7 @@ game::proxy::SimulationSetupProxy::setSlot(Slot_t slot)
 }
 
 bool
-game::proxy::SimulationSetupProxy::getObject(WaitIndicator& ind, Slot_t slot, ObjectInfo& info)
+game::proxy::SimulationSetupProxy::getObject(util::WaitIndicator& ind, Slot_t slot, ObjectInfo& info)
 {
     class Task : public Trampoline::Request_t {
      public:
@@ -1716,7 +1716,7 @@ game::proxy::SimulationSetupProxy::getObject(WaitIndicator& ind, Slot_t slot, Ob
 }
 
 bool
-game::proxy::SimulationSetupProxy::isDuplicateId(WaitIndicator& ind, Slot_t slot, Id_t candidate)
+game::proxy::SimulationSetupProxy::isDuplicateId(util::WaitIndicator& ind, Slot_t slot, Id_t candidate)
 {
     class Task : public Trampoline::Request_t {
      public:
@@ -1739,7 +1739,7 @@ game::proxy::SimulationSetupProxy::isDuplicateId(WaitIndicator& ind, Slot_t slot
 }
 
 void
-game::proxy::SimulationSetupProxy::getNumBaseTorpedoes(WaitIndicator& ind, Slot_t slot, Elements_t& result)
+game::proxy::SimulationSetupProxy::getNumBaseTorpedoes(util::WaitIndicator& ind, Slot_t slot, Elements_t& result)
 {
     class Task : public Trampoline::Request_t {
      public:
@@ -2016,7 +2016,7 @@ game::proxy::SimulationSetupProxy::setNumBaseTorpedoes(Slot_t slot, const Elemen
 }
 
 void
-game::proxy::SimulationSetupProxy::getAbilityChoices(WaitIndicator& ind, Slot_t slot, AbilityChoices& result)
+game::proxy::SimulationSetupProxy::getAbilityChoices(util::WaitIndicator& ind, Slot_t slot, AbilityChoices& result)
 {
     class Task : public Trampoline::Request_t {
      public:
@@ -2035,7 +2035,7 @@ game::proxy::SimulationSetupProxy::getAbilityChoices(WaitIndicator& ind, Slot_t 
 }
 
 void
-game::proxy::SimulationSetupProxy::getFriendlyCodeChoices(WaitIndicator& ind, Slot_t slot, game::spec::FriendlyCodeList::Infos_t& result)
+game::proxy::SimulationSetupProxy::getFriendlyCodeChoices(util::WaitIndicator& ind, Slot_t slot, game::spec::FriendlyCodeList::Infos_t& result)
 {
     class Task : public Trampoline::Request_t {
      public:
@@ -2054,25 +2054,25 @@ game::proxy::SimulationSetupProxy::getFriendlyCodeChoices(WaitIndicator& ind, Sl
 }
 
 void
-game::proxy::SimulationSetupProxy::getOwnerChoices(WaitIndicator& ind, Elements_t& result)
+game::proxy::SimulationSetupProxy::getOwnerChoices(util::WaitIndicator& ind, Elements_t& result)
 {
     getChoices(ind, &Trampoline::getOwnerChoices, result);
 }
 
 void
-game::proxy::SimulationSetupProxy::getExperienceLevelChoices(WaitIndicator& ind, Elements_t& result)
+game::proxy::SimulationSetupProxy::getExperienceLevelChoices(util::WaitIndicator& ind, Elements_t& result)
 {
     getChoices(ind, &Trampoline::getExperienceLevelChoices, result);
 }
 
 void
-game::proxy::SimulationSetupProxy::getHullTypeChoices(WaitIndicator& ind, Elements_t& result)
+game::proxy::SimulationSetupProxy::getHullTypeChoices(util::WaitIndicator& ind, Elements_t& result)
 {
     getChoices(ind, &Trampoline::getHullTypeChoices, result);
 }
 
 void
-game::proxy::SimulationSetupProxy::getPrimaryChoices(WaitIndicator& ind, Slot_t slot, PrimaryChoices& result)
+game::proxy::SimulationSetupProxy::getPrimaryChoices(util::WaitIndicator& ind, Slot_t slot, PrimaryChoices& result)
 {
     class Task : public Trampoline::Request_t {
      public:
@@ -2091,7 +2091,7 @@ game::proxy::SimulationSetupProxy::getPrimaryChoices(WaitIndicator& ind, Slot_t 
 }
 
 void
-game::proxy::SimulationSetupProxy::getSecondaryChoices(WaitIndicator& ind, Slot_t slot, SecondaryChoices& result)
+game::proxy::SimulationSetupProxy::getSecondaryChoices(util::WaitIndicator& ind, Slot_t slot, SecondaryChoices& result)
 {
     class Task : public Trampoline::Request_t {
      public:
@@ -2110,37 +2110,37 @@ game::proxy::SimulationSetupProxy::getSecondaryChoices(WaitIndicator& ind, Slot_
 }
 
 void
-game::proxy::SimulationSetupProxy::getEngineTypeChoices(WaitIndicator& ind, Elements_t& result)
+game::proxy::SimulationSetupProxy::getEngineTypeChoices(util::WaitIndicator& ind, Elements_t& result)
 {
     getChoices(ind, &Trampoline::getEngineTypeChoices, result);
 }
 
 void
-game::proxy::SimulationSetupProxy::getAggressivenessChoices(WaitIndicator& ind, Elements_t& result)
+game::proxy::SimulationSetupProxy::getAggressivenessChoices(util::WaitIndicator& ind, Elements_t& result)
 {
     getChoices(ind, &Trampoline::getAggressivenessChoices, result);
 }
 
 void
-game::proxy::SimulationSetupProxy::getBaseBeamLevelChoices(WaitIndicator& ind, Elements_t& result)
+game::proxy::SimulationSetupProxy::getBaseBeamLevelChoices(util::WaitIndicator& ind, Elements_t& result)
 {
     getChoices(ind, &Trampoline::getBaseBeamLevelChoices, result);
 }
 
 void
-game::proxy::SimulationSetupProxy::getBaseTorpedoLevelChoices(WaitIndicator& ind, Elements_t& result)
+game::proxy::SimulationSetupProxy::getBaseTorpedoLevelChoices(util::WaitIndicator& ind, Elements_t& result)
 {
     getChoices(ind, &Trampoline::getBaseTorpedoLevelChoices, result);
 }
 
 void
-game::proxy::SimulationSetupProxy::getPlanetNameChoices(WaitIndicator& ind, Elements_t& result)
+game::proxy::SimulationSetupProxy::getPlanetNameChoices(util::WaitIndicator& ind, Elements_t& result)
 {
     getChoices(ind, &Trampoline::getPlanetNameChoices, result);
 }
 
 void
-game::proxy::SimulationSetupProxy::getPopulationChoices(WaitIndicator& ind, Slot_t slot, PopulationChoices& result)
+game::proxy::SimulationSetupProxy::getPopulationChoices(util::WaitIndicator& ind, Slot_t slot, PopulationChoices& result)
 {
     class Task : public Trampoline::Request_t {
      public:
@@ -2159,49 +2159,49 @@ game::proxy::SimulationSetupProxy::getPopulationChoices(WaitIndicator& ind, Slot
 }
 
 game::proxy::SimulationSetupProxy::Range_t
-game::proxy::SimulationSetupProxy::getIdRange(WaitIndicator& ind, Slot_t slot)
+game::proxy::SimulationSetupProxy::getIdRange(util::WaitIndicator& ind, Slot_t slot)
 {
     return getRange(ind, &Trampoline::getIdRange, slot);
 }
 
 game::proxy::SimulationSetupProxy::Range_t
-game::proxy::SimulationSetupProxy::getDamageRange(WaitIndicator& ind, Slot_t slot)
+game::proxy::SimulationSetupProxy::getDamageRange(util::WaitIndicator& ind, Slot_t slot)
 {
     return getRange(ind, &Trampoline::getDamageRange, slot);
 }
 
 game::proxy::SimulationSetupProxy::Range_t
-game::proxy::SimulationSetupProxy::getShieldRange(WaitIndicator& ind, Slot_t slot)
+game::proxy::SimulationSetupProxy::getShieldRange(util::WaitIndicator& ind, Slot_t slot)
 {
     return getRange(ind, &Trampoline::getShieldRange, slot);
 }
 
 game::proxy::SimulationSetupProxy::Range_t
-game::proxy::SimulationSetupProxy::getCrewRange(WaitIndicator& ind, Slot_t slot)
+game::proxy::SimulationSetupProxy::getCrewRange(util::WaitIndicator& ind, Slot_t slot)
 {
     return getRange(ind, &Trampoline::getCrewRange, slot);
 }
 
 game::proxy::SimulationSetupProxy::Range_t
-game::proxy::SimulationSetupProxy::getInterceptIdRange(WaitIndicator& ind, Slot_t slot)
+game::proxy::SimulationSetupProxy::getInterceptIdRange(util::WaitIndicator& ind, Slot_t slot)
 {
     return getRange(ind, &Trampoline::getInterceptIdRange, slot);
 }
 
 game::proxy::SimulationSetupProxy::Range_t
-game::proxy::SimulationSetupProxy::getBaseDefenseRange(WaitIndicator& ind, Slot_t slot)
+game::proxy::SimulationSetupProxy::getBaseDefenseRange(util::WaitIndicator& ind, Slot_t slot)
 {
     return getRange(ind, &Trampoline::getBaseDefenseRange, slot);
 }
 
 game::proxy::SimulationSetupProxy::Range_t
-game::proxy::SimulationSetupProxy::getNumBaseFightersRange(WaitIndicator& ind, Slot_t slot)
+game::proxy::SimulationSetupProxy::getNumBaseFightersRange(util::WaitIndicator& ind, Slot_t slot)
 {
     return getRange(ind, &Trampoline::getNumBaseFightersRange, slot);
 }
 
 void
-game::proxy::SimulationSetupProxy::getConfiguration(WaitIndicator& ind, game::sim::Configuration& config)
+game::proxy::SimulationSetupProxy::getConfiguration(util::WaitIndicator& ind, game::sim::Configuration& config)
 {
     class Task : public Trampoline::Request_t {
      public:
@@ -2237,7 +2237,7 @@ game::proxy::SimulationSetupProxy::setConfiguration(const game::sim::Configurati
 }
 
 void
-game::proxy::SimulationSetupProxy::getPlayerRelations(WaitIndicator& ind, PlayerRelations& rel)
+game::proxy::SimulationSetupProxy::getPlayerRelations(util::WaitIndicator& ind, PlayerRelations& rel)
 {
     class Task : public Trampoline::Request_t {
      public:
@@ -2294,7 +2294,7 @@ game::proxy::SimulationSetupProxy::setProperty(Slot_t slot, void (Object::*set)(
 
 template<typename Object, typename Result>
 void
-game::proxy::SimulationSetupProxy::getChoices(WaitIndicator& ind, void (Object::*get)(Result&), Result& result)
+game::proxy::SimulationSetupProxy::getChoices(util::WaitIndicator& ind, void (Object::*get)(Result&), Result& result)
 {
     class Task : public Trampoline::Request_t {
      public:
@@ -2314,7 +2314,7 @@ game::proxy::SimulationSetupProxy::getChoices(WaitIndicator& ind, void (Object::
 
 template<typename Object>
 game::proxy::SimulationSetupProxy::Range_t
-game::proxy::SimulationSetupProxy::getRange(WaitIndicator& ind, Range_t (Object::*get)(Slot_t), Slot_t slot)
+game::proxy::SimulationSetupProxy::getRange(util::WaitIndicator& ind, Range_t (Object::*get)(Slot_t), Slot_t slot)
 {
     class Task : public Trampoline::Request_t {
      public:
@@ -2338,7 +2338,7 @@ game::proxy::SimulationSetupProxy::getRange(WaitIndicator& ind, Range_t (Object:
 
 template<typename Object>
 game::sim::Setup::Status
-game::proxy::SimulationSetupProxy::copyGame(WaitIndicator& ind, Slot_t from, Slot_t to, game::sim::Setup::Status (Object::*copy)(Slot_t, Slot_t))
+game::proxy::SimulationSetupProxy::copyGame(util::WaitIndicator& ind, Slot_t from, Slot_t to, game::sim::Setup::Status (Object::*copy)(Slot_t, Slot_t))
 {
     class Task : public Trampoline::Request_t {
      public:

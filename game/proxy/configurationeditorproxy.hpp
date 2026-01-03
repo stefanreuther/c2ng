@@ -12,10 +12,9 @@
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Configuration editor proxy.
         Bidirectional proxy to a game::config::ConfigurationEditor object.
@@ -52,7 +51,7 @@ namespace game { namespace proxy {
             @param [in,out] ind     WaitIndicator for UI synchronisation
             @see game::config::ConfigurationEditor::loadValues()
             @see game::config::ConfigurationEditor::Node::describe() */
-        void loadValues(WaitIndicator& ind);
+        void loadValues(util::WaitIndicator& ind);
 
         /** Access previously-loaded values.
             Returns the values previously loaded using loadValues().

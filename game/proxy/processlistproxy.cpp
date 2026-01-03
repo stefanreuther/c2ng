@@ -105,7 +105,7 @@ game::proxy::ProcessListProxy::~ProcessListProxy()
 
 // Initialize and retrieve initial process list.
 void
-game::proxy::ProcessListProxy::init(WaitIndicator& link, Infos_t& result)
+game::proxy::ProcessListProxy::init(util::WaitIndicator& link, Infos_t& result)
 {
     class Request : public util::Request<Trampoline> {
      public:
@@ -151,7 +151,7 @@ game::proxy::ProcessListProxy::resumeConfirmedProcesses()
 
 // Perform all prepared state changes.
 uint32_t
-game::proxy::ProcessListProxy::commit(WaitIndicator& link)
+game::proxy::ProcessListProxy::commit(util::WaitIndicator& link)
 {
     class Request : public util::Request<Trampoline> {
      public:

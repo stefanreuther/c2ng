@@ -42,7 +42,7 @@ namespace {
      public:
         Dialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, VcrDatabaseProxy& proxy, util::NumberFormatter fmt);
 
-        void init(game::proxy::WaitIndicator& ind, const game::vcr::BattleInfo& info, size_t initialUnit);
+        void init(util::WaitIndicator& ind, const game::vcr::BattleInfo& info, size_t initialUnit);
         game::Reference run(ui::Widget& help);
         void requestCurrent();
         void onListScroll();
@@ -111,7 +111,7 @@ Dialog::Dialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<
 
 /* Initialize (blocking data retrieval) */
 void
-Dialog::init(game::proxy::WaitIndicator& ind, const game::vcr::BattleInfo& info, size_t initialUnit)
+Dialog::init(util::WaitIndicator& ind, const game::vcr::BattleInfo& info, size_t initialUnit)
 {
     // Environment
     game::PlayerArray<String_t> names = m_proxy.getPlayerNames(ind, game::Player::AdjectiveName);

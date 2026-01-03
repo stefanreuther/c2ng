@@ -6,7 +6,6 @@
 #include <memory>
 #include "game/proxy/attachmentproxy.hpp"
 #include "afl/sys/loglistener.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/v3/attachmentconfiguration.hpp"
 #include "game/v3/attachmentunpacker.hpp"
 
@@ -122,7 +121,7 @@ game::proxy::AttachmentProxy::~AttachmentProxy()
 { }
 
 void
-game::proxy::AttachmentProxy::loadDirectory(WaitIndicator& ind, PlayerSet_t players, bool autoSelect, Infos_t& result, bool& proceed)
+game::proxy::AttachmentProxy::loadDirectory(util::WaitIndicator& ind, PlayerSet_t players, bool autoSelect, Infos_t& result, bool& proceed)
 {
     class Task : public util::Request<Trampoline> {
      public:

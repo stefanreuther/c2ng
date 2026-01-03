@@ -1,19 +1,19 @@
 /**
-  *  \file client/widgets/filelistbox.hpp
+  *  \file ui/widgets/filelistbox.hpp
+  *  \brief Class ui::widgets::FileListbox
   */
-#ifndef C2NG_CLIENT_WIDGETS_FILELISTBOX_HPP
-#define C2NG_CLIENT_WIDGETS_FILELISTBOX_HPP
+#ifndef C2NG_UI_WIDGETS_FILELISTBOX_HPP
+#define C2NG_UI_WIDGETS_FILELISTBOX_HPP
 
-#include <vector>
 #include "afl/base/signal.hpp"
 #include "afl/base/signalconnection.hpp"
 #include "afl/string/string.hpp"
 #include "ui/root.hpp"
 #include "ui/scrollablewidget.hpp"
 
-namespace client { namespace widgets {
+namespace ui { namespace widgets {
 
-    class FileListbox : public ui::ScrollableWidget {
+    class FileListbox : public ScrollableWidget {
      public:
         enum Icon { iNone, iFile, iGame, iFolder, iAccount, iUp, iComputer, iLink, iFavoriteFolder, iRoot, iFavorite };
         struct Item {
@@ -27,7 +27,7 @@ namespace client { namespace widgets {
         };
         typedef std::vector<Item> Items_t;
 
-        FileListbox(int columns, int lines, ui::Root& root);
+        FileListbox(int columns, int lines, Root& root);
         ~FileListbox();
 
         // FileListbox:
@@ -54,7 +54,7 @@ namespace client { namespace widgets {
         afl::base::Signal<void(size_t)> sig_itemDoubleClick;
 
      private:
-        ui::Root& m_root;
+        Root& m_root;
 
         int m_columns;          // FIXME m_numColumns
         int m_lines;            // FIXME m_numLines

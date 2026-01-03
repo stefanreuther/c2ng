@@ -24,7 +24,7 @@ game::proxy::PlayerProxy::PlayerProxy(util::RequestSender<Session> gameSender)
 { }
 
 game::PlayerSet_t
-game::proxy::PlayerProxy::getAllPlayers(WaitIndicator& link)
+game::proxy::PlayerProxy::getAllPlayers(util::WaitIndicator& link)
 {
     PlayerSet_t result;
 
@@ -50,7 +50,7 @@ game::proxy::PlayerProxy::getAllPlayers(WaitIndicator& link)
 }
 
 String_t
-game::proxy::PlayerProxy::getPlayerName(WaitIndicator& link, int id, Player::Name which)
+game::proxy::PlayerProxy::getPlayerName(util::WaitIndicator& link, int id, Player::Name which)
 {
     String_t result;
 
@@ -79,7 +79,7 @@ game::proxy::PlayerProxy::getPlayerName(WaitIndicator& link, int id, Player::Nam
 }
 
 game::PlayerArray<String_t>
-game::proxy::PlayerProxy::getPlayerNames(WaitIndicator& link, Player::Name which)
+game::proxy::PlayerProxy::getPlayerNames(util::WaitIndicator& link, Player::Name which)
 {
     PlayerArray<String_t> result;
 

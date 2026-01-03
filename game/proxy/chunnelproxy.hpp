@@ -9,11 +9,11 @@
 #include "afl/base/signal.hpp"
 #include "afl/data/stringlist.hpp"
 #include "game/map/point.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/ref/userlist.hpp"
 #include "game/session.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -77,14 +77,14 @@ namespace game { namespace proxy {
             \param shipId [in] Initiator ship Id
             \param pos    [in] Desired chunnel target position
             \param list   [out] Result */
-        void getCandidates(WaitIndicator& link, Id_t shipId, game::map::Point pos, game::ref::UserList& list);
+        void getCandidates(util::WaitIndicator& link, Id_t shipId, game::map::Point pos, game::ref::UserList& list);
 
         /** Synchronous request to set up a chunnel.
             \param link       [in] WaitIndicator
             \param fromShipId [in] Initiator ship Id
             \param toShipId   [in] Mate ship Id
             \return List of possible failures user needs to fix */
-        afl::data::StringList_t setupChunnel(WaitIndicator& link, Id_t fromShipId, Id_t toShipId);
+        afl::data::StringList_t setupChunnel(util::WaitIndicator& link, Id_t fromShipId, Id_t toShipId);
 
         /** Signal: new CandidateList
             \see postCandidateRequest */

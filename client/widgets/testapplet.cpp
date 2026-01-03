@@ -5,7 +5,6 @@
 
 #include "client/widgets/testapplet.hpp"
 #include "client/widgets/alliancestatuslist.hpp"
-#include "client/widgets/filelistbox.hpp"
 #include "client/widgets/playerlist.hpp"
 #include "client/widgets/referencelistbox.hpp"
 #include "game/map/object.hpp"
@@ -95,32 +94,6 @@ client::widgets::TestApplet::makeReferenceList()
                 ReferenceListbox list(root);
                 list.setContent(ul);
                 testWidget(root, list);
-            }
-    };
-    return new Class();
-}
-
-// FileListbox widget
-client::widgets::TestApplet*
-client::widgets::TestApplet::makeFileList()
-{
-    class Class : public TestApplet {
-     public:
-        void runTest(ui::Root& root, afl::string::Translator& /*tx*/)
-            {
-                FileListbox box(2, 7, root);
-
-                FileListbox::Items_t items;
-                items.push_back(FileListbox::Item("up", 0, true, FileListbox::iUp));
-                for (int i = 0; i < 10; ++i) {
-                    items.push_back(FileListbox::Item("directory", 1, true, FileListbox::iFolder));
-                }
-                for (int i = 0; i < 20; ++i) {
-                    items.push_back(FileListbox::Item("file", 1, false, FileListbox::iFile));
-                }
-                box.swapItems(items);
-
-                testWidget(root, box);
             }
     };
     return new Class();

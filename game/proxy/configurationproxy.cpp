@@ -11,7 +11,7 @@ game::proxy::ConfigurationProxy::ConfigurationProxy(util::RequestSender<Session>
 { }
 
 util::NumberFormatter
-game::proxy::ConfigurationProxy::getNumberFormatter(WaitIndicator& link)
+game::proxy::ConfigurationProxy::getNumberFormatter(util::WaitIndicator& link)
 {
     class Query : public util::Request<Session> {
      public:
@@ -39,7 +39,7 @@ game::proxy::ConfigurationProxy::getNumberFormatter(WaitIndicator& link)
 }
 
 int32_t
-game::proxy::ConfigurationProxy::getOption(WaitIndicator& link, const game::config::IntegerOptionDescriptor& desc)
+game::proxy::ConfigurationProxy::getOption(util::WaitIndicator& link, const game::config::IntegerOptionDescriptor& desc)
 {
     int32_t result = 0;
     getOptionTemplate(link, desc, result);
@@ -47,7 +47,7 @@ game::proxy::ConfigurationProxy::getOption(WaitIndicator& link, const game::conf
 }
 
 String_t
-game::proxy::ConfigurationProxy::getOption(WaitIndicator& link, const game::config::StringOptionDescriptor& desc)
+game::proxy::ConfigurationProxy::getOption(util::WaitIndicator& link, const game::config::StringOptionDescriptor& desc)
 {
     String_t result;
     getOptionTemplate(link, desc, result);
@@ -55,7 +55,7 @@ game::proxy::ConfigurationProxy::getOption(WaitIndicator& link, const game::conf
 }
 
 game::config::MarkerOption::Data
-game::proxy::ConfigurationProxy::getOption(WaitIndicator& link, const game::config::MarkerOptionDescriptor& desc)
+game::proxy::ConfigurationProxy::getOption(util::WaitIndicator& link, const game::config::MarkerOptionDescriptor& desc)
 {
     game::config::MarkerOption::Data result;
     getOptionTemplate(link, desc, result);
@@ -88,7 +88,7 @@ game::proxy::ConfigurationProxy::gameSender()
 
 template<typename Desc, typename Value>
 inline void
-game::proxy::ConfigurationProxy::getOptionTemplate(WaitIndicator& link, const Desc& desc, Value& result)
+game::proxy::ConfigurationProxy::getOptionTemplate(util::WaitIndicator& link, const Desc& desc, Value& result)
 {
     class Query : public util::Request<Session> {
      public:

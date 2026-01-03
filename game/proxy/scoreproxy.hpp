@@ -7,13 +7,13 @@
 
 #include <memory>
 #include "afl/base/signal.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/score/scorebuilderbase.hpp"
 #include "game/session.hpp"
 #include "util/datatable.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestsender.hpp"
 #include "util/stringlist.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -60,13 +60,13 @@ namespace game { namespace proxy {
             \param [in]  ind  WaitIndicator for UI synchronisation
             \param [out] out  Result
             \see game::score::ChartBuilder::getVariant */
-        void getChartVariants(WaitIndicator& ind, Variants_t& out);
+        void getChartVariants(util::WaitIndicator& ind, Variants_t& out);
 
         /** Retrieve "table" variants.
             \param [in]  ind  WaitIndicator for UI synchronisation
             \param [out] out  Result
             \see game::score::TableBuilder::getVariant */
-        void getTableVariants(WaitIndicator& ind, Variants_t& out);
+        void getTableVariants(util::WaitIndicator& ind, Variants_t& out);
 
         /** Retrieve list of turns.
             Format of the returned list:
@@ -75,13 +75,13 @@ namespace game { namespace proxy {
             - string is the timestamp (Timestamp::getTimestampAsString())
             \param [in]  ind  WaitIndicator for UI synchronisation
             \param [out] out  List of turns */
-        void getTurns(WaitIndicator& ind, util::StringList& out);
+        void getTurns(util::WaitIndicator& ind, util::StringList& out);
 
         /** Get overview information.
             This is ad-hoc information required to build a score view; extend as needed.
             \param [in]  ind  WaitIndicator for UI synchronisation
             \param [out] out  Information */
-        void getOverviewInformation(WaitIndicator& ind, Info& out);
+        void getOverviewInformation(util::WaitIndicator& ind, Info& out);
 
         /** Select "chart" variant.
             The new content will be reported using sig_chartUpdate.

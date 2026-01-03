@@ -8,7 +8,6 @@
 #include "game/config/userconfiguration.hpp"
 #include "game/map/info/browser.hpp"
 #include "game/map/info/nulllinkbuilder.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/root.hpp"
 #include "util/doc/htmlrenderer.hpp"
 #include "util/doc/renderoptions.hpp"
@@ -173,7 +172,7 @@ game::proxy::ImperialStatsProxy::setPageOptions(game::map::info::Page page, Page
 }
 
 bool
-game::proxy::ImperialStatsProxy::savePageAsHTML(WaitIndicator& ind, game::map::info::Page page, String_t fileName, String_t& errorMessage)
+game::proxy::ImperialStatsProxy::savePageAsHTML(util::WaitIndicator& ind, game::map::info::Page page, String_t fileName, String_t& errorMessage)
 {
     class Task : public util::Request<Trampoline> {
      public:

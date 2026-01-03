@@ -5,10 +5,10 @@
 #ifndef C2NG_GAME_PROXY_CONVERTSUPPLIESPROXY_HPP
 #define C2NG_GAME_PROXY_CONVERTSUPPLIESPROXY_HPP
 
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "game/types.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -45,7 +45,7 @@ namespace game { namespace proxy {
             \param reservedSupplies Supplies to reserve (game::actions::ConvertSupplies::setReservedSupplies())
             \param reservedMoney Money to reserve (game::actions::ConvertSupplies::setReservedMoney())
             \return Status. If the planet does not exist or has wrong state, the status will be reported with valid=false. */
-        Status init(WaitIndicator& link, Id_t planetId, int32_t reservedSupplies, int32_t reservedMoney);
+        Status init(util::WaitIndicator& link, Id_t planetId, int32_t reservedSupplies, int32_t reservedMoney);
 
         /** Sell supplies.
             Submits the request to sell the specified number of supplies.

@@ -6,13 +6,13 @@
 #define C2NG_CLIENT_DIALOGS_MESSAGEEDITOR_HPP
 
 #include "game/proxy/outboxproxy.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/root.hpp"
 #include "ui/widgets/editor.hpp"
 #include "util/editor/editor.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace client { namespace dialogs {
 
@@ -75,7 +75,7 @@ namespace client { namespace dialogs {
         void onCancel();
         void onSend();
         void onReadMessage();
-        void updateContent(game::proxy::WaitIndicator& ind);
+        void updateContent(util::WaitIndicator& ind);
 
         ui::Root& m_root;
         game::proxy::OutboxProxy& m_proxy;

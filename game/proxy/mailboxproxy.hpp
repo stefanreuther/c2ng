@@ -12,10 +12,9 @@
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
 #include "util/rich/text.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Bidirectional proxy for message access.
         Proxies access to a game::msg::Mailbox.
@@ -91,14 +90,14 @@ namespace game { namespace proxy {
             Retrieves number of messages and last position.
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [out] status Status */
-        void getStatus(WaitIndicator& ind, Status& status);
+        void getStatus(util::WaitIndicator& ind, Status& status);
 
         /** Get summary.
             Retrieves a list of subject lines.
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [out] summary Summary list
             \param [out] index   Index into summary list of current message */
-        void getSummary(WaitIndicator& ind, game::msg::Browser::Summary_t& summary, size_t& index);
+        void getSummary(util::WaitIndicator& ind, game::msg::Browser::Summary_t& summary, size_t& index);
 
         /** Set current message.
             Eventually replies with sig_update.
@@ -132,7 +131,7 @@ namespace game { namespace proxy {
             \retval true success
             \retval false error; errorMessage has been set
             \see game::msg::writeMessages */
-        bool write(WaitIndicator& ind, const String_t& fileName, size_t first, size_t last, String_t& errorMessage);
+        bool write(util::WaitIndicator& ind, const String_t& fileName, size_t first, size_t last, String_t& errorMessage);
 
         /** Toggle whether heading is filtered.
             Responds with sig_summaryChanged.
@@ -153,7 +152,7 @@ namespace game { namespace proxy {
             \param [in] index   Message index
             \param [in] action  Action
             \return parameters */
-        QuoteResult quoteMessage(WaitIndicator& ind, size_t index, QuoteAction action);
+        QuoteResult quoteMessage(util::WaitIndicator& ind, size_t index, QuoteAction action);
 
         /** Signal: message update.
             \param msg Message */

@@ -1,21 +1,21 @@
 /**
-  *  \file game/proxy/waitindicator.cpp
-  *  \brief Class game::proxy::WaitIndicator
+  *  \file util/waitindicator.cpp
+  *  \brief Class util::WaitIndicator
   */
 
-#include "game/proxy/waitindicator.hpp"
+#include "util/waitindicator.hpp"
 
 // Constructor.
-game::proxy::WaitIndicator::WaitIndicator(util::RequestDispatcher& disp)
+util::WaitIndicator::WaitIndicator(RequestDispatcher& disp)
     : m_receiver(disp, *this)
 { }
 
 // Destructor.
-game::proxy::WaitIndicator::~WaitIndicator()
+util::WaitIndicator::~WaitIndicator()
 { }
 
 void
-game::proxy::WaitIndicator::confirm(util::RequestSender<WaitIndicator>& sender, bool success)
+util::WaitIndicator::confirm(RequestSender<WaitIndicator>& sender, bool success)
 {
     // Note that this function is called from a destructor.
     // If it throws (e.g. out of memory), life as you know it will be over.
@@ -23,7 +23,7 @@ game::proxy::WaitIndicator::confirm(util::RequestSender<WaitIndicator>& sender, 
     // the confirmation will not get back to the UI thread, causing it to hang forever
     // (but still reacting to UI events and thus not being killable using the window manager).
     // Thus, crashing is the better alternative.
-    class Confirmer : public util::Request<WaitIndicator> {
+    class Confirmer : public Request<WaitIndicator> {
      public:
         Confirmer(bool success)
             : m_success(success)
@@ -31,7 +31,7 @@ game::proxy::WaitIndicator::confirm(util::RequestSender<WaitIndicator>& sender, 
         virtual void handle(WaitIndicator& ind)
             { ind.post(m_success); }
      private:
-        bool m_success;
+        const bool m_success;
     };
     sender.postNewRequest(new Confirmer(success));
 }

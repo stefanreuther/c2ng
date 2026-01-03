@@ -59,7 +59,7 @@ namespace {
         void onAdd();
         void onRemove();
 
-        void doAdd(game::proxy::WaitIndicator& ind, const String_t& fileName);
+        void doAdd(util::WaitIndicator& ind, const String_t& fileName);
         void doRemove(String_t id);
 
         void showError(const String_t& errorMessage, const String_t& conclusio, const Text& defaultMessage);
@@ -222,7 +222,7 @@ Dialog::onRemove()
 
 /** Implementation of the "add" action. */
 void
-Dialog::doAdd(game::proxy::WaitIndicator& ind, const String_t& fileName)
+Dialog::doAdd(util::WaitIndicator& ind, const String_t& fileName)
 {
     // Initialize
     afl::string::Translator& tx = m_parent.translator();

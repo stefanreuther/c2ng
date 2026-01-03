@@ -8,9 +8,9 @@
 #include <vector>
 #include "afl/base/types.hpp"
 #include "afl/string/string.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -45,13 +45,13 @@ namespace game { namespace proxy {
             \param result [out] Result
             \param processId    List only this process's mutexes
             \see interpreter::MutexList::enumMutexes() */
-        void enumMutexes(WaitIndicator& link, Infos_t& result, uint32_t processId);
+        void enumMutexes(util::WaitIndicator& link, Infos_t& result, uint32_t processId);
 
         /** Enumerate all active mutexes.
             \param link         WaitIndicator object for UI synchronisation
             \param result [out] Result
             \see interpreter::MutexList::enumMutexes()  */
-        void enumMutexes(WaitIndicator& link, Infos_t& result);
+        void enumMutexes(util::WaitIndicator& link, Infos_t& result);
 
      private:
         util::RequestSender<Session> m_gameSender;

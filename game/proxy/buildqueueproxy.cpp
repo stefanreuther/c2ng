@@ -106,7 +106,7 @@ game::proxy::BuildQueueProxy::BuildQueueProxy(util::RequestSender<Session> gameS
 { }
 
 void
-game::proxy::BuildQueueProxy::getStatus(WaitIndicator& link, Infos_t& data, GlobalInfo& global)
+game::proxy::BuildQueueProxy::getStatus(util::WaitIndicator& link, Infos_t& data, GlobalInfo& global)
 {
     class Task : public util::Request<Trampoline> {
      public:

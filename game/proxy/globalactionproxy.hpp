@@ -9,10 +9,9 @@
 #include "interpreter/variablereference.hpp"
 #include "util/requestsender.hpp"
 #include "util/treelist.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Proxy for global actions.
 
@@ -32,7 +31,7 @@ namespace game { namespace proxy {
             @param [in,out] ind     WaitIndicator for UI synchronisation
             @param [out]    result  Result
             @param [in]     ref     Reference to variable containing the global actions */
-        void getActions(WaitIndicator& ind, util::TreeList& result, interpreter::VariableReference ref);
+        void getActions(util::WaitIndicator& ind, util::TreeList& result, interpreter::VariableReference ref);
 
      private:
         util::RequestSender<Session> m_gameSender;

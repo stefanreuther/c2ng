@@ -11,10 +11,9 @@
 #include "game/session.hpp"
 #include "game/types.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Synchronous, bidirectional proxy to access properties of a Reference. */
     class ReferenceProxy {
@@ -29,12 +28,12 @@ namespace game { namespace proxy {
             @param [in]  which  Which name to return
             @return Name if reference is valid and name could be produced
             @see game::Session::getReferenceName() */
-        afl::base::Optional<String_t> getReferenceName(WaitIndicator& ind, Reference ref, ObjectName which);
+        afl::base::Optional<String_t> getReferenceName(util::WaitIndicator& ind, Reference ref, ObjectName which);
 
         /** Get position, given a reference.
             @param [in]  ind    WaitIndicator
             @param [in]  ref    Reference */
-        afl::base::Optional<game::map::Point> getReferencePosition(WaitIndicator& ind, Reference ref);
+        afl::base::Optional<game::map::Point> getReferencePosition(util::WaitIndicator& ind, Reference ref);
 
      private:
         util::RequestSender<Session> m_gameSender;

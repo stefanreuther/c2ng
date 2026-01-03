@@ -7,7 +7,6 @@
 #include "afl/base/uncopyable.hpp"
 #include "afl/string/format.hpp"
 #include "game/browser/account.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/registrationkey.hpp"
 #include "game/turnloader.hpp"
 #include "game/types.hpp"
@@ -400,7 +399,7 @@ game::proxy::BrowserProxy::selectFolder(OptionalIndex_t index)
 
 // Check whether to suggest setting up a local folder.
 bool
-game::proxy::BrowserProxy::isSelectedFolderSetupSuggested(WaitIndicator& ind)
+game::proxy::BrowserProxy::isSelectedFolderSetupSuggested(util::WaitIndicator& ind)
 {
     struct Task : public util::Request<Trampoline> {
      public:
@@ -472,7 +471,7 @@ game::proxy::BrowserProxy::setLocalDirectoryName(const String_t& dirName)
 
 // Verify status of a directory.
 game::proxy::BrowserProxy::DirectoryStatus_t
-game::proxy::BrowserProxy::verifyLocalDirectory(WaitIndicator& ind, const String_t& dirName)
+game::proxy::BrowserProxy::verifyLocalDirectory(util::WaitIndicator& ind, const String_t& dirName)
 {
     class Verifier : public util::Request<Trampoline> {
      public:
@@ -518,7 +517,7 @@ game::proxy::BrowserProxy::setLocalDirectoryNone()
 
 // Get current configuration.
 void
-game::proxy::BrowserProxy::getConfiguration(WaitIndicator& ind, Configuration& config)
+game::proxy::BrowserProxy::getConfiguration(util::WaitIndicator& ind, Configuration& config)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -552,7 +551,7 @@ game::proxy::BrowserProxy::getConfiguration(WaitIndicator& ind, Configuration& c
 
 // Change configuration.
 void
-game::proxy::BrowserProxy::setConfiguration(WaitIndicator& ind, const Configuration& config)
+game::proxy::BrowserProxy::setConfiguration(util::WaitIndicator& ind, const Configuration& config)
 {
     // TODO: should probably reload
     class Task : public util::Request<Trampoline> {
@@ -606,7 +605,7 @@ game::proxy::BrowserProxy::updateConfiguration()
 
 // Add an account.
 bool
-game::proxy::BrowserProxy::addAccount(WaitIndicator& ind, String_t user, String_t type, String_t host)
+game::proxy::BrowserProxy::addAccount(util::WaitIndicator& ind, String_t user, String_t type, String_t host)
 {
     // TODO: should probably automatically reload
     class Task : public util::Request<Trampoline> {

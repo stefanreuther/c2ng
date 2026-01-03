@@ -10,6 +10,7 @@
 #include "afl/string/format.hpp"
 #include "client/dialogs/planetinfodialog.hpp"
 #include "client/dialogs/sessionfileselectiondialog.hpp"
+#include "client/downlink.hpp"
 #include "client/si/control.hpp"
 #include "client/widgets/helpwidget.hpp"
 #include "game/map/info/scriptlinkbuilder.hpp"

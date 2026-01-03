@@ -342,7 +342,7 @@ game::proxy::TaskEditorProxy::selectTask(Id_t id, interpreter::Process::ProcessK
 }
 
 void
-game::proxy::TaskEditorProxy::getStatus(WaitIndicator& ind, Status& out)
+game::proxy::TaskEditorProxy::getStatus(util::WaitIndicator& ind, Status& out)
 {
     class Task : public util::Request<Trampoline> {
      public:

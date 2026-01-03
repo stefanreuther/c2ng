@@ -7,11 +7,11 @@
 
 #include "game/actions/taxationaction.hpp"
 #include "game/map/planeteffectors.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "game/types.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -64,12 +64,12 @@ namespace game { namespace proxy {
             \param ind WaitIndicator for UI synchronisation
             \return PlanetEffectors
             \see game::map::preparePlanetEffectors */
-        game::map::PlanetEffectors getEffectors(WaitIndicator& ind);
+        game::map::PlanetEffectors getEffectors(util::WaitIndicator& ind);
 
         /** Get current status, synchronously.
             \param [in]  ind WaitIndicator for UI synchronisation
             \param [out] out Result */
-        void getStatus(WaitIndicator& ind, Status& out);
+        void getStatus(util::WaitIndicator& ind, Status& out);
 
         /** Set effectors.
             The updated prediction will arrive as sig_update callback.

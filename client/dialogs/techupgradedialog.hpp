@@ -5,12 +5,12 @@
 #ifndef C2NG_CLIENT_DIALOGS_TECHUPGRADEDIALOG_HPP
 #define C2NG_CLIENT_DIALOGS_TECHUPGRADEDIALOG_HPP
 
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
+#include "game/spec/cost.hpp"
 #include "game/types.hpp"
 #include "ui/root.hpp"
 #include "util/requestsender.hpp"
-#include "game/spec/cost.hpp"
+#include "util/waitindicator.hpp"
 
 namespace client { namespace dialogs {
 
@@ -40,7 +40,7 @@ namespace client { namespace dialogs {
         \retval true Tech level is available (was available before, or got bought)
         \retval false Tech level is not available (cannot be bought, user canceled) */
     bool checkTechUpgrade(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, game::Id_t pid,
-                          game::proxy::WaitIndicator& ind, game::TechLevel area, int level, game::spec::Cost reservedAmount,
+                          util::WaitIndicator& ind, game::TechLevel area, int level, game::spec::Cost reservedAmount,
                           String_t introFormat, String_t title);
 
 } }

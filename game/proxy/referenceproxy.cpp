@@ -6,7 +6,6 @@
 #include "game/proxy/referenceproxy.hpp"
 #include "game/game.hpp"
 #include "game/map/universe.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/turn.hpp"
 #include "util/request.hpp"
 
@@ -15,7 +14,7 @@ game::proxy::ReferenceProxy::ReferenceProxy(util::RequestSender<Session> gameSen
 { }
 
 afl::base::Optional<String_t>
-game::proxy::ReferenceProxy::getReferenceName(WaitIndicator& ind, Reference ref, ObjectName which)
+game::proxy::ReferenceProxy::getReferenceName(util::WaitIndicator& ind, Reference ref, ObjectName which)
 {
     class Task : public util::Request<Session> {
      public:
@@ -38,7 +37,7 @@ game::proxy::ReferenceProxy::getReferenceName(WaitIndicator& ind, Reference ref,
 }
 
 afl::base::Optional<game::map::Point>
-game::proxy::ReferenceProxy::getReferencePosition(WaitIndicator& ind, Reference ref)
+game::proxy::ReferenceProxy::getReferencePosition(util::WaitIndicator& ind, Reference ref)
 {
     class Task : public util::Request<Session> {
      public:

@@ -91,7 +91,7 @@ namespace {
         void onOK();
         void onDoubleClick(game::map::Point pt);
         void onMove(game::map::Point pt);
-        void onShipSelect(game::proxy::WaitIndicator& ind, game::Id_t id);
+        void onShipSelect(util::WaitIndicator& ind, game::Id_t id);
         game::Id_t chooseChunnelMate();
 
      private:
@@ -118,7 +118,7 @@ namespace {
      */
     class SyncSearchProxy {
      public:
-        SyncSearchProxy(util::RequestSender<game::Session> gameSender, util::RequestDispatcher& reply, game::proxy::WaitIndicator& ind)
+        SyncSearchProxy(util::RequestSender<game::Session> gameSender, util::RequestDispatcher& reply, util::WaitIndicator& ind)
             : m_proxy(gameSender, reply), m_waitIndicator(ind)
             {
                 m_proxy.sig_success.add(this, &SyncSearchProxy::onSuccess);
@@ -144,7 +144,7 @@ namespace {
             { m_waitIndicator.post(false); }
 
         game::proxy::SearchProxy m_proxy;
-        game::proxy::WaitIndicator& m_waitIndicator;
+        util::WaitIndicator& m_waitIndicator;
         game::ref::List m_result;
     };
 
@@ -157,7 +157,7 @@ namespace {
             : m_owner(), m_position()
             { }
 
-        void getShipStatus(game::proxy::WaitIndicator& ind, util::RequestSender<game::Session> gameSender, game::Id_t id)
+        void getShipStatus(util::WaitIndicator& ind, util::RequestSender<game::Session> gameSender, game::Id_t id)
             {
                 // Clear status
                 m_owner = 0;
@@ -629,7 +629,7 @@ NavChartDialog::onMove(game::map::Point pt)
 }
 
 void
-NavChartDialog::onShipSelect(game::proxy::WaitIndicator& ind, game::Id_t id)
+NavChartDialog::onShipSelect(util::WaitIndicator& ind, game::Id_t id)
 {
     // ex WShipArgWindow::onShipSelect
     // FIXME: handle exceptions

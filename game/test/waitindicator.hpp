@@ -8,15 +8,15 @@
 #include <queue>
 #include "afl/sys/mutex.hpp"
 #include "afl/sys/semaphore.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "util/requestdispatcher.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace test {
 
     /** WaitIndicator for testing use.
         Implements a minimal WaitIndicator with no additional preconditions.
         It can also serve as a simple RequestDispatcher. */
-    class WaitIndicator : public util::RequestDispatcher, public game::proxy::WaitIndicator {
+    class WaitIndicator : public util::RequestDispatcher, public util::WaitIndicator {
      public:
         /** Constructor. */
         WaitIndicator();

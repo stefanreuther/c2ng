@@ -5,9 +5,9 @@
 #ifndef C2NG_GAME_PROXY_FRIENDLYCODEPROXY_HPP
 #define C2NG_GAME_PROXY_FRIENDLYCODEPROXY_HPP
 
-#include "util/requestsender.hpp"
 #include "game/session.hpp"
-#include "game/proxy/waitindicator.hpp"
+#include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -25,7 +25,7 @@ namespace game { namespace proxy {
             \param link WaitIndicator
             \return friendly code; empty if preconditions not fulfilled
             \see game::spec::FriendlyCodeList::generateRandomCode */
-        String_t generateRandomCode(WaitIndicator& link);
+        String_t generateRandomCode(util::WaitIndicator& link);
 
      private:
         util::RequestSender<Session> m_gameSender;

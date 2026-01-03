@@ -11,7 +11,7 @@ game::proxy::TeamProxy::TeamProxy(util::RequestSender<Session> gameSender)
 { }
 
 void
-game::proxy::TeamProxy::init(WaitIndicator& link, TeamSettings& out)
+game::proxy::TeamProxy::init(util::WaitIndicator& link, TeamSettings& out)
 {
     class Task : public util::Request<Session> {
      public:

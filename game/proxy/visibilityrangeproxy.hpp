@@ -8,9 +8,9 @@
 #include "afl/string/translator.hpp"
 #include "game/map/rangeset.hpp"
 #include "game/map/visibilityrange.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -26,20 +26,20 @@ namespace game { namespace proxy {
             @param ind    WaitIndicator for UI synchronisation
             @return Configuration
             @see game::map::loadVisibilityConfiguration() */
-        game::map::VisConfig loadVisibilityConfiguration(WaitIndicator& ind);
+        game::map::VisConfig loadVisibilityConfiguration(util::WaitIndicator& ind);
 
         /** Get available visibility range settings.
             @param ind    WaitIndicator for UI synchronisation
             @return Settings
             @see game::map::getVisibilityRangeSettings() */
-        game::map::VisSettings_t getVisibilityRangeSettings(WaitIndicator& ind);
+        game::map::VisSettings_t getVisibilityRangeSettings(util::WaitIndicator& ind);
 
         /** Build visibility range according to configuration.
             @param ind    WaitIndicator for UI synchronisation
             @param vc     Configuration
             @return newly-allocated RangeSet containing the result. Never null.
             @see game::map::buildVisibilityRange() */
-        std::auto_ptr<game::map::RangeSet> buildVisibilityRange(WaitIndicator& ind, const game::map::VisConfig& vc);
+        std::auto_ptr<game::map::RangeSet> buildVisibilityRange(util::WaitIndicator& ind, const game::map::VisConfig& vc);
 
      private:
         util::RequestSender<Session> m_gameSender;

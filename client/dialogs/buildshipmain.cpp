@@ -529,7 +529,7 @@ client::dialogs::BuildShipMain::setCursors(const game::proxy::BuildShipProxy::St
 }
 
 bool
-client::dialogs::BuildShipMain::checkTechUpgrade(game::proxy::WaitIndicator& ind, game::TechLevel area, int level)
+client::dialogs::BuildShipMain::checkTechUpgrade(util::WaitIndicator& ind, game::TechLevel area, int level)
 {
     static const char*const MESSAGES[] = {
         N_("To build this engine, you need tech %d."),

@@ -72,7 +72,7 @@ game::proxy::ConvertSuppliesProxy::ConvertSuppliesProxy(util::RequestSender<Sess
 { }
 
 game::proxy::ConvertSuppliesProxy::Status
-game::proxy::ConvertSuppliesProxy::init(WaitIndicator& link, Id_t planetId, int32_t reservedSupplies, int32_t reservedMoney)
+game::proxy::ConvertSuppliesProxy::init(util::WaitIndicator& link, Id_t planetId, int32_t reservedSupplies, int32_t reservedMoney)
 {
     class Task : public util::Request<Trampoline> {
      public:

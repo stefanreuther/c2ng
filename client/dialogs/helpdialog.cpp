@@ -33,7 +33,7 @@
 #include "ui/window.hpp"
 
 using afl::io::xml::Nodes_t;
-using game::proxy::WaitIndicator;
+using util::WaitIndicator;
 
 namespace {
     const char*const TOC_PAGE = "toc";
@@ -178,7 +178,7 @@ HelpDialog::run()
     keys.add(util::KeyMod_Alt + 'h',            this, &HelpDialog::onHelp);
     keys.add(util::Key_F1,                      this, &HelpDialog::onHelp);
     keys.add('g',                               this, &HelpDialog::onGoTo);
-                
+
     win.add(g1);
     win.add(g2);
     win.add(del.addNew(new ui::widgets::Quit(m_root, m_loop)));

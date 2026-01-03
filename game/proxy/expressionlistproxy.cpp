@@ -17,7 +17,7 @@ game::proxy::ExpressionListProxy::ExpressionListProxy(util::RequestSender<Sessio
 { }
 
 void
-game::proxy::ExpressionListProxy::getList(WaitIndicator& ind, game::config::ExpressionLists::Items_t& out)
+game::proxy::ExpressionListProxy::getList(util::WaitIndicator& ind, game::config::ExpressionLists::Items_t& out)
 {
     class Task : public util::Request<Session> {
      public:

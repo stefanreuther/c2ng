@@ -93,7 +93,7 @@ game::proxy::BuildStarbaseProxy::~BuildStarbaseProxy()
 { }
 
 void
-game::proxy::BuildStarbaseProxy::init(WaitIndicator& link, Id_t id, Status& status)
+game::proxy::BuildStarbaseProxy::init(util::WaitIndicator& link, Id_t id, Status& status)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -111,7 +111,7 @@ game::proxy::BuildStarbaseProxy::init(WaitIndicator& link, Id_t id, Status& stat
 }
 
 void
-game::proxy::BuildStarbaseProxy::commit(WaitIndicator& link)
+game::proxy::BuildStarbaseProxy::commit(util::WaitIndicator& link)
 {
     class Task : public util::Request<Trampoline> {
      public:

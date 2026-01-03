@@ -96,7 +96,7 @@ namespace {
 
 bool
 client::widgets::doExpressionListPopup(ui::Root& root,
-                                       game::proxy::WaitIndicator& ind,
+                                       util::WaitIndicator& ind,
                                        game::proxy::ExpressionListProxy& proxy,
                                        gfx::Point anchor,
                                        String_t& value,

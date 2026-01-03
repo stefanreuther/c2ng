@@ -31,7 +31,7 @@ namespace client { namespace dialogs {
         \param after  After fight? (parameter to VcrDatabaseProxy::addToSimulation)
         \param root   UI root
         \param tx     Translator */
-    void addToSimulation(game::proxy::WaitIndicator& ind, game::proxy::VcrDatabaseProxy& proxy, int hullNr, bool after, ui::Root& root, afl::string::Translator& tx);
+    void addToSimulation(util::WaitIndicator& ind, game::proxy::VcrDatabaseProxy& proxy, int hullNr, bool after, ui::Root& root, afl::string::Translator& tx);
 
 } }
 

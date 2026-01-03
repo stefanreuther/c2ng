@@ -11,11 +11,11 @@
 #include "game/actions/multitransfersetup.hpp"
 #include "game/cargocontainer.hpp"
 #include "game/element.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestsender.hpp"
 #include "util/vector.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -105,7 +105,7 @@ namespace game { namespace proxy {
             \return result
 
             \see game::actions::MultiTransferSetup::build() */
-        game::actions::MultiTransferSetup::Result init(WaitIndicator& link, const game::actions::MultiTransferSetup& setup);
+        game::actions::MultiTransferSetup::Result init(util::WaitIndicator& link, const game::actions::MultiTransferSetup& setup);
 
         /** Add new hold space.
             \param name Name
@@ -115,13 +115,13 @@ namespace game { namespace proxy {
         /** Get general information.
             \param link       WaitIndicator object for UI synchronisation
             \param info [out] Result */
-        void getGeneralInformation(WaitIndicator& link, General& info);
+        void getGeneralInformation(util::WaitIndicator& link, General& info);
 
         /** Get information about participant.
             \param link       WaitIndicator object for UI synchronisation
             \param side       Side to query (starting at 0)
             \param info [out] Result */
-        void getParticipantInformation(WaitIndicator& link, size_t side, Participant& info);
+        void getParticipantInformation(util::WaitIndicator& link, size_t side, Participant& info);
 
         /** Set overload permission.
             \param enable New value

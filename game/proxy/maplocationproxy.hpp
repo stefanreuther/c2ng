@@ -13,10 +13,9 @@
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Asynchronous, bidirectional proxy for map location.
         This accesses the Session > Game > game::map::Cursors > game::map::Location object.
@@ -63,7 +62,7 @@ namespace game { namespace proxy {
             \param [in]  shipId   Focus ship Id; can be 0
             \return alternate position if found
             \see game::map::Location::getOtherPosition() */
-        afl::base::Optional<game::map::Point> getOtherPosition(WaitIndicator& ind, game::Id_t shipId);
+        afl::base::Optional<game::map::Point> getOtherPosition(util::WaitIndicator& ind, game::Id_t shipId);
 
         /** Location callback.
             Called in response to postQueryLocation().

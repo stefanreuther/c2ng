@@ -7,10 +7,10 @@
 
 #include "afl/base/signal.hpp"
 #include "game/interface/processlisteditor.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -47,7 +47,7 @@ namespace game { namespace proxy {
         /** Initialize and retrieve initial process list.
             \param link         WaitIndicator object for UI synchronisation
             \param result [out] Result */
-        void init(WaitIndicator& link, Infos_t& result);
+        void init(util::WaitIndicator& link, Infos_t& result);
 
         /** Prepare a state change.
             The change will be executed when commit() is called.
@@ -78,7 +78,7 @@ namespace game { namespace proxy {
             Caller needs to run that process group.
             \param link WaitIndicator object for UI synchronisation
             \return process group Id */
-        uint32_t commit(WaitIndicator& link);
+        uint32_t commit(util::WaitIndicator& link);
 
         /** Signal: updated process list. */
         afl::base::Signal<void(const Infos_t&)> sig_listChange;

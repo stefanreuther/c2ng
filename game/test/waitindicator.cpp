@@ -9,7 +9,7 @@
 
 game::test::WaitIndicator::WaitIndicator()
     : util::RequestDispatcher(),
-      game::proxy::WaitIndicator(static_cast<RequestDispatcher&>(*this)),
+      util::WaitIndicator(static_cast<RequestDispatcher&>(*this)),
       m_mutex(),
       m_resultSemaphore(0),
       m_result(false),

@@ -7,10 +7,10 @@
 
 #include <vector>
 #include "afl/string/string.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/reference.hpp"
 #include "game/session.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -65,7 +65,7 @@ namespace game { namespace proxy {
             \param link      WaitIndicator object for UI synchronisation
             \param out [out] List of commands
             \param metaOut [out] Metadata */
-        bool init(WaitIndicator& link, Infos_t& out, MetaInfo& metaOut);
+        bool init(util::WaitIndicator& link, Infos_t& out, MetaInfo& metaOut);
 
         /** Add a command.
             \param link          WaitIndicator object for UI synchronisation
@@ -75,14 +75,14 @@ namespace game { namespace proxy {
             \retval true Success
             \retval false Command not accepted, out parameters not updated
             \see game::v3::CommandContainer::addNewCommand, game::v3::Command::parseCommand */
-        bool addCommand(WaitIndicator& link, const String_t& cmd, Infos_t& newList, size_t& newPos);
+        bool addCommand(util::WaitIndicator& link, const String_t& cmd, Infos_t& newList, size_t& newPos);
 
         /** Remove a command.
             \param link          WaitIndicator object for UI synchronisation
             \param cmd     [in]  Command to remove; should be taken from a previous command list
             \param newList [out] Updated list of commands
             \see game::v3::CommandContainer::removeCommand */
-        void removeCommand(WaitIndicator& link, const String_t& cmd, Infos_t& newList);
+        void removeCommand(util::WaitIndicator& link, const String_t& cmd, Infos_t& newList);
 
      private:
         util::RequestSender<Session> m_gameSender;

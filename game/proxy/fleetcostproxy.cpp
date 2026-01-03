@@ -61,7 +61,7 @@ game::proxy::FleetCostProxy::setOptions(const game::sim::FleetCostOptions& opts)
 }
 
 void
-game::proxy::FleetCostProxy::getOptions(WaitIndicator& ind, game::sim::FleetCostOptions& opts)
+game::proxy::FleetCostProxy::getOptions(util::WaitIndicator& ind, game::sim::FleetCostOptions& opts)
 {
     // FIXME: should persist the configuration somehow
     (void) ind;
@@ -69,7 +69,7 @@ game::proxy::FleetCostProxy::getOptions(WaitIndicator& ind, game::sim::FleetCost
 }
 
 void
-game::proxy::FleetCostProxy::computeFleetCosts(WaitIndicator& ind, PlayerSet_t players, bool isTeam, game::spec::CostSummary& out)
+game::proxy::FleetCostProxy::computeFleetCosts(util::WaitIndicator& ind, PlayerSet_t players, bool isTeam, game::spec::CostSummary& out)
 {
     class Task : public util::Request<SimulationAdaptor> {
      public:
@@ -90,7 +90,7 @@ game::proxy::FleetCostProxy::computeFleetCosts(WaitIndicator& ind, PlayerSet_t p
 }
 
 game::PlayerSet_t
-game::proxy::FleetCostProxy::getInvolvedPlayers(WaitIndicator& ind)
+game::proxy::FleetCostProxy::getInvolvedPlayers(util::WaitIndicator& ind)
 {
     class Task : public util::Request<SimulationAdaptor> {
      public:
@@ -111,7 +111,7 @@ game::proxy::FleetCostProxy::getInvolvedPlayers(WaitIndicator& ind)
 }
 
 game::PlayerSet_t
-game::proxy::FleetCostProxy::getInvolvedTeams(WaitIndicator& ind)
+game::proxy::FleetCostProxy::getInvolvedTeams(util::WaitIndicator& ind)
 {
     class Task : public util::Request<SimulationAdaptor> {
      public:

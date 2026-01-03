@@ -150,7 +150,7 @@ game::proxy::ShipSpeedProxy::~ShipSpeedProxy()
 { }
 
 game::proxy::ShipSpeedProxy::Status
-game::proxy::ShipSpeedProxy::getStatus(WaitIndicator& link)
+game::proxy::ShipSpeedProxy::getStatus(util::WaitIndicator& link)
 {
     class InitTask : public util::Request<Trampoline> {
      public:

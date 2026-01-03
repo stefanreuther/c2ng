@@ -7,7 +7,6 @@
 
 #include <memory>
 #include "afl/base/signal.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/ref/configuration.hpp"
 #include "game/ref/listobserver.hpp"
 #include "game/ref/userlist.hpp"
@@ -15,6 +14,7 @@
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -67,12 +67,12 @@ namespace game { namespace proxy {
         /** Wait until idle.
             Waits until isIdle() returns true.
             \param link WaitIndicator */
-        void waitIdle(WaitIndicator& link);
+        void waitIdle(util::WaitIndicator& link);
 
         /** Get configuration.
             \param link WaitIndicator
             \return effective configuration as determined by setConfigurationSelection */
-        game::ref::Configuration getConfig(WaitIndicator& link);
+        game::ref::Configuration getConfig(util::WaitIndicator& link);
 
         /** Set configuration.
             Updates the configuration in UserConfiguration and updates the list.

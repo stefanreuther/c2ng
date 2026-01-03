@@ -6,11 +6,11 @@
 #define C2NG_GAME_PROXY_KEYMAPPROXY_HPP
 
 #include "afl/base/signalconnection.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "util/keymap.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -75,13 +75,13 @@ namespace game { namespace proxy {
         /** Get description of the current keymap.
             \param link WaitIndicator
             \param out [out] Result will be produced here. Empty if keymap is not set or undefined. */
-        void getDescription(WaitIndicator& link, util::KeymapInformation& out);
+        void getDescription(util::WaitIndicator& link, util::KeymapInformation& out);
 
         /** Get description of a key.
             \param link WaitIndicator
             \param key Key
             \param result [out] Result will be produced here. Unassigned if keymap is not set or undefined. */
-        void getKey(WaitIndicator& link, util::Key_t key, Info& result);
+        void getKey(util::WaitIndicator& link, util::Key_t key, Info& result);
 
      private:
         util::RequestReceiver<KeymapProxy> m_reply;

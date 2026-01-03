@@ -11,10 +11,9 @@
 #include "game/session.hpp"
 #include "game/spec/costsummary.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Ship list proxy.
         Provides ability to retrieve a list of ships, intended for the "visual scan" function.
@@ -44,7 +43,7 @@ namespace game { namespace proxy {
             @param excludeShip  Do not include this ship Id even if it is otherwise eligible (0=exclude none)
 
             @see game::ref::List::addObjectsAt() */
-        void buildCurrent(WaitIndicator& ind, game::map::Point pos, game::ref::List::Options_t options, Id_t excludeShip);
+        void buildCurrent(util::WaitIndicator& ind, game::map::Point pos, game::ref::List::Options_t options, Id_t excludeShip);
 
         /** Build list of ships according to prediction.
             Computes next-turn ship positions, starting at viewpoint turn, and lists all ships at a position.
@@ -53,14 +52,14 @@ namespace game { namespace proxy {
             @param pos          Position
             @param fromShip     If a valid ship Id, list ships at this ship's next position instead of @c pos
             @param options      Options (IncludeForeignShips, SafeShipsOnly) */
-        void buildNext(WaitIndicator& ind, game::map::Point pos, Id_t fromShip, game::ref::List::Options_t options);
+        void buildNext(util::WaitIndicator& ind, game::map::Point pos, Id_t fromShip, game::ref::List::Options_t options);
 
         /** Get cargo summary.
             If list was loaded using buildCurrent(), builds a list of current ship's cargo.
             If list was loaded using buildNext(), builds a list of predicted ship's next-turn cargo.
             @param ind WaitIndicator for UI synchronisation
             @return cargo summary */
-        game::spec::CostSummary getCargoSummary(WaitIndicator& ind);
+        game::spec::CostSummary getCargoSummary(util::WaitIndicator& ind);
 
         /** Get list.
             @return cached list from previous build() call */

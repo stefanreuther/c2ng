@@ -13,10 +13,9 @@
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Asynchronous, two-way proxy for resolving search queries.
         Submit a search query using search().
@@ -35,7 +34,7 @@ namespace game { namespace proxy {
             \param ind WaitIndicator for UI synchronisation
             \return saved search query
             \see savedQuery() */
-        SearchQuery getSavedQuery(WaitIndicator& ind);
+        SearchQuery getSavedQuery(util::WaitIndicator& ind);
 
         /** Submit a search query.
             The search query is executed asynchronously on the game thread.

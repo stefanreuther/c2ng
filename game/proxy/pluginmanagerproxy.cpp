@@ -6,7 +6,6 @@
 #include "game/proxy/pluginmanagerproxy.hpp"
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/string/format.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "util/io.hpp"
 
 using afl::string::Format;
@@ -326,7 +325,7 @@ game::proxy::PluginManagerProxy::requestDetails(const String_t& id)
 
 // Prepare installation.
 game::proxy::PluginManagerProxy::InstallInfo
-game::proxy::PluginManagerProxy::prepareInstall(WaitIndicator& ind, const String_t& fileName)
+game::proxy::PluginManagerProxy::prepareInstall(util::WaitIndicator& ind, const String_t& fileName)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -348,7 +347,7 @@ game::proxy::PluginManagerProxy::prepareInstall(WaitIndicator& ind, const String
 
 // Perform installation.
 game::proxy::PluginManagerProxy::InstallResult
-game::proxy::PluginManagerProxy::doInstall(WaitIndicator& ind)
+game::proxy::PluginManagerProxy::doInstall(util::WaitIndicator& ind)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -369,7 +368,7 @@ game::proxy::PluginManagerProxy::doInstall(WaitIndicator& ind)
 
 // Prepare uninstallation.
 game::proxy::PluginManagerProxy::RemoveResult
-game::proxy::PluginManagerProxy::prepareRemove(WaitIndicator& ind, const String_t& id)
+game::proxy::PluginManagerProxy::prepareRemove(util::WaitIndicator& ind, const String_t& id)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -391,7 +390,7 @@ game::proxy::PluginManagerProxy::prepareRemove(WaitIndicator& ind, const String_
 
 // Perform uninstallation.
 game::proxy::PluginManagerProxy::RemoveResult
-game::proxy::PluginManagerProxy::doRemove(WaitIndicator& ind, const String_t& id)
+game::proxy::PluginManagerProxy::doRemove(util::WaitIndicator& ind, const String_t& id)
 {
     class Task : public util::Request<Trampoline> {
      public:

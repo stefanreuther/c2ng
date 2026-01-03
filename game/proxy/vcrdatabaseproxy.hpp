@@ -14,6 +14,7 @@
 #include "game/proxy/vcrdatabaseadaptor.hpp"
 #include "game/reference.hpp"
 #include "game/root.hpp"
+#include "game/shipquery.hpp"
 #include "game/spec/info/picturenamer.hpp"
 #include "game/spec/shiplist.hpp"
 #include "game/teamsettings.hpp"
@@ -24,11 +25,9 @@
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
 #include "util/stringlist.hpp"
-#include "game/shipquery.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Bidirectional proxy for VCR database access.
         Proxies access to a game::vcr::Database.
@@ -116,19 +115,19 @@ namespace game { namespace proxy {
             Retrieves number of battles and last position.
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [out] status Status */
-        void getStatus(WaitIndicator& ind, Status& status);
+        void getStatus(util::WaitIndicator& ind, Status& status);
 
         /** Get TeamSettings.
             If the VcrDatabaseAdaptor knows about a TeamSettings object, returns a copy of that.
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [out] teams  TeamSettings */
-        void getTeamSettings(WaitIndicator& ind, TeamSettings& teams);
+        void getTeamSettings(util::WaitIndicator& ind, TeamSettings& teams);
 
         /** Get player names.
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [in]  which  Name to query
             \return Array of player names */
-        PlayerArray<String_t> getPlayerNames(WaitIndicator& ind, Player::Name which);
+        PlayerArray<String_t> getPlayerNames(util::WaitIndicator& ind, Player::Name which);
 
         /** Set current battle.
             Replies with one or more sig_update calls.
@@ -156,7 +155,7 @@ namespace game { namespace proxy {
             \param hullType Hull type; see setHullType
             \param after    true: after fight; false: before fight
             \return status */
-        AddResult addToSimulation(WaitIndicator& ind, int hullType, bool after);
+        AddResult addToSimulation(util::WaitIndicator& ind, int hullType, bool after);
 
         /** Save battles to file.
             \param [in]  ind      WaitIndicator
@@ -165,7 +164,7 @@ namespace game { namespace proxy {
             \param [in]  num      Number of battles to save
             \param [out] errorMessage Error message
             \return true on success, false on error */
-        bool save(WaitIndicator& ind, String_t fileName, size_t first, size_t num, String_t& errorMessage);
+        bool save(util::WaitIndicator& ind, String_t fileName, size_t first, size_t num, String_t& errorMessage);
 
         /** Signal: data update.
             \param index Battle index

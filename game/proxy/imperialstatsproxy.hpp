@@ -13,10 +13,9 @@
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
 #include "util/stringlist.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Imperial Statistic Proxy.
 
@@ -62,7 +61,7 @@ namespace game { namespace proxy {
             @param [in]  fileName Output file name
             @param [out] errorMessage Error message
             @return true on success; false on error (error message will be set) */
-        bool savePageAsHTML(WaitIndicator& ind, game::map::info::Page page, String_t fileName, String_t& errorMessage);
+        bool savePageAsHTML(util::WaitIndicator& ind, game::map::info::Page page, String_t fileName, String_t& errorMessage);
 
         /** Signal: update of page content.
             Sent in response to requestPageContent().

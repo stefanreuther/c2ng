@@ -301,7 +301,7 @@ client::dialogs::MessageEditor::onReadMessage()
 }
 
 void
-client::dialogs::MessageEditor::updateContent(game::proxy::WaitIndicator& ind)
+client::dialogs::MessageEditor::updateContent(util::WaitIndicator& ind)
 {
     // ex WEditMessageWindow::setReceivers (part)
     String_t newHeader = m_proxy.getHeadersForDisplay(ind, m_sender, m_receivers);

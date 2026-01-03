@@ -8,7 +8,6 @@
 #include "afl/string/format.hpp"
 #include "afl/string/translator.hpp"
 #include "game/interface/referencelistcontext.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "interpreter/process.hpp"
 
 namespace {
@@ -140,7 +139,7 @@ game::proxy::SearchProxy::SearchProxy(util::RequestSender<Session> gameSender, u
 { }
 
 game::SearchQuery
-game::proxy::SearchProxy::getSavedQuery(WaitIndicator& ind)
+game::proxy::SearchProxy::getSavedQuery(util::WaitIndicator& ind)
 {
     class Task : public util::Request<Session> {
      public:

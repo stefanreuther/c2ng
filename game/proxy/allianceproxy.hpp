@@ -10,10 +10,9 @@
 #include "game/playerset.hpp"
 #include "game/session.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Alliance proxy.
         Allows retrieving and updating alliance information.
@@ -50,7 +49,7 @@ namespace game { namespace proxy {
         /** Get status (initialize).
             @param ind WaitIndicator for UI synchronisation
             @return status */
-        Status getStatus(WaitIndicator& ind);
+        Status getStatus(util::WaitIndicator& ind);
 
         /** Update alliances.
             Updates the game from the given alliance container.

@@ -219,7 +219,7 @@ namespace {
      public:
         SearchDialog(const SearchQuery& initialQuery, game::Reference currentObject, game::ref::List& result, client::si::UserSide& iface, util::NumberFormatter fmt, client::si::OutputState& out, bool isSubDialog);
 
-        void loadQuery(game::proxy::WaitIndicator& ind);
+        void loadQuery(util::WaitIndicator& ind);
         int run(bool immediate);
 
         virtual void handleStateChange(client::si::RequestLink2 link, client::si::OutputState::Target target);
@@ -355,7 +355,7 @@ SearchDialog::SearchDialog(const SearchQuery& initialQuery, game::Reference curr
 }
 
 void
-SearchDialog::loadQuery(game::proxy::WaitIndicator& ind)
+SearchDialog::loadQuery(util::WaitIndicator& ind)
 {
     m_query = m_searchProxy.getSavedQuery(ind);
 }

@@ -7,7 +7,6 @@
 #include "afl/data/integervalue.hpp"
 #include "game/game.hpp"
 #include "game/map/movementpredictor.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/turn.hpp"
 
 using afl::data::IntegerValue;
@@ -102,7 +101,7 @@ game::proxy::ListProxy::~ListProxy()
 { }
 
 void
-game::proxy::ListProxy::buildCurrent(WaitIndicator& ind, game::map::Point pos, game::ref::List::Options_t options, Id_t excludeShip)
+game::proxy::ListProxy::buildCurrent(util::WaitIndicator& ind, game::map::Point pos, game::ref::List::Options_t options, Id_t excludeShip)
 {
     class ListBuilder : public util::Request<Session> {
      public:
@@ -149,7 +148,7 @@ game::proxy::ListProxy::buildCurrent(WaitIndicator& ind, game::map::Point pos, g
 }
 
 void
-game::proxy::ListProxy::buildNext(WaitIndicator& ind, game::map::Point pos, Id_t fromShip, game::ref::List::Options_t options)
+game::proxy::ListProxy::buildNext(util::WaitIndicator& ind, game::map::Point pos, Id_t fromShip, game::ref::List::Options_t options)
 {
     class NextBuilder : public util::Request<game::Session> {
      public:
@@ -242,7 +241,7 @@ game::proxy::ListProxy::buildNext(WaitIndicator& ind, game::map::Point pos, Id_t
 }
 
 game::spec::CostSummary
-game::proxy::ListProxy::getCargoSummary(WaitIndicator& ind)
+game::proxy::ListProxy::getCargoSummary(util::WaitIndicator& ind)
 {
     class Task : public util::Request<Session> {
      public:

@@ -1,19 +1,19 @@
 /**
-  *  \file game/proxy/waitindicator.hpp
-  *  \brief Class game::proxy::WaitIndicator
+  *  \file util/waitindicator.hpp
+  *  \brief Class util::WaitIndicator
   */
-#ifndef C2NG_GAME_PROXY_WAITINDICATOR_HPP
-#define C2NG_GAME_PROXY_WAITINDICATOR_HPP
+#ifndef C2NG_UTIL_WAITINDICATOR_HPP
+#define C2NG_UTIL_WAITINDICATOR_HPP
 
 #include "util/request.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
 
-namespace game { namespace proxy {
+namespace util {
 
     /** Helper for calling "down" into a proxy from a UI thread.
-        If a UI component needs information from the game/browser session (background thread),
+        If a UI component needs information from a background thread,
         it can use a WaitIndicator to quasi-synchronously communicate with it.
 
         The WaitIndicator interface allows proxy implementations to signal the wait situation,
@@ -33,7 +33,7 @@ namespace game { namespace proxy {
      public:
         /** Constructor.
             \param disp RequestDispatcher to dispatch into this thread */
-        explicit WaitIndicator(util::RequestDispatcher& disp);
+        explicit WaitIndicator(RequestDispatcher& disp);
 
         /** Destructor. */
         virtual ~WaitIndicator();
@@ -50,7 +50,7 @@ namespace game { namespace proxy {
             \param req Request to execute
             \return true if request was executed, false if request could not be executed (other end died, or recursion). */
         template<typename T>
-        bool call(util::RequestSender<T> sender, util::Request<T>& req);
+        bool call(RequestSender<T> sender, Request<T>& req);
 
         /** Release this thread.
             Upon completion of the task given to the target object,
@@ -72,9 +72,9 @@ namespace game { namespace proxy {
             RequestSender requires a newly-allocated request whose lifetime it controls.
             The Request we get has lifetime controlled by the user, and requires confirmation. */
         template<typename T>
-        class RequestWrapper : public util::Request<T> {
+        class RequestWrapper : public Request<T> {
          public:
-            RequestWrapper(util::Request<T>& req, WaitIndicator& link)
+            RequestWrapper(Request<T>& req, WaitIndicator& link)
                 : m_request(req), m_confirm(link.m_receiver.getSender()), m_success(false)
                 { }
             ~RequestWrapper()
@@ -82,21 +82,21 @@ namespace game { namespace proxy {
             void handle(T& t)
                 { m_request.handle(t); m_success = true; }
          private:
-            util::Request<T>& m_request;
-            util::RequestSender<WaitIndicator> m_confirm;
+            Request<T>& m_request;
+            RequestSender<WaitIndicator> m_confirm;
             bool m_success;
         };
 
-        util::RequestReceiver<WaitIndicator> m_receiver;
+        RequestReceiver<WaitIndicator> m_receiver;
 
-        static void confirm(util::RequestSender<WaitIndicator>& sender, bool success);
+        static void confirm(RequestSender<WaitIndicator>& sender, bool success);
     };
 
-} }
+}
 
 template<typename T>
 bool
-game::proxy::WaitIndicator::call(util::RequestSender<T> sender, util::Request<T>& req)
+util::WaitIndicator::call(RequestSender<T> sender, Request<T>& req)
 {
     sender.postNewRequest(new RequestWrapper<T>(req, *this));
     return this->wait();

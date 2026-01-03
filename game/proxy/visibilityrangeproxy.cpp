@@ -13,7 +13,7 @@ game::proxy::VisibilityRangeProxy::VisibilityRangeProxy(util::RequestSender<Sess
 { }
 
 game::map::VisConfig
-game::proxy::VisibilityRangeProxy::loadVisibilityConfiguration(WaitIndicator& ind)
+game::proxy::VisibilityRangeProxy::loadVisibilityConfiguration(util::WaitIndicator& ind)
 {
     class Task : public util::Request<Session> {
      public:
@@ -39,7 +39,7 @@ game::proxy::VisibilityRangeProxy::loadVisibilityConfiguration(WaitIndicator& in
 }
 
 game::map::VisSettings_t
-game::proxy::VisibilityRangeProxy::getVisibilityRangeSettings(WaitIndicator& ind)
+game::proxy::VisibilityRangeProxy::getVisibilityRangeSettings(util::WaitIndicator& ind)
 {
     class Task : public util::Request<Session> {
      public:
@@ -67,7 +67,7 @@ game::proxy::VisibilityRangeProxy::getVisibilityRangeSettings(WaitIndicator& ind
 }
 
 std::auto_ptr<game::map::RangeSet>
-game::proxy::VisibilityRangeProxy::buildVisibilityRange(WaitIndicator& ind, const game::map::VisConfig& vc)
+game::proxy::VisibilityRangeProxy::buildVisibilityRange(util::WaitIndicator& ind, const game::map::VisConfig& vc)
 {
     class Task : public util::Request<Session> {
      public:

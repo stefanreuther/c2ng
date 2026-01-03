@@ -1,21 +1,21 @@
 /**
-  *  \file client/widgets/filelistbox.cpp
+  *  \file ui/widgets/filelistbox.cpp
+  *  \brief Class ui::widgets::FileListbox
   *
   *  FIXME: this widget is very similar to FolderListbox.
   *  - FileListbox: supports multiple columns which we really want for file requesters
   *  - FolderListbox: supports just one column but implements the regular AbstractListbox interface
   */
 
+#include "ui/widgets/filelistbox.hpp"
+
 #include <algorithm>
-#include "client/widgets/filelistbox.hpp"
 #include "gfx/complex.hpp"
 #include "gfx/context.hpp"
 #include "ui/draw.hpp"
 #include "ui/widgets/abstractlistbox.hpp"
 
-using ui::widgets::AbstractListbox;
-
-client::widgets::FileListbox::FileListbox(int columns, int lines, ui::Root& root)
+ui::widgets::FileListbox::FileListbox(int columns, int lines, ui::Root& root)
     : ScrollableWidget(),
       m_root(root),
       m_columns(columns),
@@ -30,12 +30,12 @@ client::widgets::FileListbox::FileListbox(int columns, int lines, ui::Root& root
       conn_imageChange(root.provider().sig_imageChange.add(this, &FileListbox::onImageChange))
 { }
 
-client::widgets::FileListbox::~FileListbox()
+ui::widgets::FileListbox::~FileListbox()
 { }
 
 // FileListbox:
 void
-client::widgets::FileListbox::swapItems(Items_t& items)
+ui::widgets::FileListbox::swapItems(Items_t& items)
 {
     m_items.swap(items);
     m_currentItem = 0;
@@ -44,8 +44,8 @@ client::widgets::FileListbox::swapItems(Items_t& items)
     requestRedraw();
 }
 
-const client::widgets::FileListbox::Item*
-client::widgets::FileListbox::getItem(size_t n)
+const ui::widgets::FileListbox::Item*
+ui::widgets::FileListbox::getItem(size_t n)
 {
     if (n < m_items.size()) {
         return &m_items[n];
@@ -55,7 +55,7 @@ client::widgets::FileListbox::getItem(size_t n)
 }
 
 void
-client::widgets::FileListbox::setCurrentIndex(size_t n)
+ui::widgets::FileListbox::setCurrentIndex(size_t n)
 {
     if (/*n >= 0 &&*/ n < m_items.size() && n != m_currentItem) {
         m_currentItem = n;
@@ -66,32 +66,32 @@ client::widgets::FileListbox::setCurrentIndex(size_t n)
 }
 
 size_t
-client::widgets::FileListbox::getCurrentItem() const
+ui::widgets::FileListbox::getCurrentItem() const
 {
     return m_currentItem;
 }
 
 // ScrollableWidget:
 int
-client::widgets::FileListbox::getPageTop() const
+ui::widgets::FileListbox::getPageTop() const
 {
     return int(m_firstItem);
 }
 
 int
-client::widgets::FileListbox::getPageSize() const
+ui::widgets::FileListbox::getPageSize() const
 {
     return m_currentColumns * m_currentLines;
 }
 
 int
-client::widgets::FileListbox::getTotalSize() const
+ui::widgets::FileListbox::getTotalSize() const
 {
     return int(m_items.size());
 }
 
 void
-client::widgets::FileListbox::setPageTop(int top)
+ui::widgets::FileListbox::setPageTop(int top)
 {
     if (top >= 0 && top < getTotalSize()) {
         size_t t = size_t(top);
@@ -105,7 +105,7 @@ client::widgets::FileListbox::setPageTop(int top)
 }
 
 void
-client::widgets::FileListbox::scroll(Operation op)
+ui::widgets::FileListbox::scroll(Operation op)
 {
     switch (op) {
      case LineUp:   scrollUp(1);                                           break;
@@ -117,7 +117,7 @@ client::widgets::FileListbox::scroll(Operation op)
 
 // Widget:
 void
-client::widgets::FileListbox::draw(gfx::Canvas& can)
+ui::widgets::FileListbox::draw(gfx::Canvas& can)
 {
     // ex UIFileChooser::drawContent
     // Trigger image loading
@@ -185,7 +185,7 @@ client::widgets::FileListbox::draw(gfx::Canvas& can)
 }
 
 void
-client::widgets::FileListbox::handleStateChange(State st, bool /*enable*/)
+ui::widgets::FileListbox::handleStateChange(State st, bool /*enable*/)
 {
     // ex UIFileChooser::onStateChange
     if (st == FocusedState) {
@@ -194,14 +194,14 @@ client::widgets::FileListbox::handleStateChange(State st, bool /*enable*/)
 }
 
 void
-client::widgets::FileListbox::handlePositionChange()
+ui::widgets::FileListbox::handlePositionChange()
 {
     // ex UIFileChooser::onResize
     updateSize();
 }
 
 ui::layout::Info
-client::widgets::FileListbox::getLayoutInfo() const
+ui::widgets::FileListbox::getLayoutInfo() const
 {
     // ex UIFileChooser::getLayoutInfo
     gfx::Point size = getPreferredCellSize().scaledBy(m_columns, m_lines);
@@ -209,7 +209,7 @@ client::widgets::FileListbox::getLayoutInfo() const
 }
 
 bool
-client::widgets::FileListbox::handleKey(util::Key_t key, int /*prefix*/)
+ui::widgets::FileListbox::handleKey(util::Key_t key, int /*prefix*/)
 {
     // FIXME: handle prefix?
     if (hasState(FocusedState) && !hasState(DisabledState)) {
@@ -256,7 +256,7 @@ client::widgets::FileListbox::handleKey(util::Key_t key, int /*prefix*/)
 }
 
 bool
-client::widgets::FileListbox::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
+ui::widgets::FileListbox::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
 {
     // FIXME: AbstractListbox manages m_mouseDown.
     const int lineHeight = m_root.provider().getFont(gfx::FontRequest())->getCellSize().getY();
@@ -282,13 +282,13 @@ client::widgets::FileListbox::handleMouse(gfx::Point pt, MouseButtons_t pressedB
 }
 
 gfx::Point
-client::widgets::FileListbox::getPreferredCellSize() const
+ui::widgets::FileListbox::getPreferredCellSize() const
 {
     return m_root.provider().getFont(gfx::FontRequest())->getCellSize().scaledBy(15, 1);
 }
 
 void
-client::widgets::FileListbox::onImageChange()
+ui::widgets::FileListbox::onImageChange()
 {
     if (m_icons.get() == 0) {
         m_icons = m_root.provider().getImage("files");
@@ -299,7 +299,7 @@ client::widgets::FileListbox::onImageChange()
 }
 
 void
-client::widgets::FileListbox::updateSize()
+ui::widgets::FileListbox::updateSize()
 {
     // ex UIFileChooser::updateSize
     gfx::Point prefSize = getPreferredCellSize();
@@ -322,7 +322,7 @@ client::widgets::FileListbox::updateSize()
 }
 
 void
-client::widgets::FileListbox::updatePageTop()
+ui::widgets::FileListbox::updatePageTop()
 {
     if (m_currentItem < m_firstItem) {
         m_firstItem = m_currentItem;
@@ -335,7 +335,7 @@ client::widgets::FileListbox::updatePageTop()
 }
 
 void
-client::widgets::FileListbox::updateCurrentItem()
+ui::widgets::FileListbox::updateCurrentItem()
 {
     if (m_currentItem < m_firstItem) {
         m_currentItem = m_firstItem;
@@ -348,13 +348,13 @@ client::widgets::FileListbox::updateCurrentItem()
 }
 
 void
-client::widgets::FileListbox::scrollUp(size_t amount)
+ui::widgets::FileListbox::scrollUp(size_t amount)
 {
     setCurrentIndex(m_currentItem - std::min(m_currentItem, amount));
 }
 
 void
-client::widgets::FileListbox::scrollDown(size_t amount)
+ui::widgets::FileListbox::scrollDown(size_t amount)
 {
     if (!m_items.empty()) {
         setCurrentIndex(m_currentItem + std::min(m_items.size() - m_currentItem - 1, amount));

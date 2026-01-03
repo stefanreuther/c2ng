@@ -8,11 +8,11 @@
 #include "afl/base/signal.hpp"
 #include "afl/data/stringlist.hpp"
 #include "game/proxy/exportadaptor.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "interpreter/exporter/configuration.hpp"
 #include "interpreter/exporter/fieldlist.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -56,7 +56,7 @@ namespace game { namespace proxy {
             Retrieves the current configuration.
             @param [in]  ind     WaitIndicator for UI synchronisation
             @param [out] config  Configuration */
-        void getStatus(WaitIndicator& ind, interpreter::exporter::Configuration& config);
+        void getStatus(util::WaitIndicator& ind, interpreter::exporter::Configuration& config);
 
         /** Set character set by index.
             Will eventually generate a sig_change with the new configuration.
@@ -77,7 +77,7 @@ namespace game { namespace proxy {
             @param [out] errorMessage  Error message
             @return true on success, false on error (message set)
             @see interpreter::exporter::Configuration::load() */
-        bool load(WaitIndicator& ind, String_t fileName, String_t& errorMessage);
+        bool load(util::WaitIndicator& ind, String_t fileName, String_t& errorMessage);
 
         /** Save configuration to file.
             @param [in]  ind           WaitIndicator for UI synchronisation
@@ -85,7 +85,7 @@ namespace game { namespace proxy {
             @param [out] errorMessage  Error message
             @return true on success, false on error (message set)
             @see interpreter::exporter::Configuration::save() */
-        bool save(WaitIndicator& ind, String_t fileName, String_t& errorMessage);
+        bool save(util::WaitIndicator& ind, String_t fileName, String_t& errorMessage);
 
         /** Perform export into a file.
             @param [in]  ind           WaitIndicator for UI synchronisation
@@ -93,7 +93,7 @@ namespace game { namespace proxy {
             @param [out] errorMessage  Error message
             @return true on success, false on error (message set)
             @see interpreter::exporter::Configuration::exportFile() */
-        bool exportFile(WaitIndicator& ind, String_t fileName, String_t& errorMessage);
+        bool exportFile(util::WaitIndicator& ind, String_t fileName, String_t& errorMessage);
 
 
         /*
@@ -164,7 +164,7 @@ namespace game { namespace proxy {
         /** Retrieve list of properties.
             @param [in]  ind WaitIndicator
             @param [out] out Result */
-        void enumProperties(WaitIndicator& ind, afl::data::StringList_t& out);
+        void enumProperties(util::WaitIndicator& ind, afl::data::StringList_t& out);
 
 
         /** Signal: configuration change.
@@ -179,7 +179,7 @@ namespace game { namespace proxy {
         util::RequestSender<Trampoline> m_sender;
 
         typedef bool (Trampoline::*FileFunction_t)(String_t, String_t&);
-        bool callFileFunction(WaitIndicator& ind, String_t fileName, String_t& errorMessage, FileFunction_t fcn);
+        bool callFileFunction(util::WaitIndicator& ind, String_t fileName, String_t& errorMessage, FileFunction_t fcn);
     };
 
 } }

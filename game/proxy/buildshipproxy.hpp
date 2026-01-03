@@ -19,10 +19,9 @@
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Bidirectional proxy for ship building.
         Proxies a game::actions::BuildShip and some related functions.
@@ -94,25 +93,25 @@ namespace game { namespace proxy {
         /** Get status, synchronously.
             \param [in,out] ind    WaitIndicator for UI synchronisation
             \param [out]    result Result */
-        void getStatus(WaitIndicator& ind, Status& result);
+        void getStatus(util::WaitIndicator& ind, Status& result);
 
         /** Get cost summary, synchronously.
             \param [in,out] ind    WaitIndicator for UI synchronisation
             \param [out]    result Result, containing cost breakdown in human-readable form  */
-        void getCostSummary(WaitIndicator& ind, game::spec::CostSummary& result);
+        void getCostSummary(util::WaitIndicator& ind, game::spec::CostSummary& result);
 
         /** Get order as ShipQuery object.
             \param [in,out] ind    WaitIndicator for UI synchronisation
             \return ShipQuery object
             \see game::actions::BuildShip::getQuery */
-        ShipQuery getQuery(WaitIndicator& ind);
+        ShipQuery getQuery(util::WaitIndicator& ind);
 
         /** Get order as script command.
             \param [in,out] ind    WaitIndicator for UI synchronisation
             \param [in]     verb   Command verb to use
             \return command
             \see game::ShipBuildOrder::toScriptCommand */
-        String_t toScriptCommand(WaitIndicator& ind, String_t verb);
+        String_t toScriptCommand(util::WaitIndicator& ind, String_t verb);
 
         /** Find ship cloning at this planet.
             \param [in,out] ind    WaitIndicator for UI synchronisation
@@ -121,7 +120,7 @@ namespace game { namespace proxy {
             \retval true  Found a ship; id/name updated
             \retval false No cloning ship found
             \see game::map::Universe::findShipCloningAt */
-        bool findShipCloningHere(WaitIndicator& ind, Id_t& id, String_t& name);
+        bool findShipCloningHere(util::WaitIndicator& ind, Id_t& id, String_t& name);
 
         /** Cancel all clone orders at this planet.
             The operation is processed asynchronously.

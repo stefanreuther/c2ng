@@ -126,7 +126,7 @@ game::proxy::ReferenceListProxy::isIdle() const
 }
 
 void
-game::proxy::ReferenceListProxy::waitIdle(WaitIndicator& link)
+game::proxy::ReferenceListProxy::waitIdle(util::WaitIndicator& link)
 {
     class Request : public util::Request<Observer> {
      public:
@@ -139,7 +139,7 @@ game::proxy::ReferenceListProxy::waitIdle(WaitIndicator& link)
 
 
 game::ref::Configuration
-game::proxy::ReferenceListProxy::getConfig(WaitIndicator& link)
+game::proxy::ReferenceListProxy::getConfig(util::WaitIndicator& link)
 {
     class Request : public util::Request<Observer> {
      public:

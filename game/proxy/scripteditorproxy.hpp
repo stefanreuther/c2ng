@@ -10,10 +10,9 @@
 #include "game/interface/propertylist.hpp"
 #include "game/session.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Proxy for context-dependant script-editing tasks.
         Provides bidirectional, synchronous, stateless access.
@@ -34,7 +33,7 @@ namespace game { namespace proxy {
             @param [in]     ctxp          ContextProvider; can be null (output will only include global names, file names).
 
             @see game::interface::buildCompletionList() */
-        void buildCompletionList(WaitIndicator& ind,
+        void buildCompletionList(util::WaitIndicator& ind,
                                  game::interface::CompletionList& result,
                                  String_t text,
                                  bool onlyCommands,
@@ -48,7 +47,7 @@ namespace game { namespace proxy {
             @param [in]     ctxp          ContextProvider; can be null (output will be empty).
 
             @see game::interface::buildPropertyList() */
-        void buildPropertyList(WaitIndicator& ind,
+        void buildPropertyList(util::WaitIndicator& ind,
                                game::interface::PropertyList& result,
                                std::auto_ptr<game::interface::ContextProvider> ctxp);
 

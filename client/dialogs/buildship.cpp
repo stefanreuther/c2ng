@@ -62,10 +62,10 @@ namespace {
         ui::EventLoop m_loop;
         bool m_isNew;
 
-        bool checkClone(game::proxy::WaitIndicator& ind);
+        bool checkClone(util::WaitIndicator& ind);
         bool checkChange();
 
-        bool addToAutoTask(game::proxy::WaitIndicator& ind, const String_t& cmd);
+        bool addToAutoTask(util::WaitIndicator& ind, const String_t& cmd);
     };
 }
 
@@ -209,7 +209,7 @@ BuildShipDialog::onBuildOrderChange(const BuildShipProxy::Status& st)
 /* Check for conflicting clone order.
    Return true to proceed, false to stop processing. */
 bool
-BuildShipDialog::checkClone(game::proxy::WaitIndicator& ind)
+BuildShipDialog::checkClone(util::WaitIndicator& ind)
 {
     afl::string::Translator& tx = m_widget.translator();
     ui::Root& root = m_widget.root();
@@ -268,7 +268,7 @@ BuildShipDialog::checkChange()
    (This was a general function in PCC2, but only used for base tasks, so I place it here for now.
    It can probably be moved with little pain if needed.) */
 bool
-BuildShipDialog::addToAutoTask(game::proxy::WaitIndicator& ind, const String_t& cmd)
+BuildShipDialog::addToAutoTask(util::WaitIndicator& ind, const String_t& cmd)
 {
     // ex addToAutoTask(IntExecutionContext* task, string_t cmd)
     afl::string::Translator& tx = m_widget.translator();

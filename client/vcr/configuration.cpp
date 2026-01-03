@@ -47,7 +47,7 @@ client::vcr::Configuration::Configuration()
 }
 
 void
-client::vcr::Configuration::load(game::proxy::WaitIndicator& link, game::proxy::ConfigurationProxy& proxy)
+client::vcr::Configuration::load(util::WaitIndicator& link, game::proxy::ConfigurationProxy& proxy)
 {
     // Always in correct range
     setSpeed(proxy.getOption(link, UserConfiguration::Vcr_Speed));

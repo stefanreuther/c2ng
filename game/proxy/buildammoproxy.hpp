@@ -14,10 +14,9 @@
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Bidirectional proxy for building ammunition.
         Proxies a game::actions::BuildAmmo.
@@ -97,7 +96,7 @@ namespace game { namespace proxy {
         /** Get status, synchronously.
             \param [in,out] ind    WaitIndicator for UI synchronisation
             \param [out]    result Status */
-        void getStatus(WaitIndicator& ind, Status& result);
+        void getStatus(util::WaitIndicator& ind, Status& result);
 
         // FIXME: routine to request candidate ships
 

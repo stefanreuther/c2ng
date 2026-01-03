@@ -109,7 +109,7 @@ game::proxy::CargoTransferProxy::init(const game::actions::CargoTransferSetup& s
 
 // Initialize for multi-unit setup.
 game::actions::MultiTransferSetup::Result
-game::proxy::CargoTransferProxy::init(WaitIndicator& link, const game::actions::MultiTransferSetup& setup)
+game::proxy::CargoTransferProxy::init(util::WaitIndicator& link, const game::actions::MultiTransferSetup& setup)
 {
     class Task : public util::Request<Observer> {
      public:
@@ -148,7 +148,7 @@ game::proxy::CargoTransferProxy::addHoldSpace(const String_t& name)
 
 // Get general information.
 void
-game::proxy::CargoTransferProxy::getGeneralInformation(WaitIndicator& link, General& info)
+game::proxy::CargoTransferProxy::getGeneralInformation(util::WaitIndicator& link, General& info)
 {
     class Task : public util::Request<Observer> {
      public:
@@ -190,7 +190,7 @@ game::proxy::CargoTransferProxy::getGeneralInformation(WaitIndicator& link, Gene
 
 // Get information about participant.
 void
-game::proxy::CargoTransferProxy::getParticipantInformation(WaitIndicator& link, size_t side, Participant& info)
+game::proxy::CargoTransferProxy::getParticipantInformation(util::WaitIndicator& link, size_t side, Participant& info)
 {
     class Task : public util::Request<Observer> {
      public:

@@ -1,9 +1,9 @@
 /**
-  *  \file test/game/proxy/waitindicatortest.cpp
-  *  \brief Test for game::proxy::WaitIndicator
+  *  \file test/util/waitindicatortest.cpp
+  *  \brief Test for util::WaitIndicator
   */
 
-#include "game/proxy/waitindicator.hpp"
+#include "util/waitindicator.hpp"
 
 #include "afl/test/testrunner.hpp"
 #include "util/requestdispatcher.hpp"
@@ -12,10 +12,10 @@
 /** Interface test.
     Actual functionality is tested by other tests;
     this only tests the interface for well-formedness. */
-AFL_TEST_NOARG("game.proxy.WaitIndicator")
+AFL_TEST_NOARG("util.WaitIndicator")
 {
     // Test object
-    class Tester : public game::proxy::WaitIndicator {
+    class Tester : public util::WaitIndicator {
      public:
         Tester(util::RequestDispatcher& disp)
             : WaitIndicator(disp)
@@ -28,4 +28,3 @@ AFL_TEST_NOARG("game.proxy.WaitIndicator")
     util::SimpleRequestDispatcher disp;
     Tester t(disp);
 }
-

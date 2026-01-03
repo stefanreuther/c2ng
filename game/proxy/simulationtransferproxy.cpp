@@ -27,7 +27,7 @@ game::proxy::SimulationTransferProxy::~SimulationTransferProxy()
 { }
 
 bool
-game::proxy::SimulationTransferProxy::hasObject(WaitIndicator& ind, Reference ref)
+game::proxy::SimulationTransferProxy::hasObject(util::WaitIndicator& ind, Reference ref)
 {
     class Task : public Request_t {
      public:
@@ -49,7 +49,7 @@ game::proxy::SimulationTransferProxy::hasObject(WaitIndicator& ind, Reference re
 }
 
 bool
-game::proxy::SimulationTransferProxy::copyObjectFromGame(WaitIndicator& ind, Reference ref)
+game::proxy::SimulationTransferProxy::copyObjectFromGame(util::WaitIndicator& ind, Reference ref)
 {
     class Task : public Request_t {
      public:
@@ -74,7 +74,7 @@ game::proxy::SimulationTransferProxy::copyObjectFromGame(WaitIndicator& ind, Ref
 }
 
 size_t
-game::proxy::SimulationTransferProxy::copyObjectsFromGame(WaitIndicator& ind, const game::ref::List& list)
+game::proxy::SimulationTransferProxy::copyObjectsFromGame(util::WaitIndicator& ind, const game::ref::List& list)
 {
     class Task : public Request_t {
      public:

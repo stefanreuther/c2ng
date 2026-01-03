@@ -8,8 +8,8 @@
 #include "game/player.hpp"
 #include "game/playerarray.hpp"
 #include "game/playerset.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -25,7 +25,7 @@ namespace game { namespace proxy {
             \see PlayerList::getAllPlayers()
             \param link WaitIndicator object
             \return set of players. Empty if session has no player list. */
-        PlayerSet_t getAllPlayers(WaitIndicator& link);
+        PlayerSet_t getAllPlayers(util::WaitIndicator& link);
 
         /** Get name of a player.
             \see PlayerList::getPlayerName()
@@ -34,14 +34,14 @@ namespace game { namespace proxy {
             \param which Which name to get
             \return name. Empty if parameters out of range or session has no player list.
             \see game::PlayerList::getPlayerName */
-        String_t getPlayerName(WaitIndicator& link, int id, Player::Name which);
+        String_t getPlayerName(util::WaitIndicator& link, int id, Player::Name which);
 
         /** Get names of all players.
             \param link WaitIndicator object
             \param which Which names to get
             \return array of names. Values for empty or out-of-range indexes are empty.
             \see game::PlayerList::getPlayerNames */
-        PlayerArray<String_t> getPlayerNames(WaitIndicator& link, Player::Name which);
+        PlayerArray<String_t> getPlayerNames(util::WaitIndicator& link, Player::Name which);
 
      private:
         util::RequestSender<Session> m_gameSender;

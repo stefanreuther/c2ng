@@ -6,7 +6,6 @@
 #include "game/proxy/shipinfoproxy.hpp"
 #include "game/game.hpp"
 #include "game/map/universe.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/turn.hpp"
 
 using game::map::Ship;
@@ -18,7 +17,7 @@ game::proxy::ShipInfoProxy::ShipInfoProxy(const util::RequestSender<Session>& ga
 { }
 
 game::proxy::ShipInfoProxy::CargoStatus
-game::proxy::ShipInfoProxy::getCargo(WaitIndicator& ind, Id_t shipId, int which, game::map::ShipCargoInfos_t& out)
+game::proxy::ShipInfoProxy::getCargo(util::WaitIndicator& ind, Id_t shipId, int which, game::map::ShipCargoInfos_t& out)
 {
     class Task : public util::Request<Session> {
      public:
@@ -66,7 +65,7 @@ game::proxy::ShipInfoProxy::getCargo(WaitIndicator& ind, Id_t shipId, int which,
 }
 
 game::map::ShipExperienceInfo
-game::proxy::ShipInfoProxy::getExperienceInfo(WaitIndicator& ind, Id_t shipId)
+game::proxy::ShipInfoProxy::getExperienceInfo(util::WaitIndicator& ind, Id_t shipId)
 {
     class Task : public util::Request<Session> {
      public:

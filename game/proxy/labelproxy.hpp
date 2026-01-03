@@ -7,10 +7,10 @@
 
 #include "afl/base/optional.hpp"
 #include "afl/base/signal.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -44,7 +44,7 @@ namespace game { namespace proxy {
             @param [in,out] ind         WaitIndicator for UI synchronisation
             @param [out]    shipExpr    Ship expression
             @param [out]    planetExpr  Planet expression */
-        void getConfiguration(WaitIndicator& ind, String_t& shipExpr, String_t& planetExpr);
+        void getConfiguration(util::WaitIndicator& ind, String_t& shipExpr, String_t& planetExpr);
 
         /** Set configuration.
             Will asynchronously update the configuration and return a sig_configurationApplied on success.

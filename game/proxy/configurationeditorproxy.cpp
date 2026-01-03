@@ -5,7 +5,6 @@
 
 #include "game/proxy/configurationeditorproxy.hpp"
 #include "afl/base/signalconnection.hpp"
-#include "game/proxy/waitindicator.hpp"
 
 using game::config::ConfigurationEditor;
 
@@ -133,7 +132,7 @@ game::proxy::ConfigurationEditorProxy::~ConfigurationEditorProxy()
 { }
 
 void
-game::proxy::ConfigurationEditorProxy::loadValues(WaitIndicator& ind)
+game::proxy::ConfigurationEditorProxy::loadValues(util::WaitIndicator& ind)
 {
     class Task : public util::Request<Trampoline> {
      public:

@@ -6,9 +6,9 @@
 #define C2NG_GAME_PROXY_CARGOTRANSFERSETUPPROXY_HPP
 
 #include "game/actions/cargotransfersetup.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -44,26 +44,26 @@ namespace game { namespace proxy {
             \param planetId Planet Id
             \param shipId Ship Id
             \see game::actions::CargoTransferSetup::fromPlanetShip() */
-        void createPlanetShip(WaitIndicator& link, Id_t planetId, Id_t shipId);
+        void createPlanetShip(util::WaitIndicator& link, Id_t planetId, Id_t shipId);
 
         /** Construct from a two ships.
             \param link WaitIndicator
             \param leftId First ship Id
             \param rightId Second ship Id
             \see game::actions::CargoTransferSetup::fromShipShip() */
-        void createShipShip(WaitIndicator& link, Id_t leftId, Id_t rightId);
+        void createShipShip(util::WaitIndicator& link, Id_t leftId, Id_t rightId);
 
         /** Construct for jettison.
             \param link WaitIndicator
             \param shipId Ship Id
             \see game::actions::CargoTransferSetup::fromShipJettison() */
-        void createShipJettison(WaitIndicator& link, Id_t shipId);
+        void createShipJettison(util::WaitIndicator& link, Id_t shipId);
 
         /** Construct for beam-up-multiple mission.
             \param link WaitIndicator
             \param shipId Ship Id
             \see game::actions::CargoTransferSetup::fromShipBeamUp() */
-        void createShipBeamUp(WaitIndicator& link, Id_t shipId);
+        void createShipBeamUp(util::WaitIndicator& link, Id_t shipId);
 
         /** Swap sides.
             Reverses the order in which results will be produced in get().
@@ -75,7 +75,7 @@ namespace game { namespace proxy {
             If getConflictInfo() returned null, this is a no-op.
             \param link WaitIndicator
             \see game::actions::CargoTransferSetup::cancelConflictingTransfer() */
-        void cancelConflictingTransfer(WaitIndicator& link);
+        void cancelConflictingTransfer(util::WaitIndicator& link);
 
 
         /*

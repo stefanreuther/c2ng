@@ -186,7 +186,7 @@ game::proxy::ScoreProxy::~ScoreProxy()
 { }
 
 void
-game::proxy::ScoreProxy::getChartVariants(WaitIndicator& ind, Variants_t& out)
+game::proxy::ScoreProxy::getChartVariants(util::WaitIndicator& ind, Variants_t& out)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -203,7 +203,7 @@ game::proxy::ScoreProxy::getChartVariants(WaitIndicator& ind, Variants_t& out)
 }
 
 void
-game::proxy::ScoreProxy::getTableVariants(WaitIndicator& ind, Variants_t& out)
+game::proxy::ScoreProxy::getTableVariants(util::WaitIndicator& ind, Variants_t& out)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -220,7 +220,7 @@ game::proxy::ScoreProxy::getTableVariants(WaitIndicator& ind, Variants_t& out)
 }
 
 void
-game::proxy::ScoreProxy::getTurns(WaitIndicator& ind, util::StringList& out)
+game::proxy::ScoreProxy::getTurns(util::WaitIndicator& ind, util::StringList& out)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -237,7 +237,7 @@ game::proxy::ScoreProxy::getTurns(WaitIndicator& ind, util::StringList& out)
 }
 
 void
-game::proxy::ScoreProxy::getOverviewInformation(WaitIndicator& ind, Info& out)
+game::proxy::ScoreProxy::getOverviewInformation(util::WaitIndicator& ind, Info& out)
 {
     class Task : public util::Request<Trampoline> {
      public:

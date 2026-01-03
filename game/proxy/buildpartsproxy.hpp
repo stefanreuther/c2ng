@@ -14,10 +14,9 @@
 #include "util/requestdispatcher.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Bidirectional proxy for building starship parts.
         Proxies a game::actions::BuildParts.
@@ -65,7 +64,7 @@ namespace game { namespace proxy {
         /** Get status, synchronously.
             \param [in,out] ind    WaitIndicator for UI synchronisation
             \param [out]    st     Result */
-        void getStatus(WaitIndicator& ind, Status& st);
+        void getStatus(util::WaitIndicator& ind, Status& st);
 
         /** Select part for building.
             Will respond with an update containing the new part costs and count.

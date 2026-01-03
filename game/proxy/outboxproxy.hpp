@@ -5,14 +5,13 @@
 #ifndef C2NG_GAME_PROXY_OUTBOXPROXY_HPP
 #define C2NG_GAME_PROXY_OUTBOXPROXY_HPP
 
-#include "game/session.hpp"
 #include "game/proxy/mailboxadaptor.hpp"
-#include "util/requestsender.hpp"
+#include "game/session.hpp"
 #include "game/stringverifier.hpp"
+#include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Bidirectional proxy for sent-messages access.
         Proxies access to a game::msg::Outbox.
@@ -53,20 +52,20 @@ namespace game { namespace proxy {
             \param [in]     receivers Message receivers
             \return headers (multi-line string, ending in "\n")
             \see game::msg::Outbox::getHeadersForDisplay() */
-        String_t getHeadersForDisplay(WaitIndicator& ind, int sender, PlayerSet_t receivers);
+        String_t getHeadersForDisplay(util::WaitIndicator& ind, int sender, PlayerSet_t receivers);
 
         /** Get message data.
             \param [in,out] ind       UI synchronisation
             \param [in]     id        Message Id
             \param [out]    result    Message information
             \return true Success */
-        bool getMessage(WaitIndicator& ind, Id_t id, Info& result);
+        bool getMessage(util::WaitIndicator& ind, Id_t id, Info& result);
 
         /** Get string verifier.
             Obtains a clone of the game's StringVerifier.
             \param [in,out] ind       UI synchronisation
             \return Newly-allocated StringVerifier. Caller takes ownership. Can be null. */
-        StringVerifier* createStringVerifier(WaitIndicator& ind);
+        StringVerifier* createStringVerifier(util::WaitIndicator& ind);
 
         /** Add message.
             The message is created asynchronously.
@@ -100,7 +99,7 @@ namespace game { namespace proxy {
             \param [in]     fileName File name
             \param [out]    errorMessage Error message
             \return true on success, false on error (errorMessage set) */
-        bool addMessageToFile(WaitIndicator& ind, int sender, String_t text, String_t fileName, String_t& errorMessage);
+        bool addMessageToFile(util::WaitIndicator& ind, int sender, String_t text, String_t fileName, String_t& errorMessage);
 
         /** Load message text from file.
             \param [in,out] ind      UI synchronisation
@@ -108,7 +107,7 @@ namespace game { namespace proxy {
             \param [in]     fileName File name
             \param [out]    errorMessage Error message
             \return true on success, false on error (errorMessage set) */
-        bool loadMessageTextFromFile(WaitIndicator& ind, String_t& text, String_t fileName, String_t& errorMessage);
+        bool loadMessageTextFromFile(util::WaitIndicator& ind, String_t& text, String_t fileName, String_t& errorMessage);
 
         /** Get MailboxAdaptor.
             \return MailboxAdaptor that accesses the same Outbox this proxy is accessing */

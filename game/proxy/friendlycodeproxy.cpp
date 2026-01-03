@@ -13,7 +13,7 @@ game::proxy::FriendlyCodeProxy::FriendlyCodeProxy(util::RequestSender<Session> g
 { }
 
 String_t
-game::proxy::FriendlyCodeProxy::generateRandomCode(WaitIndicator& link)
+game::proxy::FriendlyCodeProxy::generateRandomCode(util::WaitIndicator& link)
 {
     class Query : public util::Request<game::Session> {
      public:

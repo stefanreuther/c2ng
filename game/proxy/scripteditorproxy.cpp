@@ -4,7 +4,6 @@
   */
 
 #include "game/proxy/scripteditorproxy.hpp"
-#include "game/proxy/waitindicator.hpp"
 
 namespace {
     /* Collect list of contexts in a vector */
@@ -34,7 +33,7 @@ game::proxy::ScriptEditorProxy::ScriptEditorProxy(util::RequestSender<Session> g
 { }
 
 void
-game::proxy::ScriptEditorProxy::buildCompletionList(WaitIndicator& ind,
+game::proxy::ScriptEditorProxy::buildCompletionList(util::WaitIndicator& ind,
                                                     game::interface::CompletionList& result,
                                                     String_t text,
                                                     bool onlyCommands,
@@ -66,7 +65,7 @@ game::proxy::ScriptEditorProxy::buildCompletionList(WaitIndicator& ind,
 }
 
 void
-game::proxy::ScriptEditorProxy::buildPropertyList(WaitIndicator& ind,
+game::proxy::ScriptEditorProxy::buildPropertyList(util::WaitIndicator& ind,
                                                   game::interface::PropertyList& result,
                                                   std::auto_ptr<game::interface::ContextProvider> ctxp)
 {

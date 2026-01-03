@@ -12,10 +12,10 @@
 #include "game/map/objectcursor.hpp"
 #include "game/map/point.hpp"
 #include "game/proxy/objectobserver.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "game/types.hpp"
 #include "util/requestreceiver.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -108,7 +108,7 @@ namespace game { namespace proxy {
             \param [in,out] ind            WaitIndicator for UI synchronisation
             \param [in]     viewpointShip  Viewpoint ship Id, for SweepItem::have
             \param [out]    out            Result */
-        void getSweepInfo(WaitIndicator& ind, Id_t viewpointShip, SweepInfo& out);
+        void getSweepInfo(util::WaitIndicator& ind, Id_t viewpointShip, SweepInfo& out);
 
         /** Browse minefields.
             Updated information will be reported on sig_passageChange, sig_minefieldChange.

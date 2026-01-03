@@ -20,7 +20,7 @@ game::proxy::CargoTransferSetupProxy::CargoTransferSetupProxy(util::RequestSende
 { }
 
 void
-game::proxy::CargoTransferSetupProxy::createPlanetShip(WaitIndicator& link, int planetId, int shipId)
+game::proxy::CargoTransferSetupProxy::createPlanetShip(util::WaitIndicator& link, int planetId, int shipId)
 {
     // Task
     class Task : public util::Request<Session> {
@@ -47,7 +47,7 @@ game::proxy::CargoTransferSetupProxy::createPlanetShip(WaitIndicator& link, int 
 }
 
 void
-game::proxy::CargoTransferSetupProxy::createShipShip(WaitIndicator& link, int leftId, int rightId)
+game::proxy::CargoTransferSetupProxy::createShipShip(util::WaitIndicator& link, int leftId, int rightId)
 {
     // Task
     class Task : public util::Request<Session> {
@@ -74,7 +74,7 @@ game::proxy::CargoTransferSetupProxy::createShipShip(WaitIndicator& link, int le
 }
 
 void
-game::proxy::CargoTransferSetupProxy::createShipJettison(WaitIndicator& link, int shipId)
+game::proxy::CargoTransferSetupProxy::createShipJettison(util::WaitIndicator& link, int shipId)
 {
     // Task
     class Task : public util::Request<Session> {
@@ -101,7 +101,7 @@ game::proxy::CargoTransferSetupProxy::createShipJettison(WaitIndicator& link, in
 }
 
 void
-game::proxy::CargoTransferSetupProxy::createShipBeamUp(WaitIndicator& link, int shipId)
+game::proxy::CargoTransferSetupProxy::createShipBeamUp(util::WaitIndicator& link, int shipId)
 {
     // Task
     class Task : public util::Request<Session> {
@@ -148,7 +148,7 @@ game::proxy::CargoTransferSetupProxy::swapSides()
 }
 
 void
-game::proxy::CargoTransferSetupProxy::cancelConflictingTransfer(WaitIndicator& link)
+game::proxy::CargoTransferSetupProxy::cancelConflictingTransfer(util::WaitIndicator& link)
 {
     // Task
     class Task : public util::Request<Session> {

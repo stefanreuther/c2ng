@@ -5,7 +5,6 @@
 
 #include "game/proxy/hullspecificationproxy.hpp"
 #include "game/game.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/root.hpp"
 #include "game/score/compoundscore.hpp"
 #include "game/shipquery.hpp"
@@ -207,7 +206,7 @@ game::proxy::HullSpecificationProxy::setQuery(const ShipQuery& q)
 }
 
 void
-game::proxy::HullSpecificationProxy::describeWeaponEffects(WaitIndicator& ind, game::spec::info::WeaponEffects& result)
+game::proxy::HullSpecificationProxy::describeWeaponEffects(util::WaitIndicator& ind, game::spec::info::WeaponEffects& result)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -229,7 +228,7 @@ game::proxy::HullSpecificationProxy::describeWeaponEffects(WaitIndicator& ind, g
 }
 
 void
-game::proxy::HullSpecificationProxy::describeHullFunctionDetails(WaitIndicator& ind, game::spec::info::AbilityDetails_t& result, bool useNormalPictures)
+game::proxy::HullSpecificationProxy::describeHullFunctionDetails(util::WaitIndicator& ind, game::spec::info::AbilityDetails_t& result, bool useNormalPictures)
 {
     class Task : public util::Request<Trampoline> {
      public:

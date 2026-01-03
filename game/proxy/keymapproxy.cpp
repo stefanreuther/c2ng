@@ -81,7 +81,7 @@ game::proxy::KeymapProxy::setKeymapName(String_t keymap)
 
 // Get description of the current keymap.
 void
-game::proxy::KeymapProxy::getDescription(WaitIndicator& link, util::KeymapInformation& out)
+game::proxy::KeymapProxy::getDescription(util::WaitIndicator& link, util::KeymapInformation& out)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -105,7 +105,7 @@ game::proxy::KeymapProxy::getDescription(WaitIndicator& link, util::KeymapInform
 
 // Get description of a key.
 void
-game::proxy::KeymapProxy::getKey(WaitIndicator& link, util::Key_t key, Info& result)
+game::proxy::KeymapProxy::getKey(util::WaitIndicator& link, util::Key_t key, Info& result)
 {
     class Task : public util::Request<Trampoline> {
      public:

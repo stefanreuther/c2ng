@@ -7,10 +7,10 @@
 
 #include "game/map/locationreverter.hpp"
 #include "game/map/point.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/ref/userlist.hpp"
 #include "game/session.hpp"
 #include "util//requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -43,7 +43,7 @@ namespace game { namespace proxy {
             \param [in]  link   WaitIndicator
             \param [in]  pt     Position
             \param [out] status Transaction status */
-        void init(WaitIndicator& link, game::map::Point pt, Status& status);
+        void init(util::WaitIndicator& link, game::map::Point pt, Status& status);
 
         /** Commit.
             \param modes Modes to use */

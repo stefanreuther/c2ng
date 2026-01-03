@@ -1,9 +1,10 @@
 /**
-  *  \file client/dialogs/fileselectiondialog.cpp
-  *  \brief Class client::dialogs::FileSelectionDialog
+  *  \file ui/dialogs/fileselectiondialog.cpp
+  *  \brief Class ui::dialogs::FileSelectionDialog
   */
 
-#include "client/dialogs/fileselectiondialog.hpp"
+#include "ui/dialogs/fileselectiondialog.hpp"
+
 #include "afl/base/deleter.hpp"
 #include "afl/base/optional.hpp"
 #include "ui/dialogs/messagebox.hpp"
@@ -20,12 +21,12 @@
 #include "util/filenamepattern.hpp"
 #include "util/io.hpp"
 
-using client::widgets::FileListbox;
-using client::dialogs::FileSelectionDialog;
 using util::DirectoryBrowser;
+using ui::dialogs::FileSelectionDialog;
 using ui::widgets::SimpleIconBox;
+using ui::widgets::FileListbox;
 
-struct client::dialogs::FileSelectionDialog::State {
+struct ui::dialogs::FileSelectionDialog::State {
     String_t thisDirectoryName;
     size_t contentOffset;
     FileListbox::Items_t contentItems;
@@ -37,7 +38,7 @@ struct client::dialogs::FileSelectionDialog::State {
         { }
 };
 
-struct client::dialogs::FileSelectionDialog::Result {
+struct ui::dialogs::FileSelectionDialog::Result {
     bool hasNewContent;
     afl::base::Optional<String_t> error;
     afl::base::Optional<String_t> newWildcard;
@@ -273,7 +274,7 @@ namespace {
 }
 
 
-client::dialogs::FileSelectionDialog::FileSelectionDialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<afl::io::FileSystem> fs, String_t title)
+ui::dialogs::FileSelectionDialog::FileSelectionDialog(Root& root, afl::string::Translator& tx, util::RequestSender<afl::io::FileSystem> fs, String_t title)
     : m_root(root),
       m_translator(tx),
       m_fileSystem(fs),
@@ -292,55 +293,55 @@ client::dialogs::FileSelectionDialog::FileSelectionDialog(ui::Root& root, afl::s
       m_browser()
 { }
 
-client::dialogs::FileSelectionDialog::~FileSelectionDialog()
+ui::dialogs::FileSelectionDialog::~FileSelectionDialog()
 { }
 
 void
-client::dialogs::FileSelectionDialog::setFolder(const String_t& folderName)
+ui::dialogs::FileSelectionDialog::setFolder(const String_t& folderName)
 {
     m_folderName = folderName;
 }
 
 String_t
-client::dialogs::FileSelectionDialog::getFolder() const
+ui::dialogs::FileSelectionDialog::getFolder() const
 {
     // ex UIFileChooserDialog::getCurrentDirectory (sort-of)
     return m_folderName;
 }
 
 void
-client::dialogs::FileSelectionDialog::setPattern(const String_t& pat)
+ui::dialogs::FileSelectionDialog::setPattern(const String_t& pat)
 {
     m_patterns.assign(1, pat);
 }
 
 void
-client::dialogs::FileSelectionDialog::addPattern(const String_t& pat)
+ui::dialogs::FileSelectionDialog::addPattern(const String_t& pat)
 {
     m_patterns.push_back(pat);
 }
 
 void
-client::dialogs::FileSelectionDialog::setDefaultExtension(const String_t& defaultExtension)
+ui::dialogs::FileSelectionDialog::setDefaultExtension(const String_t& defaultExtension)
 {
     m_defaultExtension = defaultExtension;
 }
 
 void
-client::dialogs::FileSelectionDialog::setHelpWidget(ui::Widget& helpWidget)
+ui::dialogs::FileSelectionDialog::setHelpWidget(Widget& helpWidget)
 {
     m_pHelpWidget = &helpWidget;
 }
 
 String_t
-client::dialogs::FileSelectionDialog::getResult() const
+ui::dialogs::FileSelectionDialog::getResult() const
 {
     // ex UIFileChooserDialog::getResultFile
     return m_result;
 }
 
 bool
-client::dialogs::FileSelectionDialog::run()
+ui::dialogs::FileSelectionDialog::run()
 {
     // ex UIFileChooserDialog::init (part)
 
@@ -353,9 +354,9 @@ client::dialogs::FileSelectionDialog::run()
     //   SimpleIconBox (directory crumbs)
     //   HBox (default dialog buttons)
     afl::base::Deleter del;
-    ui::Window& win = del.addNew(new ui::Window(m_title, m_root.provider(), m_root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
+    Window& win = del.addNew(new Window(m_title, m_root.provider(), m_root.colorScheme(), BLUE_WINDOW, ui::layout::VBox::instance5));
 
-    ui::Group& g1 = del.addNew(new ui::Group(ui::layout::HBox::instance5));
+    Group& g1 = del.addNew(new Group(ui::layout::HBox::instance5));
     g1.add(del.addNew(new ui::widgets::StaticText(m_translator("File:"),
                                                   util::SkinColor::Static,
                                                   gfx::FontRequest().addSize(1),
@@ -363,7 +364,7 @@ client::dialogs::FileSelectionDialog::run()
     g1.add(m_input);
     win.add(g1);
 
-    win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), ui::LoweredFrame,
+    win.add(ui::widgets::FrameGroup::wrapWidget(del, m_root.colorScheme(), LoweredFrame,
                                                 del.addNew(new ui::widgets::ScrollbarContainer(m_fileList, m_root))));
     win.add(m_crumbTrail);
 
@@ -382,8 +383,8 @@ client::dialogs::FileSelectionDialog::run()
     // Keys
     ui::widgets::KeyDispatcher& disp = del.addNew(new ui::widgets::KeyDispatcher());
     win.add(disp);
-    disp.add(util::KeyMod_Alt + 'f', &m_input, &ui::Widget::requestFocus);
-    disp.add(util::Key_Down, &m_fileList, &ui::Widget::requestFocus);
+    disp.add(util::KeyMod_Alt + 'f', &m_input, &Widget::requestFocus);
+    disp.add(util::Key_Down, &m_fileList, &Widget::requestFocus);
     disp.add(util::Key_Backspace, this, &FileSelectionDialog::onKeyBackspace);
 
     win.add(del.addNew(new ui::widgets::Quit(m_root, m_loop)));
@@ -407,7 +408,7 @@ client::dialogs::FileSelectionDialog::run()
 }
 
 void
-client::dialogs::FileSelectionDialog::init()
+ui::dialogs::FileSelectionDialog::init()
 {
     State state;
     InitTask t(m_browser, m_folderName, m_patterns, state, m_translator);
@@ -416,7 +417,7 @@ client::dialogs::FileSelectionDialog::init()
 }
 
 void
-client::dialogs::FileSelectionDialog::loadState(State& state)
+ui::dialogs::FileSelectionDialog::loadState(State& state)
 {
     m_fileList.swapItems(state.contentItems);
     size_t index = 0;
@@ -432,10 +433,10 @@ client::dialogs::FileSelectionDialog::loadState(State& state)
 }
 
 void
-client::dialogs::FileSelectionDialog::onEnter()
+ui::dialogs::FileSelectionDialog::onEnter()
 {
     // ex UIFileChooserDialog::onEnter
-    if (m_fileList.hasState(ui::Widget::FocusedState)) {
+    if (m_fileList.hasState(Widget::FocusedState)) {
         // Choose an item
         onItemDoubleClick(m_fileList.getCurrentItem());
     } else {
@@ -445,7 +446,7 @@ client::dialogs::FileSelectionDialog::onEnter()
 }
 
 void
-client::dialogs::FileSelectionDialog::onItemDoubleClick(size_t index)
+ui::dialogs::FileSelectionDialog::onItemDoubleClick(size_t index)
 {
     if (const FileListbox::Item* item = m_fileList.getItem(index)) {
         if (item->canEnter) {
@@ -463,7 +464,7 @@ client::dialogs::FileSelectionDialog::onItemDoubleClick(size_t index)
 }
 
 void
-client::dialogs::FileSelectionDialog::onCrumbClick(size_t index)
+ui::dialogs::FileSelectionDialog::onCrumbClick(size_t index)
 {
     // If last item has been clicked, do nothing, as this would mean no directory change.
     if (index != m_crumbTrail.getNumItems()-1) {
@@ -472,20 +473,20 @@ client::dialogs::FileSelectionDialog::onCrumbClick(size_t index)
 }
 
 void
-client::dialogs::FileSelectionDialog::onKeyBackspace()
+ui::dialogs::FileSelectionDialog::onKeyBackspace()
 {
     handleUp(1);
 }
 
 void
-client::dialogs::FileSelectionDialog::handleUserInput(String_t name, bool allowPattern)
+ui::dialogs::FileSelectionDialog::handleUserInput(String_t name, bool allowPattern)
 {
     State state;
     Result result;
     InputTask t(m_browser, name, allowPattern, m_defaultExtension, state, result, m_translator);
     m_link.call(m_fileSystem, t);
     if (const String_t* err = result.error.get()) {
-        ui::dialogs::MessageBox(*err, m_title, m_root).doOkDialog(m_translator);
+        MessageBox(*err, m_title, m_root).doOkDialog(m_translator);
     }
     if (result.hasNewContent) {
         loadState(state);
@@ -499,7 +500,7 @@ client::dialogs::FileSelectionDialog::handleUserInput(String_t name, bool allowP
 }
 
 void
-client::dialogs::FileSelectionDialog::handleUp(size_t levels)
+ui::dialogs::FileSelectionDialog::handleUp(size_t levels)
 {
     State state;
     UpTask t(m_browser, levels, state, m_translator);
@@ -508,7 +509,7 @@ client::dialogs::FileSelectionDialog::handleUp(size_t levels)
 }
 
 void
-client::dialogs::FileSelectionDialog::handleChangeDirectory(size_t index)
+ui::dialogs::FileSelectionDialog::handleChangeDirectory(size_t index)
 {
     State state;
     DownTask t(m_browser, index, state, m_translator);

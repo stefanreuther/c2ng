@@ -6,17 +6,16 @@
 #include "client/dialogs/labelconfig.hpp"
 #include "afl/base/deleter.hpp"
 #include "client/downlink.hpp"
-#include "client/widgets/busyindicator.hpp"
 #include "client/widgets/expressionlist.hpp"
 #include "client/widgets/helpwidget.hpp"
 #include "game/proxy/expressionlistproxy.hpp"
 #include "game/proxy/labelproxy.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/eventloop.hpp"
 #include "ui/group.hpp"
 #include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
+#include "ui/widgets/busyindicator.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/focusiterator.hpp"
 #include "ui/widgets/framegroup.hpp"
@@ -27,6 +26,7 @@
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
 #include "util/unicodechars.hpp"
+#include "util/waitindicator.hpp"
 
 using game::config::ExpressionLists;
 using game::proxy::ExpressionListProxy;
@@ -69,7 +69,7 @@ namespace {
     class Dialog : private gfx::KeyEventConsumer {
      public:
         Dialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender);
-        void init(game::proxy::WaitIndicator& ind);
+        void init(util::WaitIndicator& ind);
         void run();
 
         void onOK();
@@ -96,7 +96,7 @@ namespace {
         Compound m_ship;
         Compound m_planet;
 
-        client::widgets::BusyIndicator m_applyBlocker;
+        ui::widgets::BusyIndicator m_applyBlocker;
     };
 }
 
@@ -116,7 +116,7 @@ Dialog::Dialog(ui::Root& root, afl::string::Translator& tx, util::RequestSender<
 }
 
 void
-Dialog::init(game::proxy::WaitIndicator& ind)
+Dialog::init(util::WaitIndicator& ind)
 {
     String_t shipExpr, planetExpr;
     m_labelProxy.getConfiguration(ind, shipExpr, planetExpr);

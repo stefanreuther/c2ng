@@ -19,10 +19,9 @@
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
 #include "util/rich/text.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Game browser proxy.
         Proxies a game::browser::Browser.
@@ -140,7 +139,7 @@ namespace game { namespace proxy {
             @param ind WaitIndicator
             @return true UI should suggest configuring a local folder
             @see game::browser::Browser::isSelectedFolderSetupSuggested() */
-        bool isSelectedFolderSetupSuggested(WaitIndicator& ind);
+        bool isSelectedFolderSetupSuggested(util::WaitIndicator& ind);
 
         /** Set local directory, automatically.
             Updates the folder previously loaded using selectFolder();
@@ -160,7 +159,7 @@ namespace game { namespace proxy {
             @param dirName Directory name to check
             @return status
             @see game::browser::Browser::verifyLocalDirectory() */
-        DirectoryStatus_t verifyLocalDirectory(WaitIndicator& ind, const String_t& dirName);
+        DirectoryStatus_t verifyLocalDirectory(util::WaitIndicator& ind, const String_t& dirName);
 
         /** Set local directory to none.
             Updates the folder previously loaded using selectFolder();
@@ -175,7 +174,7 @@ namespace game { namespace proxy {
 
             @param [in,out] ind     WaitIndicator
             @param [out]    config  Configuration */
-        void getConfiguration(WaitIndicator& ind, Configuration& config);
+        void getConfiguration(util::WaitIndicator& ind, Configuration& config);
 
         /** Change configuration.
             Updates configuration of the folder previously loaded using selectFolder();
@@ -185,7 +184,7 @@ namespace game { namespace proxy {
 
             @param [in,out] ind     WaitIndicator
             @param [in]     config  Configuration */
-        void setConfiguration(WaitIndicator& ind, const Configuration& config);
+        void setConfiguration(util::WaitIndicator& ind, const Configuration& config);
 
         /** Update configuration.
             Saves configuration possibly modified by other operations (e.g. unpack).
@@ -198,7 +197,7 @@ namespace game { namespace proxy {
             @param type Account type
             @param host Host name
             @return true on success, false if this account already exists */
-        bool addAccount(WaitIndicator& ind, String_t user, String_t type, String_t host);
+        bool addAccount(util::WaitIndicator& ind, String_t user, String_t type, String_t host);
 
         /** Access underlying file system.
             @return RequestSender to access file system */

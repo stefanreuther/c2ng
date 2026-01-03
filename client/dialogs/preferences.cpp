@@ -131,7 +131,7 @@ namespace {
         @param ind          WaitIndicator for UI synchronisation
         @param ref          Reference to variable containing ConfigurationEditorProxy
         @return TreeList */
-    util::TreeList loadTree(util::RequestSender<game::Session> gameSender, game::proxy::WaitIndicator& ind, const VariableReference& ref)
+    util::TreeList loadTree(util::RequestSender<game::Session> gameSender, util::WaitIndicator& ind, const VariableReference& ref)
     {
         class Task : public util::Request<game::Session> {
          public:

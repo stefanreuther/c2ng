@@ -3,9 +3,8 @@
   *  \brief Class game::proxy::AllianceProxy
   */
 
-#include "game/proxy/allianceproxy.hpp"
 #include "game/game.hpp"
-#include "game/proxy/waitindicator.hpp"
+#include "game/proxy/allianceproxy.hpp"
 #include "game/root.hpp"
 #include "game/turn.hpp"
 
@@ -14,7 +13,7 @@ game::proxy::AllianceProxy::AllianceProxy(util::RequestSender<Session> gameSende
 { }
 
 game::proxy::AllianceProxy::Status
-game::proxy::AllianceProxy::getStatus(WaitIndicator& ind)
+game::proxy::AllianceProxy::getStatus(util::WaitIndicator& ind)
 {
     class Query : public util::Request<Session> {
      public:

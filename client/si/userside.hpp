@@ -9,12 +9,12 @@
 #include "client/screenhistory.hpp"
 #include "client/si/requestlink2.hpp"
 #include "client/si/scripttask.hpp"
-#include "client/widgets/busyindicator.hpp"
 #include "game/extraidentifier.hpp"
 #include "game/interface/contextprovider.hpp"
 #include "game/session.hpp"
 #include "interpreter/process.hpp"
 #include "ui/root.hpp"
+#include "ui/widgets/busyindicator.hpp"
 #include "util/messagecollector.hpp"
 #include "util/request.hpp"
 #include "util/requestdispatcher.hpp"
@@ -345,7 +345,7 @@ namespace client { namespace si {
         util::MessageCollector& m_console;
         afl::sys::Log& m_mainLog;
         ScreenHistory m_history;
-        client::widgets::BusyIndicator m_blocker;
+        ui::widgets::BusyIndicator m_blocker;
         ui::Root& m_root;
         afl::string::Translator& m_translator;
         afl::base::Ptr<util::StopSignal> m_stopSignal;
@@ -356,7 +356,7 @@ namespace client { namespace si {
 
         bool m_interrupting;
         std::vector<std::pair<RequestLink2, String_t> > m_interruptedProcesses;
-        client::widgets::BusyIndicator m_interruptBlocker;
+        ui::widgets::BusyIndicator m_interruptBlocker;
     };
 
 } }

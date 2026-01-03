@@ -8,9 +8,9 @@
 #include <vector>
 #include "afl/base/signal.hpp"
 #include "game/map/selections.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/ref/list.hpp"
 #include "game/session.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -62,7 +62,7 @@ namespace game { namespace proxy {
         /** Get state, synchronously.
             \param       ind      WaitIndicator for UI synchronisation
             \param [out] result   Result */
-        void init(WaitIndicator& ind, Info& result);
+        void init(util::WaitIndicator& ind, Info& result);
 
         /** Set current layer, asynchronously.
             The change is reported using sig_selectionChange.
@@ -78,7 +78,7 @@ namespace game { namespace proxy {
             \retval true  Expression parsed correctly; update will be reported using sig_selectionChange
             \retval false Expression failed to parse; error message placed in \c error
             \see game::map::Selections::executeCompiledExpression */
-        bool executeExpression(WaitIndicator& ind, const String_t& expression, LayerReference_t targetLayer, String_t& error);
+        bool executeExpression(util::WaitIndicator& ind, const String_t& expression, LayerReference_t targetLayer, String_t& error);
 
         /** Mark objects given as list, asynchronously.
             \param targetLayer Target layer

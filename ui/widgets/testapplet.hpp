@@ -52,6 +52,7 @@ namespace ui { namespace widgets {
         static TestApplet* makeCheckbox();
         static TestApplet* makeFrames();
         static TestApplet* makeOptionGrid();
+        static TestApplet* makeFileList();
 
         static void testWidget(ui::Root& root, ui::Widget& w);
 

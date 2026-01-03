@@ -12,7 +12,7 @@ game::proxy::MutexListProxy::MutexListProxy(util::RequestSender<Session> gameSen
 
 // Enumerate mutexes owned by a process.
 void
-game::proxy::MutexListProxy::enumMutexes(WaitIndicator& link, Infos_t& result, uint32_t processId)
+game::proxy::MutexListProxy::enumMutexes(util::WaitIndicator& link, Infos_t& result, uint32_t processId)
 {
     class Task : public util::Request<Session> {
      public:
@@ -35,7 +35,7 @@ game::proxy::MutexListProxy::enumMutexes(WaitIndicator& link, Infos_t& result, u
 
 // Enumerate all active mutexes.
 void
-game::proxy::MutexListProxy::enumMutexes(WaitIndicator& link, Infos_t& result)
+game::proxy::MutexListProxy::enumMutexes(util::WaitIndicator& link, Infos_t& result)
 {
     class Task : public util::Request<Session> {
      public:

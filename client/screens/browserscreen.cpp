@@ -520,15 +520,15 @@ client::screens::BrowserScreen::onKeyPlugin(int)
             { }
         virtual void unloadPlugin(const String_t& id)
             {
-                class Confirmer : public util::Request<game::proxy::WaitIndicator> {
+                class Confirmer : public util::Request<util::WaitIndicator> {
                  public:
-                    virtual void handle(game::proxy::WaitIndicator& ind)
+                    virtual void handle(util::WaitIndicator& ind)
                         { ind.post(true); }
                 };
 
                 class ManagerRequest : public util::Request<ui::res::Manager> {
                  public:
-                    ManagerRequest(const String_t& id, util::RequestSender<game::proxy::WaitIndicator> reply)
+                    ManagerRequest(const String_t& id, util::RequestSender<util::WaitIndicator> reply)
                         : m_id(id), m_reply(reply)
                         { }
 
@@ -539,7 +539,7 @@ client::screens::BrowserScreen::onKeyPlugin(int)
                         { mgr.removeProvidersByKey(m_id); }
                  private:
                     const String_t m_id;
-                    util::RequestSender<game::proxy::WaitIndicator> m_reply;
+                    util::RequestSender<util::WaitIndicator> m_reply;
                 };
 
                 class HelpRequest : public util::Request<game::Session> {
@@ -555,7 +555,7 @@ client::screens::BrowserScreen::onKeyPlugin(int)
 
                 Downlink link(root(), translator());
                 if (ui::DefaultResourceProvider* drp = dynamic_cast<ui::DefaultResourceProvider*>(&root().provider())) {
-                    util::RequestReceiver<game::proxy::WaitIndicator> linkReceiver(root().engine().dispatcher(), link);
+                    util::RequestReceiver<util::WaitIndicator> linkReceiver(root().engine().dispatcher(), link);
                     drp->postNewManagerRequest(new ManagerRequest(id, linkReceiver.getSender()), true);
                     link.wait();
                 }

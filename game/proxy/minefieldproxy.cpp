@@ -352,7 +352,7 @@ game::proxy::MinefieldProxy::setPassageDistance(int distance)
 }
 
 void
-game::proxy::MinefieldProxy::getSweepInfo(WaitIndicator& ind, Id_t viewpointShip, SweepInfo& out)
+game::proxy::MinefieldProxy::getSweepInfo(util::WaitIndicator& ind, Id_t viewpointShip, SweepInfo& out)
 {
     class Task : public util::Request<Trampoline> {
      public:

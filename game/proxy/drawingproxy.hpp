@@ -9,11 +9,11 @@
 #include "afl/base/signal.hpp"
 #include "game/map/drawing.hpp"
 #include "game/map/point.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "util/requestdispatcher.hpp"
 #include "util/requestsender.hpp"
 #include "util/stringlist.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -50,12 +50,12 @@ namespace game { namespace proxy {
         /** Get status, synchronously.
             \param [in]  ind     WaitIndicator for UI synchronisation
             \param [out] status  Result */
-        void getStatus(WaitIndicator& ind, Status_t& status);
+        void getStatus(util::WaitIndicator& ind, Status_t& status);
 
         /** Get list of used tags with names.
             \param [in]  ind  WaitIndicator for UI synchronisation
             \param [out] list Result list, containing tag/value pairs */
-        void getTagList(WaitIndicator& ind, util::StringList& list);
+        void getTagList(util::WaitIndicator& ind, util::StringList& list);
 
         /** Create a new drawing.
             The new drawing is selected as new current drawing.

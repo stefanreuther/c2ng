@@ -7,9 +7,9 @@
 
 #include "afl/base/signal.hpp"
 #include "game/actions/taxationaction.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/session.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
 
@@ -80,7 +80,7 @@ namespace game { namespace proxy {
         /** Get status.
             \param link WaitIndicator
             \param out [out] Result */
-        void getStatus(WaitIndicator& link, Status& out);
+        void getStatus(util::WaitIndicator& link, Status& out);
 
         // Asynchronous modifiers
 

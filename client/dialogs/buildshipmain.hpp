@@ -176,7 +176,7 @@ namespace client { namespace dialogs {
 
         // UI helpers
         void setCursors(const game::proxy::BuildShipProxy::Status& st);
-        bool checkTechUpgrade(game::proxy::WaitIndicator& ind, game::TechLevel area, int level);
+        bool checkTechUpgrade(util::WaitIndicator& ind, game::TechLevel area, int level);
         void renderBuildOrder(const game::proxy::BuildShipProxy::Status& st);
         void renderSpecification(game::TechLevel area, const game::spec::info::PageContent& content);
         void updateBuildOrder();

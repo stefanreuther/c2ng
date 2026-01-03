@@ -28,7 +28,7 @@ client::dialogs::SessionFileSelectionDialog::~SessionFileSelectionDialog()
 { }
 
 void
-client::dialogs::SessionFileSelectionDialog::setFolderFromSession(game::proxy::WaitIndicator& ind)
+client::dialogs::SessionFileSelectionDialog::setFolderFromSession(util::WaitIndicator& ind)
 {
     class Task : public util::Request<game::Session> {
      public:
@@ -65,7 +65,7 @@ client::dialogs::SessionFileSelectionDialog::storeFolderInSession()
 }
 
 bool
-client::dialogs::SessionFileSelectionDialog::runDefault(game::proxy::WaitIndicator& ind)
+client::dialogs::SessionFileSelectionDialog::runDefault(util::WaitIndicator& ind)
 {
     // PCC1 and PCC2 update the 'UI.DIRECTORY' variable on every folder change.
     // We therefore update it upon every exit from the dialog, successful or not.

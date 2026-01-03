@@ -7,7 +7,6 @@
 #include "game/game.hpp"
 #include "game/map/universe.hpp"
 #include "game/proxy/viewpointstarbaseadaptor.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/registrationkey.hpp"
 #include "game/root.hpp"
 #include "game/spec/shiplist.hpp"
@@ -228,7 +227,7 @@ game::proxy::BaseStorageProxy::~BaseStorageProxy()
 { }
 
 void
-game::proxy::BaseStorageProxy::getParts(WaitIndicator& ind, TechLevel level, Parts_t& result)
+game::proxy::BaseStorageProxy::getParts(util::WaitIndicator& ind, TechLevel level, Parts_t& result)
 {
     class Task : public util::Request<Trampoline> {
      public:

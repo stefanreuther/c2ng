@@ -8,10 +8,9 @@
 #include "game/map/shipinfo.hpp"
 #include "game/session.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Ship information access.
         Provides bidirectional, synchronous access to the functions from game/map/shipinfo.hpp. */
@@ -44,7 +43,7 @@ namespace game { namespace proxy {
             @param which  [in]     Which information to return (bitset)
             @param out    [out]    Result
             @return Status of provided result */
-        CargoStatus getCargo(WaitIndicator& ind, Id_t shipId, int which, game::map::ShipCargoInfos_t& out);
+        CargoStatus getCargo(util::WaitIndicator& ind, Id_t shipId, int which, game::map::ShipCargoInfos_t& out);
 
         /** Get experience information.
             Returns the result of game::map::packShipExperienceInfo().
@@ -54,7 +53,7 @@ namespace game { namespace proxy {
             @param ind    [in,out] UI synchronisation
             @param shipId [in]     Ship Id
             @return Result */
-        game::map::ShipExperienceInfo getExperienceInfo(WaitIndicator& ind, Id_t shipId);
+        game::map::ShipExperienceInfo getExperienceInfo(util::WaitIndicator& ind, Id_t shipId);
 
      private:
         util::RequestSender<Session> m_gameSender;

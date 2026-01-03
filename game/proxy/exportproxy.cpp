@@ -247,7 +247,7 @@ game::proxy::ExportProxy::~ExportProxy()
 
 // Get current status.
 void
-game::proxy::ExportProxy::getStatus(WaitIndicator& ind, interpreter::exporter::Configuration& config)
+game::proxy::ExportProxy::getStatus(util::WaitIndicator& ind, interpreter::exporter::Configuration& config)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -279,21 +279,21 @@ game::proxy::ExportProxy::setFormat(interpreter::exporter::Format fmt)
 
 // Load configuration from file.
 bool
-game::proxy::ExportProxy::load(WaitIndicator& ind, String_t fileName, String_t& errorMessage)
+game::proxy::ExportProxy::load(util::WaitIndicator& ind, String_t fileName, String_t& errorMessage)
 {
     return callFileFunction(ind, fileName, errorMessage, &Trampoline::load);
 }
 
 // Save configuration to file.
 bool
-game::proxy::ExportProxy::save(WaitIndicator& ind, String_t fileName, String_t& errorMessage)
+game::proxy::ExportProxy::save(util::WaitIndicator& ind, String_t fileName, String_t& errorMessage)
 {
     return callFileFunction(ind, fileName, errorMessage, &Trampoline::save);
 }
 
 // Perform export into a file.
 bool
-game::proxy::ExportProxy::exportFile(WaitIndicator& ind, String_t fileName, String_t& errorMessage)
+game::proxy::ExportProxy::exportFile(util::WaitIndicator& ind, String_t fileName, String_t& errorMessage)
 {
     return callFileFunction(ind, fileName, errorMessage, &Trampoline::exportFile);
 }
@@ -366,7 +366,7 @@ game::proxy::ExportProxy::toggleFieldAlignment(Index_t index)
 
 // Retrieve list of properties.
 void
-game::proxy::ExportProxy::enumProperties(WaitIndicator& ind, afl::data::StringList_t& out)
+game::proxy::ExportProxy::enumProperties(util::WaitIndicator& ind, afl::data::StringList_t& out)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -384,7 +384,7 @@ game::proxy::ExportProxy::enumProperties(WaitIndicator& ind, afl::data::StringLi
 
 // Shortcut for calling a synchronous file-access function.
 bool
-game::proxy::ExportProxy::callFileFunction(WaitIndicator& ind, String_t fileName, String_t& errorMessage, FileFunction_t fcn)
+game::proxy::ExportProxy::callFileFunction(util::WaitIndicator& ind, String_t fileName, String_t& errorMessage, FileFunction_t fcn)
 {
     class Task : public util::Request<Trampoline> {
      public:

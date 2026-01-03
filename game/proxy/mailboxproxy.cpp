@@ -14,7 +14,6 @@
 #include "game/msg/outbox.hpp"
 #include "game/parser/informationconsumer.hpp"
 #include "game/playerset.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/root.hpp"
 
 using afl::string::Format;
@@ -342,7 +341,7 @@ game::proxy::MailboxProxy::~MailboxProxy()
 { }
 
 void
-game::proxy::MailboxProxy::getStatus(WaitIndicator& ind, Status& status)
+game::proxy::MailboxProxy::getStatus(util::WaitIndicator& ind, Status& status)
 {
     // Query status from game side
     class Task : public util::Request<Trampoline> {
@@ -360,7 +359,7 @@ game::proxy::MailboxProxy::getStatus(WaitIndicator& ind, Status& status)
 }
 
 void
-game::proxy::MailboxProxy::getSummary(WaitIndicator& ind, game::msg::Browser::Summary_t& summary, size_t& index)
+game::proxy::MailboxProxy::getSummary(util::WaitIndicator& ind, game::msg::Browser::Summary_t& summary, size_t& index)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -400,7 +399,7 @@ game::proxy::MailboxProxy::search(game::msg::Browser::Mode mode, int amount, boo
 }
 
 bool
-game::proxy::MailboxProxy::write(WaitIndicator& ind, const String_t& fileName, size_t first, size_t last, String_t& errorMessage)
+game::proxy::MailboxProxy::write(util::WaitIndicator& ind, const String_t& fileName, size_t first, size_t last, String_t& errorMessage)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -451,7 +450,7 @@ game::proxy::MailboxProxy::receiveData()
 }
 
 game::proxy::MailboxProxy::QuoteResult
-game::proxy::MailboxProxy::quoteMessage(WaitIndicator& ind, size_t index, QuoteAction action)
+game::proxy::MailboxProxy::quoteMessage(util::WaitIndicator& ind, size_t index, QuoteAction action)
 {
     class Task : public util::Request<Trampoline> {
      public:

@@ -135,7 +135,7 @@ game::proxy::TaxationProxy::~TaxationProxy()
 
 // Get status.
 void
-game::proxy::TaxationProxy::getStatus(WaitIndicator& link, Status& out)
+game::proxy::TaxationProxy::getStatus(util::WaitIndicator& link, Status& out)
 {
     class Task : public util::Request<Trampoline> {
      public:

@@ -9,7 +9,6 @@
 #include "game/map/planet.hpp"
 #include "game/map/planetstorage.hpp"
 #include "game/map/universe.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/turn.hpp"
 
 /*
@@ -171,7 +170,7 @@ game::proxy::BuildPartsProxy::~BuildPartsProxy()
 { }
 
 void
-game::proxy::BuildPartsProxy::getStatus(WaitIndicator& ind, Status& st)
+game::proxy::BuildPartsProxy::getStatus(util::WaitIndicator& ind, Status& st)
 {
     class Task : public util::Request<Trampoline> {
      public:

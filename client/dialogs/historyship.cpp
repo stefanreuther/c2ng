@@ -36,7 +36,7 @@ namespace {
     static_assert(HistoryShipSelection::ByAge   == 3, "ByAge");
     static_assert(HistoryShipSelection::ByName  == 4, "ByName");
 
-    void loadConfiguration(game::proxy::WaitIndicator& ind, game::proxy::ConfigurationProxy& proxy, HistoryShipSelection& sel)
+    void loadConfiguration(util::WaitIndicator& ind, game::proxy::ConfigurationProxy& proxy, HistoryShipSelection& sel)
     {
         int32_t value = proxy.getOption(ind, game::config::UserConfiguration::Sort_History);
         if (value >= 0 && value <= int32_t(HistoryShipSelection::SortMax)) {

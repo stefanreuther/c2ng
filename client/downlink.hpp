@@ -5,25 +5,17 @@
 #ifndef C2NG_CLIENT_DOWNLINK_HPP
 #define C2NG_CLIENT_DOWNLINK_HPP
 
-#include "afl/string/translator.hpp"
-#include "client/widgets/busyindicator.hpp"
-#include "game/proxy/waitindicator.hpp"
-#include "ui/eventloop.hpp"
-#include "ui/root.hpp"
 #include "client/si/userside.hpp"
+#include "ui/waitindicator.hpp"
 
 namespace client {
 
     /** Helper for calling "down" into the game/browser session with UI synchronisation.
-        This implements a WaitIndicator using the UI framework.
-        During the wait time, the sending thread (the UI thread) will be kept alive using an EventLoop,
-        and the user sees a BusyIndicator.
-
-        Use Downlink for information requests in reaction to user input.
-        Do NOT use Downlink from a drawWidget() callback.
+        This extends ui::WaitIndicator with a constructor taking a client::si::UserSide
+        that allows canceling background scripts.
 
         If you're interacting with scripts, use client::si::Control. */
-    class Downlink : public game::proxy::WaitIndicator {
+    class Downlink : public ui::WaitIndicator {
      public:
         /** Constructor.
             \param root UI Root
@@ -34,20 +26,6 @@ namespace client {
             If the Downlink is constructed using this signature, it will allow cancelling potential background scripts.
             \param us UserSide */
         explicit Downlink(client::si::UserSide& us);
-
-        ~Downlink();
-
-        // WaitIndicator:
-        void post(bool success);
-        bool wait();
-
-     private:
-        ui::Root& m_root;
-        client::widgets::BusyIndicator m_indicator;
-        bool m_busy;
-        ui::EventLoop m_loop;
-
-        void setBusy(bool flag);
     };
 }
 

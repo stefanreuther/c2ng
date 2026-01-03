@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/v3/passwordapplet.cpp game/v3/passwordapplet.hpp \
+FILES_gamelib = util/waitindicator.cpp util/waitindicator.hpp \
+    game/v3/passwordapplet.cpp game/v3/passwordapplet.hpp \
     game/maint/dump/textoutput.cpp game/maint/dump/textoutput.hpp \
     game/maint/dump/input.cpp game/maint/dump/parsers.cpp \
     game/maint/dump/parsers.hpp game/maint/dump/typedetector.cpp \
@@ -286,8 +287,7 @@ FILES_gamelib = game/v3/passwordapplet.cpp game/v3/passwordapplet.hpp \
     game/proxy/commandlistproxy.hpp util/simplerequestdispatcher.cpp \
     util/simplerequestdispatcher.hpp game/test/waitindicator.cpp \
     game/test/waitindicator.hpp game/proxy/keymapproxy.cpp \
-    game/proxy/keymapproxy.hpp game/proxy/waitindicator.cpp \
-    game/proxy/waitindicator.hpp game/maint/messagesearchapplication.cpp \
+    game/proxy/keymapproxy.hpp game/maint/messagesearchapplication.cpp \
     game/maint/messagesearchapplication.hpp \
     game/maint/configurationapplication.cpp \
     game/maint/configurationapplication.hpp \
@@ -828,17 +828,21 @@ PROJ_AUTO += \
     gamelib:game/*.cpp,game/*.hpp,util/*.cpp,util/*.hpp,interpreter/*.cpp,interpreter/*.hpp
 
 TARGETS += guilib
-FILES_guilib = client/dialogs/vcroptions.cpp client/dialogs/vcroptions.hpp \
-    client/vcr/configuration.cpp client/vcr/configuration.hpp \
-    gfx/threed/modelapplet.cpp gfx/threed/modelapplet.hpp \
-    gfx/threed/renderapplet.cpp gfx/threed/renderapplet.hpp \
-    client/widgets/testapplet.cpp client/widgets/testapplet.hpp \
-    ui/widgets/testapplet.cpp ui/widgets/testapplet.hpp gfx/applet.cpp \
-    gfx/applet.hpp client/dialogs/missionselection.cpp \
-    client/dialogs/missionselection.hpp gfx/codec/custom.cpp \
-    gfx/codec/custom.hpp gfx/codec/application.cpp gfx/codec/application.hpp \
-    gfx/codec/bmp.cpp gfx/codec/bmp.hpp gfx/codec/codec.hpp \
-    gfx/colorquantizer.cpp gfx/colorquantizer.hpp \
+FILES_guilib = ui/dialogs/fileselectiondialog.cpp \
+    ui/dialogs/fileselectiondialog.hpp ui/widgets/filelistbox.cpp \
+    ui/widgets/filelistbox.hpp ui/widgets/busyindicator.cpp \
+    ui/widgets/busyindicator.hpp ui/waitindicator.cpp \
+    ui/waitindicator.hpp client/dialogs/vcroptions.cpp \
+    client/dialogs/vcroptions.hpp client/vcr/configuration.cpp \
+    client/vcr/configuration.hpp gfx/threed/modelapplet.cpp \
+    gfx/threed/modelapplet.hpp gfx/threed/renderapplet.cpp \
+    gfx/threed/renderapplet.hpp client/widgets/testapplet.cpp \
+    client/widgets/testapplet.hpp ui/widgets/testapplet.cpp \
+    ui/widgets/testapplet.hpp gfx/applet.cpp gfx/applet.hpp \
+    client/dialogs/missionselection.cpp client/dialogs/missionselection.hpp \
+    gfx/codec/custom.cpp gfx/codec/custom.hpp gfx/codec/application.cpp \
+    gfx/codec/application.hpp gfx/codec/bmp.cpp gfx/codec/bmp.hpp \
+    gfx/codec/codec.hpp gfx/colorquantizer.cpp gfx/colorquantizer.hpp \
     gfx/threed/colortransformation.cpp gfx/threed/colortransformation.hpp \
     gfx/threed/positionlist.cpp gfx/threed/positionlist.hpp \
     gfx/threed/model.cpp gfx/threed/model.hpp \
@@ -1043,9 +1047,7 @@ FILES_guilib = client/dialogs/vcroptions.cpp client/dialogs/vcroptions.hpp \
     client/dialogs/buildstarbasedialog.cpp \
     client/dialogs/buildstarbasedialog.hpp client/tiles/taskeditortile.cpp \
     client/tiles/taskeditortile.hpp client/dialogs/taxationdialog.cpp \
-    client/dialogs/taxationdialog.hpp client/dialogs/fileselectiondialog.cpp \
-    client/dialogs/fileselectiondialog.hpp client/widgets/filelistbox.cpp \
-    client/widgets/filelistbox.hpp client/dialogs/searchdialog.cpp \
+    client/dialogs/taxationdialog.hpp client/dialogs/searchdialog.cpp \
     client/dialogs/searchdialog.hpp client/map/minefieldmissionoverlay.cpp \
     client/map/minefieldmissionoverlay.hpp client/map/prefixoverlay.cpp \
     client/map/prefixoverlay.hpp client/tiles/starchartheadertile.cpp \
@@ -1215,7 +1217,6 @@ FILES_guilib = client/dialogs/vcroptions.cpp client/dialogs/vcroptions.hpp \
     client/si/scriptprocedure.cpp client/si/scriptprocedure.hpp \
     client/si/scriptside.hpp ui/dialogs/messagebox.cpp \
     ui/dialogs/messagebox.hpp ui/rich/statictext.cpp ui/rich/statictext.hpp \
-    client/widgets/busyindicator.cpp client/widgets/busyindicator.hpp \
     ui/widgets/tiledpanel.cpp ui/widgets/tiledpanel.hpp \
     ui/widgets/keydispatcher.cpp ui/widgets/keydispatcher.hpp \
     ui/invisiblewidget.cpp ui/invisiblewidget.hpp client/usercallback.cpp \
@@ -1865,7 +1866,8 @@ DEPEND_c2ng = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/game/v3/passwordapplettest.cpp \
+FILES_testsuite = test/ui/waitindicatortest.cpp \
+    test/util/waitindicatortest.cpp test/game/v3/passwordapplettest.cpp \
     test/game/maint/dump/applicationtest.cpp \
     test/game/maint/dump/parserstest.cpp \
     test/game/maint/dump/typedetectortest.cpp \
@@ -2543,7 +2545,6 @@ FILES_testsuite = test/game/v3/passwordapplettest.cpp \
     test/game/ref/historyshiplisttest.cpp \
     test/game/ref/fleetmemberlisttest.cpp test/game/ref/fleetlisttest.cpp \
     test/game/ref/configurationtest.cpp \
-    test/game/proxy/waitindicatortest.cpp \
     test/game/proxy/visibilityrangeproxytest.cpp \
     test/game/proxy/vcroverviewproxytest.cpp \
     test/game/proxy/vcrdatabaseproxytest.cpp \
@@ -2839,7 +2840,7 @@ FILES_testsuite = test/game/v3/passwordapplettest.cpp \
     test/client/map/locationtest.cpp \
     test/client/dialogs/objectselectiondialogtest.cpp \
     test/client/picturenamertest.cpp test/client/markertest.cpp \
-    test/client/downlinktest.cpp test/client/applicationparameterstest.cpp
+    test/client/applicationparameterstest.cpp
 TYPE_testsuite = testapp
 DEPEND_testsuite = serverlib guilib gamelib afl
 PROJ_AUTO += testsuite:u/*.cpp,u/*.hpp,test/*.cpp

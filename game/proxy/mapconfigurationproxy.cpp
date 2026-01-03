@@ -20,7 +20,7 @@ game::proxy::MapConfigurationProxy::MapConfigurationProxy(util::RequestSender<Se
 { }
 
 void
-game::proxy::MapConfigurationProxy::getMapConfiguration(WaitIndicator& ind, game::map::Configuration& config)
+game::proxy::MapConfigurationProxy::getMapConfiguration(util::WaitIndicator& ind, game::map::Configuration& config)
 {
     class Task : public util::Request<Session> {
      public:
@@ -71,7 +71,7 @@ game::proxy::MapConfigurationProxy::setMapConfiguration(const game::map::Configu
 }
 
 game::map::RenderOptions
-game::proxy::MapConfigurationProxy::getRenderOptions(WaitIndicator& ind, game::map::RenderOptions::Area a)
+game::proxy::MapConfigurationProxy::getRenderOptions(util::WaitIndicator& ind, game::map::RenderOptions::Area a)
 {
     class Task : public util::Request<Session> {
      public:
@@ -116,7 +116,7 @@ game::proxy::MapConfigurationProxy::setRenderOptions(game::map::RenderOptions::A
 }
 
 void
-game::proxy::MapConfigurationProxy::getMarkerConfiguration(WaitIndicator& ind, std::vector<game::config::MarkerOption::Data>& config)
+game::proxy::MapConfigurationProxy::getMarkerConfiguration(util::WaitIndicator& ind, std::vector<game::config::MarkerOption::Data>& config)
 {
     class Task : public util::Request<Session> {
      public:

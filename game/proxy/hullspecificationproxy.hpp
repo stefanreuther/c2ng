@@ -15,10 +15,9 @@
 #include "game/types.hpp"
 #include "util/requestreceiver.hpp"
 #include "util/requestsender.hpp"
+#include "util/waitindicator.hpp"
 
 namespace game { namespace proxy {
-
-    class WaitIndicator;
 
     /** Hull specification access.
 
@@ -87,13 +86,13 @@ namespace game { namespace proxy {
             Returns the weapon effects for the previously-configured ship.
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [out] result Result */
-        void describeWeaponEffects(WaitIndicator& ind, game::spec::info::WeaponEffects& result);
+        void describeWeaponEffects(util::WaitIndicator& ind, game::spec::info::WeaponEffects& result);
 
         /** Get hull function details.
             \param [in]  ind    WaitIndicator for UI synchronisation
             \param [out] result Result
             \param [in]  useNormalPictures If true, use normal pictures even if hull function is unavailable or broken */
-        void describeHullFunctionDetails(WaitIndicator& ind, game::spec::info::AbilityDetails_t& result, bool useNormalPictures);
+        void describeHullFunctionDetails(util::WaitIndicator& ind, game::spec::info::AbilityDetails_t& result, bool useNormalPictures);
 
         /** Signal: ship data to show.
             \param data Data */

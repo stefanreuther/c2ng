@@ -226,7 +226,7 @@ game::proxy::SelectionProxy::~SelectionProxy()
 
 // Get state, synchronously.
 void
-game::proxy::SelectionProxy::init(WaitIndicator& ind, Info& result)
+game::proxy::SelectionProxy::init(util::WaitIndicator& ind, Info& result)
 {
     class Task : public util::Request<Trampoline> {
      public:
@@ -251,7 +251,7 @@ game::proxy::SelectionProxy::setCurrentLayer(LayerReference_t newLayer)
 
 // Execute user-provided expression, synchronously.
 bool
-game::proxy::SelectionProxy::executeExpression(WaitIndicator& ind, const String_t& expression, LayerReference_t targetLayer, String_t& error)
+game::proxy::SelectionProxy::executeExpression(util::WaitIndicator& ind, const String_t& expression, LayerReference_t targetLayer, String_t& error)
 {
     class Task : public util::Request<Trampoline> {
      public:

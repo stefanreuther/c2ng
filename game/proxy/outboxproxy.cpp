@@ -9,7 +9,6 @@
 #include "game/game.hpp"
 #include "game/msg/file.hpp"
 #include "game/msg/outbox.hpp"
-#include "game/proxy/waitindicator.hpp"
 #include "game/root.hpp"
 #include "game/turn.hpp"
 #include "interpreter/arguments.hpp"
@@ -41,7 +40,7 @@ game::proxy::OutboxProxy::~OutboxProxy()
 { }
 
 String_t
-game::proxy::OutboxProxy::getHeadersForDisplay(WaitIndicator& ind, int sender, PlayerSet_t receivers)
+game::proxy::OutboxProxy::getHeadersForDisplay(util::WaitIndicator& ind, int sender, PlayerSet_t receivers)
 {
     class Task : public util::Request<Session> {
      public:
@@ -62,7 +61,7 @@ game::proxy::OutboxProxy::getHeadersForDisplay(WaitIndicator& ind, int sender, P
 }
 
 bool
-game::proxy::OutboxProxy::getMessage(WaitIndicator& ind, Id_t id, Info& result)
+game::proxy::OutboxProxy::getMessage(util::WaitIndicator& ind, Id_t id, Info& result)
 {
     class Task : public util::Request<Session> {
      public:
@@ -92,7 +91,7 @@ game::proxy::OutboxProxy::getMessage(WaitIndicator& ind, Id_t id, Info& result)
 }
 
 game::StringVerifier*
-game::proxy::OutboxProxy::createStringVerifier(WaitIndicator& ind)
+game::proxy::OutboxProxy::createStringVerifier(util::WaitIndicator& ind)
 {
     typedef std::auto_ptr<StringVerifier> Result_t;
     class Task : public util::Request<Session> {
@@ -198,7 +197,7 @@ game::proxy::OutboxProxy::deleteMessage(Id_t id)
 }
 
 bool
-game::proxy::OutboxProxy::addMessageToFile(WaitIndicator& ind, int sender, String_t text, String_t fileName, String_t& errorMessage)
+game::proxy::OutboxProxy::addMessageToFile(util::WaitIndicator& ind, int sender, String_t text, String_t fileName, String_t& errorMessage)
 {
     class Task : public util::Request<Session> {
      public:
@@ -268,7 +267,7 @@ game::proxy::OutboxProxy::addMessageToFile(WaitIndicator& ind, int sender, Strin
 }
 
 bool
-game::proxy::OutboxProxy::loadMessageTextFromFile(WaitIndicator& ind, String_t& text, String_t fileName, String_t& errorMessage)
+game::proxy::OutboxProxy::loadMessageTextFromFile(util::WaitIndicator& ind, String_t& text, String_t fileName, String_t& errorMessage)
 {
     class Task : public util::Request<Session> {
      public:

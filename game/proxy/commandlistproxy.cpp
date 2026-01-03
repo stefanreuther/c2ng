@@ -106,7 +106,7 @@ game::proxy::CommandListProxy::CommandListProxy(util::RequestSender<Session> gam
 { }
 
 bool
-game::proxy::CommandListProxy::init(WaitIndicator& link, Infos_t& out, MetaInfo& metaOut)
+game::proxy::CommandListProxy::init(util::WaitIndicator& link, Infos_t& out, MetaInfo& metaOut)
 {
     class Request : public util::Request<Session> {
      public:
@@ -131,7 +131,7 @@ game::proxy::CommandListProxy::init(WaitIndicator& link, Infos_t& out, MetaInfo&
 }
 
 bool
-game::proxy::CommandListProxy::addCommand(WaitIndicator& link, const String_t& cmd, Infos_t& newList, size_t& newPos)
+game::proxy::CommandListProxy::addCommand(util::WaitIndicator& link, const String_t& cmd, Infos_t& newList, size_t& newPos)
 {
     class Request : public util::Request<Session> {
      public:
@@ -179,7 +179,7 @@ game::proxy::CommandListProxy::addCommand(WaitIndicator& link, const String_t& c
 }
 
 void
-game::proxy::CommandListProxy::removeCommand(WaitIndicator& link, const String_t& cmd, Infos_t& newList)
+game::proxy::CommandListProxy::removeCommand(util::WaitIndicator& link, const String_t& cmd, Infos_t& newList)
 {
     class Request : public util::Request<Session> {
      public:

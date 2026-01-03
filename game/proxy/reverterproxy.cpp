@@ -76,7 +76,7 @@ game::proxy::ReverterProxy::~ReverterProxy()
 
 // Initialize.
 void
-game::proxy::ReverterProxy::init(WaitIndicator& link, game::map::Point pt, Status& status)
+game::proxy::ReverterProxy::init(util::WaitIndicator& link, game::map::Point pt, Status& status)
 {
     class Task : public util::Request<Trampoline> {
      public:

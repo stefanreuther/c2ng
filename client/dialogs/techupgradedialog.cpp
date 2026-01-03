@@ -183,7 +183,7 @@ client::dialogs::doTechUpgradeDialog(ui::Root& root, afl::string::Translator& tx
 
 bool
 client::dialogs::checkTechUpgrade(ui::Root& root, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender, game::Id_t pid,
-                                  game::proxy::WaitIndicator& ind, game::TechLevel area, int level, game::spec::Cost reservedAmount,
+                                  util::WaitIndicator& ind, game::TechLevel area, int level, game::spec::Cost reservedAmount,
                                   String_t introFormat, String_t title)
 {
     // Try to achieve correct tech level
