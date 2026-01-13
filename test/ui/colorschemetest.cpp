@@ -33,7 +33,7 @@ AFL_TEST("ui.ColorScheme:drawBackground", a)
 }
 
 /** Test that we can get every color, even out-of-range ones. */
-AFL_TEST("ui.ColorScheme:getColor", a)
+AFL_TEST_NOARG("ui.ColorScheme:getColor")
 {
     // Use a RGBAPixmap to initialize the palette to a 1:1 mapping
     ui::ColorScheme testee;
@@ -43,10 +43,5 @@ AFL_TEST("ui.ColorScheme:getColor", a)
     // Test we can get everything
     for (uint32_t i = 0; i < ui::Color_Avail; ++i) {
         testee.getColor(uint8_t(i));
-    }
-
-    // Out-of-range colors must report black
-    for (uint32_t i = ui::Color_Avail; i < 255; ++i) {
-        a.checkEqual("01. getColor", testee.getColor(uint8_t(i)), COLORQUAD_FROM_RGB(0,0,0));
     }
 }

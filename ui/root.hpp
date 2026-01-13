@@ -43,6 +43,43 @@ namespace ui {
         There is no internal interlocking. */
     class Root : public Widget {
      public:
+        /** Class for palette loader. */
+        class PaletteLoader {
+         protected:
+            /** This class is not intended for deletion using base-class pointers. */
+            ~PaletteLoader()
+                { }
+         public:
+            /** Set palette.
+                \param index  Index (>= Color_Avail)
+                \param colors Colors to set */
+            virtual void setPalette(uint8_t index, afl::base::Memory<const gfx::ColorQuad_t> colors) = 0;
+        };
+
+        /** Palette handler.
+            When using palettized screen, only one component can define the active palette.
+            To do so,
+            - inherit PaletteHandler
+            - call Root::addPaletteHandler() when it is created and becomes visible
+            - call Root::removePaletteHandler() when it is removed and becomes invisible */
+        class PaletteHandler {
+         protected:
+            /** This class is not intended for deletion using base-class pointers. */
+            ~PaletteHandler()
+                { }
+         public:
+            /** Load palette.
+                Called when this component's palette becomes active.
+                \param ldr PaletteLoader instance */
+            virtual void loadPalette(PaletteLoader& ldr) = 0;
+
+            /** Unload palette.
+                Called when another component's palette becomes active.
+                Usually, this means this component needs to request a redraw
+                using the active palette. */
+            virtual void unloadPalette() = 0;
+        };
+
         typedef afl::base::Closure<void(gfx::EventConsumer&)> EventTask_t;
 
         /** Constructor.
@@ -169,10 +206,30 @@ namespace ui {
             \param offset Distance to edge. When anchored at an edge, leave that many pixels from that edge. */
         void moveWidgetToEdge(Widget& widget, gfx::HorizontalAlignment xPos, gfx::VerticalAlignment yPos, int offset);
 
+        /** Add a palette handler.
+            This will call PaletteLoader::unloadPalette() for the old palette,
+            and PaletteLoader::loadPalette() for the new one.
+            \param hdl PaletteHandler to add */
+        void addPaletteHandler(PaletteHandler& hdl);
+
+        /** Remove a palette handler.
+            If this removes the active palette, this will call
+            PaletteLoader::loadPalette() for the newly-active one.
+            \param hdl PaletteHandler to remove */
+        void removePaletteHandler(PaletteHandler& hdl);
+
+        /** Update palette.
+            If the given PaletteHandler is active, refreshes all PaletteHandlers
+            by calling their loadPalette() or unloadPalette() function.
+            \param origin Originating PaletteHandler */
+        void updatePalette(PaletteHandler& origin);
+
         /** Save a screenshot.
             Saves the current canvas by invoking sig_screenshot with the right parameters. */
         void saveScreenshot();
 
+        /** Signal: take screenshot.
+            \param canvas Screen canvas */
         afl::base::Signal<void(gfx::Canvas&)> sig_screenshot;
 
      private:
@@ -187,6 +244,8 @@ namespace ui {
         ColorScheme m_colorScheme;                                         ///< Color scheme (palette -> pixel mapping).
         gfx::ResourceProvider& m_provider;                                 ///< Resource provider.
 
+        std::vector<PaletteHandler*> m_paletteHandlers;
+
         // Mouse state
         bool m_mouseEventKnown;                                            ///< Mouse state: true if m_mousePosition, m_mouseButtons valid.
         bool m_mouseEventRequested;                                        ///< Mouse state: true if postMouseEvent() was called but not yet confirmed.
@@ -198,6 +257,7 @@ namespace ui {
         void initWindow();
         void performDeferredRedraws();
         void drawFrames(gfx::Canvas& can, Widget& widget);
+        void activatePalette();
     };
 
 }

@@ -64,3 +64,157 @@ AFL_TEST("ui.Root", a)
     // Verify result
     a.checkEqual("31. get", w.get(), "fcbead");
 }
+
+/*
+ *  PaletteHandler
+ */
+
+namespace {
+    class PHImpl : public ui::Root::PaletteHandler {
+     public:
+        PHImpl(String_t& acc, String_t name)
+            : m_acc(acc), m_name(name)
+            { }
+        void loadPalette(ui::Root::PaletteLoader&)
+            { m_acc += "load " + m_name + "."; }
+        void unloadPalette()
+            { m_acc += "unload " + m_name + "."; }
+     private:
+        String_t& m_acc;
+        String_t m_name;
+    };
+}
+
+/* Simple sequence */
+AFL_TEST("ui.Root:PaletteHandler:simple", a)
+{
+    // Environment
+    gfx::NullEngine engine;
+    gfx::NullResourceProvider provider;
+    ui::Root root(engine, provider, gfx::WindowParameters());
+
+    // Add
+    String_t acc;
+    PHImpl ph(acc, "a");
+    root.addPaletteHandler(ph);
+    a.checkEqual("after add", acc, "load a.");
+
+    // Remove
+    acc.clear();
+    root.removePaletteHandler(ph);
+    a.checkEqual("after remove", acc, "");
+}
+
+/* Multiple PHs, symmetric */
+AFL_TEST("ui.Root:PaletteHandler:symmetric", a)
+{
+    // Environment
+    gfx::NullEngine engine;
+    gfx::NullResourceProvider provider;
+    ui::Root root(engine, provider, gfx::WindowParameters());
+
+    // Add
+    String_t acc;
+    PHImpl ph1(acc, "a");
+    PHImpl ph2(acc, "b");
+    PHImpl ph3(acc, "c");
+    root.addPaletteHandler(ph1);
+    root.addPaletteHandler(ph2);
+    root.addPaletteHandler(ph3);
+    a.checkEqual("after add", acc, "load a.load b.unload a.load c.unload a.unload b.");
+
+    // Update
+    acc.clear();
+    root.updatePalette(ph3);
+    a.checkEqual("after update 3", acc, "load c.unload a.unload b.");
+
+    acc.clear();
+    root.updatePalette(ph1);
+    a.checkEqual("after update 1", acc, "");
+
+    // Remove
+    acc.clear();
+    root.removePaletteHandler(ph3);
+    root.removePaletteHandler(ph2);
+    root.removePaletteHandler(ph1);
+    a.checkEqual("after remove", acc, "load b.unload a.load a.");
+}
+
+/* Multiple PHs, asymmetric */
+AFL_TEST("ui.Root:PaletteHandler:asymmetric", a)
+{
+    // Environment
+    gfx::NullEngine engine;
+    gfx::NullResourceProvider provider;
+    ui::Root root(engine, provider, gfx::WindowParameters());
+
+    // Add and remove a PaletteHandler
+    String_t acc;
+    PHImpl ph1(acc, "a");
+    PHImpl ph2(acc, "b");
+    root.addPaletteHandler(ph1);
+    root.addPaletteHandler(ph2);
+    a.checkEqual("after add", acc, "load a.load b.unload a.");
+
+    // Removing ph1 does not trigger a callback because it is invisible; removing ph2 does not trigger because there is none left.
+    acc.clear();
+    root.removePaletteHandler(ph1);
+    root.removePaletteHandler(ph2);
+    a.checkEqual("after remove", acc, "");
+}
+
+/* Palette setting */
+AFL_TEST("ui.Root:PaletteHandler:loadPalette", a)
+{
+    class LocalPHImpl : public ui::Root::PaletteHandler {
+     public:
+        void loadPalette(ui::Root::PaletteLoader& ldr)
+            {
+                const gfx::ColorQuad_t q[] = { COLORQUAD_FROM_RGB(200, 0, 0), COLORQUAD_FROM_RGB(0, 0, 100) };
+                ldr.setPalette(210, q);
+            }
+        void unloadPalette()
+            { }
+    };
+
+    // Environment
+    gfx::NullEngine engine;
+    gfx::NullResourceProvider provider;
+    ui::Root root(engine, provider, gfx::WindowParameters());
+
+    // Add a PaletteHandler
+    LocalPHImpl ph;
+    root.addPaletteHandler(ph);
+
+    // Verify that palette was loaded
+    a.checkEqual("color 210", root.colorScheme().getColor(210), COLORQUAD_FROM_RGB(200, 0, 0));
+    a.checkEqual("color 211", root.colorScheme().getColor(211), COLORQUAD_FROM_RGB(0, 0, 100));
+}
+
+/* Palette setting, out of range */
+AFL_TEST("ui.Root:PaletteHandler:loadPalette:out-of-range", a)
+{
+    class LocalPHImpl : public ui::Root::PaletteHandler {
+     public:
+        void loadPalette(ui::Root::PaletteLoader& ldr)
+            {
+                const gfx::ColorQuad_t q[] = { COLORQUAD_FROM_RGB(200, 0, 0), COLORQUAD_FROM_RGB(0, 0, 100) };
+                ldr.setPalette(ui::Color_Avail-1, q);
+            }
+        void unloadPalette()
+            { }
+    };
+
+    // Environment
+    gfx::NullEngine engine;
+    gfx::NullResourceProvider provider;
+    ui::Root root(engine, provider, gfx::WindowParameters());
+
+    // Add a PaletteHandler
+    LocalPHImpl ph;
+    root.addPaletteHandler(ph);
+
+    // Verify that palette was loaded
+    a.checkDifferent("color 159", root.colorScheme().getColor(ui::Color_Avail-1), COLORQUAD_FROM_RGB(200, 0, 0));
+    a.checkEqual("color 160", root.colorScheme().getColor(ui::Color_Avail), COLORQUAD_FROM_RGB(0, 0, 100));
+}

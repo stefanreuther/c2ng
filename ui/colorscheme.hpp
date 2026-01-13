@@ -94,17 +94,42 @@ namespace ui {
 
     extern const gfx::ColorQuad_t STANDARD_COLORS[Color_Avail];
 
+    /** User-interface color scheme.
+        Manages a color palette such that the Color_XXX values have the expected definition.
+        For a palettized screen, the palette is set up appropriately; see gfx::Canvas::setPalette(). */
     class ColorScheme : public gfx::ColorScheme<uint8_t> {
      public:
+        /** Constructor. */
         ColorScheme();
         virtual ~ColorScheme();
+
+        // ColorScheme:
         virtual gfx::Color_t getColor(uint8_t index);
         virtual void drawBackground(gfx::Canvas& can, const gfx::Rectangle& area);
 
+        /** Initialize.
+            Called by Root.
+            Defines the palette and/or the index/color mapping.
+            \param can Screen canvas */
         void init(gfx::Canvas& can);
 
+        /** Set palette.
+            Ensures that the given color indexes have the given definition.
+            To call this method (indirectly), derive from Root::PaletteHandler and implement loadPalette().
+            \param can    Screen canvas (provided by Root)
+            \param index  Index (should be >= Color_Avail)
+            \param colors Colors */
+        void setPalette(gfx::Canvas& can, uint8_t index, afl::base::Memory<const gfx::ColorQuad_t> colors);
+
+        /** Check for compatible canvas.
+            A canvas is compatible if it uses palettized colors that match our palette.
+            For incompatible canvases, a color transformation is required, that may or may not
+            produce the expected result.
+            \param can Canvas to check (an image, usually) */
+        bool isCompatibleCanvas(gfx::Canvas& can) const;
+
      private:
-        gfx::Color_t m_colors[Color_Avail];
+        gfx::Color_t m_colors[256];
     };
 }
 

@@ -273,6 +273,47 @@ ui::Root::moveWidgetToEdge(Widget& widget, gfx::HorizontalAlignment xPos, gfx::V
     widget.setExtent(widgetPos);
 }
 
+// Add a palette handler.
+void
+ui::Root::addPaletteHandler(PaletteHandler& hdl)
+{
+    // Add new palette
+    m_paletteHandlers.push_back(&hdl);
+    activatePalette();
+}
+
+// Remove a palette handler.
+void
+ui::Root::removePaletteHandler(PaletteHandler& hdl)
+{
+    // Find location of this palette
+    size_t i = m_paletteHandlers.size();
+    while (i > 0 && m_paletteHandlers[i-1] != &hdl) {
+        --i;
+    }
+
+    // Found?
+    if (i != 0) {
+        // Remove old instance; i points one beyond
+        --i;
+        m_paletteHandlers.erase(m_paletteHandlers.begin() + i);
+
+        // If erased instance was last one, update
+        if (i >= m_paletteHandlers.size()) {
+            activatePalette();
+        }
+    }
+}
+
+// Update palette.
+void
+ui::Root::updatePalette(PaletteHandler& origin)
+{
+    if (!m_paletteHandlers.empty() && m_paletteHandlers.back() == &origin) {
+        activatePalette();
+    }
+}
+
 // Save a screenshot.
 void
 ui::Root::saveScreenshot()
@@ -345,4 +386,42 @@ ui::Root::drawFrames(gfx::Canvas& can, Widget& widget)
         ctx.setColor(Color_Yellow);
     }
     drawRectangle(ctx, widget.getExtent());
+}
+
+
+void
+ui::Root::activatePalette()
+{
+    // Implementation of PaletteLoader
+    class PaletteLoaderImpl : public PaletteLoader {
+     public:
+        PaletteLoaderImpl(const afl::base::Ptr<gfx::Canvas>& window, ColorScheme& colorScheme)
+            : m_window(window), m_colorScheme(colorScheme)
+            { }
+
+        void setPalette(uint8_t index, afl::base::Memory<const gfx::ColorQuad_t> colors)
+            {
+                if (m_window.get() != 0) {
+                    m_colorScheme.setPalette(*m_window, index, colors);
+                }
+            }
+     private:
+        afl::base::Ptr<gfx::Canvas> m_window;
+        ColorScheme& m_colorScheme;
+    };
+
+    if (!m_paletteHandlers.empty()) {
+        PaletteHandler* active = m_paletteHandlers.back();
+
+        // Load it
+        PaletteLoaderImpl impl(m_window, m_colorScheme);
+        active->loadPalette(impl);
+
+        // Unload all others
+        for (size_t i = 0; i < m_paletteHandlers.size(); ++i) {
+            if (m_paletteHandlers[i] != active) {
+                m_paletteHandlers[i]->unloadPalette();
+            }
+        }
+    }
 }

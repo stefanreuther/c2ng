@@ -3,6 +3,7 @@
   */
 
 #include "ui/colorscheme.hpp"
+#include "afl/base/countof.hpp"
 #include "gfx/context.hpp"
 
 /** Standard Palette.
@@ -183,7 +184,7 @@ gfx::Color_t
 ui::ColorScheme::getColor(uint8_t index)
 {
     // ex GfxStandardColorScheme::getColor
-    return index < Color_Avail ? m_colors[index] : m_colors[0];
+    return index < countof(m_colors) ? m_colors[index] : m_colors[0];
 }
 
 void
@@ -197,4 +198,41 @@ void
 ui::ColorScheme::init(gfx::Canvas& can)
 {
     can.setPalette(0, STANDARD_COLORS, m_colors);
+}
+
+void
+ui::ColorScheme::setPalette(gfx::Canvas& can, uint8_t index, afl::base::Memory<const gfx::ColorQuad_t> colors)
+{
+    size_t pos = index;
+    if (pos < Color_Avail) {
+        size_t toSkip = Color_Avail - pos;
+        colors.split(toSkip);
+        pos += toSkip;
+    }
+    can.setPalette(static_cast<gfx::Color_t>(pos), colors, afl::base::Memory<gfx::Color_t>(m_colors).subrange(pos));
+}
+
+bool
+ui::ColorScheme::isCompatibleCanvas(gfx::Canvas& can) const
+{
+    if (can.getBitsPerPixel() > 8) {
+        return false;
+    }
+
+    const size_t N = countof(STANDARD_COLORS);
+    gfx::Color_t in[N];
+    gfx::ColorQuad_t out[N];
+    for (size_t i = 0; i < N; ++i) {
+        in[i] = static_cast<gfx::Color_t>(i);
+        out[i] = 0;
+    }
+
+    can.decodeColors(in, out);
+
+    for (size_t i = 0; i < N; ++i) {
+        if (out[i] != STANDARD_COLORS[i]) {
+            return false;
+        }
+    }
+    return true;
 }

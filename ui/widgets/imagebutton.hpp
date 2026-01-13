@@ -15,7 +15,7 @@ namespace ui { namespace widgets {
     /** Image button.
         Displays an image that can be clicked with an optional overlay text.
         (If you just want an image, ignore the "can be clicked" part.) */
-    class ImageButton : public BaseButton {
+    class ImageButton : public BaseButton, public Root::PaletteHandler {
      public:
         /** Constructor.
             \param image    Image name (for ResourceProvider::getImage)
@@ -40,15 +40,19 @@ namespace ui { namespace widgets {
             \param color Color. By default, skin background (potentially patterned) is drawn. */
         void setBackgroundColor(uint8_t color);
 
+        // PaletteHandler:
+        void loadPalette(Root::PaletteLoader& ldr);
+        void unloadPalette();
+
      private:
         /* Private Icon implementation. We could probably use Image? */
         class Icon : public ui::icons::Icon {
          public:
-            Icon(String_t imageName, Root& root, gfx::Point size);
+            Icon(Root& root, gfx::Point size);
             virtual gfx::Point getSize() const;
             virtual void draw(gfx::Context<SkinColor::Color>& ctx, gfx::Rectangle area, ButtonFlags_t flags) const;
 
-            String_t m_imageName;
+            afl::base::Ptr<gfx::Canvas> m_image;
             String_t m_text;
             Root& m_root;
             gfx::Point m_size;
@@ -56,7 +60,9 @@ namespace ui { namespace widgets {
             int m_backgroundColor;
         };
 
+        bool m_paletteLoaded;
         Icon m_icon;
+        String_t m_imageName;
         afl::base::SignalConnection conn_imageChange;
 
         void onImageChange();

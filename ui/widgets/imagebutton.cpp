@@ -13,8 +13,8 @@
 #include "gfx/complex.hpp"
 
 inline
-ui::widgets::ImageButton::Icon::Icon(String_t imageName, Root& root, gfx::Point size)
-    : m_imageName(imageName), m_root(root), m_size(size), m_font(), m_backgroundColor(-1)
+ui::widgets::ImageButton::Icon::Icon(Root& root, gfx::Point size)
+    : m_image(), m_root(root), m_size(size), m_font(), m_backgroundColor(-1)
 {
     m_font.addSize(-1);
 }
@@ -38,9 +38,8 @@ ui::widgets::ImageButton::Icon::draw(gfx::Context<SkinColor::Color>& ctx, gfx::R
     }
 
     // Draw the image.
-    afl::base::Ptr<gfx::Canvas> image = m_root.provider().getImage(m_imageName);
-    if (image.get() != 0) {
-        blitSized(ctx, area, *image);
+    if (m_image.get() != 0) {
+        blitSized(ctx, area, *m_image);
     }
 
     // Draw the text, if any.
@@ -78,21 +77,26 @@ ui::widgets::ImageButton::Icon::draw(gfx::Context<SkinColor::Color>& ctx, gfx::R
 
 ui::widgets::ImageButton::ImageButton(String_t image, util::Key_t key, ui::Root& root, gfx::Point size)
     : BaseButton(root, key),
-      m_icon(image, root, size),
+      m_paletteLoaded(false),
+      m_icon(root, size),
+      m_imageName(image),
       conn_imageChange(root.provider().sig_imageChange.add(this, &ImageButton::onImageChange))
 {
     setIcon(m_icon);
+    onImageChange();
 }
 
 ui::widgets::ImageButton::~ImageButton()
-{ }
+{
+    root().removePaletteHandler(*this);
+}
 
 void
 ui::widgets::ImageButton::setImage(String_t image)
 {
-    if (image != m_icon.m_imageName) {
-        m_icon.m_imageName = image;
-        requestRedraw();
+    if (image != m_imageName) {
+        m_imageName = image;
+        onImageChange();
     }
 }
 
@@ -116,6 +120,45 @@ ui::widgets::ImageButton::setBackgroundColor(uint8_t color)
 
 void
 ui::widgets::ImageButton::onImageChange()
+{
+    afl::base::Ptr<gfx::Canvas> image = root().provider().getImage(m_imageName);
+    if (image.get() != m_icon.m_image.get()) {
+        m_icon.m_image = image;
+
+        bool wantPalette = (image.get() != 0 && root().colorScheme().isCompatibleCanvas(*image));
+        if (wantPalette && !m_paletteLoaded) {
+            root().addPaletteHandler(*this);
+        }
+        if (!wantPalette && m_paletteLoaded) {
+            root().removePaletteHandler(*this);
+        }
+        if (wantPalette && m_paletteLoaded) {
+            root().updatePalette(*this);
+        }
+        m_paletteLoaded = wantPalette;
+        requestRedraw();
+    }
+}
+
+void
+ui::widgets::ImageButton::loadPalette(Root::PaletteLoader& ldr)
+{
+    if (m_icon.m_image.get() != 0) {
+        const size_t N = 256-Color_Avail;
+        gfx::Color_t in[N];
+        gfx::ColorQuad_t out[N];
+        for (size_t i = 0; i < N; ++i) {
+            in[i] = static_cast<gfx::Color_t>(i + Color_Avail);
+            out[i] = 0;
+        }
+        m_icon.m_image->decodeColors(in, out);
+        ldr.setPalette(Color_Avail, out);
+        requestRedraw();
+    }
+}
+
+void
+ui::widgets::ImageButton::unloadPalette()
 {
     requestRedraw();
 }

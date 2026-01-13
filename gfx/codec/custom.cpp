@@ -36,9 +36,9 @@ namespace {
         COLORQUAD_FROM_RGB(129, 129, 194),    // 7
         COLORQUAD_FROM_RGB( 97,  97, 129),    // 8
         COLORQUAD_FROM_RGB(255, 255,   0),    // 9
-        COLORQUAD_FROM_RGB(  0,   0,   0),    // 10 -- dynamic in 4-bpp
-        COLORQUAD_FROM_RGB(  0,   0,   0),    // 11 -- dynamic in 4-bpp
-        COLORQUAD_FROM_RGB(  0,   0,   0),    // 12 -- dynamic in 4-bpp
+        COLORQUAD_FROM_RGB(121,  97, 121),    // 10 -- dynamic in 4-bpp -- not used by images but must match UI
+        COLORQUAD_FROM_RGB(129, 129, 129),    // 11 -- dynamic in 4-bpp -- not used by images but must match UI
+        COLORQUAD_FROM_RGB(178, 178, 137),    // 12 -- dynamic in 4-bpp -- not used by images but must match UI
         COLORQUAD_FROM_RGB(  0,   0,   0),    // 13 -- dynamic in 4-bpp
         COLORQUAD_FROM_RGB(  0,   0,   0),    // 14 -- dynamic in 4-bpp
         COLORQUAD_FROM_RGB(255, 255, 255),    // 15
@@ -179,6 +179,14 @@ namespace {
         COLORQUAD_FROM_RGB( 93,  93,   0),    // 149
         COLORQUAD_FROM_RGB(109, 109,   0),    // 150
         COLORQUAD_FROM_RGB(125, 125,   0),    // 151 -- 183
+        COLORQUAD_FROM_RGB( 24,  32,  40),    // 152 -- not used by images but must match UI
+        COLORQUAD_FROM_RGB( 96, 112, 128),    // 153 -- not used by images but must match UI
+        COLORQUAD_FROM_RGB( 18,  24,  30),    // 154 -- not used by images but must match UI
+        COLORQUAD_FROM_RGB( 72,  84,  96),    // 155 -- not used by images but must match UI
+        COLORQUAD_FROM_RGB(  0,   0,   0),    // 156 -- not used by images but must match UI
+        COLORQUAD_FROM_RGB(  0,   0,   0),    // 157 -- not used by images but must match UI
+        COLORQUAD_FROM_RGB(  0,   0,   0),    // 158 -- not used by images but must match UI
+        COLORQUAD_FROM_RGB(  0,   0,   0),    // 159 -- not used by images but must match UI
     };
 
     /** PCC1 4-bpp file format.
