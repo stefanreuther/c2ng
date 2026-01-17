@@ -161,6 +161,20 @@ AFL_TEST("gfx.codec.Application:convert:plain8", a)
     a.checkEqual("03. file content", getFileContent(env, "out.cd").substr(0, 2), "CD");
 }
 
+/** Test conversion to plain raw. */
+AFL_TEST("gfx.codec.Application:convert:raw", a)
+{
+    Environment env;
+    env.fs.openFile("in.cc", FileSystem::Create)->fullWrite(FOUR_BIT_FILE);
+
+    String_t args[] = { "convert", "custom:in.cc", "raw:out.gfx" };
+    setCommandLine(env, args);
+
+    a.checkEqual("01. run",          runApplication(env), 0);
+    a.checkEqual("02. output",       getOutput(env), "");
+    a.checkEqual("03. file content", getFileContent(env, "out.gfx").substr(1, 1), "\x08");
+}
+
 /** Test conversion to packed 4-bit.
     The compressed data stream will contain our signature at position 7. */
 AFL_TEST("gfx.codec.Application:convert:packed4", a)
@@ -190,6 +204,20 @@ AFL_TEST("gfx.codec.Application:convert:packed8", a)
     a.checkEqual       ("02. output",       getOutput(env), "");
     a.checkGreaterEqual("03. file size",    getFileContent(env, "out.cd").size(), 7U);
     a.checkEqual       ("04. file content", getFileContent(env, "out.cd").substr(7, 2), "CD");
+}
+
+/** Test conversion to packed raw. */
+AFL_TEST("gfx.codec.Application:convert:packedraw", a)
+{
+    Environment env;
+    env.fs.openFile("in.cc", FileSystem::Create)->fullWrite(FOUR_BIT_FILE);
+
+    String_t args[] = { "convert", "custom:in.cc", "packedraw:out.gfx" };
+    setCommandLine(env, args);
+
+    a.checkEqual("01. run",          runApplication(env), 0);
+    a.checkEqual("02. output",       getOutput(env), "");
+    a.checkEqual("03. file content", getFileContent(env, "out.gfx").substr(8, 1), "\x08");
 }
 
 /** Test unsuccessful "convert" subcommand invocation: too few args. */

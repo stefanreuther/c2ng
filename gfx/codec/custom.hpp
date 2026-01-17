@@ -17,17 +17,18 @@ namespace gfx { namespace codec {
         They are used in cc.res, which PCC2 supports as extra source for image files.
         They are normally used with a compression layer (run-length encoding) on top.
 
-        This class supports loading all three file formats with optional compression,
-        and automatic format detection.
+        This class supports loading and writing all three file formats with optional compression,
+        and automatic format detection during read.
 
-        This class supports writing the first two formats with optional compression;
-        actual type is configured during construction. */
+        Whereas ".cc" and ".cd" (FourBit, EightBit) images do have a palette, ".gfx" (Raw) does not;
+        images saved in this format save the raw pixel data. */
     class Custom : public Codec {
      public:
         /** File format for save(). */
         enum Mode {
             FourBit,            ///< 4 bit per pixel, ".cc"
-            EightBit            ///< 8 bit per pixel, ".cd"
+            EightBit,           ///< 8 bit per pixel, ".cd"
+            Raw                 ///< Raw 8-bit per pixel, ".gfx"
         };
 
         /** Default constructor.

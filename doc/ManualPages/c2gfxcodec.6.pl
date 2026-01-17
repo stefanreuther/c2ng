@@ -9,6 +9,7 @@ section('Description',
         paragraph_text("PCC 1.x and PCC2 use a custom format with 8 and 4 bits per pixel,",
                        "conventionally having the file extension <i>.cd</i> and <i>.cc</i>.",
                        "The primary benefit of that codec is (was) use of PCC 1.x's fixed color palette.",
+                       "In addition, there is a file format without specific palette, mainly used for UI assets (<i>.gfx</i>).",
                        "The files can optionally be compressed using a simple run-length encoding scheme."),
         paragraph_text("Multiple files of this type can be stored in resource files (<i>*.res</i>).",
                        "Resource files can be installed as plugins (see <link>c2plugin(6)</link>),",
@@ -34,10 +35,14 @@ subsect('File Specifications',
                          paragraph_text('Plain 8-bit custom codec;')),
         paragraph_detail('<b>plain4:</b><i>PATH.cd</i>',
                          paragraph_text('Plain 4-bit custom codec;')),
+        paragraph_detail('<b>raw:</b><i>PATH.gfx</i>',
+                         paragraph_text('Raw 8-bit pixel data;')),
         paragraph_detail('<b>packed4:</b><i>PATH.cd</i>',
                          paragraph_text('Packed (compressed) 4-bit custom codec;')),
         paragraph_detail('<b>packed8:</b><i>PATH.cd</i>',
-                         paragraph_text('Packed (compressed) 8-bit custom codec.')));
+                         paragraph_text('Packed (compressed) 8-bit custom codec;')),
+        paragraph_detail('<b>packedraw:</b><i>PATH.gfx</i>',
+                         paragraph_text('Packed (compressed) raw 8-bit pixel data.')));
 
 section('Environment',
         paragraph_default_environment());

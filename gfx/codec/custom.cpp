@@ -460,6 +460,29 @@ namespace {
         out.fullWrite(encodedImage->pixels());
     }
 
+    void saveGFXImage(gfx::Canvas& can, afl::io::Stream& out)
+    {
+        static const uint8_t signature[] = {0,8};
+        gfx::Point size = can.getSize();
+        GFXHeader header;
+        header.width = int16_t(size.getX());
+        header.height = int16_t(size.getY());
+        out.fullWrite(signature);
+        out.fullWrite(afl::base::fromObject(header));
+
+        afl::base::GrowableMemory<gfx::Color_t> colors;
+        afl::base::GrowableMemory<uint8_t> bytes;
+        colors.resize(size.getX());
+        bytes.resize(size.getX());
+        for (int y = 0; y < size.getY(); ++y) {
+            can.getPixels(gfx::Point(0, y), colors);
+            for (int x = 0; x < size.getX(); ++x) {
+                *bytes.at(x) = static_cast<uint8_t>(*colors.at(x));
+            }
+            out.fullWrite(bytes);
+        }
+    }
+
     void saveImageInternal(gfx::codec::Custom::Mode mode, gfx::Canvas& can, afl::io::Stream& out)
     {
         switch (mode) {
@@ -468,6 +491,9 @@ namespace {
             break;
          case gfx::codec::Custom::EightBit:
             saveEightBitImage(can, out);
+            break;
+         case gfx::codec::Custom::Raw:
+            saveGFXImage(can, out);
             break;
         }
     }

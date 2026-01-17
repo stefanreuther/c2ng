@@ -132,4 +132,40 @@ AFL_TEST("gfx.codec.Custom:save", a)
         };
         a.checkEqualContent<uint8_t>("41. 8-bit compressed", out.getContent(), EXPECTED);
     }
+
+    // Raw uncompressed
+    {
+        afl::io::InternalStream out;
+        Custom(Custom::Raw, false).save(*can, out);
+
+        static const uint8_t EXPECTED[] = {
+            0,8,
+            3,0,5,0,
+            0,0,0,
+            0,1,0,
+            0,0,0,
+            0,2,0,
+            0,2,0
+        };
+        a.checkEqualContent<uint8_t>("51. raw uncompressed", out.getContent(), EXPECTED);
+    }
+
+    // Raw compressed
+    {
+        afl::io::InternalStream out;
+        Custom(Custom::Raw, true).save(*can, out);
+
+        static const uint8_t EXPECTED[] = {
+            21,0,0,0,
+            21,0,255,
+            0,8,
+            3,0,5,
+            255,5,0,
+            1,
+            255,5,0,
+            2,0,0,2,0,
+            0,0,
+        };
+        a.checkEqualContent<uint8_t>("61. raw compressed", out.getContent(), EXPECTED);
+    }
 }

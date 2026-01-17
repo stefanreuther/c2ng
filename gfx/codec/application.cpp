@@ -135,8 +135,10 @@ gfx::codec::Application::showHelp()
                                               "bmp:PATH.bmp\tBitmap file\n"
                                               "plain8:PATH.cd, custom:PATH.cd\tPlain 8-bit custom codec\n"
                                               "plain4:PATH.cc\tPlain 4-bit custom codec\n"
+                                              "raw:PATH.gfx\tRaw 8-bit pixel data\n"
                                               "packed8:PATH.cd\tPacked 8-bit custom codec\n"
-                                              "packed4:PATH.cc\tPacked 4-bit custom codec\n"))));
+                                              "packed4:PATH.cc\tPacked 4-bit custom codec\n"
+                                              "packedraw:PATH.gfx\tPacked raw 8-bit pixel data\n"))));
     exit(0);
 }
 
@@ -269,12 +271,20 @@ gfx::codec::Application::openFile(Status& st, util::StringParser& p, afl::io::Fi
         st.codec.reset(new Custom(Custom::FourBit, false));
         st.stream = fileSystem().openFile(p.getRemainder(), mode).asPtr();
         return true;
+    } else if (p.parseString("raw:")) {
+        st.codec.reset(new Custom(Custom::Raw, false));
+        st.stream = fileSystem().openFile(p.getRemainder(), mode).asPtr();
+        return true;
     } else if (p.parseString("packed8:") || p.parseString("custom:")) {
         st.codec.reset(new Custom(Custom::EightBit, true));
         st.stream = fileSystem().openFile(p.getRemainder(), mode).asPtr();
         return true;
     } else if (p.parseString("packed4:")) {
         st.codec.reset(new Custom(Custom::FourBit, true));
+        st.stream = fileSystem().openFile(p.getRemainder(), mode).asPtr();
+        return true;
+    } else if (p.parseString("packedraw:")) {
+        st.codec.reset(new Custom(Custom::Raw, true));
         st.stream = fileSystem().openFile(p.getRemainder(), mode).asPtr();
         return true;
     } else if (p.parseString("bmp:")) {
