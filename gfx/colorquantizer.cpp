@@ -277,7 +277,7 @@ gfx::ColorQuantizer::ColorQuantizer()
     : m_firstUsable(0), m_firstDynamic(0),
       m_numUsable(256), m_numDynamic(256)
 {
-    Memory<ColorQuad_t>(m_palette).fill(0);
+    Memory<ColorQuad_t>(m_palette).fill(COLORQUAD_FROM_RGB(0,0,0));
 }
 
 afl::base::Ref<gfx::PalettizedPixmap>
