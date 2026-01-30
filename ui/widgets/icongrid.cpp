@@ -352,7 +352,7 @@ ui::widgets::IconGrid::handleMouse(gfx::Point pt, MouseButtons_t pressedButtons)
 
         // Move selected item
         int nx = (pt.getX() - getExtent().getLeftX()) / (m_cellSize.getX() + 1);
-        int ny = (pt.getY() - getExtent().getTopY())  / (m_cellSize.getY() + 1);
+        int ny = (pt.getY() - getExtent().getTopY())  / (m_cellSize.getY() + 1) + m_pageTop;
 
         size_t pos = size_t(nx + ny*m_widthInCells);
         if (nx < m_widthInCells && pos < m_icons.size()) {
