@@ -36,26 +36,6 @@ client::widgets::FolderListbox::getItemHeight(size_t /*n*/) const
     return m_font->getLineHeight();
 }
 
-int
-client::widgets::FolderListbox::getHeaderHeight() const
-{
-    return 0;
-}
-
-int
-client::widgets::FolderListbox::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-client::widgets::FolderListbox::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
-void
-client::widgets::FolderListbox::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
 void
 client::widgets::FolderListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {

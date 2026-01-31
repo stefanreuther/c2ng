@@ -88,26 +88,6 @@ client::widgets::AllianceStatusList::getItemHeight(size_t /*n*/) const
     return getItemHeight();
 }
 
-int
-client::widgets::AllianceStatusList::getHeaderHeight() const
-{
-    return 0;
-}
-
-int
-client::widgets::AllianceStatusList::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-client::widgets::AllianceStatusList::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
-void
-client::widgets::AllianceStatusList::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
 void
 client::widgets::AllianceStatusList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {

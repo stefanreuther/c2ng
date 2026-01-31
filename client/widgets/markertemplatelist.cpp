@@ -48,26 +48,6 @@ client::widgets::MarkerTemplateList::getItemHeight(size_t /*n*/) const
     return getLineHeight();
 }
 
-int
-client::widgets::MarkerTemplateList::getHeaderHeight() const
-{
-    return 0;
-}
-
-int
-client::widgets::MarkerTemplateList::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-client::widgets::MarkerTemplateList::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
-void
-client::widgets::MarkerTemplateList::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
 void
 client::widgets::MarkerTemplateList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {

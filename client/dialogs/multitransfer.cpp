@@ -86,10 +86,6 @@ namespace {
         virtual size_t getNumItems() const;
         virtual bool isItemAccessible(size_t n) const;
         virtual int getItemHeight(size_t n) const;
-        virtual int getHeaderHeight() const;
-        virtual int getFooterHeight() const;
-        virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);
-        virtual void drawFooter(gfx::Canvas& can, gfx::Rectangle area);
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state);
 
         // Widget:
@@ -109,6 +105,19 @@ namespace {
         ui::Root& m_root;
         afl::string::Translator& m_translator;
         NumberFormatter m_formatter;
+
+        // Header
+        class Header : public ui::icons::Icon {
+         public:
+            Header(MultiTransferList& parent)
+                : Icon(), m_parent(parent)
+                { }
+            virtual gfx::Point getSize() const;
+            virtual void draw(gfx::Context<SkinColor::Color>& ctx, gfx::Rectangle area, ui::ButtonFlags_t flags) const;
+         private:
+            MultiTransferList& m_parent;
+        };
+        Header m_header;
 
         // Internal data structure
         struct Item {
@@ -188,8 +197,10 @@ namespace {
  */
 
 MultiTransferList::MultiTransferList(ui::Root& root, afl::string::Translator& tx, NumberFormatter fmt)
-    : m_root(root), m_translator(tx), m_formatter(fmt), m_items()
-{ }
+    : m_root(root), m_translator(tx), m_formatter(fmt), m_header(*this), m_items()
+{
+    setHeader(&m_header);
+}
 
 // AbstractListbox:
 size_t
@@ -209,44 +220,6 @@ MultiTransferList::getItemHeight(size_t /*n*/) const
 {
     return getFont()->getLineHeight();
 }
-
-int
-MultiTransferList::getHeaderHeight() const
-{
-    return getFont()->getLineHeight();
-}
-
-int
-MultiTransferList::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-MultiTransferList::drawHeader(gfx::Canvas& can, gfx::Rectangle area)
-{
-    // ex WMultiTransferHeader::drawContent
-    afl::base::Ref<gfx::Font> font(getFont());
-    const int em = font->getEmWidth();
-
-    gfx::Context<SkinColor::Color> ctx(can, getColorScheme());
-    ctx.useFont(*font);
-    ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
-    ctx.setColor(SkinColor::Static);
-
-    drawHLine(ctx, area.getLeftX(), area.getBottomY()-1, area.getRightX()-1);
-
-    area.consumeRightX(RightMargin_px);
-    outTextF(ctx, area.splitRightX(FreeWidth_ems * em), m_translator("Free"));
-    outTextF(ctx, area.splitRightX(HaveWidth_ems * em), m_translator("Have"));
-
-    ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
-    outTextF(ctx, area, " " + m_translator("Unit"));
-}
-
-void
-MultiTransferList::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
 
 void
 MultiTransferList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
@@ -358,6 +331,34 @@ MultiTransferList::hasRoomForHold(int32_t holdAmount, size_t extension) const
             && !m_items[extension].isTemporary
             && m_items[extension].room >= holdAmount);
 }
+
+gfx::Point
+MultiTransferList::Header::getSize() const
+{
+    return m_parent.getFont()->getCellSize();
+}
+
+void
+MultiTransferList::Header::draw(gfx::Context<SkinColor::Color>& ctx, gfx::Rectangle area, ui::ButtonFlags_t /*flags*/) const
+{
+    // ex WMultiTransferHeader::drawContent
+    afl::base::Ref<gfx::Font> font(m_parent.getFont());
+    const int em = font->getEmWidth();
+
+    ctx.useFont(*font);
+    ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
+    ctx.setColor(SkinColor::Static);
+
+    drawHLine(ctx, area.getLeftX(), area.getBottomY()-1, area.getRightX()-1);
+
+    area.consumeRightX(RightMargin_px);
+    outTextF(ctx, area.splitRightX(FreeWidth_ems * em), m_parent.m_translator("Free"));
+    outTextF(ctx, area.splitRightX(HaveWidth_ems * em), m_parent.m_translator("Have"));
+
+    ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
+    outTextF(ctx, area, " " + m_parent.m_translator("Unit"));
+}
+
 
 /*
  *  MultiTransferDialog

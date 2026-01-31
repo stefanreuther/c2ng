@@ -43,14 +43,6 @@ class client::tiles::TaskEditorTile::ListWidget : public ui::widgets::AbstractLi
         { return n <= m_status.commands.size(); }
     virtual int getItemHeight(size_t /*n*/) const
         { return m_provider.getFont(gfx::FontRequest())->getLineHeight(); }
-    virtual int getHeaderHeight() const
-        { return 0; }
-    virtual int getFooterHeight() const
-        { return 0; }
-    virtual void drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-        { }
-    virtual void drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-        { }
     virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
         {
             // ex WAutoTaskEditorList::drawPart

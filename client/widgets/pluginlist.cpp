@@ -94,26 +94,6 @@ client::widgets::PluginList::getItemHeight(size_t /*n*/) const
     return getItemHeight();
 }
 
-int
-client::widgets::PluginList::getHeaderHeight() const
-{
-    return 0;
-}
-
-int
-client::widgets::PluginList::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-client::widgets::PluginList::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
-void
-client::widgets::PluginList::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
 void
 client::widgets::PluginList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {

@@ -186,26 +186,6 @@ ui::widgets::CheckboxListbox::getItemHeight(size_t /*n*/) const
     return getItemHeight();
 }
 
-int
-ui::widgets::CheckboxListbox::getHeaderHeight() const
-{
-    return 0;
-}
-
-int
-ui::widgets::CheckboxListbox::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-ui::widgets::CheckboxListbox::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
-void
-ui::widgets::CheckboxListbox::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
 void
 ui::widgets::CheckboxListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {

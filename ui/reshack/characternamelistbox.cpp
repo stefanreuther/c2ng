@@ -61,26 +61,6 @@ ui::reshack::CharacterNameListbox::getItemHeight(size_t /*n*/) const
     return m_root.provider().getFont(gfx::FontRequest())->getLineHeight();
 }
 
-int
-ui::reshack::CharacterNameListbox::getHeaderHeight() const
-{
-    return 0;
-}
-
-int
-ui::reshack::CharacterNameListbox::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-ui::reshack::CharacterNameListbox::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
-void
-ui::reshack::CharacterNameListbox::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
 void
 ui::reshack::CharacterNameListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {

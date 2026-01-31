@@ -45,10 +45,14 @@ client::widgets::CostSummaryList::CostSummaryList(int numLines, bool isList, Foo
       m_translator(tx),
       m_content(),
       m_available(),
-      m_numberFormatter(fmt)
+      m_numberFormatter(fmt),
+      m_header(*this),
+      m_footer(*this)
 {
     // ex WBillDisplay::WBillDisplay
     setState(DisabledState, !isList);
+    setHeader(&m_header);
+    setFooter(&m_footer);
 }
 
 client::widgets::CostSummaryList::~CostSummaryList()
@@ -113,7 +117,67 @@ client::widgets::CostSummaryList::getItemHeight(size_t /*n*/) const
     return getLineHeight();
 }
 
+void
+client::widgets::CostSummaryList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
+{
+    // ex WBillDisplay::drawPart, CBillWidget.Draw (part)
+    afl::base::Ref<gfx::Font> font = m_root.provider().getFont("");
+    const int m = font->getEmWidth();
+
+    gfx::Context<SkinColor::Color> ctx(can, getColorScheme());
+    ctx.useFont(*font);
+
+    afl::base::Deleter del;
+    ui::prepareColorListItem(ctx, area, hasState(DisabledState) ? PassiveItem : state, m_root.colorScheme(), del);
+    if (const game::spec::CostSummary::Item* p = m_content.get(item)) {
+        const int x = area.getLeftX();
+        const int y = area.getTopY();
+
+        ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
+        outTextF(ctx, gfx::Point(x + 3*m, y), m*20, p->name);
+        ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
+        outText(ctx, gfx::Point(x + 3*m,  y), Format("%d %s ", p->multiplier, UTF_TIMES));
+        showValue(ctx, x + 27*m, y, m_numberFormatter, p->cost.get(Cost::Money) + p->cost.get(Cost::Supplies));
+        showValue(ctx, x + 31*m, y, m_numberFormatter, p->cost.get(Cost::Tritanium));
+        showValue(ctx, x + 35*m, y, m_numberFormatter, p->cost.get(Cost::Duranium));
+        showValue(ctx, x + 39*m, y, m_numberFormatter, p->cost.get(Cost::Molybdenum));
+    }
+}
+
+void
+client::widgets::CostSummaryList::handlePositionChange()
+{
+    defaultHandlePositionChange();
+}
+
+ui::layout::Info
+client::widgets::CostSummaryList::getLayoutInfo() const
+{
+    const int emWidth  = m_root.provider().getFont("")->getEmWidth();
+    const int numLines = (m_numLines != 0 ? m_numLines : int(m_content.getNumItems()));
+    const int height   = numLines * getLineHeight() + getHeaderHeight() + getFooterHeight();
+
+    int width  = 39 * emWidth;
+    if (!hasState(DisabledState)) {
+        width += 5;
+    }
+
+    return ui::layout::Info(gfx::Point(width, height), ui::layout::Info::GrowBoth);
+}
+
+bool
+client::widgets::CostSummaryList::handleKey(util::Key_t key, int prefix)
+{
+    return defaultHandleKey(key, prefix);
+}
+
 int
+client::widgets::CostSummaryList::getLineHeight() const
+{
+    return m_root.provider().getFont("")->getLineHeight();
+}
+
+inline int
 client::widgets::CostSummaryList::getHeaderHeight() const
 {
     return getLineHeight();
@@ -132,8 +196,8 @@ client::widgets::CostSummaryList::getFooterHeight() const
     return result;
 }
 
-void
-client::widgets::CostSummaryList::drawHeader(gfx::Canvas& can, gfx::Rectangle area)
+inline void
+client::widgets::CostSummaryList::drawHeader(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area)
 {
     // ex WBillDisplay::drawContent, CBillWidget.Draw (part)
     afl::base::Ref<gfx::Font> font = m_root.provider().getFont("");
@@ -142,7 +206,6 @@ client::widgets::CostSummaryList::drawHeader(gfx::Canvas& can, gfx::Rectangle ar
     const int m = font->getEmWidth();
     const int h = font->getLineHeight();
 
-    gfx::Context<SkinColor::Color> ctx(can, getColorScheme());
     ctx.useFont(*font);
     ctx.setColor(SkinColor::Static);
 
@@ -158,8 +221,8 @@ client::widgets::CostSummaryList::drawHeader(gfx::Canvas& can, gfx::Rectangle ar
     }
 }
 
-void
-client::widgets::CostSummaryList::drawFooter(gfx::Canvas& can, gfx::Rectangle area)
+inline void
+client::widgets::CostSummaryList::drawFooter(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area)
 {
     // ex WBillTotalDisplay::drawContent, CBillWidget.Draw (part)
     afl::base::Ref<gfx::Font> font = m_root.provider().getFont("");
@@ -168,7 +231,6 @@ client::widgets::CostSummaryList::drawFooter(gfx::Canvas& can, gfx::Rectangle ar
     const int m = font->getEmWidth();
     const int h = font->getLineHeight();
 
-    gfx::Context<SkinColor::Color> ctx(can, getColorScheme());
     ctx.useFont(*font);
     ctx.setColor(SkinColor::Static);
     // FIXME -> drawBackground(ctx, getExtent());
@@ -229,62 +291,26 @@ client::widgets::CostSummaryList::drawFooter(gfx::Canvas& can, gfx::Rectangle ar
     }
 }
 
-void
-client::widgets::CostSummaryList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
+gfx::Point
+client::widgets::CostSummaryList::Header::getSize() const
 {
-    // ex WBillDisplay::drawPart, CBillWidget.Draw (part)
-    afl::base::Ref<gfx::Font> font = m_root.provider().getFont("");
-    const int m = font->getEmWidth();
-
-    gfx::Context<SkinColor::Color> ctx(can, getColorScheme());
-    ctx.useFont(*font);
-
-    afl::base::Deleter del;
-    ui::prepareColorListItem(ctx, area, hasState(DisabledState) ? PassiveItem : state, m_root.colorScheme(), del);
-    if (const game::spec::CostSummary::Item* p = m_content.get(item)) {
-        const int x = area.getLeftX();
-        const int y = area.getTopY();
-
-        ctx.setTextAlign(gfx::LeftAlign, gfx::TopAlign);
-        outTextF(ctx, gfx::Point(x + 3*m, y), m*20, p->name);
-        ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
-        outText(ctx, gfx::Point(x + 3*m,  y), Format("%d %s ", p->multiplier, UTF_TIMES));
-        showValue(ctx, x + 27*m, y, m_numberFormatter, p->cost.get(Cost::Money) + p->cost.get(Cost::Supplies));
-        showValue(ctx, x + 31*m, y, m_numberFormatter, p->cost.get(Cost::Tritanium));
-        showValue(ctx, x + 35*m, y, m_numberFormatter, p->cost.get(Cost::Duranium));
-        showValue(ctx, x + 39*m, y, m_numberFormatter, p->cost.get(Cost::Molybdenum));
-    }
+    return gfx::Point(10, m_parent.getHeaderHeight());
 }
 
 void
-client::widgets::CostSummaryList::handlePositionChange()
+client::widgets::CostSummaryList::Header::draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::ButtonFlags_t /*flags*/) const
 {
-    defaultHandlePositionChange();
+    m_parent.drawHeader(ctx, area);
 }
 
-ui::layout::Info
-client::widgets::CostSummaryList::getLayoutInfo() const
+gfx::Point
+client::widgets::CostSummaryList::Footer::getSize() const
 {
-    const int emWidth  = m_root.provider().getFont("")->getEmWidth();
-    const int numLines = (m_numLines != 0 ? m_numLines : int(m_content.getNumItems()));
-    const int height   = numLines * getLineHeight() + getHeaderHeight() + getFooterHeight();
-
-    int width  = 39 * emWidth;
-    if (!hasState(DisabledState)) {
-        width += 5;
-    }
-
-    return ui::layout::Info(gfx::Point(width, height), ui::layout::Info::GrowBoth);
+    return gfx::Point(10, m_parent.getFooterHeight());
 }
 
-bool
-client::widgets::CostSummaryList::handleKey(util::Key_t key, int prefix)
+void
+client::widgets::CostSummaryList::Footer::draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::ButtonFlags_t /*flags*/) const
 {
-    return defaultHandleKey(key, prefix);
-}
-
-int
-client::widgets::CostSummaryList::getLineHeight() const
-{
-    return m_root.provider().getFont("")->getLineHeight();
+    m_parent.drawFooter(ctx, area);
 }

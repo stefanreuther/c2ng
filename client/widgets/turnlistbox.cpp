@@ -44,26 +44,6 @@ client::widgets::TurnListbox::getItemHeight(size_t /*n*/) const
         + 2*OUTLINE_SIZE;
 }
 
-int
-client::widgets::TurnListbox::getHeaderHeight() const
-{
-    return 0;
-}
-
-int
-client::widgets::TurnListbox::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-client::widgets::TurnListbox::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
-void
-client::widgets::TurnListbox::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
 void
 client::widgets::TurnListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {

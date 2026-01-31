@@ -42,26 +42,6 @@ ui::widgets::StringListbox::getItemHeight(size_t /*n*/) const
     return m_provider.getFont(gfx::FontRequest())->getLineHeight();
 }
 
-int
-ui::widgets::StringListbox::getHeaderHeight() const
-{
-    return 0;
-}
-
-int
-ui::widgets::StringListbox::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-ui::widgets::StringListbox::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
-void
-ui::widgets::StringListbox::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
 void
 ui::widgets::StringListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {

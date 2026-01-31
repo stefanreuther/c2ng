@@ -9,6 +9,7 @@
 #include "gfx/complex.hpp"
 #include "gfx/context.hpp"
 #include "ui/draw.hpp"
+#include "ui/icons/icon.hpp"
 #include "ui/layout/vbox.hpp"
 #include "ui/widgets/framegroup.hpp"
 #include "ui/widgets/quit.hpp"
@@ -17,9 +18,20 @@
 #include "ui/widgets/statictext.hpp"
 #include "ui/window.hpp"
 
+namespace {
+    int getHeight(ui::icons::Icon* p)
+    {
+        return p != 0
+            ? p->getSize().getY()
+            : 0;
+    }
+}
+
 ui::widgets::AbstractListbox::AbstractListbox()
     : ScrollableWidget(),
       m_flags(),
+      m_pHeader(0),
+      m_pFooter(0),
       m_currentItem(),
       m_topY(),
       m_mouseDown(false)
@@ -35,7 +47,7 @@ ui::widgets::AbstractListbox::getPageTop() const
 int
 ui::widgets::AbstractListbox::getPageSize() const
 {
-    return std::max(0, getExtent().getHeight() - getHeaderHeight());
+    return std::max(0, getExtent().getHeight() - getHeight(m_pHeader) - getHeight(m_pFooter));
 }
 
 int
@@ -103,13 +115,13 @@ ui::widgets::AbstractListbox::draw(gfx::Canvas& can)
     gfx::Rectangle r = getExtent();
 
     // Draw header and footer
-    const int headerHeight = getHeaderHeight();
-    if (headerHeight != 0) {
-        drawHeader(can, r.splitY(headerHeight));
+    if (m_pHeader != 0) {
+        gfx::Context<SkinColor::Color> ctx(can, getColorScheme());
+        m_pHeader->draw(ctx, r.splitY(m_pHeader->getSize().getY()), ButtonFlags_t());
     }
-    const int footerHeight = getFooterHeight();
-    if (footerHeight != 0) {
-        drawFooter(can, r.splitBottomY(footerHeight));
+    if (m_pFooter != 0) {
+        gfx::Context<SkinColor::Color> ctx(can, getColorScheme());
+        m_pFooter->draw(ctx, r.splitBottomY(m_pFooter->getSize().getY()), ButtonFlags_t());
     }
 
     // Draw content
@@ -256,8 +268,8 @@ ui::widgets::AbstractListbox::handleMouse(gfx::Point pt, MouseButtons_t pressedB
     // Check for mouse in widget
     // FIXME: PCC2 checks with fuzz factor slightly outside in second pass
     gfx::Rectangle r(getExtent());
-    r.consumeY(getHeaderHeight());
-    r.consumeBottomY(getFooterHeight());
+    r.consumeY(getHeight(m_pHeader));
+    r.consumeBottomY(getHeight(m_pFooter));
     if (r.contains(pt)) {
         if (hasFlag(Blocked)) {
             // Widget is blocked. Request activation but do not do anything.
@@ -334,6 +346,20 @@ ui::widgets::AbstractListbox::handleMouse(gfx::Point pt, MouseButtons_t pressedB
 }
 
 void
+ui::widgets::AbstractListbox::setHeader(ui::icons::Icon* pHeader)
+{
+    m_pHeader = pHeader;
+    requestRedraw();
+}
+
+void
+ui::widgets::AbstractListbox::setFooter(ui::icons::Icon* pFooter)
+{
+    m_pFooter = pFooter;
+    requestRedraw();
+}
+
+void
 ui::widgets::AbstractListbox::setFlag(Flag flag, bool enable)
 {
     if (enable) {
@@ -356,8 +382,8 @@ ui::widgets::AbstractListbox::updateItem(size_t item)
     pos.moveBy(getRelativeToAbsoluteOffset());
 
     gfx::Rectangle view(getExtent());
-    view.consumeY(getHeaderHeight());
-    view.consumeBottomY(getFooterHeight());
+    view.consumeY(getHeight(m_pHeader));
+    view.consumeBottomY(getHeight(m_pFooter));
     pos.intersect(view);
     if (pos.exists()) {
         requestRedraw(pos);
@@ -497,7 +523,7 @@ ui::widgets::AbstractListbox::setCurrentItem(size_t nr, Direction dir)
 
             // If this is the first selectable item, scroll up all the way to the top.
             // This is required to make unselectable headings visible.
-            if (isFirstAccessibleItem(nr) && itemPos.getBottomY() <= getExtent().getHeight() - getHeaderHeight() - getFooterHeight()) {
+            if (isFirstAccessibleItem(nr) && itemPos.getBottomY() <= getExtent().getHeight() - getHeight(m_pHeader) - getHeight(m_pFooter)) {
                 itemPos.include(gfx::Point());
             }
 
@@ -611,7 +637,7 @@ ui::widgets::AbstractListbox::makeVisible(const gfx::Rectangle& relativeArea)
     const int totalHeight = getTotalSize();
     const int oldTopY = m_topY;
 
-    const int availableHeight = getExtent().getHeight() - getHeaderHeight() - getFooterHeight();
+    const int availableHeight = getExtent().getHeight() - getHeight(m_pHeader) - getHeight(m_pFooter);
     if (availableHeight <= 0) {
         // Don't change anything, it's not visible
     } else if (availableHeight >= totalHeight) {
@@ -648,5 +674,5 @@ ui::widgets::AbstractListbox::getRelativeToAbsoluteOffset()
 {
     return getExtent().getTopLeft()
         - gfx::Point(0, m_topY)
-        + gfx::Point(0, getHeaderHeight());
+        + gfx::Point(0, getHeight(m_pHeader));
 }

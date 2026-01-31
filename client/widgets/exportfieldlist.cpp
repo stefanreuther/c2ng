@@ -48,26 +48,6 @@ client::widgets::ExportFieldList::getItemHeight(size_t /*n*/) const
     return getFont()->getLineHeight();
 }
 
-int
-client::widgets::ExportFieldList::getHeaderHeight() const
-{
-    return 0;
-}
-
-int
-client::widgets::ExportFieldList::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-client::widgets::ExportFieldList::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
-void
-client::widgets::ExportFieldList::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
 void
 client::widgets::ExportFieldList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {

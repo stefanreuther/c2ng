@@ -12,6 +12,10 @@
 #include "ui/root.hpp"
 #include "ui/scrollablewidget.hpp"
 
+namespace ui { namespace icons {
+    class Icon;
+} }
+
 namespace ui { namespace widgets {
 
     /** Base class for a scrollable list box.
@@ -60,10 +64,6 @@ namespace ui { namespace widgets {
         virtual size_t getNumItems() const = 0;
         virtual bool isItemAccessible(size_t n) const = 0;
         virtual int getItemHeight(size_t n) const = 0;
-        virtual int getHeaderHeight() const = 0;
-        virtual int getFooterHeight() const = 0;
-        virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area) = 0;
-        virtual void drawFooter(gfx::Canvas& can, gfx::Rectangle area) = 0;
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state) = 0;
 
         // ScrollableWidget virtuals:
@@ -83,6 +83,8 @@ namespace ui { namespace widgets {
         bool defaultHandleKey(util::Key_t key, int prefix);
         virtual bool handleMouse(gfx::Point pt, MouseButtons_t pressedButtons);
 
+        void setHeader(ui::icons::Icon* pHeader);
+        void setFooter(ui::icons::Icon* pFooter);
         void setFlag(Flag flag, bool enable);
         bool hasFlag(Flag flag) const;
         void updateItem(size_t item);
@@ -110,6 +112,8 @@ namespace ui { namespace widgets {
 
      private:
         Flags_t m_flags;
+        ui::icons::Icon* m_pHeader;
+        ui::icons::Icon* m_pFooter;
 
         size_t m_currentItem;
         int m_topY;

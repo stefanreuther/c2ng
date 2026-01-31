@@ -121,26 +121,6 @@ client::widgets::CombatUnitList::getItemHeight(size_t /*n*/) const
     return getFont()->getLineHeight();
 }
 
-int
-client::widgets::CombatUnitList::getHeaderHeight() const
-{
-    return 0;
-}
-
-int
-client::widgets::CombatUnitList::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-client::widgets::CombatUnitList::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
-void
-client::widgets::CombatUnitList::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
 void
 client::widgets::CombatUnitList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {

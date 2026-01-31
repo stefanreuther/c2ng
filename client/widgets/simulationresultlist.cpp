@@ -21,9 +21,11 @@ client::widgets::SimulationResultList::SimulationResultList(ui::Root& root)
       m_playerSet(),
       m_classResults(),
       m_labelWidth(1),
-      m_cellWidth(1)
+      m_cellWidth(1),
+      m_header(*this)
 {
     // ex WSimClassResultList::WSimClassResultList
+    setHeader(&m_header);
 }
 
 client::widgets::SimulationResultList::~SimulationResultList()
@@ -70,37 +72,6 @@ client::widgets::SimulationResultList::getItemHeight(size_t /*n*/) const
 {
     return getFont(m_root)->getLineHeight();
 }
-
-int
-client::widgets::SimulationResultList::getHeaderHeight() const
-{
-    return getFont(m_root)->getLineHeight();
-}
-
-int
-client::widgets::SimulationResultList::getFooterHeight() const
-{
-    return 0;
-}
-void
-client::widgets::SimulationResultList::drawHeader(gfx::Canvas& can, gfx::Rectangle area)
-{
-    // ex WSimClassResultList::drawContent
-    gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
-    ctx.useFont(*getFont(m_root));
-    ctx.setColor(util::SkinColor::Static);
-
-    area.consumeX(m_labelWidth);
-    for (int i = 1; i <= game::MAX_PLAYERS; ++i) {
-        if (m_playerSet.contains(i)) {
-            outTextF(ctx, area.splitX(m_cellWidth), m_playerNames.get(i));
-        }
-    }
-}
-
-void
-client::widgets::SimulationResultList::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
 
 void
 client::widgets::SimulationResultList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
@@ -163,4 +134,25 @@ bool
 client::widgets::SimulationResultList::handleKey(util::Key_t key, int prefix)
 {
     return defaultHandleKey(key, prefix);
+}
+
+gfx::Point
+client::widgets::SimulationResultList::Header::getSize() const
+{
+    return getFont(m_parent.m_root)->getCellSize();
+}
+
+void
+client::widgets::SimulationResultList::Header::draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::ButtonFlags_t /*flags*/) const
+{
+    // ex WSimClassResultList::drawContent
+    ctx.useFont(*getFont(m_parent.m_root));
+    ctx.setColor(util::SkinColor::Static);
+
+    area.consumeX(m_parent.m_labelWidth);
+    for (int i = 1; i <= game::MAX_PLAYERS; ++i) {
+        if (m_parent.m_playerSet.contains(i)) {
+            outTextF(ctx, area.splitX(m_parent.m_cellWidth), m_parent.m_playerNames.get(i));
+        }
+    }
 }

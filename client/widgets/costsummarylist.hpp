@@ -9,6 +9,7 @@
 #include "afl/string/translator.hpp"
 #include "game/session.hpp"
 #include "game/spec/costsummary.hpp"
+#include "ui/icons/icon.hpp"
 #include "ui/root.hpp"
 #include "ui/widgets/abstractlistbox.hpp"
 #include "util/numberformatter.hpp"
@@ -63,10 +64,6 @@ namespace client { namespace widgets {
         virtual size_t getNumItems() const;
         virtual bool isItemAccessible(size_t n) const;
         virtual int getItemHeight(size_t n) const;
-        virtual int getHeaderHeight() const;
-        virtual int getFooterHeight() const;
-        virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);
-        virtual void drawFooter(gfx::Canvas& can, gfx::Rectangle area);
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state);
 
         virtual void handlePositionChange();
@@ -83,6 +80,35 @@ namespace client { namespace widgets {
         util::NumberFormatter m_numberFormatter;
 
         int getLineHeight() const;
+
+        int getHeaderHeight() const;
+        int getFooterHeight() const;
+        void drawHeader(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area);
+        void drawFooter(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area);
+
+        class Header : public ui::icons::Icon {
+         public:
+            Header(CostSummaryList& parent)
+                : Icon(), m_parent(parent)
+                { }
+            virtual gfx::Point getSize() const;
+            virtual void draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::ButtonFlags_t flags) const;
+         private:
+            CostSummaryList& m_parent;
+        };
+        Header m_header;
+
+        class Footer : public ui::icons::Icon {
+         public:
+            Footer(CostSummaryList& parent)
+                : Icon(), m_parent(parent)
+                { }
+            virtual gfx::Point getSize() const;
+            virtual void draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::ButtonFlags_t flags) const;
+         private:
+            CostSummaryList& m_parent;
+        };
+        Footer m_footer;
     };
 
 } }

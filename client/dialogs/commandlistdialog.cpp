@@ -54,14 +54,6 @@ namespace {
             { return true; }
         virtual int getItemHeight(size_t /*n*/) const
             { return getItemHeight(); }
-        virtual int getHeaderHeight() const
-            { return 0; }
-        virtual int getFooterHeight() const
-            { return 0; }
-        virtual void drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-            { }
-        virtual void drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-            { }
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
             {
                 // ex WCommandList::drawPart

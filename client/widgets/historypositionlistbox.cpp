@@ -106,26 +106,6 @@ client::widgets::HistoryPositionListbox::getItemHeight(size_t n) const
     }
 }
 
-int
-client::widgets::HistoryPositionListbox::getHeaderHeight() const
-{
-    return 0;
-}
-
-int
-client::widgets::HistoryPositionListbox::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-client::widgets::HistoryPositionListbox::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
-void
-client::widgets::HistoryPositionListbox::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
 void
 client::widgets::HistoryPositionListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {

@@ -7,6 +7,7 @@
 #include "game/playerarray.hpp"
 #include "game/playerset.hpp"
 #include "game/proxy/simulationrunproxy.hpp"
+#include "ui/icons/icon.hpp"
 #include "ui/root.hpp"
 #include "ui/widgets/abstractlistbox.hpp"
 
@@ -28,10 +29,6 @@ namespace client { namespace widgets {
         virtual size_t getNumItems() const;
         virtual bool isItemAccessible(size_t n) const;
         virtual int getItemHeight(size_t n) const;
-        virtual int getHeaderHeight() const;
-        virtual int getFooterHeight() const;
-        virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);
-        virtual void drawFooter(gfx::Canvas& can, gfx::Rectangle area);
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state);
 
         // Widget:
@@ -47,6 +44,19 @@ namespace client { namespace widgets {
 
         int m_labelWidth;
         int m_cellWidth;
+
+        // Header
+        class Header : public ui::icons::Icon {
+         public:
+            Header(SimulationResultList& parent)
+                : Icon(), m_parent(parent)
+                { }
+            virtual gfx::Point getSize() const;
+            virtual void draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::ButtonFlags_t flags) const;
+         private:
+            SimulationResultList& m_parent;
+        };
+        Header m_header;
     };
 
 } }

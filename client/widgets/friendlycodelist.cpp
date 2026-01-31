@@ -63,26 +63,6 @@ client::widgets::FriendlyCodeList::getItemHeight(size_t /*n*/) const
     return m_root.provider().getFont(gfx::FontRequest())->getLineHeight();
 }
 
-int
-client::widgets::FriendlyCodeList::getHeaderHeight() const
-{
-    return 0;
-}
-
-int
-client::widgets::FriendlyCodeList::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-client::widgets::FriendlyCodeList::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
-void
-client::widgets::FriendlyCodeList::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
 void
 client::widgets::FriendlyCodeList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {

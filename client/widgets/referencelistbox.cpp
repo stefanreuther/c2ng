@@ -103,26 +103,6 @@ client::widgets::ReferenceListbox::getItemHeight(size_t /*n*/) const
     return m_root.provider().getFont(gfx::FontRequest())->getCellSize().getY();
 }
 
-int
-client::widgets::ReferenceListbox::getHeaderHeight() const
-{
-    return 0;
-}
-
-int
-client::widgets::ReferenceListbox::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-client::widgets::ReferenceListbox::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
-void
-client::widgets::ReferenceListbox::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
 void
 client::widgets::ReferenceListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {

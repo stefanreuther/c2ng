@@ -94,10 +94,6 @@ namespace {
         virtual size_t getNumItems() const;
         virtual bool isItemAccessible(size_t n) const;
         virtual int getItemHeight(size_t n) const;
-        virtual int getHeaderHeight() const;
-        virtual int getFooterHeight() const;
-        virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);
-        virtual void drawFooter(gfx::Canvas& can, gfx::Rectangle area);
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state);
         virtual void handlePositionChange();
         virtual ui::layout::Info getLayoutInfo() const;
@@ -114,6 +110,19 @@ namespace {
         ui::Root& m_root;
         afl::string::Translator& m_translator;
         ProcessListProxy::Infos_t m_content;
+
+        // Header
+        class Header : public ui::icons::Icon {
+         public:
+            Header(ProcessListWidget& parent)
+                : Icon(), m_parent(parent)
+                { }
+            virtual gfx::Point getSize() const;
+            virtual void draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::ButtonFlags_t flags) const;
+         private:
+            ProcessListWidget& m_parent;
+        };
+        Header m_header;
     };
 
 
@@ -254,9 +263,11 @@ namespace {
 ProcessListWidget::ProcessListWidget(ui::Root& root, afl::string::Translator& tx)
     : m_root(root),
       m_translator(tx),
-      m_content()
+      m_content(),
+      m_header(*this)
 {
     // WProcessList::WProcessList
+    setHeader(&m_header);
 }
 
 size_t
@@ -276,39 +287,6 @@ ProcessListWidget::getItemHeight(size_t /*n*/) const
 {
     return getFont()->getLineHeight();
 }
-
-int
-ProcessListWidget::getHeaderHeight() const
-{
-    return getFont()->getLineHeight();
-}
-
-int
-ProcessListWidget::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-ProcessListWidget::drawHeader(gfx::Canvas& can, gfx::Rectangle area)
-{
-    // WProcessListHeader::drawContent
-    afl::base::Ref<gfx::Font> font = getFont();
-    const int em = font->getEmWidth();
-
-    gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
-    ctx.useFont(*font);
-    ctx.setColor(util::SkinColor::Static);
-    outTextF(ctx, area.splitX(NameWidth*em),   m_translator("Name"));
-    outTextF(ctx, area.splitX(MsgWidth*em),    m_translator("Msg"));
-    outTextF(ctx, area.splitX(WhereWidth*em),  m_translator("Where"));
-    outTextF(ctx, area.splitX(PriWidth*em),    m_translator("Pri"));
-    outTextF(ctx, area.splitX(StatusWidth*em), m_translator("Status"));
-}
-
-void
-ProcessListWidget::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
 
 void
 ProcessListWidget::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
@@ -437,6 +415,29 @@ afl::base::Ref<gfx::Font>
 ProcessListWidget::getFont() const
 {
     return m_root.provider().getFont("");
+}
+
+gfx::Point
+ProcessListWidget::Header::getSize() const
+{
+    return m_parent.getFont()->getCellSize();
+}
+
+void
+ProcessListWidget::Header::draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::ButtonFlags_t /*flags*/) const
+{
+    // WProcessListHeader::drawContent
+    afl::string::Translator& tx = m_parent.m_translator;
+    afl::base::Ref<gfx::Font> font = m_parent.getFont();
+    const int em = font->getEmWidth();
+
+    ctx.useFont(*font);
+    ctx.setColor(util::SkinColor::Static);
+    outTextF(ctx, area.splitX(NameWidth*em),   tx("Name"));
+    outTextF(ctx, area.splitX(MsgWidth*em),    tx("Msg"));
+    outTextF(ctx, area.splitX(WhereWidth*em),  tx("Where"));
+    outTextF(ctx, area.splitX(PriWidth*em),    tx("Pri"));
+    outTextF(ctx, area.splitX(StatusWidth*em), tx("Status"));
 }
 
 

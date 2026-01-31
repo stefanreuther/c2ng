@@ -70,8 +70,8 @@ using util::rich::Text;
 class ui::widgets::TestApplet::MyListbox : public AbstractListbox {
  public:
     MyListbox()
-        : AbstractListbox()
-        { }
+        : AbstractListbox(), m_header()
+        { setHeader(&m_header); }
     virtual ui::layout::Info getLayoutInfo() const
         { return Point(200, 110); }
     virtual void handlePositionChange()
@@ -84,19 +84,6 @@ class ui::widgets::TestApplet::MyListbox : public AbstractListbox {
         { return true; }
     virtual int getItemHeight(size_t /*n*/) const
         { return 16; }
-    virtual int getHeaderHeight() const
-        { return 5; }
-    virtual int getFooterHeight() const
-        { return 0; }
-    virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area)
-        {
-            ColorQuad_t cq[1] = {COLORQUAD_FROM_RGBA(128,0,0,0)};
-            Color_t c[1];
-            can.encodeColors(cq, c);
-            can.drawBar(area, c[0], gfx::TRANSPARENT_COLOR, gfx::FillPattern::SOLID, gfx::OPAQUE_ALPHA);
-        }
-    virtual void drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-        { }
     virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
         {
             ColorQuad_t cq[2] = {COLORQUAD_FROM_RGBA(0,16*item+20,0,0), COLORQUAD_FROM_RGBA(255,255,255,0)};
@@ -110,6 +97,21 @@ class ui::widgets::TestApplet::MyListbox : public AbstractListbox {
                 drawRectangle(ctx, area);
             }
         }
+ private:
+    class Header : public ui::icons::Icon {
+     public:
+        gfx::Point getSize() const
+            { return gfx::Point(10, 5); }
+        void draw(gfx::Context<SkinColor::Color>& ctx, gfx::Rectangle area, ButtonFlags_t /*flags*/) const
+            {
+                gfx::Canvas& can = ctx.canvas();
+                ColorQuad_t cq[1] = {COLORQUAD_FROM_RGBA(128,0,0,0)};
+                Color_t c[1];
+                can.encodeColors(cq, c);
+                can.drawBar(area, c[0], gfx::TRANSPARENT_COLOR, gfx::FillPattern::SOLID, gfx::OPAQUE_ALPHA);
+            }
+    };
+    Header m_header;
 };
 
 // Test widget for clip test

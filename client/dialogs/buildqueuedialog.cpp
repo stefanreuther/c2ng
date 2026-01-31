@@ -65,10 +65,6 @@ namespace {
         virtual size_t getNumItems() const;
         virtual bool isItemAccessible(size_t n) const;
         virtual int getItemHeight(size_t n) const;
-        virtual int getHeaderHeight() const;
-        virtual int getFooterHeight() const;
-        virtual void drawHeader(gfx::Canvas& can, gfx::Rectangle area);
-        virtual void drawFooter(gfx::Canvas& can, gfx::Rectangle area);
         virtual void drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state);
         virtual void handlePositionChange();
         virtual ui::layout::Info getLayoutInfo() const;
@@ -81,6 +77,19 @@ namespace {
         afl::string::Translator& m_translator;
         Infos_t m_data;
         Columns_t m_columns;
+
+        // Header
+        class Header : public ui::icons::Icon {
+         public:
+            Header(BuildQueueList& parent)
+                : Icon(), m_parent(parent)
+                { }
+            virtual gfx::Point getSize() const;
+            virtual void draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::ButtonFlags_t flags) const;
+         private:
+            BuildQueueList& m_parent;
+        };
+        Header m_header;
     };
 
     class BuildQueueBar : public ui::SimpleWidget {
@@ -277,8 +286,11 @@ BuildQueueList::BuildQueueList(ui::Root& root, afl::string::Translator& tx, Colu
     : m_root(root),
       m_translator(tx),
       m_data(),
-      m_columns(cols)
-{ }
+      m_columns(cols),
+      m_header(*this)
+{
+    setHeader(&m_header);
+}
 
 void
 BuildQueueList::setContent(const Infos_t& data)
@@ -353,45 +365,6 @@ BuildQueueList::getItemHeight(size_t /*n*/) const
 {
     return getItemHeight();
 }
-
-int
-BuildQueueList::getHeaderHeight() const
-{
-    return m_root.provider().getFont(gfx::FontRequest())->getLineHeight();
-}
-
-int
-BuildQueueList::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-BuildQueueList::drawHeader(gfx::Canvas& can, gfx::Rectangle area)
-{
-    afl::base::Ref<gfx::Font> normalFont = m_root.provider().getFont(gfx::FontRequest());
-    const int em = normalFont->getEmWidth();
-
-    gfx::Context<util::SkinColor::Color> ctx(can, getColorScheme());
-    ctx.setColor(util::SkinColor::Static);
-    ctx.useFont(*normalFont);
-
-    drawHLine(ctx, area.getLeftX(), area.getBottomY()-1, area.getRightX()-1);
-
-    area.consumeX(GAP_PX + ICON_HEMS*em/2);
-    outTextF(ctx, area.splitX(ACTION_EMS * em + GAP_PX), m_translator("Build Order"));
-    outTextF(ctx, area.splitX(FCODE_EMS * em + GAP_PX), m_translator("FCode"));
-    if (m_columns.contains(QueuePositionColumn)) {
-        outTextF(ctx, area.splitX(QPOS_EMS * em + GAP_PX), m_translator("Q-Pos"));
-    }
-    if (m_columns.contains(BuildPointsColumn)) {
-        outTextF(ctx, area, m_translator("Build Points"));
-    }
-}
-
-void
-BuildQueueList::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
 
 void
 BuildQueueList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
@@ -515,6 +488,34 @@ BuildQueueList::getItemHeight() const
         + 2*PAD_PX;
 }
 
+gfx::Point
+BuildQueueList::Header::getSize() const
+{
+    return m_parent.m_root.provider().getFont(gfx::FontRequest())->getCellSize();
+}
+
+void
+BuildQueueList::Header::draw(gfx::Context<util::SkinColor::Color>& ctx, gfx::Rectangle area, ui::ButtonFlags_t /*flags*/) const
+{
+    afl::string::Translator& tx = m_parent.m_translator;
+    afl::base::Ref<gfx::Font> normalFont = m_parent.m_root.provider().getFont(gfx::FontRequest());
+    const int em = normalFont->getEmWidth();
+
+    ctx.setColor(util::SkinColor::Static);
+    ctx.useFont(*normalFont);
+
+    drawHLine(ctx, area.getLeftX(), area.getBottomY()-1, area.getRightX()-1);
+
+    area.consumeX(GAP_PX + ICON_HEMS*em/2);
+    outTextF(ctx, area.splitX(ACTION_EMS * em + GAP_PX), tx("Build Order"));
+    outTextF(ctx, area.splitX(FCODE_EMS * em + GAP_PX), tx("FCode"));
+    if (m_parent.m_columns.contains(QueuePositionColumn)) {
+        outTextF(ctx, area.splitX(QPOS_EMS * em + GAP_PX), tx("Q-Pos"));
+    }
+    if (m_parent.m_columns.contains(BuildPointsColumn)) {
+        outTextF(ctx, area, tx("Build Points"));
+    }
+}
 
 /*
  *  BuildQueueBar

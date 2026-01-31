@@ -93,25 +93,6 @@ client::widgets::ConfigValueList::getItemHeight(size_t /*n*/) const
     return m_root.provider().getFont(gfx::FontRequest())->getLineHeight();
 }
 
-int
-client::widgets::ConfigValueList::getHeaderHeight() const
-{
-    return 0;
-}
-int
-client::widgets::ConfigValueList::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-client::widgets::ConfigValueList::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
-void
-client::widgets::ConfigValueList::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
 void
 client::widgets::ConfigValueList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {

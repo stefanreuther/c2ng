@@ -250,26 +250,6 @@ ui::widgets::TreeListbox::getItemHeight(size_t n) const
     return height;
 }
 
-int
-ui::widgets::TreeListbox::getHeaderHeight() const
-{
-    return 0;
-}
-
-int
-ui::widgets::TreeListbox::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-ui::widgets::TreeListbox::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
-void
-ui::widgets::TreeListbox::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
 void
 ui::widgets::TreeListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {

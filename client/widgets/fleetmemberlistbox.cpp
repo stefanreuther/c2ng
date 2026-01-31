@@ -88,26 +88,6 @@ client::widgets::FleetMemberListbox::getItemHeight(size_t /*n*/) const
     return getFont()->getLineHeight();
 }
 
-int
-client::widgets::FleetMemberListbox::getHeaderHeight() const
-{
-    return 0;
-}
-
-int
-client::widgets::FleetMemberListbox::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-client::widgets::FleetMemberListbox::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
-void
-client::widgets::FleetMemberListbox::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
 void
 client::widgets::FleetMemberListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {

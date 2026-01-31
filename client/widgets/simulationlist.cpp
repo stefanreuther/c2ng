@@ -66,26 +66,6 @@ client::widgets::SimulationList::getItemHeight(size_t /*n*/) const
     return getLineHeight();
 }
 
-int
-client::widgets::SimulationList::getHeaderHeight() const
-{
-    return 0;
-}
-
-int
-client::widgets::SimulationList::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-client::widgets::SimulationList::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
-void
-client::widgets::SimulationList::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
 void
 client::widgets::SimulationList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {

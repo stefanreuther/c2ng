@@ -122,26 +122,6 @@ client::widgets::HistoryShipListbox::getItemHeight(size_t /*n*/) const
     return m_root.provider().getFont(gfx::FontRequest())->getCellSize().getY();
 }
 
-int
-client::widgets::HistoryShipListbox::getHeaderHeight() const
-{
-    return 0;
-}
-
-int
-client::widgets::HistoryShipListbox::getFooterHeight() const
-{
-    return 0;
-}
-
-void
-client::widgets::HistoryShipListbox::drawHeader(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
-void
-client::widgets::HistoryShipListbox::drawFooter(gfx::Canvas& /*can*/, gfx::Rectangle /*area*/)
-{ }
-
 void
 client::widgets::HistoryShipListbox::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, ItemState state)
 {
