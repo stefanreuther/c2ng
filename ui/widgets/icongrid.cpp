@@ -384,12 +384,12 @@ ui::widgets::IconGrid::handleVerticalScroll(int delta, int adjust)
 {
     const bool isMultiline = m_icons.size() > size_t(m_widthInCells);
     if (isMultiline) {
-        int newLine = m_currentLine + delta;
         int numLines = getTotalSize();
+        int newLine = std::max(0, std::min(numLines-1, m_currentLine + delta));
         while (newLine >= 0 && newLine <= numLines && !isItemAccessible(m_currentColumn, newLine)) {
             newLine += adjust;
         }
-        if (isItemAccessible(m_currentColumn, newLine)) {
+        if (newLine != m_currentLine && isItemAccessible(m_currentColumn, newLine)) {
             requestActive();
             setCurrentItem(m_currentColumn, newLine);
             return true;
