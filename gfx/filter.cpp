@@ -48,9 +48,3 @@ gfx::Filter::encodeColors(afl::base::Memory<const ColorQuad_t> colorDefinitions,
 {
     m_parent.encodeColors(colorDefinitions, colorHandles);
 }
-
-afl::base::Ref<gfx::Canvas>
-gfx::Filter::convertCanvas(afl::base::Ref<Canvas> orig)
-{
-    return orig;
-}

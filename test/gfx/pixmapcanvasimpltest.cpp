@@ -91,11 +91,6 @@ namespace {
                 }
                 colorHandles.fill(COLORQUAD_FROM_RGBA(0,0,0,0));
             }
-        virtual afl::base::Ref<gfx::Canvas> convertCanvas(afl::base::Ref<gfx::Canvas> orig)
-            {
-                // FIXME: can we do better?
-                return orig;
-            }
     };
 }
 

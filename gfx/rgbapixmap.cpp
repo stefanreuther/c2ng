@@ -10,7 +10,7 @@ class gfx::RGBAPixmap::TraitsImpl {
  public:
     typedef ColorQuad_t Pixel_t;
     typedef ColorQuad_t Data_t;
-        
+
     Data_t* get(int x, int y) const
         { return m_pix.row(y).at(x); }
     static inline Pixel_t peek(Data_t* ptr)
@@ -60,11 +60,6 @@ class gfx::RGBAPixmap::CanvasImpl : public gfx::PixmapCanvasImpl<RGBAPixmap, Tra
                 }
             }
             colorHandles.fill(COLORQUAD_FROM_RGBA(0,0,0,0));
-        }
-    virtual afl::base::Ref<Canvas> convertCanvas(afl::base::Ref<Canvas> orig)
-        {
-            // FIXME: can we do better?
-            return orig;
         }
 };
 

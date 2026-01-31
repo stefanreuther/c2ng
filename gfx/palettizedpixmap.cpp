@@ -66,11 +66,6 @@ class gfx::PalettizedPixmap::CanvasImpl : public gfx::PixmapCanvasImpl<Palettize
             }
             colorHandles.fill(0);
         }
-    virtual afl::base::Ref<Canvas> convertCanvas(afl::base::Ref<Canvas> orig)
-        {
-            // FIXME: can we do better?
-            return orig;
-        }
 };
 
 

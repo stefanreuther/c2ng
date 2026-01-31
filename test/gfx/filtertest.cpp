@@ -94,8 +94,6 @@ namespace {
             { checkCall("decodeColors"); }
         virtual void encodeColors(afl::base::Memory<const gfx::ColorQuad_t> /*colorDefinitions*/, afl::base::Memory<gfx::Color_t> /*colorHandles*/)
             { checkCall("encodeColors"); }
-        virtual afl::base::Ref<Canvas> convertCanvas(afl::base::Ref<Canvas> orig)
-            { checkCall("convertCanvas"); return orig; }
     };
 }
 

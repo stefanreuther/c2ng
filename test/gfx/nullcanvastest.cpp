@@ -57,9 +57,4 @@ AFL_TEST("gfx.NullCanvas", a)
         a.checkEqual("48. result", quadsOut[0], 0U);
         a.checkEqual("49. result", quadsOut[1], 0U);
     }
-
-    // Conversion
-    afl::base::Ref<gfx::Canvas> can = *new gfx::NullCanvas();
-    afl::base::Ref<gfx::Canvas> can2 = testee.convertCanvas(can);
-    a.checkEqual("51. convertCanvas", &*can, &*can2);
 }

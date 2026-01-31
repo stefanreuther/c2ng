@@ -90,9 +90,3 @@ gfx::NullCanvas::encodeColors(afl::base::Memory<const ColorQuad_t> /*colorDefini
 {
     colorHandles.fill(0);
 }
-
-afl::base::Ref<gfx::Canvas>
-gfx::NullCanvas::convertCanvas(afl::base::Ref<Canvas> orig)
-{
-    return orig;
-}

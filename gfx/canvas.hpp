@@ -170,8 +170,6 @@ namespace gfx {
             If colorDefinitions and colorHandles do not have the same number of elements, the behaviour is undefined. */
         virtual void encodeColors(afl::base::Memory<const ColorQuad_t> colorDefinitions, afl::base::Memory<Color_t> colorHandles) = 0;
 
-        virtual afl::base::Ref<Canvas> convertCanvas(afl::base::Ref<Canvas> orig) = 0;
-
         void defaultBlit(Point pt, Canvas& src, Rectangle rect);
         bool defaultIsClipped(const Rectangle& r);
         bool defaultIsVisible(const Rectangle& r);

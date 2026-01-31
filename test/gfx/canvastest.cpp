@@ -48,8 +48,6 @@ AFL_TEST_NOARG("gfx.Canvas")
             { }
         virtual void encodeColors(afl::base::Memory<const ColorQuad_t> /*colorDefinitions*/, afl::base::Memory<Color_t> /*colorHandles*/)
             { }
-        virtual afl::base::Ref<Canvas> convertCanvas(afl::base::Ref<Canvas> orig)
-            { return orig; }
     };
     Tester t;
 }

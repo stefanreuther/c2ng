@@ -363,37 +363,6 @@ gfx::sdl::Surface::encodeColors(afl::base::Memory<const ColorQuad_t> colorDefini
     }
 }
 
-afl::base::Ref<gfx::Canvas>
-gfx::sdl::Surface::convertCanvas(afl::base::Ref<Canvas> orig)
-{
-    // ex GfxPixmap::convertToScreenFormat, GfxPixmap::convertTo
-
-    // FIXME: think about preserving alpha.
-    // If input is RGBA8888 and screen is RGB565, this looses the alpha channel (I think).
-    // SDL_DisplayFormatAlpha has some extra logic to avoid that.
-    if (Surface* sfc = dynamic_cast<Surface*>(&orig.get())) {
-        // I took a peep at SDL_DisplayFormat for these flag combinations:
-        // - output is hardware if this is hardware
-        // - preserve colorkey/alpha
-        uint32_t flags = (m_surface->flags & SDL_HWSURFACE) | (sfc->m_surface->flags & (SDL_SRCCOLORKEY | SDL_SRCALPHA));
-        SDL_Surface* copy = SDL_ConvertSurface(sfc->m_surface, m_surface->format, flags);
-        if (copy) {
-            try {
-                return *new Surface(copy, true);
-            }
-            catch (...) {
-                SDL_FreeSurface(copy);
-                throw;
-            }
-        } else {
-            throw GraphicsException(SDL_GetError());
-        }
-    } else {
-        // FIXME: if orig is anything else, convert that to a SDL_Surface to speed up further blits.
-        return orig;
-    }
-}
-
 void
 gfx::sdl::Surface::ensureLocked()
 {

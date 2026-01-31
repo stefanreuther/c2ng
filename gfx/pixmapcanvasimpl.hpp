@@ -61,7 +61,6 @@ namespace gfx {
         // virtual void setPalette(Color_t start, afl::base::Memory<const ColorQuad_t> colorDefinitions, afl::base::Memory<Color_t> colorHandles);
         // virtual void decodeColors(afl::base::Memory<const Color_t> colorHandles, afl::base::Memory<ColorQuad_t> colorDefinitions);
         // virtual void encodeColors(afl::base::Memory<const ColorQuad_t> colorDefinitions, afl::base::Memory<Color_t> colorHandles);
-        // virtual afl::base::Ptr<Canvas> convertCanvas(afl::base::Ptr<Canvas> orig);
 
         PixmapType& pixmap();
 
