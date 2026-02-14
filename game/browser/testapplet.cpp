@@ -24,6 +24,7 @@
 #include "game/registrationkey.hpp"
 #include "game/root.hpp"
 #include "game/turnloader.hpp"
+#include "util/connectionprovider.hpp"
 #include "util/profiledirectory.hpp"
 
 using afl::base::Ptr;
@@ -88,7 +89,7 @@ game::browser::TestApplet::run(util::Application& app, afl::sys::Environment::Co
 
     Client client;
     Thread clientThread("http", client);
-    client.setNewConnectionProvider(new afl::net::http::DefaultConnectionProvider(client, m_networkStack));
+    client.setNewConnectionProvider(new util::ConnectionProvider(client, m_networkStack));
     clientThread.start();
     Manager httpManager(client);
 

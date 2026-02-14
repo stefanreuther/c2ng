@@ -14,17 +14,12 @@
 #include "afl/io/directoryentry.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/net/http/client.hpp"
-#include "afl/net/http/clientconnection.hpp"
-#include "afl/net/http/clientconnectionprovider.hpp"
 #include "afl/net/http/manager.hpp"
-#include "afl/net/securenetworkstack.hpp"
 #include "afl/net/tunnel/tunnelablenetworkstack.hpp"
 #include "afl/string/format.hpp"
-#include "afl/string/messages.hpp"
 #include "afl/string/parse.hpp"
 #include "afl/sys/dialog.hpp"
 #include "afl/sys/environment.hpp"
-#include "afl/sys/mutexguard.hpp"
 #include "afl/sys/thread.hpp"
 #include "afl/test/translator.hpp"
 #include "client/applicationparameters.hpp"
@@ -74,6 +69,7 @@
 #include "ui/rich/documentview.hpp"
 #include "ui/root.hpp"
 #include "ui/screenshotlistener.hpp"
+#include "util/connectionprovider.hpp"
 #include "util/consolelogger.hpp"
 #include "util/messagecollector.hpp"
 #include "util/profiledirectory.hpp"
@@ -368,108 +364,6 @@ namespace {
         RequestSender<game::Session> m_gameSender;
     };
 
-    class ConnectionProvider : public afl::net::http::ClientConnectionProvider,
-                               private afl::base::Stoppable,
-                               private afl::base::Uncopyable
-    {
-     public:
-        ConnectionProvider(afl::net::http::Client& client, afl::net::NetworkStack& stack)
-            : m_client(client),
-              m_networkStack(stack),
-              m_secureNetworkStack(),
-              m_wake(0),
-              m_mutex(),
-              m_stop(false),
-              m_thread("ConnectionProvider", *this)
-            { m_thread.start(); }
-        ~ConnectionProvider()
-            { }
-        void requestNewConnection()
-            { m_wake.post(); }
-     private:
-        // Thread:
-        virtual void run()
-            {
-                try {
-                    m_secureNetworkStack.reset(new afl::net::SecureNetworkStack(m_networkStack));
-                }
-                catch (std::exception& e) {
-                    // FIXME: log it
-                }
-                while (1) {
-                    // Wait for something to happen
-                    m_wake.wait();
-
-                    // Stop requested?
-                    {
-                        afl::sys::MutexGuard g(m_mutex);
-                        if (m_stop) {
-                            break;
-                        }
-                    }
-
-                    // Create requested connections
-                    afl::net::Name name;
-                    String_t scheme;
-                    while (m_client.getUnsatisfiedTarget(name, scheme)) {
-                        if (scheme == "http") {
-                            tryConnect(m_networkStack, name, scheme);
-                        } else if (scheme == "https" && m_secureNetworkStack.get() != 0) {
-                            tryConnect(*m_secureNetworkStack, name, scheme);
-                        } else {
-                            // Mismatching scheme, request cannot be fulfilled
-                            m_client.cancelRequestsByTarget(name, scheme,
-                                                            afl::net::http::ClientRequest::UnsupportedProtocol,
-                                                            afl::string::Messages::invalidUrl());
-                        }
-                    }
-                }
-            }
-        virtual void stop()
-            {
-                {
-                    afl::sys::MutexGuard g(m_mutex);
-                    m_stop = true;
-                }
-                m_wake.post();
-            }
-
-        void tryConnect(afl::net::NetworkStack& stack, const afl::net::Name& name, const String_t& scheme)
-            {
-                const uint32_t CONNECTION_TIMEOUT = 30000;
-                try {
-                    // Try connecting...
-                    afl::base::Ref<afl::net::Socket> socket = stack.connect(name, CONNECTION_TIMEOUT);
-                    m_client.addNewConnection(new afl::net::http::ClientConnection(name, scheme, socket));
-                }
-                catch (std::exception& e) {
-                    // Regular failure case
-                    m_client.cancelRequestsByTarget(name, scheme,
-                                                    afl::net::http::ClientRequest::ConnectionFailed,
-                                                    e.what());
-                }
-                catch (...) {
-                    // Irregular failure case; avoid that exceptions kill the thread
-                    m_client.cancelRequestsByTarget(name, scheme,
-                                                    afl::net::http::ClientRequest::ConnectionFailed,
-                                                    afl::string::Messages::unknownError());
-                }
-            }
-
-        // Integration:
-        afl::net::http::Client& m_client;
-        afl::net::NetworkStack& m_networkStack;
-        std::auto_ptr<afl::net::SecureNetworkStack> m_secureNetworkStack;
-
-        // Work:
-        afl::sys::Semaphore m_wake;
-        afl::sys::Mutex m_mutex;
-        bool m_stop;
-
-        // Thread: must be last
-        afl::sys::Thread m_thread;
-    };
-
 
     /*
      *  Browser screen initalisation actions
@@ -706,7 +600,7 @@ client::Application::appMain(gfx::Engine& engine)
     log().write(afl::sys::Log::Debug, LOG_NAME, translator()("Starting network..."));
     afl::net::http::Client client;
     afl::sys::Thread clientThread("http", client);
-    client.setNewConnectionProvider(new ConnectionProvider(client, net));
+    client.setNewConnectionProvider(new util::ConnectionProvider(client, net));
     clientThread.start();
     afl::net::http::Manager httpManager(client);
 
