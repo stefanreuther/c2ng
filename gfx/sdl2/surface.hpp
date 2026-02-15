@@ -56,6 +56,7 @@ namespace gfx { namespace sdl2 {
         SDL_Surface* m_surface;
         bool m_owned;
         bool m_locked;
+        bool m_mustClear;
         Rectangle m_updateRegion;
     };
 

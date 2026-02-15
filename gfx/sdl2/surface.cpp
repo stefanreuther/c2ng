@@ -19,6 +19,7 @@ gfx::sdl2::Surface::Surface(SDL_Surface* surface, bool owned)
     : m_surface(surface),
       m_owned(owned),
       m_locked(false),
+      m_mustClear(true),
       m_updateRegion()
 { }
 
@@ -29,6 +30,7 @@ gfx::sdl2::Surface::Surface(int wi, int he, SDL_PixelFormat* format)
                                      format->Bmask, format->Amask)),
       m_owned(true),
       m_locked(false),
+      m_mustClear(true),
       m_updateRegion()
 {
     if (!m_surface) {
@@ -400,6 +402,13 @@ gfx::sdl2::Surface::presentUpdate(SDL_Texture* tex, SDL_Renderer* renderer)
         r.w = m_updateRegion.getWidth();
         r.h = m_updateRegion.getHeight();
         SDL_UpdateTexture(tex, 0, m_surface->pixels, m_surface->pitch);
+        if (m_mustClear) {
+            // m_mustClear is set by invalidate(); in particular, in response to window size changes.
+            // In that case, the renderer contains a copy of the old (pre-resize) content; clear and draw anew.
+            // For normal operation, clear is not required (and would interfere with partial updates).
+            SDL_RenderClear(renderer);
+            m_mustClear = false;
+        }
         SDL_RenderCopy(renderer, tex, &r, &r);
         SDL_RenderPresent(renderer);
 
@@ -411,6 +420,7 @@ void
 gfx::sdl2::Surface::invalidate()
 {
     m_updateRegion = Rectangle(0, 0, m_surface->w, m_surface->h);
+    m_mustClear = true;
 }
 
 #endif

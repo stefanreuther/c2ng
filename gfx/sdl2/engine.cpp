@@ -344,6 +344,8 @@ gfx::sdl2::Engine::createWindow(const WindowParameters& param)
     int sdlFlags = 0;
     if (param.fullScreen) {
         sdlFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+    } else {
+        sdlFlags |= SDL_WINDOW_RESIZABLE;
     }
 
     const int width = param.size.getX();
@@ -666,12 +668,17 @@ gfx::sdl2::Engine::convertEvent(const SDL_Event& se, gfx::EventConsumer& consume
         return true;
 
      case SDL_WINDOWEVENT:
-        if (se.window.event == SDL_WINDOWEVENT_EXPOSED) {
+        switch (se.window.event) {
+         case SDL_WINDOWEVENT_EXPOSED:
+         case SDL_WINDOWEVENT_RESIZED:
+         case SDL_WINDOWEVENT_SIZE_CHANGED:
+         case SDL_WINDOWEVENT_MAXIMIZED:
+         case SDL_WINDOWEVENT_RESTORED:
             if (m_window.get() != 0) {
                 m_window->invalidate();
             }
             return true;
-        } else {
+         default:
             return false;
         }
 
