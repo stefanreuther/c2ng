@@ -228,12 +228,12 @@ AFL_TEST("game.browser.Browser:browse-sequence", a)
     a.checkEqual("14. content", env.browser.content()[0]->getName(), "one");
     a.checkEqual("15. content", env.browser.content()[1]->getName(), "two");
 
-    a.checkNull("16. child", env.browser.getSelectedChild());
+    a.checkNull("16. child", env.browser.getSelectedFolder());
     a.check("17. child", !env.browser.getSelectedChildIndex().isValid());
 
     // Select child
     env.browser.selectChild(1);
-    a.checkNonNull("21. child", env.browser.getSelectedChild());
+    a.checkNonNull("21. child", env.browser.getSelectedFolder());
     a.checkEqual("22. child", env.browser.getSelectedChildIndex().orElse(99), 1U);
 
     // Load child
@@ -248,7 +248,7 @@ AFL_TEST("game.browser.Browser:browse-sequence", a)
     a.checkEqual("33. content", env.browser.content().size(), 1U);
     a.checkEqual("34. content", env.browser.content()[0]->getName(), "more");
 
-    a.checkNull("36. child", env.browser.getSelectedChild());
+    a.checkNull("36. child", env.browser.getSelectedFolder());
     a.check("37. child", !env.browser.getSelectedChildIndex().isValid());
 
     // Go back
@@ -256,7 +256,7 @@ AFL_TEST("game.browser.Browser:browse-sequence", a)
     env.browser.openParent();
     env.browser.loadContent(makeTrackerTask(loaded3))->call();
     a.check("41. loaded", loaded3);
-    a.checkNonNull("42. child", env.browser.getSelectedChild());
+    a.checkNonNull("42. child", env.browser.getSelectedFolder());
     a.checkEqual("43. child", env.browser.getSelectedChildIndex().orElse(99), 1U);
 }
 
@@ -290,7 +290,7 @@ AFL_TEST("game.browser.Browser:reload-sequence", a)
 
     // Origin folder still selected
     // (This is the "selected element, but not a previous path element" case.)
-    a.checkNonNull("12. child", env.browser.getSelectedChild());
+    a.checkNonNull("12. child", env.browser.getSelectedFolder());
     a.checkEqual("13. child", env.browser.getSelectedChildIndex().orElse(99), 2U);
 }
 
@@ -332,7 +332,7 @@ AFL_TEST("game.browser.Browser:config", a)
 
     // Load root (exercises loadGameRoot)
     bool loaded2 = false;
-    env.browser.loadChildRoot(makeTrackerTask(loaded2))->call();
+    env.browser.loadSelectedRoot(makeTrackerTask(loaded2))->call();
     a.check("11. loaded", loaded2);
     a.checkNonNull("12. root", env.browser.getSelectedRoot().get());
     a.checkNonNull("13. turn", env.browser.getSelectedRoot()->getTurnLoader().get());
@@ -353,6 +353,56 @@ AFL_TEST("game.browser.Browser:config", a)
     a.check("31. updated", saved);
 
     Ref<Stream> in = env.fs.openFile("/dir/sub/pcc2.ini", FileSystem::OpenRead);
+    String_t content = afl::string::fromBytes(in->createVirtualMapping()->get());
+    a.check("32. contains", content.find("Export.ShipFields = name,owner") != String_t::npos);
+}
+
+// Test loadContent() and configuration modification
+// Same as game.browser.Browser:config, but uses selectSelf()
+AFL_TEST("game.browser.Browser:config:self", a)
+{
+    Ref<InternalDirectory> spec = InternalDirectory::create("spec");
+    spec->openFile("race.nm", FileSystem::Create)
+        ->fullWrite(game::test::getDefaultRaceNames());
+    BrowserEnvironment env;
+    env.fs.createDirectory("/dir");
+    env.fs.openFile("/dir/player7.rst", FileSystem::Create)
+        ->fullWrite(game::test::getResultFile30());
+    env.browser.addNewHandler(new DirectoryHandler(env.browser, spec, env.profile));
+
+    // Open directory
+    a.check("01. openFolder", env.browser.openFolder("/dir"));
+
+    // Load its content
+    bool loaded = false;
+    env.browser.loadContent(makeTrackerTask(loaded))->call();
+    a.check("02. loaded", loaded);
+    a.checkEqual("03. content", env.browser.content().size(), 0U);
+    env.browser.selectSelf();
+
+    // Load root (exercises loadGameRoot)
+    bool loaded2 = false;
+    env.browser.loadSelectedRoot(makeTrackerTask(loaded2))->call();
+    a.check("11. loaded", loaded2);
+    a.checkNonNull("12. root", env.browser.getSelectedRoot().get());
+    a.checkNonNull("13. turn", env.browser.getSelectedRoot()->getTurnLoader().get());
+
+    String_t extra;
+    a.check("14. status", env.browser.getSelectedRoot()->getTurnLoader()->getPlayerStatus(7, extra, env.tx).contains(TurnLoader::Available));
+
+    // Verify presence of configuration
+    a.checkNonNull("21. config", env.browser.getSelectedConfiguration());
+
+    // Update configuration
+    UserConfiguration& config = *env.browser.getSelectedConfiguration();
+    config[UserConfiguration::ExportShipFields].set("name,owner");
+    config[UserConfiguration::ExportShipFields].setSource(ConfigurationOption::Game);
+
+    bool saved = false;
+    env.browser.updateConfiguration(makeTrackerTask(saved))->call();
+    a.check("31. updated", saved);
+
+    Ref<Stream> in = env.fs.openFile("/dir/pcc2.ini", FileSystem::OpenRead);
     String_t content = afl::string::fromBytes(in->createVirtualMapping()->get());
     a.check("32. contains", content.find("Export.ShipFields = name,owner") != String_t::npos);
 }

@@ -76,7 +76,8 @@ game::browser::Browser::Browser(afl::io::FileSystem& fileSystem,
       m_pathOrigin(),
       m_content(),
       m_rootFolder(*this),
-      m_selectedChild(),
+      m_selection(NoSelection),
+      m_selectedChildIndex(),
       m_childLoaded(false),
       m_childRoot(),
       m_childConfig()
@@ -167,8 +168,21 @@ game::browser::Browser::openParent()
 void
 game::browser::Browser::selectChild(size_t n)
 {
-    if (!m_selectedChild.isSame(n)) {
-        m_selectedChild = n;
+    if (m_selection != ChildSelected || m_selectedChildIndex != n) {
+        m_selection = ChildSelected;
+        m_selectedChildIndex = n;
+        m_childLoaded = false;
+        m_childRoot.reset();
+        m_childConfig.reset();
+    }
+}
+
+void
+game::browser::Browser::selectSelf()
+{
+    if (m_selection != SelfSelected) {
+        m_selection = SelfSelected;
+        m_selectedChildIndex = 0;
         m_childLoaded = false;
         m_childRoot.reset();
         m_childConfig.reset();
@@ -201,27 +215,38 @@ void
 game::browser::Browser::clearContent()
 {
     m_content.clear();
-    m_selectedChild = afl::base::Nothing;
+    m_selection = NoSelection;
+    m_selectedChildIndex = 0;
     m_childLoaded = false;
     m_childRoot.reset();
     m_childConfig.reset();
 }
 
 game::browser::Folder*
-game::browser::Browser::getSelectedChild() const
+game::browser::Browser::getSelectedFolder()
 {
-    size_t pos;
-    if (m_selectedChild.get(pos) && pos < m_content.size()) {
-        return m_content[pos];
-    } else {
-        return 0;
+    switch (m_selection) {
+     case ChildSelected:
+        if (m_selectedChildIndex < m_content.size()) {
+            return m_content[m_selectedChildIndex];
+        }
+        break;
+     case SelfSelected:
+        return &currentFolder();
+     case NoSelection:
+        break;
     }
+    return 0;
 }
 
 game::browser::Browser::OptionalIndex_t
 game::browser::Browser::getSelectedChildIndex() const
 {
-    return m_selectedChild;
+    if (m_selection == ChildSelected) {
+        return m_selectedChildIndex;
+    } else {
+        return afl::base::Nothing;
+    }
 }
 
 afl::base::Ptr<game::Root>
@@ -301,9 +326,8 @@ game::browser::Browser::loadContent(std::auto_ptr<Task_t> then)
 
                 // If we have a selected element, but not a previous path element, select that element.
                 // This preserves the cursor when we reload a directory.
-                size_t n;
-                if (m_parent.m_pathOrigin.get() == 0 && m_parent.m_selectedChild.get(n) && n < m_parent.m_content.size()) {
-                    m_parent.m_pathOrigin.reset(m_parent.m_content.extractElement(n));
+                if (m_parent.m_pathOrigin.get() == 0 && m_parent.m_selection == ChildSelected && m_parent.m_selectedChildIndex < m_parent.m_content.size()) {
+                    m_parent.m_pathOrigin.reset(m_parent.m_content.extractElement(m_parent.m_selectedChildIndex));
                 }
 
                 // Start task
@@ -319,7 +343,7 @@ game::browser::Browser::loadContent(std::auto_ptr<Task_t> then)
 }
 
 std::auto_ptr<game::Task_t>
-game::browser::Browser::loadChildRoot(std::auto_ptr<Task_t> then)
+game::browser::Browser::loadSelectedRoot(std::auto_ptr<Task_t> then)
 {
     // Separate task to allow sequential execution
     class Task : public Task_t {
@@ -329,23 +353,23 @@ game::browser::Browser::loadChildRoot(std::auto_ptr<Task_t> then)
             { }
         virtual void call()
             {
-                m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Task: Browser.loadChildRoot");
+                m_parent.m_log.write(LogListener::Trace, LOG_NAME, "Task: Browser.loadSelectedRoot");
 
-                size_t n;
-                if (!m_parent.m_childLoaded && m_parent.m_selectedChild.get(n) && n < m_parent.m_content.size()) {
+                Folder* f = m_parent.getSelectedFolder();
+                if (!m_parent.m_childLoaded && f != 0) {
                     m_parent.m_childLoaded = true;
                     m_parent.m_childConfig = game::config::UserConfiguration::create().asPtr();
 
                     // Load configuration
                     try {
-                        m_parent.m_content[n]->loadConfiguration(*m_parent.m_childConfig);
+                        f->loadConfiguration(*m_parent.m_childConfig);
                     }
                     catch (std::exception& e) {
                         m_parent.m_log.write(LogListener::Warn, LOG_NAME, String_t(), e);
                     }
 
                     // Load root
-                    m_then = m_parent.loadGameRoot(n, m_then);
+                    m_then = m_parent.loadFolderGameRoot(*f, m_then);
                 }
                 m_then->call();
             }
@@ -372,18 +396,18 @@ game::browser::Browser::updateConfiguration(std::auto_ptr<Task_t> then)
                 // Update configuration after user modified it:
                 // - save to disk
                 // - reload the root to let the new configuration take effect
-                size_t n;
-                if (m_parent.m_childLoaded && m_parent.m_selectedChild.get(n) && n < m_parent.m_content.size() && m_parent.m_childConfig.get() != 0) {
+                Folder* f = m_parent.getSelectedFolder();
+                if (m_parent.m_childLoaded && f != 0 && m_parent.m_childConfig.get() != 0) {
                     // Save configuration
                     try {
-                        m_parent.m_content[n]->saveConfiguration(*m_parent.m_childConfig);
+                        f->saveConfiguration(*m_parent.m_childConfig);
                     }
                     catch (std::exception& e) {
                         m_parent.m_log.write(LogListener::Warn, LOG_NAME, String_t(), e);
                     }
 
                     // Load root
-                    m_then = m_parent.loadGameRoot(n, m_then);
+                    m_then = m_parent.loadFolderGameRoot(*f, m_then);
                 }
                 m_then->call();
             }
@@ -427,17 +451,17 @@ game::browser::Browser::expandGameDirectoryName(String_t directoryName) const
 void
 game::browser::Browser::setSelectedLocalDirectoryName(String_t directoryName)
 {
-    size_t n;
-    if (m_selectedChild.get(n) && n < m_content.size()) {
-        m_content[n]->setLocalDirectoryName(directoryName);
+    Folder* f = getSelectedFolder();
+    if (f != 0) {
+        f->setLocalDirectoryName(directoryName);
     }
 }
 
 void
 game::browser::Browser::setSelectedLocalDirectoryAutomatically()
 {
-    size_t n;
-    if (m_selectedChild.get(n) && n < m_content.size()) {
+    Folder* f = getSelectedFolder();
+    if (f != 0) {
         // Profile
         afl::base::Ref<afl::io::Directory> profileDirectory = m_profile.open();
 
@@ -449,7 +473,7 @@ game::browser::Browser::setSelectedLocalDirectoryAutomatically()
         afl::base::Ref<afl::io::Directory> gamesDir = gamesEntry->openDirectory();
 
         // Assuming game name has form "a b (c)" or "zz/a b"...
-        String_t gameName = m_content[n]->getName();
+        String_t gameName = f->getName();
 
         // ...try "a_b"
         if (trySetLocalDirectoryName(*gamesDir, simplifyFileName(stripDecorations(gameName)))) {
@@ -528,7 +552,7 @@ game::browser::Browser::trySetLocalDirectoryName(afl::io::Directory& gamesDir, S
 }
 
 std::auto_ptr<game::Task_t>
-game::browser::Browser::loadGameRoot(size_t n, std::auto_ptr<Task_t>& then)
+game::browser::Browser::loadFolderGameRoot(Folder& f, std::auto_ptr<Task_t>& then)
 {
     class Then : public LoadGameRootTask_t {
      public:
@@ -545,5 +569,5 @@ game::browser::Browser::loadGameRoot(size_t n, std::auto_ptr<Task_t>& then)
         Browser& m_parent;
         std::auto_ptr<Task_t> m_then;
     };
-    return m_content[n]->loadGameRoot(*m_childConfig, std::auto_ptr<LoadGameRootTask_t>(new Then(*this, then)));
+    return f.loadGameRoot(*m_childConfig, std::auto_ptr<LoadGameRootTask_t>(new Then(*this, then)));
 }

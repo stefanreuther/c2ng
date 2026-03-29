@@ -40,7 +40,7 @@ namespace game { namespace browser {
           The effective position is determined by the last item in the list;
         - content is only known after loadContent() completed, and consists of a list of child folders;
         - after content is loaded, an item can be selected;
-          the selected item's game content can be loaded using loadChildRoot();
+          the selected item's game content can be loaded using loadSelectedRoot();
         - when navigating to a parent folder, the originating folder is tracked
           so that it can be automatically selected in the parent's list.
 
@@ -153,10 +153,14 @@ namespace game { namespace browser {
         void openParent();
 
         /** Select child.
-            This does not yet load the child root; see loadChildRoot().
+            This does not yet load the child root; see loadSelectedRoot().
 
             @param n Child index (0-based); call is ignored if value is out-of-range */
         void selectChild(size_t n);
+
+        /** Select the current folder.
+            This does not yet load the current folder root; see loadSelectedRoot(). */
+        void selectSelf();
 
         /** Access current folder.
             @return current folder (last in path list) */
@@ -174,25 +178,25 @@ namespace game { namespace browser {
             @post content().empty() */
         void clearContent();
 
-        /** Get selected child.
-            @return If a valid child folder has been selected, pointer to child. Otherwise, null. */
-        Folder* getSelectedChild() const;
+        /** Get selected folder.
+            @return If a valid child folder has been selected, pointer to it. Otherwise, null. */
+        Folder* getSelectedFolder();
 
         /** Get index of selected child.
             @return Child index as set by selectChild(), if any */
         OptionalIndex_t getSelectedChildIndex() const;
 
         /** Get root of selected child.
-            @return root, if loaded successfully using loadChildRoot(). Otherwise, null. */
+            @return root, if loaded successfully using loadSelectedRoot(). Otherwise, null. */
         afl::base::Ptr<Root> getSelectedRoot() const;
 
         /** Get configuration of selected child.
-            @return configuration, if loaded successfully using loadChildRoot(); valid until a new child is selected.
-                    If loadChildRoot() has not yet been called successfully, null. */
+            @return configuration, if loaded successfully using loadSelectedRoot(); valid until a new child is selected.
+                    If loadSelectedRoot() has not yet been called successfully, null. */
         game::config::UserConfiguration* getSelectedConfiguration() const;
 
         /** Check whether to suggest setting up a local folder.
-            Examines the folder previously loaded using loadChildRoot().
+            Examines the folder previously loaded using loadSelectedRoot().
             @return true UI should suggest configuring a local folder */
         bool isSelectedFolderSetupSuggested() const;
 
@@ -209,7 +213,7 @@ namespace game { namespace browser {
         /** Load root of selected child.
             If no child has been selected at this time, does nothing.
             @param then Completion callback. At this time, the Browser object's content has been updated (root, config). */
-        std::auto_ptr<Task_t> loadChildRoot(std::auto_ptr<Task_t> then);
+        std::auto_ptr<Task_t> loadSelectedRoot(std::auto_ptr<Task_t> then);
 
         /** Update configuration of selected child.
             Use after updating the configuration.
@@ -289,14 +293,20 @@ namespace game { namespace browser {
         RootFolder m_rootFolder;
 
         // Selecting a child
-        OptionalIndex_t m_selectedChild;
+        enum Selection {
+            NoSelection,
+            ChildSelected,
+            SelfSelected
+        };
+        Selection m_selection;
+        size_t m_selectedChildIndex;
 
         bool m_childLoaded;
         afl::base::Ptr<Root> m_childRoot;
         afl::base::Ptr<game::config::UserConfiguration> m_childConfig;
 
         bool trySetLocalDirectoryName(afl::io::Directory& gamesDir, String_t directoryName);
-        std::auto_ptr<Task_t> loadGameRoot(size_t n, std::auto_ptr<Task_t>& then);
+        std::auto_ptr<Task_t> loadFolderGameRoot(Folder& f, std::auto_ptr<Task_t>& then);
     };
 
 } }

@@ -130,7 +130,7 @@ namespace game { namespace proxy {
         /** Select folder and report information.
             Loads the content and reports sig_selectedInfoUpdate.
             @param index Index into current folder (unset: report information about current folder; index: report information about index'th child)
-            @see game::browser::Browser::loadChildRoot */
+            @see game::browser::Browser::loadSelectedRoot */
         void selectFolder(OptionalIndex_t index);
 
         /** Check whether to suggest setting up a local folder.

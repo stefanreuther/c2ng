@@ -206,7 +206,7 @@ game::interface::PrivateFunctions::IFTakeRoot(Session& /*session*/, interpreter:
             : m_gameSender(gameSender), m_processId(processId)
             { }
         void handle(game::browser::Session& session)
-            { session.addTask(session.browser().loadChildRoot(std::auto_ptr<Task_t>(new Task2(m_gameSender, session, m_processId)))); }
+            { session.addTask(session.browser().loadSelectedRoot(std::auto_ptr<Task_t>(new Task2(m_gameSender, session, m_processId)))); }
      private:
         RequestSender<Session> m_gameSender;
         uint32_t m_processId;

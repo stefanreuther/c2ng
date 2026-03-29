@@ -111,7 +111,7 @@ namespace {
                 // Build information
                 m_session.log().write(LogListener::Trace, LOG_NAME, "Task: ChildBuilder");
                 Browser& b = m_session.browser();
-                if (Folder* f = b.getSelectedChild()) {
+                if (Folder* f = b.getSelectedFolder()) {
                     Ptr<Root> root = b.getSelectedRoot();
                     Ptr<TurnLoader> loader = root.get() != 0 ? root->getTurnLoader() : 0;
                     if (loader.get() != 0) {
@@ -379,7 +379,7 @@ game::proxy::BrowserProxy::selectFolder(OptionalIndex_t index)
                     // Info
                     if (!current) {
                         b.selectChild(pos);
-                        t.session().addTask(b.loadChildRoot(std::auto_ptr<Task_t>(new ChildBuilder(m_reply, t.session(), result))));
+                        t.session().addTask(b.loadSelectedRoot(std::auto_ptr<Task_t>(new ChildBuilder(m_reply, t.session(), result))));
                     } else {
                         // FIXME: focusing on the browser, not on an item - unselect current item in t.browser()?
                         buildFolderInfo(*f, *result);
