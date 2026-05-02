@@ -113,7 +113,7 @@ game::proxy::SelectionProxy::Trampoline::setCurrentLayer(LayerReference_t newLay
 {
     // Perform action
     if (m_game.get() != 0) {
-        m_game->selections().setCurrentLayer(newLayer.resolve(m_game->selections()), m_game->viewpointTurn().universe());
+        m_game->selections().setCurrentLayer(newLayer, m_game->viewpointTurn().universe());
     }
 
     // Signal other listeners

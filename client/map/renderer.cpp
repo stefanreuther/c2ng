@@ -13,6 +13,11 @@
 #include "gfx/context.hpp"
 #include "util/math.hpp"
 
+using game::TeamSettings;
+using game::map::Drawing;
+using gfx::Context;
+using gfx::FillPattern;
+
 namespace {
     const int SCRingRadius           = 3;      ///< Radius of planet ring, in ly.
     const int SCMaxRingRadius        = 6;      ///< Max.\ radius of scaled planet ring, in pixels.
@@ -46,33 +51,33 @@ namespace {
         drawVLine(ctx, pt.getX(), pt.getY() - size, pt.getY() + size);
     }
 
-    uint8_t getShipColor(game::TeamSettings::Relation rel)
+    uint8_t getShipColor(TeamSettings::Relation rel)
     {
         switch (rel) {
-         case game::TeamSettings::ThisPlayer:   return ui::Color_Green;
-         case game::TeamSettings::AlliedPlayer: return ui::Color_Yellow;
-         case game::TeamSettings::EnemyPlayer:  return ui::Color_Red;
+         case TeamSettings::ThisPlayer:   return ui::Color_Green;
+         case TeamSettings::AlliedPlayer: return ui::Color_Yellow;
+         case TeamSettings::EnemyPlayer:  return ui::Color_Red;
         }
         return ui::Color_Pink;
     }
 
-    uint8_t getShipTrailColor(game::TeamSettings::Relation rel, int age)
+    uint8_t getShipTrailColor(TeamSettings::Relation rel, int age)
     {
         int delta = 7 - std::min(7, age >> 1);
         switch (rel) {
-         case game::TeamSettings::ThisPlayer:   return static_cast<uint8_t>(ui::Color_GreenScale + delta);
-         case game::TeamSettings::AlliedPlayer: return static_cast<uint8_t>(ui::Color_DarkYellowScale + delta);
-         case game::TeamSettings::EnemyPlayer:  return static_cast<uint8_t>(ui::Color_Fire + delta);
+         case TeamSettings::ThisPlayer:   return static_cast<uint8_t>(ui::Color_GreenScale + delta);
+         case TeamSettings::AlliedPlayer: return static_cast<uint8_t>(ui::Color_DarkYellowScale + delta);
+         case TeamSettings::EnemyPlayer:  return static_cast<uint8_t>(ui::Color_Fire + delta);
         }
         return ui::Color_Pink;
     }
 
-    uint8_t getMinefieldColor(game::TeamSettings::Relation rel)
+    uint8_t getMinefieldColor(TeamSettings::Relation rel)
     {
         switch (rel) {
-         case game::TeamSettings::ThisPlayer:   return ui::Color_GreenScale+4;
-         case game::TeamSettings::AlliedPlayer: return ui::Color_DarkYellowScale+4;
-         case game::TeamSettings::EnemyPlayer:  return ui::Color_Dark;
+         case TeamSettings::ThisPlayer:   return ui::Color_GreenScale+4;
+         case TeamSettings::AlliedPlayer: return ui::Color_DarkYellowScale+4;
+         case TeamSettings::EnemyPlayer:  return ui::Color_Dark;
         }
         return ui::Color_DarkPink;
     }
@@ -87,7 +92,7 @@ namespace {
         97,  99,  101, 103, 105, 107, 109, 111, 113, 115,
         98,  100, 102, 104, 106, 108, 110, 112, 114, 116
     };
-    static_assert(countof(user_colors) == game::map::Drawing::NUM_USER_COLORS + 1, "countof user_colors");
+    static_assert(countof(user_colors) == Drawing::NUM_USER_COLORS + 1, "countof user_colors");
 
     static const uint8_t ufo_colors[] = {
         ui::Color_Black,     ui::Color_DarkBlue,      ui::Color_DarkGreen,    ui::Color_DarkCyan,
@@ -112,7 +117,7 @@ namespace {
 
 class client::map::Renderer::Listener : public game::map::RendererListener {
  public:
-    Listener(gfx::Context<uint8_t>& ctx, const Renderer& parent)
+    Listener(Context<uint8_t>& ctx, const Renderer& parent)
         : m_context(ctx),
           m_parent(parent)
         { }
@@ -149,14 +154,14 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
         {
             // ex chart.pas:SetMineFillStyle
             // Adjust pattern position to avoid that own and foreing minefields hide each other
-            if (rel == game::TeamSettings::ThisPlayer) {
+            if (rel == TeamSettings::ThisPlayer) {
                 pt.addY(1);
             }
 
             if (isWeb) {
-                m_context.setFillPattern(gfx::FillPattern(gfx::FillPattern::GRAY50).shiftUp((pt.getX() + pt.getY()) & 1));
+                m_context.setFillPattern(FillPattern(FillPattern::GRAY50).shiftUp((pt.getX() + pt.getY()) & 1));
             } else {
-                m_context.setFillPattern(gfx::FillPattern(gfx::FillPattern::GRAY25).shiftUp((15 + 2*(pt.getX() & 1) - pt.getY()) & 3));
+                m_context.setFillPattern(FillPattern(FillPattern::GRAY25).shiftUp((15 + 2*(pt.getX() & 1) - pt.getY()) & 3));
             }
         }
 
@@ -287,8 +292,7 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
             m_context.setLinePattern(0xFF);
             if ((flags & ripHasBase) != 0) {
                 int sbsize = std::min(m_parent.scale(SCCrossRadius), SCMaxCrossRadius);
-                drawHLine(m_context, ptx.getX() - sbsize, ptx.getY(), ptx.getX() + sbsize);
-                drawVLine(m_context, ptx.getX(), ptx.getY() - sbsize, ptx.getY() + sbsize);
+                drawCross(m_context, ptx, sbsize);
             }
 
             // Draw planet ring
@@ -340,7 +344,7 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
                 drawPixel(m_context, pt);
             }
             if ((flags & risShowIcon) != 0) {
-                drawShipIcon(m_context, pt, rel == game::TeamSettings::ThisPlayer, m_parent.scale(10) > 5);
+                drawShipIcon(m_context, pt, rel == TeamSettings::ThisPlayer, m_parent.scale(10) > 5);
             }
             if ((flags & risFleetLeader) != 0) {
                 drawPixel(m_context, pt + gfx::Point(-1, -1));
@@ -381,7 +385,7 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
 
             m_context.setLinePattern(0xFF);
             m_context.setColor(getUfoColor(colorCode));
-            m_context.setFillPattern(gfx::FillPattern(UFO_FILL).shiftDown(center.getY() & 3).shiftRight(center.getX() & 3));
+            m_context.setFillPattern(FillPattern(UFO_FILL).shiftDown(center.getY() & 3).shiftRight(center.getX() & 3));
 
             drawMovingObject(center, m_parent.scale(r), speed, heading, filled);
             drawCross(m_context, center, m_parent.getCrossSize());
@@ -498,8 +502,7 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
             gfx::Point ax = m_parent.scale(a);
             gfx::Point bx = m_parent.scale(b);
             drawLine(m_context, ax, bx);
-            drawHLine(m_context, bx.getX()-waypointCrossSize, bx.getY(), bx.getX()+waypointCrossSize);
-            drawVLine(m_context, bx.getX(), bx.getY()-waypointCrossSize, bx.getY()+waypointCrossSize);
+            drawCross(m_context, bx, waypointCrossSize);
         }
 
     virtual void drawShipTask(game::map::Point a, game::map::Point b, Relation_t /*rel*/, int /*seq*/)
@@ -511,8 +514,7 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
             gfx::Point ax = m_parent.scale(a);
             gfx::Point bx = m_parent.scale(b);
             drawLine(m_context, ax, bx);
-            drawHLine(m_context, bx.getX()-waypointCrossSize, bx.getY(), bx.getX()+waypointCrossSize);
-            drawVLine(m_context, bx.getX(), bx.getY()-waypointCrossSize, bx.getY()+waypointCrossSize);
+            drawCross(m_context, bx, waypointCrossSize);
         }
 
     virtual void drawShipVector(game::map::Point a, game::map::Point b, Relation_t /*rel*/)
@@ -539,7 +541,7 @@ class client::map::Renderer::Listener : public game::map::RendererListener {
         }
 
  private:
-    gfx::Context<uint8_t>& m_context;
+    Context<uint8_t>& m_context;
     const Renderer& m_parent;
 };
 
@@ -583,7 +585,7 @@ client::map::Renderer::getExtent() const
 void
 client::map::Renderer::draw(gfx::Canvas& can, ui::ColorScheme& colorScheme, gfx::ResourceProvider& provider) const
 {
-    gfx::Context<uint8_t> ctx(can, colorScheme);
+    Context<uint8_t> ctx(can, colorScheme);
     setFont(ctx, provider);
 
     if (m_renderList.get() != 0) {
@@ -595,21 +597,21 @@ client::map::Renderer::draw(gfx::Canvas& can, ui::ColorScheme& colorScheme, gfx:
 void
 client::map::Renderer::drawDrawing(gfx::Canvas& can, ui::ColorScheme& colorScheme, gfx::ResourceProvider& provider, const game::map::Drawing& d, uint8_t color) const
 {
-    gfx::Context<uint8_t> ctx(can, colorScheme);
+    Context<uint8_t> ctx(can, colorScheme);
     setFont(ctx, provider);
 
     Listener painter(ctx, *this);
     switch (d.getType()) {
-     case game::map::Drawing::LineDrawing:
+     case Drawing::LineDrawing:
         painter.drawUserLine(d.getPos(), d.getPos2(), color);
         break;
-     case game::map::Drawing::RectangleDrawing:
+     case Drawing::RectangleDrawing:
         painter.drawUserRectangle(d.getPos(), d.getPos2(), color);
         break;
-     case game::map::Drawing::CircleDrawing:
+     case Drawing::CircleDrawing:
         painter.drawUserCircle(d.getPos(), d.getCircleRadius(), color);
         break;
-     case game::map::Drawing::MarkerDrawing:
+     case Drawing::MarkerDrawing:
         painter.drawUserMarker(d.getPos(), d.getMarkerKind(), color, afl::string::strFirst(d.getComment(), "|"));
         break;
     }

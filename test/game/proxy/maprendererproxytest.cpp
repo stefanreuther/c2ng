@@ -63,7 +63,7 @@ namespace {
     };
 
     /* RendererListener to capture received marker colors */
-    class MarkerCollector : public game::map::RenderList {
+    class MarkerCollector : public game::map::RendererListener {
      public:
         typedef afl::bits::SmallSet<int> Colors_t;
 
@@ -102,6 +102,8 @@ namespace {
         virtual void drawShipTrail(Point, Point, Relation_t, int, int)
             { }
         virtual void drawShipWaypoint(Point, Point, Relation_t)
+            { }
+        virtual void drawShipTask(Point, Point, Relation_t, int)
             { }
         virtual void drawShipVector(Point, Point, Relation_t)
             { }
