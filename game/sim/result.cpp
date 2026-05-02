@@ -6,15 +6,13 @@
 #include "game/sim/result.hpp"
 
 // Initialize.
-void
-game::sim::Result::init(const Configuration& config, int this_battle_index)
-{
-    this->this_battle_index   = this_battle_index;
-    this->this_battle_weight  = 1;
-    this->total_battle_weight = 1;
-    this->series_length       = config.getMode() == Configuration::VcrNuHost ? 118 : 110;
-    this->battles             = 0;
-}
+game::sim::Result::Result(const Configuration& config, int this_battle_index)
+    : this_battle_weight(1),
+      total_battle_weight(1),
+      series_length(config.getMode() == Configuration::VcrNuHost ? 118 : 110),
+      this_battle_index(this_battle_index),
+      battles()
+{ }
 
 // Add a series of a given length.
 int

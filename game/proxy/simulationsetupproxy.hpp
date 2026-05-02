@@ -12,7 +12,6 @@
 #include "afl/string/string.hpp"
 #include "game/map/point.hpp"
 #include "game/proxy/simulationadaptor.hpp"
-#include "game/session.hpp"
 #include "game/sim/ability.hpp"
 #include "game/sim/configuration.hpp"
 #include "game/sim/gameinterface.hpp"
@@ -702,6 +701,10 @@ namespace game { namespace proxy {
             Should be called whenever the simulation editor is opened. */
         void usePlayerRelations();
 
+        /** Access the underlying SimulationAdaptor sender.
+            \return SimulationAdaptor */
+        util::RequestSender<SimulationAdaptor> adaptorSender();
+
 
         /** Signal: list changed.
             Reported whenever a list item changed, or the list itself changed (items added or removed).
@@ -719,16 +722,8 @@ namespace game { namespace proxy {
             Reported whenever the object observed using setSlot() changes. */
         afl::base::Signal<void(Slot_t, const ObjectInfo&)> sig_objectChange;
 
-
-
-        /** Access the underlying SimulationAdaptor sender.
-            \return SimulationAdaptor */
-        util::RequestSender<SimulationAdaptor> adaptorSender();
-
-
      private:
         class TrampolineFromAdaptor;
-        class AdaptorFromSession;
         class Trampoline;
         util::RequestSender<SimulationAdaptor> m_adaptorSender;
         util::RequestReceiver<SimulationSetupProxy> m_reply;

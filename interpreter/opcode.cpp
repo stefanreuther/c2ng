@@ -12,7 +12,7 @@
    Anyway, this is a canary to tell us if a compiler starts to think otherwise.
    If this breaks, (a) remove this check to get it working again quickly,
    and (b) start investigating why it broke. */
-static_assert(sizeof(interpreter::Opcode), 4);
+static_assert(sizeof(interpreter::Opcode) == 4, "sizeof Opcode");
 
 namespace {
     // Names for enum Scope

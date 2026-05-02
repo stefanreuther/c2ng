@@ -111,7 +111,7 @@ namespace {
 
         // Check for vpwork directory
         String_t dirTitle = afl::string::strLCase(dir.getTitle());
-        static_assert(game::v3::structures::NUM_GAMESTAT_SLOTS == 8, NUM_GAMESTAT_SLOTS);
+        static_assert(game::v3::structures::NUM_GAMESTAT_SLOTS == 8, "NUM_GAMESTAT_SLOTS");
         if (dirTitle.size() == 7 && dirTitle >= "vpwork1" && dirTitle <= "vpwork8") {
             const int slotNr = dirTitle[6] - '1';
             try {

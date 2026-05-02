@@ -25,7 +25,8 @@ AFL_TEST("game.sim.ClassResult:basics", a)
     setup.addShip()->setOwner(0);
     setup.addPlanet()->setOwner(4);
 
-    game::sim::Result res;
+    game::sim::Configuration config;
+    game::sim::Result res(config, 0);
     res.battles = new game::vcr::classic::Database();
 
     // Constructor
@@ -66,9 +67,10 @@ AFL_TEST("game.sim.ClassResult:multiple", a)
     setup3.addPlanet()->setOwner(4);
 
     // Results
-    game::sim::Result res1; res1.battles = new game::vcr::classic::Database();
-    game::sim::Result res2; res2.battles = new game::vcr::classic::Database();
-    game::sim::Result res3; res3.battles = new game::vcr::classic::Database();
+    game::sim::Configuration config;
+    game::sim::Result res1(config, 0); res1.battles = new game::vcr::classic::Database();
+    game::sim::Result res2(config, 1); res2.battles = new game::vcr::classic::Database();
+    game::sim::Result res3(config, 2); res3.battles = new game::vcr::classic::Database();
 
     // ClassResults
     game::sim::ClassResult cr1(setup1, res1);

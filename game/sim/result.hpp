@@ -58,16 +58,10 @@ namespace game { namespace sim {
         /** Actual battle. Filled in by simulator. */
         Database_t battles;
 
-        /** Constructor. */
-        // FIXME: merge with init?
-        Result()
-            : this_battle_weight(1), total_battle_weight(1), series_length(1), this_battle_index(0), battles()
-            { }
-
-        /** Initialize.
+        /** Constructor.
             \param config            Simulation configuration
             \param this_battle_index Index of the battle to be simulated, 0-based. */
-        void init(const Configuration& config, int this_battle_index);
+        Result(const Configuration& config, int this_battle_index);
 
         /** Add a series of a given length.
             Returns the position in the series.

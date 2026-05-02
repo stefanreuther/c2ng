@@ -57,8 +57,7 @@ namespace {
 
     game::sim::Result makeResult(int index)
     {
-        game::sim::Result r;
-        r.init(game::sim::Configuration(), index);   // 0 to initialize
+        game::sim::Result r(game::sim::Configuration(), index);   // 0 to initialize
         r.battles = new game::vcr::classic::Database();
         return r;
     }
@@ -69,8 +68,7 @@ AFL_TEST("game.sim.ResultList:basics", a)
     game::sim::ResultList testee;
 
     // Add a class result (1x player 2, 2x player 7)
-    game::sim::Result result;
-    result.init(game::sim::Configuration(), 0);   // 0 to initialize
+    game::sim::Result result(game::sim::Configuration(), 0);   // 0 to initialize
     result.battles = new game::vcr::classic::Database();
 
     {
@@ -133,8 +131,7 @@ AFL_TEST("game.sim.ResultList:increase-weight", a)
     game::sim::ResultList testee;
 
     // Add a class result (2x player 1) with weight 1
-    game::sim::Result result1;
-    result1.init(game::sim::Configuration(), 0);   // 0 to initialize
+    game::sim::Result result1(game::sim::Configuration(), 0);   // 0 to initialize
     result1.battles = new game::vcr::classic::Database();
 
     {
@@ -146,8 +143,7 @@ AFL_TEST("game.sim.ResultList:increase-weight", a)
     }
 
     // Add another class result (2x player 1) with weight 10
-    game::sim::Result result2;
-    result2.init(game::sim::Configuration(), 1);   // 1 to add
+    game::sim::Result result2(game::sim::Configuration(), 1);   // 1 to add
     result2.battles = new game::vcr::classic::Database();
     result2.addSeries(2);
     result2.total_battle_weight *= 10;
@@ -185,8 +181,7 @@ AFL_TEST("game.sim.ResultList:decrease-weight", a)
     game::sim::ResultList testee;
 
     // Add class result (2x player 1) with weight 10 first
-    game::sim::Result result2;
-    result2.init(game::sim::Configuration(), 0);   // 0 to initialize
+    game::sim::Result result2(game::sim::Configuration(), 0);   // 0 to initialize
     result2.battles = new game::vcr::classic::Database();
     result2.addSeries(2);
     result2.total_battle_weight *= 10;
@@ -200,8 +195,7 @@ AFL_TEST("game.sim.ResultList:decrease-weight", a)
     }
 
     // Add a class result (2x player 1) with weight 1
-    game::sim::Result result1;
-    result1.init(game::sim::Configuration(), 1);   // 0 to add
+    game::sim::Result result1(game::sim::Configuration(), 1);   // 0 to add
     result1.battles = new game::vcr::classic::Database();
 
     {

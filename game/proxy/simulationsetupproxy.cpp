@@ -5,9 +5,6 @@
   *  FIXME: 20201218: This implements some "if-this-then-that" logic, e.g. "clear cloak if ship is set to agg_Kill",
   *  and some range logic, e.g. "Lizards have 150 damage max".
   *  Consider moving that into game/sim/.
-  *
-  *  FIXME: 20201218: for now, this can only access the game::sim::Session that is associated with a game::Session.
-  *  Try to avoid dependencies on the game::Session (other than for initialisation) to allow future expansion.
   */
 
 #include <cmath>
@@ -17,15 +14,14 @@
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/translator.hpp"
+#include "game/game.hpp"
 #include "game/root.hpp"
 #include "game/sim/loader.hpp"
 #include "game/sim/planet.hpp"
-#include "game/sim/sessionextra.hpp"
 #include "game/sim/ship.hpp"
+#include "game/sim/sort.hpp"
 #include "game/spec/basichullfunction.hpp"
 #include "util/math.hpp"
-#include "game/sim/sort.hpp"
-#include "game/game.hpp"
 
 using afl::string::Format;
 using game::config::HostConfiguration;

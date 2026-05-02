@@ -41,8 +41,7 @@ AFL_TEST("game.sim.UnitResult:ship:torpedoes", a)
         stat.handleTorpedoHit();     // 7 torpedoes hit
     }
 
-    game::sim::Result res;
-    res.init(game::sim::Configuration(), 0);  // Index 0 is required to set the min/max values
+    game::sim::Result res(game::sim::Configuration(), 0);  // Index 0 is required to set the min/max values
 
     // Test
     game::sim::UnitResult testee;
@@ -92,8 +91,7 @@ AFL_TEST("game.sim.UnitResult:ship:carrier", a)
     stat.init(obj, 1);
     stat.handleFightersAboard(23);
 
-    game::sim::Result res;
-    res.init(game::sim::Configuration(), 0);  // Index 0 is required to set the min/max values
+    game::sim::Result res(game::sim::Configuration(), 0);  // Index 0 is required to set the min/max values
 
     // Test
     game::sim::UnitResult testee;
@@ -142,8 +140,7 @@ AFL_TEST("game.sim.UnitResult:planet", a)
         stat.handleTorpedoHit();       // 5 torpedoes hit
     }
 
-    game::sim::Result res;
-    res.init(game::sim::Configuration(), 0);  // Index 0 is required to set the min/max values
+    game::sim::Result res(game::sim::Configuration(), 0);  // Index 0 is required to set the min/max values
 
     // Test
     game::sim::UnitResult testee;
@@ -189,8 +186,7 @@ AFL_TEST("game.sim.UnitResult:multi", a)
         game::vcr::Statistic stat;
         stat.init(obj, 1);
 
-        game::sim::Result res;
-        res.init(game::sim::Configuration(), 0);  // Index 0 is required to set the min/max values
+        game::sim::Result res(game::sim::Configuration(), 0);  // Index 0 is required to set the min/max values
 
         testee.addResult(oldShip, newShip, stat, res);
     }
@@ -203,8 +199,7 @@ AFL_TEST("game.sim.UnitResult:multi", a)
         game::vcr::Statistic stat;
         stat.init(obj, 1);
 
-        game::sim::Result res;
-        res.init(game::sim::Configuration(), 1);
+        game::sim::Result res(game::sim::Configuration(), 1);
 
         testee.addResult(oldShip, newShip, stat, res);
     }
@@ -217,8 +212,7 @@ AFL_TEST("game.sim.UnitResult:multi", a)
         game::vcr::Statistic stat;
         stat.init(obj, 1);
 
-        game::sim::Result res;
-        res.init(game::sim::Configuration(), 2);
+        game::sim::Result res(game::sim::Configuration(), 2);
 
         testee.addResult(oldShip, newShip, stat, res);
     }

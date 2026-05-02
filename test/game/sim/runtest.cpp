@@ -221,11 +221,10 @@ namespace {
         std::vector<game::vcr::Statistic> stats;
         game::sim::Configuration opts;
         game::sim::Setup setup;
-        game::sim::Result result;
 
         TestHarness()
             : list(), config(game::config::HostConfiguration::create()), flakConfiguration(), rng(42),
-              stats(), opts(), setup(), result()
+              stats(), opts(), setup()
             { initShipList(list); }
     };
 }
@@ -242,22 +241,22 @@ AFL_TEST("game.sim.Run:VcrHost", a)
     // Setup
     Ship* s1 = addOutrider(a, h.setup, 1, 12, h.list);
     Ship* s2 = addOutrider(a, h.setup, 2, 11, h.list);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
     a.checkEqual("01. getSeed", h.rng.getSeed(), 42U);
 
     // - a battle has been created
-    a.checkNonNull("11. battles",           h.result.battles.get());
-    a.checkEqual("12. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("13. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("14. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("15. series_length",       h.result.series_length, 110);
-    a.checkEqual("16. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("11. battles",           result.battles.get());
+    a.checkEqual("12. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("13. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("14. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("15. series_length",       result.series_length, 110);
+    a.checkEqual("16. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("21. stats", h.stats.size(), 2U);
@@ -287,22 +286,22 @@ AFL_TEST("game.sim.Run:VcrHost:big", a)
     // Setup
     Ship* s1 = addGorbie(a, h.setup, 1, 8, h.list);
     Ship* s2 = addAnnihilation(a, h.setup, 2, 6, h.list);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
     a.checkEqual("01. getSeed", h.rng.getSeed(), 42U);
 
     // - a battle has been created
-    a.checkNonNull("11. battles",           h.result.battles.get());
-    a.checkEqual("12. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("13. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("14. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("15. series_length",       h.result.series_length, 110);
-    a.checkEqual("16. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("11. battles",           result.battles.get());
+    a.checkEqual("12. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("13. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("14. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("15. series_length",       result.series_length, 110);
+    a.checkEqual("16. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("21. stats",                h.stats.size(), 2U);
@@ -337,26 +336,26 @@ AFL_TEST("game.sim.Run:VcrHost:NTP", a)
     Ship* s1 = addAnnihilation(a, h.setup, 1, 6, h.list);
     Ship* s2 = addAnnihilation(a, h.setup, 2, 2, h.list);
     s2->setFriendlyCode("NTP");
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
     a.checkEqual("01. getSeed", h.rng.getSeed(), 42U);
 
     // - a battle has been created
-    a.checkNonNull("11. battles", h.result.battles.get());
-    a.checkEqual("12. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("13. getId",               h.result.battles->getBattle(0)->getObject(0, false)->getId(), 2);
-    a.checkEqual("14. getNumBattles",       h.result.battles->getBattle(0)->getObject(0, false)->getNumTorpedoes(), 0);
-    a.checkEqual("15. getId",               h.result.battles->getBattle(0)->getObject(1, false)->getId(), 1);
-    a.checkEqual("16. getNumTorpedoes",     h.result.battles->getBattle(0)->getObject(1, false)->getNumTorpedoes(), 320);
-    a.checkEqual("17. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("18. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("19. series_length",       h.result.series_length, 110);
-    a.checkEqual("20. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("11. battles", result.battles.get());
+    a.checkEqual("12. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("13. getId",               result.battles->getBattle(0)->getObject(0, false)->getId(), 2);
+    a.checkEqual("14. getNumBattles",       result.battles->getBattle(0)->getObject(0, false)->getNumTorpedoes(), 0);
+    a.checkEqual("15. getId",               result.battles->getBattle(0)->getObject(1, false)->getId(), 1);
+    a.checkEqual("16. getNumTorpedoes",     result.battles->getBattle(0)->getObject(1, false)->getNumTorpedoes(), 320);
+    a.checkEqual("17. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("18. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("19. series_length",       result.series_length, 110);
+    a.checkEqual("20. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("21. stats",                h.stats.size(), 2U);
@@ -390,22 +389,22 @@ AFL_TEST("game.sim.Run:VcrHost:Balance360k", a)
     // Setup
     Ship* s1 = addOutrider(a, h.setup, 1, 12, h.list);
     Ship* s2 = addOutrider(a, h.setup, 2, 11, h.list);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
     a.checkEqual("01. getSeed", h.rng.getSeed(), 42U);
 
     // - a battle has been created - increased weight due to balancing
-    a.checkNonNull("11. battles",           h.result.battles.get());
-    a.checkEqual("12. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("13. this_battle_weight",  h.result.this_battle_weight, 50);
-    a.checkEqual("14. total_battle_weight", h.result.total_battle_weight, 100);
-    a.checkEqual("15. series_length",       h.result.series_length, 220);             // doubled by Balance360k
-    a.checkEqual("16. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("11. battles",           result.battles.get());
+    a.checkEqual("12. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("13. this_battle_weight",  result.this_battle_weight, 50);
+    a.checkEqual("14. total_battle_weight", result.total_battle_weight, 100);
+    a.checkEqual("15. series_length",       result.series_length, 220);             // doubled by Balance360k
+    a.checkEqual("16. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("21. stats", h.stats.size(), 2U);
@@ -435,22 +434,22 @@ AFL_TEST("game.sim.Run:VcrHost:BalanceMasterAtArms", a)
     // Setup
     Ship* s1 = addGorbie(a, h.setup, 1, 8, h.list);
     Ship* s2 = addGorbie(a, h.setup, 2, 6, h.list);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
     a.checkEqual("01. getSeed", h.rng.getSeed(), 42U);
 
     // - a battle has been created - increased weight due to balancing
-    a.checkNonNull("11. battles",           h.result.battles.get());
-    a.checkEqual("12. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("13. this_battle_weight",  h.result.this_battle_weight, 28);
-    a.checkEqual("14. total_battle_weight", h.result.total_battle_weight, 1000);
-    a.checkEqual("15. series_length",       h.result.series_length, 440);             // doubled by bonus bays and by bonus fighters
-    a.checkEqual("16. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("11. battles",           result.battles.get());
+    a.checkEqual("12. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("13. this_battle_weight",  result.this_battle_weight, 28);
+    a.checkEqual("14. total_battle_weight", result.total_battle_weight, 1000);
+    a.checkEqual("15. series_length",       result.series_length, 440);             // doubled by bonus bays and by bonus fighters
+    a.checkEqual("16. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("21. stats",                h.stats.size(), 2U);
@@ -486,22 +485,22 @@ AFL_TEST("game.sim.Run:VcrHost:planet", a)
     // Setup
     Ship* s = addOutrider(a, h.setup, 1, 5, h.list);
     Planet* p = addPlanet(h.setup, 1, 4);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
     a.checkEqual("01. getSeed", h.rng.getSeed(), 42U);
 
     // - a battle has been created
-    a.checkNonNull("11. battles",           h.result.battles.get());
-    a.checkEqual("12. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("13. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("14. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("15. series_length",       h.result.series_length, 110);
-    a.checkEqual("16. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("11. battles",           result.battles.get());
+    a.checkEqual("12. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("13. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("14. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("15. series_length",       result.series_length, 110);
+    a.checkEqual("16. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("21. stats", h.stats.size(), 2U);
@@ -539,24 +538,24 @@ AFL_TEST("game.sim.Run:VcrHost:intercept", a)
     s4->setInterceptId(2);
     s4->setFriendlyCode("100");
 
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
     a.checkEqual("01. getSeed", h.rng.getSeed(), 42U);
 
     // - a battle has been created
-    a.checkNonNull("11. battles",           h.result.battles.get());
-    a.checkEqual("12. getId",               h.result.battles->getBattle(0)->getObject(0, false)->getId(), 2);
-    a.checkEqual("13. getId",               h.result.battles->getBattle(0)->getObject(1, false)->getId(), 4);
-    a.checkEqual("14. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("15. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("16. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("17. series_length",       h.result.series_length, 110);
-    a.checkEqual("18. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("11. battles",           result.battles.get());
+    a.checkEqual("12. getId",               result.battles->getBattle(0)->getObject(0, false)->getId(), 2);
+    a.checkEqual("13. getId",               result.battles->getBattle(0)->getObject(1, false)->getId(), 4);
+    a.checkEqual("14. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("15. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("16. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("17. series_length",       result.series_length, 110);
+    a.checkEqual("18. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("21. stats", h.stats.size(), 4U);
@@ -595,38 +594,38 @@ AFL_TEST("game.sim.Run:VcrHost:multi-ship", a)
     s4->setFriendlyCode("200");
     p->setFriendlyCode("ATT");
 
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has been used
     a.checkEqual("01. getSeed", h.rng.getSeed(), 673767206U);
 
     // - battles have been created; series length unchanged
-    a.checkNonNull("11. battles",           h.result.battles.get());
-    a.checkEqual("12. getNumBattles",       h.result.battles->getNumBattles(), 4U);
-    a.checkEqual("13. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("14. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("15. series_length",       h.result.series_length, 110);
-    a.checkEqual("16. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("11. battles",           result.battles.get());
+    a.checkEqual("12. getNumBattles",       result.battles->getNumBattles(), 4U);
+    a.checkEqual("13. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("14. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("15. series_length",       result.series_length, 110);
+    a.checkEqual("16. this_battle_index",   result.this_battle_index, 0);
 
     // - first battle (#2 is aggressor, #1 wins)
-    a.checkEqual("21. getId", h.result.battles->getBattle(0)->getObject(0, false)->getId(), 1);
-    a.checkEqual("22. getId", h.result.battles->getBattle(0)->getObject(1, false)->getId(), 2);
+    a.checkEqual("21. getId", result.battles->getBattle(0)->getObject(0, false)->getId(), 1);
+    a.checkEqual("22. getId", result.battles->getBattle(0)->getObject(1, false)->getId(), 2);
 
     // - second battle (#4 is aggressor, #4 wins)
-    a.checkEqual("31. getId", h.result.battles->getBattle(1)->getObject(0, false)->getId(), 1);
-    a.checkEqual("32. getId", h.result.battles->getBattle(1)->getObject(1, false)->getId(), 4);
+    a.checkEqual("31. getId", result.battles->getBattle(1)->getObject(0, false)->getId(), 1);
+    a.checkEqual("32. getId", result.battles->getBattle(1)->getObject(1, false)->getId(), 4);
 
     // - third battle (#4 is aggressor, #17 wins)
-    a.checkEqual("41. getId", h.result.battles->getBattle(2)->getObject(0, false)->getId(), 4);
-    a.checkEqual("42. getId", h.result.battles->getBattle(2)->getObject(1, false)->getId(), 17);
+    a.checkEqual("41. getId", result.battles->getBattle(2)->getObject(0, false)->getId(), 4);
+    a.checkEqual("42. getId", result.battles->getBattle(2)->getObject(1, false)->getId(), 17);
 
     // - fourth battle (#3 is aggressor, #17 wins)
-    a.checkEqual("51. getId", h.result.battles->getBattle(3)->getObject(0, false)->getId(), 3);
-    a.checkEqual("52. getId", h.result.battles->getBattle(3)->getObject(1, false)->getId(), 17);
+    a.checkEqual("51. getId", result.battles->getBattle(3)->getObject(0, false)->getId(), 3);
+    a.checkEqual("52. getId", result.battles->getBattle(3)->getObject(1, false)->getId(), 17);
 
     // - statistics
     a.checkEqual("61. stats", h.stats.size(), 5U);
@@ -674,28 +673,28 @@ AFL_TEST("game.sim.Run:VcrHost:esb", a)
     // Setup
     Ship* s1 = addOutrider(a, h.setup, 1, 6, h.list);
     Ship* s2 = addOutrider(a, h.setup, 2, 9, h.list);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
     s1->setEngineType(5);          // Nova Drive 5, 5 kt bonus
     s2->setEngineType(9);          // Transwarp Drive, 60 kt bonus
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
     a.checkEqual("01. getSeed", h.rng.getSeed(), 42U);
 
     // - a battle has been created
-    a.checkNonNull("11. battles",           h.result.battles.get());
-    a.checkEqual("12. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("13. getOwner",            h.result.battles->getBattle(0)->getObject(0, false)->getOwner(), 9);
-    a.checkEqual("14. getMass",             h.result.battles->getBattle(0)->getObject(0, false)->getMass(), 135);
-    a.checkEqual("15. getOwner",            h.result.battles->getBattle(0)->getObject(1, false)->getOwner(), 6);
-    a.checkEqual("16. getMass",             h.result.battles->getBattle(0)->getObject(1, false)->getMass(), 80);
-    a.checkEqual("17. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("18. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("19. series_length",       h.result.series_length, 110);
-    a.checkEqual("20. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("11. battles",           result.battles.get());
+    a.checkEqual("12. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("13. getOwner",            result.battles->getBattle(0)->getObject(0, false)->getOwner(), 9);
+    a.checkEqual("14. getMass",             result.battles->getBattle(0)->getObject(0, false)->getMass(), 135);
+    a.checkEqual("15. getOwner",            result.battles->getBattle(0)->getObject(1, false)->getOwner(), 6);
+    a.checkEqual("16. getMass",             result.battles->getBattle(0)->getObject(1, false)->getMass(), 80);
+    a.checkEqual("17. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("18. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("19. series_length",       result.series_length, 110);
+    a.checkEqual("20. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("21. stats", h.stats.size(), 2U);
@@ -726,25 +725,25 @@ AFL_TEST("game.sim.Run:VcrPHost4", a)
     // Setup
     Ship* s1 = addOutrider(a, h.setup, 1, 12, h.list);
     Ship* s2 = addOutrider(a, h.setup, 2, 11, h.list);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
     a.checkEqual("01. getSeed", h.rng.getSeed(), 42U);
 
     // - a battle has been created
-    a.checkNonNull("11. battles",     h.result.battles.get());
-    a.checkEqual("12. getNumBattles", h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("13. getOwner",      h.result.battles->getBattle(0)->getObject(0, false)->getOwner(), 12);
-    a.checkEqual("14. getOwner",      h.result.battles->getBattle(0)->getObject(1, false)->getOwner(), 11);
+    a.checkNonNull("11. battles",     result.battles.get());
+    a.checkEqual("12. getNumBattles", result.battles->getNumBattles(), 1U);
+    a.checkEqual("13. getOwner",      result.battles->getBattle(0)->getObject(0, false)->getOwner(), 12);
+    a.checkEqual("14. getOwner",      result.battles->getBattle(0)->getObject(1, false)->getOwner(), 11);
 
-    a.checkEqual("21. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("22. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("23. series_length",       h.result.series_length, 220);          // doubled by random left/right
-    a.checkEqual("24. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkEqual("21. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("22. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("23. series_length",       result.series_length, 220);          // doubled by random left/right
+    a.checkEqual("24. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("31. stats", h.stats.size(), 2U);
@@ -774,22 +773,22 @@ AFL_TEST("game.sim.Run:VcrPHost3:big", a)
     // Setup
     Ship* s1 = addGorbie(a, h.setup, 1, 8, h.list);
     Ship* s2 = addAnnihilation(a, h.setup, 2, 6, h.list);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
     a.checkEqual("01. getSeed", h.rng.getSeed(), 42U);
 
     // - a battle has been created
-    a.checkNonNull("11. battles",           h.result.battles.get());
-    a.checkEqual("12. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("13. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("14. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("15. series_length",       h.result.series_length, 110);
-    a.checkEqual("16. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("11. battles",           result.battles.get());
+    a.checkEqual("12. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("13. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("14. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("15. series_length",       result.series_length, 110);
+    a.checkEqual("16. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("21. stats",                h.stats.size(), 2U);
@@ -824,22 +823,22 @@ AFL_TEST("game.sim.Run:VcrPHost4:planet", a)
     // Setup
     Ship* s = addOutrider(a, h.setup, 1, 5, h.list);
     Planet* p = addPlanet(h.setup, 1, 4);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
     a.checkEqual("01. getSeed", h.rng.getSeed(), 42U);
 
     // - a battle has been created
-    a.checkNonNull("11. battles",           h.result.battles.get());
-    a.checkEqual("12. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("13. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("14. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("15. series_length",       h.result.series_length, 110);
-    a.checkEqual("16. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("11. battles",           result.battles.get());
+    a.checkEqual("12. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("13. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("14. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("15. series_length",       result.series_length, 110);
+    a.checkEqual("16. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("21. stats",                h.stats.size(), 2U);
@@ -881,26 +880,26 @@ AFL_TEST("game.sim.Run:VcrPHost4:PlanetsHaveTubes", a)
     p->setNumBaseTorpedoes(5, 20);
     p->setNumBaseTorpedoes(6, 30);
 
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
     a.checkEqual("01. getSeed", h.rng.getSeed(), 42U);
 
     // - a battle has been created
-    a.checkNonNull("11. battles",           h.result.battles.get());
-    a.checkEqual("12. getNumTorpedoes",     h.result.battles->getBattle(0)->getObject(0, false)->getNumTorpedoes(), 320);
-    a.checkEqual("13. getNumFighters",      h.result.battles->getBattle(0)->getObject(0, false)->getNumFighters(), 0);
-    a.checkEqual("14. getNumTorpedoes",     h.result.battles->getBattle(0)->getObject(1, false)->getNumTorpedoes(), 72);
-    a.checkEqual("15. getNumFighters",      h.result.battles->getBattle(0)->getObject(1, false)->getNumFighters(), 48);
-    a.checkEqual("16. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("17. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("18. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("19. series_length",       h.result.series_length, 110);
-    a.checkEqual("20. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("11. battles",           result.battles.get());
+    a.checkEqual("12. getNumTorpedoes",     result.battles->getBattle(0)->getObject(0, false)->getNumTorpedoes(), 320);
+    a.checkEqual("13. getNumFighters",      result.battles->getBattle(0)->getObject(0, false)->getNumFighters(), 0);
+    a.checkEqual("14. getNumTorpedoes",     result.battles->getBattle(0)->getObject(1, false)->getNumTorpedoes(), 72);
+    a.checkEqual("15. getNumFighters",      result.battles->getBattle(0)->getObject(1, false)->getNumFighters(), 48);
+    a.checkEqual("16. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("17. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("18. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("19. series_length",       result.series_length, 110);
+    a.checkEqual("20. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("21. stats",                h.stats.size(), 2U);
@@ -950,10 +949,10 @@ AFL_TEST("game.sim.Run:VcrPHost4:intercept", a)
     s4->setInterceptId(2);
     s4->setFriendlyCode("100");
 
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
@@ -964,14 +963,14 @@ AFL_TEST("game.sim.Run:VcrPHost4:intercept", a)
     // PCC2 places the interceptor on the left side, whereas we place them on the right (same as in THost and c2web).
     // This is not a difference from actual host behaviour because PHost always randomizes sides;
     // this test only disabled random left/right for determinism of test results.
-    a.checkNonNull("11. battles",           h.result.battles.get());
-    a.checkEqual("12. getId",               h.result.battles->getBattle(0)->getObject(0, false)->getId(), 2);
-    a.checkEqual("13. getId",               h.result.battles->getBattle(0)->getObject(1, false)->getId(), 4);
-    a.checkEqual("14. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("15. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("16. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("17. series_length",       h.result.series_length, 110);
-    a.checkEqual("18. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("11. battles",           result.battles.get());
+    a.checkEqual("12. getId",               result.battles->getBattle(0)->getObject(0, false)->getId(), 2);
+    a.checkEqual("13. getId",               result.battles->getBattle(0)->getObject(1, false)->getId(), 4);
+    a.checkEqual("14. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("15. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("16. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("17. series_length",       result.series_length, 110);
+    a.checkEqual("18. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("21. stats", h.stats.size(), 4U);
@@ -1010,38 +1009,38 @@ AFL_TEST("game.sim.Run:VcrPHost2:multi-ship", a)
     s4->setFriendlyCode("200");
     p->setFriendlyCode("ATT");
 
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has been used
     a.checkEqual("01. getSeed", h.rng.getSeed(), 3638705852U);
 
     // - battles have been created; series length unchanged
-    a.checkNonNull("11. battles",           h.result.battles.get());
-    a.checkEqual("12. getNumBattles",       h.result.battles->getNumBattles(), 4U);
-    a.checkEqual("13. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("14. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("15. series_length",       h.result.series_length, 110);
-    a.checkEqual("16. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("11. battles",           result.battles.get());
+    a.checkEqual("12. getNumBattles",       result.battles->getNumBattles(), 4U);
+    a.checkEqual("13. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("14. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("15. series_length",       result.series_length, 110);
+    a.checkEqual("16. this_battle_index",   result.this_battle_index, 0);
 
     // - first battle (#1 is aggressor, #1 wins)
-    a.checkEqual("21. getId", h.result.battles->getBattle(0)->getObject(0, false)->getId(), 1);
-    a.checkEqual("22. getId", h.result.battles->getBattle(0)->getObject(1, false)->getId(), 2);
+    a.checkEqual("21. getId", result.battles->getBattle(0)->getObject(0, false)->getId(), 1);
+    a.checkEqual("22. getId", result.battles->getBattle(0)->getObject(1, false)->getId(), 2);
 
     // - second battle (#4 is aggressor, #4 wins)
-    a.checkEqual("31. getId", h.result.battles->getBattle(1)->getObject(0, false)->getId(), 1);
-    a.checkEqual("32. getId", h.result.battles->getBattle(1)->getObject(1, false)->getId(), 4);
+    a.checkEqual("31. getId", result.battles->getBattle(1)->getObject(0, false)->getId(), 1);
+    a.checkEqual("32. getId", result.battles->getBattle(1)->getObject(1, false)->getId(), 4);
 
     // - third battle (#4 is aggressor, #17 wins)
-    a.checkEqual("41. getId", h.result.battles->getBattle(2)->getObject(0, false)->getId(), 4);
-    a.checkEqual("42. getId", h.result.battles->getBattle(2)->getObject(1, false)->getId(), 17);
+    a.checkEqual("41. getId", result.battles->getBattle(2)->getObject(0, false)->getId(), 4);
+    a.checkEqual("42. getId", result.battles->getBattle(2)->getObject(1, false)->getId(), 17);
 
     // - fourth battle (#3 is aggressor, #17 wins)
-    a.checkEqual("51. getId", h.result.battles->getBattle(3)->getObject(0, false)->getId(), 3);
-    a.checkEqual("52. getId", h.result.battles->getBattle(3)->getObject(1, false)->getId(), 17);
+    a.checkEqual("51. getId", result.battles->getBattle(3)->getObject(0, false)->getId(), 3);
+    a.checkEqual("52. getId", result.battles->getBattle(3)->getObject(1, false)->getId(), 17);
 
     // - statistics
     a.checkEqual("61. stats", h.stats.size(), 5U);
@@ -1096,26 +1095,26 @@ AFL_TEST("game.sim.Run:VcrPHost4:Commander", a)
     s3->setExperienceLevel(3);
     s3->setFlags(Ship::fl_Commander | Ship::fl_CommanderSet);
 
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been used
     a.checkEqual("01. getSeed", h.rng.getSeed(), 42U);
 
     // - battles have been created
-    a.checkNonNull("11. battles",           h.result.battles.get());
-    a.checkEqual("12. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("13. getId",               h.result.battles->getBattle(0)->getObject(0, false)->getId(), 1);
-    a.checkEqual("14. getExperienceLevel",  h.result.battles->getBattle(0)->getObject(0, false)->getExperienceLevel(), 0);
-    a.checkEqual("15. getId",               h.result.battles->getBattle(0)->getObject(1, false)->getId(), 2);
-    a.checkEqual("16. getExperienceLevel",  h.result.battles->getBattle(0)->getObject(1, false)->getExperienceLevel(), 1);
-    a.checkEqual("17. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("18. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("19. series_length",       h.result.series_length, 110);
-    a.checkEqual("20. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("11. battles",           result.battles.get());
+    a.checkEqual("12. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("13. getId",               result.battles->getBattle(0)->getObject(0, false)->getId(), 1);
+    a.checkEqual("14. getExperienceLevel",  result.battles->getBattle(0)->getObject(0, false)->getExperienceLevel(), 0);
+    a.checkEqual("15. getId",               result.battles->getBattle(0)->getObject(1, false)->getId(), 2);
+    a.checkEqual("16. getExperienceLevel",  result.battles->getBattle(0)->getObject(1, false)->getExperienceLevel(), 1);
+    a.checkEqual("17. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("18. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("19. series_length",       result.series_length, 110);
+    a.checkEqual("20. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("21. stats", h.stats.size(), 3U);
@@ -1149,14 +1148,14 @@ AFL_TEST("game.sim.Run:ship:deactivated", a)
     // As of 20200920, setting an Intercept Id will try to match the ships even though #1 is not part of battle order due to being disabled.
     addOutrider(a, h.setup, 1, 12, h.list)->setFlags(Ship::fl_Deactivated);
     addOutrider(a, h.setup, 2, 11, h.list)->setInterceptId(1);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 0U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 0U);
 }
 
 /** Test allied ships.
@@ -1173,14 +1172,14 @@ AFL_TEST("game.sim.Run:ship:allied", a)
     // Setup
     addOutrider(a, h.setup, 1, 12, h.list);
     addOutrider(a, h.setup, 2, 11, h.list);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 0U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 0U);
 }
 
 /** Test passive ships.
@@ -1195,14 +1194,14 @@ AFL_TEST("game.sim.Run:ship:passive", a)
     // Setup
     addOutrider(a, h.setup, 1, 12, h.list)->setAggressiveness(Ship::agg_Passive);
     addOutrider(a, h.setup, 2, 11, h.list)->setAggressiveness(Ship::agg_Passive);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 0U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 0U);
 }
 
 /** Test non-hostile ships.
@@ -1217,14 +1216,14 @@ AFL_TEST("game.sim.Run:ship:not-enemy", a)
     // Setup
     addOutrider(a, h.setup, 1, 12, h.list)->setAggressiveness(7);
     addOutrider(a, h.setup, 2, 11, h.list)->setAggressiveness(2);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 0U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 0U);
 }
 
 /** Test hostile ships.
@@ -1239,14 +1238,14 @@ AFL_TEST("game.sim.Run:ship:enemy", a)
     // Setup
     addOutrider(a, h.setup, 1, 12, h.list)->setAggressiveness(11);
     addOutrider(a, h.setup, 2, 11, h.list)->setAggressiveness(2);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 1U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 1U);
 }
 
 /** Test hostile ships, via persistent enemies.
@@ -1262,14 +1261,14 @@ AFL_TEST("game.sim.Run:ship:persistent-enemy", a)
     // Setup
     addOutrider(a, h.setup, 1, 12, h.list)->setAggressiveness(5);
     addOutrider(a, h.setup, 2, 11, h.list)->setAggressiveness(2);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 1U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 1U);
 }
 
 /** Test cloaked ships.
@@ -1285,14 +1284,14 @@ AFL_TEST("game.sim.Run:ship:cloaked", a)
     // Setup
     addOutrider(a, h.setup, 1, 12, h.list)->setFlags(Ship::fl_Cloaked);
     addOutrider(a, h.setup, 2, 11, h.list);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 0U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 0U);
 }
 
 /** Test ships, matching friendly codes.
@@ -1307,14 +1306,14 @@ AFL_TEST("game.sim.Run:ship:fcode-match", a)
     // Setup
     addOutrider(a, h.setup, 1, 12, h.list)->setFriendlyCode("abc");
     addOutrider(a, h.setup, 2, 11, h.list)->setFriendlyCode("abc");
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 0U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 0U);
 }
 
 /** Test ships, no fuel.
@@ -1329,14 +1328,14 @@ AFL_TEST("game.sim.Run:ship:no-fuel", a)
     // Setup
     addOutrider(a, h.setup, 1, 12, h.list)->setAggressiveness(Ship::agg_NoFuel);
     addOutrider(a, h.setup, 2, 11, h.list);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 0U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 0U);
 }
 
 /** Test ships, Cloaked Fighter Bays ability.
@@ -1352,32 +1351,32 @@ AFL_TEST("game.sim.Run:ship:CloakedFighterBays", a)
     Ship* s1 = addGorbie(a, h.setup, 1, 8, h.list);
     Ship* s2 = addGorbie(a, h.setup, 2, 4, h.list);
     Ship* s3 = addGorbie(a, h.setup, 3, 8, h.list);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
     s3->setAggressiveness(Ship::agg_Passive);
     s3->setFlags(Ship::fl_Cloaked | Ship::fl_CloakedBays | Ship::fl_CloakedBaysSet);
     // This line is not needed if Klingon ships automatically have DoubleBeamChargeAbility in NuHost:
     // s2->setFlags(Ship::fl_DoubleBeamCharge | Ship::fl_DoubleBeamChargeSet);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
     a.checkEqual("01. getSeed", h.rng.getSeed(), 42U);
 
     // - a battle has been created
-    a.checkNonNull("11. battles",           h.result.battles.get());
-    a.checkEqual("12. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("13. getId",               h.result.battles->getBattle(0)->getObject(0, false)->getId(), 2);
-    a.checkEqual("14. getNumBays",          h.result.battles->getBattle(0)->getObject(0, false)->getNumBays(), 10);
-    a.checkEqual("15. getNumFights",        h.result.battles->getBattle(0)->getObject(0, false)->getNumFighters(), 250);
-    a.checkEqual("16. getId",               h.result.battles->getBattle(0)->getObject(1, false)->getId(), 1);
-    a.checkEqual("17. getNumBays",          h.result.battles->getBattle(0)->getObject(1, false)->getNumBays(), 20);
-    a.checkEqual("18. getNumFighters",      h.result.battles->getBattle(0)->getObject(1, false)->getNumFighters(), 500);
-    a.checkEqual("19. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("20. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("21. series_length",       h.result.series_length, 118);
-    a.checkEqual("22. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("11. battles",           result.battles.get());
+    a.checkEqual("12. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("13. getId",               result.battles->getBattle(0)->getObject(0, false)->getId(), 2);
+    a.checkEqual("14. getNumBays",          result.battles->getBattle(0)->getObject(0, false)->getNumBays(), 10);
+    a.checkEqual("15. getNumFights",        result.battles->getBattle(0)->getObject(0, false)->getNumFighters(), 250);
+    a.checkEqual("16. getId",               result.battles->getBattle(0)->getObject(1, false)->getId(), 1);
+    a.checkEqual("17. getNumBays",          result.battles->getBattle(0)->getObject(1, false)->getNumBays(), 20);
+    a.checkEqual("18. getNumFighters",      result.battles->getBattle(0)->getObject(1, false)->getNumFighters(), 500);
+    a.checkEqual("19. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("20. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("21. series_length",       result.series_length, 118);
+    a.checkEqual("22. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("31. stats", h.stats.size(), 3U);
@@ -1420,29 +1419,29 @@ AFL_TEST("game.sim.Run:ship:CloakedFighterBays:ammo-limit", a)
     Ship* s1 = addOutrider(a, h.setup, 1, 12, h.list);
     Ship* s2 = addGorbie(a, h.setup, 2, 8, h.list);
     Ship* s3 = addGorbie(a, h.setup, 3, 8, h.list);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
     s2->setFriendlyCode("NT1");
     s3->setAggressiveness(Ship::agg_Passive);
     s3->setFlags(Ship::fl_Cloaked | Ship::fl_CloakedBays | Ship::fl_CloakedBaysSet);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
     a.checkEqual("01. getSeed", h.rng.getSeed(), 42U);
 
     // - a battle has been created
-    a.checkNonNull("11. battles",           h.result.battles.get());
-    a.checkEqual("12. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("13. getId",               h.result.battles->getBattle(0)->getObject(0, false)->getId(), 2);
-    a.checkEqual("14. getNumBays",          h.result.battles->getBattle(0)->getObject(0, false)->getNumBays(), 20);
-    a.checkEqual("15. getNumFighters",      h.result.battles->getBattle(0)->getObject(0, false)->getNumFighters(), 10); /* limit applied */
-    a.checkEqual("16. getId",               h.result.battles->getBattle(0)->getObject(1, false)->getId(), 1);
-    a.checkEqual("17. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("18. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("19. series_length",       h.result.series_length, 118);
-    a.checkEqual("20. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("11. battles",           result.battles.get());
+    a.checkEqual("12. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("13. getId",               result.battles->getBattle(0)->getObject(0, false)->getId(), 2);
+    a.checkEqual("14. getNumBays",          result.battles->getBattle(0)->getObject(0, false)->getNumBays(), 20);
+    a.checkEqual("15. getNumFighters",      result.battles->getBattle(0)->getObject(0, false)->getNumFighters(), 10); /* limit applied */
+    a.checkEqual("16. getId",               result.battles->getBattle(0)->getObject(1, false)->getId(), 1);
+    a.checkEqual("17. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("18. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("19. series_length",       result.series_length, 118);
+    a.checkEqual("20. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("21. stats", h.stats.size(), 3U);
@@ -1484,7 +1483,7 @@ AFL_TEST("game.sim.Run:ship:Squadron", a)
     // Setup
     Ship* s1 = addGorbie(a, h.setup, 1, 8, h.list);
     Ship* s2 = addGorbie(a, h.setup, 2, 4, h.list);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
     s1->setHullType(0, h.list);
     s1->setMass(200);
     s1->setNumBeams(3);
@@ -1492,23 +1491,23 @@ AFL_TEST("game.sim.Run:ship:Squadron", a)
     s1->setFlags(Ship::fl_Squadron | Ship::fl_SquadronSet);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - rng has not been touched because we use seed control
     a.checkEqual("01. getSeed", h.rng.getSeed(), 42U);
 
     // - a battle has been created
-    a.checkNonNull("11. battles",           h.result.battles.get());
-    a.checkEqual("12. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("13. getId",               h.result.battles->getBattle(0)->getObject(0, false)->getId(), 2);
-    a.checkEqual("14. getNumBeams",         h.result.battles->getBattle(0)->getObject(0, false)->getNumBeams(), 10);
-    a.checkEqual("15. getId",               h.result.battles->getBattle(0)->getObject(1, false)->getId(), 1);
-    a.checkEqual("16. getNumBeams",         h.result.battles->getBattle(0)->getObject(1, false)->getNumBeams(), 3);
-    a.checkEqual("17. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("18. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("19. series_length",       h.result.series_length, 118);
-    a.checkEqual("20. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("11. battles",           result.battles.get());
+    a.checkEqual("12. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("13. getId",               result.battles->getBattle(0)->getObject(0, false)->getId(), 2);
+    a.checkEqual("14. getNumBeams",         result.battles->getBattle(0)->getObject(0, false)->getNumBeams(), 10);
+    a.checkEqual("15. getId",               result.battles->getBattle(0)->getObject(1, false)->getId(), 1);
+    a.checkEqual("16. getNumBeams",         result.battles->getBattle(0)->getObject(1, false)->getNumBeams(), 3);
+    a.checkEqual("17. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("18. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("19. series_length",       result.series_length, 118);
+    a.checkEqual("20. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("21. stats", h.stats.size(), 2U);
@@ -1540,14 +1539,14 @@ AFL_TEST("game.sim.Run:planet:deactivated", a)
     // Setup
     addOutrider(a, h.setup, 1, 5, h.list);
     addPlanet(h.setup, 1, 4)->setFlags(Planet::fl_Deactivated);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 0U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 0U);
 }
 
 /** Test cloaked ship at planet.
@@ -1563,14 +1562,14 @@ AFL_TEST("game.sim.Run:planet:cloaked-ship", a)
     // Setup
     addOutrider(a, h.setup, 1, 5, h.list)->setFlags(Ship::fl_Cloaked);
     addPlanet(h.setup, 1, 4)->setFriendlyCode("ATT");
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 0U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 0U);
 }
 
 /** Test ship and planet with matching friendly codes.
@@ -1585,14 +1584,14 @@ AFL_TEST("game.sim.Run:planet:fcode-match", a)
     // Setup
     addOutrider(a, h.setup, 1, 5, h.list)->setFriendlyCode("xyz");
     addPlanet(h.setup, 1, 4)->setFriendlyCode("xyz");
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 0U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 0U);
 }
 
 /** Test ship and planet, allied.
@@ -1609,14 +1608,14 @@ AFL_TEST("game.sim.Run:planet:allied", a)
     // Setup
     addOutrider(a, h.setup, 1, 5, h.list);
     addPlanet(h.setup, 1, 4);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 0U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 0U);
 }
 
 /** Test ship and planet, not aggressive.
@@ -1631,14 +1630,14 @@ AFL_TEST("game.sim.Run:planet:not-aggressive", a)
     // Setup
     addOutrider(a, h.setup, 1, 5, h.list)->setAggressiveness(Ship::agg_Passive);
     addPlanet(h.setup, 1, 4)->setFriendlyCode("123");
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 0U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 0U);
 }
 
 /** Test ship and planet, mismatching primary enemy.
@@ -1653,14 +1652,14 @@ AFL_TEST("game.sim.Run:planet:not-enemy", a)
     // Setup
     addOutrider(a, h.setup, 1, 5, h.list)->setAggressiveness(7);
     addPlanet(h.setup, 1, 4)->setFriendlyCode("123");
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 0U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 0U);
 }
 
 /** Test ship and planet, ship is immune (by being Klingon).
@@ -1675,14 +1674,14 @@ AFL_TEST("game.sim.Run:planet:immune-race", a)
     // Setup
     addOutrider(a, h.setup, 1, 4, h.list)->setAggressiveness(7);
     addPlanet(h.setup, 1, 2)->setFriendlyCode("ATT");
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 0U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 0U);
 }
 
 /** Test ship and planet, ship is immune (by being Bird without fuel).
@@ -1697,14 +1696,14 @@ AFL_TEST("game.sim.Run:planet:immune-bird", a)
     // Setup
     addOutrider(a, h.setup, 1, 3, h.list)->setAggressiveness(Ship::agg_NoFuel);
     addPlanet(h.setup, 1, 2)->setFriendlyCode("NUK");
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 0U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 0U);
 }
 
 /** Test ship and planet, primary enemy.
@@ -1719,14 +1718,14 @@ AFL_TEST("game.sim.Run:planet:matching-enemy", a)
     // Setup
     addOutrider(a, h.setup, 1, 9, h.list)->setAggressiveness(2);
     addPlanet(h.setup, 1, 2)->setFriendlyCode("qqq");
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 1U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 1U);
 }
 
 /** Test ship and planet, planet has NUK.
@@ -1741,14 +1740,14 @@ AFL_TEST("game.sim.Run:planet:NUK", a)
     // Setup
     addOutrider(a, h.setup, 1, 9, h.list)->setAggressiveness(Ship::agg_NoFuel);
     addPlanet(h.setup, 1, 2)->setFriendlyCode("NUK");
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result: no fight
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 1U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 1U);
 }
 
 /** Test basic FLAK simulation.
@@ -1763,32 +1762,32 @@ AFL_TEST("game.sim.Run:VcrFLAK", a)
     // Setup
     Ship* s1 = addOutrider(a, h.setup, 1, 12, h.list);
     Ship* s2 = addOutrider(a, h.setup, 2, 11, h.list);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // Note that FLAK does not support seed control and will touch the RNG.
 
     // - a battle has been created
-    a.checkNonNull("01. battles",           h.result.battles.get());
-    a.checkEqual("02. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("03. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("04. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("05. series_length",       h.result.series_length, 110);
-    a.checkEqual("06. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("01. battles",           result.battles.get());
+    a.checkEqual("02. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("03. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("04. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("05. series_length",       result.series_length, 110);
+    a.checkEqual("06. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("11. stats", h.stats.size(), 2U);
 
     // - battle content
-    a.checkNonNull("21. getBattle",     h.result.battles->getBattle(0));
-    a.checkEqual  ("22. getNumObjects", h.result.battles->getBattle(0)->getNumObjects(), 2U);
-    a.checkNonNull("23. getObject",     h.result.battles->getBattle(0)->getObject(0, false));
-    a.checkEqual  ("24. getMass",       h.result.battles->getBattle(0)->getObject(0, false)->getMass(), 75);
-    a.checkNonNull("25. getObject",     h.result.battles->getBattle(0)->getObject(1, false));
-    a.checkEqual  ("26. getMass",       h.result.battles->getBattle(0)->getObject(1, false)->getMass(), 75);
+    a.checkNonNull("21. getBattle",     result.battles->getBattle(0));
+    a.checkEqual  ("22. getNumObjects", result.battles->getBattle(0)->getNumObjects(), 2U);
+    a.checkNonNull("23. getObject",     result.battles->getBattle(0)->getObject(0, false));
+    a.checkEqual  ("24. getMass",       result.battles->getBattle(0)->getObject(0, false)->getMass(), 75);
+    a.checkNonNull("25. getObject",     result.battles->getBattle(0)->getObject(1, false));
+    a.checkEqual  ("26. getMass",       result.battles->getBattle(0)->getObject(1, false)->getMass(), 75);
 
     // - ship 1
     a.checkEqual("31. getDamage", s1->getDamage(), 71);
@@ -1816,29 +1815,29 @@ AFL_TEST("game.sim.Run:VcrFLAK:esb", a)
     // Setup
     Ship* s1 = addOutrider(a, h.setup, 1, 12, h.list);
     Ship* s2 = addOutrider(a, h.setup, 2, 11, h.list);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // Note that FLAK does not support seed control and will touch the RNG.
 
     // - a battle has been created
-    a.checkNonNull("01. battles",           h.result.battles.get());
-    a.checkEqual("02. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("03. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("04. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("05. series_length",       h.result.series_length, 110);
-    a.checkEqual("06. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("01. battles",           result.battles.get());
+    a.checkEqual("02. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("03. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("04. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("05. series_length",       result.series_length, 110);
+    a.checkEqual("06. this_battle_index",   result.this_battle_index, 0);
 
     // - battle content
-    a.checkNonNull("11. getBattle",     h.result.battles->getBattle(0));
-    a.checkEqual  ("12. getNumObjects", h.result.battles->getBattle(0)->getNumObjects(), 2U);
-    a.checkNonNull("13. getObject",     h.result.battles->getBattle(0)->getObject(0, false));
-    a.checkEqual  ("14. getMass",       h.result.battles->getBattle(0)->getObject(0, false)->getMass(), 135);  // 75 kt + 300 mc * 20%
-    a.checkNonNull("15. getObject",     h.result.battles->getBattle(0)->getObject(1, false));
-    a.checkEqual  ("16. getMass",       h.result.battles->getBattle(0)->getObject(1, false)->getMass(), 135);
+    a.checkNonNull("11. getBattle",     result.battles->getBattle(0));
+    a.checkEqual  ("12. getNumObjects", result.battles->getBattle(0)->getNumObjects(), 2U);
+    a.checkNonNull("13. getObject",     result.battles->getBattle(0)->getObject(0, false));
+    a.checkEqual  ("14. getMass",       result.battles->getBattle(0)->getObject(0, false)->getMass(), 135);  // 75 kt + 300 mc * 20%
+    a.checkNonNull("15. getObject",     result.battles->getBattle(0)->getObject(1, false));
+    a.checkEqual  ("16. getMass",       result.battles->getBattle(0)->getObject(1, false)->getMass(), 135);
 
     // - statistics
     a.checkEqual("21. stats", h.stats.size(), 2U);
@@ -1878,19 +1877,19 @@ AFL_TEST("game.sim.Run:VcrFLAK:multi-ship", a)
     p->setFriendlyCode("ATT");
     p->setNumBaseFighters(60);
 
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // - battles have been created; series length unchanged
-    a.checkNonNull("01. battles",           h.result.battles.get());
-    a.checkEqual("02. getNumBattles",       h.result.battles->getNumBattles(), 1U);
-    a.checkEqual("03. this_battle_weight",  h.result.this_battle_weight, 1);
-    a.checkEqual("04. total_battle_weight", h.result.total_battle_weight, 1);
-    a.checkEqual("05. series_length",       h.result.series_length, 110);
-    a.checkEqual("06. this_battle_index",   h.result.this_battle_index, 0);
+    a.checkNonNull("01. battles",           result.battles.get());
+    a.checkEqual("02. getNumBattles",       result.battles->getNumBattles(), 1U);
+    a.checkEqual("03. this_battle_weight",  result.this_battle_weight, 1);
+    a.checkEqual("04. total_battle_weight", result.total_battle_weight, 1);
+    a.checkEqual("05. series_length",       result.series_length, 110);
+    a.checkEqual("06. this_battle_index",   result.this_battle_index, 0);
 
     // - statistics
     a.checkEqual("11. stats", h.stats.size(), 5U);
@@ -1939,26 +1938,26 @@ AFL_TEST("game.sim.Run:VcrHost:battle-order", a)
 
     // Setup
     addShipSetup(h.setup);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 3U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 3U);
 
     // 320 (lowest FCBO) vs 384 (lowest other Id)
-    a.checkEqual("11. getId", h.result.battles->getBattle(0)->getObject(0, false)->getId(), 384);
-    a.checkEqual("12. getId", h.result.battles->getBattle(0)->getObject(1, false)->getId(), 320);
+    a.checkEqual("11. getId", result.battles->getBattle(0)->getObject(0, false)->getId(), 384);
+    a.checkEqual("12. getId", result.battles->getBattle(0)->getObject(1, false)->getId(), 320);
 
     // 320 (lowest FCBO) vs 489 (second-lowest other Id)
-    a.checkEqual("21. getId", h.result.battles->getBattle(1)->getObject(0, false)->getId(), 489);
-    a.checkEqual("22. getId", h.result.battles->getBattle(1)->getObject(1, false)->getId(), 320);
+    a.checkEqual("21. getId", result.battles->getBattle(1)->getObject(0, false)->getId(), 489);
+    a.checkEqual("22. getId", result.battles->getBattle(1)->getObject(1, false)->getId(), 320);
 
     // 384 (lowest other Id) vs 489 (second-lowest other Id)
-    a.checkEqual("31. getId", h.result.battles->getBattle(2)->getObject(0, false)->getId(), 489);
-    a.checkEqual("32. getId", h.result.battles->getBattle(2)->getObject(1, false)->getId(), 384);
+    a.checkEqual("31. getId", result.battles->getBattle(2)->getObject(0, false)->getId(), 489);
+    a.checkEqual("32. getId", result.battles->getBattle(2)->getObject(1, false)->getId(), 384);
 }
 
 /** Test host order for planet fights, Tim-Host.
@@ -1974,18 +1973,18 @@ AFL_TEST("game.sim.Run:VcrHost:battle-order:planet", a)
 
     // Setup
     addPlanetSetup(h.setup);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 1U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 1U);
 
     // 455 vs 450
-    a.checkEqual("11. getId", h.result.battles->getBattle(0)->getObject(0, false)->getId(), 455);
-    a.checkEqual("12. getId", h.result.battles->getBattle(0)->getObject(1, false)->getId(), 450);
+    a.checkEqual("11. getId", result.battles->getBattle(0)->getObject(0, false)->getId(), 455);
+    a.checkEqual("12. getId", result.battles->getBattle(0)->getObject(1, false)->getId(), 450);
 }
 
 /** Test host order for ship fights, PHost.
@@ -2001,32 +2000,32 @@ AFL_TEST("game.sim.Run:VcrPHost4:battle-order", a)
 
     // Setup
     addShipSetup(h.setup);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 3U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 3U);
 
     // 384 (lowest other Id, as aggressor) vs 320 (lowest FCBO, as opponent)
-    a.checkEqual("11. getId",   h.result.battles->getBattle(0)->getObject(0, false)->getId(), 320);
-    a.checkEqual("12. getId",   h.result.battles->getBattle(0)->getObject(1, false)->getId(), 384);
-    a.checkEqual("13. getRole", h.result.battles->getBattle(0)->getObject(0, false)->getRole(), game::vcr::Object::OpponentRole);
-    a.checkEqual("14. getRole", h.result.battles->getBattle(0)->getObject(1, false)->getRole(), game::vcr::Object::AggressorRole);
+    a.checkEqual("11. getId",   result.battles->getBattle(0)->getObject(0, false)->getId(), 320);
+    a.checkEqual("12. getId",   result.battles->getBattle(0)->getObject(1, false)->getId(), 384);
+    a.checkEqual("13. getRole", result.battles->getBattle(0)->getObject(0, false)->getRole(), game::vcr::Object::OpponentRole);
+    a.checkEqual("14. getRole", result.battles->getBattle(0)->getObject(1, false)->getRole(), game::vcr::Object::AggressorRole);
 
     // 384 (lowest other Id, as aggressor) vs 489 (second-lowest other Id, as opponent)
-    a.checkEqual("21. getId",   h.result.battles->getBattle(1)->getObject(0, false)->getId(), 489);
-    a.checkEqual("22. getId",   h.result.battles->getBattle(1)->getObject(1, false)->getId(), 384);
-    a.checkEqual("23. getRole", h.result.battles->getBattle(1)->getObject(0, false)->getRole(), game::vcr::Object::OpponentRole);
-    a.checkEqual("24. getRole", h.result.battles->getBattle(1)->getObject(1, false)->getRole(), game::vcr::Object::AggressorRole);
+    a.checkEqual("21. getId",   result.battles->getBattle(1)->getObject(0, false)->getId(), 489);
+    a.checkEqual("22. getId",   result.battles->getBattle(1)->getObject(1, false)->getId(), 384);
+    a.checkEqual("23. getRole", result.battles->getBattle(1)->getObject(0, false)->getRole(), game::vcr::Object::OpponentRole);
+    a.checkEqual("24. getRole", result.battles->getBattle(1)->getObject(1, false)->getRole(), game::vcr::Object::AggressorRole);
 
     // 489 (second-lowest other Id, as aggressor) vs 320 (as opponent)
-    a.checkEqual("31. getId",   h.result.battles->getBattle(2)->getObject(0, false)->getId(), 320);
-    a.checkEqual("32. getId",   h.result.battles->getBattle(2)->getObject(1, false)->getId(), 489);
-    a.checkEqual("33. getRole", h.result.battles->getBattle(2)->getObject(0, false)->getRole(), game::vcr::Object::OpponentRole);
-    a.checkEqual("34. getRole", h.result.battles->getBattle(2)->getObject(1, false)->getRole(), game::vcr::Object::AggressorRole);
+    a.checkEqual("31. getId",   result.battles->getBattle(2)->getObject(0, false)->getId(), 320);
+    a.checkEqual("32. getId",   result.battles->getBattle(2)->getObject(1, false)->getId(), 489);
+    a.checkEqual("33. getRole", result.battles->getBattle(2)->getObject(0, false)->getRole(), game::vcr::Object::OpponentRole);
+    a.checkEqual("34. getRole", result.battles->getBattle(2)->getObject(1, false)->getRole(), game::vcr::Object::AggressorRole);
 }
 
 /** Test host order for planet fights, PHost.
@@ -2042,18 +2041,18 @@ AFL_TEST("game.sim.Run:VcrPHost4:battle-order:planet", a)
 
     // Setup
     addPlanetSetup(h.setup);
-    h.result.init(h.opts, 0);
+    game::sim::Result result(h.opts, 0);
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 1U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 1U);
 
     // 455 vs 450
-    a.checkEqual("11. getId", h.result.battles->getBattle(0)->getObject(0, false)->getId(), 455);
-    a.checkEqual("12. getId", h.result.battles->getBattle(0)->getObject(1, false)->getId(), 450);
+    a.checkEqual("11. getId", result.battles->getBattle(0)->getObject(0, false)->getId(), 455);
+    a.checkEqual("12. getId", result.battles->getBattle(0)->getObject(1, false)->getId(), 450);
 }
 
 /** Test ShieldGenerator.
@@ -2065,6 +2064,7 @@ AFL_TEST("game.sim.Run:ship:ShieldGenerator", a)
     TestHarness h;
     h.opts.setMode(game::sim::Configuration::VcrHost, 0, *h.config);
     h.opts.setRandomLeftRight(false);
+    game::sim::Result result(h.opts, 0);
 
     // Setup
     // - attackers
@@ -2081,30 +2081,30 @@ AFL_TEST("game.sim.Run:ship:ShieldGenerator", a)
     }
 
     // Do it
-    game::sim::runSimulation(h.setup, h.stats, h.result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
+    game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
 
     // Verify result
     // THost places aggressor to the right, thus, freighters always on the left.
-    a.checkNonNull("01. battles", h.result.battles.get());
-    a.checkEqual("02. getNumBattles", h.result.battles->getNumBattles(), 5U);
+    a.checkNonNull("01. battles", result.battles.get());
+    a.checkEqual("02. getNumBattles", result.battles->getNumBattles(), 5U);
 
-    a.checkEqual("11. getId",     h.result.battles->getBattle(0)->getObject(1, false)->getId(), 1);
-    a.checkEqual("12. getShield", h.result.battles->getBattle(0)->getObject(1, false)->getShield(), 35);
-    a.checkEqual("13. getId",     h.result.battles->getBattle(0)->getObject(0, false)->getId(), 10);
+    a.checkEqual("11. getId",     result.battles->getBattle(0)->getObject(1, false)->getId(), 1);
+    a.checkEqual("12. getShield", result.battles->getBattle(0)->getObject(1, false)->getShield(), 35);
+    a.checkEqual("13. getId",     result.battles->getBattle(0)->getObject(0, false)->getId(), 10);
 
-    a.checkEqual("21. getId",     h.result.battles->getBattle(1)->getObject(1, false)->getId(), 1);
-    a.checkEqual("22. getShield", h.result.battles->getBattle(1)->getObject(1, false)->getShield(), 60);
-    a.checkEqual("23. getId",     h.result.battles->getBattle(1)->getObject(0, false)->getId(), 11);
+    a.checkEqual("21. getId",     result.battles->getBattle(1)->getObject(1, false)->getId(), 1);
+    a.checkEqual("22. getShield", result.battles->getBattle(1)->getObject(1, false)->getShield(), 60);
+    a.checkEqual("23. getId",     result.battles->getBattle(1)->getObject(0, false)->getId(), 11);
 
-    a.checkEqual("31. getId",     h.result.battles->getBattle(2)->getObject(1, false)->getId(), 1);
-    a.checkEqual("32. getShield", h.result.battles->getBattle(2)->getObject(1, false)->getShield(), 85);
-    a.checkEqual("33. getId",     h.result.battles->getBattle(2)->getObject(0, false)->getId(), 12);
+    a.checkEqual("31. getId",     result.battles->getBattle(2)->getObject(1, false)->getId(), 1);
+    a.checkEqual("32. getShield", result.battles->getBattle(2)->getObject(1, false)->getShield(), 85);
+    a.checkEqual("33. getId",     result.battles->getBattle(2)->getObject(0, false)->getId(), 12);
 
-    a.checkEqual("41. getId",     h.result.battles->getBattle(3)->getObject(1, false)->getId(), 1);
-    a.checkEqual("42. getShield", h.result.battles->getBattle(3)->getObject(1, false)->getShield(), 110);
-    a.checkEqual("43. getId",     h.result.battles->getBattle(3)->getObject(0, false)->getId(), 13);
+    a.checkEqual("41. getId",     result.battles->getBattle(3)->getObject(1, false)->getId(), 1);
+    a.checkEqual("42. getShield", result.battles->getBattle(3)->getObject(1, false)->getShield(), 110);
+    a.checkEqual("43. getId",     result.battles->getBattle(3)->getObject(0, false)->getId(), 13);
 
-    a.checkEqual("51. getId",     h.result.battles->getBattle(4)->getObject(1, false)->getId(), 1);
-    a.checkEqual("52. getShield", h.result.battles->getBattle(4)->getObject(1, false)->getShield(), 125);  // Maximum reached
-    a.checkEqual("53. getId",     h.result.battles->getBattle(4)->getObject(0, false)->getId(), 14);
+    a.checkEqual("51. getId",     result.battles->getBattle(4)->getObject(1, false)->getId(), 1);
+    a.checkEqual("52. getShield", result.battles->getBattle(4)->getObject(1, false)->getShield(), 125);  // Maximum reached
+    a.checkEqual("53. getId",     result.battles->getBattle(4)->getObject(0, false)->getId(), 14);
 }

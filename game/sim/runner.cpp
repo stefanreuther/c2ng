@@ -32,11 +32,10 @@ game::sim::Runner::Job::Job(const Setup& setup,
       m_flakConfiguration(flakConfig),
       m_log(log),
       m_rng(rng.getSeed() ^ uint32_t(serial)),
-      m_result(),
+      m_result(opts, int(serial)),
       m_stats()
 {
     m_rng();
-    m_result.init(opts, int(serial));
 }
 
 inline void

@@ -9,15 +9,10 @@
 /** Verify a simple sequence. */
 AFL_TEST("game.sim.Result", a)
 {
-    game::sim::Result result;
-    a.check("01. this_battle_weight", result.this_battle_weight > 0);
-    a.checkEqual("02. this_battle_index", result.this_battle_index, 0);
-
-    // Initialize
     game::sim::Configuration config;
     afl::base::Ref<game::config::HostConfiguration> hostConfiguration = game::config::HostConfiguration::create();
     config.setMode(config.VcrHost, 0, *hostConfiguration);
-    result.init(config, 120);
+    game::sim::Result result(config, 120);
 
     a.checkEqual("11. series_length", result.series_length, 110);
     a.checkEqual("12. this_battle_weight", result.this_battle_weight, 1);
