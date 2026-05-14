@@ -9,17 +9,27 @@
 #include "game/browser/accountmanager.hpp"
 
 game::browser::RootFolder::RootFolder(Browser& parent)
-    : m_parent(parent)
+    : m_parent(parent),
+      m_options()
 { }
 
 game::browser::RootFolder::~RootFolder()
 { }
 
 void
+game::browser::RootFolder::setOptions(Options_t opts)
+{
+    m_options = opts;
+}
+
+void
 game::browser::RootFolder::loadContent(afl::container::PtrVector<Folder>& result)
 {
     // FIXME: favorites
-    result.pushBackNew(new FileSystemRootFolder(m_parent));
+
+    if (!m_options.contains(HideFileSystem)) {
+        result.pushBackNew(new FileSystemRootFolder(m_parent));
+    }
 
     for (size_t i = 0, n = m_parent.accounts().getNumAccounts(); i < n; ++i) {
         if (Account* acc = m_parent.accounts().getAccount(i)) {

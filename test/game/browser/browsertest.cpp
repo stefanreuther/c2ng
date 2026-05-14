@@ -45,6 +45,7 @@ using game::browser::DirectoryHandler;
 using game::browser::Folder;
 using game::browser::LoadGameRootTask_t;
 using game::browser::OptionalUserCallback;
+using game::browser::RootFolder;
 using game::config::ConfigurationOption;
 using game::config::HostConfiguration;
 using game::config::UserConfiguration;
@@ -543,6 +544,31 @@ AFL_TEST("game.browser.Browser:no-handler", a)
     std::auto_ptr<Folder> p(env.browser.createAccountFolder(acc));
     a.checkNonNull("21. account", p.get());
     a.checkEqual("22. name", p->getName(), "nn");
+}
+
+// Test root - default.
+AFL_TEST("game.browser.Browser:root:default", a)
+{
+    BrowserEnvironment env;
+
+    bool loaded = false;
+    env.browser.loadContent(makeTrackerTask(loaded))->call();
+    a.check("01. loaded", loaded);
+    a.checkEqual("12. path", env.browser.path().size(), 0U);
+    a.checkEqual("13. content", env.browser.content().size(), 1U);  // "File System"
+}
+
+// Test root folder, file system disabled.
+AFL_TEST("game.browser.Browser:root:no-fs", a)
+{
+    BrowserEnvironment env;
+    env.browser.setRootOptions(RootFolder::Options_t() + RootFolder::HideFileSystem);
+
+    bool loaded = false;
+    env.browser.loadContent(makeTrackerTask(loaded))->call();
+    a.check("01. loaded", loaded);
+    a.checkEqual("12. path", env.browser.path().size(), 0U);
+    a.checkEqual("13. content", env.browser.content().size(), 0U);
 }
 
 AFL_TEST("game.browser.Browser:verifyLocalDirectory:ok", a)

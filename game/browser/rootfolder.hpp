@@ -5,6 +5,7 @@
 #ifndef C2NG_GAME_BROWSER_ROOTFOLDER_HPP
 #define C2NG_GAME_BROWSER_ROOTFOLDER_HPP
 
+#include "afl/bits/smallset.hpp"
 #include "game/browser/synchronousfolder.hpp"
 
 namespace game { namespace browser {
@@ -17,12 +18,21 @@ namespace game { namespace browser {
         but no game data. */
     class RootFolder : public SynchronousFolder {
      public:
+        enum Option {
+            HideFileSystem
+        };
+        typedef afl::bits::SmallSet<Option> Options_t;
+
         /** Constructor.
             @param parent Browser instance */
         explicit RootFolder(Browser& parent);
 
         /** Destructor. */
         ~RootFolder();
+
+        /** Set options.
+            @param opts Options */
+        void setOptions(Options_t opts);
 
         // Folder:
         virtual void loadContent(afl::container::PtrVector<Folder>& result);
@@ -38,6 +48,7 @@ namespace game { namespace browser {
 
      private:
         Browser& m_parent;
+        Options_t m_options;
     };
 
 } }

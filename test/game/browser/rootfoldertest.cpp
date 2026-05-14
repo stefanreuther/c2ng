@@ -103,7 +103,7 @@ AFL_TEST("game.browser.RootFolder", a)
     // Enumerate
     PtrVector<Folder> list;
     testee.loadContent(list);
-    a.checkGreaterEqual("31. list", list.size(), 2U); // et least 2: FS root + Account
+    a.checkGreaterEqual("31. list", list.size(), 2U); // at least 2: FS root + Account
     for (size_t i = 0; i < list.size(); ++i) {
         a.checkNonNull("32. content", list[i]);
         a.check("33. content", !testee.isSame(*list[i]));
@@ -120,3 +120,14 @@ AFL_TEST("game.browser.RootFolder", a)
     a.check("43. called", result.called);
     a.checkNull("44. result", result.result.get());
 }
+
+AFL_TEST("game.browser.RootFolder:empty", a)
+{
+    BrowserEnvironment env;
+    RootFolder testee(env.browser);
+    testee.setOptions(RootFolder::Options_t() + RootFolder::HideFileSystem);
+
+    // Enumerate
+    PtrVector<Folder> list;
+    testee.loadContent(list);
+    a.checkEqual("31. list", list.size(), 0U);}

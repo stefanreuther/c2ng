@@ -121,6 +121,11 @@ namespace game { namespace browser {
             @param h Handler (should not be null) */
         void addNewHandler(Handler* h);
 
+        /** Set options for root folder.
+            @param opts Options
+            @see RootFolder::setOptions */
+        void setRootOptions(RootFolder::Options_t opts);
+
 
         /*
          *  Navigation and Data Access
@@ -310,5 +315,11 @@ namespace game { namespace browser {
     };
 
 } }
+
+inline void
+game::browser::Browser::setRootOptions(RootFolder::Options_t opts)
+{
+    m_rootFolder.setOptions(opts);
+}
 
 #endif
