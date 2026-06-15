@@ -17,6 +17,7 @@ namespace {
     {
         return !charIsSpace(c);
     }
+
     bool charIsNotSpaceOrEqual(char c)
     {
         return !charIsSpace(c) && c != '=';
@@ -156,7 +157,7 @@ util::ConfigurationFile::merge(const ConfigurationFile& other)
 
 // Set single value.
 void
-util::ConfigurationFile::set(String_t key, String_t value)
+util::ConfigurationFile::set(const String_t& key, const String_t& value)
 {
     String_t::size_type dot = key.find('.');
     if (dot != String_t::npos) {
@@ -168,10 +169,10 @@ util::ConfigurationFile::set(String_t key, String_t value)
 
 // Set single value, sectioned.
 void
-util::ConfigurationFile::set(String_t section, String_t key, String_t value)
+util::ConfigurationFile::set(const String_t& section, const String_t& key, const String_t& value)
 {
-    String_t ucSection = afl::string::strUCase(section);
-    String_t ucKey = afl::string::strUCase(key);
+    const String_t ucSection = afl::string::strUCase(section);
+    const String_t ucKey = afl::string::strUCase(key);
 
     String_t assignmentKey = ucSection;
     if (!assignmentKey.empty()) {
@@ -202,7 +203,7 @@ util::ConfigurationFile::set(String_t section, String_t key, String_t value)
 
 // Add single value.
 void
-util::ConfigurationFile::add(String_t key, String_t value)
+util::ConfigurationFile::add(const String_t& key, const String_t& value)
 {
     String_t::size_type dot = key.find('.');
     if (dot != String_t::npos) {
@@ -214,7 +215,7 @@ util::ConfigurationFile::add(String_t key, String_t value)
 
 // Set single value, sectioned.
 void
-util::ConfigurationFile::add(String_t section, String_t key, String_t value)
+util::ConfigurationFile::add(const String_t& section, const String_t& key, const String_t& value)
 {
     String_t ucSection = afl::string::strUCase(section);
     String_t ucKey = afl::string::strUCase(key);
@@ -248,7 +249,7 @@ util::ConfigurationFile::add(String_t section, String_t key, String_t value)
 
 // Remove value.
 bool
-util::ConfigurationFile::remove(String_t key)
+util::ConfigurationFile::remove(const String_t& key)
 {
     size_t index;
     if (findIndex(Assignment, key).get(index)) {
@@ -296,7 +297,7 @@ util::ConfigurationFile::getElementByIndex(size_t index) const
 
 // Find index of an element.
 afl::base::Optional<size_t>
-util::ConfigurationFile::findIndex(ElementType type, String_t key) const
+util::ConfigurationFile::findIndex(ElementType type, const String_t& key) const
 {
     const String_t ucKey = afl::string::strUCase(key);
     size_t n = m_elements.size();
@@ -311,7 +312,7 @@ util::ConfigurationFile::findIndex(ElementType type, String_t key) const
 
 // Find an element.
 const util::ConfigurationFile::Element*
-util::ConfigurationFile::findElement(ElementType type, String_t key) const
+util::ConfigurationFile::findElement(ElementType type, const String_t& key) const
 {
     size_t i;
     if (findIndex(type, key).get(i)) {

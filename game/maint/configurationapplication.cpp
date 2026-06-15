@@ -15,6 +15,17 @@
 #include "util/string.hpp"
 #include "version.hpp"
 
+using afl::base::Ref;
+using afl::io::FileSystem;
+using afl::io::Stream;
+using afl::io::TextFile;
+using afl::string::Format;
+using afl::sys::LogListener;
+using game::config::Configuration;
+using game::config::ConfigurationOption;
+using game::config::HostConfiguration;
+using util::ConfigurationFile;
+
 namespace {
     class ConfigurationReference {
      public:
@@ -22,15 +33,15 @@ namespace {
             : m_p()
             { }
 
-        util::ConfigurationFile& operator()()
+        ConfigurationFile& operator()()
             {
                 if (m_p.get() == 0) {
-                    m_p.reset(new util::ConfigurationFile());
+                    m_p.reset(new ConfigurationFile());
                 }
                 return *m_p;
             }
 
-        void replaceOrMerge(std::auto_ptr<util::ConfigurationFile> other)
+        void replaceOrMerge(std::auto_ptr<ConfigurationFile> other)
             {
                 if (m_p.get() == 0) {
                     m_p = other;
@@ -39,11 +50,11 @@ namespace {
                 }
             }
 
-        util::ConfigurationFile* get()
+        ConfigurationFile* get()
             { return m_p.get(); }
 
      private:
-        std::auto_ptr<util::ConfigurationFile> m_p;
+        std::auto_ptr<ConfigurationFile> m_p;
     };
 
     String_t limit11(String_t in)
@@ -87,7 +98,7 @@ game::maint::ConfigurationApplication::appMain()
             } else if (text == "load-hconfig") {
                 // --load-hconfig=FILE
                 String_t fileName = cmdl.getRequiredParameter(text);
-                afl::base::Ref<afl::io::Stream> thisStream(fileSystem().openFile(fileName, afl::io::FileSystem::OpenRead));
+                Ref<Stream> thisStream(fileSystem().openFile(fileName, FileSystem::OpenRead));
                 loadHConfig(subject(), *thisStream);
             } else if (text == "D") {
                 // -D KEY=VALUE
@@ -114,8 +125,8 @@ game::maint::ConfigurationApplication::appMain()
             } else if (text == "o") {
                 // -o FILE
                 String_t fileName = cmdl.getRequiredParameter(text);
-                afl::base::Ref<afl::io::Stream> thisStream(fileSystem().openFile(fileName, afl::io::FileSystem::Create));
-                afl::io::TextFile thisText(*thisStream);
+                Ref<Stream> thisStream(fileSystem().openFile(fileName, FileSystem::Create));
+                TextFile thisText(*thisStream);
                 subject().save(thisText);
                 thisText.flush();
                 hadAction = true;
@@ -126,7 +137,7 @@ game::maint::ConfigurationApplication::appMain()
             } else if (text == "get") {
                 // --get=KEY
                 String_t key = afl::string::strUCase(cmdl.getRequiredParameter(text));
-                if (const util::ConfigurationFile::Element* ele = subject().findElement(util::ConfigurationFile::Assignment, key)) {
+                if (const ConfigurationFile::Element* ele = subject().findElement(ConfigurationFile::Assignment, key)) {
                     standardOutput().writeLine(ele->value);
                 } else {
                     standardOutput().writeLine(String_t());
@@ -135,23 +146,23 @@ game::maint::ConfigurationApplication::appMain()
             } else if (text == "save-hconfig") {
                 // --save-hconfig=FILE
                 String_t fileName = cmdl.getRequiredParameter(text);
-                afl::base::Ref<afl::io::Stream> thisStream(fileSystem().openFile(fileName, afl::io::FileSystem::Create));
+                Ref<Stream> thisStream(fileSystem().openFile(fileName, FileSystem::Create));
                 saveHConfig(subject(), *thisStream);
                 hadAction = true;
             } else if (text == "w") {
                 // -w
                 whitespaceIsSignificant = true;
-                if (util::ConfigurationFile* p = subject.get()) {
+                if (ConfigurationFile* p = subject.get()) {
                     p->setWhitespaceIsSignificant(whitespaceIsSignificant);
                 }
             } else {
-                errorExit(afl::string::Format(tx("invalid option specified. Use \"%s -h\" for help").c_str(), environment().getInvocationName()));
+                errorExit(Format(tx("invalid option specified. Use \"%s -h\" for help").c_str(), environment().getInvocationName()));
             }
         } else {
             // Just a file name: load it
-            afl::base::Ref<afl::io::Stream> thisStream(fileSystem().openFile(text, afl::io::FileSystem::OpenRead));
-            afl::io::TextFile thisText(*thisStream);
-            std::auto_ptr<util::ConfigurationFile> thisConfig(new util::ConfigurationFile());
+            Ref<Stream> thisStream(fileSystem().openFile(text, FileSystem::OpenRead));
+            TextFile thisText(*thisStream);
+            std::auto_ptr<ConfigurationFile> thisConfig(new ConfigurationFile());
             thisConfig->setWhitespaceIsSignificant(whitespaceIsSignificant);
             thisConfig->load(thisText);
             subject.replaceOrMerge(thisConfig);
@@ -168,32 +179,32 @@ game::maint::ConfigurationApplication::showHelp()
 {
     afl::string::Translator& tx = translator();
     afl::io::TextWriter& w = standardOutput();
-    w.writeLine(afl::string::Format(tx("Configuration Tool v%s - (c) 2018-2025 Stefan Reuther").c_str(), PCC2_VERSION));
-    w.writeText(afl::string::Format(tx("\n"
-                                       "Usage:\n"
-                                       "  %s [-OPTIONS|FILES...]\n"
-                                       "\n"
-                                       "%s"
-                                       "\n"
-                                       "Report bugs to <Streu@gmx.de>\n").c_str(),
-                                    environment().getInvocationName(),
-                                    util::formatOptions(tx("General:\n"
-                                                           "--help\tshow help\n"
-                                                           "-w\twhitespace is significant in values\n"
-                                                           "\n"
-                                                           "Load/Modify:\n"
-                                                           "FILE\tload text file\n"
-                                                           "--empty\tload empty file\n"
-                                                           "--load-hconfig=FILE\tload binary HConfig file\n"
-                                                           "-DKEY=VALUE\tset value\n"
-                                                           "-AKEY=VALUE\tadd value\n"
-                                                           "-UKEY\tunset value\n"
-                                                           "\n"
-                                                           "Actions:\n"
-                                                           "-o FILE\tsave result to file\n"
-                                                           "--stdout\tsend result to stdout\n"
-                                                           "--get=OPTION\tget option value\n"
-                                                           "--save-hconfig=FILE\tsave binary HConfig file\n"))));
+    w.writeLine(Format(tx("Configuration Tool v%s - (c) 2018-2025 Stefan Reuther").c_str(), PCC2_VERSION));
+    w.writeText(Format(tx("\n"
+                          "Usage:\n"
+                          "  %s [-OPTIONS|FILES...]\n"
+                          "\n"
+                          "%s"
+                          "\n"
+                          "Report bugs to <Streu@gmx.de>\n").c_str(),
+                       environment().getInvocationName(),
+                       util::formatOptions(tx("General:\n"
+                                              "--help\tshow help\n"
+                                              "-w\twhitespace is significant in values\n"
+                                              "\n"
+                                              "Load/Modify:\n"
+                                              "FILE\tload text file\n"
+                                              "--empty\tload empty file\n"
+                                              "--load-hconfig=FILE\tload binary HConfig file\n"
+                                              "-DKEY=VALUE\tset value\n"
+                                              "-AKEY=VALUE\tadd value\n"
+                                              "-UKEY\tunset value\n"
+                                              "\n"
+                                              "Actions:\n"
+                                              "-o FILE\tsave result to file\n"
+                                              "--stdout\tsend result to stdout\n"
+                                              "--get=OPTION\tget option value\n"
+                                              "--save-hconfig=FILE\tsave binary HConfig file\n"))));
     exit(0);
 }
 
@@ -205,14 +216,15 @@ game::maint::ConfigurationApplication::loadHConfig(util::ConfigurationFile& out,
     size_t size = in.read(afl::base::fromObject(data));
 
     // Convert to internal format
-    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
-    game::v3::unpackHConfig(data, size, *config, game::config::ConfigurationOption::User);
+    Ref<HostConfiguration> config = HostConfiguration::create();
+    game::v3::unpackHConfig(data, size, *config, ConfigurationOption::User);
 
     // Convert that into result
-    afl::base::Ref<game::config::Configuration::Enumerator_t> e(config->getOptions());
-    game::config::Configuration::OptionInfo_t oi;
+    // Internal options have 31 (NUM_PLAYERS) slots; we want pconfig to be limited to 11.
+    Ref<Configuration::Enumerator_t> e(config->getOptions());
+    Configuration::OptionInfo_t oi;
     while (e->getNextElement(oi)) {
-        if (oi.second != 0 && oi.second->getSource() == game::config::ConfigurationOption::User) {
+        if (oi.second != 0 && oi.second->getSource() == ConfigurationOption::User) {
             out.set("PHOST", oi.first, limit11(oi.second->toString()));
         }
     }
@@ -222,15 +234,15 @@ void
 game::maint::ConfigurationApplication::saveHConfig(const util::ConfigurationFile& in, afl::io::Stream& out)
 {
     // Convert to internal format
-    afl::base::Ref<game::config::HostConfiguration> config = game::config::HostConfiguration::create();
+    Ref<HostConfiguration> config = HostConfiguration::create();
     for (size_t i = 0, n = in.getNumElements(); i < n; ++i) {
-        if (const util::ConfigurationFile::Element* pElem = in.getElementByIndex(i)) {
+        if (const ConfigurationFile::Element* pElem = in.getElementByIndex(i)) {
             if (pElem->key.compare(0, 6, "PHOST.", 6) == 0) {
                 try {
-                    config->setOption(pElem->key.substr(6), pElem->value, game::config::ConfigurationOption::User);
+                    config->setOption(pElem->key.substr(6), pElem->value, ConfigurationOption::User);
                 }
                 catch (std::exception& e) {
-                    log().write(afl::sys::LogListener::Warn, "config", pElem->key, e);
+                    log().write(LogListener::Warn, "config", pElem->key, e);
                 }
             }
         }

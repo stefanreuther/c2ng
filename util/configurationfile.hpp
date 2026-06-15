@@ -38,7 +38,7 @@ namespace util {
             String_t    key;    ///< Key for locating an element.
             String_t    prefix; ///< Prefix text.
             String_t    value;  ///< Value text.
-            Element(ElementType type, String_t key, String_t prefix, String_t value)
+            Element(ElementType type, const String_t& key, const String_t& prefix, const String_t& value)
                 : type(type), key(key), prefix(prefix), value(value)
                 { }
         };
@@ -78,27 +78,27 @@ namespace util {
             Updates the value if it exists, creates it otherwise.
             \param key Key; either just a single key, or "section.key"
             \param value Value */
-        void set(String_t key, String_t value);
+        void set(const String_t& key, const String_t& value);
 
         /** Set single value, sectioned.
             Updates the value if it exists, creates it otherwise.
             \param section Target section
             \param key Key
             \param value Value */
-        void set(String_t section, String_t key, String_t value);
+        void set(const String_t& section, const String_t& key, const String_t& value);
 
         /** Add single value.
             Creates a new value. If that value already exists, this will be a duplicate assignment.
             \param key Key; either just a single key, or "section.key"
             \param value Value */
-        void add(String_t key, String_t value);
+        void add(const String_t& key, const String_t& value);
 
         /** Set single value, sectioned.
             Creates a new value. If that value already exists, this will be a duplicate assignment.
             \param section Target section
             \param key Key
             \param value Value */
-        void add(String_t section, String_t key, String_t value);
+        void add(const String_t& section, const String_t& key, const String_t& value);
 
         /** Remove value.
             Removes at most one instance of the key.
@@ -109,7 +109,7 @@ namespace util {
             \param key Key
             \retval true Item was removed
             \retval false No such element found */
-        bool remove(String_t key);
+        bool remove(const String_t& key);
 
         /** Add header comment.
             <b>Restriction:</b> A header comment can only be added to a nonempty file
@@ -130,13 +130,13 @@ namespace util {
             \param type Desired element type
             \param key Desired key. For Assignment, "section.key" or "key"; for Section, "section".
             \return Index if any */
-        afl::base::Optional<size_t> findIndex(ElementType type, String_t key) const;
+        afl::base::Optional<size_t> findIndex(ElementType type, const String_t& key) const;
 
         /** Find an element.
             \param type Desired element type
             \param key Desired key. For Assignment, "section.key" or "key"; for Section, "section".
             \return Element if any */
-        const Element* findElement(ElementType type, String_t key) const;
+        const Element* findElement(ElementType type, const String_t& key) const;
 
         /** Find end of section.
             Assuming \c startIndex points at an element of a section, locates the end of the section (=next delimiter or end).
