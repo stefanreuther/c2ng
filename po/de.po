@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-01-25 19:52+0100\n"
+"PO-Revision-Date: 2026-06-18 21:28+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:390
@@ -40,7 +40,7 @@ msgstr ""
 "%s\n"
 "Fehler bitte melden an <Streu@gmx.de>"
 
-#: game/maint/configurationapplication.cpp:172
+#: game/maint/configurationapplication.cpp:197
 msgid ""
 "\n"
 "Usage:\n"
@@ -383,7 +383,7 @@ msgstr "%d grav. Triebwerk%!1{e%}"
 
 #: client/tiles/shipmovementtile.cpp:258 client/tiles/shipmovementtile.cpp:289
 #: client/tiles/starchartheadertile.cpp:91
-#: client/widgets/historypositionlistbox.cpp:161
+#: client/widgets/historypositionlistbox.cpp:141
 #: client/widgets/vcrobjectinfo.cpp:148 game/map/ufotype.cpp:343
 #: game/spec/info/info.cpp:142 game/spec/info/info.cpp:143
 #: game/spec/info/info.cpp:144 game/spec/info/info.cpp:310
@@ -719,12 +719,12 @@ msgstr "%d× planen"
 msgid "%d×Ftr"
 msgstr "%d×Jäg"
 
-#: game/proxy/simulationsetupproxy.cpp:1047
-#: game/proxy/simulationsetupproxy.cpp:1087
+#: game/proxy/simulationsetupproxy.cpp:1043
+#: game/proxy/simulationsetupproxy.cpp:1083
 msgid "%s\t(tech %d, K%d, D%d)"
 msgstr "%s\t(Tech %d, K%d, D%d)"
 
-#: game/proxy/simulationsetupproxy.cpp:359 game/sim/fleetcost.cpp:28
+#: game/proxy/simulationsetupproxy.cpp:355 game/sim/fleetcost.cpp:28
 msgid "%s %s"
 msgstr "%s %s"
 
@@ -798,7 +798,7 @@ msgstr "%s-Geschütze"
 msgid "%s colony"
 msgstr "%s-Kolonie"
 
-#: game/proxy/simulationsetupproxy.cpp:361 game/sim/fleetcost.cpp:30
+#: game/proxy/simulationsetupproxy.cpp:357 game/sim/fleetcost.cpp:30
 msgid "%s custom ship"
 msgstr "%s eigenes Schiff"
 
@@ -835,11 +835,11 @@ msgid "%s natives, %d clan%!1{s%}"
 msgstr "%s Eingeborene, %d Clan%!1{s%}"
 
 #: client/vcr/flak/playbackscreen.cpp:663
-#: game/proxy/simulationsetupproxy.cpp:353
+#: game/proxy/simulationsetupproxy.cpp:349
 msgid "%s planet"
 msgstr "%s Planet"
 
-#: game/proxy/simulationsetupproxy.cpp:351
+#: game/proxy/simulationsetupproxy.cpp:347
 msgid "%s planet+SB"
 msgstr "%s Planet+SB"
 
@@ -855,7 +855,7 @@ msgstr "%s Schiffstypen"
 msgid "%s starship"
 msgstr "%s Raumschiff"
 
-#: ui/reshack/dialogs.cpp:550
+#: ui/reshack/dialogs.cpp:534
 msgid "%s to Unicode"
 msgstr "%s nach Unicode"
 
@@ -879,7 +879,7 @@ msgstr "%s, %d Clan%!1{s%}"
 msgid "%s. Do you want to load this file?"
 msgstr "%s. Möchtest du diese Datei laden?"
 
-#: ui/reshack/dialogs.cpp:88
+#: ui/reshack/dialogs.cpp:80
 msgid "%s: %d missing"
 msgstr "%s: %d fehlen"
 
@@ -998,11 +998,11 @@ msgstr "%s:%d: unerwartetes Dateiende in .text-Bereich"
 msgid "%s:%d: unexpected closing tag \"</%s>\""
 msgstr "%s:%d: unerwartetes Ende-Tag \"</%s>\""
 
-#: client/dialogs/hullfunctionview.cpp:286
+#: client/dialogs/hullfunctionview.cpp:278
 msgid "(%d EP)"
 msgstr "(%d EP)"
 
-#: client/dialogs/hullfunctionview.cpp:284
+#: client/dialogs/hullfunctionview.cpp:276
 msgid "(%d EP; in %d turn%!1{s%} at +%d/turn)"
 msgstr "(%d EP; in %d %!1{Zügen%|Zug%} bei +%d/Zug)"
 
@@ -1022,7 +1022,7 @@ msgstr "(in %d %1{Zug%|Zügen%})"
 msgid "(%d,%d)"
 msgstr "(%d,%d)"
 
-#: client/dialogs/attachmentselection.cpp:193
+#: client/dialogs/attachmentselection.cpp:169
 msgid "(%s, %d byte%!1{s%})"
 msgstr "(%s, %d Byte%!1{s%})"
 
@@ -1114,7 +1114,7 @@ msgstr "(geändert)"
 msgid "(command not understood by PCC2)"
 msgstr "(Befehl von PCC2 nicht unterstützt)"
 
-#: client/dialogs/hullfunctionview.cpp:319
+#: client/dialogs/hullfunctionview.cpp:311
 msgid "(currently broken)"
 msgstr "(derzeit defekt)"
 
@@ -1146,7 +1146,7 @@ msgstr "(standardmäßig verboten)"
 msgid "(ground)"
 msgstr "(Boden)"
 
-#: client/dialogs/fleetlist.cpp:81
+#: client/dialogs/fleetlist.cpp:69
 msgid "(here)"
 msgstr "(hier)"
 
@@ -1158,7 +1158,7 @@ msgstr "(hist.)"
 msgid "(max)"
 msgstr "(max)"
 
-#: client/widgets/costsummarylist.cpp:220
+#: client/widgets/costsummarylist.cpp:282
 msgid "(mc) %d"
 msgstr "(mc) %d"
 
@@ -1166,7 +1166,7 @@ msgstr "(mc) %d"
 msgid "(mined)"
 msgstr "(abgebaut)"
 
-#: client/widgets/exportfieldlist.cpp:101
+#: client/widgets/exportfieldlist.cpp:81
 msgid "(more...)"
 msgstr "(mehr...)"
 
@@ -1223,9 +1223,9 @@ msgstr "(gesetzt)"
 msgid "(small)"
 msgstr "(klein)"
 
-#: client/widgets/costsummarylist.cpp:209
-#: client/widgets/costsummarylist.cpp:213
-#: client/widgets/costsummarylist.cpp:218
+#: client/widgets/costsummarylist.cpp:271
+#: client/widgets/costsummarylist.cpp:275
+#: client/widgets/costsummarylist.cpp:280
 msgid "(sup) %d"
 msgstr "(Vor) %d"
 
@@ -1237,7 +1237,7 @@ msgstr "(dieser Zug)"
 msgid "(total)"
 msgstr "(Gesamt)"
 
-#: client/dialogs/multitransfer.cpp:270
+#: client/dialogs/multitransfer.cpp:243
 #: client/widgets/cargotransferline.cpp:171
 msgid "(unl)"
 msgstr "(unl)"
@@ -1904,7 +1904,7 @@ msgstr "Anarchie"
 msgid "Anonymous Message"
 msgstr "Anonyme Nachricht"
 
-#: client/dialogs/buildqueuedialog.cpp:241
+#: client/dialogs/buildqueuedialog.cpp:250
 msgid "Apply changes?"
 msgstr "Änderungen übernehmen?"
 
@@ -1934,11 +1934,11 @@ msgstr "Assertion fehlgeschlagen: %s"
 msgid "Assertion failed: %s, at %s"
 msgstr "Assertion fehlgeschlagen: %s, an %s"
 
-#: client/dialogs/hullfunctionview.cpp:309
+#: client/dialogs/hullfunctionview.cpp:301
 msgid "Assigned to ship"
 msgstr "Dem Schiff zugeordnet"
 
-#: client/dialogs/hullfunctionview.cpp:306
+#: client/dialogs/hullfunctionview.cpp:298
 msgid "Assigned to ship class"
 msgstr "Der Schiffsklasse zugeordnet"
 
@@ -1986,7 +1986,7 @@ msgstr "Teile von Anhang \"%s\" fehlen."
 msgid "Attachment record is truncated"
 msgstr "Dateianhang ist abgeschnitten"
 
-#: client/dialogs/attachmentselection.cpp:264
+#: client/dialogs/attachmentselection.cpp:240
 #: client/screens/browserscreen.cpp:785 client/screens/browserscreen.cpp:794
 msgid "Attachments"
 msgstr "Anhänge"
@@ -2021,7 +2021,7 @@ msgstr "Bau-Ziel"
 msgid "Auto-Build Goals"
 msgstr "Bau-Ziele"
 
-#: ui/reshack/dialogs.cpp:499 ui/reshack/dialogs.cpp:532
+#: ui/reshack/dialogs.cpp:483 ui/reshack/dialogs.cpp:516
 msgid "Auto-Generate Character"
 msgstr "Zeichen automatisch erzeugen"
 
@@ -2041,15 +2041,15 @@ msgstr "Ein Autobuild-Datensatz hat eine unerwartete Größe"
 msgid "Automatic"
 msgstr "Automatisch"
 
-#: client/dialogs/commandlistdialog.cpp:152
-#: client/dialogs/commandlistdialog.cpp:215
-#: client/dialogs/commandlistdialog.cpp:270
-#: client/dialogs/commandlistdialog.cpp:277
-#: client/dialogs/commandlistdialog.cpp:334
+#: client/dialogs/commandlistdialog.cpp:144
+#: client/dialogs/commandlistdialog.cpp:207
+#: client/dialogs/commandlistdialog.cpp:262
+#: client/dialogs/commandlistdialog.cpp:269
+#: client/dialogs/commandlistdialog.cpp:326
 msgid "Auxiliary Commands"
 msgstr "Zusätzliche Befehle"
 
-#: client/dialogs/commandlistdialog.cpp:333
+#: client/dialogs/commandlistdialog.cpp:325
 msgid "Auxiliary commands are not supported for this host."
 msgstr "Zusatz-Kommandos werden mit diesem Host nicht unterstützt."
 
@@ -2057,11 +2057,11 @@ msgstr "Zusatz-Kommandos werden mit diesem Host nicht unterstützt."
 msgid "Available"
 msgstr "Verfügbar"
 
-#: client/dialogs/hullfunctionview.cpp:279
+#: client/dialogs/hullfunctionview.cpp:271
 msgid "Available at %s"
 msgstr "Verfügbar auf %s"
 
-#: client/dialogs/hullfunctionview.cpp:272
+#: client/dialogs/hullfunctionview.cpp:264
 msgid "Available to %s"
 msgstr "Verfügbar für %s"
 
@@ -2213,7 +2213,7 @@ msgstr "Beide sind kampfunfähig."
 msgid "Both were destroyed."
 msgstr "Beide wurden zerstört."
 
-#: ui/reshack/dialogs.cpp:391
+#: ui/reshack/dialogs.cpp:375
 msgid "Bottom"
 msgstr "Unten"
 
@@ -2262,7 +2262,7 @@ msgstr "Jäger auf Raumschiffen bauen"
 msgid "Build Fighters/Torpedoes..."
 msgstr "Raumjäger/Torpedos bauen"
 
-#: client/dialogs/buildqueuedialog.cpp:382 client/tiles/basetasktile.cpp:54
+#: client/dialogs/buildqueuedialog.cpp:510 client/tiles/basetasktile.cpp:54
 msgid "Build Order"
 msgstr "Bauauftrag"
 
@@ -2274,7 +2274,7 @@ msgstr "Bau-Auftrag abgewiesen"
 msgid "Build Order Summary"
 msgstr "Zusammenfassung der Bauaufträge"
 
-#: client/dialogs/buildqueuedialog.cpp:388
+#: client/dialogs/buildqueuedialog.cpp:516
 #: client/dialogs/combatscoresummary.cpp:141
 #: client/widgets/hullspecificationsheet.cpp:86
 msgid "Build Points"
@@ -2315,7 +2315,7 @@ msgstr "Ein neues Schiff bauen..."
 msgid "Build defense posts"
 msgstr "Verteidigungsposten bauen"
 
-#: client/dialogs/buildqueuedialog.cpp:187
+#: client/dialogs/buildqueuedialog.cpp:196
 msgid "Build earlier"
 msgstr "Früher bauen"
 
@@ -2327,7 +2327,7 @@ msgstr "Fabriken bauen"
 msgid "Build fighters"
 msgstr "Raumjäger bauen"
 
-#: client/dialogs/buildqueuedialog.cpp:192
+#: client/dialogs/buildqueuedialog.cpp:201
 msgid "Build later"
 msgstr "Später bauen"
 
@@ -2383,7 +2383,7 @@ msgstr "C - Bau abbrechen"
 msgid "C - Capital"
 msgstr "C - Kampfschiffe"
 
-#: client/dialogs/selectionmanager.cpp:364
+#: client/dialogs/selectionmanager.cpp:340
 msgid "C - Copy"
 msgstr "C - Kopieren"
 
@@ -2428,12 +2428,12 @@ msgid "Can detect cloaked ships"
 msgstr "Können getarnte Schiffe erkennen"
 
 #: client/dialogs/alliancedialog.cpp:150
-#: client/dialogs/buildqueuedialog.cpp:244 client/dialogs/buildship.cpp:232
+#: client/dialogs/buildqueuedialog.cpp:253 client/dialogs/buildship.cpp:232
 #: client/dialogs/buildship.cpp:306 client/dialogs/buildshiporder.cpp:50
 #: client/dialogs/buildstructuresdialog.cpp:660
 #: client/dialogs/cargotransferdialog.cpp:118
-#: client/dialogs/changepassword.cpp:57 client/dialogs/consoledialog.cpp:374
-#: client/dialogs/exitconfirmation.cpp:165
+#: client/dialogs/changepassword.cpp:57 client/dialogs/consoledialog.cpp:366
+#: client/dialogs/exitconfirmation.cpp:157
 #: client/dialogs/friendlycodedialog.cpp:85 client/dialogs/goaldialog.cpp:255
 #: client/dialogs/messageeditor.cpp:198 client/dialogs/newdrawing.cpp:83
 #: client/dialogs/newdrawingtag.cpp:112
@@ -2534,8 +2534,8 @@ msgstr "Fracht-Zusammenfassung (Vorhersage)"
 #: client/cargotransfer.cpp:73 client/dialogs/cargotransferdialog.cpp:218
 #: client/dialogs/cargotransferdialog.cpp:70
 #: client/dialogs/cargotransferdialog.cpp:75
-#: client/dialogs/multitransfer.cpp:523 client/dialogs/multitransfer.cpp:728
-#: client/dialogs/multitransfer.cpp:735 client/dialogs/multitransfer.cpp:739
+#: client/dialogs/multitransfer.cpp:524 client/dialogs/multitransfer.cpp:729
+#: client/dialogs/multitransfer.cpp:736 client/dialogs/multitransfer.cpp:740
 #: client/si/commands.cpp:2754 share/resource/core_ui.q:336
 msgid "Cargo Transfer"
 msgstr "Fracht-Transfer"
@@ -2597,7 +2597,7 @@ msgstr "Siegchange im Bodenkampf: %d%%"
 msgid "Change Character Set"
 msgstr "Zeichensatz ändern"
 
-#: ui/reshack/dialogs.cpp:554
+#: ui/reshack/dialogs.cpp:538
 msgid "Change Encoding"
 msgstr "Kodierung ändern"
 
@@ -2654,7 +2654,7 @@ msgstr "Namen unseres Volkes ändern..."
 msgid "Changes will get effective next turn."
 msgstr "Änderungen werden nächsten Zug wirksam."
 
-#: ui/reshack/dialogs.cpp:119
+#: ui/reshack/dialogs.cpp:111
 msgid "Character Coverage"
 msgstr "Zeichensatz-Abdeckung"
 
@@ -2682,7 +2682,7 @@ msgstr "Prüfsummenfehler in Planeten-Bereich"
 msgid "Checksum mismatch in ship section"
 msgstr "Prüfsummenfehler in Schiffs-Bereich"
 
-#: client/dialogs/exitconfirmation.cpp:159
+#: client/dialogs/exitconfirmation.cpp:151
 msgid "Choose an action"
 msgstr "Wähle eine Aktion"
 
@@ -2814,21 +2814,21 @@ msgstr "Klone, und baue ein %s"
 #: client/dialogs/buildqueuesummary.cpp:160 client/dialogs/buildship.cpp:94
 #: client/dialogs/buildshipmain.cpp:292 client/dialogs/classicvcrobject.cpp:151
 #: client/dialogs/combatoverview.cpp:69
-#: client/dialogs/commandlistdialog.cpp:170
+#: client/dialogs/commandlistdialog.cpp:162
 #: client/dialogs/flakvcrobject.cpp:177 client/dialogs/globalactions.cpp:184
-#: client/dialogs/helpdialog.cpp:166 client/dialogs/hullfunctionview.cpp:215
+#: client/dialogs/helpdialog.cpp:166 client/dialogs/hullfunctionview.cpp:207
 #: client/dialogs/hullspecification.cpp:188
 #: client/dialogs/imperialstats.cpp:279 client/dialogs/ionstormforecast.cpp:149
 #: client/dialogs/ionstorminfo.cpp:149 client/dialogs/keymapdialog.cpp:145
 #: client/dialogs/minefieldinfo.cpp:220 client/dialogs/planetinfodialog.cpp:107
 #: client/dialogs/pluginmanager.cpp:124 client/dialogs/preferences.cpp:590
-#: client/dialogs/processlistdialog.cpp:722 client/dialogs/scores.cpp:736
+#: client/dialogs/processlistdialog.cpp:723 client/dialogs/scores.cpp:736
 #: client/dialogs/searchdialog.cpp:335 client/dialogs/shipcostcalculator.cpp:73
 #: client/dialogs/simpleconsole.cpp:22
 #: client/dialogs/simulationfleetcost.cpp:160
 #: client/dialogs/simulationresult.cpp:479 client/dialogs/simulator.cpp:374
 #: client/dialogs/specbrowserdialog.cpp:321 client/dialogs/ufoinfo.cpp:180
-#: client/vcr/flak/playbackscreen.cpp:147 ui/reshack/dialogs.cpp:232
+#: client/vcr/flak/playbackscreen.cpp:147 ui/reshack/dialogs.cpp:224
 #: ui/reshack/fonteditor.cpp:224 ui/reshack/pictureeditor.cpp:213
 msgid "Close"
 msgstr "Schließen"
@@ -3076,7 +3076,7 @@ msgstr "Arbeite..."
 msgid "Configuration File"
 msgstr "Konfigurationsdatei"
 
-#: game/maint/configurationapplication.cpp:171
+#: game/maint/configurationapplication.cpp:196
 msgid "Configuration Tool v%s - (c) 2018-2025 Stefan Reuther"
 msgstr "Konfigurationswerkzeug v%s - (c) 2018-2025 Stefan Reuther"
 
@@ -3100,12 +3100,12 @@ msgstr "Fernsteuerung für neugebaute Schiffe einrichten"
 msgid "Confirm"
 msgstr "Bestätigen"
 
-#: client/dialogs/consoledialog.cpp:369 client/screens/playerscreen.cpp:150
+#: client/dialogs/consoledialog.cpp:361 client/screens/playerscreen.cpp:150
 #: game/interface/scriptapplication.cpp:248
 msgid "Console"
 msgstr "Konsole"
 
-#: client/dialogs/consoledialog.cpp:412
+#: client/dialogs/consoledialog.cpp:404
 msgid "Console: %s"
 msgstr "Konsole: %s"
 
@@ -3204,7 +3204,7 @@ msgstr "Strg-S - Speichern"
 msgid "Cumulative chart"
 msgstr "Kumulative Ansicht"
 
-#: client/widgets/turnlistbox.cpp:120
+#: client/widgets/turnlistbox.cpp:100
 msgid "Current"
 msgstr "Aktuell"
 
@@ -3216,7 +3216,7 @@ msgstr "Aktuelle Informationen (Nachricht)"
 msgid "Current mass: %d kt"
 msgstr "Aktuelle Masse: %d kt"
 
-#: client/dialogs/choosehull.cpp:130 game/proxy/simulationsetupproxy.cpp:74
+#: client/dialogs/choosehull.cpp:130 game/proxy/simulationsetupproxy.cpp:70
 msgid "Custom Ship"
 msgstr "Selbstdefiniertes Schiff"
 
@@ -3232,7 +3232,7 @@ msgstr "Kyrillisch (CP866)"
 msgid "Cyrillic (KOI8-R)"
 msgstr "Kyrillisch (KOI8-R)"
 
-#: client/dialogs/selectionmanager.cpp:362
+#: client/dialogs/selectionmanager.cpp:338
 msgid "D - Clear"
 msgstr "D - Löschen"
 
@@ -3318,7 +3318,7 @@ msgstr "Weltraum %s"
 msgid "Deep Space (%d,%d)"
 msgstr "Weltraum (%d,%d)"
 
-#: client/widgets/markertemplatelist.cpp:92
+#: client/widgets/markertemplatelist.cpp:72
 msgid "Default marker"
 msgstr "Standard-Marker"
 
@@ -3341,7 +3341,7 @@ msgstr "Verteid. verloren"
 msgid "Defense Posts"
 msgstr "Verteidigungsposten"
 
-#: client/dialogs/commandlistdialog.cpp:113 client/dialogs/export.cpp:153
+#: client/dialogs/commandlistdialog.cpp:105 client/dialogs/export.cpp:153
 #: client/tiles/fleetmembertile.cpp:46
 msgid "Del"
 msgstr "Entf"
@@ -3375,7 +3375,7 @@ msgstr "Diese Aufgabe löschen?"
 msgid "Delete this character?"
 msgstr "Dieses Zeichen löschen?"
 
-#: client/dialogs/commandlistdialog.cpp:215
+#: client/dialogs/commandlistdialog.cpp:207
 msgid "Delete this command?"
 msgstr "Diesen Befehl löschen?"
 
@@ -3429,7 +3429,7 @@ msgstr "Verzeichnisname"
 msgid "Disabling update callback \"%s\" due to error"
 msgstr "Update-Callback \"%s\" wird aufgrund Fehler deaktiviert"
 
-#: client/dialogs/exitconfirmation.cpp:155
+#: client/dialogs/exitconfirmation.cpp:147
 msgid "Discard all changes"
 msgstr "Alle Änderungen verwerfen"
 
@@ -3475,7 +3475,7 @@ msgstr "Abstand: %5d m"
 msgid "Divine"
 msgstr "Göttlich"
 
-#: client/dialogs/exitconfirmation.cpp:197
+#: client/dialogs/exitconfirmation.cpp:189
 msgid "Do you really want to exit without saving?"
 msgstr "Möchtest du wirklich beenden ohne zu speichern?"
 
@@ -3518,11 +3518,11 @@ msgstr ""
 "behalten. Mit PCC2s eingebautem Filter kannst du genauer einstellen, was du "
 "sehen willst.</small>"
 
-#: client/dialogs/selectionmanager.cpp:420
+#: client/dialogs/selectionmanager.cpp:396
 msgid "Do you want to clear all selection layers?"
 msgstr "Möchtest du wirklich alle Auswahlen löschen?"
 
-#: client/dialogs/selectionmanager.cpp:409
+#: client/dialogs/selectionmanager.cpp:385
 msgid "Do you want to clear this selection layer?"
 msgstr "Soll diese Ebene gelöscht werden?"
 
@@ -3530,7 +3530,7 @@ msgstr "Soll diese Ebene gelöscht werden?"
 msgid "Do you want to exit PCC2?"
 msgstr "Möchtest du PCC2 verlassen?"
 
-#: ui/reshack/application.cpp:378
+#: ui/reshack/application.cpp:370
 msgid "Do you want to exit? There are unsaved changes."
 msgstr "Möchtest du beenden? Es gibt ungespeicherte Änderungen."
 
@@ -3635,7 +3635,7 @@ msgstr "Schiffsfunktion #%d doppelt definiert"
 msgid "Duplicate definition for hull function with name \"%s\""
 msgstr "Schiffsfunktion \"%s\" ist doppelt definiert"
 
-#: client/tiles/shipcargotile.cpp:110 client/widgets/costsummarylist.cpp:153
+#: client/tiles/shipcargotile.cpp:110 client/widgets/costsummarylist.cpp:216
 #: share/resource/core_tiles.q:1002 share/resource/core_tiles.q:1165
 #: share/resource/core_tiles.q:799
 msgid "Dur"
@@ -3662,7 +3662,7 @@ msgstr "Duranium geladen"
 msgid "Duranium cost"
 msgstr "Duranium-Kosten"
 
-#: client/dialogs/multitransfer.cpp:619
+#: client/dialogs/multitransfer.cpp:620
 msgid "E - Add Equal"
 msgstr "E - Gleichmäßig verteilen"
 
@@ -3689,7 +3689,7 @@ msgstr "Enter - Beispiel ansehen"
 msgid "ESC"
 msgstr "ESC"
 
-#: client/dialogs/selectionmanager.cpp:374
+#: client/dialogs/selectionmanager.cpp:350
 msgid "ESC - Close"
 msgstr "ESC - Schließen"
 
@@ -3709,7 +3709,7 @@ msgstr "Ost-West"
 msgid "Economy"
 msgstr "Wirtschaft"
 
-#: client/tiles/basetasktile.cpp:31 ui/reshack/application.cpp:294
+#: client/tiles/basetasktile.cpp:31 ui/reshack/application.cpp:286
 msgid "Edit"
 msgstr "Bearbeiten"
 
@@ -3744,7 +3744,7 @@ msgstr "Einstellung ändern"
 msgid "Edit Population"
 msgstr "Bevölkerung"
 
-#: client/dialogs/commandlistdialog.cpp:270
+#: client/dialogs/commandlistdialog.cpp:262
 msgid "Edit command"
 msgstr "Befehl bearbeiten"
 
@@ -3859,7 +3859,7 @@ msgstr "Enter - Bauen"
 msgid "Enter - Change"
 msgstr "Enter - Ändern"
 
-#: client/dialogs/selectionmanager.cpp:373
+#: client/dialogs/selectionmanager.cpp:349
 msgid "Enter - Select"
 msgstr "Enter - Auswahl"
 
@@ -3871,11 +3871,11 @@ msgstr "Passwort eingeben"
 msgid "Enter X,Y coordinates or sector number"
 msgstr "Bitte X,Y-Koordinaten oder Sektornummer eingeben"
 
-#: client/dialogs/consoledialog.cpp:395
+#: client/dialogs/consoledialog.cpp:387
 msgid "Enter command or expression"
 msgstr "Bitte Ausdruck oder Befehl eingeben"
 
-#: client/dialogs/selectionmanager.cpp:509
+#: client/dialogs/selectionmanager.cpp:485
 msgid "Enter layer/expression to copy from"
 msgstr "Kopiere von Ebene/Ausdruck"
 
@@ -3908,7 +3908,7 @@ msgstr "Neue Notiz für dieses Schiff"
 msgid "Enter new name"
 msgstr "Neuer Name"
 
-#: client/dialogs/processlistdialog.cpp:525
+#: client/dialogs/processlistdialog.cpp:526
 msgid "Enter new process priority"
 msgstr "Neue Priorität"
 
@@ -3916,7 +3916,7 @@ msgstr "Neue Priorität"
 msgid "Enter new warp factor and confirm with ENTER"
 msgstr "Bitte neuen Warpfaktor eingeben und mit ENTER bestätigen"
 
-#: ui/reshack/dialogs.cpp:398
+#: ui/reshack/dialogs.cpp:382
 msgid ""
 "Enter number of pixels to add at top/bottom. Negative numbers can be used to "
 "remove pixels. Maximum you can remove without clipping from the top is %d "
@@ -4030,8 +4030,8 @@ msgstr "Fehler beim Speichern der Konfiguration"
 msgid "Error scanning help file"
 msgstr "Fehler beim Einlesen der Hilfedatei"
 
-#: gfx/sdl2/engine.cpp:354 gfx/sdl2/engine.cpp:373 gfx/sdl2/engine.cpp:381
-#: gfx/sdl2/engine.cpp:402
+#: gfx/sdl2/engine.cpp:356 gfx/sdl2/engine.cpp:375 gfx/sdl2/engine.cpp:383
+#: gfx/sdl2/engine.cpp:404
 msgid "Error setting video mode (%s): %s"
 msgstr "Fehler beim Einstellen des Grafikmodus (%s): %s"
 
@@ -4089,16 +4089,16 @@ msgstr "Ausführen"
 msgid "Execution of file \"%s\" failed: %s"
 msgstr "Ausführen der Datei \"%s\" fehlgeschlagen: %s"
 
-#: client/screens/browserscreen.cpp:216 ui/reshack/application.cpp:297
+#: client/screens/browserscreen.cpp:216 ui/reshack/application.cpp:289
 msgid "Exit"
 msgstr "Ende"
 
-#: client/dialogs/exitconfirmation.cpp:158
-#: client/dialogs/exitconfirmation.cpp:197
+#: client/dialogs/exitconfirmation.cpp:150
+#: client/dialogs/exitconfirmation.cpp:189
 msgid "Exit Game"
 msgstr "Spiel verlassen"
 
-#: client/dialogs/exitconfirmation.cpp:155
+#: client/dialogs/exitconfirmation.cpp:147
 msgid "Exit without Saving"
 msgstr "Beenden, ohne zu speichern"
 
@@ -4188,7 +4188,7 @@ msgstr "Erweiterte Ufo-Datei existiert, ist aber leer."
 msgid "Extra"
 msgstr "Extra"
 
-#: client/dialogs/multitransfer.cpp:620
+#: client/dialogs/multitransfer.cpp:621
 msgid "F - Equal Free Space"
 msgstr "F - Gleicher Freiraum"
 
@@ -4224,7 +4224,7 @@ msgstr "F4 - Sternenkarte"
 msgid "F7 - Search"
 msgstr "F7 - Suche"
 
-#: client/dialogs/buildqueuedialog.cpp:383
+#: client/dialogs/buildqueuedialog.cpp:511
 #: client/dialogs/friendlycodedialog.cpp:77 client/tiles/fleetmembertile.cpp:51
 #: client/widgets/simulationobjectinfo.cpp:258 game/parser/messagevalue.cpp:134
 #: share/resource/core_tiles.q:365
@@ -4278,7 +4278,7 @@ msgstr "Fehler beim Zurücksetzen einer Position"
 msgid "Failed to set up VCR algorithm"
 msgstr "Fehler beim Erzeugen eines VCR-Algorithmus"
 
-#: client/dialogs/hullfunctionview.cpp:316
+#: client/dialogs/hullfunctionview.cpp:308
 msgid "Fails at %d%% damage"
 msgstr "Ausfall ab %d%% Schaden"
 
@@ -4524,7 +4524,7 @@ msgstr "Filter"
 msgid "Filter Drawings"
 msgstr "Zeichnungen filtern"
 
-#: client/dialogs/subjectlist.cpp:150
+#: client/dialogs/subjectlist.cpp:142
 msgid "Filtered"
 msgstr "Gefiltert"
 
@@ -4591,7 +4591,7 @@ msgstr "Flotte verfolgen"
 msgid "Font Editor"
 msgstr "Font-Editor"
 
-#: ui/reshack/application.cpp:427
+#: ui/reshack/application.cpp:419
 msgid "Font Height"
 msgstr "Font-Höhe"
 
@@ -4648,7 +4648,7 @@ msgstr "%d Plugin%!1{s%} gefunden"
 msgid "Fr."
 msgstr "Fr."
 
-#: client/dialogs/multitransfer.cpp:240
+#: client/dialogs/multitransfer.cpp:355
 msgid "Free"
 msgstr "Frei"
 
@@ -4752,7 +4752,7 @@ msgstr "Funktionen"
 msgid "Funds"
 msgstr "Geld"
 
-#: client/dialogs/processlistdialog.cpp:605
+#: client/dialogs/processlistdialog.cpp:606
 msgid "G - Go To"
 msgstr "G - Anzeigen"
 
@@ -4794,7 +4794,7 @@ msgstr "Trümmer aufsammeln"
 msgid "Gather resources from a planet"
 msgstr "Ressourcen von einem Planeten aufladen"
 
-#: game/maint/configurationapplication.cpp:180
+#: game/maint/configurationapplication.cpp:205
 msgid ""
 "General:\n"
 "--help\tshow help\n"
@@ -4804,6 +4804,7 @@ msgid ""
 "FILE\tload text file\n"
 "--empty\tload empty file\n"
 "--load-hconfig=FILE\tload binary HConfig file\n"
+"--load-truehull=FILE\tload truehull file\n"
 "-DKEY=VALUE\tset value\n"
 "-AKEY=VALUE\tadd value\n"
 "-UKEY\tunset value\n"
@@ -4812,7 +4813,8 @@ msgid ""
 "-o FILE\tsave result to file\n"
 "--stdout\tsend result to stdout\n"
 "--get=OPTION\tget option value\n"
-"--save-hconfig=FILE\tsave binary HConfig file"
+"--save-hconfig=FILE\tsave binary HConfig file\n"
+"--save-truehull=FILE\tsave truehull file"
 msgstr ""
 "Allgemein:\n"
 "--help\tHilfe anzeigen\n"
@@ -4822,6 +4824,7 @@ msgstr ""
 "DATEI\tTextdatei laden\n"
 "--empty\tLeere Datei laden\n"
 "--load-hconfig=DATEI\tBinäre HConfig-Datei laden\n"
+"--load-truehull=DATEI\tTruehull-Datei laden\n"
 "-DNAME=WERT\tWert setzen\n"
 "-ANAME=WERT\tWert hinzufügen\n"
 "-UNAME\tWert löschen\n"
@@ -4830,9 +4833,10 @@ msgstr ""
 "-o DATEI\tErgebnis in Datei speichern\n"
 "--stdout\tErgebnis nach stdout ausgeben\n"
 "--get=OPTION\tWert einer Option abfragen\n"
-"--save-hconfig=DATEI\tBinäre HConfig-Datei speichern"
+"--save-hconfig=DATEI\tBinäre HConfig-Datei speichern\n"
+"--save-truehull=DATEI\tTruehull-Datei speichern"
 
-#: ui/reshack/dialogs.cpp:482
+#: ui/reshack/dialogs.cpp:466
 msgid "Generate this character from the following?"
 msgstr "Dieses Zeichen aus den folgenden generieren?"
 
@@ -4972,7 +4976,7 @@ msgstr ""
 "--assets=PFX\t(render) URL-Präfix für \"asset:\"-Links\n"
 "--doc=PFX\t(render) URL-Präfix für Dokument-Links"
 
-#: client/application.cpp:158
+#: client/application.cpp:154
 msgid "Global cc-res.cfg"
 msgstr "Globale cc-res.cfg"
 
@@ -4985,9 +4989,9 @@ msgstr "Global..."
 msgid "Go To X/Y"
 msgstr "Gehe zu X/Y"
 
-#: client/dialogs/buildqueuedialog.cpp:195
+#: client/dialogs/buildqueuedialog.cpp:204
 #: client/dialogs/classicvcrobject.cpp:85
-#: client/dialogs/commandlistdialog.cpp:112 client/dialogs/flakvcrobject.cpp:95
+#: client/dialogs/commandlistdialog.cpp:104 client/dialogs/flakvcrobject.cpp:95
 #: client/dialogs/helpdialog.cpp:229 client/dialogs/ionstorminfo.cpp:150
 #: client/dialogs/minefieldinfo.cpp:221 client/dialogs/searchdialog.cpp:334
 #: client/dialogs/ufoinfo.cpp:179 client/widgets/messageactionpanel.cpp:204
@@ -5080,7 +5084,7 @@ msgstr "Hat"
 msgid "Has Base"
 msgstr "Hat Basis"
 
-#: client/dialogs/multitransfer.cpp:241
+#: client/dialogs/multitransfer.cpp:356
 msgid "Have"
 msgstr "Vorh."
 
@@ -5093,7 +5097,7 @@ msgstr "Teile auf Lager"
 msgid "Heading"
 msgstr "Kurs"
 
-#: ui/reshack/application.cpp:173
+#: ui/reshack/application.cpp:165
 msgid "Height"
 msgstr "Höhe"
 
@@ -5101,19 +5105,19 @@ msgstr "Höhe"
 #: client/dialogs/buildqueuesummary.cpp:161 client/dialogs/buildship.cpp:95
 #: client/dialogs/buildshipmain.cpp:290 client/dialogs/buildshiporder.cpp:51
 #: client/dialogs/classicvcrobject.cpp:148
-#: client/dialogs/commandlistdialog.cpp:172
+#: client/dialogs/commandlistdialog.cpp:164
 #: client/dialogs/flakvcrobject.cpp:175
 #: client/dialogs/friendlycodedialog.cpp:87 client/dialogs/goaldialog.cpp:272
-#: client/dialogs/helpdialog.cpp:154 client/dialogs/hullfunctionview.cpp:214
+#: client/dialogs/helpdialog.cpp:154 client/dialogs/hullfunctionview.cpp:206
 #: client/dialogs/imperialstats.cpp:278 client/dialogs/inboxdialog.cpp:91
 #: client/dialogs/ionstorminfo.cpp:152 client/dialogs/keymapdialog.cpp:150
 #: client/dialogs/messageeditor.cpp:197 client/dialogs/minefieldinfo.cpp:223
 #: client/dialogs/newdrawing.cpp:84 client/dialogs/newdrawingtag.cpp:98
 #: client/dialogs/objectselectiondialog.cpp:373
 #: client/dialogs/outboxdialog.cpp:78 client/dialogs/pluginmanager.cpp:123
-#: client/dialogs/preferences.cpp:591 client/dialogs/processlistdialog.cpp:723
+#: client/dialogs/preferences.cpp:591 client/dialogs/processlistdialog.cpp:724
 #: client/dialogs/revertdialog.cpp:83 client/dialogs/scores.cpp:735
-#: client/dialogs/searchdialog.cpp:338 client/dialogs/selectionmanager.cpp:371
+#: client/dialogs/searchdialog.cpp:338 client/dialogs/selectionmanager.cpp:347
 #: client/dialogs/sellsuppliesdialog.cpp:62
 #: client/dialogs/shipcostcalculator.cpp:72
 #: client/dialogs/simulationfleetcost.cpp:163
@@ -5233,11 +5237,11 @@ msgstr "Hyperdrive (Warp %d)"
 msgid "Hyperdrive, warp %d"
 msgstr "Hyperdrive, warp %d"
 
-#: client/dialogs/selectionmanager.cpp:363
+#: client/dialogs/selectionmanager.cpp:339
 msgid "I - Invert"
 msgstr "I - Invertieren"
 
-#: ui/reshack/dialogs.cpp:532
+#: ui/reshack/dialogs.cpp:516
 msgid "I do not know how to generate this character."
 msgstr "Ich kann dieses Zeichen nicht generieren."
 
@@ -5307,7 +5311,7 @@ msgstr "Imperiums-Statistik"
 msgid "Import Font"
 msgstr "Font importieren"
 
-#: ui/reshack/application.cpp:395
+#: ui/reshack/application.cpp:387
 msgid "Import system font"
 msgstr "System-Font importieren"
 
@@ -5403,7 +5407,7 @@ msgstr "Info: verwendete CSS-Klassen"
 msgid "Info: used tags"
 msgstr "Info: verwendete Tags"
 
-#: client/application.cpp:777
+#: client/application.cpp:671
 msgid "Initialisation complete"
 msgstr "Initialisierung vollständig"
 
@@ -5427,7 +5431,7 @@ msgstr "Initiator benötigt Treibstoff"
 msgid "Initiator under tow"
 msgstr "Initiator wird abgeschleppt"
 
-#: client/dialogs/commandlistdialog.cpp:171 client/dialogs/export.cpp:151
+#: client/dialogs/commandlistdialog.cpp:163 client/dialogs/export.cpp:151
 msgid "Ins"
 msgstr "Einfg"
 
@@ -5695,7 +5699,7 @@ msgstr "Ungültige Spielernummer %d, Eintrag wurde ignoriert"
 msgid "Invalid search query: %s"
 msgstr "Ungültige Suchanfrage: %s"
 
-#: client/dialogs/selectionmanager.cpp:513
+#: client/dialogs/selectionmanager.cpp:489
 msgid "Invalid selection expression: %s"
 msgstr "Ungültiger Auswahl-Ausdruck: %s"
 
@@ -5795,7 +5799,7 @@ msgstr "Das Plugin kann nicht installiert werden."
 msgid "It cannot be uninstalled."
 msgstr "Das Plugin kann nicht deinstalliert werden."
 
-#: client/widgets/costsummarylist.cpp:149
+#: client/widgets/costsummarylist.cpp:212
 msgid "Item"
 msgstr "Position"
 
@@ -5837,7 +5841,7 @@ msgstr "Taste %s"
 msgid "Key '%s' in '%s'"
 msgstr "Taste '%s' in '%s'"
 
-#: gfx/sdl/engine.cpp:472 gfx/sdl2/engine.cpp:597
+#: gfx/sdl/engine.cpp:472 gfx/sdl2/engine.cpp:599
 msgid "Key not mapped: 0x%x"
 msgstr "Taste nicht erkannt: 0x%x"
 
@@ -5858,7 +5862,7 @@ msgstr "Tastatur-Debugger"
 msgid "Kill"
 msgstr "Kill"
 
-#: game/proxy/simulationsetupproxy.cpp:128
+#: game/proxy/simulationsetupproxy.cpp:124
 msgid "Kill Mission"
 msgstr "Mission Kill"
 
@@ -5866,7 +5870,7 @@ msgstr "Mission Kill"
 msgid "Kill power"
 msgstr "Töten"
 
-#: client/dialogs/selectionmanager.cpp:366
+#: client/dialogs/selectionmanager.cpp:342
 msgid "L - Load"
 msgstr "L - Laden"
 
@@ -5942,7 +5946,7 @@ msgstr "Links/Rechts-Ausgleich"
 msgid "Level %d"
 msgstr "Stufe %d"
 
-#: ui/reshack/linetool.cpp:9
+#: ui/reshack/linetool.cpp:10
 msgid "Line"
 msgstr "Linie"
 
@@ -5960,8 +5964,8 @@ msgid "List units..."
 msgstr "Einheiten..."
 
 #: client/dialogs/export.cpp:167 client/dialogs/simulator.cpp:362
-#: ui/reshack/application.cpp:245 ui/reshack/application.cpp:280
-#: ui/reshack/application.cpp:295 ui/reshack/application.cpp:341
+#: ui/reshack/application.cpp:237 ui/reshack/application.cpp:272
+#: ui/reshack/application.cpp:287 ui/reshack/application.cpp:333
 msgid "Load"
 msgstr "Laden"
 
@@ -5973,7 +5977,7 @@ msgstr "Konfiguration aus Datei laden"
 msgid "Load Message"
 msgstr "Nachricht laden"
 
-#: client/dialogs/selectionmanager.cpp:455 share/resource/core_game.q:142
+#: client/dialogs/selectionmanager.cpp:431 share/resource/core_game.q:142
 msgid "Load Selection"
 msgstr "Auswahl laden"
 
@@ -6114,10 +6118,10 @@ msgid "Location: (%d,%d) - Sector %d"
 msgstr "Position: (%d,%d) - Sektor %d"
 
 # FIXME: a good spiffy word?
-#: client/dialogs/processlistdialog.cpp:542
-#: client/dialogs/processlistdialog.cpp:552
-#: client/dialogs/processlistdialog.cpp:559
-#: client/dialogs/processlistdialog.cpp:713
+#: client/dialogs/processlistdialog.cpp:543
+#: client/dialogs/processlistdialog.cpp:553
+#: client/dialogs/processlistdialog.cpp:560
+#: client/dialogs/processlistdialog.cpp:714
 msgid "Locks"
 msgstr "Locks"
 
@@ -6137,7 +6141,7 @@ msgstr "Anmeldung fehlgeschlagen"
 msgid "M - Confirm"
 msgstr "M - Bestätigen"
 
-#: client/dialogs/selectionmanager.cpp:367
+#: client/dialogs/selectionmanager.cpp:343
 msgid "M - Merge"
 msgstr "M - Hinzufügen"
 
@@ -6194,9 +6198,9 @@ msgstr "Maketurn | Upload-Ziel..."
 msgid "Malformed URL \"%s\""
 msgstr "Fehlerhafte URL \"%s\""
 
-#: client/dialogs/buildqueuedialog.cpp:174
-#: client/dialogs/buildqueuedialog.cpp:241
-#: client/dialogs/buildqueuedialog.cpp:691
+#: client/dialogs/buildqueuedialog.cpp:183
+#: client/dialogs/buildqueuedialog.cpp:250
+#: client/dialogs/buildqueuedialog.cpp:692
 msgid "Manage Build Queue"
 msgstr "Bauliste verwalten"
 
@@ -6240,7 +6244,7 @@ msgstr "Nur markierte Objekte"
 msgid "Marker"
 msgstr "Marker"
 
-#: client/widgets/markertemplatelist.cpp:94
+#: client/widgets/markertemplatelist.cpp:74
 msgid "Marker %d"
 msgstr "Marker %d"
 
@@ -6325,7 +6329,7 @@ msgstr "Maximum"
 msgid "Member of fleet #%d"
 msgstr "Teil von Flotte #%d"
 
-#: client/dialogs/selectionmanager.cpp:461
+#: client/dialogs/selectionmanager.cpp:437
 msgid "Merge Selection"
 msgstr "Auswahl hinzufügen"
 
@@ -6334,7 +6338,7 @@ msgstr "Auswahl hinzufügen"
 msgid "Message"
 msgstr "Nachricht"
 
-#: client/dialogs/subjectlist.cpp:168
+#: client/dialogs/subjectlist.cpp:160
 msgid "Message Summary"
 msgstr "Nachrichten-Übersicht"
 
@@ -6612,7 +6616,7 @@ msgstr "Geänderte %s"
 msgid "Modify"
 msgstr "Ändern"
 
-#: client/tiles/shipcargotile.cpp:111 client/widgets/costsummarylist.cpp:154
+#: client/tiles/shipcargotile.cpp:111 client/widgets/costsummarylist.cpp:217
 #: share/resource/core_tiles.q:1003 share/resource/core_tiles.q:1166
 #: share/resource/core_tiles.q:800
 msgid "Mol"
@@ -6711,7 +6715,7 @@ msgstr "Bewegung"
 msgid "Movement (%d turn%!1{s%})"
 msgstr "Bewegung (%d %1{Zug%|Züge%})"
 
-#: client/dialogs/processlistdialog.cpp:303
+#: client/dialogs/processlistdialog.cpp:437
 msgid "Msg"
 msgstr "Meld"
 
@@ -6731,7 +6735,7 @@ msgstr "Meine Dateien"
 msgid "N - Name"
 msgstr "N - Name"
 
-#: client/dialogs/chartconfig.cpp:556 client/dialogs/processlistdialog.cpp:302
+#: client/dialogs/chartconfig.cpp:556 client/dialogs/processlistdialog.cpp:436
 #: client/dialogs/referencesortorder.cpp:38 client/dialogs/simulator.cpp:1233
 #: client/dialogs/specbrowserdialog.cpp:590
 #: client/widgets/simulationobjectinfo.cpp:256 game/parser/messagevalue.cpp:133
@@ -6817,19 +6821,19 @@ msgstr "Neutronium"
 msgid "Neutronium Density"
 msgstr "Neutronium-Dichte"
 
-#: client/dialogs/processlistdialog.cpp:341 ui/reshack/application.cpp:231
+#: client/dialogs/processlistdialog.cpp:319 ui/reshack/application.cpp:223
 msgid "New"
 msgstr "Neu"
 
-#: ui/reshack/application.cpp:393 ui/reshack/application.cpp:427
+#: ui/reshack/application.cpp:385 ui/reshack/application.cpp:419
 msgid "New Font"
 msgstr "Neuer Font"
 
-#: ui/reshack/application.cpp:169 ui/reshack/application.cpp:389
+#: ui/reshack/application.cpp:161 ui/reshack/application.cpp:381
 msgid "New Picture"
 msgstr "Neues Bild"
 
-#: ui/reshack/application.cpp:391
+#: ui/reshack/application.cpp:383
 msgid "New Picture from Clipboard"
 msgstr "Neues Bild aus Zwischenablage"
 
@@ -6850,7 +6854,7 @@ msgstr "Neuer Status: %s (%d)"
 msgid "New marker"
 msgstr "Neuer Marker"
 
-#: ui/reshack/dialogs.cpp:229
+#: ui/reshack/dialogs.cpp:221
 msgid "Next"
 msgstr "Nächster"
 
@@ -6866,7 +6870,7 @@ msgstr "Nächster bei"
 msgid "Next-turn information (\"show\")"
 msgstr "Information des nächsten Zugs (\"show\")"
 
-#: client/dialogs/buildqueuedialog.cpp:243 client/dialogs/buildship.cpp:231
+#: client/dialogs/buildqueuedialog.cpp:252 client/dialogs/buildship.cpp:231
 #: client/dialogs/buildship.cpp:260 client/dialogs/buildstarbasedialog.cpp:58
 #: client/dialogs/cloneship.cpp:130
 #: client/dialogs/simulationconfiguration.cpp:69
@@ -6876,7 +6880,7 @@ msgstr "Information des nächsten Zugs (\"show\")"
 msgid "No"
 msgstr "Nein"
 
-#: game/proxy/simulationsetupproxy.cpp:132
+#: game/proxy/simulationsetupproxy.cpp:128
 msgid "No Fuel"
 msgstr "Kein Treibstoff"
 
@@ -6896,7 +6900,7 @@ msgstr "Keine Ufos"
 msgid "No backup file configured"
 msgstr "Keine Backup-Datei konfiguriert"
 
-#: game/proxy/simulationsetupproxy.cpp:1131
+#: game/proxy/simulationsetupproxy.cpp:1127
 msgid "No base"
 msgstr "Keine Basis"
 
@@ -6961,7 +6965,7 @@ msgstr "Keine Informationen über Mineralien verfügbar."
 msgid "No information on natives available."
 msgstr "Keine Informationen über Eingeborene."
 
-#: client/dialogs/processlistdialog.cpp:542
+#: client/dialogs/processlistdialog.cpp:543
 msgid "No locks active in system."
 msgstr "Keine Locks im System aktiv."
 
@@ -7001,7 +7005,7 @@ msgstr "Keine Spielerdaten übrig."
 msgid "No player number specified. Use \"%s -h\" for help"
 msgstr "Keine Spielernummer angegeben. Mit \"%s -h\" erhalten Sie Hilfe"
 
-#: client/widgets/pluginlist.cpp:129
+#: client/widgets/pluginlist.cpp:109
 msgid "No plugins installed."
 msgstr "Keine Plugins installiert."
 
@@ -7038,7 +7042,7 @@ msgstr ""
 msgid "Nobody"
 msgstr "Niemand"
 
-#: client/dialogs/multitransfer.cpp:727
+#: client/dialogs/multitransfer.cpp:728
 msgid "Nobody has %s at this place."
 msgstr "An dieser Stelle hat niemand %s."
 
@@ -7086,7 +7090,7 @@ msgstr ""
 msgid "Nothing is known about this ship's cargo."
 msgstr "Über die Fracht dieses Raumschiffs ist nichts bekannt."
 
-#: client/dialogs/processlistdialog.cpp:711 client/tiles/taskmessagetile.cpp:67
+#: client/dialogs/processlistdialog.cpp:712 client/tiles/taskmessagetile.cpp:67
 msgid "Notification"
 msgstr "Meldung"
 
@@ -7140,12 +7144,12 @@ msgstr "O - Optionen"
 #: client/dialogs/cargohistorydialog.cpp:58
 #: client/dialogs/cargotransferdialog.cpp:117
 #: client/dialogs/changepassword.cpp:56 client/dialogs/cloneship.cpp:134
-#: client/dialogs/consoledialog.cpp:373 client/dialogs/exitconfirmation.cpp:164
+#: client/dialogs/consoledialog.cpp:365 client/dialogs/exitconfirmation.cpp:156
 #: client/dialogs/friendlycodedialog.cpp:84 client/dialogs/goaldialog.cpp:250
 #: client/dialogs/inboxdialog.cpp:90 client/dialogs/labelconfig.cpp:282
 #: client/dialogs/navchartdialog.cpp:514 client/dialogs/newdrawingtag.cpp:102
 #: client/dialogs/objectselectiondialog.cpp:371
-#: client/dialogs/outboxdialog.cpp:77 client/dialogs/processlistdialog.cpp:344
+#: client/dialogs/outboxdialog.cpp:77 client/dialogs/processlistdialog.cpp:322
 #: client/dialogs/revertdialog.cpp:46 client/dialogs/sellsuppliesdialog.cpp:59
 #: client/dialogs/shipspeeddialog.cpp:67 client/dialogs/taxationdialog.cpp:607
 #: client/dialogs/turnlistdialog.cpp:113
@@ -7183,7 +7187,7 @@ msgstr "Objekte"
 msgid "Objects from search result only"
 msgstr "Nur Objekte aus Suchergebnis"
 
-#: client/dialogs/multitransfer.cpp:665
+#: client/dialogs/multitransfer.cpp:666
 msgid "On hold: %d %s"
 msgstr "Zwischenspeicher: %d %s"
 
@@ -7453,7 +7457,7 @@ msgstr "Besitzer"
 msgid "P - Planets"
 msgstr "P - Planeten"
 
-#: client/dialogs/multitransfer.cpp:621
+#: client/dialogs/multitransfer.cpp:622
 msgid "P - Proportional"
 msgstr "P - Proportional"
 
@@ -7562,7 +7566,7 @@ msgstr "PCC2 Turn-File-Compiler v%s - (c) 2010-2025 Stefan Reuther"
 msgid "PCC2 is currently executing a script."
 msgstr "PCC2 führt geraden ein Script aus."
 
-#: client/dialogs/multitransfer.cpp:519
+#: client/dialogs/multitransfer.cpp:520
 msgid ""
 "PCC2 will now create a temporary cargo storage which you can use to shuffle "
 "cargo around. It must be empty before you can finish this cargo transfer.\n"
@@ -7605,7 +7609,7 @@ msgstr "Parse-Fehler"
 msgid "Participatory"
 msgstr "Participatory"
 
-#: game/proxy/simulationsetupproxy.cpp:130
+#: game/proxy/simulationsetupproxy.cpp:126
 msgid "Passive Ship"
 msgstr "Passives Schiff"
 
@@ -7617,7 +7621,7 @@ msgstr "Einfügen"
 msgid "Pay additional supplies"
 msgstr "Zahlen zusätzliche Vorräte"
 
-#: ui/reshack/penciltool.cpp:9
+#: ui/reshack/penciltool.cpp:10
 msgid "Pencil"
 msgstr "Bleistift"
 
@@ -7637,7 +7641,7 @@ msgstr "Pillage max. %d %1{Zug%|Züge%}"
 msgid "Pillage mission"
 msgstr "Plündern-Mission"
 
-#: ui/reshack/pipettetool.cpp:10
+#: ui/reshack/pipettetool.cpp:11
 msgid "Pipette"
 msgstr "Pipette"
 
@@ -7949,15 +7953,15 @@ msgstr "Drücke die Leertaste, um ein Feld zu ändern."
 msgid "Press the key for which you want information."
 msgstr "Drücke die Taste, für die du Information wünschst."
 
-#: ui/reshack/dialogs.cpp:223
+#: ui/reshack/dialogs.cpp:215
 msgid "Preview"
 msgstr "Vorschau"
 
-#: ui/reshack/dialogs.cpp:230
+#: ui/reshack/dialogs.cpp:222
 msgid "Previous"
 msgstr "Voriges"
 
-#: client/dialogs/processlistdialog.cpp:305
+#: client/dialogs/processlistdialog.cpp:439
 msgid "Pri"
 msgstr "Pri"
 
@@ -7970,7 +7974,7 @@ msgstr "Primär"
 msgid "Primary Enemy"
 msgstr "Primärziel"
 
-#: game/proxy/simulationsetupproxy.cpp:134
+#: game/proxy/simulationsetupproxy.cpp:130
 msgid "Primary Enemy %s"
 msgstr "Primärziel %s"
 
@@ -7982,7 +7986,7 @@ msgstr "Primärziel wurde auf %d Raumschiff%!1{en%} geändert."
 msgid "Primary Enemy: %s"
 msgstr "Primärziel: %s"
 
-#: client/dialogs/processlistdialog.cpp:715
+#: client/dialogs/processlistdialog.cpp:716
 msgid "Priority"
 msgstr "Priorität"
 
@@ -7994,8 +7998,8 @@ msgstr "Fortsetzen"
 msgid "Process %d \"%s\" interrupted unexpectedly"
 msgstr "Prozess %d \"%s\" wurde unerwartet unterbrochen"
 
-#: client/dialogs/processlistdialog.cpp:525
-#: client/dialogs/processlistdialog.cpp:699 client/screens/playerscreen.cpp:151
+#: client/dialogs/processlistdialog.cpp:526
+#: client/dialogs/processlistdialog.cpp:700 client/screens/playerscreen.cpp:151
 msgid "Process Manager"
 msgstr "Prozess-Manager"
 
@@ -8033,7 +8037,7 @@ msgstr ""
 msgid "Provides"
 msgstr "Bietet"
 
-#: client/dialogs/buildqueuedialog.cpp:385
+#: client/dialogs/buildqueuedialog.cpp:513
 msgid "Q-Pos"
 msgstr "Q-Pos"
 
@@ -8073,7 +8077,7 @@ msgstr "Rassen-Eigenschaften"
 msgid "Racial Advantages"
 msgstr "Rassen-Vorteile"
 
-#: client/dialogs/hullfunctionview.cpp:302
+#: client/dialogs/hullfunctionview.cpp:294
 msgid "Racial ability"
 msgstr "Rassen-Eigenschaft"
 
@@ -8128,7 +8132,7 @@ msgid "Ratio of total"
 msgstr "Anteil"
 
 #: client/dialogs/alliancedialog.cpp:144
-#: client/dialogs/commandlistdialog.cpp:165
+#: client/dialogs/commandlistdialog.cpp:157
 msgid "Read-only"
 msgstr "Nur Ansicht"
 
@@ -8171,7 +8175,7 @@ msgstr "Datensatz %d, %d Byte%!1{s%}"
 msgid "Record type %d, part %d"
 msgstr "Datensatz %d, Teil %d"
 
-#: client/dialogs/newdrawing.cpp:73 ui/reshack/rectangletool.cpp:11
+#: client/dialogs/newdrawing.cpp:73 ui/reshack/rectangletool.cpp:12
 msgid "Rectangle"
 msgstr "Rechteck"
 
@@ -8220,7 +8224,7 @@ msgid "Regular starchart"
 msgstr "Normale Sternenkarte"
 
 #: client/dialogs/buildstructuresdialog.cpp:523
-#: client/widgets/costsummarylist.cpp:198
+#: client/widgets/costsummarylist.cpp:260
 msgid "Remaining"
 msgstr "Verbleibend"
 
@@ -8369,8 +8373,8 @@ msgstr "Recherche"
 msgid "Reset Location"
 msgstr "Position zurücksetzen"
 
-#: ui/reshack/application.cpp:290 ui/reshack/application.cpp:378
-#: ui/reshack/application.cpp:468 ui/reshack/application.cpp:486
+#: ui/reshack/application.cpp:282 ui/reshack/application.cpp:370
+#: ui/reshack/application.cpp:460 ui/reshack/application.cpp:478
 msgid "Resource Editor"
 msgstr "Ressourcen-Editor"
 
@@ -8402,7 +8406,7 @@ msgstr "Result-Datei ist keine reguläre Datei"
 msgid "Results after %d simulation%!1{s%}"
 msgstr "Ergebnisse nach %d Simulation%!1{en%}"
 
-#: client/dialogs/exitconfirmation.cpp:153
+#: client/dialogs/exitconfirmation.cpp:145
 msgid "Return to race selection"
 msgstr "Zurück zur Spielauswahl"
 
@@ -8446,7 +8450,7 @@ msgstr "Stammverzeichnis"
 msgid "Round wrap (circular, PWrap)"
 msgstr "Rund (kreisförmig, PWrap)"
 
-#: client/dialogs/processlistdialog.cpp:704
+#: client/dialogs/processlistdialog.cpp:705
 msgid "Run"
 msgstr "Ausführen"
 
@@ -8458,7 +8462,7 @@ msgstr "Auszuführen"
 msgid "Running"
 msgstr "Läuft"
 
-#: client/dialogs/selectionmanager.cpp:365
+#: client/dialogs/selectionmanager.cpp:341
 msgid "S - Save"
 msgstr "S - Speichern"
 
@@ -8489,11 +8493,11 @@ msgid "Sample hull"
 msgstr "Beispiel-Typ"
 
 #: client/dialogs/simulator.cpp:363 client/dialogs/vcrselection.cpp:292
-#: client/dialogs/vcrselection.cpp:299 ui/reshack/application.cpp:296
+#: client/dialogs/vcrselection.cpp:299 ui/reshack/application.cpp:288
 msgid "Save"
 msgstr "Speichern"
 
-#: client/dialogs/exitconfirmation.cpp:153
+#: client/dialogs/exitconfirmation.cpp:145
 msgid "Save & Exit"
 msgstr "Speichern & Beenden"
 
@@ -8501,7 +8505,7 @@ msgstr "Speichern & Beenden"
 msgid "Save All Messages"
 msgstr "Alle Nachrichten speichern"
 
-#: client/dialogs/selectionmanager.cpp:447
+#: client/dialogs/selectionmanager.cpp:423
 msgid "Save All Selections"
 msgstr "Alle Auswahlen speichern"
 
@@ -8517,7 +8521,7 @@ msgstr "Bild speichern"
 msgid "Save Page"
 msgstr "Seite speichern"
 
-#: client/dialogs/selectionmanager.cpp:442
+#: client/dialogs/selectionmanager.cpp:418
 msgid "Save Selection"
 msgstr "Auswahl speichern"
 
@@ -8538,11 +8542,11 @@ msgstr "Aufgabe speichern"
 msgid "Save all battles"
 msgstr "Alle Kämpfe speichern"
 
-#: client/dialogs/exitconfirmation.cpp:154
+#: client/dialogs/exitconfirmation.cpp:146
 msgid "Save and keep playing"
 msgstr "Speichern und weiterspielen"
 
-#: client/dialogs/exitconfirmation.cpp:154
+#: client/dialogs/exitconfirmation.cpp:146
 msgid "Save only"
 msgstr "Nur speichern"
 
@@ -8736,11 +8740,11 @@ msgstr "Auswahl"
 msgid "Selection %c"
 msgstr "Auswahl %c"
 
-#: client/dialogs/selectionmanager.cpp:354
-#: client/dialogs/selectionmanager.cpp:410
-#: client/dialogs/selectionmanager.cpp:421
-#: client/dialogs/selectionmanager.cpp:509
-#: client/dialogs/selectionmanager.cpp:514
+#: client/dialogs/selectionmanager.cpp:330
+#: client/dialogs/selectionmanager.cpp:386
+#: client/dialogs/selectionmanager.cpp:397
+#: client/dialogs/selectionmanager.cpp:485
+#: client/dialogs/selectionmanager.cpp:490
 msgid "Selection Manager"
 msgstr "Auswahl-Manager"
 
@@ -8799,7 +8803,7 @@ msgstr "Sensoren"
 msgid "Server-side game directory"
 msgstr "Spielverzeichnis auf Server"
 
-#: ui/reshack/dialogs.cpp:231
+#: ui/reshack/dialogs.cpp:223
 msgid "Set"
 msgstr "Setzen"
 
@@ -9002,7 +9006,7 @@ msgstr "Schiff"
 
 #: client/map/starchartoverlay.cpp:234 game/actions/changebuildqueue.cpp:264
 #: game/map/ship.cpp:429 game/map/universe.cpp:41
-#: game/proxy/simulationsetupproxy.cpp:145 game/reference.cpp:56
+#: game/proxy/simulationsetupproxy.cpp:141 game/reference.cpp:56
 #: game/vcr/overview.cpp:36 share/resource/core_game.q:465
 msgid "Ship #%d"
 msgstr "Schiff #%d"
@@ -9039,7 +9043,7 @@ msgstr "Schiffsfähigkeiten"
 msgid "Ship Build Order"
 msgstr "Schiffs-Bauauftrag"
 
-#: client/dialogs/hullfunctionview.cpp:207
+#: client/dialogs/hullfunctionview.cpp:199
 msgid "Ship Functions"
 msgstr "Schiffs-Funktionen"
 
@@ -9325,7 +9329,7 @@ msgstr "Größe"
 msgid "Small starchart"
 msgstr "Kleine Sternenkarte"
 
-#: ui/reshack/rectangletool.cpp:11
+#: ui/reshack/rectangletool.cpp:12
 msgid "Solid Bar"
 msgstr "Balken"
 
@@ -9449,11 +9453,11 @@ msgstr "Leertaste - Auto"
 msgid "Space - Edit"
 msgstr "Leertaste - Ändern"
 
-#: client/dialogs/multitransfer.cpp:629
+#: client/dialogs/multitransfer.cpp:630
 msgid "Space - Tag"
 msgstr "Leertaste - Markieren"
 
-#: client/dialogs/multitransfer.cpp:627
+#: client/dialogs/multitransfer.cpp:628
 msgid "Space - Un-tag"
 msgstr "Leertaste - Markierung aufheben"
 
@@ -9621,20 +9625,20 @@ msgstr "Raumschiffe"
 msgid "Start new fleet"
 msgstr "Beginne neue Flotte"
 
-#: client/application.cpp:680
+#: client/application.cpp:574
 msgid "Starting GUI..."
 msgstr "Starte GUI..."
 
-#: client/application.cpp:717
+#: client/application.cpp:611
 msgid "Starting background thread..."
 msgstr "Starte Hintergrund-Thread..."
 
-#: client/application.cpp:706
+#: client/application.cpp:600
 msgid "Starting network..."
 msgstr "Starte Netzwerk..."
 
 #: client/dialogs/alliancedialog.cpp:137
-#: client/dialogs/processlistdialog.cpp:306
+#: client/dialogs/processlistdialog.cpp:440
 msgid "Status"
 msgstr "Status"
 
@@ -9674,7 +9678,7 @@ msgstr "Erfolgreiche Querung"
 msgid "Sufficient resources available"
 msgstr "Ausreichend Ressourcen verfügbar"
 
-#: client/dialogs/buildqueuedialog.cpp:199
+#: client/dialogs/buildqueuedialog.cpp:208
 msgid "Summary..."
 msgstr "Zusammenfassung..."
 
@@ -9714,7 +9718,7 @@ msgstr "Erlaubt bis zu %s %s."
 msgid "Survived"
 msgstr "Überlebt"
 
-#: client/dialogs/processlistdialog.cpp:708
+#: client/dialogs/processlistdialog.cpp:709
 msgid "Suspend"
 msgstr "Anhalten"
 
@@ -9758,7 +9762,7 @@ msgstr "Syntaxfehler, Zeile wurde ignoriert"
 msgid "System"
 msgstr "System"
 
-#: ui/reshack/dialogs.cpp:349
+#: ui/reshack/dialogs.cpp:333
 msgid "System Fonts"
 msgstr "System-Fonts"
 
@@ -9924,11 +9928,11 @@ msgstr "Technologie & Verteidigung"
 msgid "Temperature"
 msgstr "Temperatur"
 
-#: client/dialogs/multitransfer.cpp:526
+#: client/dialogs/multitransfer.cpp:527
 msgid "Temporary Storage #%d"
 msgstr "Zwischenspeicher #%d"
 
-#: client/dialogs/processlistdialog.cpp:706
+#: client/dialogs/processlistdialog.cpp:707
 msgid "Terminate"
 msgstr "Beenden"
 
@@ -10075,7 +10079,7 @@ msgstr ""
 "Die Statistik-Datei im Spielverzeichnis wurde von einer neueren Version von "
 "PCC2 geschrieben; Änderungen werden nicht gespeichert."
 
-#: ui/reshack/dialogs.cpp:461
+#: ui/reshack/dialogs.cpp:445
 msgid "The values you entered make the new font have a height of 0 or less."
 msgstr "Mit den eingegebenen Werten ist der Font 0 Pixel oder weniger hoch."
 
@@ -10122,7 +10126,7 @@ msgstr "An dieser Position befindet sich kein möglicher Chunnel-Partner."
 msgid "There are none of your units in this simulation."
 msgstr "Die Simulation enthält keins unserer Schiffe."
 
-#: client/dialogs/multitransfer.cpp:734
+#: client/dialogs/multitransfer.cpp:735
 msgid "There is no other fleet member at this place which could carry %s."
 msgstr "Kein anderes Flottenmitglied an dieser Stelle kann %s tragen."
 
@@ -10138,7 +10142,7 @@ msgstr "Es gibt keine andere Flotte, der wir beitreten könnten."
 msgid "There is no other ship of ours at that position."
 msgstr "An dieser Position befindet sich kein weiteres unserer Schiffe."
 
-#: client/dialogs/multitransfer.cpp:738
+#: client/dialogs/multitransfer.cpp:739
 msgid "There is no other unit at this place which could carry %s."
 msgstr "Keine andere Einheit an dieser Stelle kann %s tragen."
 
@@ -10281,7 +10285,7 @@ msgstr "Dieser Kampf kann nicht wiedergegeben werden."
 msgid "This command does not take positional parameters"
 msgstr "Dieser Befehl akzeptiert keine Positionsparameter"
 
-#: client/dialogs/commandlistdialog.cpp:277
+#: client/dialogs/commandlistdialog.cpp:269
 msgid "This command was not recognized."
 msgstr "Dieser Befehl wurde nicht erkannt."
 
@@ -10413,7 +10417,7 @@ msgstr "Diese Meldung wurde bestätigt."
 msgid "This overview covers all %d fights."
 msgstr "Diese Übersicht berücksichtigt alle %d Kämpfe."
 
-#: client/dialogs/processlistdialog.cpp:552
+#: client/dialogs/processlistdialog.cpp:553
 msgid "This process does not own any locks."
 msgstr "Dieser Prozess hält keine Locks."
 
@@ -10687,7 +10691,7 @@ msgstr ""
 msgid "Too many objects in file"
 msgstr "Zu viele Objekte in Datei"
 
-#: ui/reshack/dialogs.cpp:389
+#: ui/reshack/dialogs.cpp:373
 msgid "Top"
 msgstr "Oben"
 
@@ -10755,7 +10759,7 @@ msgstr "Gefeuerte Torpedos"
 msgid "Torps Left"
 msgstr "Verbleibende Torpedos"
 
-#: client/widgets/costsummarylist.cpp:186
+#: client/widgets/costsummarylist.cpp:248
 #: client/widgets/itemcostdisplay.cpp:111 game/map/info/info.cpp:1045
 #: game/map/info/info.cpp:1190 game/map/info/info.cpp:1387
 #: game/map/info/info.cpp:781
@@ -10819,7 +10823,7 @@ msgstr "Tow-Nummer"
 msgid "Towed ship's prediction"
 msgstr "Berechnung für abgeschlepptes Schiff"
 
-#: client/dialogs/multitransfer.cpp:749
+#: client/dialogs/multitransfer.cpp:750
 msgid "Transfer %s"
 msgstr "%s-Transfer"
 
@@ -10843,7 +10847,7 @@ msgstr "Transferiere an %s"
 msgid "Travelled this turn"
 msgstr "Bewegung diesen Zug"
 
-#: client/tiles/shipcargotile.cpp:109 client/widgets/costsummarylist.cpp:152
+#: client/tiles/shipcargotile.cpp:109 client/widgets/costsummarylist.cpp:215
 #: share/resource/core_tiles.q:1001 share/resource/core_tiles.q:1164
 #: share/resource/core_tiles.q:798
 msgid "Tri"
@@ -10877,7 +10881,7 @@ msgstr "Tritanium geladen"
 msgid "Tritanium cost"
 msgstr "Tritanium-Kosten"
 
-#: client/dialogs/scores.cpp:1365 client/widgets/turnlistbox.cpp:84
+#: client/dialogs/scores.cpp:1365 client/widgets/turnlistbox.cpp:64
 #: game/score/chartbuilder.cpp:100
 msgid "Turn %d"
 msgstr "Zug %d"
@@ -10980,7 +10984,7 @@ msgstr "Zug: Position"
 msgid "Type"
 msgstr "Typ"
 
-#: client/dialogs/multitransfer.cpp:623
+#: client/dialogs/multitransfer.cpp:624
 msgid "U - Unload"
 msgstr "U - Entladen"
 
@@ -11045,7 +11049,7 @@ msgstr "Plugin kann nicht installiert werden."
 msgid "Unable to load %s: %s"
 msgstr "%s kann nicht geladen werden: %s"
 
-#: ui/reshack/application.cpp:280
+#: ui/reshack/application.cpp:272
 msgid "Unable to load file: %s"
 msgstr "Datei kann nicht geladen werden: %s"
 
@@ -11077,11 +11081,11 @@ msgstr ""
 msgid "Unable to open file %s: %s"
 msgstr "%s kann nicht geöffnet werden: %s"
 
-#: ui/reshack/application.cpp:245
+#: ui/reshack/application.cpp:237
 msgid "Unable to open file: %s"
 msgstr "Datei kann nicht geöffnet werden: %s"
 
-#: client/application.cpp:135
+#: client/application.cpp:131
 msgid "Unable to open profile directory"
 msgstr "Profil-Verzeichnis kann nicht geöffnet werden"
 
@@ -11195,7 +11199,7 @@ msgstr "Plugin entfernen"
 msgid "Uninstallation of \"%s\" might be incomplete."
 msgstr "Entfernen von \"%s\" ist möglicherweise unvollständig."
 
-#: client/dialogs/multitransfer.cpp:244
+#: client/dialogs/multitransfer.cpp:359
 msgid "Unit"
 msgstr "Einheit"
 
@@ -11231,7 +11235,7 @@ msgstr "Universal"
 msgid "Universal Minefield FCode"
 msgstr "Universal-Minenfeld-Code"
 
-#: client/dialogs/hullfunctionview.cpp:299
+#: client/dialogs/hullfunctionview.cpp:291
 msgid "Universal ability"
 msgstr "Allgemeine Fähigkeit"
 
@@ -11243,7 +11247,7 @@ msgstr "Unbekannt"
 msgid "Unknown PHost"
 msgstr "Unbekannter PHost"
 
-#: client/applicationparameters.cpp:62 ui/reshack/application.cpp:530
+#: client/applicationparameters.cpp:62 ui/reshack/application.cpp:522
 msgid "Unknown command line parameter \"-%s\""
 msgstr "Unbekannter Kommandozeilenparameter \"-%s\""
 
@@ -11979,7 +11983,7 @@ msgstr ""
 "Hier kannst du %s-Rohre bauen und für die spätere Benutzung im Lager der "
 "Sternenbasis ablegen."
 
-#: client/application.cpp:168
+#: client/application.cpp:164
 msgid "User cc-res.cfg"
 msgstr "cc-res.cfg des Benutzers"
 
@@ -11995,7 +11999,7 @@ msgstr "Nutzername"
 msgid "User name or password not accepted!"
 msgstr "Nutzername oder Passwort nicht akzeptiert!"
 
-#: game/browser/browser.cpp:519
+#: game/browser/browser.cpp:543
 msgid "Using directory \"%s\""
 msgstr "Nutze Verzeichnis \"%s\""
 
@@ -12035,7 +12039,7 @@ msgstr "SEHR gefährlich"
 msgid "Verification succeeded"
 msgstr "Prüfung erfolgreich"
 
-#: ui/reshack/dialogs.cpp:386 ui/reshack/dialogs.cpp:461
+#: ui/reshack/dialogs.cpp:370 ui/reshack/dialogs.cpp:445
 msgid "Vertical Alignment"
 msgstr "Vertikale Ausrichtung"
 
@@ -12043,7 +12047,7 @@ msgstr "Vertikale Ausrichtung"
 msgid "Video driver: %s (%dk%s)"
 msgstr "Video-Treiber: %s (%dk%s)"
 
-#: gfx/sdl2/engine.cpp:397
+#: gfx/sdl2/engine.cpp:399
 msgid "Video driver: %s%s"
 msgstr "Video-Treiber: %s%s"
 
@@ -12314,11 +12318,11 @@ msgstr "Fangminenfeld #%d"
 msgid "What do you want to draw into the starcharts?"
 msgstr "Was möchtest du in die Sternenkarte zeichnen?"
 
-#: client/dialogs/processlistdialog.cpp:304
+#: client/dialogs/processlistdialog.cpp:438
 msgid "Where"
 msgstr "Wo"
 
-#: client/dialogs/export.cpp:156 ui/reshack/application.cpp:171
+#: client/dialogs/export.cpp:156 ui/reshack/application.cpp:163
 msgid "Width"
 msgstr "Breite"
 
@@ -12393,7 +12397,7 @@ msgstr "Turn-Datei mit %d Kommando%!1{s%} geschrieben"
 msgid "X"
 msgstr "X"
 
-#: client/dialogs/processlistdialog.cpp:721
+#: client/dialogs/processlistdialog.cpp:722
 msgid "X - Execute"
 msgstr "X - Ausführen"
 
@@ -12413,7 +12417,7 @@ msgstr "Y"
 msgid "Y Movement"
 msgstr "Y-Bewegung"
 
-#: client/dialogs/buildqueuedialog.cpp:242 client/dialogs/buildship.cpp:230
+#: client/dialogs/buildqueuedialog.cpp:251 client/dialogs/buildship.cpp:230
 #: client/dialogs/buildship.cpp:259 client/dialogs/buildstarbasedialog.cpp:58
 #: client/dialogs/cloneship.cpp:126
 #: client/dialogs/simulationconfiguration.cpp:69
@@ -12615,7 +12619,7 @@ msgstr ""
 msgid "You have %d torpedo%!1{es%}."
 msgstr "Du hast %d Torpedo%!1{s%}."
 
-#: client/dialogs/buildqueuedialog.cpp:690
+#: client/dialogs/buildqueuedialog.cpp:691
 msgid "You have no active ship build orders."
 msgstr "Du hast keine aktiven Bauaufträge."
 
@@ -12640,7 +12644,7 @@ msgstr ""
 "Befehl \"Beginne neue Flotte\" auf dem <kbd>F10</kbd>-Menü, um eine Flotte "
 "zu beginnen."
 
-#: client/dialogs/attachmentselection.cpp:269
+#: client/dialogs/attachmentselection.cpp:245
 msgid ""
 "You have received some additional files with your result. Choose which files "
 "you want to accept"
@@ -12823,11 +12827,11 @@ msgstr "am Ziel"
 msgid "auto"
 msgstr "auto"
 
-#: client/widgets/turnlistbox.cpp:98
+#: client/widgets/turnlistbox.cpp:78
 msgid "available"
 msgstr "verfügbar"
 
-#: client/widgets/turnlistbox.cpp:103
+#: client/widgets/turnlistbox.cpp:83
 msgid "available?"
 msgstr "verfügbar?"
 
@@ -12921,7 +12925,7 @@ msgstr "Befehl erfordert mindestens 2 Parameter"
 msgid "common"
 msgstr "viel"
 
-#: client/dialogs/simulationconfiguration.cpp:74 ui/reshack/dialogs.cpp:92
+#: client/dialogs/simulationconfiguration.cpp:74 ui/reshack/dialogs.cpp:84
 msgid "complete"
 msgstr "vollständig"
 
@@ -13003,7 +13007,7 @@ msgstr ""
 msgid "directory '%s' does not contain unpacked game data"
 msgstr "Verzeichnis `%s' enthält keine entpackten Spieldaten"
 
-#: client/widgets/simulationlist.cpp:113
+#: client/widgets/simulationlist.cpp:93
 msgid "disabled"
 msgstr "deaktiviert"
 
@@ -13023,7 +13027,7 @@ msgstr "aktiviert (Standard-Dateiname)"
 msgid "enemy"
 msgstr "Feind"
 
-#: client/widgets/turnlistbox.cpp:114
+#: client/widgets/turnlistbox.cpp:94
 msgid "error"
 msgstr "Fehler"
 
@@ -13035,11 +13039,11 @@ msgstr "etabliert"
 msgid "every time"
 msgstr "jedes Mal"
 
-#: game/maint/configurationapplication.cpp:105
+#: game/maint/configurationapplication.cpp:124
 msgid "expecting \"KEY=VALUE\" for option \"-A\""
 msgstr "Erwarte \"NAME=WERT\" für Option \"-A\""
 
-#: game/maint/configurationapplication.cpp:97
+#: game/maint/configurationapplication.cpp:116
 msgid "expecting \"KEY=VALUE\" for option \"-D\""
 msgstr "Erwarte \"NAME=WERT\" für Option \"-D\""
 
@@ -13186,7 +13190,7 @@ msgstr "Ungültige Option '%s' angegeben. Mit '%s -h' erhalten Sie Hilfe."
 msgid "invalid option specified"
 msgstr "Ungültige Option angegeben."
 
-#: game/maint/configurationapplication.cpp:148
+#: game/maint/configurationapplication.cpp:173
 #: game/maint/dump/application.cpp:60 game/maint/raterapplication.cpp:74
 #: game/maint/sweepapplication.cpp:65 game/v3/maketurnapplication.cpp:72
 #: game/v3/trn/dumperapplication.cpp:99 game/v3/unpackapplication.cpp:96
@@ -13280,8 +13284,8 @@ msgstr "leicht"
 msgid "line %d: %s"
 msgstr "Zeile %d: %s"
 
-#: client/widgets/pluginlist.cpp:202 client/widgets/turnlistbox.cpp:108
-#: client/widgets/turnlistbox.cpp:119
+#: client/widgets/pluginlist.cpp:182 client/widgets/turnlistbox.cpp:88
+#: client/widgets/turnlistbox.cpp:99
 msgid "loaded"
 msgstr "geladen"
 
@@ -13298,7 +13302,7 @@ msgid "max."
 msgstr "max."
 
 #: client/dialogs/buildstructuresdialog.cpp:557
-#: client/tiles/shipcargotile.cpp:119 client/widgets/costsummarylist.cpp:151
+#: client/tiles/shipcargotile.cpp:119 client/widgets/costsummarylist.cpp:214
 #: client/widgets/hullspecificationsheet.cpp:81
 #: client/widgets/itemcostdisplay.cpp:125 game/element.cpp:77
 #: game/map/info/info.cpp:644 game/spec/cost.cpp:16
@@ -13507,11 +13511,11 @@ msgstr "unerwartete Nicht-Option. Mit \"%s -h\" erhalten Sie Hilfe"
 #: client/widgets/hullspecificationsheet.cpp:146
 #: client/widgets/simulationobjectinfo.cpp:358
 #: client/widgets/simulationobjectinfo.cpp:367 game/map/info/info.cpp:1421
-#: game/proxy/simulationsetupproxy.cpp:1043
-#: game/proxy/simulationsetupproxy.cpp:107
-#: game/proxy/simulationsetupproxy.cpp:1083
-#: game/proxy/simulationsetupproxy.cpp:141
-#: game/proxy/simulationsetupproxy.cpp:96 game/searchquery.cpp:339
+#: game/proxy/simulationsetupproxy.cpp:103
+#: game/proxy/simulationsetupproxy.cpp:1039
+#: game/proxy/simulationsetupproxy.cpp:1079
+#: game/proxy/simulationsetupproxy.cpp:137
+#: game/proxy/simulationsetupproxy.cpp:92 game/searchquery.cpp:339
 #: game/sim/ability.cpp:40 game/sim/configuration.cpp:169
 #: game/sim/consoleapplication.cpp:599 game/spec/info/info.cpp:160
 #: game/tables/basemissionname.cpp:18 game/tables/mineralmassclassname.cpp:26
@@ -13537,7 +13541,7 @@ msgstr "kein/unbekannt"
 msgid "normal"
 msgstr "normal"
 
-#: client/widgets/turnlistbox.cpp:93
+#: client/widgets/turnlistbox.cpp:73
 msgid "not available"
 msgstr "nicht verfügbar"
 
@@ -13553,7 +13557,7 @@ msgstr "nicht abgeschleppt"
 msgid "not included"
 msgstr "nicht berechnen"
 
-#: client/widgets/pluginlist.cpp:207
+#: client/widgets/pluginlist.cpp:187
 msgid "not loaded"
 msgstr "nicht geladen"
 
@@ -13947,8 +13951,8 @@ msgstr "unzufrieden"
 #: client/tiles/historymovementtile.cpp:115
 #: client/tiles/historymovementtile.cpp:133
 #: client/tiles/historymovementtile.cpp:151
-#: client/widgets/historypositionlistbox.cpp:166
-#: client/widgets/historyshiplistbox.cpp:163 game/proxy/ionstormproxy.cpp:102
+#: client/widgets/historypositionlistbox.cpp:146
+#: client/widgets/historyshiplistbox.cpp:143 game/proxy/ionstormproxy.cpp:102
 #: game/proxy/ionstormproxy.cpp:113 game/proxy/ionstormproxy.cpp:83
 #: game/proxy/ionstormproxy.cpp:92 game/proxy/minefieldproxy.cpp:210
 #: game/proxy/ufoproxy.cpp:108 game/proxy/ufoproxy.cpp:116
@@ -14077,7 +14081,7 @@ msgstr "sehr instabil (<80%)"
 msgid "warm"
 msgstr "warm"
 
-#: game/maint/configurationapplication.cpp:162
+#: game/maint/configurationapplication.cpp:187
 msgid "warning: no action specified"
 msgstr "Warnung: keine Aktion angegeben"
 

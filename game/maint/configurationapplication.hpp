@@ -21,6 +21,8 @@ namespace game { namespace maint {
         void showHelp();
         void loadHConfig(util::ConfigurationFile& out, afl::io::Stream& in);
         void saveHConfig(const util::ConfigurationFile& in, afl::io::Stream& out);
+        void loadTruehull(util::ConfigurationFile& out, afl::io::Stream& in);
+        void saveTruehull(const util::ConfigurationFile& in, afl::io::Stream& out);
     };
 
 } }

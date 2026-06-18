@@ -10,6 +10,7 @@
 #include "afl/sys/standardcommandlineparser.hpp"
 #include "game/config/configuration.hpp"
 #include "game/config/hostconfiguration.hpp"
+#include "game/config/integervalueparser.hpp"
 #include "game/v3/hconfig.hpp"
 #include "game/v3/structures.hpp"
 #include "util/string.hpp"
@@ -24,6 +25,8 @@ using afl::sys::LogListener;
 using game::config::Configuration;
 using game::config::ConfigurationOption;
 using game::config::HostConfiguration;
+using game::v3::structures::NUM_HULLS_PER_PLAYER;
+using game::v3::structures::NUM_PLAYERS;
 using util::ConfigurationFile;
 
 namespace {
@@ -100,6 +103,11 @@ game::maint::ConfigurationApplication::appMain()
                 String_t fileName = cmdl.getRequiredParameter(text);
                 Ref<Stream> thisStream(fileSystem().openFile(fileName, FileSystem::OpenRead));
                 loadHConfig(subject(), *thisStream);
+            } else if (text == "load-truehull") {
+                // --load-truehull=FILE
+                String_t fileName = cmdl.getRequiredParameter(text);
+                Ref<Stream> thisStream(fileSystem().openFile(fileName, FileSystem::OpenRead));
+                loadTruehull(subject(), *thisStream);
             } else if (text == "D") {
                 // -D KEY=VALUE
                 String_t kv = cmdl.getRequiredParameter(text);
@@ -149,6 +157,12 @@ game::maint::ConfigurationApplication::appMain()
                 Ref<Stream> thisStream(fileSystem().openFile(fileName, FileSystem::Create));
                 saveHConfig(subject(), *thisStream);
                 hadAction = true;
+            } else if (text == "save-truehull") {
+                // --save-truehull=FILE
+                String_t fileName = cmdl.getRequiredParameter(text);
+                Ref<Stream> thisStream(fileSystem().openFile(fileName, FileSystem::Create));
+                saveTruehull(subject(), *thisStream);
+                hadAction = true;
             } else if (text == "w") {
                 // -w
                 whitespaceIsSignificant = true;
@@ -196,6 +210,7 @@ game::maint::ConfigurationApplication::showHelp()
                                               "FILE\tload text file\n"
                                               "--empty\tload empty file\n"
                                               "--load-hconfig=FILE\tload binary HConfig file\n"
+                                              "--load-truehull=FILE\tload truehull file\n"
                                               "-DKEY=VALUE\tset value\n"
                                               "-AKEY=VALUE\tadd value\n"
                                               "-UKEY\tunset value\n"
@@ -204,7 +219,8 @@ game::maint::ConfigurationApplication::showHelp()
                                               "-o FILE\tsave result to file\n"
                                               "--stdout\tsend result to stdout\n"
                                               "--get=OPTION\tget option value\n"
-                                              "--save-hconfig=FILE\tsave binary HConfig file\n"))));
+                                              "--save-hconfig=FILE\tsave binary HConfig file\n"
+                                              "--save-truehull=FILE\tsave truehull file\n"))));
     exit(0);
 }
 
@@ -253,5 +269,45 @@ game::maint::ConfigurationApplication::saveHConfig(const util::ConfigurationFile
     game::v3::packHConfig(data, *config);
 
     // Write file
+    out.fullWrite(afl::base::fromObject(data));
+}
+
+void
+game::maint::ConfigurationApplication::loadTruehull(util::ConfigurationFile& out, afl::io::Stream& in)
+{
+    // Load file
+    game::v3::structures::Truehull data;
+    in.fullRead(afl::base::fromObject(data));
+
+    // Convert into options
+    for (int slot = 0; slot < NUM_HULLS_PER_PLAYER; ++slot) {
+        String_t value = Format("%d", int(data.hulls[0][slot]));
+        for (int player = 1; player < NUM_PLAYERS; ++player) {
+            value += Format(",%d", int(data.hulls[player][slot]));
+        }
+        out.set("TRUEHULL", Format("Slot%d", slot+1), value);
+    }
+}
+
+void
+game::maint::ConfigurationApplication::saveTruehull(const util::ConfigurationFile& in, afl::io::Stream& out)
+{
+    // Load file
+    game::v3::structures::Truehull data;
+
+    // Read each option
+    for (int slot = 0; slot < NUM_HULLS_PER_PLAYER; ++slot) {
+        int32_t row[NUM_PLAYERS];
+        afl::base::Memory<int32_t>(row).fill(0);
+
+        if (const ConfigurationFile::Element* ele = in.findElement(ConfigurationFile::Assignment, Format("TRUEHULL.Slot%d", slot+1))) {
+            game::config::IntegerValueParser::instance.parseArray(ele->value, row);
+        }
+
+        for (int player = 0; player < NUM_PLAYERS; ++player) {
+            data.hulls[player][slot] = static_cast<int16_t>(row[player]);
+        }
+    }
+
     out.fullWrite(afl::base::fromObject(data));
 }
