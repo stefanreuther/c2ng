@@ -23,6 +23,7 @@ namespace game { namespace maint {
         void saveHConfig(const util::ConfigurationFile& in, afl::io::Stream& out);
         void loadTruehull(util::ConfigurationFile& out, afl::io::Stream& in);
         void saveTruehull(const util::ConfigurationFile& in, afl::io::Stream& out);
+        void shuffle(util::ConfigurationFile& config, const String_t& perm);
     };
 
 } }

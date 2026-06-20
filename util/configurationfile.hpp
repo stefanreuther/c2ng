@@ -43,6 +43,23 @@ namespace util {
                 { }
         };
 
+        /** Predicate for accept(). */
+        class Acceptor {
+         public:
+            /** Virtual destructor to allow derivation. */
+            virtual ~Acceptor()
+                { }
+
+            /** Check whether to accept a key.
+                \param key Key in "SECTION.NAME" format
+                \return true to accept this key, false to ignore */
+            virtual bool accept(const String_t& key) = 0;
+        };
+
+        /** Type for a permutation.
+            Contains a list of 1-based indexes. */
+        typedef std::vector<int> Permutation_t;
+
         /** Constructor.
             Makes an empty object. */
         ConfigurationFile();
@@ -147,6 +164,20 @@ namespace util {
         /** Check for assignments.
             \return true if there are any assignments. false if there are only section headers and comments, making the file essentially empty. */
         bool hasAssignments() const;
+
+        /** Shuffle assignments (player permutation).
+
+            If an assignment consists of multiple comma-separated values, it is treated as a 1-based array.
+            The new value is built by picking values according to the permutation.
+            Index values below 1 refer to the first value, values above the array length refer to the last.
+
+            A value is only modified if it is accepted by the Acceptor.
+
+            Assignments not containing a comma are not touched.
+
+            \param a    Acceptor
+            \param perm Permutation */
+        void shuffle(Acceptor& a, const Permutation_t& perm);
 
      private:
         afl::container::PtrVector<Element> m_elements;

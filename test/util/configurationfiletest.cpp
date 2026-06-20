@@ -317,3 +317,46 @@ AFL_TEST("util.ConfigurationFile:set", a)
                  "% newsec\n"
                  "  item = n2\n");
 }
+
+/** Test shuffle. */
+AFL_TEST("util.ConfigurationFile:shuffle", a)
+{
+    util::ConfigurationFile testee;
+    testee.add("outerarray", "a,b,c,d,e");
+    testee.add("outerignore", "a,b,c,d,e");
+    testee.add("outerscalar", "x");
+    testee.add("inner.array", "m,n,o,p");
+    testee.add("inner.scalar", "z");
+    testee.add("inner.ignore", "m,n,o,p");
+
+    util::ConfigurationFile::Permutation_t perm;
+    perm.push_back(5);
+    perm.push_back(1);
+    perm.push_back(3);
+    perm.push_back(-9);
+
+    class Acceptor : public util::ConfigurationFile::Acceptor {
+     public:
+        bool accept(const String_t& key)
+            { return key != "OUTERIGNORE" && key != "INNER.IGNORE"; }
+    };
+    Acceptor aa;
+    testee.shuffle(aa, perm);
+
+    // Verify
+    // Verify
+    afl::io::InternalStream out;
+    afl::io::TextFile tfo(out);
+    tfo.setSystemNewline(false);
+    testee.save(tfo);
+    tfo.flush();
+
+    a.checkEqual("", afl::string::fromBytes(out.getContent()),
+                 "  outerarray = e,a,c,a\n"
+                 "  outerignore = a,b,c,d,e\n"
+                 "  outerscalar = x\n"
+                 "% inner\n"
+                 "  array = p,m,o,m\n"
+                 "  scalar = z\n"
+                 "  ignore = m,n,o,p\n");
+}

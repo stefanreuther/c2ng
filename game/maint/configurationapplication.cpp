@@ -5,7 +5,10 @@
 
 #include <memory>
 #include "game/maint/configurationapplication.hpp"
+#include "afl/base/countof.hpp"
+#include "afl/except/commandlineexception.hpp"
 #include "afl/io/textfile.hpp"
+#include "afl/string/char.hpp"
 #include "afl/string/format.hpp"
 #include "afl/sys/standardcommandlineparser.hpp"
 #include "game/config/configuration.hpp"
@@ -14,6 +17,7 @@
 #include "game/v3/hconfig.hpp"
 #include "game/v3/structures.hpp"
 #include "util/string.hpp"
+#include "util/stringparser.hpp"
 #include "version.hpp"
 
 using afl::base::Ref;
@@ -30,6 +34,66 @@ using game::v3::structures::NUM_PLAYERS;
 using util::ConfigurationFile;
 
 namespace {
+    /*
+     *  shuffle() ignorelist processing
+     */
+
+    const char*const IGNORELIST[] = {
+        // Ignore pcontrol; command lines might contain commas
+        "PCONTROL.",
+
+        // Experience options (indexed by experience level, not race)
+        ".EMODBAYRECHARGEBONUS",
+        ".EMODBAYRECHARGERATE",
+        ".EMODBEAMHITBONUS",
+        ".EMODBEAMHITFIGHTERCHARGE",
+        ".EMODBEAMHITODDS",
+        ".EMODBEAMRECHARGEBONUS",
+        ".EMODBEAMRECHARGERATE",
+        ".EMODCREWKILLSCALING",
+        ".EMODENGINESHIELDBONUSRATE",
+        ".EMODEXTRAFIGHTERBAYS",
+        ".EMODFIGHTERBEAMEXPLOSIVE",
+        ".EMODFIGHTERBEAMKILL",
+        ".EMODFIGHTERMOVEMENTSPEED",
+        ".EMODHULLDAMAGESCALING",
+        ".EMODMAXFIGHTERSLAUNCHED",
+        ".EMODMINEHITODDSBONUS",
+        ".EMODPLANETARYTORPSPERTUBE",
+        ".EMODSHIELDDAMAGESCALING",
+        ".EMODSHIELDKILLSCALING",
+        ".EMODSTRIKESPERFIGHTER",
+        ".EMODTORPHITBONUS",
+        ".EMODTORPHITODDS",
+        ".EMODTUBERECHARGEBONUS",
+        ".EMODTUBERECHARGERATE",
+        ".EPCOMBATBOOSTLEVEL",
+        ".EPCOMBATBOOSTRATE",
+        ".EXPERIENCELEVELNAMES",
+        ".EXPERIENCELEVELS",
+
+        // Game name may contain commas
+        ".GAMENAME",
+
+        // Language (includes host language)
+        ".LANGUAGE",
+
+        // Ranges, not indexed by race
+        ".LARGEMETEORORERANGES",
+        ".METEORSHOWERORERANGES",
+        ".NATIVECLANSRANGE",
+        ".NATIVEGOVFREQUENCIES",
+        ".NATIVETYPEFREQUENCIES",
+        ".NEWNATIVESGOVERNMENTRATE",
+        ".NEWNATIVESPOPULATIONRANGE",
+        ".NEWNATIVESRACERATE",
+        ".WRAPAROUNDRECTANGLE",
+    };
+
+    /*
+     *  ConfigurationReference
+     */
+
     class ConfigurationReference {
      public:
         ConfigurationReference()
@@ -60,6 +124,10 @@ namespace {
         std::auto_ptr<ConfigurationFile> m_p;
     };
 
+    /*
+     *  Utilities
+     */
+
     String_t limit11(String_t in)
     {
         size_t i = 0;
@@ -74,6 +142,45 @@ namespace {
             ++i;
         }
         return in;
+    }
+
+    std::vector<int> parsePermutation(const String_t& perm, afl::string::Translator& tx)
+        {
+            std::vector<int> result;
+            util::StringParser p(perm);
+            String_t tmp;
+            int tmpInt;
+            while (1) {
+                p.parseWhile(afl::string::charIsSpace, tmp);
+                if (!p.parseInt(tmpInt)) {
+                    throw afl::except::CommandLineException(Format(tx("expecting number, found \"%s\""),
+                                                                   p.getRemainder().substr(0, 20)));
+                }
+                result.push_back(tmpInt);
+                p.parseWhile(afl::string::charIsSpace, tmp);
+                if (p.parseEnd()) {
+                    break;
+                }
+                if (!p.parseCharacter(',')) {
+                    throw afl::except::CommandLineException(Format(tx("expecting \",\", found \"%s\""),
+                                                                   p.getRemainder().substr()));
+                }
+            }
+            return result;
+        }
+
+    bool endsWith(const String_t& str, const char* end)
+    {
+        size_t n = std::strlen(end);
+        return str.size() >= n
+            && afl::string::strCaseCompare(str.substr(str.size()-n), end) == 0;
+    }
+
+    bool startsWith(const String_t& str, const char* beg)
+    {
+        size_t n = std::strlen(beg);
+        return str.size() >= n
+            && afl::string::strCaseCompare(str.substr(0, n), beg) == 0;
     }
 }
 
@@ -163,6 +270,9 @@ game::maint::ConfigurationApplication::appMain()
                 Ref<Stream> thisStream(fileSystem().openFile(fileName, FileSystem::Create));
                 saveTruehull(subject(), *thisStream);
                 hadAction = true;
+            } else if (text == "shuffle") {
+                // --shuffle=A,B,C,...
+                shuffle(subject(), cmdl.getRequiredParameter(text));
             } else if (text == "w") {
                 // -w
                 whitespaceIsSignificant = true;
@@ -214,6 +324,7 @@ game::maint::ConfigurationApplication::showHelp()
                                               "-DKEY=VALUE\tset value\n"
                                               "-AKEY=VALUE\tadd value\n"
                                               "-UKEY\tunset value\n"
+                                              "--shuffle=A,B,C\tshuffle player-specific settings\n"
                                               "\n"
                                               "Actions:\n"
                                               "-o FILE\tsave result to file\n"
@@ -310,4 +421,30 @@ game::maint::ConfigurationApplication::saveTruehull(const util::ConfigurationFil
     }
 
     out.fullWrite(afl::base::fromObject(data));
+}
+
+void
+game::maint::ConfigurationApplication::shuffle(util::ConfigurationFile& config, const String_t& perm)
+{
+    std::vector<int> parsedPerm = parsePermutation(perm, translator());
+    class AcceptorImpl : public util::ConfigurationFile::Acceptor {
+     public:
+        virtual bool accept(const String_t& key)
+            {
+                for (size_t i = 0; i < countof(IGNORELIST); ++i) {
+                    if (IGNORELIST[i][0] == '.') {
+                        if (endsWith(key, IGNORELIST[i])) {
+                            return false;
+                        }
+                    } else {
+                        if (startsWith(key, IGNORELIST[i])) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+    };
+    AcceptorImpl a;
+    config.shuffle(a, parsedPerm);
 }

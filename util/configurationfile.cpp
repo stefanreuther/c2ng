@@ -22,6 +22,36 @@ namespace {
     {
         return !charIsSpace(c) && c != '=';
     }
+
+    String_t permuteString(const String_t& value, const util::ConfigurationFile::Permutation_t& perm)
+    {
+        // Split string
+        std::vector<String_t> array;
+        String_t::size_type pos = 0;
+        String_t::size_type n;
+        while ((n = value.find(',', pos)) != String_t::npos) {
+            array.push_back(afl::string::strTrim(value.substr(pos, n-pos)));
+            pos = n+1;
+        }
+        array.push_back(afl::string::strTrim(value.substr(pos)));
+
+        // Re-arrange
+        String_t result;
+        for (size_t i = 0; i < perm.size(); ++i) {
+            int idx = perm[i];
+            if (i != 0) {
+                result += ',';
+            }
+            if (idx <= 0) {
+                result += array.front();
+            } else if (idx > int(array.size())) {
+                result += array.back();
+            } else {
+                result += array[idx-1];
+            }
+        }
+        return result;
+    }
 }
 
 // Constructor.
@@ -374,4 +404,16 @@ util::ConfigurationFile::hasAssignments() const
         }
     }
     return false;
+}
+
+// Shuffle assignments (player permutation).
+void
+util::ConfigurationFile::shuffle(Acceptor& a, const Permutation_t& perm)
+{
+    for (size_t i = 0, n = m_elements.size(); i < n; ++i) {
+        Element& e = *m_elements[i];
+        if (e.type == Assignment && a.accept(e.key) && e.value.find(',') != String_t::npos) {
+            e.value = permuteString(e.value, perm);
+        }
+    }
 }

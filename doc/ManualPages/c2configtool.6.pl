@@ -35,7 +35,16 @@ subsect('Load/Modify Actions',
                          paragraph_text('Add value to file.',
                                         'This can be used to add multiple copies of an assignment;')),
         paragraph_detail('<b>-U</b><i>SEC.KEY</i>',
-                         paragraph_text('Remove a value.')));
+                         paragraph_text('Remove a value;')),
+        paragraph_detail('<b>--shuffle=</b><i>A</i><b>,</b><i>B</i><b>,</b>...',
+                         paragraph_text('Shuffle player-specific settings.',
+                                        'Rebuilds all player array options by using the <i>A</i>th value for player 1,',
+                                        '<i>B</i>th value for player 2, and so on.',
+                                        'This can be used for setting up <i>PlayerRace</i> games.'),
+                         paragraph_text('<b>c2configtool</b> has a built-in ignorelist to ignore options known to <i>not</i> contain player-specific values.',
+                                        'For example, <i>WraparoundRectangle</i> or command lines in the <i>%pcontrol</i> section will not be modified.',
+                                        'Otherwise, a value containing a comma will be considered player-specific, and will be updated.',
+                                        'In particular, this means a truehull file can be rewritten using this option together with <b>--load-truehull</b> and <b>--save-truehull</b>.')));
 
 subsect('Output Actions',
         paragraph_detail('<b>-o</b> <i>FILE</i>',
