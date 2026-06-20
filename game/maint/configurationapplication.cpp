@@ -11,6 +11,7 @@
 #include "afl/string/char.hpp"
 #include "afl/string/format.hpp"
 #include "afl/sys/standardcommandlineparser.hpp"
+#include "game/config/booleanvalueparser.hpp"
 #include "game/config/configuration.hpp"
 #include "game/config/hostconfiguration.hpp"
 #include "game/config/integervalueparser.hpp"
@@ -258,6 +259,14 @@ game::maint::ConfigurationApplication::appMain()
                     standardOutput().writeLine(String_t());
                 }
                 hadAction = true;
+            } else if (text == "get-bool") {
+                // --get-bool=KEY
+                String_t key = afl::string::strUCase(cmdl.getRequiredParameter(text));
+                bool value = false;
+                if (const ConfigurationFile::Element* ele = subject().findElement(ConfigurationFile::Assignment, key)) {
+                    value = game::config::BooleanValueParser::instance.parse(ele->value);
+                }
+                exit(value ? 0 : 1);
             } else if (text == "save-hconfig") {
                 // --save-hconfig=FILE
                 String_t fileName = cmdl.getRequiredParameter(text);
@@ -330,6 +339,7 @@ game::maint::ConfigurationApplication::showHelp()
                                               "-o FILE\tsave result to file\n"
                                               "--stdout\tsend result to stdout\n"
                                               "--get=OPTION\tget option value\n"
+                                              "--get-bool=OPTION\tget boolean option value, as exit code\n"
                                               "--save-hconfig=FILE\tsave binary HConfig file\n"
                                               "--save-truehull=FILE\tsave truehull file\n"))));
     exit(0);

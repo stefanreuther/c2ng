@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-06-20 10:35+0200\n"
+"PO-Revision-Date: 2026-06-20 12:43+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:390
@@ -40,7 +40,7 @@ msgstr ""
 "%s\n"
 "Fehler bitte melden an <Streu@gmx.de>"
 
-#: game/maint/configurationapplication.cpp:307
+#: game/maint/configurationapplication.cpp:316
 msgid ""
 "\n"
 "Usage:\n"
@@ -3076,7 +3076,7 @@ msgstr "Arbeite..."
 msgid "Configuration File"
 msgstr "Konfigurationsdatei"
 
-#: game/maint/configurationapplication.cpp:306
+#: game/maint/configurationapplication.cpp:315
 msgid "Configuration Tool v%s - (c) 2018-2025 Stefan Reuther"
 msgstr "Konfigurationswerkzeug v%s - (c) 2018-2025 Stefan Reuther"
 
@@ -4794,7 +4794,8 @@ msgstr "Trümmer aufsammeln"
 msgid "Gather resources from a planet"
 msgstr "Ressourcen von einem Planeten aufladen"
 
-#: game/maint/configurationapplication.cpp:315
+#: game/maint/configurationapplication.cpp:324
+#, fuzzy
 msgid ""
 "General:\n"
 "--help\tshow help\n"
@@ -4814,6 +4815,7 @@ msgid ""
 "-o FILE\tsave result to file\n"
 "--stdout\tsend result to stdout\n"
 "--get=OPTION\tget option value\n"
+"--get-bool=OPTION\tget boolean option value, as exit code\n"
 "--save-hconfig=FILE\tsave binary HConfig file\n"
 "--save-truehull=FILE\tsave truehull file"
 msgstr ""
@@ -4835,6 +4837,7 @@ msgstr ""
 "-o DATEI\tErgebnis in Datei speichern\n"
 "--stdout\tErgebnis nach stdout ausgeben\n"
 "--get=OPTION\tWert einer Option abfragen\n"
+"--get-bool=OPTION\tWert einer Boolean-Option als Exit-Code abfragen\n"
 "--save-hconfig=DATEI\tBinäre HConfig-Datei speichern\n"
 "--save-truehull=DATEI\tTruehull-Datei speichern"
 
@@ -13041,19 +13044,19 @@ msgstr "etabliert"
 msgid "every time"
 msgstr "jedes Mal"
 
-#: game/maint/configurationapplication.cpp:165
+#: game/maint/configurationapplication.cpp:166
 msgid "expecting \",\", found \"%s\""
 msgstr "Erwarte \"NAME=WERT\" statt \"%s\""
 
-#: game/maint/configurationapplication.cpp:231
+#: game/maint/configurationapplication.cpp:232
 msgid "expecting \"KEY=VALUE\" for option \"-A\""
 msgstr "Erwarte \"NAME=WERT\" für Option \"-A\""
 
-#: game/maint/configurationapplication.cpp:223
+#: game/maint/configurationapplication.cpp:224
 msgid "expecting \"KEY=VALUE\" for option \"-D\""
 msgstr "Erwarte \"NAME=WERT\" für Option \"-D\""
 
-#: game/maint/configurationapplication.cpp:156
+#: game/maint/configurationapplication.cpp:157
 msgid "expecting number, found \"%s\""
 msgstr "Erwarte Zahl anstelle von \"%s\""
 
@@ -13200,7 +13203,7 @@ msgstr "Ungültige Option '%s' angegeben. Mit '%s -h' erhalten Sie Hilfe."
 msgid "invalid option specified"
 msgstr "Ungültige Option angegeben."
 
-#: game/maint/configurationapplication.cpp:283
+#: game/maint/configurationapplication.cpp:292
 #: game/maint/dump/application.cpp:60 game/maint/raterapplication.cpp:74
 #: game/maint/sweepapplication.cpp:65 game/v3/maketurnapplication.cpp:72
 #: game/v3/trn/dumperapplication.cpp:99 game/v3/unpackapplication.cpp:96
@@ -14091,7 +14094,7 @@ msgstr "sehr instabil (<80%)"
 msgid "warm"
 msgstr "warm"
 
-#: game/maint/configurationapplication.cpp:297
+#: game/maint/configurationapplication.cpp:306
 msgid "warning: no action specified"
 msgstr "Warnung: keine Aktion angegeben"
 
