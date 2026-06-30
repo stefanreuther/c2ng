@@ -94,6 +94,12 @@ done
 
 # Install all configuration fragments
 echo "Updating configuration..." >>$logfile
+shuffle=""
+playerracedef=""
+if test -n "$game_settings_playerRace"; then
+  shuffle="--shuffle=$game_settings_playerRace"
+  playerracedef="-DPHOST.PlayerRace=$game_settings_playerRace"
+fi
 
 # Update configuration files
 for file in pconfig.src shiplist.txt amaster.src pmaster.cfg; do
@@ -106,7 +112,7 @@ for file in pconfig.src shiplist.txt amaster.src pmaster.cfg; do
       f="$src/$file.frag"
       if test -r "$f"; then
         echo "  Using $f for $file" >>"$logfile"
-        frags="--file=$f $frags"
+        frags="$f $frags"
       fi
     done
 
@@ -114,7 +120,7 @@ for file in pconfig.src shiplist.txt amaster.src pmaster.cfg; do
     case $file in
       pconfig.src)
         # Update PHost configuration regularily, but include game name
-        perl bin/updateconfig.pl "$gamedir/data/$file" $frags "PHOST.GameName=$game_name" || exit 1
+        $bindir/c2configtool "$gamedir/data/$file" $frags $shuffle $playerracedef -D"PHOST.GameName=$game_name" -o "$gamedir/data/$file" || exit 1
         ;;
       amaster.src)
         # Some options are mirrored from pconfig.src into amaster.src
@@ -127,7 +133,7 @@ for file in pconfig.src shiplist.txt amaster.src pmaster.cfg; do
         ) > "$tmpfrag"
         nlines=$(wc -l <"$tmpfrag")
         echo "  Updating $file with" $nlines "lines from host configuration" >>"$logfile"
-        perl bin/updateconfig.pl "$gamedir/data/$file" $frags --file="$tmpfrag" "AMASTER.RaceIsPlaying=$game_slots" || exit 1
+        $bindir/c2configtool "$gamedir/data/$file" $frags "$tmpfrag" -D"AMASTER.RaceIsPlaying=$game_slots" -o "$gamedir/data/$file" || exit 1
         rm -f "$tmpfrag"
         ;;
       pmaster.cfg)
@@ -141,16 +147,22 @@ for file in pconfig.src shiplist.txt amaster.src pmaster.cfg; do
         ) > "$tmpfrag"
         nlines=$(wc -l <"$tmpfrag")
         echo "  Updating $file with" $nlines "lines from host configuration" >>"$logfile"
-        perl bin/updateconfig.pl "$gamedir/data/$file" $frags --file="$tmpfrag" "PMASTER.RaceIsPlaying=$game_slots" || exit 1
+        $bindir/c2configtool "$gamedir/data/$file" $frags "$tmpfrag" -D"PMASTER.RaceIsPlaying=$game_slots" -o "$gamedir/data/$file" || exit 1
         rm -f "$tmpfrag"
         ;;
       *)
         # Standard behaviour
-        perl bin/updateconfig.pl "$gamedir/data/$file" $frags || exit 1
+        $bindir/c2configtool "$gamedir/data/$file" $frags -o "$gamedir/data/$file" || exit 1
         ;;
     esac
   fi
 done
+
+# Create Truehull file
+if test -n "$game_settings_playerRace"; then
+  echo "Building truehull file..." >>$logfile
+  $bindir/c2configtool --load-truehull="$gamedir/data/truehull.dat" --shuffle="$game_settings_playerRace" --save-truehull="$gamedir/data/truehull.dat"
+fi
 
 # Initialize tools
 for src in $toolpaths; do

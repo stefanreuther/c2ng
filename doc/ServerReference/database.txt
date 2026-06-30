@@ -705,6 +705,7 @@ Game settings
 @key maxRankLevelToJoin:Int    (maximum rank to join; if missing, no restriction; see {user:$UID:profile}->rank)
 @key minRankPointsToJoin:Int   (minimum rank points (skill) to join; if missing, no restriction; see {user:$UID:profile}->rankpoints)
 @key maxRankPointsToJoin:Int   (maximum rank points (skill) to join; if missing, no restriction; see {user:$UID:profile}->rankpoints)
+@key playerRace:Str            (optional; if set, value of PlayerRace option (11 integers separated by commas, no spaces); will be processed by master script)
 
 These parameters are passed to host scripts as environment variables <tt>game_settings_<em>key</em></tt>.
 ---
