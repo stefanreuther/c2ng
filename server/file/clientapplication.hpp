@@ -37,6 +37,7 @@ namespace server { namespace file {
         void doSync(afl::sys::CommandLineParser& cmdl);
         void doList(afl::sys::CommandLineParser& cmdl);
         void doList(ReadOnlyDirectoryHandler& in, String_t name, bool recursive, bool longFormat, bool withHeader);
+        void doCat(afl::sys::CommandLineParser& cmdl);
         void doClear(afl::sys::CommandLineParser& cmdl);
         void doServe(afl::sys::CommandLineParser& cmdl);
         void doGC(afl::sys::CommandLineParser& cmdl);

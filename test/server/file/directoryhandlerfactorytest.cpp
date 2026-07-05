@@ -75,6 +75,24 @@ namespace {
             obj_d7->createFile("36f50b5d7d74ebbaac88a9bed28f1748602d1b", ca_objects_d7_36f50b5d7d74ebbaac88a9bed28f1748602d1b);
         }
     }
+
+    void verifySplitSuccess(const afl::test::Assert& a, const String_t combinedPath, const String_t expectedBackend, const String_t expectedChild)
+    {
+        afl::test::Assert aa(a(combinedPath));
+        String_t backend, child;
+        bool success = DirectoryHandlerFactory::splitPathName(combinedPath, backend, child);
+        aa.check("success", success);
+        aa.checkEqual("backend", backend, expectedBackend);
+        aa.checkEqual("child", child, expectedChild);
+    }
+
+    void verifySplitFailure(const afl::test::Assert& a, const String_t combinedPath)
+    {
+        afl::test::Assert aa(a(combinedPath));
+        String_t backend, child;
+        bool success = DirectoryHandlerFactory::splitPathName(combinedPath, backend, child);
+        aa.check("success", !success);
+    }
 }
 
 /** Test makePathName. */
@@ -85,6 +103,24 @@ AFL_TEST("server.file.DirectoryHandlerFactory:makePathName", a)
     a.checkEqual("03", DirectoryHandlerFactory::makePathName("a/b@ca:x", "d"), "a/b/d@ca:x");
     a.checkEqual("04", DirectoryHandlerFactory::makePathName("a/b@g/h", "e"), "a/b/e@g/h");
     a.checkEqual("05", DirectoryHandlerFactory::makePathName("c2file://a@b:c/d", "e"), "c2file://a@b:c/d/e");
+}
+
+/** Test splitPathName. */
+AFL_TEST("server.file.DirectoryHandlerFactory:splitPathName", a)
+{
+    verifySplitSuccess(a, "c2file://a:99/x/y",     "c2file://a:99/x", "y");
+    verifySplitSuccess(a, "c2file://a:b@c:99/x/y", "c2file://a:b@c:99/x", "y");
+    verifySplitSuccess(a, "c2file://a@c:99/x/y",   "c2file://a:@c:99/x", "y");        // Note: 'a@' stringified as 'a:@' for now
+    verifySplitSuccess(a, "c2file://a:99/x",       "c2file://a:99/", "x");
+    verifySplitSuccess(a, "c2file://a:99/x/y/z",   "c2file://a:99/x/y", "z");
+
+    verifySplitSuccess(a, "a/b/c@x/y",             "a/b@x/y", "c");
+    verifySplitSuccess(a, "a/b/c@x",               "a/b@x", "c");
+
+    verifySplitFailure(a, "c2file://a:99/");
+    verifySplitFailure(a, "a/b/c");
+    verifySplitFailure(a, "a@x/y");
+    verifySplitFailure(a, "c2file://:@");
 }
 
 /** Test createDirectoryHandler. */

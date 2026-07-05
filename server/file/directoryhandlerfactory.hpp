@@ -54,6 +54,15 @@ namespace server { namespace file {
             \return combined name */
         static String_t makePathName(const String_t& backendPath, const String_t& child);
 
+        /** Split a path name.
+            This is the inverse of makePathName.
+
+            \param combinedPath [in]  Path name
+            \param backendPath  [out] Backend path
+            \param child        [out] Child
+            \return true on success, \c backendPath and \c child have been set; false on error */
+        static bool splitPathName(const String_t& combinedPath, String_t& backendPath, String_t& child);
+
      private:
         typedef std::map<String_t, DirectoryHandler*> Cache_t;
         typedef std::map<String_t, afl::net::CommandHandler*> ClientCache_t;

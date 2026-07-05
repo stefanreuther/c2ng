@@ -222,3 +222,53 @@ server::file::DirectoryHandlerFactory::makePathName(const String_t& backendPath,
         }
     }
 }
+
+// Split a path name.
+bool
+server::file::DirectoryHandlerFactory::splitPathName(const String_t& combinedPath, String_t& backendPath, String_t& child)
+{
+    if (combinedPath.size() >= 9 && combinedPath.compare(0, 9, "c2file://", 9) == 0) {
+        // URL form
+        afl::net::Url u;
+        if (!u.parse(combinedPath)) {
+            // Invalid URL -> error
+            return false;
+        }
+
+        // Process the path
+        String_t path = u.getPath();
+        if (!path.empty() && path[path.size()-1] == '/') {
+            path.erase(path.size()-1);
+        }
+
+        size_t sl = path.rfind('/');
+        if (sl == String_t::npos || sl == path.size()-1) {
+            // No path separator in URL -> error
+            return false;
+        }
+
+        // Success
+        u.setPath(path.substr(0, sl));
+        backendPath = u.toString();
+        child = path.substr(sl+1);
+        return true;
+    } else {
+        String_t::size_type p = combinedPath.find('@');
+        if (p == String_t::npos) {
+            // Just a backend, so no child component -> error
+            return false;
+        }
+
+        // Got a @, so this is PATH@BACKEND. Try to split PATH
+        String_t::size_type sl = combinedPath.rfind('/', p);
+        if (sl > p) {
+            // No slash in PATH
+            return false;
+        }
+
+        // Success
+        backendPath = combinedPath.substr(0, sl) + combinedPath.substr(p);
+        child = combinedPath.substr(sl+1, p-sl-1);
+        return true;
+    }
+}
