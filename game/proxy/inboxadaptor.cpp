@@ -18,9 +18,7 @@ namespace {
      *  Current Message Persistence
      */
 
-    /* @q CCUI$CurrentInMsg:Int (Internal Variable)
-       Zero-based index of current inbox message.
-       @since PCC2 2.40.4 */
+    // Defined in core.q
     const char*const INDEX_VAR_NAME = "CCUI$CURRENTINMSG";
 
     afl::base::Optional<size_t> getCurrentMessage(game::Session& session)

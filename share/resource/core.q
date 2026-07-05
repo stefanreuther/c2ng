@@ -380,6 +380,24 @@ Dim Shared Cargo.Remainder
 % @assignable
 Dim Shared Build.Remainder
 
+% @q CCUI$CurrentVCR:Int (Internal Variable)
+% Zero-based index of current VCR.
+% @since PCC2 2.40.4
+% @assignable
+Dim Shared CCUI$CurrentVCR
+
+% @q CCUI$CurrentInMsg:Int (Internal Variable)
+% Zero-based index of current inbox message.
+% @since PCC2 2.40.4
+% @assignable
+Dim Shared CCUI$CurrentInMsg
+
+% @q CCUI$CurrentOutMsg:Int (Internal Variable)
+% Zero-based index of current outbox message.
+% @since PCC2 2.40.11
+% @assignable
+Dim Shared CCUI$CurrentOutMsg
+
 % Keymaps. Note that those differ from PCC 1.x because we support multiple inheritance.
 CreateKeymap Global, Ship, Planet, Base, Fleet
 
@@ -750,6 +768,15 @@ Bind SelectionDialog  "."      := "CCUI.ToggleSelection"
 Bind SelectionDialog  "h"      := "UI.Help 'pcc2:unitsel'",    "alt-h"  := "UI.Help 'pcc2:unitsel'"
 
 On EnterDirectory Do TryLoad "autoexec.q"
+
+On Exit
+  % When exiting a game, clear status variables
+  Cargo.Remainder := Z(0)
+  Build.Remainder := Z(0)
+  CCUI$CurrentVCR := Z(0)
+  CCUI$CurrentInMsg := Z(0)
+  CCUI$CurrentOutMsg := Z(0)
+EndOn
 
 If System.GUI Then
   LoadHelpFile MakeFileName(C2$ResourceDirectory, "pcc2help.xml")

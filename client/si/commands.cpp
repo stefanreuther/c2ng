@@ -2969,9 +2969,7 @@ client::si::IFCCUseKeymap(game::Session& /*session*/, ScriptSide& si, RequestLin
 void
 client::si::IFCCViewCombat(game::Session& session, ScriptSide& si, RequestLink1 link, interpreter::Arguments& args)
 {
-    /* @q CCUI$CurrentVCR:Int (Internal Variable)
-       Zero-based index of current VCR.
-       @since PCC2 2.40.4 */
+    // Defined in core.q
     static const char*const INDEX_VAR_NAME = "CCUI$CURRENTVCR";
 
     args.checkArgumentCount(0, 1);

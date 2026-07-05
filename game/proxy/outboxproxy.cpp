@@ -21,9 +21,7 @@ using game::actions::mustHaveRoot;
 using game::msg::Outbox;
 
 namespace {
-    /* @q CCUI$CurrentOutMsg:Int (Internal Variable)
-       Zero-based index of current outbox message.
-       @since PCC2 2.40.11 */
+    // Defined in core.q
     const char*const INDEX_VAR_NAME = "CCUI$CURRENTOUTMSG";
 
     Outbox& getOutbox(game::Session& session)
