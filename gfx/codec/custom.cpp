@@ -536,5 +536,6 @@ gfx::codec::Custom::load(afl::io::Stream& stream)
 afl::base::Memory<const gfx::ColorQuad_t>
 gfx::codec::Custom::getPalette()
 {
-    return PALETTE;
+    // Explicit cast required by gcc-4.9
+    return afl::base::Memory<const gfx::ColorQuad_t>(PALETTE);
 }

@@ -4795,7 +4795,6 @@ msgid "Gather resources from a planet"
 msgstr "Ressourcen von einem Planeten aufladen"
 
 #: game/maint/configurationapplication.cpp:324
-#, fuzzy
 msgid ""
 "General:\n"
 "--help\tshow help\n"
