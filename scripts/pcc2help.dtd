@@ -31,10 +31,11 @@
                tag   CDATA #IMPLIED
                date  CDATA #IMPLIED>
 
-<!-- Headings contain only #PCDATA to allow reusing them in attributes -->
-<!ELEMENT h1     (#PCDATA)>
-<!ELEMENT h2     (#PCDATA)>
-<!ELEMENT h3     (#PCDATA)>
+<!-- Headings originally contain only #PCDATA to allow reusing them in attributes -->
+<!-- Enable <em> because that has been used extensively in the script manual for ages -->
+<!ELEMENT h1     (#PCDATA|em)*>
+<!ELEMENT h2     (#PCDATA|em)*>
+<!ELEMENT h3     (#PCDATA|em)*>
 <!ATTLIST h1 id CDATA #IMPLIED>
 <!ATTLIST h2 id CDATA #IMPLIED>
 <!ATTLIST h3 id CDATA #IMPLIED>

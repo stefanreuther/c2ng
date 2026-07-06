@@ -82,4 +82,5 @@ foreach (@manpages) {
 
     generate("all", $html);
     generate("install-doc", generate_copy("$prefix/doc/pcc2man.html", $html));
+    add_lint($out);  # declared in doc/Rules.pl
 }

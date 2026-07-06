@@ -100,7 +100,9 @@ sub paragraph_detail {
     if (@_ == 1 && $_[0] =~ m|^<p>(.*)</p>$|s) {
         $result .= $1;
     } else {
-        $result .= join("\n", @_);
+        # In our XML, a list item cannot countain paragraphs
+        $result .= join("<br />\n", @_);
+        $result =~ s|</?p>||g;
     }
     $result .= "</li>";
     $result;

@@ -60,6 +60,7 @@ my $style = normalize_filename($ROOT, 'scripts/pcc2help.xsl');
     my $copy = generate_copy("$prefix/share/resource/pcc2interpreter.xml", $xml);
     generate("resources", $copy);
     generate("install-doc", $copy);
+    add_lint($xml);
 }
 
 
@@ -88,6 +89,7 @@ if ($CGI_PATH ne '') {
 
     generate("all", $html);
     generate("install-doc", generate_copy("$prefix/doc/pcc2tech.html", $html));
+    add_lint($xml);
 }
 
 
@@ -102,8 +104,19 @@ my $help_html = generate("$OUT/pcc2help.html",
 rule_add_info($help_html, "Rendering help HTML");
 generate("all", $help_html);
 generate("install-doc", generate_copy("$prefix/doc/pcc2help.html", $help_html));
+add_lint($help_xml);
 
 rule_set_phony("install-doc");
 generate("install", "install-doc");
 
 load_directory('ManualPages');
+
+
+
+sub add_lint {
+    my $xml = shift;
+    my $in = normalize_filename($ROOT, "scripts");
+    generate('check-xml', [$xml, "$in/pcc2help.dtd"],
+             "xmllint --path $in --noout --valid $xml");
+    rule_set_phony('check-xml');
+}
