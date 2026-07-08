@@ -6,6 +6,7 @@
 #include "afl/string/format.hpp"
 #include "game/config/userconfiguration.hpp"
 #include "game/game.hpp"
+#include "game/map/movementpredictor.hpp"
 #include "game/map/ship.hpp"
 #include "game/proxy/objectlistener.hpp"
 #include "game/root.hpp"
@@ -15,28 +16,36 @@
 #include "util/skincolor.hpp"
 
 using afl::string::Format;
-using game::map::Ship;
-using game::map::Object;
 using client::tiles::VisualScanShipInfoTile;
+using game::Game;
+using game::Root;
+using game::map::MovementPredictor;
+using game::map::Object;
+using game::map::Point;
+using game::map::Ship;
+using game::map::Universe;
+using game::spec::ShipList;
 
 namespace {
-    void prepareContent(game::Session& session, Object* obj, VisualScanShipInfoTile::Content& result)
+    void prepareContent(game::Session& session, const Object* obj, const MovementPredictor* pred, VisualScanShipInfoTile::Content& result)
     {
         // ex WVisualScanShipInfoTile::drawData
-        const Ship* pShip = dynamic_cast<Ship*>(obj);
+        const Ship* pShip = dynamic_cast<const Ship*>(obj);
         if (pShip == 0) {
             return;
         }
 
-        const game::spec::ShipList* pShipList = session.getShipList().get();
+        const ShipList* pShipList = session.getShipList().get();
         if (pShipList == 0) {
             return;
         }
 
-        const game::Root* pRoot = session.getRoot().get();
+        const Root* pRoot = session.getRoot().get();
         if (pRoot == 0) {
             return;
         }
+
+        const Game* pGame = session.getGame().get();
 
         const game::config::UserConfiguration& pref = pRoot->userConfiguration();
         afl::string::Translator& tx = session.translator();
@@ -65,28 +74,28 @@ namespace {
 
         // Line 2:
         //   Waypoint: foo
-        if (pShip->getShipKind() == Ship::CurrentShip) {
-            game::map::Point pt;
+        if (pShip->getShipKind() == Ship::CurrentShip && pGame != 0) {
+            Point pt;
             if (pShip->getWaypoint().get(pt)) {
-                if (game::Game* pGame = session.getGame().get()) {
-                    result.text[VisualScanShipInfoTile::Waypoint] =
-                        Format(tx("Waypoint: %s"), pGame->viewpointTurn().universe().findLocationName(pt, game::map::Universe::NameGravity, pGame->mapConfiguration(), pRoot->hostConfiguration(), pRoot->hostVersion(), tx));
-                }
+                result.text[VisualScanShipInfoTile::Waypoint] =
+                    Format(tx("Waypoint: %s"), pGame->viewpointTurn().universe().findLocationName(pt, Universe::NameGravity, pGame->mapConfiguration(), pRoot->hostConfiguration(), pRoot->hostVersion(), tx));
             }
         }
 
         // Line 3:
         //   Next turn: foo
-        // FIXME: port this
-        // GPoint pt = s->getPredictedPos();
-        // if (s->getShipKind() == GShip::CurrentShip && (pt.x != 0 || pt.y != 0)) {
-        //     if (pt == s->getWaypoint()) {
-        //         text = tx("Next turn: not moved");
-        //     } else {
-        //         text = format(tx("Next turn: %s"),
-        //                       getCurrentUniverse()->getLocationName(pt, locs_WW));
-        //     }
-        // }
+        if (pShip->getShipKind() == Ship::CurrentShip && pGame != 0 && pred != 0) {
+            Point nowPos, nextPos;
+            if (pShip->getPosition().get(nowPos) && pred->getShipPosition(pShip->getId()).get(nextPos)) {
+                if (nowPos == nextPos) {
+                    result.text[VisualScanShipInfoTile::NextPosition] = tx("Next turn: not moved");
+                } else {
+                    result.text[VisualScanShipInfoTile::NextPosition] =
+                        Format(tx("Next turn: %s"),
+                               pGame->viewpointTurn().universe().findLocationName(nextPos, Universe::NameGravity, pGame->mapConfiguration(), pRoot->hostConfiguration(), pRoot->hostVersion(), tx));
+                }
+            }
+        }
 
         // Line 4:
         //   Damage: %d%%
@@ -179,16 +188,34 @@ client::tiles::VisualScanShipInfoTile::attach(game::proxy::ObjectObserver& oop)
     class Listener : public game::proxy::ObjectListener {
      public:
         Listener(util::RequestSender<VisualScanShipInfoTile> reply)
-            : m_reply(reply)
+            : m_reply(reply),
+              m_predictor()
             { }
         virtual void handle(game::Session& session, game::map::Object* obj)
             {
+                // Try to create a MovementPredictor.
+                // We cannot create it in the constructor (which runs in the UI thread).
+                // It will be destroyed normally in the destructor; this is permitted because
+                // - it runs in the game thread for all current ObjectObserver implementations
+                // - even if it ran elsewhere, MovementPredictor does not keep references to game data.
+                if (m_predictor.get() == 0) {
+                    Game* g = session.getGame().get();
+                    ShipList* sl = session.getShipList().get();
+                    Root* r = session.getRoot().get();
+                    if (g != 0 && sl != 0 && r != 0) {
+                        m_predictor.reset(new MovementPredictor());
+                        m_predictor->computeMovement(g->viewpointTurn().universe(), *g, *sl, *r);
+                    }
+                }
+
+                // Build output
                 Content result;
-                prepareContent(session, obj, result);
+                prepareContent(session, obj, m_predictor.get(), result);
                 m_reply.postNewRequest(new Updater(result));
             }
      private:
         util::RequestSender<VisualScanShipInfoTile> m_reply;
+        std::auto_ptr<MovementPredictor> m_predictor;
     };
 
     oop.addNewListener(new Listener(m_reply.getSender()));
