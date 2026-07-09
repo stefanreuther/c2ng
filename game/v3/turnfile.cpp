@@ -17,6 +17,11 @@
 #include "game/v3/registrationkey.hpp"
 #include "util/randomnumbergenerator.hpp"
 
+using afl::bits::packValue;
+using afl::bits::unpackValue;
+using afl::bits::Int16LE;
+using afl::bits::Int32LE;
+
 namespace {
     const int CURRENT_VERSION = 1;
 
@@ -161,44 +166,6 @@ namespace {
         { game::v3::TurnFile::OtherCommand,      0,   0, "SendBack" },               // 62 -- SendBack
     };
 
-    // FIXME: move to afl
-    template<typename Desc>
-    bool
-    get(afl::base::ConstBytes_t data, size_t offset, typename Desc::Word_t& out)
-    {
-        data.split(offset);
-        if (const typename Desc::Bytes_t* p = data.eatN<sizeof(typename Desc::Bytes_t)>()) {
-            out = Desc::unpack(*p);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    // FIXME: move to afl
-    template<typename Desc>
-    bool
-    put(afl::base::Bytes_t data, size_t offset, typename Desc::Word_t in)
-    {
-        data.split(offset);
-        if (typename Desc::Bytes_t* p = data.eatN<sizeof(typename Desc::Bytes_t)>()) {
-            Desc::pack(*p, in);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    // FIXME: move to afl
-    void readVector(afl::io::Stream& in, afl::base::GrowableMemory<uint8_t>& bytes)
-    {
-        uint8_t page[4096];
-        while (size_t n = in.read(page)) {
-            bytes.append(afl::base::ConstBytes_t(page).trim(n));
-        }
-    }
-
-
     /** Turn Command Comparator. */
     class CommandComparator {
      public:
@@ -224,11 +191,10 @@ namespace {
     bool CommandComparator::operator()(int32_t a, int32_t b)
     {
         using game::v3::TurnFile;
-        using afl::bits::Int16LE;
 
         // Get command codes
         int16_t cca, ccb;
-        if (!get<Int16LE>(m_turnData, a, cca) || !get<Int16LE>(m_turnData, b, ccb)) {
+        if (!unpackValue<Int16LE>(cca, m_turnData, a) || !unpackValue<Int16LE>(ccb, m_turnData, b)) {
             return false;
         }
 
@@ -241,7 +207,7 @@ namespace {
                 return cca < ccb;
             } else {
                 int16_t ida, idb;
-                if (!get<Int16LE>(m_turnData, a+2, ida) || !get<Int16LE>(m_turnData, b+2, idb)) {
+                if (!unpackValue<Int16LE>(ida, m_turnData, a+2) || !unpackValue<Int16LE>(idb, m_turnData, b+2)) {
                     return false;
                 } else if (ida == idb) {
                     return cca < ccb;
@@ -480,7 +446,7 @@ game::v3::TurnFile::getCommandCode(size_t index, CommandCode_t& out) const
 {
     if (size_t* p = m_offsets.at(index)) {
         int16_t result;
-        if (get<afl::bits::Int16LE>(m_data, *p, result)) {
+        if (unpackValue<Int16LE>(result, m_data, *p)) {
             out = CommandCode_t(result);
             return true;
         } else {
@@ -514,7 +480,7 @@ game::v3::TurnFile::getCommandLength(size_t index, int& out) const
         const size_t* p = m_offsets.at(index);
         if (p == 0) {
             return false;
-        } else if (get<afl::bits::Int16LE>(m_data, *p + 6, size)) {
+        } else if (unpackValue<Int16LE>(size, m_data, *p + 6)) {
             out = size + 4;
             return true;
         } else {
@@ -539,7 +505,7 @@ game::v3::TurnFile::getCommandId(size_t index, int& out) const
 {
     if (const size_t* p = m_offsets.at(index)) {
         int16_t result;
-        if (!get<afl::bits::Int16LE>(m_data, *p + 2, result)) {
+        if (!unpackValue<Int16LE>(result, m_data, *p + 2)) {
             return false;
         } else {
             out = result;
@@ -695,7 +661,7 @@ void
 game::v3::TurnFile::addCommand(CommandCode_t cmd, int id)
 {
     // ex ccmkturn.pas:NewCommand
-    afl::bits::Value<afl::bits::Int16LE> buf[2];
+    afl::bits::Value<Int16LE> buf[2];
     m_offsets.append(m_data.size());
     buf[0] = int16_t(cmd);
     buf[1] = int16_t(id);
@@ -726,7 +692,7 @@ game::v3::TurnFile::deleteCommand(size_t index)
     // (No known tool generates aliased commands, and PHost would not be able to read them.)
     int32_t pos;
     if (getCommandPosition(index, pos)) {
-        put<afl::bits::Int16LE>(m_data, pos, 0);
+        packValue<Int16LE>(m_data, 0, pos);
     }
     m_isDirty = true;
 }
@@ -951,7 +917,7 @@ game::v3::TurnFile::init(afl::io::Stream& str, afl::string::Translator& tx, bool
 {
     // ex GTurnfile::init
     if (fullParse) {
-        readVector(str, m_data);
+        str.readAll(m_data);
         if (m_data.size() > sizeof(m_taccomHeader) && std::memcmp(m_data.at(0), TACCOM_MAGIC, 10) == 0) {
             // Taccom-enhanced TRN
             afl::base::fromObject(m_taccomHeader).copyFrom(m_data);
@@ -1010,9 +976,6 @@ game::v3::TurnFile::checkRange(afl::io::Stream& stream, afl::string::Translator&
 void
 game::v3::TurnFile::parseTurnFile(afl::io::Stream& stream, afl::string::Translator& tx, afl::io::Stream::FileSize_t offset, afl::io::Stream::FileSize_t length)
 {
-    // Imports
-    using afl::bits::Int32LE;
-
     // ex GTurnfile::parseTurnfile
     checkRange(stream, tx, offset, length);
 
@@ -1146,7 +1109,7 @@ game::v3::TurnFile::updateTurnFile(afl::base::GrowableMemory<uint8_t>& data, afl
             size_t thisCommandOffset = data.size();
             offsets.append(thisCommandOffset);
             data.append(m_data.subrange(*m_offsets.at(i), length + 4));
-            put<afl::bits::Int32LE>(data, turnDirOffset + 4*i, int32_t(thisCommandOffset - newTurnStart + 1));
+            packValue<Int32LE>(data, int32_t(thisCommandOffset - newTurnStart + 1), turnDirOffset + 4*i);
         }
     }
 
