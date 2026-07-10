@@ -34,8 +34,8 @@ AFL_TEST_NOARG("server.interface.FileBase:interface")
             { }
         virtual void createDirectoryAsUser(String_t /*dirName*/, String_t /*userId*/)
             { }
-        virtual afl::data::Value* getDirectoryProperty(String_t /*dirName*/, String_t /*propName*/)
-            { return 0; }
+        virtual String_t getDirectoryProperty(String_t /*dirName*/, String_t /*propName*/)
+            { return String_t(); }
         virtual void setDirectoryProperty(String_t /*dirName*/, String_t /*propName*/, String_t /*propValue*/)
             { }
         virtual void putFile(String_t /*fileName*/, String_t /*content*/)
@@ -54,7 +54,7 @@ AFL_TEST_NOARG("server.interface.FileBase:interface")
     Tester t;
 }
 
-/** Test getDirectoryIntegerProperty, getDirectoryStringProperty. */
+/** Test getDirectoryIntegerProperty. */
 AFL_TEST("server.interface.FileBase:typed-properties", a)
 {
     class Tester : public server::interface::FileBase, public afl::test::CallReceiver {
@@ -80,10 +80,10 @@ AFL_TEST("server.interface.FileBase:typed-properties", a)
             { }
         virtual void createDirectoryAsUser(String_t /*dirName*/, String_t /*userId*/)
             { }
-        virtual afl::data::Value* getDirectoryProperty(String_t dirName, String_t propName)
+        virtual String_t getDirectoryProperty(String_t dirName, String_t propName)
             {
                 checkCall(afl::string::Format("get(%s,%s)", dirName, propName));
-                return consumeReturnValue<afl::data::Value*>();
+                return consumeReturnValue<String_t>();
             }
         virtual void setDirectoryProperty(String_t /*dirName*/, String_t /*propName*/, String_t /*propValue*/)
             { }
@@ -100,40 +100,27 @@ AFL_TEST("server.interface.FileBase:typed-properties", a)
         virtual Usage getDiskUsage(String_t /*dirName*/)
             { return Usage(); }
 
-        void provideReturnValue(afl::data::Value* p)
+        void provideReturnValue(String_t p)
             { CallReceiver::provideReturnValue(p); }
     };
 
     // Integer
     Tester t(a);
     t.expectCall("get(dd,pp)");
-    t.provideReturnValue(0);
+    t.provideReturnValue("");
     a.checkEqual("01. getDirectoryIntegerProperty", t.getDirectoryIntegerProperty("dd", "pp"), 0);
 
     t.expectCall("get(dd2,pp2)");
-    t.provideReturnValue(server::makeIntegerValue(99));
+    t.provideReturnValue("99");
     a.checkEqual("11. getDirectoryIntegerProperty", t.getDirectoryIntegerProperty("dd2", "pp2"), 99);
 
     t.expectCall("get(dd3,pp3)");
-    t.provideReturnValue(server::makeStringValue("-3"));
+    t.provideReturnValue("-3");
     a.checkEqual("21. getDirectoryIntegerProperty", t.getDirectoryIntegerProperty("dd3", "pp3"), -3);
 
     t.expectCall("get(dd4,pp4)");
-    t.provideReturnValue(server::makeStringValue("foo"));
+    t.provideReturnValue("foo");
     AFL_CHECK_THROWS(a("31. getDirectoryIntegerProperty"), t.getDirectoryIntegerProperty("dd4", "pp4"), std::exception);
-
-    // String
-    t.expectCall("get(a,b)");
-    t.provideReturnValue(0);
-    a.checkEqual("41. getDirectoryStringProperty", t.getDirectoryStringProperty("a", "b"), "");
-
-    t.expectCall("get(c,d)");
-    t.provideReturnValue(server::makeIntegerValue(150));
-    a.checkEqual("51. getDirectoryStringProperty", t.getDirectoryStringProperty("c", "d"), "150");
-
-    t.expectCall("get(e,f)");
-    t.provideReturnValue(server::makeStringValue("hi"));
-    a.checkEqual("61. getDirectoryStringProperty", t.getDirectoryStringProperty("e", "f"), "hi");
 }
 
 /** Test getFileNT. */
@@ -165,8 +152,8 @@ AFL_TEST("server.interface.FileBase:getFileNT", a)
             { }
         virtual void createDirectoryAsUser(String_t /*dirName*/, String_t /*userId*/)
             { }
-        virtual afl::data::Value* getDirectoryProperty(String_t /*dirName*/, String_t /*propName*/)
-            { return 0; }
+        virtual String_t getDirectoryProperty(String_t /*dirName*/, String_t /*propName*/)
+            { return String_t(); }
         virtual void setDirectoryProperty(String_t /*dirName*/, String_t /*propName*/, String_t /*propValue*/)
             { }
         virtual void putFile(String_t /*fileName*/, String_t /*content*/)

@@ -31,7 +31,7 @@ namespace server { namespace file {
         virtual void createDirectory(String_t dirName);
         virtual void createDirectoryTree(String_t dirName);
         virtual void createDirectoryAsUser(String_t dirName, String_t userId);
-        virtual afl::data::Value* getDirectoryProperty(String_t dirName, String_t propName);
+        virtual String_t getDirectoryProperty(String_t dirName, String_t propName);
         virtual void setDirectoryProperty(String_t dirName, String_t propName, String_t propValue);
         virtual void putFile(String_t fileName, String_t content);
         virtual void removeFile(String_t fileName);

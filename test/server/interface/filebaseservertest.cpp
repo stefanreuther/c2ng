@@ -70,10 +70,10 @@ namespace {
             { checkCall(Format("createDirectoryTree(%s)", dirName)); }
         virtual void createDirectoryAsUser(String_t dirName, String_t userId)
             { checkCall(Format("createDirectoryAsUser(%s,%s)", dirName, userId)); }
-        virtual afl::data::Value* getDirectoryProperty(String_t dirName, String_t propName)
+        virtual String_t getDirectoryProperty(String_t dirName, String_t propName)
             {
                 checkCall(Format("getDirectoryProperty(%s,%s)", dirName, propName));
-                return consumeReturnValue<afl::data::Value*>();
+                return consumeReturnValue<String_t>();
             }
         virtual void setDirectoryProperty(String_t dirName, String_t propName, String_t propValue)
             { checkCall(Format("setDirectoryProperty(%s,%s,%s)", dirName, propName, propValue)); }
@@ -194,11 +194,11 @@ AFL_TEST("server.interface.FileBaseServer:commands", a)
 
     // getDirectoryProperty
     mock.expectCall("getDirectoryProperty(d,p)");
-    mock.provideReturnValue<afl::data::Value*>(server::makeIntegerValue(9));
+    mock.provideReturnValue<String_t>("9");
     a.checkEqual("51. propget", testee.callInt(Segment().pushBackString("PROPGET").pushBackString("d").pushBackString("p")), 9);
 
     mock.expectCall("getDirectoryProperty(d,q)");
-    mock.provideReturnValue<afl::data::Value*>(server::makeStringValue("rr"));
+    mock.provideReturnValue<String_t>("rr");
     a.checkEqual("61. propget", testee.callString(Segment().pushBackString("PROPGET").pushBackString("d").pushBackString("q")), "rr");
 
     // setDirectoryProperty
@@ -381,12 +381,8 @@ AFL_TEST("server.interface.FileBaseServer:roundtrip", a)
 
     // getDirectoryProperty
     mock.expectCall("getDirectoryProperty(d,p)");
-    mock.provideReturnValue<afl::data::Value*>(server::makeIntegerValue(9));
+    mock.provideReturnValue<String_t>("9");
     a.checkEqual("51. getDirectoryIntegerProperty", level4.getDirectoryIntegerProperty("d", "p"), 9);
-
-    mock.expectCall("getDirectoryProperty(d,q)");
-    mock.provideReturnValue<afl::data::Value*>(server::makeStringValue("rr"));
-    a.checkEqual("61. getDirectoryStringProperty", level4.getDirectoryStringProperty("d", "q"), "rr");
 
     // setDirectoryProperty
     mock.expectCall("setDirectoryProperty(dd,pp,vv)");

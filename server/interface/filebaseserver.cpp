@@ -190,7 +190,7 @@ server::interface::FileBaseServer::handleCommand(const String_t& upcasedCommand,
         args.checkArgumentCount(2);
         String_t dirName = toString(args.getNext());
         String_t propName = toString(args.getNext());
-        result.reset(m_implementation.getDirectoryProperty(dirName, propName));
+        result.reset(makeStringValue(m_implementation.getDirectoryProperty(dirName, propName)));
         return true;
     } else if (upcasedCommand == "PROPSET") {
         /* @q PROPSET dir:FileName, prop:Str, value:Str (File Command)

@@ -348,8 +348,8 @@ AFL_TEST("server.file.FileBase:directory-properties", a)
     testee.setDirectoryProperty("u", "name", "foo");
     testee.setDirectoryProperty("u", "count", "3");
     testee.setDirectoryProperty("u", "a", "e=mc2");
-    a.checkEqual("01. getDirectoryStringProperty", testee.getDirectoryStringProperty("u", "name"), "foo");
-    a.checkEqual("02. getDirectoryStringProperty", testee.getDirectoryStringProperty("u", "count"), "3");
+    a.checkEqual("01. getDirectoryProperty", testee.getDirectoryProperty("u", "name"), "foo");
+    a.checkEqual("02. getDirectoryProperty", testee.getDirectoryProperty("u", "count"), "3");
     AFL_CHECK_THROWS(a("03. getDirectoryIntegerProperty"), testee.getDirectoryIntegerProperty("u", "name"), std::exception);
     a.checkEqual("04. getDirectoryIntegerProperty", testee.getDirectoryIntegerProperty("u", "count"), 3);
 
@@ -375,9 +375,9 @@ AFL_TEST("server.file.FileBase:directory-properties", a)
 
     // Forget & reload
     testee.forgetDirectory("u");
-    a.checkEqual("51. getDirectoryStringProperty", testee.getDirectoryStringProperty("u", "name"), "foo");
-    a.checkEqual("52. getDirectoryStringProperty", testee.getDirectoryStringProperty("u", "count"), "3");
-    a.checkEqual("53. getDirectoryStringProperty", testee.getDirectoryStringProperty("u", "a"), "e=mc2");
+    a.checkEqual("51. getDirectoryProperty", testee.getDirectoryProperty("u", "name"), "foo");
+    a.checkEqual("52. getDirectoryProperty", testee.getDirectoryProperty("u", "count"), "3");
+    a.checkEqual("53. getDirectoryProperty", testee.getDirectoryProperty("u", "a"), "e=mc2");
 }
 
 /** Test getDirectoryProperty(), setDirectoryProperty() vs.\ permissions. */
@@ -413,17 +413,17 @@ AFL_TEST("server.file.FileBase:directory-properties:permissions", a)
 
     // Test reading in user context
     tb.session.setUser("1001");
-    AFL_CHECK_THROWS_CODE(a("01. getDirectoryStringProperty"), testee.getDirectoryStringProperty("writable", "p"),         "403");
-    a.checkEqual           ("02. getDirectoryStringProperty",  testee.getDirectoryStringProperty("readable", "p"),         "r");
-    a.checkEqual           ("03. getDirectoryStringProperty",  testee.getDirectoryStringProperty("both", "p"),             "b");
-    AFL_CHECK_THROWS_CODE(a("04. getDirectoryStringProperty"), testee.getDirectoryStringProperty("none", "p"),             "403");
-    a.checkEqual           ("05. getDirectoryStringProperty",  testee.getDirectoryStringProperty("none/readable", "p"),    "nr");
-    AFL_CHECK_THROWS_CODE(a("06. getDirectoryStringProperty"), testee.getDirectoryStringProperty("none/writable", "p"),    "403");
-    AFL_CHECK_THROWS_CODE(a("07. getDirectoryStringProperty"), testee.getDirectoryStringProperty("none/none", "p"),        "403");
-    AFL_CHECK_THROWS_CODE(a("08. getDirectoryStringProperty"), testee.getDirectoryStringProperty("none/missing", "p"),     "403");
-    AFL_CHECK_THROWS_CODE(a("09. getDirectoryStringProperty"), testee.getDirectoryStringProperty("listable", "p"),         "403");
-    AFL_CHECK_THROWS_CODE(a("10. getDirectoryStringProperty"), testee.getDirectoryStringProperty("readable/missing", "p"), "403");
-    AFL_CHECK_THROWS_CODE(a("11. getDirectoryStringProperty"), testee.getDirectoryStringProperty("listable/missing", "p"), "404");
+    AFL_CHECK_THROWS_CODE(a("01. getDirectoryProperty"), testee.getDirectoryProperty("writable", "p"),         "403");
+    a.checkEqual           ("02. getDirectoryProperty",  testee.getDirectoryProperty("readable", "p"),         "r");
+    a.checkEqual           ("03. getDirectoryProperty",  testee.getDirectoryProperty("both", "p"),             "b");
+    AFL_CHECK_THROWS_CODE(a("04. getDirectoryProperty"), testee.getDirectoryProperty("none", "p"),             "403");
+    a.checkEqual           ("05. getDirectoryProperty",  testee.getDirectoryProperty("none/readable", "p"),    "nr");
+    AFL_CHECK_THROWS_CODE(a("06. getDirectoryProperty"), testee.getDirectoryProperty("none/writable", "p"),    "403");
+    AFL_CHECK_THROWS_CODE(a("07. getDirectoryProperty"), testee.getDirectoryProperty("none/none", "p"),        "403");
+    AFL_CHECK_THROWS_CODE(a("08. getDirectoryProperty"), testee.getDirectoryProperty("none/missing", "p"),     "403");
+    AFL_CHECK_THROWS_CODE(a("09. getDirectoryProperty"), testee.getDirectoryProperty("listable", "p"),         "403");
+    AFL_CHECK_THROWS_CODE(a("10. getDirectoryProperty"), testee.getDirectoryProperty("readable/missing", "p"), "403");
+    AFL_CHECK_THROWS_CODE(a("11. getDirectoryProperty"), testee.getDirectoryProperty("listable/missing", "p"), "404");
 
     // Test writing in user context [bug #338]
     tb.session.setUser("1001");
@@ -450,8 +450,8 @@ AFL_TEST("server.file.FileBase:directory-properties:file", a)
     testee.createDirectory("d");
     testee.putFile("d/ff", "cc");
 
-    AFL_CHECK_THROWS_CODE(a("01. getDirectoryStringProperty"), testee.getDirectoryStringProperty("f", "p"), "405");
-    AFL_CHECK_THROWS_CODE(a("02. getDirectoryStringProperty"), testee.getDirectoryStringProperty("dd/ff", "p"), "404");
+    AFL_CHECK_THROWS_CODE(a("01. getDirectoryProperty"), testee.getDirectoryProperty("f", "p"), "405");
+    AFL_CHECK_THROWS_CODE(a("02. getDirectoryProperty"), testee.getDirectoryProperty("dd/ff", "p"), "404");
     AFL_CHECK_THROWS_CODE(a("03. setDirectoryProperty"), testee.setDirectoryProperty("f", "p", "v"), "405");
     AFL_CHECK_THROWS_CODE(a("04. setDirectoryProperty"), testee.setDirectoryProperty("dd/ff", "p", "v"), "404");
 }
@@ -1253,8 +1253,8 @@ AFL_TEST("server.file.FileBase:putFile:snoop", a)
     testee.createDirectory("a/b");
     testee.putFile("a/b/pconfig.src", "GAMENAME = Hi There");
 
-    std::auto_ptr<afl::data::Value> p(testee.getDirectoryProperty("a/b", "name"));
-    a.checkEqual("01. getDirectoryProperty", afl::data::Access(p).toString(), "Hi There");
+    String_t p(testee.getDirectoryProperty("a/b", "name"));
+    a.checkEqual("01. getDirectoryProperty", p, "Hi There");
 }
 
 /** Test file upload content snooping on copy. */
@@ -1269,6 +1269,6 @@ AFL_TEST("server.file.FileBase:putFile:snoop:copy", a)
     testee.putFile("a/b/file.txt", "GAMENAME = Hi There");
     testee.copyFile("a/b/file.txt", "a/c/pconfig.src");
 
-    std::auto_ptr<afl::data::Value> p(testee.getDirectoryProperty("a/c", "name"));
-    a.checkEqual("01. getDirectoryProperty", afl::data::Access(p).toString(), "Hi There");
+    String_t p(testee.getDirectoryProperty("a/c", "name"));
+    a.checkEqual("01. getDirectoryProperty", p, "Hi There");
 }

@@ -221,17 +221,16 @@ server::file::FileBase::createDirectoryAsUser(String_t dirName, String_t userId)
     createDirectoryCommon(dirName, userId);
 }
 
-afl::data::Value*
+String_t
 server::file::FileBase::getDirectoryProperty(String_t dirName, String_t propName)
 {
-    // FIXME: change signature to return String?
     // ex Connection::doPropGet
     // @change Returns 405 when applied to directories
     PathResolver res(m_root, m_root.rootDirectory(), m_session.getUser());
     DirectoryItem& dir = res.resolveToDirectory(dirName, DirectoryItem::AllowRead);
     dir.readContent(m_root);
 
-    return makeStringValue(dir.getProperty("prop:" + propName));
+    return dir.getProperty("prop:" + propName);
 }
 
 void

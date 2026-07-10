@@ -155,8 +155,7 @@ AFL_TEST("server.interface.FileBaseClient", a)
         mock.expectCall("PROPGET, dir, name");
         mock.provideNewResult(server::makeStringValue("Dir Name"));
 
-        std::auto_ptr<afl::data::Value> p(testee.getDirectoryProperty("dir", "name"));
-        a.checkEqual("71. result", server::toString(p.get()), "Dir Name");
+        a.checkEqual("71. getDirectoryProperty", testee.getDirectoryProperty("dir", "name"), "Dir Name");
     }
 
     // setDirectoryProperty

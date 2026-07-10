@@ -106,11 +106,11 @@ server::interface::FileBaseClient::createDirectoryAsUser(String_t dirName, Strin
     m_commandHandler.callVoid(Segment().pushBackString("MKDIRAS").pushBackString(dirName).pushBackString(userId));
 }
 
-afl::data::Value*
+String_t
 server::interface::FileBaseClient::getDirectoryProperty(String_t dirName, String_t propName)
 {
     // ex FileClient::getStringProperty, FileClient::getIntProperty
-    return m_commandHandler.call(Segment().pushBackString("PROPGET").pushBackString(dirName).pushBackString(propName));
+    return m_commandHandler.callString(Segment().pushBackString("PROPGET").pushBackString(dirName).pushBackString(propName));
 }
 
 void

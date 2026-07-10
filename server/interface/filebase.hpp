@@ -139,8 +139,8 @@ namespace server { namespace interface {
         /** Get directory property.
             \param dirName Directory name. Must exist and be readable.
             \param propName Name of property to read
-            \return newly-allocated property value (could be any type; typically a string) */
-        virtual afl::data::Value* getDirectoryProperty(String_t dirName, String_t propName) = 0;
+            \return property value */
+        virtual String_t getDirectoryProperty(String_t dirName, String_t propName) = 0;
 
         /** Set directory property.
             \param dirName Directory name. Must exist and be writable.
@@ -185,13 +185,6 @@ namespace server { namespace interface {
             \return property value as integer
             \see getDirectoryProperty */
         int32_t getDirectoryIntegerProperty(String_t dirName, String_t propName);
-
-        /** Get directory property, string result.
-            \param dirName Directory name. Must exist and be readable.
-            \param propName Name of property to read
-            \return property value as string
-            \see getDirectoryProperty */
-        String_t getDirectoryStringProperty(String_t dirName, String_t propName);
 
         /** Get file content if the file exists.
             Unlike getFile(), this will not throw on errors, but instead return Nothing.
