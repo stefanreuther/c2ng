@@ -57,7 +57,7 @@ ui::widgets::StandardDialogButtons::init()
 
 // Execute dialog with standard dialog buttons.
 bool
-ui::widgets::doStandardDialog(String_t title, String_t prompt, Widget& content, bool framed, Root& root, afl::string::Translator& tx)
+ui::widgets::doStandardDialog(String_t title, String_t prompt, Widget& content, bool framed, Widget* pHelp, Root& root, afl::string::Translator& tx)
 {
     // ex UIInputLine::run, UINumberSelector::doStandardDialog
     // Window
@@ -84,6 +84,9 @@ ui::widgets::doStandardDialog(String_t title, String_t prompt, Widget& content, 
 
     // Buttons
     StandardDialogButtons& buttons = del.addNew(new StandardDialogButtons(root, tx));
+    if (pHelp != 0) {
+        buttons.addHelp(*pHelp);
+    }
     window.add(buttons);
     window.pack();
     content.requestFocus();

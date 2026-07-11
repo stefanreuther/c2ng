@@ -2751,7 +2751,8 @@ client::si::IFCCTransferMulti(game::Session& session, ScriptSide& si, RequestLin
                 ui::widgets::StringListbox box(ctl.root().provider(), ctl.root().colorScheme());
                 box.swapItems(m_cargoTypes);
 
-                if (ui::widgets::doStandardDialog(tx("Cargo Transfer"), tx("Transfer which cargo?"), box, true, ctl.root(), tx)) {
+                client::widgets::HelpWidget help(ctl.root(), tx, ctl.interface().gameSender(), "pcc2:multicargo");
+                if (ui::widgets::doStandardDialog(tx("Cargo Transfer"), tx("Transfer which cargo?"), box, true, &help, ctl.root(), tx)) {
                     int32_t key;
                     String_t name;
                     if (box.getStringList().get(box.getCurrentItem(), key, name)) {
@@ -4018,17 +4019,14 @@ client::si::IFUIInput(game::Session& /*session*/, ScriptSide& si, RequestLink1 l
                 if ((m_flags & 4) != 0) {
                     widget.setFlag(widget.Hidden, true);
                 }
-                // FIXME: flag 'F' (framed) must be implemented differently
-                // if ((m_flags & 8) != 0) {
-                //     widget.setFlag(widget.Framed, true);
-                // }
+                bool framed = ((m_flags & 8) != 0);
                 if ((m_flags & 16) != 0) {
                     widget.setFlag(widget.GameChars, true);
                 }
 
                 widget.setText(m_defaultText);
                 std::auto_ptr<afl::data::Value> result;
-                if (widget.doStandardDialog(m_title, m_prompt, ctl.translator())) {
+                if (ui::widgets::doStandardDialog(m_title, m_prompt, widget, framed, 0, ctl.root(), ctl.translator())) {
                     result.reset(interpreter::makeStringValue(widget.getText()));
                 }
                 ui.setVariable(link, "UI.RESULT", result);
@@ -4337,9 +4335,12 @@ client::si::IFUIInputNumber(game::Session& /*session*/, ScriptSide& si, RequestL
                 sel.setValue(m_current);
 
                 // Dialog
-                // FIXME: honor 'm_help'
                 afl::base::Deleter del;
-                bool ok = ui::widgets::doStandardDialog(m_title, m_prompt, sel.addButtons(del, ctl.root()), false, ctl.root(), ctl.translator());
+                ui::Widget* pHelp = 0;
+                if (!m_help.empty()) {
+                    pHelp = &del.addNew(new client::widgets::HelpWidget(ctl.root(), ctl.translator(), ui.gameSender(), m_help));
+                }
+                bool ok = ui::widgets::doStandardDialog(m_title, m_prompt, sel.addButtons(del, ctl.root()), false, pHelp, ctl.root(), ctl.translator());
 
                 // Result
                 std::auto_ptr<afl::data::Value> result;

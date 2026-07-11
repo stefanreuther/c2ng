@@ -118,7 +118,7 @@ client::map::editMarkerComment(ui::Root& root,
     ui::widgets::InputLine input(255, root);
     input.setFlag(ui::widgets::InputLine::GameChars, true);
     input.setText(marker.getComment());
-    if (input.doStandardDialog(tx("Marker Comment"), tx("Enter new comment for this marker:"), tx)) {
+    if (input.doStandardDialog(tx("Marker Comment"), tx("Enter new comment for this marker:"), 0, tx)) {
         proxy.setComment(input.getText());
     }
 }

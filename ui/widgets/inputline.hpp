@@ -97,9 +97,10 @@ namespace ui { namespace widgets {
         /** Standard dialog.
             \param title  Window title
             \param prompt Prompt to show above input line
+            \param pHelp  Optional help widget
             \param tx     Translator
             \return true if confirmed, false if canceled */
-        bool doStandardDialog(String_t title, String_t prompt, afl::string::Translator& tx);
+        bool doStandardDialog(String_t title, String_t prompt, Widget* pHelp, afl::string::Translator& tx);
 
         // EventConsumer:
         virtual bool handleKey(util::Key_t key, int prefix);

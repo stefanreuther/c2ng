@@ -259,7 +259,9 @@ namespace {
                     input.setText(s);
                     input.setFlag(ui::widgets::InputLine::GameChars, true);
                     input.setFont("+");
-                    if (input.doStandardDialog(tx("Auxiliary Commands"), tx("Edit command:"), tx)) {
+
+                    client::widgets::HelpWidget help(root(), tx, interface().gameSender(), "pcc2:auxcmds");
+                    if (input.doStandardDialog(tx("Auxiliary Commands"), tx("Edit command:"), &help, tx)) {
                         client::Downlink link(interface());
                         game::proxy::CommandListProxy::Infos_t newList;
                         size_t newPos;

@@ -7,6 +7,7 @@
 #include "afl/string/format.hpp"
 #include "client/dialogs/choosehull.hpp"
 #include "client/dialogs/friendlycodedialog.hpp"
+#include "client/dialogs/helpdialog.hpp"
 #include "client/dialogs/sessionfileselectiondialog.hpp"
 #include "client/dialogs/simulationabilities.hpp"
 #include "client/dialogs/simulationalliances.hpp"
@@ -128,41 +129,6 @@ namespace {
         return list;
     }
 
-
-    /*
-     *  Canned Dialogs
-     */
-
-    bool doList(ui::Root& root, util::RequestSender<game::Session> /*gameSender*/, const SimulationSetupProxy::Elements_t& elems, int32_t& value, String_t title, String_t /*help*/, afl::string::Translator& tx)
-    {
-        ui::widgets::StringListbox list(root.provider(), root.colorScheme());
-        for (size_t i = 0, n = elems.size(); i < n; ++i) {
-            list.addItem(elems[i].first, elems[i].second);
-        }
-        list.setCurrentKey(value);
-
-        ui::widgets::ScrollbarContainer cont(list, root);
-
-        if (ui::widgets::doStandardDialog(title, String_t(), cont, true, root, tx)) {
-            if (list.getCurrentKey().get(value)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    bool doNumber(ui::Root& root, SimulationSetupProxy::Range_t range, int32_t& value, String_t title, String_t label, String_t /*help*/, afl::string::Translator& tx)
-    {
-        afl::base::Observable<int32_t> observableValue(value);
-        ui::widgets::DecimalSelector sel(root, tx, observableValue, range.min(), range.max(), 10);
-
-        afl::base::Deleter del;
-        if (ui::widgets::doStandardDialog(title, Format("%s [%d..%d]:", label, range.min(), range.max()), sel.addButtons(del, root), false, root, tx)) {
-            value = observableValue.get();
-            return true;
-        }
-        return false;
-    }
 
     /*
      *  Utilities
@@ -315,6 +281,9 @@ namespace {
         // Extra dialogs
         void editType(bool afterAdd, SimulationSetupProxy::Slot_t slot, int oldValue);
         void showLimitWarning();
+
+        bool doList(const SimulationSetupProxy::Elements_t& elems, int32_t& value, String_t title, String_t help);
+        bool doNumber(SimulationSetupProxy::Range_t range, int32_t& value, String_t title, String_t label, String_t help);
     };
 }
 
@@ -807,7 +776,7 @@ SimulatorDialog::onReplicate()
             showLimitWarning();
         } else {
             int32_t count = 0;
-            if (doNumber(m_root, SimulationSetupProxy::Range_t(0, limit), count, m_translator("Replicate Ship"), m_translator("Number"), "pcc2:bsim", m_translator)) {
+            if (doNumber(SimulationSetupProxy::Range_t(0, limit), count, m_translator("Replicate Ship"), m_translator("Number"), "pcc2:bsim")) {
                 Downlink link(interface());
                 SimulationSetupProxy::Slot_t slot = m_proxy.addShip(link, m_list.getCurrentItem(), count);
                 m_list.setCurrentItem(slot);
@@ -993,7 +962,7 @@ SimulatorDialog::onEditSecondary()
         } else if (info.numBays.isUnit() && info.numBays.max() > 0) {
             // Carrier, we can edit ammo (=number of fighters)
             int32_t ammo = m_currentObject.ammo;
-            if (doNumber(m_root, info.ammo, ammo, m_translator("Set Number of Fighters"), m_translator("Fighters"), "pcc2:bsim", m_translator)) {
+            if (doNumber(info.ammo, ammo, m_translator("Set Number of Fighters"), m_translator("Fighters"), "pcc2:bsim")) {
                 m_proxy.setNumBays(m_currentSlot, info.numBays.max());
                 m_proxy.setTorpedoType(m_currentSlot, 0);
                 m_proxy.setNumLaunchers(m_currentSlot, 0);
@@ -1016,7 +985,7 @@ SimulatorDialog::onEditAggressivenessAmmo()
         prependAggressivenessKeys(elems);
 
         int32_t value = m_currentObject.aggressiveness.first;
-        if (doList(m_root, m_gameSender, elems, value, m_translator("Set Aggressiveness"), "pcc2:bsim", m_translator)) {
+        if (doList(elems, value, m_translator("Set Aggressiveness"), "pcc2:bsim")) {
             m_proxy.setAggressiveness(m_currentSlot, value);
         }
     } else if (isAtBase()) {
@@ -1038,13 +1007,13 @@ SimulatorDialog::onEditDamageDefense()
         Downlink link(interface());
         SimulationSetupProxy::Range_t range = m_proxy.getDamageRange(link, m_currentSlot);
         int32_t value = m_currentObject.damage;
-        if (doNumber(m_root, range, value, m_translator("Set Damage Level"), m_translator("Damage"), "pcc2:bsim", m_translator)) {
+        if (doNumber(range, value, m_translator("Set Damage Level"), m_translator("Damage"), "pcc2:bsim")) {
             m_proxy.setDamage(m_currentSlot, value);
         }
     } else if (isAtPlanet()) {
         // ex WSimPlanetEditor::editDefense
         int32_t value = m_currentObject.defense;
-        if (doNumber(m_root, SimulationSetupProxy::Range_t(0, MAX_DEFENSE), value, m_translator("Set Defense"), m_translator("Defense"), "pcc2:bsim", m_translator)) {
+        if (doNumber(SimulationSetupProxy::Range_t(0, MAX_DEFENSE), value, m_translator("Set Defense"), m_translator("Defense"), "pcc2:bsim")) {
             m_proxy.setDefense(m_currentSlot, value);
         }
     }
@@ -1061,7 +1030,7 @@ SimulatorDialog::onEditEngine()
         prependDigits(elems);
 
         int32_t value = m_currentObject.engineType.first;
-        if (doList(m_root, m_gameSender, elems, value, m_translator("Set Engine Type"), "pcc2:bsim", m_translator)) {
+        if (doList(elems, value, m_translator("Set Engine Type"), "pcc2:bsim")) {
             m_proxy.setEngineType(m_currentSlot, value);
         }
     }
@@ -1102,7 +1071,7 @@ SimulatorDialog::onEditBaseFighters()
         Downlink link(interface());
         SimulationSetupProxy::Range_t range = m_proxy.getNumBaseFightersRange(link, m_currentSlot);
         int32_t value = m_currentObject.numBaseFighters;
-        if (doNumber(m_root, range, value, m_translator("Set Base Fighters"), m_translator("Fighters"), "pcc2:bsim", m_translator)) {
+        if (doNumber(range, value, m_translator("Set Base Fighters"), m_translator("Fighters"), "pcc2:bsim")) {
             m_proxy.setNumBaseFighters(m_currentSlot, value);
         }
     }
@@ -1119,7 +1088,7 @@ SimulatorDialog::onEditBaseBeamLevel()
         prependDigits(elems);
 
         int32_t value = m_currentObject.baseBeamTech;
-        if (doList(m_root, m_gameSender, elems, value, m_translator("Set Starbase Beam Tech"), "pcc2:bsim", m_translator)) {
+        if (doList(elems, value, m_translator("Set Starbase Beam Tech"), "pcc2:bsim")) {
             m_proxy.setBaseBeamTech(m_currentSlot, value);
         }
     }
@@ -1133,7 +1102,7 @@ SimulatorDialog::onEditCrew()
         Downlink link(interface());
         SimulationSetupProxy::Range_t range = m_proxy.getCrewRange(link, m_currentSlot);
         int32_t value = m_currentObject.crew;
-        if (doNumber(m_root, range, value, m_translator("Set Crew"), m_translator("Crew"), "pcc2:bsim", m_translator)) {
+        if (doNumber(range, value, m_translator("Set Crew"), m_translator("Crew"), "pcc2:bsim")) {
             m_proxy.setCrew(m_currentSlot, value);
         }
     }
@@ -1148,7 +1117,7 @@ SimulatorDialog::onEditId()
         SimulationSetupProxy::Range_t range = m_proxy.getIdRange(link, m_currentSlot);
         int32_t value = m_currentObject.id;
 
-        while (doNumber(m_root, range, value, m_translator("Set Id"), m_translator("Id"), "pcc2:bsim", m_translator)) {
+        while (doNumber(range, value, m_translator("Set Id"), m_translator("Id"), "pcc2:bsim")) {
             // Dupe check
             if (!m_proxy.isDuplicateId(link, m_currentSlot, value)) {
                 m_proxy.setId(m_currentSlot, value);
@@ -1205,7 +1174,7 @@ SimulatorDialog::onEditExperienceLevel()
         prependDigits(elems);
 
         int32_t value = m_currentObject.experienceLevel.first;
-        if (doList(m_root, m_gameSender, elems, value, m_translator("Set Experience Level"), "pcc2:bsim", m_translator)) {
+        if (doList(elems, value, m_translator("Set Experience Level"), "pcc2:bsim")) {
             m_proxy.setExperienceLevel(m_currentSlot, value);
         }
     }
@@ -1217,7 +1186,7 @@ SimulatorDialog::onEditMass()
     // ex WSimListWithHandler::editMass
     if (isAtShip() && m_currentObject.hullType.first == 0) {
         int32_t value = m_currentObject.mass;
-        if (doNumber(m_root, SimulationSetupProxy::Range_t(1, MAX_MASS), value, m_translator("Set Mass"), m_translator("Mass"), "pcc2:bsim", m_translator)) {
+        if (doNumber(SimulationSetupProxy::Range_t(1, MAX_MASS), value, m_translator("Set Mass"), m_translator("Mass"), "pcc2:bsim")) {
             m_proxy.setMass(m_currentSlot, value);
         }
     }
@@ -1230,7 +1199,8 @@ SimulatorDialog::onEditName()
         // ex WSimListWithHandler::editName, ccsim.pas:RenameShip
         ui::widgets::InputLine input(20, m_root);
         input.setText(m_currentObject.name);
-        if (input.doStandardDialog(m_translator("Set Ship Name"), m_translator("Name:"), m_translator)) {
+        client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:bsim");
+        if (input.doStandardDialog(m_translator("Set Ship Name"), m_translator("Name:"), &help, m_translator)) {
             m_proxy.setName(m_currentSlot, input.getText());
         }
     } else if (isAtPlanet()) {
@@ -1241,7 +1211,7 @@ SimulatorDialog::onEditName()
         sortAlphabetically(elems, 0);
 
         int32_t value = m_currentObject.id;
-        if (doList(m_root, m_gameSender, elems, value, m_translator("Set Planet Name"), "pcc2:bsim", m_translator)) {
+        if (doList(elems, value, m_translator("Set Planet Name"), "pcc2:bsim")) {
             m_proxy.setId(m_currentSlot, value);
         }
     }
@@ -1258,7 +1228,7 @@ SimulatorDialog::onEditOwner()
         prependDigits(elems);
 
         int32_t value = m_currentObject.owner.first;
-        if (doList(m_root, m_gameSender, elems, value, m_translator("Set Owner"), "pcc2:bsim", m_translator)) {
+        if (doList(elems, value, m_translator("Set Owner"), "pcc2:bsim")) {
             m_proxy.setOwner(m_currentSlot, value);
         }
     }
@@ -1322,7 +1292,7 @@ SimulatorDialog::onEditShieldBaseDefense()
         Downlink link(interface());
         SimulationSetupProxy::Range_t range = m_proxy.getShieldRange(link, m_currentSlot);
         int32_t value = m_currentObject.shield;
-        if (doNumber(m_root, range, value, m_translator("Set Shield Level"), m_translator("Shield"), "pcc2:bsim", m_translator)) {
+        if (doNumber(range, value, m_translator("Set Shield Level"), m_translator("Shield"), "pcc2:bsim")) {
             m_proxy.setShield(m_currentSlot, value);
         }
     } else if (isAtBase()) {
@@ -1330,7 +1300,7 @@ SimulatorDialog::onEditShieldBaseDefense()
         Downlink link(interface());
         SimulationSetupProxy::Range_t range = m_proxy.getBaseDefenseRange(link, m_currentSlot);
         int32_t value = m_currentObject.baseDefense;
-        if (doNumber(m_root, range, value, m_translator("Set Base Defense"), m_translator("Defense"), "pcc2:bsim", m_translator)) {
+        if (doNumber(range, value, m_translator("Set Base Defense"), m_translator("Defense"), "pcc2:bsim")) {
             m_proxy.setBaseDefense(m_currentSlot, value);
         }
     }
@@ -1349,7 +1319,7 @@ SimulatorDialog::onEditTypeBaseTorpedoLevel()
         prependDigits(elems);
 
         int32_t value = m_currentObject.baseTorpedoTech;
-        if (doList(m_root, m_gameSender, elems, value, m_translator("Set Starbase Torpedo Tech"), "pcc2:bsim", m_translator)) {
+        if (doList(elems, value, m_translator("Set Starbase Torpedo Tech"), "pcc2:bsim")) {
             m_proxy.setBaseTorpedoTech(m_currentSlot, value);
         }
     }
@@ -1372,7 +1342,7 @@ SimulatorDialog::onEditIntercept()
         SimulationSetupProxy::Range_t range = m_proxy.getInterceptIdRange(link, m_currentSlot);
         int32_t value = m_currentObject.interceptId.first;
 
-        if (doNumber(m_root, range, value, m_translator("Set Intercept-Attack Target"), m_translator("Id"), "pcc2:bsim", m_translator)) {
+        if (doNumber(range, value, m_translator("Set Intercept-Attack Target"), m_translator("Id"), "pcc2:bsim")) {
             m_proxy.setInterceptId(m_currentSlot, value);
         }
     }
@@ -1622,6 +1592,41 @@ SimulatorDialog::showLimitWarning()
         m_translator("This simulation already contains the maximum possible number of ships."),
         m_translator("Battle Simulator"),
         m_root).doOkDialog(m_translator);
+}
+
+bool
+SimulatorDialog::doList(const SimulationSetupProxy::Elements_t& elems, int32_t& value, String_t title, String_t help)
+{
+    ui::widgets::StringListbox list(m_root.provider(), m_root.colorScheme());
+    for (size_t i = 0, n = elems.size(); i < n; ++i) {
+        list.addItem(elems[i].first, elems[i].second);
+    }
+    list.setCurrentKey(value);
+
+    ui::widgets::ScrollbarContainer cont(list, m_root);
+
+    client::widgets::HelpWidget h(m_root, m_translator, m_gameSender, help);
+    if (ui::widgets::doStandardDialog(title, String_t(), cont, true, &h, m_root, m_translator)) {
+        if (list.getCurrentKey().get(value)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool
+SimulatorDialog::doNumber(SimulationSetupProxy::Range_t range, int32_t& value, String_t title, String_t label, String_t help)
+{
+    afl::base::Observable<int32_t> observableValue(value);
+    ui::widgets::DecimalSelector sel(m_root, m_translator, observableValue, range.min(), range.max(), 10);
+
+    afl::base::Deleter del;
+    client::widgets::HelpWidget h(m_root, m_translator, m_gameSender, help);
+    if (ui::widgets::doStandardDialog(title, Format("%s [%d..%d]:", label, range.min(), range.max()), sel.addButtons(del, m_root), false, &h, m_root, m_translator)) {
+        value = observableValue.get();
+        return true;
+    }
+    return false;
 }
 
 

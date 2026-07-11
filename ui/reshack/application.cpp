@@ -416,7 +416,7 @@ class ui::reshack::Application::MainDialog {
              case 3: {
                 afl::base::Observable<int32_t> height(10);
                 ui::widgets::DecimalSelector sel(root, tx, height, 1, 100, 10);
-                if (ui::widgets::doStandardDialog(tx("New Font"), tx("Font Height"), sel, false, root, tx)) {
+                if (ui::widgets::doStandardDialog(tx("New Font"), tx("Font Height"), sel, false, 0, root, tx)) {
                     Ptr<BitmapFont> font = new BitmapFont();
                     font->addNewGlyph(0, new gfx::BitmapGlyph(1, static_cast<uint16_t>(height.get())));
                     font->addNewGlyph(0, 0);

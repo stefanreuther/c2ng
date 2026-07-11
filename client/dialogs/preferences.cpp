@@ -522,7 +522,8 @@ WholePage::onEdit()
         afl::string::Translator& tx = userSide().translator();
         ui::widgets::InputLine input(10000, 20, userSide().root());
         input.setText(p->value);
-        if (input.doStandardDialog(tx("Edit Option"), tx("New Value:"), tx)) {
+        client::widgets::HelpWidget help(userSide().root(), tx, userSide().gameSender(), "pcc2:settings");
+        if (input.doStandardDialog(tx("Edit Option"), tx("New Value:"), &help, tx)) {
             // FIXME: PCC2 loops if setting fails
             proxy().setValue(m_list.getCurrentItem(), input.getText());
         }

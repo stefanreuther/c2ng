@@ -13,6 +13,7 @@
 #include "client/proxy/screenhistoryproxy.hpp"
 #include "client/si/control.hpp"
 #include "client/widgets/expressionlist.hpp"
+#include "client/widgets/helpwidget.hpp"
 #include "client/widgets/referencelistbox.hpp"
 #include "game/interface/referencecontext.hpp"
 #include "game/interface/referencelistcontext.hpp"
@@ -450,6 +451,8 @@ SearchDialog::run(bool immediate)
     disp.add(util::KeyMod_Ctrl + util::Key_Pause, &interface(), &client::si::UserSide::interruptRunningProcesses);
     win.add(disp);
 
+    m_btnHelp.dispatchKeyTo(del.addNew(new client::widgets::HelpWidget(root(), translator(), interface().gameSender(), "pcc2:search")));
+
     ui::widgets::FocusIterator& it = del.addNew(new ui::widgets::FocusIterator(ui::widgets::FocusIterator::Tab));
     it.add(m_input);
     it.add(m_refList);
@@ -822,7 +825,8 @@ SearchDialog::editMatchType()
         box.addItem(int32_t(i), afl::string::Format("%d - %s", i+1, tx(MATCH_TYPES[i])));
     }
     box.setCurrentKey(m_query.getMatchType());
-    if (ui::widgets::doStandardDialog(tx("Search Object"), tx("Search type"), box, true, root(), tx)) {
+    client::widgets::HelpWidget help(root(), tx, interface().gameSender(), "pcc2:search");
+    if (ui::widgets::doStandardDialog(tx("Search Object"), tx("Search type"), box, true, &help, root(), tx)) {
         int32_t k;
         if (box.getCurrentKey().get(k)) {
             m_query.setMatchType(SearchQuery::MatchType(k));

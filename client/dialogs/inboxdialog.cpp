@@ -351,7 +351,7 @@ client::dialogs::InboxDialog::doSearch()
     afl::string::Translator& tx = translator();
     ui::widgets::InputLine input(1000, 30, root());
     input.setText(m_searchText);
-    if (input.doStandardDialog(tx("Search in messages"), tx("Search for:"), tx)) {
+    if (input.doStandardDialog(tx("Search in messages"), tx("Search for:"), 0, tx)) {
         m_searchText = input.getText();
         if (!m_searchText.empty()) {
             m_configProxy.setOption(game::config::UserConfiguration::Messages_LastSearch, m_searchText);

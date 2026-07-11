@@ -262,7 +262,8 @@ SimulationConfigurationEditor::editMode()
     box.setCurrentKey(m_config.getMode());
 
     // Ask user
-    if (ui::widgets::doStandardDialog(m_translator("Mode"), String_t(), box, true, m_root, m_translator)) {
+    client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:simopts");
+    if (ui::widgets::doStandardDialog(m_translator("Mode"), String_t(), box, true, &help, m_root, m_translator)) {
         int32_t value;
         if (box.getCurrentKey().get(value)) {
             setMode(Configuration::VcrMode(value));
@@ -275,8 +276,8 @@ SimulationConfigurationEditor::editEngineShieldBonus()
 {
     afl::base::Observable<int32_t> value(m_config.getEngineShieldBonus());
     ui::widgets::DecimalSelector select(m_root, m_translator, value, 0, 500, 10);
-
-    if (ui::widgets::doStandardDialog(m_translator("Engine-Shield Bonus"), m_translator("Rate [%]"), select, false, m_root, m_translator)) {
+    client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:simopts");
+    if (ui::widgets::doStandardDialog(m_translator("Engine-Shield Bonus"), m_translator("Rate [%]"), select, false, &help, m_root, m_translator)) {
         m_config.setEngineShieldBonus(value.get());
         render();
     }

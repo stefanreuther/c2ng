@@ -38,13 +38,14 @@ using ui::Group;
 namespace {
     class TeamSettingsDialog {
      public:
-        TeamSettingsDialog(ui::Root& root, TeamSettings& settings, PlayerSet_t allPlayers, afl::string::Translator& tx);
+        TeamSettingsDialog(ui::Root& root, TeamSettings& settings, util::RequestSender<game::Session>& gameSender, PlayerSet_t allPlayers, afl::string::Translator& tx);
 
-        bool run(util::RequestSender<game::Session> gameSender, const PlayerArray<String_t>& playerNames);
+        bool run(const PlayerArray<String_t>& playerNames);
 
      private:
         ui::Root& m_root;
         TeamSettings& m_settings;
+        util::RequestSender<game::Session>& m_gameSender;
         afl::string::Translator& m_translator;
         PlayerSet_t m_allPlayers;
         ui::icons::ColorTile m_redTile;
@@ -63,9 +64,10 @@ namespace {
 }
 
 
-TeamSettingsDialog::TeamSettingsDialog(ui::Root& root, TeamSettings& settings, PlayerSet_t allPlayers, afl::string::Translator& tx)
+TeamSettingsDialog::TeamSettingsDialog(ui::Root& root, TeamSettings& settings, util::RequestSender<game::Session>& gameSender, PlayerSet_t allPlayers, afl::string::Translator& tx)
     : m_root(root),
       m_settings(settings),
+      m_gameSender(gameSender),
       m_translator(tx),
       m_allPlayers(allPlayers),
       m_redTile(root, getCellSize(root), ui::Color_Fire + 7),
@@ -79,10 +81,9 @@ TeamSettingsDialog::TeamSettingsDialog(ui::Root& root, TeamSettings& settings, P
 }
 
 bool
-TeamSettingsDialog::run(util::RequestSender<game::Session> gameSender, const PlayerArray<String_t>& playerNames)
+TeamSettingsDialog::run(const PlayerArray<String_t>& playerNames)
 {
-    afl::base::SignalConnection conn_teamChange(m_settings.sig_teamChange
-                                                .add(this, &TeamSettingsDialog::onTeamChange));
+    afl::base::SignalConnection conn_teamChange(m_settings.sig_teamChange.add(this, &TeamSettingsDialog::onTeamChange));
 
     // ex WTeamEditWindow::buildDialog()
     // Window[UIVBoxLayout]
@@ -124,7 +125,7 @@ TeamSettingsDialog::run(util::RequestSender<game::Session> gameSender, const Pla
     //     g3.add(*pAutoSync);
     //     add(g3);
 
-    client::widgets::HelpWidget help(m_root, m_translator, gameSender, "pcc2:teams");
+    client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:teams");
     ui::EventLoop loop(m_root);
     ui::widgets::StandardDialogButtons& g4 = del.addNew(new ui::widgets::StandardDialogButtons(m_root, m_translator));
     g4.addStop(loop);
@@ -197,7 +198,8 @@ TeamSettingsDialog::onEditName()
     input.setFlag(InputLine::GameChars, true);
 
     // Edit it
-    if (input.doStandardDialog(Format(m_translator("Team %d"), teamNr), m_translator("Team Name:"), m_translator)) {
+    client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:teams");
+    if (input.doStandardDialog(Format(m_translator("Team %d"), teamNr), m_translator("Team Name:"), &help, m_translator)) {
         m_settings.setTeamName(teamNr, input.getText());
     }
 }
@@ -261,8 +263,8 @@ client::dialogs::editTeams(ui::Root& root, util::RequestSender<game::Session> ga
     }
 
     // Dialog
-    TeamSettingsDialog dlg(root, settings, allPlayers, tx);
-    if (dlg.run(gameSender, playerNames)) {
+    TeamSettingsDialog dlg(root, settings, gameSender, allPlayers, tx);
+    if (dlg.run(playerNames)) {
         teamProxy.commit(settings);
     }
 }

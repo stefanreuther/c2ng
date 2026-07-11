@@ -72,8 +72,8 @@ client::widgets::MarkerKindSelector::getMarkerKind() const
 }
 
 bool
-client::widgets::MarkerKindSelector::doStandardDialog(String_t title, afl::string::Translator& tx)
+client::widgets::MarkerKindSelector::doStandardDialog(String_t title, ui::Widget* pHelp, afl::string::Translator& tx)
 {
     // ex WMarkerTypeSelector::doStandardDialog, chartdlg.pas:ChooseMarkerType
-    return ui::widgets::doStandardDialog(title, tx("Choose marker type:"), *this, false, m_root, tx);
+    return ui::widgets::doStandardDialog(title, tx("Choose marker type:"), *this, false, pHelp, m_root, tx);
 }

@@ -29,9 +29,10 @@ namespace client { namespace widgets {
 
         /** Standard dialog.
             \param [in] title Dialog title
+            \param [in] pHelp Help widget; optional
             \param [in] tx    Translator
             \return true if user confirmed the dialog, false on cancel */
-        bool doStandardDialog(String_t title, afl::string::Translator& tx);
+        bool doStandardDialog(String_t title, ui::Widget* pHelp, afl::string::Translator& tx);
 
      private:
         ui::Root& m_root;

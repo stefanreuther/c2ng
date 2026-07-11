@@ -108,7 +108,7 @@ ui::reshack::Dialogs::showCoverage(Session& session, std::vector<Info::Coverage>
 {
     // doFontCoverageDialog(const GfxBitmapFont& font, uint32_t& result)
     FontCoverageList list(session, data);
-    if (ui::widgets::doStandardDialog(session.translator()("Character Coverage"), "", list, false, session.root(), session.translator())) {
+    if (ui::widgets::doStandardDialog(session.translator()("Character Coverage"), "", list, false, 0, session.root(), session.translator())) {
         size_t idx = list.getCurrentItem();
         if (idx < data.size() && data[idx].numMissingCharacters != 0) {
             return data[idx].firstMissingCharacter;
@@ -330,7 +330,7 @@ ui::reshack::Dialogs::showCharacterInSystemFonts(Session& session, Unichar_t ch)
     afl::charset::Utf8().append(text, ch);
 
     SystemFontList list(session, text);
-    if (ui::widgets::doStandardDialog(session.translator()("System Fonts"), "", list, false, session.root(), session.translator())) {
+    if (ui::widgets::doStandardDialog(session.translator()("System Fonts"), "", list, false, 0, session.root(), session.translator())) {
         return session.fontList().getFontByIndex(list.getCurrentItem()).get();
     }
     return 0;

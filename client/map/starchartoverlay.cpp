@@ -610,9 +610,10 @@ client::map::StarchartOverlay::createMarker(const client::dialogs::NewDrawingInf
     const String_t title = m_translator("New marker");
     client::widgets::MarkerColorSelector mcs(m_root);
     client::widgets::MarkerKindSelector mks(m_root);
+    client::widgets::HelpWidget help(m_root, m_translator, m_screen.gameSender(), "pcc2:draw");
     mcs.setColor(info.color);
 
-    if (mks.doStandardDialog(title, m_translator)) {
+    if (mks.doStandardDialog(title, &help, m_translator)) {
         if (mcs.doStandardDialog(title, m_translator, 0)) {
             game::proxy::DrawingProxy& proxy = m_screen.drawingProxy();
             proxy.create(m_location.getPosition(), info.type);

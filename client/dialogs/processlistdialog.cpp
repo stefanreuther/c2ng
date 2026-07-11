@@ -523,8 +523,8 @@ ProcessListKeyHandler::changePriority()
         afl::base::Deleter del;
         ui::widgets::DecimalSelector& sel = del.addNew(new ui::widgets::DecimalSelector(m_root, m_translator, priority, 0, 99, 10));
         ui::Widget& w = sel.addButtons(del, m_root);
-        if (ui::widgets::doStandardDialog(m_translator("Process Manager"), m_translator("Enter new process priority:"), w, true, m_root, m_translator)) {
-            // FIXME: help: "pcc2:processmgr"
+        client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:processmgr");
+        if (ui::widgets::doStandardDialog(m_translator("Process Manager"), m_translator("Enter new process priority:"), w, true, &help, m_root, m_translator)) {
             m_proxy.setProcessPriority(processId, priority.get());
         }
     }

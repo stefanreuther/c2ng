@@ -12,6 +12,7 @@
 #include "client/downlink.hpp"
 #include "client/si/control.hpp"
 #include "client/si/userside.hpp"
+#include "client/widgets/helpwidget.hpp"
 #include "game/proxy/selectionproxy.hpp"
 #include "ui/dialogs/messagebox.hpp"
 #include "ui/draw.hpp"
@@ -482,7 +483,8 @@ void
 SelectionManager::doCopy()
 {
     ui::widgets::InputLine input(2000, 25, m_root);
-    if (ui::widgets::doStandardDialog(m_translator("Selection Manager"), m_translator("Enter layer/expression to copy from:"), input, false, m_root, m_translator)) {
+    client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:selectionmgr");
+    if (ui::widgets::doStandardDialog(m_translator("Selection Manager"), m_translator("Enter layer/expression to copy from:"), input, false, &help, m_root, m_translator)) {
         String_t error;
         client::Downlink link(interface());
         if (!m_proxy.executeExpression(link, input.getText(), m_list.getCurrentItem(), error)) {

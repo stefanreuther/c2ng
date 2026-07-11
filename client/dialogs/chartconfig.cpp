@@ -144,7 +144,7 @@ namespace {
 
     class ChartConfigDialog {
      public:
-        ChartConfigDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx);
+        ChartConfigDialog(ui::Root& root, util::RequestSender<game::Session>& gameSender, afl::string::Translator& tx);
 
         // Main entry points
         void load(client::Downlink& link);
@@ -167,7 +167,7 @@ namespace {
 
         // Connections
         ui::Root& m_root;
-        util::RequestSender<game::Session> m_gameSender;
+        util::RequestSender<game::Session>& m_gameSender;
         afl::string::Translator& m_translator;
         ui::EventLoop m_loop;
 
@@ -198,7 +198,7 @@ namespace {
     };
 }
 
-ChartConfigDialog::ChartConfigDialog(ui::Root& root, util::RequestSender<game::Session> gameSender, afl::string::Translator& tx)
+ChartConfigDialog::ChartConfigDialog(ui::Root& root, util::RequestSender<game::Session>& gameSender, afl::string::Translator& tx)
     : m_root(root),
       m_gameSender(gameSender),
       m_translator(tx),
@@ -519,9 +519,10 @@ ChartConfigDialog::onEditMarkerType()
     }
 
     // Edit type
+    client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:starchartopts");
     client::widgets::MarkerKindSelector mks(m_root);
     mks.setMarkerKind(m_markerData[pos].markerKind);
-    if (!mks.doStandardDialog(m_translator("Edit Marker"), m_translator)) {
+    if (!mks.doStandardDialog(m_translator("Edit Marker"), &help, m_translator)) {
         return;
     }
 
@@ -553,7 +554,8 @@ ChartConfigDialog::onEditMarkerName()
     InputLine input(255, m_root);
     input.setFlag(InputLine::GameChars, true);
     input.setText(m_markerData[pos].note);
-    if (!input.doStandardDialog(m_translator("Edit Marker"), m_translator("Name:"), m_translator)) {
+    client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:starchartopts");
+    if (!input.doStandardDialog(m_translator("Edit Marker"), m_translator("Name:"), &help, m_translator)) {
         return;
     }
 

@@ -181,7 +181,8 @@ namespace {
                 } else {
                     afl::base::Observable<int32_t> value(m_proxy.getUnloadInfo().hostileUnload);
                     ui::widgets::DecimalSelector sel(m_root, m_translator, value, 0, 10000, 10);
-                    if (doStandardDialog(m_translator("Ground Combat"), m_translator("Clans to attack with:"), sel, false, m_root, m_translator)) {
+                    client::widgets::HelpWidget help(m_root, m_translator, m_gameSender, "pcc2:envscreen");
+                    if (doStandardDialog(m_translator("Ground Combat"), m_translator("Clans to attack with:"), sel, false, &help, m_root, m_translator)) {
                         m_proxy.setAttackingClansOverride(value.get());
                     }
                 }

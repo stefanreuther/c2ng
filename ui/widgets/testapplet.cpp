@@ -273,7 +273,7 @@ ui::widgets::TestApplet::makeInput()
                 InputLine(10, root).
                     setFont(gfx::FontRequest().addSize(1)).
                     setText("hello").
-                    doStandardDialog("Input", "Type here:", tx);
+                    doStandardDialog("Input", "Type here:", 0, tx);
             }
     };
     return new Class();

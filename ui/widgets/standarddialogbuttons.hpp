@@ -65,10 +65,11 @@ namespace ui { namespace widgets {
         \param prompt  Prompt to show above content
         \param content Content of dialog
         \param framed  true to add a lowered frame around the content
+        \param pHelp   Optional help widget; see StandardDialogButtons::addHelp()
         \param root    Root
         \param tx      Translator (for buttons)
         \return true if dialog was confirmed, false on cancel */
-    bool doStandardDialog(String_t title, String_t prompt, Widget& content, bool framed, Root& root, afl::string::Translator& tx);
+    bool doStandardDialog(String_t title, String_t prompt, Widget& content, bool framed, Widget* pHelp, Root& root, afl::string::Translator& tx);
 
 } }
 

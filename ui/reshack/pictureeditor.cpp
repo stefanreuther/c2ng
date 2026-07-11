@@ -253,7 +253,7 @@ class ui::reshack::PictureEditor::Dialog {
 
             afl::base::Observable<int32_t> value;
             ui::widgets::DecimalSelector nsel(root, tx, value, 0, 1024, 16);
-            if (!ui::widgets::doStandardDialog(title, title, nsel, false, root, tx)) {
+            if (!ui::widgets::doStandardDialog(title, title, nsel, false, 0, root, tx)) {
                 return;
             }
 

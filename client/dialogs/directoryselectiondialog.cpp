@@ -269,7 +269,7 @@ namespace {
         void onNewDirectory()
             {
                 ui::widgets::InputLine input(1000, 40, m_root);
-                if (!input.doStandardDialog(m_translator("New directory"), m_translator("Directory name"), m_translator)) {
+                if (!input.doStandardDialog(m_translator("New directory"), m_translator("Directory name"), 0, m_translator)) {
                     return;
                 }
 

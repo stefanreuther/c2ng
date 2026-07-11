@@ -534,7 +534,8 @@ NavChartDialog::doSearchShips()
     // ex mission.pas:SearchForShip
     if (m_state.acceptShip) {
         ui::widgets::InputLine input(30, 20, m_root);
-        if (!input.doStandardDialog(m_translator("Search for ship"), m_translator("Enter ship name or Id#:"), m_translator)) {
+        client::widgets::HelpWidget help(m_root, m_translator, m_userSide.gameSender(), "pcc2:navchart");
+        if (!input.doStandardDialog(m_translator("Search for ship"), m_translator("Enter ship name or Id#:"), &help, m_translator)) {
             return;
         }
 

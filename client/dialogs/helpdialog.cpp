@@ -226,7 +226,7 @@ HelpDialog::onGoTo()
     // ex WHelpDialog::onGoTo
     ui::widgets::InputLine input(4096, 20, m_root);
     input.setText(m_pageName);
-    if (input.doStandardDialog(m_translator("Go to"), m_translator("Enter page name:"), m_translator)) {
+    if (input.doStandardDialog(m_translator("Go to"), m_translator("Enter page name:"), 0, m_translator)) {
         if (m_pageName != input.getText()) {
             onLinkClick(input.getText());
         }

@@ -177,10 +177,10 @@ ui::widgets::InputLine::getCursorIndex() const
 }
 
 bool
-ui::widgets::InputLine::doStandardDialog(String_t title, String_t prompt, afl::string::Translator& tx)
+ui::widgets::InputLine::doStandardDialog(String_t title, String_t prompt, Widget* pHelp, afl::string::Translator& tx)
 {
     // ex UIInputLine::run (totally modified)
-    return ui::widgets::doStandardDialog(title, prompt, *this, false, m_root, tx);
+    return ui::widgets::doStandardDialog(title, prompt, *this, false, pHelp, m_root, tx);
 }
 
 // EventConsumer:

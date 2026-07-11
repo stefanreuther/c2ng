@@ -163,7 +163,8 @@ namespace {
 
         // Dialog
         ui::widgets::ScrollbarContainer cont(list, root);
-        if (ui::widgets::doStandardDialog(title, String_t(), cont, true, root, tx)) {
+        client::widgets::HelpWidget help(root, tx, gameSender, "pcc2:almanac");
+        if (ui::widgets::doStandardDialog(title, String_t(), cont, true, &help, root, tx)) {
             list.getCurrentKey().get(player);
             return true;
         } else {
@@ -172,12 +173,13 @@ namespace {
     }
 
 
-    bool editSearch(ui::Root& root, const String_t& title, String_t& value, afl::string::Translator& tx)
+    bool editSearch(ui::Root& root, const String_t& title, String_t& value, afl::string::Translator& tx, util::RequestSender<game::Session> gameSender)
     {
         ui::widgets::InputLine inp(200, root);
+        client::widgets::HelpWidget help(root, tx, gameSender, "pcc2:almanac");
         inp.setText(value);
         inp.setFont("+");
-        if (inp.doStandardDialog(tx("Search"), title, tx)) {
+        if (inp.doStandardDialog(tx("Search"), title, &help, tx)) {
             value = inp.getText();
             return true;
         } else {
@@ -566,7 +568,7 @@ namespace {
                  case gsi::EditValueHull:
                     return client::dialogs::chooseHull(m_root, f.name, f.elem.value, m_translator, m_gameSender, false);
                  case gsi::EditString:
-                    return editSearch(m_root, f.name, f.value, m_translator);
+                    return editSearch(m_root, f.name, f.value, m_translator, m_gameSender);
                 }
                 return false;
             }
@@ -587,7 +589,7 @@ namespace {
                         break;
                     }
                 }
-                if (editSearch(m_root, m_translator("Name"), text, m_translator)) {
+                if (editSearch(m_root, m_translator("Name"), text, m_translator, m_gameSender)) {
                     m_proxy.setNameFilter(text);
                 }
             }
