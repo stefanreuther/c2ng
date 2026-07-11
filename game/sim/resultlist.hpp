@@ -159,8 +159,8 @@ namespace game { namespace sim {
         size_t getLastClassResultIndex() const;
 
      private:
-        int32_t m_totalWeight;            ///< Total weight. This is the value to which the battles are "normalized". ex total_weight. FIXME: name
-        int32_t m_cumulativeWeight;       ///< Sum of weights of all fights. ex cumulative_weight. FIXME: name
+        int32_t m_totalWeight;            ///< Total weight. This is the value to which the battles are "normalized". ex total_weight.
+        int32_t m_cumulativeWeight;       ///< Sum of weights of all fights. ex cumulative_weight.
         int m_numBattles;                 ///< Total number of battles so far. ex battle_count.
         size_t m_lastClassResultIndex;    ///< Last class result index.
 

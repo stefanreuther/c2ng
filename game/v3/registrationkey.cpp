@@ -146,7 +146,7 @@ game::v3::RegistrationKey::initFromDirectory(afl::io::Directory& dir, afl::sys::
     try {
         m_isValid = false;
 
-        afl::base::Ref<afl::io::Stream> s = dir.openFile("fizz.bin", afl::io::FileSystem::OpenRead);
+        afl::base::Ref<afl::io::Stream> s = dir.openFile(getKeyFileName(), afl::io::FileSystem::OpenRead);
         parseFizz(*s);
 
         // Check for reg.key in parent directory.
@@ -225,6 +225,13 @@ game::v3::RegistrationKey::getKeyId() const
     afl::checksums::SHA1 hasher;
     hasher.add(bytes);
     return hasher.getHashAsHexString();
+}
+
+// Get name of key file.
+const char*
+game::v3::RegistrationKey::getKeyFileName()
+{
+    return "fizz.bin";
 }
 
 /** Initialize registration strings from data of a FIZZ.BIN file.

@@ -901,20 +901,15 @@ interpreter::Process::executeInstruction()
                 valueStack.popBackN(op.arg);
                 if (operation == Opcode::miIMLoad)
                     valueStack.pushBackNew(0);
-            } else if (CallableValue* iv = dynamic_cast<CallableValue*>(p.get())) {
-                /* We can load this */
-                validateCalledObject(iv->isProcedureCall(), op.minor);
+            } else {
+                /* Try to load this */
+                CallableValue& iv = mustBeCallable(p.get(), (op.minor & Opcode::miIMRefuseFunctions) != 0 ? Error::ExpectProcedure : Error::ExpectIndexable);
+                validateCalledObject(iv.isProcedureCall(), op.minor);
 
                 Segment_t args;
                 valueStack.transferLastTo(op.arg, args);
 
-                iv->call(*this, args, operation == Opcode::miIMLoad);
-            } else {
-                /* Error */
-                if (op.minor & Opcode::miIMRefuseFunctions)
-                    throw Error::typeError(Error::ExpectProcedure);
-                else
-                    throw Error::typeError(Error::ExpectIndexable);
+                iv.call(*this, args, operation == Opcode::miIMLoad);
             }
             break;
          }
@@ -1173,25 +1168,22 @@ interpreter::Process::executeInstruction()
             }
             popContext();
             break;
-         case Opcode::miSpecialFirstIndex:
+         case Opcode::miSpecialFirstIndex: {
             /* Start iteration */
             checkStack(1);
-            if (CallableValue* iv = dynamic_cast<CallableValue*>(valueStack.top())) {
-                if (Context* con = iv->makeFirstContext()) {
-                    /* We have something to iterate over */
-                    pushNewContext(con);
-                    valueStack.popBack();
-                    valueStack.pushBackNew(makeBooleanValue(1));
-                } else {
-                    /* Set exists but is empty */
-                    valueStack.popBack();
-                    valueStack.pushBackNew(0);
-                }
+            CallableValue& iv = mustBeCallable(valueStack.top(), Error::ExpectIterable);
+            if (Context* con = iv.makeFirstContext()) {
+                /* We have something to iterate over */
+                pushNewContext(con);
+                valueStack.popBack();
+                valueStack.pushBackNew(makeBooleanValue(1));
             } else {
-                /* This is not a set */
-                throw Error::typeError(Error::ExpectIterable);
+                /* Set exists but is empty */
+                valueStack.popBack();
+                valueStack.pushBackNew(0);
             }
             break;
+         }
          case Opcode::miSpecialNextIndex:
             /* Continue iteration */
             if (m_contexts.empty()) {
@@ -1328,21 +1320,15 @@ interpreter::Process::executeInstruction()
          case Opcode::miSpecialBind:
             handleBind(op.arg);
             break;
-         case Opcode::miSpecialFirst:
+         case Opcode::miSpecialFirst: {
             /* Start iteration */
             /* @since 2.0.7, 2.40.6 */
             checkStack(1);
-            if (CallableValue* iv = dynamic_cast<CallableValue*>(valueStack.top())) {
-                /* We have something to iterate over */
-                Context* con = iv->makeFirstContext();
-                valueStack.popBack();
-                valueStack.pushBackNew(con);
-            } else {
-                /* This is not a set */
-                throw Error::typeError(Error::ExpectIterable);
-            }
+            Context* con = mustBeCallable(valueStack.top(), Error::ExpectIterable).makeFirstContext();
+            valueStack.popBack();
+            valueStack.pushBackNew(con);
             break;
-
+         }
          case Opcode::miSpecialNext:
             /* Continue iteration */
             /* @since 2.0.7, 2.40.6 */
@@ -1963,14 +1949,9 @@ interpreter::Process::handleBind(uint16_t nargs)
 
     // Build the closure
     std::auto_ptr<Closure> c(new Closure());
-    if (CallableValue* func = dynamic_cast<CallableValue*>(m_valueStack.top())) {
-        // OK
-        c->setNewFunction(func);
-        m_valueStack.extractTop();
-    } else {
-        // Error
-        throw Error::typeError(Error::ExpectCallable);
-    }
+    CallableValue& func = mustBeCallable(m_valueStack.top(), Error::ExpectCallable);
+    c->setNewFunction(&func);
+    m_valueStack.extractTop();
     c->addNewArgumentsFrom(m_valueStack, nargs);
 
     // Return

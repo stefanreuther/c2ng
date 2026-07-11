@@ -235,7 +235,7 @@ AFL_TEST("game.proxy.HistoryTurnProxy:no-turnloader", a)
 
     a.checkEqual("21. size",       ur.items.size(), 1U);
     a.checkEqual("22. turnNumber", ur.items[0].turnNumber, 29);
-    a.checkEqual("23. status",     ur.items[0].status, game::proxy::HistoryTurnProxy::Unknown);
+    a.checkEqual("23. status",     ur.items[0].status, game::proxy::HistoryTurnProxy::Unavailable);
 }
 
 /** Test error case: empty session.

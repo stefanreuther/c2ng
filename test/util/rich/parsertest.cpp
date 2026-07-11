@@ -141,7 +141,7 @@ AFL_TEST("util.rich.Parser:parseXml:variants", a)
 
     // Styles
     a.checkEqual("41", transform("<b>x</b>y"), "{BOLD:x}y");
-    // a.checkEqual("42", transform("<em>x</em>y"), "{BOLD:x}y");  // FIXME: should be italic!
+    a.checkEqual("42", transform("<em>x</em>y"), "{ITALIC:x}y");
     a.checkEqual("43", transform("<u>x</u>y"), "{UNDERLINE:x}y");
     a.checkEqual("44", transform("a<tt>b</tt>"), "a{FIXED:b}");
     a.checkEqual("45", transform("<b>this is <u>important</u></b>!"), "{BOLD:this is {UNDERLINE:important}}!");

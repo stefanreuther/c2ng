@@ -13,6 +13,7 @@
 #include "interpreter/simplefunction.hpp"
 #include "interpreter/simpleprocedure.hpp"
 #include "interpreter/values.hpp"
+#include "util/string.hpp"
 
 /*
  *  Imports
@@ -25,6 +26,7 @@ using interpreter::Error;
 using interpreter::Opcode;
 using interpreter::SimpleFunction;
 using interpreter::SimpleProcedure;
+using interpreter::mustBeCallable;
 
 const int game::interface::ConfigurationEditorContext::ScriptEditor;
 
@@ -141,35 +143,10 @@ namespace {
      *  Helpers
      */
 
-    // Helper to check type of a CallableValue parameter [FIXME: dup from GlobalActionContext]
-    const CallableValue& requireCallable(const afl::data::Value* value)
-    {
-        const CallableValue* cv = dynamic_cast<const CallableValue*>(value);
-        if (cv == 0) {
-            throw Error::typeError(Error::ExpectCallable);
-        }
-        return *cv;
-    }
-
-    // Add component to a string list [FIXME: dup from GlobalActionContext]
-    void addComponent(std::vector<String_t>& out, const String_t& in)
-    {
-        String_t value = afl::string::strTrim(in);
-        if (!value.empty()) {
-            out.push_back(value);
-        }
-    }
-
-    // Parse a name into a path [FIXME: dup from GlobalActionContext]
+    // Parse a name into a path
     std::vector<String_t> parsePath(const String_t& name)
     {
-        std::vector<String_t> path;
-        size_t i = 0, n;
-        while ((n = name.find('|', i)) != String_t::npos) {
-            addComponent(path, name.substr(i, n-i));
-            i = n+1;
-        }
-        addComponent(path, name.substr(i));
+        std::vector<String_t> path = util::parsePath(name, '|');
         if (path.empty()) {
             throw Error("Option name cannot be empty");
         }
@@ -258,10 +235,9 @@ namespace {
             return;
         }
 
-        const CallableValue& editCallable  = requireCallable(editValue);
-        const CallableValue& valueCallable = requireCallable(valueValue);
+        const CallableValue& editCallable  = mustBeCallable(editValue,  Error::ExpectCallable);
+        const CallableValue& valueCallable = mustBeCallable(valueValue, Error::ExpectCallable);
 
-        // Parse the name into a path [FIXME: dup from GlobalActionContext]
         std::vector<String_t> path = parsePath(name);
 
         // Create

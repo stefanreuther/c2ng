@@ -99,11 +99,7 @@ namespace interpreter {
 
             Finalizers are not persisted in any way,
             their job is to report a status back to someone who started the process on the UI.
-            If the process suspends, the finalizer will be called to report the suspension.
-
-            FIXME: we will need an API for observers to be able to watch and interrupt processes
-            (for the user Ctrl+C feature and possibly debugging).
-            That API will probably replace Finalizer. */
+            If the process suspends, the finalizer will be called to report the suspension. */
         class Finalizer : public afl::base::Deletable {
          public:
             /** Perform finalisation for this process.

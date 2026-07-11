@@ -19,6 +19,7 @@
 #include "afl/test/testrunner.hpp"
 #include "game/types.hpp"
 #include "interpreter/basevalue.hpp"
+#include "interpreter/callablevalue.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/tokenizer.hpp"
 #include <memory>
@@ -316,6 +317,8 @@ AFL_TEST("interpreter.Values:quoteString", a)
 
     // Backslash if needed
     a.checkEqual("21", interpreter::quoteString("\"a'"), "\"\\\"a'\"");
+    a.checkEqual("22", interpreter::quoteString("a\tb"), "\"a\\tb\"");
+    a.checkEqual("23", interpreter::quoteString("a\nb"), "\"a\\nb\"");
 }
 
 /** Test quoteString() round-trip compatibility for parsing. */
@@ -347,4 +350,41 @@ AFL_TEST("interpreter.Values:formatFloat", a)
 
     a.checkEqual("11", interpreter::formatFloat(0.125), "0.125");
     a.checkEqual("12", interpreter::formatFloat(-0.125), "-0.125");
+}
+
+namespace {
+    class TestCallable : public interpreter::CallableValue {
+     public:
+        virtual void call(interpreter::Process& /*proc*/, afl::data::Segment& /*args*/, bool /*want_result*/)
+            { }
+        virtual bool isProcedureCall() const
+            { return false; }
+        virtual size_t getDimension(size_t /*which*/) const
+            { return 0; }
+        virtual interpreter::Context* makeFirstContext()
+            { return rejectFirstContext(); }
+        virtual interpreter::CallableValue* clone() const
+            { return 0; }
+        virtual String_t toString(bool /*readable*/) const
+            { return String_t(); }
+        virtual void store(interpreter::TagNode&, afl::io::DataSink&, interpreter::SaveContext&) const
+            { }
+    };
+    TestCallable in;
+}
+
+/** Test mustBeCallable. */
+AFL_TEST("interpreter.Values:mustBeCallable", a)
+{
+    // Success
+    interpreter::CallableValue& out = interpreter::mustBeCallable(&in, interpreter::Error::ExpectCallable);
+    a.checkEqual("01. normal", &out, &in);
+
+    const TestCallable* inConst = &in;
+    const interpreter::CallableValue& outConst = interpreter::mustBeCallable(inConst, interpreter::Error::ExpectCallable);
+    a.checkEqual("02. const", &outConst, inConst);
+
+    // Failures
+    afl::data::IntegerValue iv(99);
+    AFL_CHECK_THROWS(a("50. int"), interpreter::mustBeCallable(&iv, interpreter::Error::ExpectCallable), interpreter::Error);
 }

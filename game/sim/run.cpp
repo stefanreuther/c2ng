@@ -638,7 +638,7 @@ namespace {
             obj.setHull(sh.getHullType());
         } else {
             obj.setMass(sh.getMass());
-            obj.setPicture(200); // FIXME: hardcoded; this is the same value as used in PCC
+            obj.setPicture(200);
             obj.setHull(0);
         }
 
@@ -1855,10 +1855,6 @@ namespace {
         }
     }
 
-    // FIXME: ShipInfo and PermutedSorter as well as the following functions
-    // are almost copied verbatim from pdk-host.cc!
-    // FIXME: merge with regular packing?
-
     /** Get damage-restricted tech level for a base. */
     int getBaseDamageTech(const Planet& pl, int have_tech)
     {
@@ -2137,8 +2133,6 @@ namespace {
            to attack all ships from that fleet. Otherwise, it could happen
            that the other fleet is still aggressive to us, but we do no
            longer have someone to attack. */
-        /* FIXME: this code is really ugly. And it is almost a duplicate
-           of the same thing in pdk-host.cc */
         for (size_t other_fleet_nr = 0; other_fleet_nr < battle.getNumFleets(); ++other_fleet_nr) {
             const game::vcr::flak::Setup::Fleet& other_fleet = battle.getFleetByIndex(other_fleet_nr);
             if (canAttackThisFleet(battle, fleet, other_fleet, info, opts, shipList, config)) {

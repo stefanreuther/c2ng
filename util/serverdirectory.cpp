@@ -308,7 +308,6 @@ util::ServerDirectory::Entry::open(File* p, bool forWriting)
 
          case File::UnreadFile: {
             // We can make that file readable
-            // FIXME: this copies the data.
             afl::base::GrowableBytes_t data;
             m_container->m_transport->getFile(m_name, data);
             p->data = new InternalStream();

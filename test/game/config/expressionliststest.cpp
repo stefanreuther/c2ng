@@ -236,8 +236,11 @@ AFL_TEST("game.config.ExpressionLists:saveRecentFiles", a)
     // Testee
     game::config::ExpressionLists testee;
     ExpressionList* s = testee.get(ExpressionLists::ShipLabels, ExpressionLists::Recent);
-    s->pushBackNew(new ExpressionList::Item("a  b  c", "", "xyz"));
-    s->pushBackNew(new ExpressionList::Item("a b c", "[!]", "123"));
+    s->pushBackNew(new ExpressionList::Item("a  b  c", "", "xyz"));     // compacted
+    s->pushBackNew(new ExpressionList::Item("[foo]", "", "foo"));       // ignored
+    s->pushBackNew(new ExpressionList::Item("#foo", "", "foo"));        // ignored
+    s->pushBackNew(new ExpressionList::Item(";foo", "", "foo"));        // ignored
+    s->pushBackNew(new ExpressionList::Item("a b c", "[!]", "123"));    // saved
     testee.saveRecentFiles(profile, log, tx);
 
     // Verify

@@ -214,7 +214,6 @@ interpreter::World::compileCommand(String_t command, bool wantResult, bool& hasR
     // Compile
     StatementCompiler sc(mcs);
     DefaultStatementCompilationContext scc(*this);
-    // scc.withStaticContext(&proc); // FIXME: can we do this? ScriptSide does it, but it requires creating the process beforehand.
     scc.withFlag(CompilationContext::RefuseBlocks);
     scc.withFlag(CompilationContext::LinearExecution);
     if (!wantResult) {

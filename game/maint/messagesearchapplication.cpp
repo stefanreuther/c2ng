@@ -300,7 +300,7 @@ namespace {
             }
      private:
         Message& m;
-        game::PlayerList playerList;   // FIXME
+        game::PlayerList playerList;
     };
 
     void Message::search()

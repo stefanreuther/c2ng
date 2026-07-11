@@ -558,7 +558,6 @@ String_t
 game::map::Planet::getName(ObjectName which, afl::string::Translator& tx, const InterpreterInterface& iface) const
 {
     // ex GPlanet::getName
-    // FIXME: make the default name "", and handle that specially here
     switch (which) {
      case PlainName:
         return m_name;

@@ -18,6 +18,8 @@
 
 namespace interpreter {
 
+    class CallableValue;
+
     /** Make a tristate-boolean value from integer.
         \param value Negative for empty, zero for false, positive for true
         \return newly-created value (can be null) */
@@ -93,6 +95,13 @@ namespace interpreter {
         \throw Error if value is not a ScalarValue */
     int32_t mustBeScalarValue(const afl::data::Value* value, Error::ExpectedType ty);
 
+    /** Get required CallableValue.
+        \param value Value to check
+        \return CallableValue
+        \throw Error if value is not a CallableValue */
+    CallableValue& mustBeCallable(afl::data::Value* value, Error::ExpectedType ty);
+    const CallableValue& mustBeCallable(const afl::data::Value* value, Error::ExpectedType ty);
+
     /** Convert to string representation.
         This function implements stringification for simple types.
         For BaseValue descendants, calls their toString() method.
@@ -142,6 +151,12 @@ interpreter::makeOptionalIntegerValue(const afl::base::Optional<UserType>& value
     } else {
         return 0;
     }
+}
+
+inline const interpreter::CallableValue&
+interpreter::mustBeCallable(const afl::data::Value* value, Error::ExpectedType ty)
+{
+    return mustBeCallable(const_cast<afl::data::Value*>(value), ty);
 }
 
 #endif

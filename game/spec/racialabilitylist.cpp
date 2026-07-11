@@ -145,7 +145,6 @@ game::spec::RacialAbilityList::ConfigBuilder::addRateConfiguration(Category cat,
 
     if (total > 4) {
         // More than 4 values.
-        // FIXME: should we create abilities here?
     } else if (total > 1) {
         // Try to build relations
         for (int pl = 1; pl <= MAX_PLAYERS; ++pl) {
@@ -201,7 +200,6 @@ game::spec::RacialAbilityList::ConfigBuilder::addCostConfiguration(Category cat,
 
     if (total > 4) {
         // More than 4 values.
-        // FIXME: should we create abilities here?
     } else if (total > 1) {
         // Try to build relations
         for (int pl = 1; pl <= MAX_PLAYERS; ++pl) {
@@ -326,9 +324,6 @@ game::spec::RacialAbilityList::ConfigBuilder::addPlayerRacialAbilities()
     addRateConfiguration(Economy, HostConfiguration::BorgAssimilationRate, borgs, m_translator("Assimilation rate"));
 
     // Fighter sweeping (mostly Colonies)
-    // FIXME: it seems a good idea to optimize here (only one entry if fighterSweepers=webSweepers,
-    // but this fails because fighterSweepers by default includes player 12+ as at this time we don't know
-    // that we have only 11.
     PlayerSet_t fighterSweepers = m_config.getPlayersWhereEnabled(HostConfiguration::FighterSweepRate);
     PlayerSet_t webSweepers = m_config[HostConfiguration::AllowColoniesSweepWebs]()
         ? m_config.getPlayersOfRace(11) & fighterSweepers

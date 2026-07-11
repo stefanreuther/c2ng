@@ -24,7 +24,7 @@ class game::proxy::BuildStructuresProxy::Trampoline {
           m_game(), m_root(), m_container(), m_action(), conn_change()
         { }
 
-     void init(Id_t id, HeaderInfo& info, Status& status)
+     void init(Id_t id, HeaderInfo& info)
         {
             // Lifetimes
             m_game = m_session.getGame();
@@ -50,9 +50,6 @@ class game::proxy::BuildStructuresProxy::Trampoline {
                 info.hasBase = planet.hasBase();
                 info.planetName = planet.getName(tx);
                 info.planetInfo = afl::string::Format(tx("(Id #%d, %s - %d" "\xC2\xB0" "\x46)"), planet.getId(), game::tables::TemperatureName(tx)(temp), temp);
-
-                // Status
-                describe(status);
 
                 // Signal
                 conn_change = m_action->sig_change.add(this, &Trampoline::onChange);
@@ -136,24 +133,16 @@ game::proxy::BuildStructuresProxy::init(util::WaitIndicator& link, Id_t id, Head
     class Task : public util::Request<Trampoline> {
      public:
         Task(Id_t id, HeaderInfo& info)
-            : m_id(id), m_info(info), m_status()
+            : m_id(id), m_info(info)
             { }
         virtual void handle(Trampoline& tpl)
-            { tpl.init(m_id, m_info, m_status); }
-        const Status& status() const
-            { return m_status; }
+            { tpl.init(m_id, m_info); }
      private:
         Id_t m_id;
         HeaderInfo& m_info;
-        Status m_status;
     };
     Task t(id, info);
     link.call(m_sender, t);
-
-    // FIXME: needed?
-    // if (info.ok) {
-    //     sig_statusChange.raise(t.status());
-    // }
 }
 
 void

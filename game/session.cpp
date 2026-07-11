@@ -741,8 +741,6 @@ game::Session::getComment(Scope scope, int id) const
 bool
 game::Session::hasTask(Scope scope, int id) const
 {
-    // FIXME: consider changing the signature to take an object,
-    // to avoid the reverse-mapping into a universe.
     if (const Game* g = m_game.get()) {
         using interpreter::Process;
         const game::map::Universe& univ = g->currentTurn().universe();

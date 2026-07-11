@@ -11,7 +11,7 @@ namespace game { namespace v3 { namespace trn {
     class IndexFilter : public Filter {
      public:
         /** Create.
-            \param from,to index range, 1-based(!)(FIXME?), boundaries inclusive. */
+            \param from,to index range, 1-based(!), boundaries inclusive. */
         IndexFilter(size_t from, size_t to);
 
         virtual bool accept(const TurnFile& trn, size_t index) const;

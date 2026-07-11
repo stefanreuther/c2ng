@@ -28,8 +28,6 @@ String_t
 game::map::PlanetStorage::getName(afl::string::Translator& tx) const
 {
     // ex GPlanetTransfer::getName
-    // FIXME: PCC 1.x says "$NAME starbase" or "planet $NAME" here.
-    // should we use same wording?
     return m_planet.getName(tx);
 }
 

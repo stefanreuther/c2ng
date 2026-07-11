@@ -140,7 +140,6 @@ void
 game::spec::FriendlyCodeList::sort()
 {
     // ex GFCodeList::sort
-    // FIXME: use stable_sort instead?
     m_data.sort(compareFriendlyCodes);
 }
 

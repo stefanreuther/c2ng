@@ -53,7 +53,6 @@ namespace {
                |WrmRandDisplacement|           |WrmRandDisplacement|
                |WrmDisplacement|WrmDisplacement| */
             // FIXME: adjust /dif/ for wraparound
-            // FIXME: PCC1 uses slightly different formulas
             int dif = pos_now - pos_old;
             if (dif > 0 && dif > time * rand) {
                 /* We moved to the right by more than WrmRandDisplacement,

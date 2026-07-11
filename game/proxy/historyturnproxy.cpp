@@ -137,7 +137,7 @@ class game::proxy::HistoryTurnProxy::UpdateRequest : public util::Request<Sessio
                     // Update
                     int firstTurn = std::max(m_firstTurn, lastTurn - (m_maxTurns-1));
                     g->previousTurns().initFromTurnScores(g->scores(), firstTurn, lastTurn - firstTurn + 1);
-                    g->previousTurns().initFromTurnLoader(*r->getTurnLoader(), *r, g->getViewpointPlayer(), firstTurn, lastTurn - firstTurn + 1);
+                    g->previousTurns().initFromTurnLoader(*r, g->getViewpointPlayer(), firstTurn, lastTurn - firstTurn + 1);
 
                     // Build result
                     for (int i = firstTurn; i <= lastTurn; ++i) {

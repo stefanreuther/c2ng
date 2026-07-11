@@ -20,7 +20,7 @@ namespace game { namespace proxy {
         - initialize (init())
 
         Bidirectional, asynchronous: modifications cause sig_statusChange to be raised
-        - update() to request an update
+        - update() to request an update; call after connecting listeners
         - addLimitCash(), doStandardAutoBuild() to modify the request
         - commit() */
     class BuildStructuresProxy {

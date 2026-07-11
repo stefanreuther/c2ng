@@ -47,7 +47,7 @@ namespace game { namespace spec { namespace info {
             \param e element to describe
             \param browser Browser (provides access to environment)
             \return populated FilterInfo */
-        FilterInfo describe(const FilterElement& e, const Browser& browser) const;
+        static FilterInfo describe(const FilterElement& e, const Browser& browser);
 
         /** Get player filter.
             If this filter contains a Value_Player element, returns its parameter.

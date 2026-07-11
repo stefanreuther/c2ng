@@ -5,6 +5,7 @@
 
 #include "game/historyturnlist.hpp"
 #include "game/historyturn.hpp"
+#include "game/root.hpp"
 #include "game/score/turnscore.hpp"
 #include "game/turnloader.hpp"
 
@@ -67,14 +68,16 @@ game::HistoryTurnList::initFromTurnScores(const game::score::TurnScoreList& scor
 }
 
 void
-game::HistoryTurnList::initFromTurnLoader(TurnLoader& loader, Root& root, int player, int turn, int count)
+game::HistoryTurnList::initFromTurnLoader(Root& root, int player, int turn, int count)
 {
-    // FIXME: use the query-many-at-once capability?
+    TurnLoader* loader = root.getTurnLoader().get();
     for (int i = 0; i < count; ++i, ++turn) {
         if (HistoryTurn* p = create(turn)) {
             if (p->getStatus() == HistoryTurn::Unknown) {
                 TurnLoader::HistoryStatus st[1] = {TurnLoader::Negative};
-                loader.getHistoryStatus(player, turn, st, root);
+                if (loader != 0) {
+                    loader->getHistoryStatus(player, turn, st, root);
+                }
                 switch (st[0]) {
                  case TurnLoader::Negative:
                     p->setStatus(HistoryTurn::Unavailable);

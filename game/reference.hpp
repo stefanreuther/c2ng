@@ -50,9 +50,7 @@ namespace game {
             /** Minefield. Id is minefield number. */
             Minefield,
 
-            /** Ufo.
-                FIXME: clarify the meaning of type Ufo. Right now, we pass an Id, which can be ambiguous with Hans' ufos.
-                PCC 1.x passed an index. */
+            /** Ufo. Id is an Ufo Id. */
             Ufo,
 
             /** Hull. Id is hull number. */
