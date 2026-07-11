@@ -684,7 +684,6 @@ ui::rich::DocumentParser::parsePre()
         util::rich::Text out;
         while (hi.scan(seg)) {
             // This implements the PCC2 syntax style: comments red, strings green.
-            // FIXME: we could implement more styles, e.g. bold keywords.
             switch (seg.getFormat()) {
              case util::syntax::StringFormat:
                 out.append(util::SkinColor::Green, afl::string::fromMemory(seg.getText()));
@@ -695,10 +694,17 @@ ui::rich::DocumentParser::parsePre()
                 out.append(util::SkinColor::Red, afl::string::fromMemory(seg.getText()));
                 break;
 
-             case util::syntax::DefaultFormat:
              case util::syntax::KeywordFormat:
-             case util::syntax::NameFormat:
              case util::syntax::SectionFormat:
+                out.append(util::rich::Text(afl::string::fromMemory(seg.getText()))
+                           .withStyle(util::rich::StyleAttribute::Bold));
+                break;
+
+             case util::syntax::NameFormat:
+                out.append(util::SkinColor::Blue, afl::string::fromMemory(seg.getText()));
+                break;
+
+             case util::syntax::DefaultFormat:
              case util::syntax::QuoteFormat:
              case util::syntax::ErrorFormat:
                 out.append(afl::string::fromMemory(seg.getText()));
