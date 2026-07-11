@@ -230,7 +230,6 @@ client::dialogs::doReferenceSortOrderMenu(game::ref::Configuration& order, gfx::
     // ex WVisualScanListWindow::onMenu, sort.pas:ChooseSortOrder
     ui::widgets::StringListbox box(root.provider(), root.colorScheme());
 
-    // FIXME: improve this...
     const int32_t NUM_ITEMS = int32_t(countof(ITEMS));
     int32_t current = 0;
     for (int32_t i = 0; i < NUM_ITEMS; ++i) {

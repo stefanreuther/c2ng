@@ -11,7 +11,6 @@ double
 game::vcr::flak::Position::distanceTo(const Position& other) const
 {
     // ex FlakPos::distanceTo, flak.pas:DistanceFleetToFleet, flak.pas:DistanceFleetToXY, flak.pas:DistanceFleetToShip
-    // FIXME: PCC1 has optimisations for same y's here
     // These must be double, we're computing stuff like 200000^2 here
     const double dist_x = x - other.x;
     const double dist_y = y - other.y;

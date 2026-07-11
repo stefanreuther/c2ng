@@ -12,6 +12,7 @@
 #include "afl/data/visitor.hpp"
 #include "afl/string/format.hpp"
 #include "interpreter/basevalue.hpp"
+#include "interpreter/callablevalue.hpp"
 #include "interpreter/error.hpp"
 
 // Make a tristate-boolean value from integer.
@@ -147,7 +148,7 @@ interpreter::mustBeStringValue(const afl::data::Value* value)
 {
     const afl::data::StringValue* sv = dynamic_cast<const afl::data::StringValue*>(value);
     if (sv == 0) {
-        throw interpreter::Error::typeError(interpreter::Error::ExpectString);
+        throw Error::typeError(Error::ExpectString);
     }
     return sv->getValue();
 }
@@ -157,11 +158,20 @@ interpreter::mustBeScalarValue(const afl::data::Value* value, Error::ExpectedTyp
 {
     const afl::data::ScalarValue* sv = dynamic_cast<const afl::data::ScalarValue*>(value);
     if (sv == 0) {
-        throw interpreter::Error::typeError(ty);
+        throw Error::typeError(ty);
     }
     return sv->getValue();
 }
 
+interpreter::CallableValue&
+interpreter::mustBeCallable(afl::data::Value* value, Error::ExpectedType ty)
+{
+    CallableValue* cv = dynamic_cast<CallableValue*>(value);
+    if (cv == 0) {
+        throw Error::typeError(ty);
+    }
+    return *cv;
+}
 
 // Convert to string representation.
 String_t
@@ -208,7 +218,6 @@ interpreter::toString(const afl::data::Value* value, bool readable)
             }
         virtual void visitVector(const afl::data::Vector& /*vv*/)
             {
-                // FIXME: does this appear in scripts? Our arrays behave differently (multi-dimension, callable, etc.)
                 m_result = "#<vector>";
             }
         virtual void visitOther(const afl::data::Value& other)
@@ -228,7 +237,6 @@ interpreter::toString(const afl::data::Value* value, bool readable)
             }
         virtual void visitError(const String_t& /*source*/, const String_t& str)
             {
-                // FIXME: does this appear in scripts?
                 throw Error(str);
             }
         bool m_readable;
@@ -245,23 +253,23 @@ interpreter::quoteString(const String_t& value)
 {
     // ex int/value.h:quoteString
     // ex ccexpr.pas:Quote
-    // FIXME: should this handle \t? For now, it's not strictly necessary; console shows it as
-    // replacement character which can be correctly recalled and parsed.
-    if (value.find_first_of("\"\\\n") == value.npos) {
+    if (value.find_first_of("\"\\\n\t") == value.npos) {
         // No meta-characters, use unquoted double-quote string
         return "\"" + value + "\"";
-    } else if (value.find_first_of("\'\n") == value.npos) {
+    } else if (value.find_first_of("\'\n\t") == value.npos) {
         // Double-quotes or backslashes, but no apostrophes or newlines
         return "'" + value + "'";
     } else {
         // Sufficiently complicated, so add quotes.
         String_t output = "\"";
         String_t::size_type i = 0, j;
-        while (((j = value.find_first_of("\"\\\n", i)) != value.npos)) {
+        while (((j = value.find_first_of("\"\\\n\t", i)) != value.npos)) {
             output.append(value, i, j-i);
             output.append(1, '\\');
             if (value[j] == '\n') {
                 output.append(1, 'n');
+            } else if (value[j] == '\t') {
+                output.append(1, 't');
             } else {
                 output.append(value, j, 1);
             }
@@ -294,7 +302,6 @@ interpreter::formatFloat(double value)
 bool
 interpreter::isAlmostZero(double value)
 {
-    // FIXME: Traditionally, we consider values below 1.0E-06 as zero (falsy, not permitted as divisor).
-    // Can we do better, now that we're guaranteed to have IEEE FP?
+    // Traditionally, we consider values below 1.0E-06 as zero (falsy, not permitted as divisor).
     return std::fabs(value) < 1.0E-06;
 }

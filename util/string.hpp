@@ -5,6 +5,7 @@
 #ifndef C2NG_UTIL_STRING_HPP
 #define C2NG_UTIL_STRING_HPP
 
+#include "afl/data/stringlist.hpp"
 #include "afl/string/string.hpp"
 #include "afl/string/translator.hpp"
 
@@ -172,6 +173,18 @@ namespace util {
         \return if correct prefix present, pointer to first character after it. If prefix not present, null. */
     const char* strStartsWith(const String_t& str, const char* pfx);
 
+    /** Add element to list of strings.
+        Appends the string unless it is empty.
+        \param list List
+        \param in String to append */
+    void addPathElement(afl::data::StringList_t& list, const String_t& in);
+
+    /** Parse string into path.
+        Returns a list consisting of all nonempty delimited segments of the given string.
+        \param str String to parse
+        \param delim Delimiter
+        \return list */
+    afl::data::StringList_t parsePath(const String_t& str, char delim);
 }
 
 #endif

@@ -246,8 +246,6 @@ game::interface::IFAddFCode(game::Session& session, interpreter::Process& /*proc
 
    You can only modify complete options, there's no way to modify just one slot of an array option.
 
-   FIXME: Need to have a way to have configuration without a loaded game
-
    If the option you're setting has not be defined before, this command will produce a new option of type "string".
    (In PCC2, the command will fail for unknown options.)
 
@@ -464,12 +462,8 @@ game::interface::IFExport(game::Session& session, interpreter::Process& /*proc*/
     }
 
     // Try to export
-    interpreter::CallableValue* callable = dynamic_cast<interpreter::CallableValue*>(array);
-    if (callable == 0) {
-        throw interpreter::Error::typeError(interpreter::Error::ExpectIterable);
-    }
-
-    std::auto_ptr<interpreter::Context> ctx(callable->makeFirstContext());
+    interpreter::CallableValue& callable = interpreter::mustBeCallable(array, interpreter::Error::ExpectIterable);
+    std::auto_ptr<interpreter::Context> ctx(callable.makeFirstContext());
     if (ctx.get() == 0) {
         throw interpreter::Error("Export set is empty");
     }
@@ -767,9 +761,7 @@ game::interface::IFHistoryLoadTurn(game::Session& session, interpreter::Process&
         // If turn is not known at all, update metainformation
         if (g->previousTurns().getTurnStatus(turnNumber) == HistoryTurn::Unknown) {
             g->previousTurns().initFromTurnScores(g->scores(), turnNumber, 1);
-            if (TurnLoader* tl = r->getTurnLoader().get()) {
-                g->previousTurns().initFromTurnLoader(*tl, *r, g->getViewpointPlayer(), turnNumber, 1);
-            }
+            g->previousTurns().initFromTurnLoader(*r, g->getViewpointPlayer(), turnNumber, 1);
         }
 
         // If turn is loadable, load

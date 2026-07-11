@@ -52,9 +52,9 @@ namespace {
         { "b",                 kStyle, StyleAttribute::Bold }, /* tag name */
         { "big",               kStyle, StyleAttribute::Big },
         { "bold",              kStyle, StyleAttribute::Bold }, /* real name */
-        { "em",                kStyle, StyleAttribute::Bold }, /* tag name (should actually be italic) */
+        { "em",                kStyle, StyleAttribute::Italic }, /* tag name */
         { "fixed",             kStyle, StyleAttribute::Fixed }, /* real name */
-        // { "italic",            kStyle, StyleAttribute::Italic }, /* not supported yet */
+        { "italic",            kStyle, StyleAttribute::Italic }, /* not supported yet */
         { "kbd",               kStyle, StyleAttribute::Key }, /* tag name */
         { "key",               kStyle, StyleAttribute::Key }, /* real name */
         { "none",              kNone,  0 },

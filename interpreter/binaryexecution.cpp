@@ -1020,17 +1020,14 @@ namespace {
         }
 
         // Array
-        const interpreter::CallableValue* av = dynamic_cast<const interpreter::CallableValue*>(a);
-        if (av == 0) {
-            throw Error::typeError(Error::ExpectArray);
-        }
+        const interpreter::CallableValue& av = interpreter::mustBeCallable(a, Error::ExpectArray);
 
         // Index
         size_t n;
-        if (!interpreter::checkIndexArg(n, b, 1, av->getDimension(0))) {
+        if (!interpreter::checkIndexArg(n, b, 1, av.getDimension(0))) {
             return 0;
         } else {
-            return makeSizeValue(av->getDimension(n+1));
+            return makeSizeValue(av.getDimension(n+1));
         }
     }
 

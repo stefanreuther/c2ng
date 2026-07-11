@@ -10,6 +10,7 @@
 #include "afl/sys/mutexguard.hpp"
 #include "server/monitor/timeserieswriter.hpp"
 #include "server/monitor/timeseriesloader.hpp"
+#include "util/string.hpp"
 
 using server::monitor::Observer;
 using afl::string::Format;
@@ -163,8 +164,7 @@ server::monitor::Status::render(afl::sys::Time& time) const
                    "        <span class=\"value\">%d&nbsp;%s</span>\n"
                    "      </div>\n");
         }
-        // FIXME: HTML escaping? We don't have that in utilities yet. c2monitor-classic didn't do it
-        result += Format(tpl, i, m_observers[i]->getName(), pItem->value, m_observers[i]->getUnit());
+        result += Format(tpl, i, util::encodeHtml(m_observers[i]->getName(), true), pItem->value, util::encodeHtml(m_observers[i]->getUnit(), true));
     }
     time = m_statusTime;
     return result;

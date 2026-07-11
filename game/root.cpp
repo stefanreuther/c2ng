@@ -43,7 +43,7 @@ game::Root::setTurnLoader(afl::base::Ptr<TurnLoader> turnLoader)
 }
 
 // Get turn loader.
-afl::base::Ptr<game::TurnLoader>
+const afl::base::Ptr<game::TurnLoader>&
 game::Root::getTurnLoader() const
 {
     return m_turnLoader;

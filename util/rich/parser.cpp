@@ -117,10 +117,7 @@ util::rich::Parser::parseTextItem(bool keepFormat)
     } else if (isOpeningTag("b")) {
         return parseText(keepFormat).withStyle(StyleAttribute::Bold);
     } else if (isOpeningTag("em")) {
-        // FIXME: availability of fonts shouldn't be an issue here
-        // Should be italic, but we don't have an italic font yet.
-        // return parseText(keepFormat).withAttribute(RichTextStyleAttribute::Italic);
-        return parseText(keepFormat).withStyle(StyleAttribute::Bold);
+        return parseText(keepFormat).withStyle(StyleAttribute::Italic);
     } else if (isOpeningTag("u")) {
         return parseText(keepFormat).withStyle(StyleAttribute::Underline);
     } else if (isOpeningTag("tt")) {

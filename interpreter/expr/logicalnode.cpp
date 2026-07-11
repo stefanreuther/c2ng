@@ -58,7 +58,7 @@ interpreter::expr::LogicalNode::compileCondition(BytecodeObject& bco, const Comp
     //                                j iff
 
     if (m_binaryOp == biAnd) {
-        // FIXME(?): this generates different side-effects from compileValue().
+        // Note that this generates different side-effects from compileValue().
         // compileValue() will evaluate RHS if LHS is Empty (to distinguish Empty and False),
         // whereas this implementation will not. If we wish to keep efficient short-circuit
         // evaluation, it probably makes sense to keep this undefined.

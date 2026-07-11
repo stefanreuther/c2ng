@@ -97,7 +97,6 @@ game::score::Loader::load(TurnScoreList& list, afl::io::Stream& in)
 
     /* Read scores */
     in.setPos(new_header.headerSize);
-    // FIXME: loaded_records.reserve(new_header.numEntries);
     for (size_t i = 0, n = new_header.numEntries; i < n; ++i) {
         st::ScoreRecordHeader rh;
         in.fullRead(afl::base::fromObject(rh));

@@ -68,8 +68,6 @@ namespace game { namespace maint {
             OptionValue();
         };
 
-        // FIXME: this uses the original generic data structure.
-        // It would make sense to convert to a more specific one, i.e. ranges with just 8 slots.
         enum Config {
             Master_CoreRangesUsual,
             Master_CoreRangesAlternate,

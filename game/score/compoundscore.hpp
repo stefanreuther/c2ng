@@ -111,8 +111,6 @@ namespace game { namespace score {
         bool isValid() const;
 
      private:
-        // FIXME: the origin class, WScore, also managed a name.
-
         /** Maximum number of components. */
         static const size_t MAX = 4;
 

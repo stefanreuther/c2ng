@@ -290,7 +290,6 @@ bool
 game::Game::isGameObject(const game::vcr::Object& obj, const game::spec::HullVector_t& hulls) const
 {
     // ex WVcrSelectorWindowRealGameInterface::isGameObject
-    // FIXME: 20210417 Is this a nice place for this function?
     const game::map::Universe& univ = viewpointTurn().universe();
     if (!obj.isPlanet()) {
         const game::map::Ship* sh = univ.allShips().getObjectByIndex(obj.getId());

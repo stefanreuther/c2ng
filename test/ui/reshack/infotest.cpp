@@ -54,7 +54,7 @@ AFL_TEST("ui.reshack.Info:getFontCoverage", a)
 }
 
 /* Test getFontCoverage, missing ASCII chars */
-AFL_TEST("ui.reshack.Info:getFontCoverage", a)
+AFL_TEST("ui.reshack.Info:getFontCoverage:missing-ascii", a)
 {
     afl::string::NullTranslator tx;
     gfx::BitmapFont font;

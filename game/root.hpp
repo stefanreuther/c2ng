@@ -168,7 +168,7 @@ namespace game {
         void setTurnLoader(afl::base::Ptr<TurnLoader> turnLoader);
 
         /** Get turn loader. */
-        afl::base::Ptr<TurnLoader> getTurnLoader() const;
+        const afl::base::Ptr<TurnLoader>& getTurnLoader() const;
 
         /** Get permitted actions. */
         Actions_t getPossibleActions() const;

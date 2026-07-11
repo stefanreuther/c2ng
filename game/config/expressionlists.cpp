@@ -56,7 +56,8 @@ namespace {
             for (size_t index = 0, n = list.size(); index < n; ++index) {
                 if (const util::ExpressionList::Item* it = list.get(index)) {
                     // Sanitize the name so we'll be able to re-parse it
-                    // FIXME: this will fail if the line starts with '#', ';' or '[', but is good enough for now.
+                    // This file traditionally uses double-space as delimiter, so name cannot contain double space.
+                    // Squish spaces. This also implicitly removes leading spaces.
                     String_t name = it->name;
                     String_t::size_type i = 0;
                     bool deleting = true;
@@ -71,10 +72,13 @@ namespace {
                     }
 
                     // Save
-                    tf.writeText(name);
-                    tf.writeText("  ");
-                    tf.writeText(it->flags);
-                    tf.writeLine(it->value);
+                    // Cannot parse items starting with '#' or ';' (comment; see constructor) or '[' (section; see handleLine)
+                    if (!name.empty() && name[0] != '#' && name[0] != ';' && name[0] != '[') {
+                        tf.writeText(name);
+                        tf.writeText("  ");
+                        tf.writeText(it->flags);
+                        tf.writeLine(it->value);
+                    }
                 }
             }
             tf.writeLine();

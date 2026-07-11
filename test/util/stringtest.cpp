@@ -425,3 +425,34 @@ AFL_TEST("util.String:formatZoomLevel", a)
     a.checkEqual("02", formatZoomLevel(4, 4), "4/4");
     a.checkEqual("03", formatZoomLevel(1, 2), "1/2");
 }
+
+/** Test parsePath (and, implicitly, addPathElement). */
+AFL_TEST("util.String:parsePath:empty", a)
+{
+    afl::data::StringList_t x = util::parsePath("", ';');
+    a.checkEqual("size", x.size(), 0U);
+}
+
+AFL_TEST("util.String:parsePath:single", a)
+{
+    afl::data::StringList_t x = util::parsePath(" a a ", ';');
+    a.checkEqual("size", x.size(), 1U);
+    a.checkEqual("idx0", x[0], "a a");
+}
+
+AFL_TEST("util.String:parsePath:multi", a)
+{
+    afl::data::StringList_t x = util::parsePath(" a; b; c ", ';');
+    a.checkEqual("size", x.size(), 3U);
+    a.checkEqual("idx0", x[0], "a");
+    a.checkEqual("idx1", x[1], "b");
+    a.checkEqual("idx2", x[2], "c");
+}
+
+AFL_TEST("util.String:parsePath:empty-element", a)
+{
+    afl::data::StringList_t x = util::parsePath(" a;; c ", ';');
+    a.checkEqual("size", x.size(), 2U);
+    a.checkEqual("idx0", x[0], "a");
+    a.checkEqual("idx1", x[1], "c");
+}

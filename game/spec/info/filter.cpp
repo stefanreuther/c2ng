@@ -86,7 +86,7 @@ game::spec::info::Filter::describe(FilterInfos_t& result, const Browser& browser
 
 // Describe single element.
 game::spec::info::FilterInfo
-game::spec::info::Filter::describe(const FilterElement& e, const Browser& browser) const
+game::spec::info::Filter::describe(const FilterElement& e, const Browser& browser)
 {
     afl::string::Translator& tx = browser.translator();
     switch (e.att) {

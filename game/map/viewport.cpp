@@ -216,7 +216,6 @@ game::map::Viewport::getShipIgnoreTaskId() const
 bool
 game::map::Viewport::containsCircle(Point origin, int radius) const
 {
-    // FIXME: make this method smarter
     return containsRectangle(origin - Point(radius, radius), origin + Point(radius, radius));
 }
 
@@ -235,7 +234,6 @@ game::map::Viewport::containsRectangle(Point a, Point b) const
 bool
 game::map::Viewport::containsLine(Point a, Point b) const
 {
-    // FIXME: make this method smarter
     return containsRectangle(a, b);
 }
 

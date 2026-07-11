@@ -39,17 +39,11 @@ namespace {
 
     String_t getLanguageCode(afl::string::Translator& tx)
     {
-        // Translators: translate this as {lang}de, {lang}es, etc.
-        // FIXME: We're stripping the tag manually here.
-        // The idea is to move this stripping into the actual translator implementation
-        // to also allow context-dependant translations such as for example {mission}none, {owner}none
+        // Translators: translate this as "de", "es", etc.
+        // The "{...}" is stripped by util::Translator;
+        // it allows context-dependant translations such as for example {mission}none, {owner}none
         // that require different word forms in some languages.
-        String_t text = tx.translateString("{lang}en");
-        String_t::size_type n = text.find('}');
-        if (n != String_t::npos) {
-            text.erase(0, n+1);
-        }
-        return text;
+        return tx("{lang}en");
     }
 }
 

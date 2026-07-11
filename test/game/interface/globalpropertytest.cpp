@@ -9,7 +9,6 @@
 #include "afl/data/integervalue.hpp"
 #include "afl/data/stringvalue.hpp"
 #include "afl/io/nullfilesystem.hpp"
-#include "afl/string/nulltranslator.hpp"
 #include "afl/test/testrunner.hpp"
 #include "game/game.hpp"
 #include "game/registrationkey.hpp"
@@ -29,6 +28,7 @@
 #include "interpreter/test/contextverifier.hpp"
 #include "interpreter/test/valueverifier.hpp"
 #include "interpreter/values.hpp"
+#include "util/translator.hpp"
 #include "version.hpp"
 #include <stdexcept>
 
@@ -130,7 +130,7 @@ AFL_TEST("game.interface.GlobalProperty:full", a)
             { }
     };
 
-    afl::string::NullTranslator tx;
+    util::Translator tx;
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
     session.rng().setSeed(77);                                                   // igpRandomSeed
@@ -208,7 +208,7 @@ AFL_TEST("game.interface.GlobalProperty:full", a)
     A game is loaded, but optional objects are not present. */
 AFL_TEST("game.interface.GlobalProperty:half", a)
 {
-    afl::string::NullTranslator tx;
+    util::Translator tx;
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
     session.rng().setSeed(77);                                                   // igpRandomSeed
@@ -258,7 +258,7 @@ AFL_TEST("game.interface.GlobalProperty:half", a)
     No game loaded, so most properties are not present. */
 AFL_TEST("game.interface.GlobalProperty:empty", a)
 {
-    afl::string::NullTranslator tx;
+    util::Translator tx;
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
     session.rng().setSeed(42);
@@ -295,7 +295,7 @@ AFL_TEST("game.interface.GlobalProperty:empty", a)
 /** Test setGlobalProperty(). */
 AFL_TEST("game.interface.GlobalProperty:set", a)
 {
-    afl::string::NullTranslator tx;
+    util::Translator tx;
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
     session.rng().setSeed(42);
@@ -343,7 +343,7 @@ AFL_TEST("game.interface.GlobalProperty:set", a)
 /** Test setGlobalProperty() with empty session. */
 AFL_TEST("game.interface.GlobalProperty:set:empty", a)
 {
-    afl::string::NullTranslator tx;
+    util::Translator tx;
     afl::io::NullFileSystem fs;
     game::Session session(tx, fs);
 
@@ -368,7 +368,7 @@ AFL_TEST("game.interface.GlobalProperty:set:empty", a)
 AFL_TEST("game.interface.GlobalProperty:host-properties", a)
 {
     struct TestCase {
-        afl::string::NullTranslator tx;
+        util::Translator tx;
         afl::io::NullFileSystem fs;
         game::Session session;
 

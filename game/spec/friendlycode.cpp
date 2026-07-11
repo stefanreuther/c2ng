@@ -178,7 +178,6 @@ bool
 game::spec::FriendlyCode::parseFlags(const String_t& s, const char* data, FlagSet_t& flags, PlayerSet_t& races)
 {
     // ex util/misc.cc:parseFlags, ccmain.pas:GetRaces
-    // FIXME: rewrite using Memory<>
     String_t::size_type t = 0;
     flags = FlagSet_t();
     while (t < s.length()) {
@@ -217,7 +216,6 @@ game::spec::FriendlyCode::initFromString(const String_t& descriptionLine, afl::s
     // ex GFCode::initFromString, ccmain.pas:DefineFriendlyCode
     String_t flagStr;
     if (!afl::string::strSplit(descriptionLine, flagStr, m_description, ",")) {
-        // FIXME: exception?
         throw std::range_error(afl::string::Format(tx("Friendly code \"%s\" lacking description").c_str(), m_code));
     }
     m_description = afl::string::strTrim(m_description);

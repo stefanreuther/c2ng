@@ -195,7 +195,6 @@ void
 game::maint::DifficultyRater::addConfigurationValue(String_t name, String_t value)
 {
     // ex DifficultyRater::addConfig
-    // FIXME: make this return false if the option is not recognized
     // Mapping of names to config keys
     struct Map {
         const char* name;

@@ -132,7 +132,7 @@ AFL_TEST("ui.reshack.FontUtil:findTop:empty", a)
 }
 
 /* Test findTop, findBottom: full glyph */
-AFL_TEST("ui.reshack.FontUtil:findTop:empty", a)
+AFL_TEST("ui.reshack.FontUtil:findTop:full", a)
 {
     gfx::BitmapGlyph g(10, 30);
     for (int x = 0; x < 10; ++x) {
@@ -864,7 +864,7 @@ AFL_TEST("ui.reshack.FontUtil:loadBDF", a)
 }
 
 /* Test loadBDF, failure */
-AFL_TEST("ui.reshack.FontUtil:loadBDF", a)
+AFL_TEST("ui.reshack.FontUtil:loadBDF:error", a)
 {
     const char*const CONTENT = "Whatever\n";
     afl::io::ConstMemoryStream ms(afl::string::toBytes(CONTENT));

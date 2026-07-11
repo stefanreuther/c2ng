@@ -35,6 +35,8 @@ AFL_TEST("game.v3.RegistrationKey:init", a)
     a.checkDifferent("05. getLine", testee.getLine(RegistrationKey::Line2), "");
     a.checkDifferent("06. getLine", testee.getLine(RegistrationKey::Line3), "");
     a.checkDifferent("07. getLine", testee.getLine(RegistrationKey::Line4), "");
+
+    a.checkNonNull("11. getKeyFileName", RegistrationKey::getKeyFileName());
 }
 
 AFL_TEST("game.v3.RegistrationKey:file-roundtrip", a)

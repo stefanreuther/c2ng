@@ -14,10 +14,9 @@
 #include "server/file/root.hpp"
 
 using afl::base::Ref;
+using game::v3::RegistrationKey;
 
 namespace {
-    const char KEYFILE_NAME[] = "fizz.bin";
-
     void createSlotList(server::file::GameStatus::GameInfo& out,
                         const game::v3::DirectoryScanner& scanner,
                         const server::common::RaceNames& raceNames)
@@ -49,14 +48,13 @@ server::file::GameStatus::load(Root& root, DirectoryItem& dir)
 
     try {
         // Step 1: Load registration
-        // FIXME: this uses a-priori knowledge that the key parser will use the file KEYFILE_NAME.
-        if (/*FileItem* it =*/ dir.findFile(KEYFILE_NAME)) {
-            game::v3::RegistrationKey key(std::auto_ptr<afl::charset::Charset>(root.defaultCharacterSet().clone()));
+        if (/*FileItem* it =*/ dir.findFile(RegistrationKey::getKeyFileName())) {
+            RegistrationKey key(std::auto_ptr<afl::charset::Charset>(root.defaultCharacterSet().clone()));
             afl::string::NullTranslator tx;
             key.initFromDirectory(*dirWrapper, root.log(), tx);
 
             std::auto_ptr<KeyInfo> k(new KeyInfo());
-            k->fileName = KEYFILE_NAME;
+            k->fileName = RegistrationKey::getKeyFileName();
             k->isRegistered = (key.getStatus() == key.Registered);
             k->label1 = key.getLine(key.Line1);
             k->label2 = key.getLine(key.Line2);

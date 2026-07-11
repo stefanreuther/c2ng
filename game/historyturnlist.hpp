@@ -50,16 +50,13 @@ namespace game {
         void initFromTurnScores(const game::score::TurnScoreList& scores, int turn, int count);
 
         /** Initialize from turn loader.
-            This will query the turn loader for all turns that are not yet known.
+            This will query the root's turn loader for all turns that are not yet known.
 
-            \param loader Turn loader
-            \param root Root
+            \param root Root (should have a TurnLoader)
             \param player Player number to check
             \param turn First turn number to initialize
-            \param count Number of turns
-
-            FIXME: the TurnLoader is contained in the root; do we need the distinction? */
-        void initFromTurnLoader(TurnLoader& loader, Root& root, int player, int turn, int count);
+            \param count Number of turns */
+        void initFromTurnLoader(Root& root, int player, int turn, int count);
 
         /** Get status for one turn.
             This will report the stored status.

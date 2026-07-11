@@ -83,6 +83,10 @@ namespace game { namespace v3 {
             \return key Id */
         String_t getKeyId() const;
 
+        /** Get name of key file.
+            \return "fizz.bin" */
+        static const char* getKeyFileName();
+
      private:
         void initFromFizz(const uint32_t (&data)[KEY_SIZE_WORDS]);
         void parseFizz(afl::io::Stream& s);

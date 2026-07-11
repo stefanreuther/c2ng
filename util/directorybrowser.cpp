@@ -63,7 +63,6 @@ void
 util::DirectoryBrowser::openDirectory(String_t name)
 {
     // Get absolute, canonical path (resolve ".." etc.)
-    // FIXME: should this be relative to current directory of the browser?
     name = m_fileSystem.getAbsolutePathName(name);
 
     // Are we going up?

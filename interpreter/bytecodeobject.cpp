@@ -345,8 +345,6 @@ void
 interpreter::BytecodeObject::addPushLiteral(const afl::data::Value* literal)
 {
     // ex IntBytecodeObject::addPushLiteral
-    // FIXME: can we use visit() instead of dynamic_cast here?
-
     // Is it empty?
     if (literal == 0) {
         addInstruction(Opcode::maPush, Opcode::sBoolean, uint16_t(-1));

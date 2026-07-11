@@ -280,8 +280,6 @@ game::map::Universe::postprocess(PlayerSet_t playingSet, PlayerSet_t availablePl
     m_minefields.internalCheck(turnNumber, host, config);
     m_drawings.eraseExpiredDrawings(turnNumber);
     m_ufos.postprocess(turnNumber, mapConfig, config, tx, log);
-    // FIXME: port: setTypePlayability(ty_minefields, playability);
-    // FIXME: port: setTypePlayability(ty_ufos, playability);
 
     // Signal sets
     m_playedShips.sig_setChange.raise(0);

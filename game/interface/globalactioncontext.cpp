@@ -9,30 +9,14 @@
 #include "interpreter/propertyacceptor.hpp"
 #include "interpreter/simpleprocedure.hpp"
 #include "interpreter/typehint.hpp"
+#include "interpreter/values.hpp"
+#include "util/string.hpp"
 
 using interpreter::CallableValue;
 using interpreter::Error;
+using interpreter::mustBeCallable;
 
 namespace {
-    // Helper to check type of a CallableValue parameter
-    const CallableValue& requireCallable(const afl::data::Value* value)
-    {
-        const CallableValue* cv = dynamic_cast<const CallableValue*>(value);
-        if (cv == 0) {
-            throw Error::typeError(Error::ExpectCallable);
-        }
-        return *cv;
-    }
-
-    // Add component to a string list
-    void addComponent(std::vector<String_t>& out, const String_t& in)
-    {
-        String_t value = afl::string::strTrim(in);
-        if (!value.empty()) {
-            out.push_back(value);
-        }
-    }
-
     /* @q Add name:Str, prepare:Func, exec:Sub, result:Sub (Global Action Context)
        Add a Global Action.
 
@@ -78,18 +62,12 @@ namespace {
             return;
         }
 
-        const CallableValue& prepareCallable = requireCallable(prepareValue);
-        const CallableValue& execCallable    = requireCallable(execValue);
-        const CallableValue& resultCallable  = requireCallable(resultValue);
+        const CallableValue& prepareCallable = mustBeCallable(prepareValue, Error::ExpectCallable);
+        const CallableValue& execCallable    = mustBeCallable(execValue,    Error::ExpectCallable);
+        const CallableValue& resultCallable  = mustBeCallable(resultValue,  Error::ExpectCallable);
 
         // Parse the name into a path
-        std::vector<String_t> path;
-        size_t i = 0, n;
-        while ((n = name.find('|', i)) != String_t::npos) {
-            addComponent(path, name.substr(i, n-i));
-            i = n+1;
-        }
-        addComponent(path, name.substr(i));
+        std::vector<String_t> path = util::parsePath(name, '|');
         if (path.empty()) {
             throw Error("Action name cannot be empty");
         }

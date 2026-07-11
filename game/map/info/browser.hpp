@@ -25,7 +25,7 @@ namespace game { namespace map { namespace info {
     class Browser {
      public:
         /** Constructor.
-            @param session Session // FIXME: can we use something smaller than a Session?
+            @param session Session
             @param link LinkBuilder
             @param fmt  Number Formatter */
         Browser(Session& session, const LinkBuilder& link, util::NumberFormatter fmt);

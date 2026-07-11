@@ -23,8 +23,6 @@ namespace game { namespace v3 {
         - call saveAll() to write them out */
     class Maketurn {
      public:
-        // FIXME: do we need a charset? Since we convert game->game, we probably don't need it
-
         /** Constructor.
             \param dir       Directory
             \param players   Player list

@@ -57,6 +57,7 @@ ui::rich::Splitter::handleAttribute(const util::rich::Attribute& att, bool start
         int delta = start ? +1 : -1;
         switch (sa->getStyle()) {
          case util::rich::StyleAttribute::Bold:
+         case util::rich::StyleAttribute::Italic:
             m_bold += delta;
             break;
          case util::rich::StyleAttribute::Big:
@@ -73,8 +74,6 @@ ui::rich::Splitter::handleAttribute(const util::rich::Attribute& att, bool start
             break;
          case util::rich::StyleAttribute::Key:
             m_key += delta;
-            break;
-         default:
             break;
         }
     } else if (const util::rich::ColorAttribute* ca = dynamic_cast<const util::rich::ColorAttribute*>(&att)) {

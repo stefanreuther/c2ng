@@ -148,8 +148,6 @@ namespace game { namespace map {
         /** Get canonical location of a point, simple version.
             This handles just rectangular wrap, where all instances of a location are equivalent.
 
-            Usage: FIXME
-
             \param pt point to check
             \return updated location */
         Point getSimpleCanonicalLocation(Point pt) const;

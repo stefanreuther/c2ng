@@ -485,3 +485,25 @@ util::strStartsWith(const String_t& str, const char* pfx)
         return 0;
     }
 }
+
+void
+util::addPathElement(afl::data::StringList_t& list, const String_t& in)
+{
+    String_t value = afl::string::strTrim(in);
+    if (!value.empty()) {
+        list.push_back(value);
+    }
+}
+
+afl::data::StringList_t
+util::parsePath(const String_t& str, char delim)
+{
+    afl::data::StringList_t path;
+    size_t i = 0, n;
+    while ((n = str.find(delim, i)) != String_t::npos) {
+        addPathElement(path, str.substr(i, n-i));
+        i = n+1;
+    }
+    addPathElement(path, str.substr(i));
+    return path;
+}

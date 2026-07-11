@@ -160,6 +160,7 @@ ui::rich::Document::Splitter::process(const util::rich::Attribute& att, int delt
     if (const util::rich::StyleAttribute* sa = dynamic_cast<const util::rich::StyleAttribute*>(&att)) {
         switch (sa->getStyle()) {
          case util::rich::StyleAttribute::Bold:
+         case util::rich::StyleAttribute::Italic:
             nbold += delta;
             break;
          case util::rich::StyleAttribute::Big:
@@ -176,8 +177,6 @@ ui::rich::Document::Splitter::process(const util::rich::Attribute& att, int delt
             break;
          case util::rich::StyleAttribute::Key:
             nkey += delta;
-            break;
-         default:
             break;
         }
     } else if (const util::rich::LinkAttribute* la = dynamic_cast<const util::rich::LinkAttribute*>(&att)) {

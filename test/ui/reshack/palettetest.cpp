@@ -92,7 +92,7 @@ AFL_TEST("ui.reshack.Palette:copyPalette", a)
 }
 
 /* Test isEditableColor */
-AFL_TEST("ui.reshack.Palette:copyPalette", a)
+AFL_TEST("ui.reshack.Palette:isEditableColor", a)
 {
     a.check("standard 0",   !Palette::isEditableColor(Palette::StandardPaletteColor, 0));
     a.check("standard 150", !Palette::isEditableColor(Palette::StandardPaletteColor, 150));
