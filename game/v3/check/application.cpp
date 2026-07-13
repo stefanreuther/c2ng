@@ -89,7 +89,7 @@ game::v3::check::Application::appMain()
     afl::io::TextFile log(*logFile);
 
     // Prepare checker
-    Checker checker(*gamedirObj, *rootdirObj, player, log, standardOutput(), errorOutput());
+    Checker checker(*gamedirObj, *rootdirObj, player, log, standardOutput(), errorOutput(), translator());
     checker.config() = config;
 
     // Operate!
