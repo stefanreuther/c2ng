@@ -12,7 +12,6 @@
 #include "afl/io/filesystem.hpp"
 #include "afl/io/stream.hpp"
 #include "afl/string/format.hpp"
-#include "afl/string/nulltranslator.hpp"
 #include "game/exception.hpp"
 #include "game/v3/trn/turnprocessor.hpp"
 #include "game/v3/turnfile.hpp"
@@ -35,7 +34,8 @@ game::v3::check::Checker::Checker(afl::io::Directory& gamedir,
                                   int player,
                                   afl::io::TextWriter& log,
                                   afl::io::TextWriter& output,
-                                  afl::io::TextWriter& error)
+                                  afl::io::TextWriter& error,
+                                  afl::string::Translator& tx)
     : gamedir(gamedir),
       rootdir(rootdir),
       m_player(player),
@@ -43,6 +43,7 @@ game::v3::check::Checker::Checker(afl::io::Directory& gamedir,
       output(output),
       error(error),
       m_config(),
+      m_translator(tx),
       had_ck_error(false),
       had_divi(false),
       html_fmt(hRaw),
@@ -393,12 +394,23 @@ game::v3::check::Checker::openSpecFile(const String_t& name) const
     return rootdir.openFile(name, afl::io::FileSystem::OpenRead);
 }
 
+// Open the XYPLAN file
+afl::base::Ref<afl::io::Stream>
+game::v3::check::Checker::openXYPlanFile() const
+{
+    try {
+        return openGameFile(Format("xyplan%d.dat", m_player));
+    }
+    catch (afl::except::FileProblemException& e) {
+        return openSpecFile("xyplan.dat");
+    }
+}
+
 void
 game::v3::check::Checker::loadXYPlan()
 {
     // ex check.pas:LoadXYPlan
-    // FIXME: ExploreMap?
-    Ref<Stream> dat = openSpecFile("xyplan.dat");
+    Ref<Stream> dat = openXYPlanFile();
     for (int i = 0; i < NUM_PLANETS; ++i) {
         gs::PlanetXY xyr;
         dat->fullRead(afl::base::fromObject(xyr));
@@ -453,7 +465,6 @@ void
 game::v3::check::Checker::loadShips(const DirStuff& stuff)
 {
     // ex check.pas:LoadShips
-    // FIXME:    FillChar(ships, Sizeof(ships), 0);
     gs::Int16_t cdat, cdis;
     gs::Ship rdat, rdis;
 
@@ -495,7 +506,6 @@ void
 game::v3::check::Checker::loadPlanets(const DirStuff& stuff)
 {
     // ex check.pas:LoadPlanets
-    // FIXME: FillChar(planets, Sizeof(planets), 0);
     loadXYPlan();
 
     // pdata
@@ -770,10 +780,9 @@ game::v3::check::Checker::loadTurn(const uint8_t (&rst_timestamp)[18])
 {
     // Load turn file
     afl::charset::Utf8Charset cs;
-    afl::string::NullTranslator tx;        // FIXME
     String_t ntrn = Format("player%d.trn", m_player);
     Ref<Stream> trn = openGameFile(ntrn);
-    TurnFile tf(cs, tx, *trn, true);
+    TurnFile tf(cs, m_translator, *trn, true);
 
     // Validate header info
     if (tf.getPlayer() != m_player) {
@@ -1048,7 +1057,7 @@ game::v3::check::Checker::checkTransfer(const String_t& name, const game::v3::st
         if (dat.targetId != 0 && dat.colonists == 0 && dat.ore[0] == 0
             && dat.ore[1] == 0 && dat.ore[2] == 0 && dat.ore[3] == 0 && dat.supplies == 0)
         {
-            // FIXME: This one happens when using planets.exe and a 3rd-party Maketurn.
+            // This one happens when using planets.exe and a 3rd-party Maketurn.
             // planets.exe creates an empty host-side transfer along with every client-side transfer.
             // PHost <4.0h/3.4j rejects that as an illegal transfer (host-side cannot be between own ships),
             // a filter was added on 2004-04-11.
@@ -1077,7 +1086,7 @@ game::v3::check::Checker::checkTransferTarget(const String_t& name, const game::
         || dat.ore[2] != 0 || dat.ore[3] != 0 || dat.supplies != 0)
     {
         if (dat.targetId != i) {
-            // FIXME: this is a yellow alert for PHost.
+            // This is a yellow alert for PHost.
             logDivi();
             logStr(Format("RANGE: %s: %s order has invalid target.", ctx, name));
             logStr(Format("    Value is %d", int(dat.targetId)));

@@ -4,12 +4,13 @@
 #ifndef C2NG_GAME_V3_CHECK_CHECKER_HPP
 #define C2NG_GAME_V3_CHECK_CHECKER_HPP
 
-#include "game/v3/structures.hpp"
+#include "afl/base/memory.hpp"
 #include "afl/io/filesystem.hpp"
 #include "afl/io/textwriter.hpp"
-#include "afl/base/memory.hpp"
+#include "afl/string/translator.hpp"
 #include "game/v3/check/configuration.hpp"
 #include "game/v3/genfile.hpp"
+#include "game/v3/structures.hpp"
 
 namespace game { namespace v3 { namespace check {
 
@@ -52,7 +53,8 @@ namespace game { namespace v3 { namespace check {
                 int player,
                 afl::io::TextWriter& log,
                 afl::io::TextWriter& output,
-                afl::io::TextWriter& error);
+                afl::io::TextWriter& error,
+                afl::string::Translator& tx);
 
         ~Checker();
 
@@ -89,6 +91,7 @@ namespace game { namespace v3 { namespace check {
         afl::io::TextWriter& output;
         afl::io::TextWriter& error;
         Configuration m_config;
+        afl::string::Translator& m_translator;
 
         struct DirStuff {
             game::v3::GenFile gen;
@@ -132,6 +135,7 @@ namespace game { namespace v3 { namespace check {
         // Loading things
         afl::base::Ref<afl::io::Stream> openGameFile(const String_t& name) const;
         afl::base::Ref<afl::io::Stream> openSpecFile(const String_t& name) const;
+        afl::base::Ref<afl::io::Stream> openXYPlanFile() const;
 
         void loadXYPlan();
         int planetAt(int x, int y) const;
