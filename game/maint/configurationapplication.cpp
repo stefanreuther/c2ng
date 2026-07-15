@@ -6,6 +6,8 @@
 #include <memory>
 #include "game/maint/configurationapplication.hpp"
 #include "afl/base/countof.hpp"
+#include "afl/charset/codepage.hpp"
+#include "afl/charset/codepagecharset.hpp"
 #include "afl/except/commandlineexception.hpp"
 #include "afl/io/textfile.hpp"
 #include "afl/string/char.hpp"
@@ -183,6 +185,27 @@ namespace {
         return str.size() >= n
             && afl::string::strCaseCompare(str.substr(0, n), beg) == 0;
     }
+
+    /* Size warning (factored out for code size) */
+    void checkLength(size_t found, size_t allowed, const String_t& key, util::Application& app)
+    {
+        if (found > allowed) {
+            app.errorOutput().writeLine(Format(app.translator()("Warning: value for \"%s\" is too long (%d > %d)"), key, found, allowed));
+        }
+    }
+
+    /* Assign to a Value<FixedString>, with length check.
+       Used when building race names. */
+    template<size_t N>
+    void assignNameString(afl::bits::Value<afl::bits::FixedString<N> >& out, const ConfigurationFile& in, String_t key, util::Application& app)
+    {
+        if (const ConfigurationFile::Element* ele = in.findElement(ConfigurationFile::Assignment, key)) {
+            afl::charset::CodepageCharset cs(afl::charset::g_codepageLatin1);
+            afl::base::GrowableBytes_t encoded = cs.encode(afl::string::toMemory(ele->value));
+            checkLength(encoded.size(), N, key, app);
+            out = encoded;
+        }
+    }
 }
 
 game::maint::ConfigurationApplication::ConfigurationApplication(afl::sys::Environment& env, afl::io::FileSystem& fs)
@@ -216,6 +239,11 @@ game::maint::ConfigurationApplication::appMain()
                 String_t fileName = cmdl.getRequiredParameter(text);
                 Ref<Stream> thisStream(fileSystem().openFile(fileName, FileSystem::OpenRead));
                 loadTruehull(subject(), *thisStream);
+            } else if (text == "load-racenames") {
+                // --load-racenames=FILE
+                String_t fileName = cmdl.getRequiredParameter(text);
+                Ref<Stream> thisStream(fileSystem().openFile(fileName, FileSystem::OpenRead));
+                loadRaceNames(subject(), *thisStream);
             } else if (text == "D") {
                 // -D KEY=VALUE
                 String_t kv = cmdl.getRequiredParameter(text);
@@ -279,6 +307,12 @@ game::maint::ConfigurationApplication::appMain()
                 Ref<Stream> thisStream(fileSystem().openFile(fileName, FileSystem::Create));
                 saveTruehull(subject(), *thisStream);
                 hadAction = true;
+            } else if (text == "save-racenames") {
+                // --save-racenames=FILE
+                String_t fileName = cmdl.getRequiredParameter(text);
+                Ref<Stream> thisStream(fileSystem().openFile(fileName, FileSystem::Create));
+                saveRaceNames(subject(), *thisStream);
+                hadAction = true;
             } else if (text == "shuffle") {
                 // --shuffle=A,B,C,...
                 shuffle(subject(), cmdl.getRequiredParameter(text));
@@ -329,6 +363,7 @@ game::maint::ConfigurationApplication::showHelp()
                                               "FILE\tload text file\n"
                                               "--empty\tload empty file\n"
                                               "--load-hconfig=FILE\tload binary HConfig file\n"
+                                              "--load-racenames=FILE\tload race name file\n"
                                               "--load-truehull=FILE\tload truehull file\n"
                                               "-DKEY=VALUE\tset value\n"
                                               "-AKEY=VALUE\tadd value\n"
@@ -341,6 +376,7 @@ game::maint::ConfigurationApplication::showHelp()
                                               "--get=OPTION\tget option value\n"
                                               "--get-bool=OPTION\tget boolean option value, as exit code\n"
                                               "--save-hconfig=FILE\tsave binary HConfig file\n"
+                                              "--save-racenames=FILE\tsave race name file\n"
                                               "--save-truehull=FILE\tsave truehull file\n"))));
     exit(0);
 }
@@ -413,7 +449,6 @@ game::maint::ConfigurationApplication::loadTruehull(util::ConfigurationFile& out
 void
 game::maint::ConfigurationApplication::saveTruehull(const util::ConfigurationFile& in, afl::io::Stream& out)
 {
-    // Load file
     game::v3::structures::Truehull data;
 
     // Read each option
@@ -430,6 +465,42 @@ game::maint::ConfigurationApplication::saveTruehull(const util::ConfigurationFil
         }
     }
 
+    // Write file
+    out.fullWrite(afl::base::fromObject(data));
+}
+
+void
+game::maint::ConfigurationApplication::loadRaceNames(util::ConfigurationFile& out, afl::io::Stream& in)
+{
+    // Load file
+    game::v3::structures::RaceNames data;
+    in.fullRead(afl::base::fromObject(data));
+
+    // Convert into options
+    // The default codepage for ini files is Latin-1.
+    // Accessing the race.nm file as Latin-1 essentially provides a 1:1 passthrough.
+    afl::charset::CodepageCharset cs(afl::charset::g_codepageLatin1);
+    for (int player = 0; player < game::v3::structures::NUM_PLAYERS; ++player) {
+        out.set("RACENAMES", Format("Long%d", player+1), cs.decode(data.longNames[player]));
+        out.set("RACENAMES", Format("Short%d", player+1), cs.decode(data.shortNames[player]));
+        out.set("RACENAMES", Format("Adj%d", player+1), cs.decode(data.adjectiveNames[player]));
+    }
+}
+
+void
+game::maint::ConfigurationApplication::saveRaceNames(const util::ConfigurationFile& in, afl::io::Stream& out)
+{
+    // Convert to binary
+    game::v3::structures::RaceNames data;
+    afl::base::fromObject(data).fill(0);
+    afl::charset::CodepageCharset cs(afl::charset::g_codepageLatin1);
+
+    // Write file
+    for (int player = 0; player < game::v3::structures::NUM_PLAYERS; ++player) {
+        assignNameString(data.longNames[player],      in, Format("RACENAMES.Long%d", player+1), *this);
+        assignNameString(data.shortNames[player],     in, Format("RACENAMES.Short%d", player+1), *this);
+        assignNameString(data.adjectiveNames[player], in, Format("RACENAMES.Adj%d", player+1), *this);
+    }
     out.fullWrite(afl::base::fromObject(data));
 }
 

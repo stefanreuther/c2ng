@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-07-05 13:53+0200\n"
+"PO-Revision-Date: 2026-07-15 21:20+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:390
@@ -40,7 +40,7 @@ msgstr ""
 "%s\n"
 "Fehler bitte melden an <Streu@gmx.de>"
 
-#: game/maint/configurationapplication.cpp:316
+#: game/maint/configurationapplication.cpp:342
 msgid ""
 "\n"
 "Usage:\n"
@@ -3076,7 +3076,7 @@ msgstr "Arbeite..."
 msgid "Configuration File"
 msgstr "Konfigurationsdatei"
 
-#: game/maint/configurationapplication.cpp:328
+#: game/maint/configurationapplication.cpp:341
 msgid "Configuration Tool v%s - (c) 2018-2025 Stefan Reuther"
 msgstr "Konfigurationswerkzeug v%s - (c) 2018-2025 Stefan Reuther"
 
@@ -4794,7 +4794,7 @@ msgstr "Trümmer aufsammeln"
 msgid "Gather resources from a planet"
 msgstr "Ressourcen von einem Planeten aufladen"
 
-#: game/maint/configurationapplication.cpp:324
+#: game/maint/configurationapplication.cpp:350
 msgid ""
 "General:\n"
 "--help\tshow help\n"
@@ -4804,6 +4804,7 @@ msgid ""
 "FILE\tload text file\n"
 "--empty\tload empty file\n"
 "--load-hconfig=FILE\tload binary HConfig file\n"
+"--load-racenames=FILE\tload race name file\n"
 "--load-truehull=FILE\tload truehull file\n"
 "-DKEY=VALUE\tset value\n"
 "-AKEY=VALUE\tadd value\n"
@@ -4816,6 +4817,7 @@ msgid ""
 "--get=OPTION\tget option value\n"
 "--get-bool=OPTION\tget boolean option value, as exit code\n"
 "--save-hconfig=FILE\tsave binary HConfig file\n"
+"--save-racenames=FILE\tsave race name file\n"
 "--save-truehull=FILE\tsave truehull file"
 msgstr ""
 "Allgemein:\n"
@@ -4826,6 +4828,7 @@ msgstr ""
 "DATEI\tTextdatei laden\n"
 "--empty\tLeere Datei laden\n"
 "--load-hconfig=DATEI\tBinäre HConfig-Datei laden\n"
+"--load-racenames=FILE\tRassennamen-Datei laden\n"
 "--load-truehull=DATEI\tTruehull-Datei laden\n"
 "-DNAME=WERT\tWert setzen\n"
 "-ANAME=WERT\tWert hinzufügen\n"
@@ -4838,6 +4841,7 @@ msgstr ""
 "--get=OPTION\tWert einer Option abfragen\n"
 "--get-bool=OPTION\tWert einer Boolean-Option als Exit-Code abfragen\n"
 "--save-hconfig=DATEI\tBinäre HConfig-Datei speichern\n"
+"--save-racenames=FILE\tRassennamen-Datei speichern!\n"
 "--save-truehull=DATEI\tTruehull-Datei speichern"
 
 #: ui/reshack/dialogs.cpp:466
@@ -12213,6 +12217,10 @@ msgstr "Warnung: Knoten hat einmalige Sekundär-Id"
 msgid "Warning: node is empty (no children and no content)"
 msgstr "Warnung: Knoten ist leer (keine Unterknoten und kein Inhalt)"
 
+#: game/maint/configurationapplication.cpp:196
+msgid "Warning: value for \"%s\" is too long (%d > %d)"
+msgstr "Warnung: Wert für \"%s\" ist zu lang (%d > %d)"
+
 #: client/tiles/historymovementtile.cpp:146
 #: client/tiles/shipmovementtile.cpp:210 game/interface/ufoproperty.cpp:134
 msgid "Warp %d"
@@ -13059,11 +13067,11 @@ msgstr "jedes Mal"
 msgid "expecting \",\", found \"%s\""
 msgstr "Erwarte \"NAME=WERT\" statt \"%s\""
 
-#: game/maint/configurationapplication.cpp:239
+#: game/maint/configurationapplication.cpp:252
 msgid "expecting \"KEY=VALUE\" for option \"-A\""
 msgstr "Erwarte \"NAME=WERT\" für Option \"-A\""
 
-#: game/maint/configurationapplication.cpp:231
+#: game/maint/configurationapplication.cpp:244
 msgid "expecting \"KEY=VALUE\" for option \"-D\""
 msgstr "Erwarte \"NAME=WERT\" für Option \"-D\""
 
@@ -13218,7 +13226,7 @@ msgstr "Ungültige Option '%s' angegeben. Mit '%s -h' erhalten Sie Hilfe."
 msgid "invalid option specified"
 msgstr "Ungültige Option angegeben."
 
-#: game/maint/configurationapplication.cpp:305
+#: game/maint/configurationapplication.cpp:318
 #: game/maint/dump/application.cpp:60 game/maint/raterapplication.cpp:74
 #: game/maint/sweepapplication.cpp:65 game/v3/maketurnapplication.cpp:72
 #: game/v3/trn/dumperapplication.cpp:99 game/v3/unpackapplication.cpp:96
@@ -14114,7 +14122,7 @@ msgstr "sehr instabil (<80%)"
 msgid "warm"
 msgstr "warm"
 
-#: game/maint/configurationapplication.cpp:319
+#: game/maint/configurationapplication.cpp:332
 msgid "warning: no action specified"
 msgstr "Warnung: keine Aktion angegeben"
 
