@@ -137,6 +137,10 @@ AFL_TEST("game.v3.ResultLoader:loadTurnfile", a)
     a.checkEqual("11. getFriendlyCode", h.turn.universe().ships().get(9)->getFriendlyCode().orElse(""), "abc");
     a.checkEqual("12. getColonistTax",  h.turn.universe().planets().get(270)->getColonistTax().orElse(0), 5);
     a.checkEqual("13. getBaseMission",  h.turn.universe().planets().get(400)->getBaseMission().orElse(0), 3);
+
+    // Verify properties
+    a.checkEqual("21. LocalFileFormatProperty",      h.testee.getProperty(game::TurnLoader::LocalFileFormatProperty), "RST");
+    a.checkDifferent("22. RemoteFileFormatProperty", h.testee.getProperty(game::TurnLoader::RemoteFileFormatProperty), "");
 }
 
 /** Test loadTurnfile(), failure case: invalid file.
