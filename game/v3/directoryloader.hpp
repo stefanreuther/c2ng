@@ -14,7 +14,7 @@
 #include "game/browser/usercallback.hpp"
 #include "game/map/universe.hpp"
 #include "game/playerarray.hpp"
-#include "game/turnloader.hpp"
+#include "game/v3/baseturnloader.hpp"
 #include "game/v3/directoryscanner.hpp"
 #include "util/profiledirectory.hpp"
 
@@ -23,7 +23,7 @@ namespace game { namespace v3 {
     class ControlFile;
 
     /** TurnLoader for unpacked game directory. */
-    class DirectoryLoader : public TurnLoader {
+    class DirectoryLoader : public BaseTurnLoader {
      public:
         /** Constructor.
             \param specificationDirectory Specification directory (union of game directory, default specification directory)
@@ -44,20 +44,13 @@ namespace game { namespace v3 {
         virtual PlayerStatusSet_t getPlayerStatus(int player, String_t& extra, afl::string::Translator& tx) const;
         virtual std::auto_ptr<Task_t> loadCurrentTurn(Game& game, int player, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
         virtual std::auto_ptr<Task_t> saveCurrentTurn(const Game& game, PlayerSet_t player, SaveOptions_t opts, const Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
-        virtual void getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root);
-        virtual std::auto_ptr<Task_t> loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, Session& session, std::auto_ptr<StatusTask_t> then);
-        virtual std::auto_ptr<Task_t> saveConfiguration(const Root& root, afl::sys::LogListener& log, afl::string::Translator& tx, std::auto_ptr<Task_t> then);
         virtual String_t getProperty(Property p);
 
      private:
         /*
          *  Integration (constructor parameters)
          */
-        afl::base::Ref<afl::io::Directory> m_specificationDirectory;
         afl::base::Ref<afl::io::Directory> m_defaultSpecificationDirectory;
-        std::auto_ptr<afl::charset::Charset> m_charset;
-        afl::io::FileSystem& m_fileSystem;
-        util::ProfileDirectory* m_pProfile;
         game::browser::UserCallback* m_pCallback;
 
         /*
@@ -81,17 +74,6 @@ namespace game { namespace v3 {
             \param root Root
             \param session Session */
         void doLoadCurrentTurn(Game& game, int player, Root& root, Session& session);
-
-        /** Implementation of loadHistoryTurn.
-            Can throw on error.
-            \param turn Turn
-            \param game Game
-            \param player Player
-            \param turnNumber Turn number to load
-            \param root Root
-            \param log Logger
-            \param tx Translator */
-        void doLoadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, afl::sys::LogListener& log, afl::string::Translator& tx);
 
         /** Implementation of saveCurrentTurn.
             Can throw on error.

@@ -26,7 +26,6 @@
 #include "game/v3/registry.hpp"
 #include "game/v3/structures.hpp"
 #include "game/v3/writer.hpp"
-#include "util/backupfile.hpp"
 
 using afl::base::ConstBytes_t;
 using afl::base::Ptr;
@@ -41,7 +40,6 @@ using afl::string::Format;
 using afl::string::Translator;
 using afl::sys::LogListener;
 using game::PlayerSet_t;
-using game::config::UserConfiguration;
 using game::map::BaseData;
 using game::map::Planet;
 using game::map::PlanetData;
@@ -153,11 +151,8 @@ game::v3::DirectoryLoader::DirectoryLoader(afl::base::Ref<afl::io::Directory> sp
                                            util::ProfileDirectory* pProfile,
                                            game::browser::UserCallback* pCallback)
 
-    : m_specificationDirectory(specificationDirectory),
+    : BaseTurnLoader(specificationDirectory, charset, fs, pProfile),
       m_defaultSpecificationDirectory(defaultSpecificationDirectory),
-      m_charset(charset),
-      m_fileSystem(fs),
-      m_pProfile(pProfile),
       m_pCallback(pCallback),
       m_playerFlags(),
       m_playersWithDosOutbox()
@@ -235,68 +230,6 @@ game::v3::DirectoryLoader::saveCurrentTurn(const Game& game, PlayerSet_t players
     }
 }
 
-void
-game::v3::DirectoryLoader::getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root)
-{
-    // FIXME: same as ResultLoader?
-    while (HistoryStatus* p = status.eat()) {
-        // Prepare template
-        util::BackupFile tpl;
-        tpl.setGameDirectoryName(root.gameDirectory().getDirectoryName());
-        tpl.setPlayerNumber(player);
-        tpl.setTurnNumber(turn);
-
-        // Do we have a history file?
-        if (tpl.hasFile(m_fileSystem, root.userConfiguration()[UserConfiguration::Backup_Result]())) {
-            *p = StronglyPositive;
-        } else {
-            *p = Negative;
-        }
-
-        ++turn;
-    }
-}
-
-std::auto_ptr<game::Task_t>
-game::v3::DirectoryLoader::loadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, Session& session, std::auto_ptr<StatusTask_t> then)
-{
-    class Task : public Task_t {
-     public:
-        Task(DirectoryLoader& parent, Turn& turn, Game& game, int player, int turnNumber, Root& root, Session& session, std::auto_ptr<StatusTask_t>& then)
-            : m_parent(parent), m_turn(turn), m_game(game), m_player(player), m_turnNumber(turnNumber), m_root(root), m_log(session.log()), m_translator(session.translator()), m_then(then)
-            { }
-        virtual void call()
-            {
-                m_log.write(LogListener::Trace, LOG_NAME, "Task: loadHistoryTurn");
-                try {
-                    m_parent.doLoadHistoryTurn(m_turn, m_game, m_player, m_turnNumber, m_root, m_log, m_translator);
-                    m_then->call(true);
-                }
-                catch (std::exception& e) {
-                    m_log.write(LogListener::Error, LOG_NAME, String_t(), e);
-                    m_then->call(false);
-                }
-            }
-     private:
-        DirectoryLoader& m_parent;
-        Turn& m_turn;
-        Game& m_game;
-        int m_player;
-        int m_turnNumber;
-        Root& m_root;
-        LogListener& m_log;
-        Translator& m_translator;
-        std::auto_ptr<StatusTask_t> m_then;
-    };
-    return std::auto_ptr<Task_t>(new Task(*this, turn, game, player, turnNumber, root, session, then));
-}
-
-std::auto_ptr<game::Task_t>
-game::v3::DirectoryLoader::saveConfiguration(const Root& root, afl::sys::LogListener& log, afl::string::Translator& tx, std::auto_ptr<Task_t> then)
-{
-    return defaultSaveConfiguration(root, m_pProfile, log, tx, then);
-}
-
 String_t
 game::v3::DirectoryLoader::getProperty(Property p)
 {
@@ -342,21 +275,18 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Game& game, int player, Root& root,
     GenExtra::create(turn).create(player) = gen;
 
     // Initialize
-    Loader ldr(*m_charset, tx, log);
+    Loader ldr(charset(), tx, log);
     ldr.prepareUniverse(turn.universe());
     ldr.prepareTurn(turn, root, session, player);
 
     // Load common files
-    ldr.loadCommonFiles(root.gameDirectory(), *m_specificationDirectory, turn.universe(), player);
+    ldr.loadCommonFiles(root.gameDirectory(), specificationDirectory(), turn.universe(), player);
 
     // load database
     loadCurrentDatabases(game, player, root, session);
 
     // expression lists
-    if (m_pProfile != 0) {
-        game.expressionLists().loadRecentFiles(*m_pProfile, log, tx);
-        game.expressionLists().loadPredefinedFiles(*m_pProfile, *m_specificationDirectory, log, tx);
-    }
+    loadExpressionLists(game, log, tx);
 
     gen.copyScoresTo(game.scores());
     turn.setTurnNumber(gen.getTurnNumber());
@@ -440,12 +370,12 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Game& game, int player, Root& root,
     {
         Ptr<Stream> s = dir.openFileNT(Format("mess35%d.dat", player), FileSystem::OpenRead);
         if (s.get() != 0) {
-            LocalOutboxReader(turn, ldr, player).loadOutbox35(*s, *m_charset, tx);
+            LocalOutboxReader(turn, ldr, player).loadOutbox35(*s, charset(), tx);
             m_playersWithDosOutbox -= player;
         } else {
             s = dir.openFileNT(Format("mess%d.dat", player), FileSystem::OpenRead);
             if (s.get() != 0) {
-                LocalOutboxReader(turn, ldr, player).loadOutbox(*s, *m_charset, tx);
+                LocalOutboxReader(turn, ldr, player).loadOutbox(*s, charset(), tx);
                 m_playersWithDosOutbox += player;
             }
         }
@@ -456,7 +386,7 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Game& game, int player, Root& root,
     {
         Ptr<Stream> s = dir.openFileNT(Format("cmd%d.txt", player), FileSystem::OpenRead);
         if (s.get() != 0) {
-            CommandExtra::create(turn).create(player).loadCommandFile(*s, gen.getTimestamp(), *m_charset);
+            CommandExtra::create(turn).create(player).loadCommandFile(*s, gen.getTimestamp(), charset());
         }
     }
 
@@ -476,68 +406,9 @@ game::v3::DirectoryLoader::doLoadCurrentTurn(Game& game, int player, Root& root,
         }
     }
 
-    // Load fleets.
+    // Load extra files.
     // Must be after loading main data because it requires shipsource flags
-    try {
-        game::db::FleetLoader(*m_charset, tx).load(root.gameDirectory(), turn.universe(), player);
-    }
-    catch (FileProblemException& e) {
-        log.write(LogListener::Warn, LOG_NAME, tx("File has been ignored"), e);
-    }
-
-    // FLAK
-    ldr.loadFlakBattles(turn, dir, player);
-
-    // Util
-    Parser mp(tx, log, game, player, root, game::actions::mustHaveShipList(session), session.world().atomTable());
-    {
-        Ptr<Stream> s = dir.openFileNT(Format("util%d.dat", player), FileSystem::OpenRead);
-        if (s.get() != 0) {
-            mp.loadUtilData(*s, *m_charset);
-        } else {
-            mp.handleNoUtilData();
-        }
-    }
-
-    // Message parser
-    {
-        Ptr<Stream> file = m_specificationDirectory->openFileNT("msgparse.ini", FileSystem::OpenRead);
-        if (file.get() != 0) {
-            mp.parseMessages(*file, turn.inbox(), *m_charset);
-        }
-    }
-}
-
-void
-game::v3::DirectoryLoader::doLoadHistoryTurn(Turn& turn, Game& game, int player, int turnNumber, Root& root, afl::sys::LogListener& log, afl::string::Translator& tx)
-{
-    // FIXME: same as ResultLoader?
-    Loader ldr(*m_charset, tx, log);
-    ldr.prepareUniverse(turn.universe());
-
-    // FIXME: backup these files?
-    ldr.loadCommonFiles(root.gameDirectory(), *m_specificationDirectory, turn.universe(), player);
-
-    // load turn file backup
-    util::BackupFile tpl;
-    tpl.setGameDirectoryName(root.gameDirectory().getDirectoryName());
-    tpl.setPlayerNumber(player);
-    tpl.setTurnNumber(turnNumber);
-
-    {
-        Ref<Stream> file = tpl.openFile(m_fileSystem, root.userConfiguration()[UserConfiguration::Backup_Result](), tx);
-        log.write(LogListener::Info, LOG_NAME, Format(tx("Loading %s backup file..."), root.playerList().getPlayerName(player, Player::AdjectiveName, tx)));
-        ldr.loadResult(turn, root, game, *file, player);
-    }
-
-    // if (have_trn) {
-    //     Ptr<Stream> trnfile = game_file_dir->openFile(Format("player%d.trn", player), Stream::C_READ);
-    //     loadTurn(trn, *trnfile, player);
-    // }
-
-    // FIXME: history fleets not loaded here
-    // FIXME: alliances not loaded until here; would need message/util.dat parsing
-    // FIXME: load FLAK
+    loadExtraFiles(game, turn, player, root, session);
 }
 
 void
@@ -606,11 +477,11 @@ game::v3::DirectoryLoader::doSaveCurrentTurn(const Game& game, PlayerSet_t playe
                 if (!m_playersWithDosOutbox.contains(player)) {
                     // Windows
                     Ref<Stream> file = dir.openFile(Format("mess35%d.dat", player), FileSystem::Create);
-                    Writer(*m_charset, tx, log).saveOutbox35(out, player, *file);
+                    Writer(charset(), tx, log).saveOutbox35(out, player, *file);
                 } else {
                     // DOS
                     Ref<Stream> file = dir.openFile(Format("mess%d.dat", player), FileSystem::Create);
-                    Writer(*m_charset, tx, log).saveOutbox(out, player, root.playerList(), *file);
+                    Writer(charset(), tx, log).saveOutbox(out, player, root.playerList(), *file);
                 }
                 out.deleteMessagesAfter(marker);
             }
@@ -640,10 +511,10 @@ game::v3::DirectoryLoader::doSaveCurrentTurn(const Game& game, PlayerSet_t playe
             control.save(dir, tx, log);
 
             // Database
-            saveCurrentDatabases(game, player, root, session, *m_charset);
+            saveCurrentDatabases(game, player, root, session, charset());
 
             // Fleets
-            game::db::FleetLoader(*m_charset, tx).save(root.gameDirectory(), turn.universe(), player);
+            game::db::FleetLoader(charset(), tx).save(root.gameDirectory(), turn.universe(), player);
 
         }
     }
@@ -652,9 +523,7 @@ game::v3::DirectoryLoader::doSaveCurrentTurn(const Game& game, PlayerSet_t playe
     fizz.save(dir);
 
     // Recent
-    if (m_pProfile != 0) {
-        game.expressionLists().saveRecentFiles(*m_pProfile, log, tx);
-    }
+    saveExpressionLists(game, log, tx);
 }
 
 void
@@ -679,7 +548,7 @@ game::v3::DirectoryLoader::loadKore(afl::io::Stream& file, Turn& turn, int playe
         return;
     }
 
-    Loader ldr(*m_charset, tx, log);
+    Loader ldr(charset(), tx, log);
 
     // Minefields
     ldr.loadKoreMinefields(turn.universe(), file, 500, player, turn.getTurnNumber());
@@ -718,7 +587,7 @@ game::v3::DirectoryLoader::loadSkore(afl::io::Stream& file, Turn& turn, afl::sys
 
     // Do we have extended Ufos?
     if (std::memcmp(header.signature, "yAmsz", 5) == 0 && header.resultVersion > 0 && header.numUfos > 100) {
-        Loader(*m_charset, tx, log).loadUfos(turn.universe(), file, 101, header.numUfos - 100);
+        Loader(charset(), tx, log).loadUfos(turn.universe(), file, 101, header.numUfos - 100);
     }
 }
 
@@ -752,7 +621,7 @@ game::v3::DirectoryLoader::saveShips(afl::io::Stream& file, const game::map::Uni
 
                 // Serialize it
                 gt::Ship rawShip;
-                Packer(*m_charset).packShip(rawShip, i, shipData, remapExplore);
+                Packer(charset()).packShip(rawShip, i, shipData, remapExplore);
                 file.fullWrite(afl::base::fromObject(rawShip));
 
                 // Checksums
@@ -795,7 +664,7 @@ game::v3::DirectoryLoader::savePlanets(afl::io::Stream& file, const game::map::U
 
                 // Serialize it
                 gt::Planet rawPlanet;
-                Packer(*m_charset).packPlanet(rawPlanet, i, planetData);
+                Packer(charset()).packPlanet(rawPlanet, i, planetData);
                 file.fullWrite(afl::base::fromObject(rawPlanet));
 
                 // Checksums
@@ -841,7 +710,7 @@ game::v3::DirectoryLoader::saveBases(afl::io::Stream& file, const game::map::Uni
 
                 // Serialize it
                 gt::Base rawBase;
-                Packer(*m_charset).packBase(rawBase, i, baseData, baseOwner);
+                Packer(charset()).packBase(rawBase, i, baseData, baseOwner);
                 file.fullWrite(afl::base::fromObject(rawBase));
 
                 // Checksums

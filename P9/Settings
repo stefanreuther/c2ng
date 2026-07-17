@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = util/connectionprovider.cpp util/connectionprovider.hpp \
+FILES_gamelib = game/v3/baseturnloader.cpp game/v3/baseturnloader.hpp \
+    util/connectionprovider.cpp util/connectionprovider.hpp \
     util/characternamelist.cpp util/characternamelist.hpp \
     util/waitindicator.cpp util/waitindicator.hpp game/v3/passwordapplet.cpp \
     game/v3/passwordapplet.hpp game/maint/dump/textoutput.cpp \
@@ -1895,8 +1896,9 @@ DEPEND_c2reshack = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/util/connectionprovidertest.cpp \
-    test/ui/reshack/sessiontest.cpp test/ui/reshack/rectangletooltest.cpp \
+FILES_testsuite = test/game/v3/baseturnloadertest.cpp \
+    test/util/connectionprovidertest.cpp test/ui/reshack/sessiontest.cpp \
+    test/ui/reshack/rectangletooltest.cpp \
     test/ui/reshack/pipettetooltest.cpp test/ui/reshack/penciltooltest.cpp \
     test/ui/reshack/palettetest.cpp test/ui/reshack/linetooltest.cpp \
     test/ui/reshack/infotest.cpp test/ui/reshack/fontutiltest.cpp \
