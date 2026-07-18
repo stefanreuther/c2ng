@@ -16,33 +16,30 @@ using game::vcr::Statistic;
 using game::sim::Setup;
 
 namespace {
-    void addShip(afl::test::Assert a, Setup& setup, int owner, int damage, int fighters)
+    void addShip(Setup& setup, int owner, int damage, int fighters)
     {
-        game::sim::Ship* sh = setup.addShip();
-        a.check("addShip", sh);
-        sh->setOwner(owner);
-        sh->setDamage(damage);
-        sh->setNumBays(3);
-        sh->setAmmo(fighters);
+        game::sim::Ship& sh = setup.addShip();
+        sh.setOwner(owner);
+        sh.setDamage(damage);
+        sh.setNumBays(3);
+        sh.setAmmo(fighters);
     }
 
-    void addTorpedoShip(afl::test::Assert a, Setup& setup, int owner, int damage, int torps)
+    void addTorpedoShip(Setup& setup, int owner, int damage, int torps)
     {
-        game::sim::Ship* sh = setup.addShip();
-        a.check("addTorpedoShip", sh);
-        sh->setOwner(owner);
-        sh->setDamage(damage);
-        sh->setNumLaunchers(4);
-        sh->setTorpedoType(3);
-        sh->setAmmo(torps);
+        game::sim::Ship& sh = setup.addShip();
+        sh.setOwner(owner);
+        sh.setDamage(damage);
+        sh.setNumLaunchers(4);
+        sh.setTorpedoType(3);
+        sh.setAmmo(torps);
     }
 
-    void addPlanet(afl::test::Assert a, Setup& setup, int owner, int fighters)
+    void addPlanet(Setup& setup, int owner, int fighters)
     {
-        game::sim::Planet* pl = setup.addPlanet();
-        a.check("addPlanet", pl);
-        pl->setOwner(owner);
-        pl->setNumBaseFighters(fighters);
+        game::sim::Planet& pl = setup.addPlanet();
+        pl.setOwner(owner);
+        pl.setNumBaseFighters(fighters);
     }
 
     Statistic makeStatistic(int fighters)
@@ -73,16 +70,16 @@ AFL_TEST("game.sim.ResultList:basics", a)
 
     {
         Setup before;
-        addShip(a, before, 7,  0, 10);
-        addShip(a, before, 2,  0, 70);
-        addShip(a, before, 2, 50, 10);
-        addPlanet(a, before, 2, 30);
+        addShip(before, 7,  0, 10);
+        addShip(before, 2,  0, 70);
+        addShip(before, 2, 50, 10);
+        addPlanet(before, 2, 30);
 
         Setup after;
-        addShip(a, after, 7,  20, 10);     // 20 damage taken
-        addShip(a, after, 2,   0, 20);     // 50 fighters lost
-        addShip(a, after, 0, 100, 0);
-        addPlanet(a, after, 7, 20);        // 10 fighters lost
+        addShip(after, 7,  20, 10);     // 20 damage taken
+        addShip(after, 2,   0, 20);     // 50 fighters lost
+        addShip(after, 0, 100, 0);
+        addPlanet(after, 7, 20);        // 10 fighters lost
 
         Statistic stats[] = {
             makeStatistic(5),
@@ -135,8 +132,8 @@ AFL_TEST("game.sim.ResultList:increase-weight", a)
     result1.battles = new game::vcr::classic::Database();
 
     {
-        Setup before; addShip(a, before,   1,  0, 10); addPlanet(a, before, 2, 30);
-        Setup after;  addShip(a, after,    1, 20, 10); addPlanet(a, after,  1, 20);
+        Setup before; addShip(before,   1,  0, 10); addPlanet(before, 2, 30);
+        Setup after;  addShip(after,    1, 20, 10); addPlanet(after,  1, 20);
         Statistic stats[] = { makeStatistic(8), makeStatistic(18) };
 
         testee.addResult(before, after, stats, result1);
@@ -150,8 +147,8 @@ AFL_TEST("game.sim.ResultList:increase-weight", a)
     result2.this_battle_weight *= 5;
 
     {
-        Setup before; addShip(a, before,   1,  0, 10); addPlanet(a, before, 2, 30);
-        Setup after;  addShip(a, after,    1, 20, 10); addPlanet(a, after,  1, 20);
+        Setup before; addShip(before,   1,  0, 10); addPlanet(before, 2, 30);
+        Setup after;  addShip(after,    1, 20, 10); addPlanet(after,  1, 20);
         Statistic stats[] = { makeStatistic(4), makeStatistic(12) };
         testee.addResult(before, after, stats, result2);
     }
@@ -188,8 +185,8 @@ AFL_TEST("game.sim.ResultList:decrease-weight", a)
     result2.this_battle_weight *= 5;
 
     {
-        Setup before; addShip(a, before,   1,  0, 10); addPlanet(a, before, 2, 30);
-        Setup after;  addShip(a, after,    1, 20, 10); addPlanet(a, after,  1, 20);
+        Setup before; addShip(before,   1,  0, 10); addPlanet(before, 2, 30);
+        Setup after;  addShip(after,    1, 20, 10); addPlanet(after,  1, 20);
         Statistic stats[] = { makeStatistic(4), makeStatistic(12) };
         testee.addResult(before, after, stats, result2);
     }
@@ -199,8 +196,8 @@ AFL_TEST("game.sim.ResultList:decrease-weight", a)
     result1.battles = new game::vcr::classic::Database();
 
     {
-        Setup before; addShip(a, before,   1,  0, 10); addPlanet(a, before, 2, 30);
-        Setup after;  addShip(a, after,    1, 20, 10); addPlanet(a, after,  1, 20);
+        Setup before; addShip(before,   1,  0, 10); addPlanet(before, 2, 30);
+        Setup after;  addShip(after,    1, 20, 10); addPlanet(after,  1, 20);
         Statistic stats[] = { makeStatistic(8), makeStatistic(18) };
 
         testee.addResult(before, after, stats, result1);
@@ -223,10 +220,10 @@ AFL_TEST("game.sim.ResultList:decrease-weight", a)
 AFL_TEST("game.sim.ResultList:multiple-classes", a)
 {
     // Setups
-    Setup before; addShip(a, before, 1, 0, 10);    addShip(a, before, 1, 0, 10);    addShip(a, before, 2, 0, 10);
-    Setup after1; addShip(a, after1, 1, 30, 10);   addShip(a, after1, 0, 100, 10);  addShip(a, after1, 0, 100, 10);
-    Setup after2; addShip(a, after2, 1, 30, 10);   addShip(a, after2, 1, 30, 10);   addShip(a, after2, 0, 100, 10);
-    Setup after3; addShip(a, after3, 0, 100, 10);  addShip(a, after3, 0, 100, 10);  addShip(a, after3, 2, 80, 10);
+    Setup before; addShip(before, 1, 0, 10);    addShip(before, 1, 0, 10);    addShip(before, 2, 0, 10);
+    Setup after1; addShip(after1, 1, 30, 10);   addShip(after1, 0, 100, 10);  addShip(after1, 0, 100, 10);
+    Setup after2; addShip(after2, 1, 30, 10);   addShip(after2, 1, 30, 10);   addShip(after2, 0, 100, 10);
+    Setup after3; addShip(after3, 0, 100, 10);  addShip(after3, 0, 100, 10);  addShip(after3, 2, 80, 10);
     Statistic stats[] = { makeStatistic(8), makeStatistic(18) };
 
     // Create ResultList with one result
@@ -289,8 +286,8 @@ AFL_TEST("game.sim.ResultList:multiple-classes", a)
 AFL_TEST("game.sim.ResultList:describeUnitResult", a)
 {
     // Setups
-    Setup before; addShip(a, before, 1, 0, 10);    addShip(a, before, 1, 0, 10);
-    Setup after1; addShip(a, after1, 1, 30, 10);   addShip(a, after1, 0, 100, 10);
+    Setup before; addShip(before, 1, 0, 10);    addShip(before, 1, 0, 10);
+    Setup after1; addShip(after1, 1, 30, 10);   addShip(after1, 0, 100, 10);
     Statistic stats[] = { makeStatistic(8), makeStatistic(18) };
 
     // Create ResultList with one result
@@ -326,8 +323,8 @@ AFL_TEST("game.sim.ResultList:describeUnitResult", a)
 AFL_TEST("game.sim.ResultList:describeUnitResult:2", a)
 {
     // Setups
-    Setup before; addTorpedoShip(a, before, 1,   0, 10); addPlanet(a, before, 2, 30);
-    Setup after1; addTorpedoShip(a, after1, 0, 100,  1); addPlanet(a, after1, 2, 28);
+    Setup before; addTorpedoShip(before, 1,   0, 10); addPlanet(before, 2, 30);
+    Setup after1; addTorpedoShip(after1, 0, 100,  1); addPlanet(after1, 2, 28);
     Statistic stats[] = { makeStatistic(0), makeStatistic(0) };
 
     // Create ResultList with one result

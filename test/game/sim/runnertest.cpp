@@ -22,34 +22,34 @@
 using game::sim::Ship;
 
 namespace {
-    Ship* addShip(game::sim::Setup& setup, int hullNr, int id, int owner, const game::spec::ShipList& list)
+    Ship& addShip(game::sim::Setup& setup, int hullNr, int id, int owner, const game::spec::ShipList& list)
     {
-        Ship* ship = setup.addShip();
-        ship->setId(id);
-        ship->setFriendlyCode("???");
-        ship->setDamage(0);
-        ship->setShield(100);
-        ship->setOwner(owner);
-        ship->setExperienceLevel(0);
-        ship->setFlags(0);
-        ship->setHullType(hullNr, list);     // sets crew, mass, hullType, numBeams, beamType, numLaunchers, torpedoType, numBays, ammo
-        ship->setEngineType(game::test::TRANSWARP_ENGINE_ID);
-        ship->setAggressiveness(Ship::agg_Kill);
-        ship->setInterceptId(0);
+        Ship& ship = setup.addShip();
+        ship.setId(id);
+        ship.setFriendlyCode("???");
+        ship.setDamage(0);
+        ship.setShield(100);
+        ship.setOwner(owner);
+        ship.setExperienceLevel(0);
+        ship.setFlags(0);
+        ship.setHullType(hullNr, list);     // sets crew, mass, hullType, numBeams, beamType, numLaunchers, torpedoType, numBays, ammo
+        ship.setEngineType(game::test::TRANSWARP_ENGINE_ID);
+        ship.setAggressiveness(Ship::agg_Kill);
+        ship.setInterceptId(0);
         return ship;
     }
 
-    Ship* addOutrider(afl::test::Assert a, game::sim::Setup& setup, int id, int owner, const game::spec::ShipList& list)
+    Ship& addOutrider(afl::test::Assert a, game::sim::Setup& setup, int id, int owner, const game::spec::ShipList& list)
     {
-        Ship* ship = addShip(setup, game::test::OUTRIDER_HULL_ID, id, owner, list);
-        a.checkEqual("addOutrider > getCrew", ship->getCrew(), 180);  // verify that setHullType worked as planned
+        Ship& ship = addShip(setup, game::test::OUTRIDER_HULL_ID, id, owner, list);
+        a.checkEqual("addOutrider > getCrew", ship.getCrew(), 180);  // verify that setHullType worked as planned
         return ship;
     }
 
-    Ship* addGorbie(afl::test::Assert a, game::sim::Setup& setup, int id, int owner, const game::spec::ShipList& list)
+    Ship& addGorbie(afl::test::Assert a, game::sim::Setup& setup, int id, int owner, const game::spec::ShipList& list)
     {
-        Ship* ship = addShip(setup, game::test::GORBIE_HULL_ID, id, owner, list);
-        a.checkEqual("addGorbie > getCrew", ship->getCrew(), 2287);
+        Ship& ship = addShip(setup, game::test::GORBIE_HULL_ID, id, owner, list);
+        a.checkEqual("addGorbie > getCrew", ship.getCrew(), 2287);
         return ship;
     }
 

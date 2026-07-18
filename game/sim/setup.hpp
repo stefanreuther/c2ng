@@ -67,14 +67,14 @@ namespace game { namespace sim {
 
         /** Add planet.
             If the setup does not contain a planet, adds one; otherwise, no change.
-            \return planet; null on failure (cannot currently happen) */
-        Planet* addPlanet();
+            \return planet */
+        Planet& addPlanet();
 
         /** Add planet from data.
             Adds a planet (like addPlanet()) and initializes it with the given data.
             \param data Data
-            \return planet; null on failure (cannot currently happen) */
-        Planet* addPlanet(const Planet& data);
+            \return planet */
+        Planet& addPlanet(const Planet& data);
 
         /** Check presence of planet.
             \return true if setup has a planet */
@@ -97,15 +97,15 @@ namespace game { namespace sim {
          */
 
         /** Add a ship.
-            \return ship; null on failure (cannot currently happen) */
-        Ship* addShip();
+            \return ship */
+        Ship& addShip();
 
         /** Add a ship from data.
             Adds a ship (like addShip()) and initializes it with the given data.
             If a ship with the same Id already exists, overwrites that.
             \param data Data
-            \return ship; null on failure (cannot currently happen) */
-        Ship* addShip(const Ship& data);
+            \return ship */
+        Ship& addShip(const Ship& data);
 
         /** Get number of ships.
             \return number of ships */

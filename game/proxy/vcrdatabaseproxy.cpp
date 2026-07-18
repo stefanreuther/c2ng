@@ -209,14 +209,12 @@ game::proxy::VcrDatabaseProxy::Trampoline::addToSimulation(size_t index, size_t 
     game::sim::BaseTransfer transfer(shipList, config, m_adaptor.translator());
     bool ok = false;
     if (obj->isPlanet()) {
-        game::sim::Planet* pl = setup->addPlanet();
-        if (pl != 0) {
-            ok = transfer.copyPlanetFromBattle(*pl, *obj);
-        }
+        game::sim::Planet& pl = setup->addPlanet();
+        ok = transfer.copyPlanetFromBattle(pl, *obj);
     } else {
         game::sim::Ship* sh = setup->findShipById(obj->getId());
         if (sh == 0) {
-            sh = setup->addShip();
+            sh = &setup->addShip();
         }
         if (sh != 0) {
             ok = transfer.copyShipFromBattle(*sh, *obj, hullType, b->isESBActive(config));

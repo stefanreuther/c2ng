@@ -21,32 +21,32 @@ namespace {
     void addAnnihilation(game::sim::Setup& setup, int id, int owner, const game::spec::ShipList& shipList)
     {
         afl::string::NullTranslator tx;
-        game::sim::Ship* sh = setup.addShip();
-        sh->setHullType(game::test::ANNIHILATION_HULL_ID, shipList);
-        sh->setId(id);
-        sh->setOwner(owner);
-        sh->setDefaultName(tx);
-        sh->setEngineType(5);
+        game::sim::Ship& sh = setup.addShip();
+        sh.setHullType(game::test::ANNIHILATION_HULL_ID, shipList);
+        sh.setId(id);
+        sh.setOwner(owner);
+        sh.setDefaultName(tx);
+        sh.setEngineType(5);
     }
 
     void addCustomShip(game::sim::Setup& setup, int id, int owner)
     {
         afl::string::NullTranslator tx;
-        game::sim::Ship* sh = setup.addShip();
-        sh->setId(id);
-        sh->setOwner(owner);
-        sh->setDefaultName(tx);
-        sh->setNumBays(3);
-        sh->setAmmo(5);
+        game::sim::Ship& sh = setup.addShip();
+        sh.setId(id);
+        sh.setOwner(owner);
+        sh.setDefaultName(tx);
+        sh.setNumBays(3);
+        sh.setAmmo(5);
     }
 
     void addPlanet(game::sim::Setup& setup, int owner)
     {
-        game::sim::Planet* pl = setup.addPlanet();
-        pl->setOwner(owner);
-        pl->setBaseBeamTech(3);
-        pl->setDefense(17);
-        pl->setBaseDefense(5);
+        game::sim::Planet& pl = setup.addPlanet();
+        pl.setOwner(owner);
+        pl.setBaseBeamTech(3);
+        pl.setDefense(17);
+        pl.setBaseDefense(5);
     }
 }
 
