@@ -49,59 +49,59 @@ namespace {
         opts.setBalancingMode(balance);
     }
 
-    Ship* addShip(game::sim::Setup& setup, int hullNr, int id, int owner, const game::spec::ShipList& list)
+    Ship& addShip(game::sim::Setup& setup, int hullNr, int id, int owner, const game::spec::ShipList& list)
     {
-        Ship* ship = setup.addShip();
-        ship->setId(id);
-        ship->setFriendlyCode("???");
-        ship->setDamage(0);
-        ship->setShield(100);
-        ship->setOwner(owner);
-        ship->setExperienceLevel(0);
-        ship->setFlags(0);
-        ship->setHullType(hullNr, list);     // sets crew, mass, hullType, numBeams, beamType, numLaunchers, torpedoType, numBays, ammo
-        ship->setEngineType(9);
-        ship->setAggressiveness(Ship::agg_Kill);
-        ship->setInterceptId(0);
+        Ship& ship = setup.addShip();
+        ship.setId(id);
+        ship.setFriendlyCode("???");
+        ship.setDamage(0);
+        ship.setShield(100);
+        ship.setOwner(owner);
+        ship.setExperienceLevel(0);
+        ship.setFlags(0);
+        ship.setHullType(hullNr, list);     // sets crew, mass, hullType, numBeams, beamType, numLaunchers, torpedoType, numBays, ammo
+        ship.setEngineType(9);
+        ship.setAggressiveness(Ship::agg_Kill);
+        ship.setInterceptId(0);
         return ship;
     }
 
-    Ship* addOutrider(afl::test::Assert a, game::sim::Setup& setup, int id, int owner, const game::spec::ShipList& list)
+    Ship& addOutrider(afl::test::Assert a, game::sim::Setup& setup, int id, int owner, const game::spec::ShipList& list)
     {
-        Ship* ship = addShip(setup, 1, id, owner, list);
-        a.checkEqual("addOutrider > getCrew", ship->getCrew(), 180);  // verify that setHullType worked as planned
+        Ship& ship = addShip(setup, 1, id, owner, list);
+        a.checkEqual("addOutrider > getCrew", ship.getCrew(), 180);  // verify that setHullType worked as planned
         return ship;
     }
 
-    Ship* addGorbie(afl::test::Assert a, game::sim::Setup& setup, int id, int owner, const game::spec::ShipList& list)
+    Ship& addGorbie(afl::test::Assert a, game::sim::Setup& setup, int id, int owner, const game::spec::ShipList& list)
     {
-        Ship* ship = addShip(setup, 70, id, owner, list);
-        a.checkEqual("addGorbie > getCrew", ship->getCrew(), 2287);
+        Ship& ship = addShip(setup, 70, id, owner, list);
+        a.checkEqual("addGorbie > getCrew", ship.getCrew(), 2287);
         return ship;
     }
 
-    Ship* addAnnihilation(afl::test::Assert a, game::sim::Setup& setup, int id, int owner, const game::spec::ShipList& list)
+    Ship& addAnnihilation(afl::test::Assert a, game::sim::Setup& setup, int id, int owner, const game::spec::ShipList& list)
     {
-        Ship* ship = addShip(setup, 53, id, owner, list);
-        a.checkEqual("addAnnihilation > getCrew", ship->getCrew(), 2910);
+        Ship& ship = addShip(setup, 53, id, owner, list);
+        a.checkEqual("addAnnihilation > getCrew", ship.getCrew(), 2910);
         return ship;
     }
 
-    Planet* addPlanet(game::sim::Setup& setup, int id, int owner)
+    Planet& addPlanet(game::sim::Setup& setup, int id, int owner)
     {
-        Planet* p = setup.addPlanet();
-        p->setId(id);
-        p->setFriendlyCode("???");
-        p->setDamage(0);
-        p->setShield(100);
-        p->setOwner(owner);
-        p->setExperienceLevel(0);
-        p->setFlags(0);
-        p->setDefense(61);
-        p->setBaseDefense(30);
-        p->setBaseBeamTech(5);
-        p->setBaseTorpedoTech(1);
-        p->setNumBaseFighters(12);
+        Planet& p = setup.addPlanet();
+        p.setId(id);
+        p.setFriendlyCode("???");
+        p.setDamage(0);
+        p.setShield(100);
+        p.setOwner(owner);
+        p.setExperienceLevel(0);
+        p.setFlags(0);
+        p.setDefense(61);
+        p.setBaseDefense(30);
+        p.setBaseBeamTech(5);
+        p.setBaseTorpedoTech(1);
+        p.setNumBaseFighters(12);
         return p;
     }
 
@@ -109,107 +109,107 @@ namespace {
     {
         // Add ship setup for order tests.
         // Reference: test.sim from bug #428
-        Ship* a = setup.addShip();
-        a->setId(450);
-        a->setFriendlyCode("010");
-        a->setDamage(0);
-        a->setShield(100);
-        a->setOwner(8);
-        a->setHullTypeOnly(0);
-        a->setCrew(2287);
-        a->setMass(980);
-        a->setBeamType(6);
-        a->setNumBeams(10);
-        a->setNumLaunchers(0);
-        a->setNumBays(10);
-        a->setAmmo(250);
-        a->setEngineType(9);
-        a->setAggressiveness(Ship::agg_Kill);
+        Ship& a = setup.addShip();
+        a.setId(450);
+        a.setFriendlyCode("010");
+        a.setDamage(0);
+        a.setShield(100);
+        a.setOwner(8);
+        a.setHullTypeOnly(0);
+        a.setCrew(2287);
+        a.setMass(980);
+        a.setBeamType(6);
+        a.setNumBeams(10);
+        a.setNumLaunchers(0);
+        a.setNumBays(10);
+        a.setAmmo(250);
+        a.setEngineType(9);
+        a.setAggressiveness(Ship::agg_Kill);
 
-        Ship* b = setup.addShip();
-        b->setId(455);
-        b->setFriendlyCode("020");
-        b->setDamage(0);
-        b->setShield(100);
-        b->setOwner(9);
-        b->setHullTypeOnly(0);
-        b->setCrew(1958);
-        b->setMass(850);
-        b->setBeamType(10);
-        b->setNumBeams(6);
-        b->setNumLaunchers(0);
-        b->setNumBays(10);
-        b->setAmmo(10);
-        b->setEngineType(9);
-        b->setAggressiveness(Ship::agg_Kill);
+        Ship& b = setup.addShip();
+        b.setId(455);
+        b.setFriendlyCode("020");
+        b.setDamage(0);
+        b.setShield(100);
+        b.setOwner(9);
+        b.setHullTypeOnly(0);
+        b.setCrew(1958);
+        b.setMass(850);
+        b.setBeamType(10);
+        b.setNumBeams(6);
+        b.setNumLaunchers(0);
+        b.setNumBays(10);
+        b.setAmmo(10);
+        b.setEngineType(9);
+        b.setAggressiveness(Ship::agg_Kill);
 
-        Planet* p = setup.addPlanet();
-        p->setId(230);
-        p->setFriendlyCode("000");
-        p->setOwner(8);
-        p->setDefense(351);
-        p->setBaseBeamTech(10);
-        p->setNumBaseFighters(50);
-        p->setBaseDefense(200);
-        p->setBaseTorpedoTech(10);
+        Planet& p = setup.addPlanet();
+        p.setId(230);
+        p.setFriendlyCode("000");
+        p.setOwner(8);
+        p.setDefense(351);
+        p.setBaseBeamTech(10);
+        p.setNumBaseFighters(50);
+        p.setBaseDefense(200);
+        p.setBaseTorpedoTech(10);
     }
 
     void addShipSetup(game::sim::Setup& setup)
     {
         // Add ship setup for order tests.
         // Reference: test2.sim from bug #428
-        Ship* a = setup.addShip();
-        a->setId(384);
-        a->setFriendlyCode("&'K");
-        a->setDamage(0);
-        a->setShield(100);
-        a->setOwner(8);
-        a->setHullTypeOnly(0);
-        a->setCrew(1);
-        a->setMass(24);
-        a->setBeamType(6);
-        a->setNumBeams(1);
-        a->setNumLaunchers(0);
-        a->setNumBays(0);
-        a->setAmmo(0);
-        a->setEngineType(9);
-        a->setAggressiveness(Ship::agg_Kill);
+        Ship& a = setup.addShip();
+        a.setId(384);
+        a.setFriendlyCode("&'K");
+        a.setDamage(0);
+        a.setShield(100);
+        a.setOwner(8);
+        a.setHullTypeOnly(0);
+        a.setCrew(1);
+        a.setMass(24);
+        a.setBeamType(6);
+        a.setNumBeams(1);
+        a.setNumLaunchers(0);
+        a.setNumBays(0);
+        a.setAmmo(0);
+        a.setEngineType(9);
+        a.setAggressiveness(Ship::agg_Kill);
 
-        Ship* b = setup.addShip();
-        b->setId(489);
-        b->setFriendlyCode("'d;");
-        b->setDamage(81);
-        b->setShield(19);
-        b->setOwner(10);
-        b->setHullTypeOnly(0);
-        b->setCrew(430);
-        b->setMass(160);
-        b->setBeamType(9);
-        b->setNumBeams(4);
-        b->setNumLaunchers(3);
-        b->setTorpedoType(10);
-        b->setNumBays(0);
-        b->setAmmo(0);
-        b->setEngineType(9);
-        b->setAggressiveness(Ship::agg_Kill);
+        Ship& b = setup.addShip();
+        b.setId(489);
+        b.setFriendlyCode("'d;");
+        b.setDamage(81);
+        b.setShield(19);
+        b.setOwner(10);
+        b.setHullTypeOnly(0);
+        b.setCrew(430);
+        b.setMass(160);
+        b.setBeamType(9);
+        b.setNumBeams(4);
+        b.setNumLaunchers(3);
+        b.setTorpedoType(10);
+        b.setNumBays(0);
+        b.setAmmo(0);
+        b.setEngineType(9);
+        b.setAggressiveness(Ship::agg_Kill);
 
-        Ship* c = setup.addShip();
-        c->setId(320);
-        c->setFriendlyCode("001");
-        c->setDamage(0);
-        c->setShield(100);
-        c->setOwner(9);
-        c->setHullTypeOnly(0);
-        c->setCrew(102);
-        c->setMass(130);
-        c->setBeamType(0);
-        c->setNumBeams(0);
-        c->setNumLaunchers(0);
-        c->setTorpedoType(0);
-        c->setNumBays(0);
-        c->setAmmo(0);
-        c->setEngineType(9);
-        c->setAggressiveness(Ship::agg_Passive);
+        Ship& c = setup.addShip();
+        c.setId(320);
+        c.setFriendlyCode("001");
+        c.setDamage(0);
+        c.setShield(100);
+        c.setOwner(9);
+        c.setHullTypeOnly(0);
+        c.setCrew(102);
+        c.setMass(130);
+        c.setBeamType(0);
+        c.setNumBeams(0);
+        c.setNumLaunchers(0);
+        c.setTorpedoType(0);
+        c.setNumBays(0);
+        c.setAmmo(0);
+        c.setEngineType(9);
+        c.setAggressiveness(Ship::agg_Passive);
     }
 
     /* Common environment */
@@ -239,8 +239,8 @@ AFL_TEST("game.sim.Run:VcrHost", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    Ship* s1 = addOutrider(a, h.setup, 1, 12, h.list);
-    Ship* s2 = addOutrider(a, h.setup, 2, 11, h.list);
+    Ship& s1 = addOutrider(a, h.setup, 1, 12, h.list);
+    Ship& s2 = addOutrider(a, h.setup, 2, 11, h.list);
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -262,16 +262,16 @@ AFL_TEST("game.sim.Run:VcrHost", a)
     a.checkEqual("21. stats", h.stats.size(), 2U);
 
     // - ship 1
-    a.checkEqual("31. getDamage", s1->getDamage(), 107);
-    a.checkEqual("32. getShield", s1->getShield(), 0);
-    a.checkEqual("33. getCrew",   s1->getCrew(), 103);
-    a.checkEqual("34. getOwner",  s1->getOwner(), 0);
+    a.checkEqual("31. getDamage", s1.getDamage(), 107);
+    a.checkEqual("32. getShield", s1.getShield(), 0);
+    a.checkEqual("33. getCrew",   s1.getCrew(), 103);
+    a.checkEqual("34. getOwner",  s1.getOwner(), 0);
 
     // - ship 2
-    a.checkEqual("41. getDamage", s2->getDamage(), 82);
-    a.checkEqual("42. getShield", s2->getShield(), 0);
-    a.checkEqual("43. getCrew",   s2->getCrew(), 121);
-    a.checkEqual("44. getOwner",  s2->getOwner(), 11);
+    a.checkEqual("41. getDamage", s2.getDamage(), 82);
+    a.checkEqual("42. getShield", s2.getShield(), 0);
+    a.checkEqual("43. getCrew",   s2.getCrew(), 121);
+    a.checkEqual("44. getOwner",  s2.getOwner(), 11);
 }
 
 /** Test basic Host simulation, big ships.
@@ -284,8 +284,8 @@ AFL_TEST("game.sim.Run:VcrHost:big", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    Ship* s1 = addGorbie(a, h.setup, 1, 8, h.list);
-    Ship* s2 = addAnnihilation(a, h.setup, 2, 6, h.list);
+    Ship& s1 = addGorbie(a, h.setup, 1, 8, h.list);
+    Ship& s2 = addAnnihilation(a, h.setup, 2, 6, h.list);
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -311,16 +311,16 @@ AFL_TEST("game.sim.Run:VcrHost:big", a)
     a.checkEqual("25. getNumTorpedoHits",    h.stats[1].getNumTorpedoHits(), 29);
 
     // - ship 1
-    a.checkEqual("31. getDamage", s1->getDamage(), 38);
-    a.checkEqual("32. getShield", s1->getShield(), 0);
-    a.checkEqual("33. getCrew",   s1->getCrew(), 2173);
-    a.checkEqual("34. getOwner",  s1->getOwner(), 8);
+    a.checkEqual("31. getDamage", s1.getDamage(), 38);
+    a.checkEqual("32. getShield", s1.getShield(), 0);
+    a.checkEqual("33. getCrew",   s1.getCrew(), 2173);
+    a.checkEqual("34. getOwner",  s1.getOwner(), 8);
 
     // - ship 2
-    a.checkEqual("41. getDamage", s2->getDamage(), 102);
-    a.checkEqual("42. getShield", s2->getShield(), 0);
-    a.checkEqual("43. getCrew",   s2->getCrew(), 2880);
-    a.checkEqual("44. getOwner",  s2->getOwner(), 0);
+    a.checkEqual("41. getDamage", s2.getDamage(), 102);
+    a.checkEqual("42. getShield", s2.getShield(), 0);
+    a.checkEqual("43. getCrew",   s2.getCrew(), 2880);
+    a.checkEqual("44. getOwner",  s2.getOwner(), 0);
 }
 
 /** Test basic Host simulation, NTP.
@@ -333,9 +333,9 @@ AFL_TEST("game.sim.Run:VcrHost:NTP", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    Ship* s1 = addAnnihilation(a, h.setup, 1, 6, h.list);
-    Ship* s2 = addAnnihilation(a, h.setup, 2, 2, h.list);
-    s2->setFriendlyCode("NTP");
+    Ship& s1 = addAnnihilation(a, h.setup, 1, 6, h.list);
+    Ship& s2 = addAnnihilation(a, h.setup, 2, 2, h.list);
+    s2.setFriendlyCode("NTP");
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -365,16 +365,16 @@ AFL_TEST("game.sim.Run:VcrHost:NTP", a)
     a.checkEqual("25. getNumTorpedoHits",    h.stats[1].getNumTorpedoHits(), 0);
 
     // - ship 1
-    a.checkEqual("31. getDamage", s1->getDamage(), 2);
-    a.checkEqual("32. getShield", s1->getShield(), 0);
-    a.checkEqual("33. getCrew",   s1->getCrew(), 2907);
-    a.checkEqual("34. getOwner",  s1->getOwner(), 6);
+    a.checkEqual("31. getDamage", s1.getDamage(), 2);
+    a.checkEqual("32. getShield", s1.getShield(), 0);
+    a.checkEqual("33. getCrew",   s1.getCrew(), 2907);
+    a.checkEqual("34. getOwner",  s1.getOwner(), 6);
 
     // - ship 2
-    a.checkEqual("41. getDamage", s2->getDamage(), 153);
-    a.checkEqual("42. getShield", s2->getShield(), 0);
-    a.checkEqual("43. getCrew",   s2->getCrew(), 2483);
-    a.checkEqual("44. getOwner",  s2->getOwner(), 0);
+    a.checkEqual("41. getDamage", s2.getDamage(), 153);
+    a.checkEqual("42. getShield", s2.getShield(), 0);
+    a.checkEqual("43. getCrew",   s2.getCrew(), 2483);
+    a.checkEqual("44. getOwner",  s2.getOwner(), 0);
 }
 
 /** Test Host simulation, balancing mode "360 kt".
@@ -387,8 +387,8 @@ AFL_TEST("game.sim.Run:VcrHost:Balance360k", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::Balance360k);
 
     // Setup
-    Ship* s1 = addOutrider(a, h.setup, 1, 12, h.list);
-    Ship* s2 = addOutrider(a, h.setup, 2, 11, h.list);
+    Ship& s1 = addOutrider(a, h.setup, 1, 12, h.list);
+    Ship& s2 = addOutrider(a, h.setup, 2, 11, h.list);
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -410,16 +410,16 @@ AFL_TEST("game.sim.Run:VcrHost:Balance360k", a)
     a.checkEqual("21. stats", h.stats.size(), 2U);
 
     // - ship 1
-    a.checkEqual("31. getDamage", s1->getDamage(), 107);
-    a.checkEqual("32. getShield", s1->getShield(), 0);
-    a.checkEqual("33. getCrew",   s1->getCrew(), 103);
-    a.checkEqual("34. getOwner",  s1->getOwner(), 0);
+    a.checkEqual("31. getDamage", s1.getDamage(), 107);
+    a.checkEqual("32. getShield", s1.getShield(), 0);
+    a.checkEqual("33. getCrew",   s1.getCrew(), 103);
+    a.checkEqual("34. getOwner",  s1.getOwner(), 0);
 
     // - ship 2
-    a.checkEqual("41. getDamage", s2->getDamage(), 82);
-    a.checkEqual("42. getShield", s2->getShield(), 0);
-    a.checkEqual("43. getCrew",   s2->getCrew(), 121);
-    a.checkEqual("44. getOwner",  s2->getOwner(), 11);
+    a.checkEqual("41. getDamage", s2.getDamage(), 82);
+    a.checkEqual("42. getShield", s2.getShield(), 0);
+    a.checkEqual("43. getCrew",   s2.getCrew(), 121);
+    a.checkEqual("44. getOwner",  s2.getOwner(), 11);
 }
 
 /** Test Host simulation, balancing mode "Master at Arms".
@@ -432,8 +432,8 @@ AFL_TEST("game.sim.Run:VcrHost:BalanceMasterAtArms", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceMasterAtArms);
 
     // Setup
-    Ship* s1 = addGorbie(a, h.setup, 1, 8, h.list);
-    Ship* s2 = addGorbie(a, h.setup, 2, 6, h.list);
+    Ship& s1 = addGorbie(a, h.setup, 1, 8, h.list);
+    Ship& s2 = addGorbie(a, h.setup, 2, 6, h.list);
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -459,18 +459,18 @@ AFL_TEST("game.sim.Run:VcrHost:BalanceMasterAtArms", a)
     a.checkEqual("25. getNumTorpedoHits",    h.stats[1].getNumTorpedoHits(), 0);
 
     // - ship 1
-    a.checkEqual("31. getDamage", s1->getDamage(), 102);
-    a.checkEqual("32. getShield", s1->getShield(), 0);
-    a.checkEqual("33. getCrew",   s1->getCrew(), 2287);
-    a.checkEqual("34. getOwner",  s1->getOwner(), 0);
-    a.checkEqual("35. getAmmo",              s1->getAmmo(), 151);
+    a.checkEqual("31. getDamage", s1.getDamage(), 102);
+    a.checkEqual("32. getShield", s1.getShield(), 0);
+    a.checkEqual("33. getCrew",   s1.getCrew(), 2287);
+    a.checkEqual("34. getOwner",  s1.getOwner(), 0);
+    a.checkEqual("35. getAmmo",   s1.getAmmo(), 151);
 
     // - ship 2
-    a.checkEqual("41. getDamage", s2->getDamage(), 0);
-    a.checkEqual("42. getShield", s2->getShield(), 50);
-    a.checkEqual("43. getCrew",   s2->getCrew(), 2287);
-    a.checkEqual("44. getOwner",  s2->getOwner(), 6);
-    a.checkEqual("45. getAmmo",              s2->getAmmo(), 175);
+    a.checkEqual("41. getDamage", s2.getDamage(), 0);
+    a.checkEqual("42. getShield", s2.getShield(), 50);
+    a.checkEqual("43. getCrew",   s2.getCrew(), 2287);
+    a.checkEqual("44. getOwner",  s2.getOwner(), 6);
+    a.checkEqual("45. getAmmo",   s2.getAmmo(), 175);
 }
 
 /** Test Host simulation, planet.
@@ -483,8 +483,8 @@ AFL_TEST("game.sim.Run:VcrHost:planet", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    Ship* s = addOutrider(a, h.setup, 1, 5, h.list);
-    Planet* p = addPlanet(h.setup, 1, 4);
+    Ship& s = addOutrider(a, h.setup, 1, 5, h.list);
+    Planet& p = addPlanet(h.setup, 1, 4);
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -505,16 +505,16 @@ AFL_TEST("game.sim.Run:VcrHost:planet", a)
     // - statistics
     a.checkEqual("21. stats", h.stats.size(), 2U);
 
-    // - ship 1
-    a.checkEqual("31. getDamage", s->getDamage(), 103);
-    a.checkEqual("32. getShield", s->getShield(), 0);
-    a.checkEqual("33. getCrew",   s->getCrew(), 128);
-    a.checkEqual("34. getOwner",  s->getOwner(), 0);
+    // - ship
+    a.checkEqual("31. getDamage", s.getDamage(), 103);
+    a.checkEqual("32. getShield", s.getShield(), 0);
+    a.checkEqual("33. getCrew",   s.getCrew(), 128);
+    a.checkEqual("34. getOwner",  s.getOwner(), 0);
 
-    // - ship 2
-    a.checkEqual("41. getDamage", p->getDamage(), 0);
-    a.checkEqual("42. getShield", p->getShield(), 100);
-    a.checkEqual("43. getOwner",  p->getOwner(), 4);
+    // - planet
+    a.checkEqual("41. getDamage", p.getDamage(), 0);
+    a.checkEqual("42. getShield", p.getShield(), 100);
+    a.checkEqual("43. getOwner",  p.getOwner(), 4);
 }
 
 /** Test Host simulation, intercept-attack.
@@ -527,16 +527,16 @@ AFL_TEST("game.sim.Run:VcrHost:intercept", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    /*Ship* s1 =*/ addOutrider(a, h.setup, 1, 1, h.list);
-    Ship* s2 = addOutrider(a, h.setup, 2, 2, h.list);
-    Ship* s3 = addOutrider(a, h.setup, 3, 3, h.list);
-    Ship* s4 = addOutrider(a, h.setup, 4, 4, h.list);
-    s3->setAggressiveness(2);
-    s3->setInterceptId(2);
-    s3->setFriendlyCode("200");
-    s4->setAggressiveness(2);
-    s4->setInterceptId(2);
-    s4->setFriendlyCode("100");
+    /*Ship& s1 =*/ addOutrider(a, h.setup, 1, 1, h.list);
+    Ship& s2 = addOutrider(a, h.setup, 2, 2, h.list);
+    Ship& s3 = addOutrider(a, h.setup, 3, 3, h.list);
+    Ship& s4 = addOutrider(a, h.setup, 4, 4, h.list);
+    s3.setAggressiveness(2);
+    s3.setInterceptId(2);
+    s3.setFriendlyCode("200");
+    s4.setAggressiveness(2);
+    s4.setInterceptId(2);
+    s4.setFriendlyCode("100");
 
     game::sim::Result result(h.opts, 0);
 
@@ -561,16 +561,16 @@ AFL_TEST("game.sim.Run:VcrHost:intercept", a)
     a.checkEqual("21. stats", h.stats.size(), 4U);
 
     // - ship 2
-    a.checkEqual("31. getDamage", s2->getDamage(), 82);
-    a.checkEqual("32. getShield", s2->getShield(), 0);
-    a.checkEqual("33. getCrew",   s2->getCrew(), 121);
-    a.checkEqual("34. getOwner",  s2->getOwner(), 2);
+    a.checkEqual("31. getDamage", s2.getDamage(), 82);
+    a.checkEqual("32. getShield", s2.getShield(), 0);
+    a.checkEqual("33. getCrew",   s2.getCrew(), 121);
+    a.checkEqual("34. getOwner",  s2.getOwner(), 2);
 
     // - ship 4
-    a.checkEqual("41. getDamage", s4->getDamage(), 107);
-    a.checkEqual("42. getShield", s4->getShield(), 0);
-    a.checkEqual("43. getCrew",   s4->getCrew(), 103);
-    a.checkEqual("44. getOwner",  s4->getOwner(), 0);
+    a.checkEqual("41. getDamage", s4.getDamage(), 107);
+    a.checkEqual("42. getShield", s4.getShield(), 0);
+    a.checkEqual("43. getCrew",   s4.getCrew(), 103);
+    a.checkEqual("44. getOwner",  s4.getOwner(), 0);
 }
 
 /** Test multi-ship Host simulation.
@@ -583,16 +583,16 @@ AFL_TEST("game.sim.Run:VcrHost:multi-ship", a)
     h.opts.setMode(game::sim::Configuration::VcrHost, 0, *h.config);
 
     // Setup
-    Ship* s1 = addOutrider(a, h.setup, 1, 1, h.list);
-    Ship* s2 = addOutrider(a, h.setup, 2, 2, h.list);
-    Ship* s3 = addOutrider(a, h.setup, 3, 2, h.list);
-    Ship* s4 = addOutrider(a, h.setup, 4, 2, h.list);
-    Planet* p = addPlanet(h.setup, 17, 1);
-    s1->setFriendlyCode("-20");
-    s2->setFriendlyCode("100");
-    s3->setFriendlyCode("300");
-    s4->setFriendlyCode("200");
-    p->setFriendlyCode("ATT");
+    Ship& s1 = addOutrider(a, h.setup, 1, 1, h.list);
+    Ship& s2 = addOutrider(a, h.setup, 2, 2, h.list);
+    Ship& s3 = addOutrider(a, h.setup, 3, 2, h.list);
+    Ship& s4 = addOutrider(a, h.setup, 4, 2, h.list);
+    Planet& p = addPlanet(h.setup, 17, 1);
+    s1.setFriendlyCode("-20");
+    s2.setFriendlyCode("100");
+    s3.setFriendlyCode("300");
+    s4.setFriendlyCode("200");
+    p.setFriendlyCode("ATT");
 
     game::sim::Result result(h.opts, 0);
 
@@ -631,33 +631,33 @@ AFL_TEST("game.sim.Run:VcrHost:multi-ship", a)
     a.checkEqual("61. stats", h.stats.size(), 5U);
 
     // - ship 1
-    a.checkEqual("71. getDamage", s1->getDamage(), 110);
-    a.checkEqual("72. getShield", s1->getShield(), 0);
-    a.checkEqual("73. getCrew",   s1->getCrew(), 47);
-    a.checkEqual("74. getOwner",  s1->getOwner(), 0);
+    a.checkEqual("71. getDamage", s1.getDamage(), 110);
+    a.checkEqual("72. getShield", s1.getShield(), 0);
+    a.checkEqual("73. getCrew",   s1.getCrew(), 47);
+    a.checkEqual("74. getOwner",  s1.getOwner(), 0);
 
     // - ship 2
-    a.checkEqual("81. getDamage", s2->getDamage(), 162);
-    a.checkEqual("82. getShield", s2->getShield(), 0);
-    a.checkEqual("83. getCrew",   s2->getCrew(), 65);
-    a.checkEqual("84. getOwner",  s2->getOwner(), 0);
+    a.checkEqual("81. getDamage", s2.getDamage(), 162);
+    a.checkEqual("82. getShield", s2.getShield(), 0);
+    a.checkEqual("83. getCrew",   s2.getCrew(), 65);
+    a.checkEqual("84. getOwner",  s2.getOwner(), 0);
 
     // - ship 3
-    a.checkEqual("91. getDamage", s3->getDamage(), 159);
-    a.checkEqual("92. getShield", s3->getShield(), 0);
-    a.checkEqual("93. getCrew",   s3->getCrew(), 100);
-    a.checkEqual("94. getOwner",  s3->getOwner(), 0);
+    a.checkEqual("91. getDamage", s3.getDamage(), 159);
+    a.checkEqual("92. getShield", s3.getShield(), 0);
+    a.checkEqual("93. getCrew",   s3.getCrew(), 100);
+    a.checkEqual("94. getOwner",  s3.getOwner(), 0);
 
     // - ship 4
-    a.checkEqual("101. getDamage", s4->getDamage(), 168);
-    a.checkEqual("102. getShield", s4->getShield(), 0);
-    a.checkEqual("103. getCrew",   s4->getCrew(), 73);
-    a.checkEqual("104. getOwner",  s4->getOwner(), 0);
+    a.checkEqual("101. getDamage", s4.getDamage(), 168);
+    a.checkEqual("102. getShield", s4.getShield(), 0);
+    a.checkEqual("103. getCrew",   s4.getCrew(), 73);
+    a.checkEqual("104. getOwner",  s4.getOwner(), 0);
 
     // - planet
-    a.checkEqual("111. getDamage", p->getDamage(), 0);
-    a.checkEqual("112. getShield", p->getShield(), 100);
-    a.checkEqual("113. getOwner",  p->getOwner(), 1);
+    a.checkEqual("111. getDamage", p.getDamage(), 0);
+    a.checkEqual("112. getShield", p.getShield(), 100);
+    a.checkEqual("113. getOwner",  p.getOwner(), 1);
 }
 
 /** Test Host simulation with Engine/Shield bonus.
@@ -671,11 +671,11 @@ AFL_TEST("game.sim.Run:VcrHost:esb", a)
     h.opts.setEngineShieldBonus(20);
 
     // Setup
-    Ship* s1 = addOutrider(a, h.setup, 1, 6, h.list);
-    Ship* s2 = addOutrider(a, h.setup, 2, 9, h.list);
+    Ship& s1 = addOutrider(a, h.setup, 1, 6, h.list);
+    Ship& s2 = addOutrider(a, h.setup, 2, 9, h.list);
     game::sim::Result result(h.opts, 0);
-    s1->setEngineType(5);          // Nova Drive 5, 5 kt bonus
-    s2->setEngineType(9);          // Transwarp Drive, 60 kt bonus
+    s1.setEngineType(5);          // Nova Drive 5, 5 kt bonus
+    s2.setEngineType(9);          // Transwarp Drive, 60 kt bonus
 
     // Do it
     game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
@@ -700,16 +700,16 @@ AFL_TEST("game.sim.Run:VcrHost:esb", a)
     a.checkEqual("21. stats", h.stats.size(), 2U);
 
     // - ship 1
-    a.checkEqual("31. getDamage", s1->getDamage(), 119);
-    a.checkEqual("32. getShield", s1->getShield(), 0);
-    a.checkEqual("33. getCrew",   s1->getCrew(), 89);
-    a.checkEqual("34. getOwner",  s1->getOwner(), 0);
+    a.checkEqual("31. getDamage", s1.getDamage(), 119);
+    a.checkEqual("32. getShield", s1.getShield(), 0);
+    a.checkEqual("33. getCrew",   s1.getCrew(), 89);
+    a.checkEqual("34. getOwner",  s1.getOwner(), 0);
 
     // - ship 2
-    a.checkEqual("41. getDamage", s2->getDamage(), 12);
-    a.checkEqual("42. getShield", s2->getShield(), 0);
-    a.checkEqual("43. getCrew",   s2->getCrew(), 158);
-    a.checkEqual("44. getOwner",  s2->getOwner(), 9);
+    a.checkEqual("41. getDamage", s2.getDamage(), 12);
+    a.checkEqual("42. getShield", s2.getShield(), 0);
+    a.checkEqual("43. getCrew",   s2.getCrew(), 158);
+    a.checkEqual("44. getOwner",  s2.getOwner(), 9);
 }
 
 /** Test basic PHost simulation.
@@ -723,8 +723,8 @@ AFL_TEST("game.sim.Run:VcrPHost4", a)
     h.opts.setRandomLeftRight(true);
 
     // Setup
-    Ship* s1 = addOutrider(a, h.setup, 1, 12, h.list);
-    Ship* s2 = addOutrider(a, h.setup, 2, 11, h.list);
+    Ship& s1 = addOutrider(a, h.setup, 1, 12, h.list);
+    Ship& s2 = addOutrider(a, h.setup, 2, 11, h.list);
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -749,16 +749,16 @@ AFL_TEST("game.sim.Run:VcrPHost4", a)
     a.checkEqual("31. stats", h.stats.size(), 2U);
 
     // - ship 1
-    a.checkEqual("41. getDamage", s1->getDamage(), 100);
-    a.checkEqual("42. getShield", s1->getShield(), 0);
-    a.checkEqual("43. getCrew",   s1->getCrew(), 132);
-    a.checkEqual("44. getOwner",  s1->getOwner(), 0);
+    a.checkEqual("41. getDamage", s1.getDamage(), 100);
+    a.checkEqual("42. getShield", s1.getShield(), 0);
+    a.checkEqual("43. getCrew",   s1.getCrew(), 132);
+    a.checkEqual("44. getOwner",  s1.getOwner(), 0);
 
     // - ship 2
-    a.checkEqual("51. getDamage", s2->getDamage(), 70);
-    a.checkEqual("52. getShield", s2->getShield(), 0);
-    a.checkEqual("53. getCrew",   s2->getCrew(), 132);
-    a.checkEqual("54. getOwner",  s2->getOwner(), 11);
+    a.checkEqual("51. getDamage", s2.getDamage(), 70);
+    a.checkEqual("52. getShield", s2.getShield(), 0);
+    a.checkEqual("53. getCrew",   s2.getCrew(), 132);
+    a.checkEqual("54. getOwner",  s2.getOwner(), 11);
 }
 
 /** Test basic Host simulation, big ships.
@@ -771,8 +771,8 @@ AFL_TEST("game.sim.Run:VcrPHost3:big", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrPHost3, game::sim::Configuration::BalanceNone);
 
     // Setup
-    Ship* s1 = addGorbie(a, h.setup, 1, 8, h.list);
-    Ship* s2 = addAnnihilation(a, h.setup, 2, 6, h.list);
+    Ship& s1 = addGorbie(a, h.setup, 1, 8, h.list);
+    Ship& s2 = addAnnihilation(a, h.setup, 2, 6, h.list);
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -798,16 +798,16 @@ AFL_TEST("game.sim.Run:VcrPHost3:big", a)
     a.checkEqual("25. getNumTorpedoHits",    h.stats[1].getNumTorpedoHits(), 29);
 
     // - ship 1
-    a.checkEqual("31. getDamage", s1->getDamage(), 38);
-    a.checkEqual("32. getShield", s1->getShield(), 0);
-    a.checkEqual("33. getCrew",   s1->getCrew(), 2173);
-    a.checkEqual("34. getOwner",  s1->getOwner(), 8);
+    a.checkEqual("31. getDamage", s1.getDamage(), 38);
+    a.checkEqual("32. getShield", s1.getShield(), 0);
+    a.checkEqual("33. getCrew",   s1.getCrew(), 2173);
+    a.checkEqual("34. getOwner",  s1.getOwner(), 8);
 
     // - ship 2
-    a.checkEqual("41. getDamage", s2->getDamage(), 100);
-    a.checkEqual("42. getShield", s2->getShield(), 0);
-    a.checkEqual("43. getCrew",   s2->getCrew(), 2902);
-    a.checkEqual("44. getOwner",  s2->getOwner(), 0);
+    a.checkEqual("41. getDamage", s2.getDamage(), 100);
+    a.checkEqual("42. getShield", s2.getShield(), 0);
+    a.checkEqual("43. getCrew",   s2.getCrew(), 2902);
+    a.checkEqual("44. getOwner",  s2.getOwner(), 0);
 }
 
 
@@ -821,8 +821,8 @@ AFL_TEST("game.sim.Run:VcrPHost4:planet", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrPHost4, game::sim::Configuration::BalanceNone);
 
     // Setup
-    Ship* s = addOutrider(a, h.setup, 1, 5, h.list);
-    Planet* p = addPlanet(h.setup, 1, 4);
+    Ship& s = addOutrider(a, h.setup, 1, 5, h.list);
+    Planet& p = addPlanet(h.setup, 1, 4);
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -848,15 +848,15 @@ AFL_TEST("game.sim.Run:VcrPHost4:planet", a)
     a.checkEqual("25. getNumTorpedoHits",    h.stats[1].getNumTorpedoHits(), 0);
 
     // - ship 1
-    a.checkEqual("31. getDamage", s->getDamage(), 100);
-    a.checkEqual("32. getShield", s->getShield(), 0);
-    a.checkEqual("33. getCrew",   s->getCrew(), 131);
-    a.checkEqual("34. getOwner",  s->getOwner(), 0);
+    a.checkEqual("31. getDamage", s.getDamage(), 100);
+    a.checkEqual("32. getShield", s.getShield(), 0);
+    a.checkEqual("33. getCrew",   s.getCrew(), 131);
+    a.checkEqual("34. getOwner",  s.getOwner(), 0);
 
-    // - ship 2
-    a.checkEqual("41. getDamage", p->getDamage(), 0);
-    a.checkEqual("42. getShield", p->getShield(), 100);
-    a.checkEqual("43. getOwner",  p->getOwner(), 4);
+    // - planet
+    a.checkEqual("41. getDamage", p.getDamage(), 0);
+    a.checkEqual("42. getShield", p.getShield(), 100);
+    a.checkEqual("43. getOwner",  p.getOwner(), 4);
 }
 
 /** Test PHost simulation, planet with torpedo tubes.
@@ -870,15 +870,15 @@ AFL_TEST("game.sim.Run:VcrPHost4:PlanetsHaveTubes", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrPHost4, game::sim::Configuration::BalanceNone);
 
     // Setup
-    Ship* s = addAnnihilation(a, h.setup, 1, 6, h.list);
-    Planet* p = addPlanet(h.setup, 1, 9);
-    p->setDefense(61);
-    p->setBaseDefense(200);
-    p->setBaseBeamTech(7);
-    p->setBaseTorpedoTech(4);
-    p->setNumBaseFighters(40);
-    p->setNumBaseTorpedoes(5, 20);
-    p->setNumBaseTorpedoes(6, 30);
+    Ship& s = addAnnihilation(a, h.setup, 1, 6, h.list);
+    Planet& p = addPlanet(h.setup, 1, 9);
+    p.setDefense(61);
+    p.setBaseDefense(200);
+    p.setBaseBeamTech(7);
+    p.setBaseTorpedoTech(4);
+    p.setNumBaseFighters(40);
+    p.setNumBaseTorpedoes(5, 20);
+    p.setNumBaseTorpedoes(6, 30);
 
     game::sim::Result result(h.opts, 0);
 
@@ -909,23 +909,23 @@ AFL_TEST("game.sim.Run:VcrPHost4:PlanetsHaveTubes", a)
     // FIXME: missing -> a.checkEqual("25. getNumTorpedoHits", h.stats[1].getNumTorpedoHits(), 0);
 
     // - ship 1
-    a.checkEqual("31. getDamage", s->getDamage(), 100);
-    a.checkEqual("32. getShield", s->getShield(), 0);
-    a.checkEqual("33. getCrew",   s->getCrew(), 2884);
-    a.checkEqual("34. getOwner",  s->getOwner(), 0);
-    a.checkEqual("35. getAmmo",   s->getAmmo(), 290);
+    a.checkEqual("31. getDamage", s.getDamage(), 100);
+    a.checkEqual("32. getShield", s.getShield(), 0);
+    a.checkEqual("33. getCrew",   s.getCrew(), 2884);
+    a.checkEqual("34. getOwner",  s.getOwner(), 0);
+    a.checkEqual("35. getAmmo",   s.getAmmo(), 290);
 
-    // - ship 2
-    a.checkEqual("41. getDamage", p->getDamage(), 84);
-    a.checkEqual("42. getShield", p->getShield(), 0);
-    a.checkEqual("43. getOwner",  p->getOwner(), 9);
+    // - planet
+    a.checkEqual("41. getDamage", p.getDamage(), 84);
+    a.checkEqual("42. getShield", p.getShield(), 0);
+    a.checkEqual("43. getOwner",  p.getOwner(), 9);
 
     /* Existing torpedoes are worth 20*12 + 30*13 = 630 mc = 48 torpedoes effectively,
        plus 3*8 = 24 from PlanetaryTorpsPerTube = 78 total.
        We fire 24 torpedoes = 312 mc worth,
        and thus remove ceil(312 / (12+13)) = 13 of each. */
-    a.checkEqual("51. getNumBaseTorpedoes", p->getNumBaseTorpedoes(5), 7);
-    a.checkEqual("52. getNumBaseTorpedoes", p->getNumBaseTorpedoes(6), 17);
+    a.checkEqual("51. getNumBaseTorpedoes", p.getNumBaseTorpedoes(5), 7);
+    a.checkEqual("52. getNumBaseTorpedoes", p.getNumBaseTorpedoes(6), 17);
 }
 
 /** Test PHost simulation, intercept-attack.
@@ -938,16 +938,16 @@ AFL_TEST("game.sim.Run:VcrPHost4:intercept", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrPHost4, game::sim::Configuration::BalanceNone);
 
     // Setup
-    /*Ship* s1 =*/ addOutrider(a, h.setup, 1, 1, h.list);
-    Ship* s2 = addOutrider(a, h.setup, 2, 2, h.list);
-    Ship* s3 = addOutrider(a, h.setup, 3, 3, h.list);
-    Ship* s4 = addOutrider(a, h.setup, 4, 4, h.list);
-    s3->setAggressiveness(2);
-    s3->setInterceptId(2);
-    s3->setFriendlyCode("200");
-    s4->setAggressiveness(2);
-    s4->setInterceptId(2);
-    s4->setFriendlyCode("100");
+    /*Ship& s1 =*/ addOutrider(a, h.setup, 1, 1, h.list);
+    Ship& s2 = addOutrider(a, h.setup, 2, 2, h.list);
+    Ship& s3 = addOutrider(a, h.setup, 3, 3, h.list);
+    Ship& s4 = addOutrider(a, h.setup, 4, 4, h.list);
+    s3.setAggressiveness(2);
+    s3.setInterceptId(2);
+    s3.setFriendlyCode("200");
+    s4.setAggressiveness(2);
+    s4.setInterceptId(2);
+    s4.setFriendlyCode("100");
 
     game::sim::Result result(h.opts, 0);
 
@@ -976,16 +976,16 @@ AFL_TEST("game.sim.Run:VcrPHost4:intercept", a)
     a.checkEqual("21. stats", h.stats.size(), 4U);
 
     // - ship 2
-    a.checkEqual("31. getDamage", s2->getDamage(), 100);
-    a.checkEqual("32. getShield", s2->getShield(), 0);
-    a.checkEqual("33. getCrew",   s2->getCrew(), 110);
-    a.checkEqual("34. getOwner",  s2->getOwner(), 0);
+    a.checkEqual("31. getDamage", s2.getDamage(), 100);
+    a.checkEqual("32. getShield", s2.getShield(), 0);
+    a.checkEqual("33. getCrew",   s2.getCrew(), 110);
+    a.checkEqual("34. getOwner",  s2.getOwner(), 0);
 
     // - ship 4
-    a.checkEqual("41. getDamage", s4->getDamage(), 100);
-    a.checkEqual("42. getShield", s4->getShield(), 0);
-    a.checkEqual("43. getCrew",   s4->getCrew(), 132);
-    a.checkEqual("44. getOwner",  s4->getOwner(), 0);
+    a.checkEqual("41. getDamage", s4.getDamage(), 100);
+    a.checkEqual("42. getShield", s4.getShield(), 0);
+    a.checkEqual("43. getCrew",   s4.getCrew(), 132);
+    a.checkEqual("44. getOwner",  s4.getOwner(), 0);
 }
 
 /** Test multi-ship PHost simulation.
@@ -998,16 +998,16 @@ AFL_TEST("game.sim.Run:VcrPHost2:multi-ship", a)
     h.opts.setMode(game::sim::Configuration::VcrPHost2, 0, *h.config);
 
     // Setup
-    Ship* s1 = addOutrider(a, h.setup, 1, 1, h.list);
-    Ship* s2 = addOutrider(a, h.setup, 2, 2, h.list);
-    Ship* s3 = addOutrider(a, h.setup, 3, 2, h.list);
-    Ship* s4 = addOutrider(a, h.setup, 4, 2, h.list);
-    Planet* p = addPlanet(h.setup, 17, 1);
-    s1->setFriendlyCode("-20");
-    s2->setFriendlyCode("100");
-    s3->setFriendlyCode("300");
-    s4->setFriendlyCode("200");
-    p->setFriendlyCode("ATT");
+    Ship& s1 = addOutrider(a, h.setup, 1, 1, h.list);
+    Ship& s2 = addOutrider(a, h.setup, 2, 2, h.list);
+    Ship& s3 = addOutrider(a, h.setup, 3, 2, h.list);
+    Ship& s4 = addOutrider(a, h.setup, 4, 2, h.list);
+    Planet& p = addPlanet(h.setup, 17, 1);
+    s1.setFriendlyCode("-20");
+    s2.setFriendlyCode("100");
+    s3.setFriendlyCode("300");
+    s4.setFriendlyCode("200");
+    p.setFriendlyCode("ATT");
 
     game::sim::Result result(h.opts, 0);
 
@@ -1046,33 +1046,33 @@ AFL_TEST("game.sim.Run:VcrPHost2:multi-ship", a)
     a.checkEqual("61. stats", h.stats.size(), 5U);
 
     // - ship 1
-    a.checkEqual("71. getDamage", s1->getDamage(), 100);
-    a.checkEqual("72. getShield", s1->getShield(), 0);
-    a.checkEqual("73. getCrew",   s1->getCrew(), 84);
-    a.checkEqual("74. getOwner",  s1->getOwner(), 0);
+    a.checkEqual("71. getDamage", s1.getDamage(), 100);
+    a.checkEqual("72. getShield", s1.getShield(), 0);
+    a.checkEqual("73. getCrew",   s1.getCrew(), 84);
+    a.checkEqual("74. getOwner",  s1.getOwner(), 0);
 
     // - ship 2
-    a.checkEqual("81. getDamage", s2->getDamage(), 100);
-    a.checkEqual("82. getShield", s2->getShield(), 0);
-    a.checkEqual("83. getCrew",   s2->getCrew(), 88);
-    a.checkEqual("84. getOwner",  s2->getOwner(), 0);
+    a.checkEqual("81. getDamage", s2.getDamage(), 100);
+    a.checkEqual("82. getShield", s2.getShield(), 0);
+    a.checkEqual("83. getCrew",   s2.getCrew(), 88);
+    a.checkEqual("84. getOwner",  s2.getOwner(), 0);
 
     // - ship 3
-    a.checkEqual("91. getDamage", s3->getDamage(), 100);
-    a.checkEqual("92. getShield", s3->getShield(), 0);
-    a.checkEqual("93. getCrew",   s3->getCrew(), 107);
-    a.checkEqual("94. getOwner",  s3->getOwner(), 0);
+    a.checkEqual("91. getDamage", s3.getDamage(), 100);
+    a.checkEqual("92. getShield", s3.getShield(), 0);
+    a.checkEqual("93. getCrew",   s3.getCrew(), 107);
+    a.checkEqual("94. getOwner",  s3.getOwner(), 0);
 
     // - ship 4
-    a.checkEqual("101. getDamage", s4->getDamage(), 100);
-    a.checkEqual("102. getShield", s4->getShield(), 0);
-    a.checkEqual("103. getCrew",   s4->getCrew(), 94);
-    a.checkEqual("104. getOwner",  s4->getOwner(), 0);
+    a.checkEqual("101. getDamage", s4.getDamage(), 100);
+    a.checkEqual("102. getShield", s4.getShield(), 0);
+    a.checkEqual("103. getCrew",   s4.getCrew(), 94);
+    a.checkEqual("104. getOwner",  s4.getOwner(), 0);
 
     // - planet
-    a.checkEqual("111. getDamage", p->getDamage(), 0);
-    a.checkEqual("112. getShield", p->getShield(), 100);
-    a.checkEqual("113. getOwner",  p->getOwner(), 1);
+    a.checkEqual("111. getDamage", p.getDamage(), 0);
+    a.checkEqual("112. getShield", p.getShield(), 100);
+    a.checkEqual("113. getOwner",  p.getOwner(), 1);
 }
 
 /** Test PHost simulation, with commanders.
@@ -1086,14 +1086,14 @@ AFL_TEST("game.sim.Run:VcrPHost4:Commander", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrPHost4, game::sim::Configuration::BalanceNone);
 
     // Setup
-    Ship* s1 = addOutrider(a, h.setup, 1, 1, h.list);
-    Ship* s2 = addOutrider(a, h.setup, 2, 2, h.list);
-    Ship* s3 = addOutrider(a, h.setup, 3, 2, h.list);
-    s1->setAggressiveness(Ship::agg_Passive);
-    s2->setAggressiveness(Ship::agg_Kill);
-    s3->setAggressiveness(Ship::agg_Passive);
-    s3->setExperienceLevel(3);
-    s3->setFlags(Ship::fl_Commander | Ship::fl_CommanderSet);
+    Ship& s1 = addOutrider(a, h.setup, 1, 1, h.list);
+    Ship& s2 = addOutrider(a, h.setup, 2, 2, h.list);
+    Ship& s3 = addOutrider(a, h.setup, 3, 2, h.list);
+    s1.setAggressiveness(Ship::agg_Passive);
+    s2.setAggressiveness(Ship::agg_Kill);
+    s3.setAggressiveness(Ship::agg_Passive);
+    s3.setExperienceLevel(3);
+    s3.setFlags(Ship::fl_Commander | Ship::fl_CommanderSet);
 
     game::sim::Result result(h.opts, 0);
 
@@ -1123,16 +1123,16 @@ AFL_TEST("game.sim.Run:VcrPHost4:Commander", a)
     a.checkEqual("24. getNumFights", h.stats[2].getNumFights(), 0);
 
     // - ship 1
-    a.checkEqual("31. getDamage", s1->getDamage(), 37);
-    a.checkEqual("32. getShield", s1->getShield(), 0);
-    a.checkEqual("33. getCrew",   s1->getCrew(), 140);
-    a.checkEqual("34. getOwner",  s1->getOwner(), 1);
+    a.checkEqual("31. getDamage", s1.getDamage(), 37);
+    a.checkEqual("32. getShield", s1.getShield(), 0);
+    a.checkEqual("33. getCrew",   s1.getCrew(), 140);
+    a.checkEqual("34. getOwner",  s1.getOwner(), 1);
 
     // - ship 2
-    a.checkEqual("41. getDamage", s2->getDamage(), 100);
-    a.checkEqual("42. getShield", s2->getShield(), 0);
-    a.checkEqual("43. getCrew",   s2->getCrew(), 92);
-    a.checkEqual("44. getOwner",  s2->getOwner(), 0);
+    a.checkEqual("41. getDamage", s2.getDamage(), 100);
+    a.checkEqual("42. getShield", s2.getShield(), 0);
+    a.checkEqual("43. getCrew",   s2.getCrew(), 92);
+    a.checkEqual("44. getOwner",  s2.getOwner(), 0);
 }
 
 /** Test deactivated ship.
@@ -1146,8 +1146,8 @@ AFL_TEST("game.sim.Run:ship:deactivated", a)
 
     // Setup
     // As of 20200920, setting an Intercept Id will try to match the ships even though #1 is not part of battle order due to being disabled.
-    addOutrider(a, h.setup, 1, 12, h.list)->setFlags(Ship::fl_Deactivated);
-    addOutrider(a, h.setup, 2, 11, h.list)->setInterceptId(1);
+    addOutrider(a, h.setup, 1, 12, h.list).setFlags(Ship::fl_Deactivated);
+    addOutrider(a, h.setup, 2, 11, h.list).setInterceptId(1);
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -1192,8 +1192,8 @@ AFL_TEST("game.sim.Run:ship:passive", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    addOutrider(a, h.setup, 1, 12, h.list)->setAggressiveness(Ship::agg_Passive);
-    addOutrider(a, h.setup, 2, 11, h.list)->setAggressiveness(Ship::agg_Passive);
+    addOutrider(a, h.setup, 1, 12, h.list).setAggressiveness(Ship::agg_Passive);
+    addOutrider(a, h.setup, 2, 11, h.list).setAggressiveness(Ship::agg_Passive);
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -1214,8 +1214,8 @@ AFL_TEST("game.sim.Run:ship:not-enemy", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    addOutrider(a, h.setup, 1, 12, h.list)->setAggressiveness(7);
-    addOutrider(a, h.setup, 2, 11, h.list)->setAggressiveness(2);
+    addOutrider(a, h.setup, 1, 12, h.list).setAggressiveness(7);
+    addOutrider(a, h.setup, 2, 11, h.list).setAggressiveness(2);
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -1236,8 +1236,8 @@ AFL_TEST("game.sim.Run:ship:enemy", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    addOutrider(a, h.setup, 1, 12, h.list)->setAggressiveness(11);
-    addOutrider(a, h.setup, 2, 11, h.list)->setAggressiveness(2);
+    addOutrider(a, h.setup, 1, 12, h.list).setAggressiveness(11);
+    addOutrider(a, h.setup, 2, 11, h.list).setAggressiveness(2);
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -1259,8 +1259,8 @@ AFL_TEST("game.sim.Run:ship:persistent-enemy", a)
     h.opts.enemySettings().set(11, 12, true);
 
     // Setup
-    addOutrider(a, h.setup, 1, 12, h.list)->setAggressiveness(5);
-    addOutrider(a, h.setup, 2, 11, h.list)->setAggressiveness(2);
+    addOutrider(a, h.setup, 1, 12, h.list).setAggressiveness(5);
+    addOutrider(a, h.setup, 2, 11, h.list).setAggressiveness(2);
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -1282,7 +1282,7 @@ AFL_TEST("game.sim.Run:ship:cloaked", a)
     (*h.config)[game::config::HostConfiguration::AllowCloakedShipsAttack].set(0);
 
     // Setup
-    addOutrider(a, h.setup, 1, 12, h.list)->setFlags(Ship::fl_Cloaked);
+    addOutrider(a, h.setup, 1, 12, h.list).setFlags(Ship::fl_Cloaked);
     addOutrider(a, h.setup, 2, 11, h.list);
     game::sim::Result result(h.opts, 0);
 
@@ -1304,8 +1304,8 @@ AFL_TEST("game.sim.Run:ship:fcode-match", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    addOutrider(a, h.setup, 1, 12, h.list)->setFriendlyCode("abc");
-    addOutrider(a, h.setup, 2, 11, h.list)->setFriendlyCode("abc");
+    addOutrider(a, h.setup, 1, 12, h.list).setFriendlyCode("abc");
+    addOutrider(a, h.setup, 2, 11, h.list).setFriendlyCode("abc");
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -1326,7 +1326,7 @@ AFL_TEST("game.sim.Run:ship:no-fuel", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    addOutrider(a, h.setup, 1, 12, h.list)->setAggressiveness(Ship::agg_NoFuel);
+    addOutrider(a, h.setup, 1, 12, h.list).setAggressiveness(Ship::agg_NoFuel);
     addOutrider(a, h.setup, 2, 11, h.list);
     game::sim::Result result(h.opts, 0);
 
@@ -1348,14 +1348,14 @@ AFL_TEST("game.sim.Run:ship:CloakedFighterBays", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrNuHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    Ship* s1 = addGorbie(a, h.setup, 1, 8, h.list);
-    Ship* s2 = addGorbie(a, h.setup, 2, 4, h.list);
-    Ship* s3 = addGorbie(a, h.setup, 3, 8, h.list);
+    Ship& s1 = addGorbie(a, h.setup, 1, 8, h.list);
+    Ship& s2 = addGorbie(a, h.setup, 2, 4, h.list);
+    Ship& s3 = addGorbie(a, h.setup, 3, 8, h.list);
     game::sim::Result result(h.opts, 0);
-    s3->setAggressiveness(Ship::agg_Passive);
-    s3->setFlags(Ship::fl_Cloaked | Ship::fl_CloakedBays | Ship::fl_CloakedBaysSet);
+    s3.setAggressiveness(Ship::agg_Passive);
+    s3.setFlags(Ship::fl_Cloaked | Ship::fl_CloakedBays | Ship::fl_CloakedBaysSet);
     // This line is not needed if Klingon ships automatically have DoubleBeamChargeAbility in NuHost:
-    // s2->setFlags(Ship::fl_DoubleBeamCharge | Ship::fl_DoubleBeamChargeSet);
+    // s2.setFlags(Ship::fl_DoubleBeamCharge | Ship::fl_DoubleBeamChargeSet);
 
     // Do it
     game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
@@ -1385,25 +1385,25 @@ AFL_TEST("game.sim.Run:ship:CloakedFighterBays", a)
     a.checkEqual("34. getNumFights", h.stats[2].getNumFights(), 0);
 
     // - ship 1
-    a.checkEqual("41. getDamage", s1->getDamage(), 9);
-    a.checkEqual("42. getShield", s1->getShield(), 0);
-    a.checkEqual("43. getCrew",   s1->getCrew(), 2287);
-    a.checkEqual("44. getOwner",  s1->getOwner(), 8);
-    a.checkEqual("45. getAmmo",   s1->getAmmo(), 183);
+    a.checkEqual("41. getDamage", s1.getDamage(), 9);
+    a.checkEqual("42. getShield", s1.getShield(), 0);
+    a.checkEqual("43. getCrew",   s1.getCrew(), 2287);
+    a.checkEqual("44. getOwner",  s1.getOwner(), 8);
+    a.checkEqual("45. getAmmo",   s1.getAmmo(), 183);
 
     // - ship 2
-    a.checkEqual("51. getDamage", s2->getDamage(), 102);
-    a.checkEqual("52. getShield", s2->getShield(), 0);
-    a.checkEqual("53. getCrew",   s2->getCrew(), 2287);
-    a.checkEqual("54. getOwner",  s2->getOwner(), 0);
-    a.checkEqual("55. getAmmo",   s2->getAmmo(), 150);
+    a.checkEqual("51. getDamage", s2.getDamage(), 102);
+    a.checkEqual("52. getShield", s2.getShield(), 0);
+    a.checkEqual("53. getCrew",   s2.getCrew(), 2287);
+    a.checkEqual("54. getOwner",  s2.getOwner(), 0);
+    a.checkEqual("55. getAmmo",   s2.getAmmo(), 150);
 
     // - ship 3
-    a.checkEqual("61. getDamage", s3->getDamage(), 0);
-    a.checkEqual("62. getShield", s3->getShield(), 100);
-    a.checkEqual("63. getCrew",   s3->getCrew(), 2287);
-    a.checkEqual("64. getOwner",  s3->getOwner(), 8);
-    a.checkEqual("65. getAmmo",   s3->getAmmo(), 183);
+    a.checkEqual("61. getDamage", s3.getDamage(), 0);
+    a.checkEqual("62. getShield", s3.getShield(), 100);
+    a.checkEqual("63. getCrew",   s3.getCrew(), 2287);
+    a.checkEqual("64. getOwner",  s3.getOwner(), 8);
+    a.checkEqual("65. getAmmo",   s3.getAmmo(), 183);
 }
 
 /** Test ships, Cloaked Fighter Bays ability, ammo limit (bug #416).
@@ -1416,13 +1416,13 @@ AFL_TEST("game.sim.Run:ship:CloakedFighterBays:ammo-limit", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrNuHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    Ship* s1 = addOutrider(a, h.setup, 1, 12, h.list);
-    Ship* s2 = addGorbie(a, h.setup, 2, 8, h.list);
-    Ship* s3 = addGorbie(a, h.setup, 3, 8, h.list);
+    Ship& s1 = addOutrider(a, h.setup, 1, 12, h.list);
+    Ship& s2 = addGorbie(a, h.setup, 2, 8, h.list);
+    Ship& s3 = addGorbie(a, h.setup, 3, 8, h.list);
     game::sim::Result result(h.opts, 0);
-    s2->setFriendlyCode("NT1");
-    s3->setAggressiveness(Ship::agg_Passive);
-    s3->setFlags(Ship::fl_Cloaked | Ship::fl_CloakedBays | Ship::fl_CloakedBaysSet);
+    s2.setFriendlyCode("NT1");
+    s3.setAggressiveness(Ship::agg_Passive);
+    s3.setFlags(Ship::fl_Cloaked | Ship::fl_CloakedBays | Ship::fl_CloakedBaysSet);
 
     // Do it
     game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
@@ -1450,25 +1450,25 @@ AFL_TEST("game.sim.Run:ship:CloakedFighterBays:ammo-limit", a)
     a.checkEqual("24. getNumFights", h.stats[2].getNumFights(), 0);
 
     // - ship 1
-    a.checkEqual("31. getDamage", s1->getDamage(), 187);
-    a.checkEqual("32. getShield", s1->getShield(), 0);
-    a.checkEqual("33. getCrew",   s1->getCrew(), 64);
-    a.checkEqual("34. getOwner",  s1->getOwner(), 0);
-    a.checkEqual("35. getAmmo",   s1->getAmmo(), 0);
+    a.checkEqual("31. getDamage", s1.getDamage(), 187);
+    a.checkEqual("32. getShield", s1.getShield(), 0);
+    a.checkEqual("33. getCrew",   s1.getCrew(), 64);
+    a.checkEqual("34. getOwner",  s1.getOwner(), 0);
+    a.checkEqual("35. getAmmo",   s1.getAmmo(), 0);
 
     // - ship 2
-    a.checkEqual("41. getDamage", s2->getDamage(), 0);
-    a.checkEqual("42. getShield", s2->getShield(), 100);
-    a.checkEqual("43. getCrew",   s2->getCrew(), 2287);
-    a.checkEqual("44. getOwner",  s2->getOwner(), 8);
-    a.checkEqual("45. getAmmo",   s2->getAmmo(), 248);
+    a.checkEqual("41. getDamage", s2.getDamage(), 0);
+    a.checkEqual("42. getShield", s2.getShield(), 100);
+    a.checkEqual("43. getCrew",   s2.getCrew(), 2287);
+    a.checkEqual("44. getOwner",  s2.getOwner(), 8);
+    a.checkEqual("45. getAmmo",   s2.getAmmo(), 248);
 
     // - ship 3
-    a.checkEqual("51. getDamage", s3->getDamage(), 0);
-    a.checkEqual("52. getShield", s3->getShield(), 100);
-    a.checkEqual("53. getCrew",   s3->getCrew(), 2287);
-    a.checkEqual("54. getOwner",  s3->getOwner(), 8);
-    a.checkEqual("55. getAmmo",   s3->getAmmo(), 249);
+    a.checkEqual("51. getDamage", s3.getDamage(), 0);
+    a.checkEqual("52. getShield", s3.getShield(), 100);
+    a.checkEqual("53. getCrew",   s3.getCrew(), 2287);
+    a.checkEqual("54. getOwner",  s3.getOwner(), 8);
+    a.checkEqual("55. getAmmo",   s3.getAmmo(), 249);
 }
 
 /** Test ships, Squadron ability.
@@ -1481,14 +1481,14 @@ AFL_TEST("game.sim.Run:ship:Squadron", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrNuHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    Ship* s1 = addGorbie(a, h.setup, 1, 8, h.list);
-    Ship* s2 = addGorbie(a, h.setup, 2, 4, h.list);
+    Ship& s1 = addGorbie(a, h.setup, 1, 8, h.list);
+    Ship& s2 = addGorbie(a, h.setup, 2, 4, h.list);
     game::sim::Result result(h.opts, 0);
-    s1->setHullType(0, h.list);
-    s1->setMass(200);
-    s1->setNumBeams(3);
-    s1->setNumBays(0);
-    s1->setFlags(Ship::fl_Squadron | Ship::fl_SquadronSet);
+    s1.setHullType(0, h.list);
+    s1.setMass(200);
+    s1.setNumBeams(3);
+    s1.setNumBays(0);
+    s1.setFlags(Ship::fl_Squadron | Ship::fl_SquadronSet);
 
     // Do it
     game::sim::runSimulation(h.setup, h.stats, result, h.opts, h.list, *h.config, h.flakConfiguration, h.rng);
@@ -1513,18 +1513,18 @@ AFL_TEST("game.sim.Run:ship:Squadron", a)
     a.checkEqual("21. stats", h.stats.size(), 2U);
 
     // - ship 1
-    a.checkEqual("31. getDamage",   s1->getDamage(), 0);
-    a.checkEqual("32. getShield",   s1->getShield(), 100);
-    a.checkEqual("33. getCrew",     s1->getCrew(), 2287);
-    a.checkEqual("34. getOwner",    s1->getOwner(), 8);
-    a.checkEqual("35. getNumBeams", s1->getNumBeams(), 2);       // <- changed
+    a.checkEqual("31. getDamage",   s1.getDamage(), 0);
+    a.checkEqual("32. getShield",   s1.getShield(), 100);
+    a.checkEqual("33. getCrew",     s1.getCrew(), 2287);
+    a.checkEqual("34. getOwner",    s1.getOwner(), 8);
+    a.checkEqual("35. getNumBeams", s1.getNumBeams(), 2);       // <- changed
 
     // - ship 2
-    a.checkEqual("41. getDamage", s2->getDamage(), 0);
-    a.checkEqual("42. getShield", s2->getShield(), 100);
-    a.checkEqual("43. getCrew",   s2->getCrew(), 2287);
-    a.checkEqual("44. getOwner",  s2->getOwner(), 4);
-    a.checkEqual("45. getAmmo",   s2->getAmmo(), 244);
+    a.checkEqual("41. getDamage", s2.getDamage(), 0);
+    a.checkEqual("42. getShield", s2.getShield(), 100);
+    a.checkEqual("43. getCrew",   s2.getCrew(), 2287);
+    a.checkEqual("44. getOwner",  s2.getOwner(), 4);
+    a.checkEqual("45. getAmmo",   s2.getAmmo(), 244);
 }
 
 /** Test deactivated planet.
@@ -1538,7 +1538,7 @@ AFL_TEST("game.sim.Run:planet:deactivated", a)
 
     // Setup
     addOutrider(a, h.setup, 1, 5, h.list);
-    addPlanet(h.setup, 1, 4)->setFlags(Planet::fl_Deactivated);
+    addPlanet(h.setup, 1, 4).setFlags(Planet::fl_Deactivated);
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -1560,8 +1560,8 @@ AFL_TEST("game.sim.Run:planet:cloaked-ship", a)
     (*h.config)[game::config::HostConfiguration::AllowCloakedShipsAttack].set(0);
 
     // Setup
-    addOutrider(a, h.setup, 1, 5, h.list)->setFlags(Ship::fl_Cloaked);
-    addPlanet(h.setup, 1, 4)->setFriendlyCode("ATT");
+    addOutrider(a, h.setup, 1, 5, h.list).setFlags(Ship::fl_Cloaked);
+    addPlanet(h.setup, 1, 4).setFriendlyCode("ATT");
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -1582,8 +1582,8 @@ AFL_TEST("game.sim.Run:planet:fcode-match", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    addOutrider(a, h.setup, 1, 5, h.list)->setFriendlyCode("xyz");
-    addPlanet(h.setup, 1, 4)->setFriendlyCode("xyz");
+    addOutrider(a, h.setup, 1, 5, h.list).setFriendlyCode("xyz");
+    addPlanet(h.setup, 1, 4).setFriendlyCode("xyz");
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -1628,8 +1628,8 @@ AFL_TEST("game.sim.Run:planet:not-aggressive", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    addOutrider(a, h.setup, 1, 5, h.list)->setAggressiveness(Ship::agg_Passive);
-    addPlanet(h.setup, 1, 4)->setFriendlyCode("123");
+    addOutrider(a, h.setup, 1, 5, h.list).setAggressiveness(Ship::agg_Passive);
+    addPlanet(h.setup, 1, 4).setFriendlyCode("123");
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -1650,8 +1650,8 @@ AFL_TEST("game.sim.Run:planet:not-enemy", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    addOutrider(a, h.setup, 1, 5, h.list)->setAggressiveness(7);
-    addPlanet(h.setup, 1, 4)->setFriendlyCode("123");
+    addOutrider(a, h.setup, 1, 5, h.list).setAggressiveness(7);
+    addPlanet(h.setup, 1, 4).setFriendlyCode("123");
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -1672,8 +1672,8 @@ AFL_TEST("game.sim.Run:planet:immune-race", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    addOutrider(a, h.setup, 1, 4, h.list)->setAggressiveness(7);
-    addPlanet(h.setup, 1, 2)->setFriendlyCode("ATT");
+    addOutrider(a, h.setup, 1, 4, h.list).setAggressiveness(7);
+    addPlanet(h.setup, 1, 2).setFriendlyCode("ATT");
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -1694,8 +1694,8 @@ AFL_TEST("game.sim.Run:planet:immune-bird", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    addOutrider(a, h.setup, 1, 3, h.list)->setAggressiveness(Ship::agg_NoFuel);
-    addPlanet(h.setup, 1, 2)->setFriendlyCode("NUK");
+    addOutrider(a, h.setup, 1, 3, h.list).setAggressiveness(Ship::agg_NoFuel);
+    addPlanet(h.setup, 1, 2).setFriendlyCode("NUK");
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -1716,8 +1716,8 @@ AFL_TEST("game.sim.Run:planet:matching-enemy", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    addOutrider(a, h.setup, 1, 9, h.list)->setAggressiveness(2);
-    addPlanet(h.setup, 1, 2)->setFriendlyCode("qqq");
+    addOutrider(a, h.setup, 1, 9, h.list).setAggressiveness(2);
+    addPlanet(h.setup, 1, 2).setFriendlyCode("qqq");
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -1738,8 +1738,8 @@ AFL_TEST("game.sim.Run:planet:NUK", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrHost, game::sim::Configuration::BalanceNone);
 
     // Setup
-    addOutrider(a, h.setup, 1, 9, h.list)->setAggressiveness(Ship::agg_NoFuel);
-    addPlanet(h.setup, 1, 2)->setFriendlyCode("NUK");
+    addOutrider(a, h.setup, 1, 9, h.list).setAggressiveness(Ship::agg_NoFuel);
+    addPlanet(h.setup, 1, 2).setFriendlyCode("NUK");
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -1760,8 +1760,8 @@ AFL_TEST("game.sim.Run:VcrFLAK", a)
     setDeterministicConfig(h.opts, *h.config, game::sim::Configuration::VcrFLAK, game::sim::Configuration::BalanceNone);
 
     // Setup
-    Ship* s1 = addOutrider(a, h.setup, 1, 12, h.list);
-    Ship* s2 = addOutrider(a, h.setup, 2, 11, h.list);
+    Ship& s1 = addOutrider(a, h.setup, 1, 12, h.list);
+    Ship& s2 = addOutrider(a, h.setup, 2, 11, h.list);
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -1790,16 +1790,16 @@ AFL_TEST("game.sim.Run:VcrFLAK", a)
     a.checkEqual  ("26. getMass",       result.battles->getBattle(0)->getObject(1, false)->getMass(), 75);
 
     // - ship 1
-    a.checkEqual("31. getDamage", s1->getDamage(), 71);
-    a.checkEqual("32. getShield", s1->getShield(), 0);
-    a.checkEqual("33. getCrew",   s1->getCrew(), 131);
-    a.checkEqual("34. getOwner",  s1->getOwner(), 12);
+    a.checkEqual("31. getDamage", s1.getDamage(), 71);
+    a.checkEqual("32. getShield", s1.getShield(), 0);
+    a.checkEqual("33. getCrew",   s1.getCrew(), 131);
+    a.checkEqual("34. getOwner",  s1.getOwner(), 12);
 
     // - ship 2
-    a.checkEqual("41. getDamage", s2->getDamage(), 103);
-    a.checkEqual("42. getShield", s2->getShield(), 0);
-    a.checkEqual("43. getCrew",   s2->getCrew(), 109);
-    a.checkEqual("44. getOwner",  s2->getOwner(), 0);
+    a.checkEqual("41. getDamage", s2.getDamage(), 103);
+    a.checkEqual("42. getShield", s2.getShield(), 0);
+    a.checkEqual("43. getCrew",   s2.getCrew(), 109);
+    a.checkEqual("44. getOwner",  s2.getOwner(), 0);
 }
 
 /** Test basic FLAK simulation, with ESB.
@@ -1813,8 +1813,8 @@ AFL_TEST("game.sim.Run:VcrFLAK:esb", a)
     h.opts.setEngineShieldBonus(20);
 
     // Setup
-    Ship* s1 = addOutrider(a, h.setup, 1, 12, h.list);
-    Ship* s2 = addOutrider(a, h.setup, 2, 11, h.list);
+    Ship& s1 = addOutrider(a, h.setup, 1, 12, h.list);
+    Ship& s2 = addOutrider(a, h.setup, 2, 11, h.list);
     game::sim::Result result(h.opts, 0);
 
     // Do it
@@ -1843,16 +1843,16 @@ AFL_TEST("game.sim.Run:VcrFLAK:esb", a)
     a.checkEqual("21. stats", h.stats.size(), 2U);
 
     // - ship 1
-    a.checkEqual("31. getDamage", s1->getDamage(), 96);
-    a.checkEqual("32. getShield", s1->getShield(), 0);
-    a.checkEqual("33. getCrew",   s1->getCrew(), 76);
-    a.checkEqual("34. getOwner",  s1->getOwner(), 12);
+    a.checkEqual("31. getDamage", s1.getDamage(), 96);
+    a.checkEqual("32. getShield", s1.getShield(), 0);
+    a.checkEqual("33. getCrew",   s1.getCrew(), 76);
+    a.checkEqual("34. getOwner",  s1.getOwner(), 12);
 
     // - ship 2
-    a.checkEqual("41. getDamage", s2->getDamage(), 107);
-    a.checkEqual("42. getShield", s2->getShield(), 0);
-    a.checkEqual("43. getCrew",   s2->getCrew(), 64);
-    a.checkEqual("44. getOwner",  s2->getOwner(), 0);
+    a.checkEqual("41. getDamage", s2.getDamage(), 107);
+    a.checkEqual("42. getShield", s2.getShield(), 0);
+    a.checkEqual("43. getCrew",   s2.getCrew(), 64);
+    a.checkEqual("44. getOwner",  s2.getOwner(), 0);
 }
 
 /** Test multi-ship FLAK simulation.
@@ -1865,17 +1865,17 @@ AFL_TEST("game.sim.Run:VcrFLAK:multi-ship", a)
     h.opts.setMode(game::sim::Configuration::VcrFLAK, 0, *h.config);
 
     // Setup
-    Ship* s1 = addOutrider(a, h.setup, 1, 1, h.list);
-    Ship* s2 = addOutrider(a, h.setup, 2, 2, h.list);
-    Ship* s3 = addOutrider(a, h.setup, 3, 2, h.list);
-    Ship* s4 = addOutrider(a, h.setup, 4, 2, h.list);
-    Planet* p = addPlanet(h.setup, 17, 1);
-    s1->setFriendlyCode("-20");
-    s2->setFriendlyCode("100");
-    s3->setFriendlyCode("300");
-    s4->setFriendlyCode("200");
-    p->setFriendlyCode("ATT");
-    p->setNumBaseFighters(60);
+    Ship& s1 = addOutrider(a, h.setup, 1, 1, h.list);
+    Ship& s2 = addOutrider(a, h.setup, 2, 2, h.list);
+    Ship& s3 = addOutrider(a, h.setup, 3, 2, h.list);
+    Ship& s4 = addOutrider(a, h.setup, 4, 2, h.list);
+    Planet& p = addPlanet(h.setup, 17, 1);
+    s1.setFriendlyCode("-20");
+    s2.setFriendlyCode("100");
+    s3.setFriendlyCode("300");
+    s4.setFriendlyCode("200");
+    p.setFriendlyCode("ATT");
+    p.setNumBaseFighters(60);
 
     game::sim::Result result(h.opts, 0);
 
@@ -1896,33 +1896,33 @@ AFL_TEST("game.sim.Run:VcrFLAK:multi-ship", a)
     a.checkEqual("12. getMinFightersAboard", h.stats.at(4).getMinFightersAboard(), 39);
 
     // - ship 1
-    a.checkEqual("21. getDamage", s1->getDamage(), 0);
-    a.checkEqual("22. getShield", s1->getShield(), 52);
-    a.checkEqual("23. getCrew",   s1->getCrew(), 180);
-    a.checkEqual("24. getOwner",  s1->getOwner(), 1);
+    a.checkEqual("21. getDamage", s1.getDamage(), 0);
+    a.checkEqual("22. getShield", s1.getShield(), 52);
+    a.checkEqual("23. getCrew",   s1.getCrew(), 180);
+    a.checkEqual("24. getOwner",  s1.getOwner(), 1);
 
     // - ship 2
-    a.checkEqual("31. getDamage", s2->getDamage(), 159);
-    a.checkEqual("32. getShield", s2->getShield(), 0);
-    a.checkEqual("33. getCrew",   s2->getCrew(), 101);
-    a.checkEqual("34. getOwner",  s2->getOwner(), 0);
+    a.checkEqual("31. getDamage", s2.getDamage(), 159);
+    a.checkEqual("32. getShield", s2.getShield(), 0);
+    a.checkEqual("33. getCrew",   s2.getCrew(), 101);
+    a.checkEqual("34. getOwner",  s2.getOwner(), 0);
 
     // - ship 3
-    a.checkEqual("41. getDamage", s3->getDamage(), 151);
-    a.checkEqual("42. getShield", s3->getShield(), 0);
-    a.checkEqual("43. getCrew",   s3->getCrew(), 105);
-    a.checkEqual("44. getOwner",  s3->getOwner(), 0);
+    a.checkEqual("41. getDamage", s3.getDamage(), 151);
+    a.checkEqual("42. getShield", s3.getShield(), 0);
+    a.checkEqual("43. getCrew",   s3.getCrew(), 105);
+    a.checkEqual("44. getOwner",  s3.getOwner(), 0);
 
     // - ship 4
-    a.checkEqual("51. getDamage", s4->getDamage(), 155);
-    a.checkEqual("52. getShield", s4->getShield(), 0);
-    a.checkEqual("53. getCrew",   s4->getCrew(), 97);
-    a.checkEqual("54. getOwner",  s4->getOwner(), 0);
+    a.checkEqual("51. getDamage", s4.getDamage(), 155);
+    a.checkEqual("52. getShield", s4.getShield(), 0);
+    a.checkEqual("53. getCrew",   s4.getCrew(), 97);
+    a.checkEqual("54. getOwner",  s4.getOwner(), 0);
 
     // - planet
-    a.checkEqual("61. getDamage", p->getDamage(), 0);
-    a.checkEqual("62. getShield", p->getShield(), 100);
-    a.checkEqual("63. getOwner",  p->getOwner(), 1);
+    a.checkEqual("61. getDamage", p.getDamage(), 0);
+    a.checkEqual("62. getShield", p.getShield(), 100);
+    a.checkEqual("63. getOwner",  p.getOwner(), 1);
 }
 
 /** Test host order for ship fights, Tim-Host.
@@ -2068,12 +2068,12 @@ AFL_TEST("game.sim.Run:ship:ShieldGenerator", a)
 
     // Setup
     // - attackers
-    Ship* a1 = addAnnihilation(a, h.setup, 1, 6, h.list);
-    a1->setShield(10);
-    a1->setBeamType(10);
-    a1->setNumBeams(10);
-    Ship* a2 = addAnnihilation(a, h.setup, 2, 6, h.list);
-    a2->setFlags(Ship::fl_ShieldGenerator | Ship::fl_ShieldGeneratorSet);
+    Ship& a1 = addAnnihilation(a, h.setup, 1, 6, h.list);
+    a1.setShield(10);
+    a1.setBeamType(10);
+    a1.setNumBeams(10);
+    Ship& a2 = addAnnihilation(a, h.setup, 2, 6, h.list);
+    a2.setFlags(Ship::fl_ShieldGenerator | Ship::fl_ShieldGeneratorSet);
 
     // - defenders
     for (int i = 0; i < 5; ++i) {

@@ -476,26 +476,20 @@ game::proxy::SimulationSetupProxy::Trampoline::addShip(Slot_t slot, int count, L
         // Create first ship
         if (slot >= setup.getNumShips()) {
             Id_t id = setup.findUnusedShipId(1, gi);
-            if (Ship* sh = setup.addShip()) {
-                // Success
-                slot = setup.getNumShips() - 1;
-                sh->setHullType(0, *shipList);
-                sh->setId(id);
-                if (int n = shipList->beams().size()) {
-                    sh->setBeamType(n);
-                    sh->setNumBeams(1);
-                }
-                if (int n = shipList->engines().size()) {
-                    sh->setEngineType(n);
-                }
-                sh->setAggressiveness(Ship::agg_Kill);
-                sh->setDefaultName(m_translator);
-                --count;
-            } else {
-                // Fail-safe (cannot happen)
-                slot = 0;
-                count = 0;
+            Ship& sh = setup.addShip();
+            slot = setup.getNumShips() - 1;
+            sh.setHullType(0, *shipList);
+            sh.setId(id);
+            if (int n = shipList->beams().size()) {
+                sh.setBeamType(n);
+                sh.setNumBeams(1);
             }
+            if (int n = shipList->engines().size()) {
+                sh.setEngineType(n);
+            }
+            sh.setAggressiveness(Ship::agg_Kill);
+            sh.setDefaultName(m_translator);
+            --count;
         }
 
         // Create further ships

@@ -139,8 +139,10 @@ game::proxy::SimulationTransferProxy::copyObjectFromGame(Session& session, Refer
          case Reference::Ship:
             if (game::map::Ship* in = t.universe().ships().get(ref.getId())) {
                 game::sim::Ship tmp;
-                result = transfer.copyShipFromGame(tmp, *in)
-                    && sim->setup().addShip(tmp) != 0;
+                if (transfer.copyShipFromGame(tmp, *in)) {
+                    sim->setup().addShip(tmp);
+                    result = true;
+                }
             }
             break;
 
@@ -148,8 +150,10 @@ game::proxy::SimulationTransferProxy::copyObjectFromGame(Session& session, Refer
          case Reference::Starbase:
             if (game::map::Planet* in = t.universe().planets().get(ref.getId())) {
                 game::sim::Planet tmp;
-                result = transfer.copyPlanetFromGame(tmp, *in)
-                    && sim->setup().addPlanet(tmp);
+                if (transfer.copyPlanetFromGame(tmp, *in)) {
+                    sim->setup().addPlanet(tmp);
+                    result = true;
+                }
             }
             break;
 

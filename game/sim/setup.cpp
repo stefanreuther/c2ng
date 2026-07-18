@@ -76,7 +76,7 @@ game::sim::Setup::operator=(const Setup& other)
 }
 
 // Add planet.
-game::sim::Planet*
+game::sim::Planet&
 game::sim::Setup::addPlanet()
 {
     // FIXME: PCC2 resets the planet to standard values (and marks it dirty); do we need this?
@@ -84,17 +84,15 @@ game::sim::Setup::addPlanet()
         m_planet.reset(new Planet());
         m_structureChanged = true;
     }
-    return m_planet.get();
+    return *m_planet.get();
 }
 
 // Add planet from data.
-game::sim::Planet*
+game::sim::Planet&
 game::sim::Setup::addPlanet(const Planet& data)
 {
-    Planet* pl = addPlanet();
-    if (pl != 0) {
-        *pl = data;
-    }
+    Planet& pl = addPlanet();
+    pl = data;
     return pl;
 }
 
@@ -133,27 +131,25 @@ game::sim::Setup::removePlanet()
 }
 
 // Add a ship.
-game::sim::Ship*
+game::sim::Ship&
 game::sim::Setup::addShip()
 {
     // ex GSimState::addShip
-    Ship* result = m_ships.pushBackNew(new Ship());
+    Ship& result = *m_ships.pushBackNew(new Ship());
     m_structureChanged = true;
     return result;
 }
 
 // Add a ship from data.
-game::sim::Ship*
+game::sim::Ship&
 game::sim::Setup::addShip(const Ship& data)
 {
     Ship* sh = findShipById(data.getId());
     if (sh == 0) {
-        sh = addShip();
+        sh = &addShip();
     }
-    if (sh != 0) {
-        *sh = data;
-    }
-    return sh;
+    *sh = data;
+    return *sh;
 }
 
 // Get number of ships.
@@ -355,21 +351,18 @@ game::sim::Setup::merge(const Setup& other)
         if (const Ship* otherShip = other.getShip(i)) {
             Ship* myShip = findShipById(otherShip->getId());
             if (myShip == 0) {
-                myShip = addShip();
+                myShip = &addShip();
             }
-            if (myShip != 0) {
-                *myShip = *otherShip;
-                myShip->markDirty();
-            }
+            *myShip = *otherShip;
+            myShip->markDirty();
         }
     }
 
     // Merge planet
     if (const Planet* otherPlanet = other.getPlanet()) {
-        if (Planet* myPlanet = addPlanet()) {
-            *myPlanet = *otherPlanet;
-            myPlanet->markDirty();
-        }
+        Planet& myPlanet = addPlanet();
+        myPlanet = *otherPlanet;
+        myPlanet.markDirty();
     }
 }
 

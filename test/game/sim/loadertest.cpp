@@ -23,23 +23,23 @@ namespace {
     /* Prepare a setup for the "save" tests */
     void prepare(game::sim::Setup& setup)
     {
-        game::sim::Ship* sh = setup.addShip();
-        sh->setName("Boat");
-        sh->setOwner(3);
-        sh->setTorpedoType(7);
-        sh->setNumLaunchers(4);
-        sh->setAmmo(180);
-        sh->setCrew(17);
-        sh->setFriendlyCode("abc");
-        sh->setEngineType(8);
+        game::sim::Ship& sh = setup.addShip();
+        sh.setName("Boat");
+        sh.setOwner(3);
+        sh.setTorpedoType(7);
+        sh.setNumLaunchers(4);
+        sh.setAmmo(180);
+        sh.setCrew(17);
+        sh.setFriendlyCode("abc");
+        sh.setEngineType(8);
 
-        game::sim::Planet* pl = setup.addPlanet();
-        pl->setOwner(4);
-        pl->setDefense(61);
-        pl->setFriendlyCode("xyz");
-        pl->setBaseBeamTech(6);
-        pl->setBaseTorpedoTech(9);
-        pl->setBaseDefense(12);
+        game::sim::Planet& pl = setup.addPlanet();
+        pl.setOwner(4);
+        pl.setDefense(61);
+        pl.setFriendlyCode("xyz");
+        pl.setBaseBeamTech(6);
+        pl.setBaseTorpedoTech(9);
+        pl.setBaseDefense(12);
     }
 }
 

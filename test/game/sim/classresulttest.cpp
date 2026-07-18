@@ -19,11 +19,11 @@ AFL_TEST("game.sim.ClassResult:basics", a)
 {
     // Environment
     game::sim::Setup setup;
-    setup.addShip()->setOwner(4);
-    setup.addShip()->setOwner(2);
-    setup.addShip()->setOwner(99);
-    setup.addShip()->setOwner(0);
-    setup.addPlanet()->setOwner(4);
+    setup.addShip().setOwner(4);
+    setup.addShip().setOwner(2);
+    setup.addShip().setOwner(99);
+    setup.addShip().setOwner(0);
+    setup.addPlanet().setOwner(4);
 
     game::sim::Configuration config;
     game::sim::Result res(config, 0);
@@ -52,19 +52,19 @@ AFL_TEST("game.sim.ClassResult:multiple", a)
 {
     // Some setups
     game::sim::Setup setup1;
-    setup1.addShip()->setOwner(4);
-    setup1.addShip()->setOwner(2);
-    setup1.addPlanet()->setOwner(4);
+    setup1.addShip().setOwner(4);
+    setup1.addShip().setOwner(2);
+    setup1.addPlanet().setOwner(4);
 
     game::sim::Setup setup2;
-    setup2.addShip()->setOwner(2);
-    setup2.addShip()->setOwner(4);
-    setup2.addPlanet()->setOwner(4);
+    setup2.addShip().setOwner(2);
+    setup2.addShip().setOwner(4);
+    setup2.addPlanet().setOwner(4);
 
     game::sim::Setup setup3;
-    setup3.addShip()->setOwner(3);
-    setup3.addShip()->setOwner(2);
-    setup3.addPlanet()->setOwner(4);
+    setup3.addShip().setOwner(3);
+    setup3.addShip().setOwner(2);
+    setup3.addPlanet().setOwner(4);
 
     // Results
     game::sim::Configuration config;
