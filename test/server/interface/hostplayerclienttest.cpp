@@ -29,7 +29,14 @@ AFL_TEST("server.interface.HostPlayerClient:commands", a)
     // join
     mock.expectCall("PLAYERJOIN, 42, 3, uu");
     mock.provideNewResult(0);
-    AFL_CHECK_SUCCEEDS(a("01. join"), testee.join(42, 3, "uu"));
+    AFL_CHECK_SUCCEEDS(a("01. join"), testee.join(42, 3, "uu", HostPlayer::JoinOptions()));
+
+    // join with options
+    HostPlayer::JoinOptions opts;
+    opts.raceChoice = "99,88";
+    mock.expectCall("PLAYERJOIN, 42, 3, uu, RACE, 99,88");
+    mock.provideNewResult(0);
+    AFL_CHECK_SUCCEEDS(a("01. join"), testee.join(42, 3, "uu", opts));
 
     // substitute
     mock.expectCall("PLAYERSUBST, 56, 1, zz");
@@ -61,6 +68,7 @@ AFL_TEST("server.interface.HostPlayerClient:commands", a)
         h->setNew("users", new VectorValue(v));
         h->setNew("editable", server::makeIntegerValue(2));
         h->setNew("joinable", server::makeIntegerValue(1));
+        h->setNew("race", server::makeStringValue("0,8,15"));
 
         mock.expectCall("PLAYERSTAT, 17, 3");
         mock.provideNewResult(new HashValue(h));
@@ -75,6 +83,7 @@ AFL_TEST("server.interface.HostPlayerClient:commands", a)
         a.checkEqual("47. userIds",       i.userIds[2], "wilma");
         a.checkEqual("48. numEditable",   i.numEditable, 2);
         a.checkEqual("49. joinable",      i.joinable, true);
+        a.checkEqual("50. raceChoice",    i.raceChoice.orElse("-"), "0,8,15");
     }
     // - no response, deserialized as default
     {
@@ -88,6 +97,7 @@ AFL_TEST("server.interface.HostPlayerClient:commands", a)
         a.checkEqual("54. userIds",       i.userIds.size(), 0U);
         a.checkEqual("55. numEditable",   i.numEditable, 0);
         a.checkEqual("56. joinable",      i.joinable, false);
+        a.checkEqual("57. raceChoice",    i.raceChoice.isValid(), false);
     }
 
     // list

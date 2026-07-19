@@ -106,6 +106,13 @@ server::host::Game::Slot::rank()
     return m_tree.hashKey("status").intField("rank");
 }
 
+// Access chosen race.
+afl::net::redis::StringField
+server::host::Game::Slot::raceChoice()
+{
+    return m_tree.hashKey("status").stringField("race");
+}
+
 /***************************** Game::TurnInfo ****************************/
 
 server::host::Game::TurnInfo::TurnInfo(afl::net::redis::HashKey key)
@@ -842,6 +849,7 @@ server::host::Game::describe(bool verbose, String_t forUser, String_t otherUser,
        @key name:Str                     (Game name, {game:$GID:name})
        @key description:Str              (**Game description)
        @key difficulty:Int               (Difficulty)
+       @key kind:Int                     (Game kind, 0=normal, 1=duel duel)
        @key currentSchedule:HostSchedule (current schedule)
        @key slots:StrList                (**Slot states. For each slot, one of "occupied", "open", "self", or "dead")
        @key turns:IntList                (**Turn states. For each slot, a {@type HostTurnStatus} value)
@@ -893,6 +901,9 @@ server::host::Game::describe(bool verbose, String_t forUser, String_t otherUser,
 
     // Difficulty
     result.difficulty = getDifficulty(root);
+
+    // Game kind
+    result.kind = kind().get();
 
     // Schedule
     afl::net::redis::Subtree schedule = m_game.subtree("schedule");
@@ -1079,7 +1090,7 @@ server::host::Game::describeSlot(int32_t slot, String_t forUser, Root& root, con
             ++numEditable;
         }
     }
-    bool occupied = result.userIds.size() > 0;
+    const bool occupied = result.userIds.size() > 0;
 
     result.numEditable = numEditable;
     result.joinable = !occupied
@@ -1090,6 +1101,11 @@ server::host::Game::describeSlot(int32_t slot, String_t forUser, Root& root, con
         if (!isJoinRestrictionSatisfied(u)) {
             result.joinable = false;
         }
+    }
+
+    // If counting is set, player is on this slot.
+    if (counting) {
+        result.raceChoice = getSlot(slot).raceChoice().get();
     }
     return result;
 }
@@ -1313,6 +1329,12 @@ afl::net::redis::IntegerField
 server::host::Game::maxRankPointsToJoin()
 {
     return settings().intField("maxRankPointsToJoin");
+}
+
+afl::net::redis::IntegerField
+server::host::Game::kind()
+{
+    return settings().intField("kind");
 }
 
 // Access history.

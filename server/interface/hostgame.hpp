@@ -66,6 +66,7 @@ namespace server { namespace interface {
             String_t name;                                                 ///< Game name.
             afl::base::Optional<String_t> description;                     ///< Game description (subtitle).
             int32_t difficulty;                                            ///< Game difficulty.
+            int32_t kind;                                                  ///< Game kind.
             afl::base::Optional<HostSchedule::Schedule> currentSchedule;   ///< Currently-active schedule.
             afl::base::Optional<std::vector<SlotState> > slotStates;       ///< States of all slots.
             afl::base::Optional<std::vector<int32_t> > turnStates;         ///< States of all turns for all slots.

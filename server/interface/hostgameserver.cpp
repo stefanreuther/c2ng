@@ -518,6 +518,9 @@ server::interface::HostGameServer::packInfo(const HostGame::Info& info)
     // difficulty
     h->setNew("difficulty", makeIntegerValue(info.difficulty));
 
+    // game kind
+    h->setNew("kind", makeIntegerValue(info.kind));
+
     // currentSchedule
     if (const HostSchedule::Schedule* p = info.currentSchedule.get()) {
         h->setNew("currentSchedule", HostScheduleServer::packSchedule(*p));

@@ -14,6 +14,7 @@ server::interface::HostGame::Info::Info()
       name(),
       description(),
       difficulty(0),
+      kind(0),
       currentSchedule(),
       slotStates(),
       turnStates(),

@@ -13,7 +13,7 @@ AFL_TEST_NOARG("server.interface.HostPlayer:interface")
 {
     class Tester : public HostPlayer {
      public:
-        virtual void join(int32_t /*gameId*/, int32_t /*slot*/, String_t /*userId*/)
+        virtual void join(int32_t /*gameId*/, int32_t /*slot*/, String_t /*userId*/, JoinOptions /*opt*/)
             { }
         virtual void substitute(int32_t /*gameId*/, int32_t /*slot*/, String_t /*userId*/)
             { }

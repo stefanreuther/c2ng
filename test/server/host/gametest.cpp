@@ -132,6 +132,7 @@ AFL_TEST("server.host.Game:describe", a)
     t.hashKey("settings").stringField("shiplist").set("S");
     t.hashKey("settings").intField("forum").set(46);
     t.hashKey("settings").intField("minRankLevelToJoin").set(4);
+    t.hashKey("settings").intField("kind").set(8);
 
     // Player 3 has a yellow turn
     t.hashKey("player:3:status").intField("slot").set(1);
@@ -179,6 +180,7 @@ AFL_TEST("server.host.Game:describe", a)
         a.checkEqual("12. shipListKind",        i.shipListKind, "shiplist kind");
         a.checkEqual("13. turnNumber",          i.turnNumber, 12);
         a.check     ("14. userPlays",           i.userPlays.isSame(true));
+        a.checkEqual("15. kind",                i.kind, 8);
     }
     {
         // Verbose
@@ -218,6 +220,7 @@ AFL_TEST("server.host.Game:describe", a)
         a.check("74. masterDescription", i.masterDescription.isSame(String_t("a master")));
         a.check("75. masterKind",        i.masterKind.isSame(String_t("master kind")));
         a.check("76. forumId",           i.forumId.isSame(46));
+        a.checkEqual("77. kind",         i.kind, 8);
     }
     {
         // Verbose, as user C
@@ -527,6 +530,7 @@ AFL_TEST("server.host.Game:describeSlot", a)
     StringKey(h.db(), "game:61:type").set("unlisted");
 
     HashKey(h.db(), "game:61:player:1:status").intField("slot").set(1);
+    HashKey(h.db(), "game:61:player:1:status").stringField("race").set("7,9");
     HashKey(h.db(), "game:61:player:2:status").intField("slot").set(1);
     StringListKey(h.db(), "game:61:player:1:users").pushBack("a");
     StringListKey(h.db(), "game:61:player:1:users").pushBack("b");
@@ -560,6 +564,7 @@ AFL_TEST("server.host.Game:describeSlot", a)
     a.checkEqual("17. userIds",       a1.userIds[2], "c");
     a.checkEqual("18. numEditable",   a1.numEditable, 3);
     a.checkEqual("19. joinable",      a1.joinable, false);
+    a.checkEqual("20. raceChoice",    a1.raceChoice.orElse("-"), "7,9");
 
     // - b
     a.checkEqual("21. longName",      b1.longName, a1.longName);
@@ -568,14 +573,17 @@ AFL_TEST("server.host.Game:describeSlot", a)
     a.check     ("24. userIds",       b1.userIds == a1.userIds);
     a.checkEqual("25. numEditable",   b1.numEditable, 2);
     a.checkEqual("26. joinable",      b1.joinable, false);
+    a.checkEqual("27. raceChoice",    b1.raceChoice.orElse("-"), "7,9");
 
     // - c
     a.checkEqual("31. numEditable",   c1.numEditable, 1);
     a.checkEqual("32. joinable",      c1.joinable, false);
+    a.checkEqual("33. raceChoice",    c1.raceChoice.orElse("-"), "7,9");
 
     // - b
     a.checkEqual("41. numEditable",   d1.numEditable, 0);
     a.checkEqual("42. joinable",      d1.joinable, false);
+    a.checkEqual("43. raceChoice",    d1.raceChoice.isValid(), false);
 
     // Test slot 2
     HostPlayer::Info a2 = g.describeSlot(2, "a", h.root(), raceNames);

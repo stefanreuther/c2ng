@@ -38,6 +38,7 @@ namespace {
         h->setNew("name",                server::makeStringValue("The Name"));
         h->setNew("description",         server::makeStringValue("A test game"));
         h->setNew("difficulty",          server::makeIntegerValue(133));
+        h->setNew("kind",                server::makeIntegerValue(7));
         h->setNew("currentSchedule",     new HashValue(sch));
         h->setNew("slots",               new VectorValue(Vector::create(Segment().pushBackString("open").pushBackString("occupied").pushBackString("self"))));
         h->setNew("turns",               new VectorValue(Vector::create(Segment().pushBackInteger(0).pushBackInteger(2).pushBackInteger(1))));
@@ -318,6 +319,7 @@ AFL_TEST("server.interface.HostGameClient:getInfo", a)
         a.checkEqual("14. name",        i.name, "The Name");
         a.check     ("15. description", i.description.isSame(String_t("A test game")));
         a.checkEqual("16. difficulty",  i.difficulty, 133);
+        a.checkEqual("17. kind",        i.kind, 7);
 
         a.check("21. currentSchedule", i.currentSchedule.isValid());
         a.check("22. currentSchedule", i.currentSchedule.get()->type.isSame(HostSchedule::Weekly));

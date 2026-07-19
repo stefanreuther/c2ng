@@ -292,6 +292,9 @@ server::interface::HostGameClient::unpackInfo(const Value_t* value)
     // difficulty
     result.difficulty = a("difficulty").toInteger();
 
+    // kind
+    result.kind = a("kind").toInteger();
+
     // currentSchedule
     if (const Value_t* p = a("currentSchedule").getValue()) {
         result.currentSchedule = HostScheduleClient::unpackSchedule(p);

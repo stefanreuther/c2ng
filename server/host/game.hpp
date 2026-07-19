@@ -54,6 +54,10 @@ namespace server { namespace host {
             /** Access ranks.
                 \return key. After end of game, 1=first, 2=second place etc.; 0=dead */
             afl::net::redis::IntegerField rank();
+
+            /** Access chosen race.
+                \return race; format depending on game kind, typically, list of integers */
+            afl::net::redis::StringField raceChoice();
          private:
             afl::net::redis::Subtree m_tree;
         };
@@ -535,6 +539,10 @@ namespace server { namespace host {
         /** Access "maximum skill to join" value.
             \return field */
         afl::net::redis::IntegerField maxRankPointsToJoin();
+
+        /** Access "kind" value.
+            \return field */
+        afl::net::redis::IntegerField kind();
 
         /** Access history.
             \return string list */

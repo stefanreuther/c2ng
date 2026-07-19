@@ -24,8 +24,8 @@ namespace {
         HostPlayerMock(afl::test::Assert a)
             : CallReceiver(a)
             { }
-        virtual void join(int32_t gameId, int32_t slot, String_t userId)
-            { checkCall(Format("join(%d,%d,%s)", gameId, slot, userId)); }
+        virtual void join(int32_t gameId, int32_t slot, String_t userId, JoinOptions opt)
+            { checkCall(Format("join(%d,%d,%s,r=%s)", gameId, slot, userId, opt.raceChoice.orElse("-"))); }
         virtual void substitute(int32_t gameId, int32_t slot, String_t userId)
             { checkCall(Format("substitute(%d,%d,%s)", gameId, slot, userId)); }
         virtual void resign(int32_t gameId, int32_t slot, String_t userId)
@@ -72,8 +72,13 @@ AFL_TEST("server.interface.HostPlayerServer:commands", a)
     server::interface::HostPlayerServer testee(mock);
 
     // join
-    mock.expectCall("join(5,3,u)");
+    mock.expectCall("join(5,3,u,r=-)");
     AFL_CHECK_SUCCEEDS(a("01. playerjoin"), testee.callVoid(Segment().pushBackString("PLAYERJOIN").pushBackInteger(5).pushBackInteger(3).pushBackString("u")));
+
+    // join with options
+    mock.expectCall("join(5,3,u,r=4,7)");
+    AFL_CHECK_SUCCEEDS(a("02. playerjoin"), testee.callVoid(Segment().pushBackString("PLAYERJOIN").pushBackInteger(5).pushBackInteger(3).pushBackString("u")
+                                                            .pushBackString("race").pushBackString("4,7")));
 
     // substitute
     mock.expectCall("substitute(97,12,q)");
@@ -97,6 +102,7 @@ AFL_TEST("server.interface.HostPlayerServer:commands", a)
         ia.userIds.push_back("ua1");
         ia.numEditable = 1;
         ia.joinable = false;
+        ia.raceChoice = "5,7";
 
         HostPlayer::Info ib;
         ib.longName = "long b";
@@ -134,6 +140,7 @@ AFL_TEST("server.interface.HostPlayerServer:commands", a)
         a.checkEqual("55. users",    ap("8")("users")[0].toString(), "ua1");
         a.checkEqual("56. editable", ap("8")("editable").toInteger(), 1);
         a.checkEqual("57. joinable", ap("8")("joinable").toInteger(), 0);
+        a.checkEqual("58. race",     ap("8")("race").toString(), "5,7");
 
         a.checkEqual("61. long",     ap("11")("long").toString(), "long b");
         a.checkEqual("62. short",    ap("11")("short").toString(), "short b");
@@ -143,6 +150,7 @@ AFL_TEST("server.interface.HostPlayerServer:commands", a)
         a.checkEqual("66. users",    ap("11")("users")[1].toString(), "ub2");
         a.checkEqual("67. editable", ap("11")("editable").toInteger(), 0);
         a.checkEqual("68. joinable", ap("11")("joinable").toInteger(), 1);
+        a.checkNull ("69. race",     ap("11")("race").getValue());
     }
     {
         // Prepare call
@@ -212,7 +220,7 @@ AFL_TEST("server.interface.HostPlayerServer:commands", a)
     AFL_CHECK_SUCCEEDS(a("141. playerset"), testee.callVoid(Segment().pushBackString("PLAYERSET").pushBackInteger(10).pushBackString("uq").pushBackString("k").pushBackString("v")));
 
     // Variants
-    mock.expectCall("join(5,3,u)");
+    mock.expectCall("join(5,3,u,r=-)");
     AFL_CHECK_SUCCEEDS(a("151. playerjoin"), testee.callVoid(Segment().pushBackString("playerjoin").pushBackInteger(5).pushBackInteger(3).pushBackString("u")));
 
     mock.expectCall("list(23,1)");
@@ -242,6 +250,8 @@ AFL_TEST("server.interface.HostPlayerServer:errors", a)
     AFL_CHECK_THROWS(a("04. missing arg"), testee.callVoid(Segment().pushBackString("PLAYERJOIN")), std::exception);
     AFL_CHECK_THROWS(a("05. bad type"),    testee.callVoid(Segment().pushBackString("PLAYERADD").pushBackInteger(1).pushBackString("a").pushBackString("x")), std::exception);
     AFL_CHECK_THROWS(a("06. bad option"),  testee.callVoid(Segment().pushBackString("PLAYERLS").pushBackInteger(23).pushBackString("what")), std::exception);
+    AFL_CHECK_THROWS(a("07. missing opt"), testee.callVoid(Segment().pushBackString("PLAYERJOIN").pushBackInteger(5).pushBackInteger(3).pushBackString("u").pushBackString("race")), std::exception);
+    AFL_CHECK_THROWS(a("08. bad opt"),     testee.callVoid(Segment().pushBackString("PLAYERJOIN").pushBackInteger(5).pushBackInteger(3).pushBackString("u").pushBackString("foobar").pushBackString("x")), std::exception);
 }
 
 AFL_TEST("server.interface.HostPlayerServer:roundtrip", a)
@@ -253,10 +263,16 @@ AFL_TEST("server.interface.HostPlayerServer:roundtrip", a)
     server::interface::HostPlayerClient level4(level3);
 
     // join
-    mock.expectCall("join(5,3,u)");
-    AFL_CHECK_SUCCEEDS(a("01. join"), level4.join(5, 3, "u"));
+    mock.expectCall("join(5,3,u,r=-)");
+    AFL_CHECK_SUCCEEDS(a("01. join"), level4.join(5, 3, "u", HostPlayer::JoinOptions()));
 
-     // substitute
+    // join with options
+    HostPlayer::JoinOptions opts;
+    opts.raceChoice = "9,3";
+    mock.expectCall("join(5,3,u,r=9,3)");
+    AFL_CHECK_SUCCEEDS(a("02. join"), level4.join(5, 3, "u", opts));
+
+    // substitute
     mock.expectCall("substitute(97,12,q)");
     AFL_CHECK_SUCCEEDS(a("11. substitute"), level4.substitute(97, 12, "q"));
 
@@ -278,6 +294,7 @@ AFL_TEST("server.interface.HostPlayerServer:roundtrip", a)
         ia.userIds.push_back("ua1");
         ia.numEditable = 1;
         ia.joinable = false;
+        ia.raceChoice = "66";
 
         HostPlayer::Info ib;
         ib.longName = "long b";
@@ -309,6 +326,7 @@ AFL_TEST("server.interface.HostPlayerServer:roundtrip", a)
         a.checkEqual("56. userIds",       result[8].userIds[0], "ua1");
         a.checkEqual("57. numEditable",   result[8].numEditable, 1);
         a.checkEqual("58. joinable",      result[8].joinable, 0);
+        a.checkEqual("58a. raceChoice",   result[8].raceChoice.orElse("-"), "66");
         a.checkEqual("59. longName",      result[11].longName, "long b");
         a.checkEqual("60. shortName",     result[11].shortName, "short b");
         a.checkEqual("61. adjectiveName", result[11].adjectiveName, "adj b");
@@ -354,6 +372,7 @@ AFL_TEST("server.interface.HostPlayerServer:roundtrip", a)
         a.checkEqual("87. userIds",       out.userIds[2], "c");
         a.checkEqual("88. numEditable",   out.numEditable, 2);
         a.checkEqual("89. joinable",      out.joinable, 0);
+        a.checkEqual("89a. race",         out.raceChoice.isValid(), false);
     }
 
     // setDirectory

@@ -28,7 +28,7 @@ bool
 server::interface::HostPlayerServer::handleCommand(const String_t& upcasedCommand, interpreter::Arguments& args, std::auto_ptr<Value_t>& result)
 {
     if (upcasedCommand == "PLAYERJOIN") {
-        /* @q PLAYERJOIN game:GID slot:Int user:UID (Host Command)
+        /* @q PLAYERJOIN game:GID slot:Int user:UID [RACE races:Str] (Host Command)
            Join a game.
            Fails if the slot is already taken.
 
@@ -40,12 +40,22 @@ server::interface::HostPlayerServer::handleCommand(const String_t& upcasedComman
            @err 403 Permission denied (user already plays on this game)
            @err 409 Slot is not available
            @uses game:$GID:player:$P:users */
-        args.checkArgumentCount(3);
+        args.checkArgumentCountAtLeast(3);
         int32_t gameId = toInteger(args.getNext());
         int32_t slotId = toInteger(args.getNext());
         String_t userId = toString(args.getNext());
+        HostPlayer::JoinOptions opt;
+        while (args.getNumArgs() > 0) {
+            String_t keyword = afl::string::strUCase(toString(args.getNext()));
+            if (keyword == "RACE") {
+                args.checkArgumentCountAtLeast(1);
+                opt.raceChoice = toString(args.getNext());
+            } else {
+                throw std::runtime_error(INVALID_OPTION);
+            }
+        }
 
-        m_implementation.join(gameId, slotId, userId);
+        m_implementation.join(gameId, slotId, userId, opt);
         result.reset(makeStringValue("OK"));
         return true;
     } else if (upcasedCommand == "PLAYERSUBST") {
@@ -284,6 +294,7 @@ server::interface::HostPlayerServer::packInfo(const HostPlayer::Info& i)
        @key long:Str       Long race name
        @key short:Str      Short race name
        @key adj:Str        Race name adjective
+       @key race:Str       Race choice; typically, list of integers
        @key users:StrList  {@type UID|User Ids} of all users in this slot.
                            The primary player is on the first slot,
                            replacements on following slots.
@@ -300,6 +311,9 @@ server::interface::HostPlayerServer::packInfo(const HostPlayer::Info& i)
     h->setNew("users", new VectorValue(v));
     h->setNew("editable", makeIntegerValue(i.numEditable));
     h->setNew("joinable", makeIntegerValue(i.joinable));
+    if (const String_t* p = i.raceChoice.get()) {
+        h->setNew("race", makeStringValue(*p));
+    }
 
     return new HashValue(h);
 }

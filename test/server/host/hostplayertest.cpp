@@ -144,18 +144,44 @@ AFL_TEST("server.host.HostPlayer:join", a)
     // Join users
     for (int i = 1; i <= 10; ++i) {
         cron.expectCall("handleGameChange(1)");
-        testee.join(gid, i, Format("u%d", i));
+        testee.join(gid, i, Format("u%d", i), HostPlayer::JoinOptions());
     }
 
     // Joining the final user must start the game
     cron.expectCall("handleGameChange(1)");
-    testee.join(gid, 11, "u11");
+    testee.join(gid, 11, "u11", HostPlayer::JoinOptions());
 
     // Resigning will again notify the scheduler
     cron.expectCall("handleGameChange(1)");
     testee.resign(gid, 7, "u7");
 
     cron.checkFinish();
+}
+
+/** Test successful join() with parameter. */
+AFL_TEST("server.host.HostPlayer:join:with-race-choice", a)
+{
+    TestHarness h;
+    server::host::Session session;
+    server::host::HostPlayer testee(session, h.root());
+    CronMock cron(a);
+    h.root().setCron(&cron);
+    h.addUsers();
+
+    // Create a game
+    int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
+    a.checkEqual("01. createNewGame", gid, 1);
+
+    // Join user
+    HostPlayer::JoinOptions opts;
+    opts.raceChoice = "7,5";
+    cron.expectCall("handleGameChange(1)");
+    testee.join(gid, 3, "u5", opts);
+    cron.checkFinish();
+
+    // Verify database
+    HostPlayer::Info info = testee.getInfo(gid, 3);
+    a.checkEqual("11. raceChoice", info.raceChoice.orElse("-"), "7,5");
 }
 
 /** Test join() failure cases, admin access. */
@@ -171,20 +197,20 @@ AFL_TEST("server.host.HostPlayer:join:error:admin", a)
     a.checkEqual("01. createNewGame", gid, 1);
 
     // Error: game does not exist
-    AFL_CHECK_THROWS(a("11. wrong game"), testee.join(77, 1, "u1"), std::exception);
+    AFL_CHECK_THROWS(a("11. wrong game"), testee.join(77, 1, "u1", HostPlayer::JoinOptions()), std::exception);
 
     // Error: slot does not exist
-    AFL_CHECK_THROWS(a("21. wrong slot"), testee.join(gid, 99, "u1"), std::exception);
+    AFL_CHECK_THROWS(a("21. wrong slot"), testee.join(gid, 99, "u1", HostPlayer::JoinOptions()), std::exception);
 
     // Error: user does not exist
-    AFL_CHECK_THROWS(a("31. wrong user"), testee.join(gid, 1, "zz"), std::exception);
+    AFL_CHECK_THROWS(a("31. wrong user"), testee.join(gid, 1, "zz", HostPlayer::JoinOptions()), std::exception);
 
     // Error: slot already taken
-    AFL_CHECK_SUCCEEDS(a("41. slot open"), testee.join(gid, 3, "u3"));
-    AFL_CHECK_THROWS  (a("42. slot taken"), testee.join(gid, 3, "u4"), std::exception);
+    AFL_CHECK_SUCCEEDS(a("41. slot open"), testee.join(gid, 3, "u3", HostPlayer::JoinOptions()));
+    AFL_CHECK_THROWS  (a("42. slot taken"), testee.join(gid, 3, "u4", HostPlayer::JoinOptions()), std::exception);
 
     // Not an error: you are already on this game - not detected if we're admin
-    AFL_CHECK_SUCCEEDS(a("51. multi-join"), testee.join(gid, 4, "u3"));
+    AFL_CHECK_SUCCEEDS(a("51. multi-join"), testee.join(gid, 4, "u3", HostPlayer::JoinOptions()));
 }
 
 /** Test join() failure cases, user access. */
@@ -198,26 +224,26 @@ AFL_TEST("server.host.HostPlayer:join:error:user", a)
     // Create a game
     int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
     a.checkEqual("01. createNewGame", gid, 1);
-    AFL_CHECK_SUCCEEDS(a("02. join"), testee.join(gid, 3, "u4"));
+    AFL_CHECK_SUCCEEDS(a("02. join"), testee.join(gid, 3, "u4", HostPlayer::JoinOptions()));
 
     // Set user context for all subsequent commands
     session.setUser("u3");
 
     // Error: game does not exist
-    AFL_CHECK_THROWS(a("11. wrong game"), testee.join(77, 1, "u3"), std::exception);
+    AFL_CHECK_THROWS(a("11. wrong game"), testee.join(77, 1, "u3", HostPlayer::JoinOptions()), std::exception);
 
     // Error: slot does not exist
-    AFL_CHECK_THROWS(a("21. wrong slot"), testee.join(gid, 99, "u3"), std::exception);
+    AFL_CHECK_THROWS(a("21. wrong slot"), testee.join(gid, 99, "u3", HostPlayer::JoinOptions()), std::exception);
 
     // Error: slot already taken
-    AFL_CHECK_THROWS(a("31. slot taken"), testee.join(gid, 3, "u3"), std::exception);
+    AFL_CHECK_THROWS(a("31. slot taken"), testee.join(gid, 3, "u3", HostPlayer::JoinOptions()), std::exception);
 
     // Error: you cannot join someone else
-    AFL_CHECK_THROWS(a("41. join other"), testee.join(gid, 3, "u4"), std::exception);
+    AFL_CHECK_THROWS(a("41. join other"), testee.join(gid, 3, "u4", HostPlayer::JoinOptions()), std::exception);
 
     // Error: you are already on this game
-    AFL_CHECK_SUCCEEDS(a("51. join"), testee.join(gid, 1, "u3"));
-    AFL_CHECK_THROWS(a("52. already joined"), testee.join(gid, 2, "u3"), std::exception);
+    AFL_CHECK_SUCCEEDS(a("51. join"), testee.join(gid, 1, "u3", HostPlayer::JoinOptions()));
+    AFL_CHECK_THROWS(a("52. already joined"), testee.join(gid, 2, "u3", HostPlayer::JoinOptions()), std::exception);
 }
 
 /** Test resign(), normal cases. */
@@ -236,11 +262,11 @@ AFL_TEST("server.host.HostPlayer:resign", a)
 
     // Join some users
     cron.expectCall("handleGameChange(1)");
-    testee.join(gid, 1, "u1");
+    testee.join(gid, 1, "u1", HostPlayer::JoinOptions());
     cron.expectCall("handleGameChange(1)");
-    testee.join(gid, 2, "u2");
+    testee.join(gid, 2, "u2", HostPlayer::JoinOptions());
     cron.expectCall("handleGameChange(1)");
-    testee.join(gid, 3, "u3");
+    testee.join(gid, 3, "u3", HostPlayer::JoinOptions());
     testee.substitute(gid, 3, "u4");
 
     // Resign: no notification
@@ -267,7 +293,7 @@ AFL_TEST("server.host.HostPlayer:resign:intermediate", a)
     a.checkEqual("01. createNewGame", gid, 1);
 
     // Join 4 users to one slot
-    testee.join(gid, 1, "u1");
+    testee.join(gid, 1, "u1", HostPlayer::JoinOptions());
     testee.substitute(gid, 1, "u2");
     testee.substitute(gid, 1, "u3");
     testee.substitute(gid, 1, "u4");
@@ -296,7 +322,7 @@ AFL_TEST("server.host.HostPlayer:resign:primary", a)
     a.checkEqual("01. createNewGame", gid, 1);
 
     // Join 4 users to one slot
-    testee.join(gid, 1, "u1");
+    testee.join(gid, 1, "u1", HostPlayer::JoinOptions());
     testee.substitute(gid, 1, "u2");
     testee.substitute(gid, 1, "u3");
     testee.substitute(gid, 1, "u4");
@@ -322,7 +348,7 @@ AFL_TEST("server.host.HostPlayer:resign:permissions", a)
     a.checkEqual("01. createNewGame", gid, 1);
 
     // Join 5 users to one slot
-    testee.join(gid, 1, "u1");
+    testee.join(gid, 1, "u1", HostPlayer::JoinOptions());
     testee.substitute(gid, 1, "u2");
     testee.substitute(gid, 1, "u3");
     testee.substitute(gid, 1, "u4");
@@ -363,7 +389,7 @@ AFL_TEST("server.host.HostPlayer:substitute", a)
     a.checkEqual("01. createNewGame", gid, 1);
 
     // Join 5 users to one slot
-    testee.join(gid, 1, "u1");
+    testee.join(gid, 1, "u1", HostPlayer::JoinOptions());
     testee.substitute(gid, 1, "u2");
     testee.substitute(gid, 1, "u3");
     testee.substitute(gid, 1, "u4");
@@ -394,7 +420,7 @@ AFL_TEST("server.host.HostPlayer:substitute:user", a)
     a.checkEqual("01. createNewGame", gid, 1);
 
     // Join 5 users to one slot
-    testee.join(gid, 1, "u1");
+    testee.join(gid, 1, "u1", HostPlayer::JoinOptions());
     testee.substitute(gid, 1, "u2");
     testee.substitute(gid, 1, "u3");
     testee.substitute(gid, 1, "u4");
@@ -482,10 +508,10 @@ AFL_TEST("server.host.HostPlayer:getInfo", a)
     a.checkEqual("01. createNewGame", gid, 1);
 
     // Join some users
-    testee.join(gid, 1, "u1");
+    testee.join(gid, 1, "u1", HostPlayer::JoinOptions());
     testee.substitute(gid, 1, "u2");
-    testee.join(gid, 7, "u3");
-    testee.join(gid, 11, "u4");
+    testee.join(gid, 7, "u3", HostPlayer::JoinOptions());
+    testee.join(gid, 11, "u4", HostPlayer::JoinOptions());
 
     // Get information about a slot
     {
@@ -536,7 +562,7 @@ AFL_TEST("server.host.HostPlayer:setDirectory", a)
     // Create a game and join a user
     int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
     a.checkEqual("01. createNewGame", gid, 1);
-    testee.join(gid, 3, "u4");
+    testee.join(gid, 3, "u4", HostPlayer::JoinOptions());
 
     // Directory name initially unset
     a.checkEqual("11. getDirectory", testee.getDirectory(gid, "u4"), "");
@@ -564,7 +590,7 @@ AFL_TEST("server.host.HostPlayer:setDirectory:error:permissions", a)
     // Create a game and join a user
     int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
     a.checkEqual("01. createNewGame", gid, 1);
-    testee.join(gid, 3, "u4");
+    testee.join(gid, 3, "u4", HostPlayer::JoinOptions());
 
     // Set directory.
     // Fails because we didn't create the parent directory.
@@ -588,7 +614,7 @@ AFL_TEST("server.host.HostPlayer:setDirectory:error:user", a)
     // Create a game and join a user
     int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
     a.checkEqual("01. createNewGame", gid, 1);
-    testee.join(gid, 3, "u4");
+    testee.join(gid, 3, "u4", HostPlayer::JoinOptions());
 
     // Set directory as user u1
     session.setUser("u1");
@@ -636,7 +662,7 @@ AFL_TEST("server.host.HostPlayer:setDirectory:error:change", a)
     // Create a game and join a user
     int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
     a.checkEqual("01. createNewGame", gid, 1);
-    testee.join(gid, 3, "u4");
+    testee.join(gid, 3, "u4", HostPlayer::JoinOptions());
 
     // Set directory, works
     AFL_CHECK_SUCCEEDS(a("11. setDirectory"), testee.setDirectory(gid, "u4", "u4home/x/y"));
@@ -665,8 +691,8 @@ AFL_TEST("server.host.HostPlayer:setDirectory:error:conflict", a)
     int32_t gid2 = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
     a.checkEqual("01", gid1, 1);
     a.checkEqual("02", gid2, 2);
-    testee.join(gid1, 3, "u4");
-    testee.join(gid2, 4, "u4");
+    testee.join(gid1, 3, "u4", HostPlayer::JoinOptions());
+    testee.join(gid2, 4, "u4", HostPlayer::JoinOptions());
 
     // Set directory, works
     AFL_CHECK_SUCCEEDS(a("11. setDirectory"), testee.setDirectory(gid1, "u4", "u4home/x/y"));
@@ -692,7 +718,7 @@ AFL_TEST("server.host.HostPlayer:setDirectory:move", a)
     // Create a game and join a user
     int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
     a.checkEqual("01. createNewGame", gid, 1);
-    testee.join(gid, 3, "u4");
+    testee.join(gid, 3, "u4", HostPlayer::JoinOptions());
 
     // Set directory
     AFL_CHECK_SUCCEEDS(a("11. setDirectory"), testee.setDirectory(gid, "u4", "u4home/x/y"));
@@ -716,8 +742,8 @@ AFL_TEST("server.host.HostPlayer:checkFile", a)
     // Create a game and join two users
     int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
     a.checkEqual("01. createNewGame", gid, 1);
-    testee.join(gid, 1, "u1");
-    testee.join(gid, 3, "u3");
+    testee.join(gid, 1, "u1", HostPlayer::JoinOptions());
+    testee.join(gid, 3, "u3", HostPlayer::JoinOptions());
     testee.setDirectory(gid, "u3", "u3home/x");
 
     // Check with no directory name: Stale for 1 because they have not set a directory
@@ -758,7 +784,7 @@ AFL_TEST("server.host.HostPlayer:wrong-game-state", a)
     int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Preparing);
 
     // Operations fail
-    AFL_CHECK_THROWS(a("01. join"),       testee.join(gid, 1, "u1"), std::exception);
+    AFL_CHECK_THROWS(a("01. join"),       testee.join(gid, 1, "u1", HostPlayer::JoinOptions()), std::exception);
     AFL_CHECK_THROWS(a("02. substitute"), testee.substitute(gid, 1, "u2"), std::exception);
     AFL_CHECK_THROWS(a("03. resign"),     testee.resign(gid, 1, "u2"), std::exception);
 
@@ -774,7 +800,7 @@ AFL_TEST("server.host.HostPlayer:wrong-game-state", a)
     }
 
     // Operations still fail
-    AFL_CHECK_THROWS(a("11. join"),       testee.join(gid, 4, "u1"), std::exception);
+    AFL_CHECK_THROWS(a("11. join"),       testee.join(gid, 4, "u1", HostPlayer::JoinOptions()), std::exception);
     AFL_CHECK_THROWS(a("12. substitute"), testee.substitute(gid, 3, "u2"), std::exception);
     AFL_CHECK_THROWS(a("13. resign"),     testee.resign(gid, 1, "u2"), std::exception);
 }
@@ -797,8 +823,8 @@ AFL_TEST("server.host.HostPlayer:settings", a)
     int32_t gid2 = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
     a.checkEqual("01. createNewGame", gid1, 1);
     a.checkEqual("02. createNewGame", gid2, 2);
-    HostPlayer(rootSession, h.root()).join(gid1, 3, "u4");
-    HostPlayer(rootSession, h.root()).join(gid2, 4, "u4");
+    HostPlayer(rootSession, h.root()).join(gid1, 3, "u4", HostPlayer::JoinOptions());
+    HostPlayer(rootSession, h.root()).join(gid2, 4, "u4", HostPlayer::JoinOptions());
 
     // Initial value: empty
     // - success cases: root, player themselves
@@ -856,24 +882,24 @@ AFL_TEST("server.host.HostPlayer:join:profile-permission", a)
     // - u1 can join
     {
         int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
-        AFL_CHECK_SUCCEEDS(a("01. join"), HostPlayer(allowedSession, h.root()).join(gid, 1, "u1"));
+        AFL_CHECK_SUCCEEDS(a("01. join"), HostPlayer(allowedSession, h.root()).join(gid, 1, "u1", HostPlayer::JoinOptions()));
     }
     // - u2 can not join
     {
         int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
-        AFL_CHECK_THROWS(a("02. join disabled"), HostPlayer(forbiddenSession, h.root()).join(gid, 2, "u2"), std::exception);
+        AFL_CHECK_THROWS(a("02. join disabled"), HostPlayer(forbiddenSession, h.root()).join(gid, 2, "u2", HostPlayer::JoinOptions()), std::exception);
     }
     // - u3 can join
     {
         int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
-        AFL_CHECK_SUCCEEDS(a("03. join"), HostPlayer(defaultSession, h.root()).join(gid, 3, "u3"));
+        AFL_CHECK_SUCCEEDS(a("03. join"), HostPlayer(defaultSession, h.root()).join(gid, 3, "u3", HostPlayer::JoinOptions()));
     }
     // - root can join anyone
     {
         int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
-        AFL_CHECK_SUCCEEDS(a("04. join as admin"), HostPlayer(rootSession, h.root()).join(gid, 1, "u1"));
-        AFL_CHECK_SUCCEEDS(a("05. join as admin"), HostPlayer(rootSession, h.root()).join(gid, 2, "u2"));
-        AFL_CHECK_SUCCEEDS(a("06. join as admin"), HostPlayer(rootSession, h.root()).join(gid, 3, "u3"));
+        AFL_CHECK_SUCCEEDS(a("04. join as admin"), HostPlayer(rootSession, h.root()).join(gid, 1, "u1", HostPlayer::JoinOptions()));
+        AFL_CHECK_SUCCEEDS(a("05. join as admin"), HostPlayer(rootSession, h.root()).join(gid, 2, "u2", HostPlayer::JoinOptions()));
+        AFL_CHECK_SUCCEEDS(a("06. join as admin"), HostPlayer(rootSession, h.root()).join(gid, 3, "u3", HostPlayer::JoinOptions()));
     }
 }
 
@@ -900,7 +926,7 @@ AFL_TEST("server.host.HostPlayer:join-limit", a)
     {
         int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
         a.checkEqual("01. joinable", userInstance.getInfo(gid, 3).joinable, true);
-        AFL_CHECK_SUCCEEDS(a("02. join"), userInstance.join(gid, 3, "u3"));
+        AFL_CHECK_SUCCEEDS(a("02. join"), userInstance.join(gid, 3, "u3", HostPlayer::JoinOptions()));
         a.checkEqual("03. userIds", userInstance.getInfo(gid, 3).userIds[0], "u3");
     }
 
@@ -909,7 +935,7 @@ AFL_TEST("server.host.HostPlayer:join-limit", a)
         int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
         Game(h.root(), gid).minRankLevelToJoin().set(4);
         a.checkEqual("11. joinable", userInstance.getInfo(gid, 3).joinable, false);
-        AFL_CHECK_THROWS(a("12. join"), userInstance.join(gid, 3, "u3"), std::exception);
+        AFL_CHECK_THROWS(a("12. join"), userInstance.join(gid, 3, "u3", HostPlayer::JoinOptions()), std::exception);
         a.check("13. userIds", userInstance.getInfo(gid, 3).userIds.empty());
     }
 
@@ -918,7 +944,7 @@ AFL_TEST("server.host.HostPlayer:join-limit", a)
         int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
         Game(h.root(), gid).maxRankLevelToJoin().set(2);
         a.checkEqual("21. joinable", userInstance.getInfo(gid, 3).joinable, false);
-        AFL_CHECK_THROWS(a("22. join"), userInstance.join(gid, 3, "u3"), std::exception);
+        AFL_CHECK_THROWS(a("22. join"), userInstance.join(gid, 3, "u3", HostPlayer::JoinOptions()), std::exception);
         a.check("23. userIds", userInstance.getInfo(gid, 3).userIds.empty());
     }
 
@@ -927,7 +953,7 @@ AFL_TEST("server.host.HostPlayer:join-limit", a)
         int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
         Game(h.root(), gid).minRankPointsToJoin().set(10000);
         a.checkEqual("31. joinable", userInstance.getInfo(gid, 3).joinable, false);
-        AFL_CHECK_THROWS(a("32. join"), userInstance.join(gid, 3, "u3"), std::exception);
+        AFL_CHECK_THROWS(a("32. join"), userInstance.join(gid, 3, "u3", HostPlayer::JoinOptions()), std::exception);
         a.check("33. userIds", userInstance.getInfo(gid, 3).userIds.empty());
     }
 
@@ -936,7 +962,7 @@ AFL_TEST("server.host.HostPlayer:join-limit", a)
         int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
         Game(h.root(), gid).maxRankPointsToJoin().set(500);
         a.checkEqual("41. joinable", userInstance.getInfo(gid, 3).joinable, false);
-        AFL_CHECK_THROWS(a("42. join"), userInstance.join(gid, 3, "u3"), std::exception);
+        AFL_CHECK_THROWS(a("42. join"), userInstance.join(gid, 3, "u3", HostPlayer::JoinOptions()), std::exception);
         a.check("43. userIds", userInstance.getInfo(gid, 3).userIds.empty());
     }
 
@@ -948,7 +974,7 @@ AFL_TEST("server.host.HostPlayer:join-limit", a)
         Game(h.root(), gid).minRankPointsToJoin().set(777);
         Game(h.root(), gid).maxRankPointsToJoin().set(777);
         a.checkEqual("51. joinable", userInstance.getInfo(gid, 3).joinable, true);
-        AFL_CHECK_SUCCEEDS(a("52. join"), userInstance.join(gid, 3, "u3"));
+        AFL_CHECK_SUCCEEDS(a("52. join"), userInstance.join(gid, 3, "u3", HostPlayer::JoinOptions()));
         a.checkEqual("53. userIds", userInstance.getInfo(gid, 3).userIds[0], "u3");
     }
 
@@ -960,7 +986,7 @@ AFL_TEST("server.host.HostPlayer:join-limit", a)
         Game(h.root(), gid).minRankPointsToJoin().set(400);
         Game(h.root(), gid).maxRankPointsToJoin().set(900);
         a.checkEqual("61. joinable", userInstance.getInfo(gid, 3).joinable, true);
-        AFL_CHECK_SUCCEEDS(a("62. join"), userInstance.join(gid, 3, "u3"));
+        AFL_CHECK_SUCCEEDS(a("62. join"), userInstance.join(gid, 3, "u3", HostPlayer::JoinOptions()));
         a.checkEqual("63. userIds", userInstance.getInfo(gid, 3).userIds[0], "u3");
     }
 }
