@@ -23,7 +23,7 @@ namespace server { namespace interface {
         ~HostPlayerClient();
 
         // HostPlayer virtuals:
-        virtual void join(int32_t gameId, int32_t slot, String_t userId);
+        virtual void join(int32_t gameId, int32_t slot, String_t userId, JoinOptions opt);
         virtual void substitute(int32_t gameId, int32_t slot, String_t userId);
         virtual void resign(int32_t gameId, int32_t slot, String_t userId);
         virtual void add(int32_t gameId, String_t userId);

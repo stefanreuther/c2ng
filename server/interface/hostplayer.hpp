@@ -23,11 +23,17 @@ namespace server { namespace interface {
             String_t longName;                ///< Long race name.
             String_t shortName;               ///< Short race name.
             String_t adjectiveName;           ///< Adjective race name.
+            afl::base::Optional<String_t> raceChoice; ///< Race choice. Comma-separated list of numbers.
             afl::data::StringList_t userIds;  ///< Players in this slot. First is primary.
             int32_t numEditable;              ///< Number of slots current player can modify.
             bool joinable;                    ///< True if current player can join this slot.
 
             Info();
+        };
+
+        /** Options for join(). */
+        struct JoinOptions {
+            afl::base::Optional<String_t> raceChoice;    ///< Race choice. Comma-separated list of numbers.
         };
 
         /** File creation permission. */
@@ -43,7 +49,7 @@ namespace server { namespace interface {
             \param gameId game Id
             \param slot Slot number
             \param userId user Id */
-        virtual void join(int32_t gameId, int32_t slot, String_t userId) = 0;
+        virtual void join(int32_t gameId, int32_t slot, String_t userId, JoinOptions opt) = 0;
 
         /** Set replacement player (PLAYERSUBST).
             \param gameId game Id

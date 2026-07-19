@@ -42,7 +42,7 @@ server::host::HostPlayer::HostPlayer(const Session& session, Root& root)
 { }
 
 void
-server::host::HostPlayer::join(int32_t gameId, int32_t slot, String_t userId)
+server::host::HostPlayer::join(int32_t gameId, int32_t slot, String_t userId, JoinOptions opt)
 {
     // ex planetscentral/host/cmdplayer.h:doPlayerJoin
 
@@ -63,6 +63,11 @@ server::host::HostPlayer::join(int32_t gameId, int32_t slot, String_t userId)
     /* Only joining/running games can be joined */
     HostGame::State gameState = game.getState();
     if (gameState != HostGame::Joining && gameState != HostGame::Running) {
+        throw std::runtime_error(WRONG_GAME_STATE);
+    }
+
+    /* Race choice can be set only for joining games */
+    if (opt.raceChoice.isValid() && gameState != HostGame::Joining) {
         throw std::runtime_error(WRONG_GAME_STATE);
     }
 
@@ -103,6 +108,9 @@ server::host::HostPlayer::join(int32_t gameId, int32_t slot, String_t userId)
         // CronImpl needs lastPlayerJoined to generate the correct time.
         // Because we're running under mutex protection, CronImpl will not interfere with us and see a partial state.
         game.setConfigInt("lastPlayerJoined", m_root.getTime());
+    }
+    if (const String_t* p = opt.raceChoice.get()) {
+        game.getSlot(slot).raceChoice().set(*p);
     }
 
     // Reconsider scheduler. Joining can turn a game from "all turns in" to "not all turns in"

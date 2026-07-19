@@ -220,6 +220,7 @@ namespace {
         i.name                = "Answer";
         i.description         = "A Game";
         i.difficulty          = 96;
+        i.kind                = 5;
         i.currentSchedule     = sch;
         i.slotStates          = ss;
         i.turnStates          = ts;
@@ -337,6 +338,7 @@ AFL_TEST("server.interface.HostGameServer:commands", a)
         a.checkEqual("112. forum",               ap("forum").toInteger(), 23);
         a.checkEqual("113. userRank",            ap("userRank").toInteger(), 7);
         a.checkEqual("114. otherRank",           ap("otherRank").toInteger(), 8);
+        a.checkEqual("115. kind",                ap("kind").toInteger(), 5);
     }
 
     // - default (=minimal) data
@@ -356,6 +358,7 @@ AFL_TEST("server.interface.HostGameServer:commands", a)
         a.checkNull ("128. forum",           ap("forum").getValue());
         a.checkNull ("129. userRank",        ap("userRank").getValue());
         a.checkNull ("130. otherRank",       ap("otherRank").getValue());
+        a.checkEqual("131. kind",            ap("kind").toInteger(), 0);
     }
 
     // getInfos

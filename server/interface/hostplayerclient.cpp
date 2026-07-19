@@ -19,11 +19,16 @@ server::interface::HostPlayerClient::HostPlayerClient(afl::net::CommandHandler& 
 server::interface::HostPlayerClient::~HostPlayerClient()
 { }
 
-// PLAYERJOIN game:GID slot:Int user:UID
+// PLAYERJOIN game:GID slot:Int user:UID [RACE race:Str]
 void
-server::interface::HostPlayerClient::join(int32_t gameId, int32_t slot, String_t userId)
+server::interface::HostPlayerClient::join(int32_t gameId, int32_t slot, String_t userId, JoinOptions opt)
 {
-    m_commandHandler.callVoid(Segment().pushBackString("PLAYERJOIN").pushBackInteger(gameId).pushBackInteger(slot).pushBackString(userId));
+    Segment cmd;
+    cmd.pushBackString("PLAYERJOIN").pushBackInteger(gameId).pushBackInteger(slot).pushBackString(userId);
+    if (const String_t* s = opt.raceChoice.get()) {
+        cmd.pushBackString("RACE").pushBackString(*s);
+    }
+    m_commandHandler.callVoid(cmd);
 }
 
 // PLAYERSUBST game:GID slot:Int user:UID
@@ -132,5 +137,8 @@ server::interface::HostPlayerClient::unpackInfo(const Value_t* p)
     a("users").toStringList(result.userIds);
     result.numEditable   = a("editable").toInteger();
     result.joinable      = a("joinable").toInteger() != 0;
+    if (const Value_t* p = a("race").getValue()) {
+        result.raceChoice = Access(p).toString();
+    }
     return result;
 }

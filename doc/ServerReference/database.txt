@@ -568,6 +568,7 @@ Empty: unoccupied slot.
 @key turn:HostTurnStatus
 @c        [- time (timestamp of turn upload or state change)]
 @key rank:Int (if game is finished, this slot's rank; 1-11 for places, 0 allowed for deaths)
+@key race:Str (selected race as per {PLAYERJOIN} command)
 ---
 
 @q game:$GID:users : IntHash (Database)
@@ -706,6 +707,7 @@ Game settings
 @key minRankPointsToJoin:Int   (minimum rank points (skill) to join; if missing, no restriction; see {user:$UID:profile}->rankpoints)
 @key maxRankPointsToJoin:Int   (maximum rank points (skill) to join; if missing, no restriction; see {user:$UID:profile}->rankpoints)
 @key playerRace:Str            (optional; if set, value of PlayerRace option (11 integers separated by commas, no spaces); will be processed by master script)
+@key mode:Int                  (optional game mode; 0/default for normal, 1 for Dual Duel)
 
 These parameters are passed to host scripts as environment variables <tt>game_settings_<em>key</em></tt>.
 ---
