@@ -21,6 +21,8 @@
 #include "server/interface/hostgame.hpp"
 #include "server/host/user.hpp"
 
+using server::host::Game;
+using server::host::Root;
 using server::interface::HostGame;
 
 namespace {
@@ -96,21 +98,25 @@ server::host::HostPlayer::join(int32_t gameId, int32_t slot, String_t userId, Jo
         }
     }
 
+    /* Dual duel restriction */
+    const Game::PushMode pm = game.validatePlayerSlot(slot);
+    const int effSlot = pm.slot;
+
     /* Slot must be empty */
-    if (!game.isSlotInGame(slot) || game.isSlotPlayed(slot)) {
+    if (!game.isSlotInGame(effSlot) || game.isSlotPlayed(effSlot)) {
         throw std::runtime_error(SLOT_NOT_AVAILABLE);
     }
 
     /* All conditions fulfilled */
-    game.pushPlayerSlot(slot, userId, m_root);
-    game.addUserHistoryItem(m_root, userId == m_session.getUser() ? "game-join" : "game-join-other", afl::string::Format("%s:%d", userId, slot), userId);
+    game.pushPlayerSlot(pm, userId, m_root);
+    game.addUserHistoryItem(m_root, userId == m_session.getUser() ? "game-join" : "game-join-other", afl::string::Format("%s:%d", userId, effSlot), userId);
     if (!game.hasAnyOpenSlot()) {
         // CronImpl needs lastPlayerJoined to generate the correct time.
         // Because we're running under mutex protection, CronImpl will not interfere with us and see a partial state.
         game.setConfigInt("lastPlayerJoined", m_root.getTime());
     }
     if (const String_t* p = opt.raceChoice.get()) {
-        game.getSlot(slot).raceChoice().set(*p);
+        game.getSlot(effSlot).raceChoice().set(*p);
     }
 
     // Reconsider scheduler. Joining can turn a game from "all turns in" to "not all turns in"
@@ -143,9 +149,13 @@ server::host::HostPlayer::substitute(int32_t gameId, int32_t slot, String_t user
         throw std::runtime_error(WRONG_GAME_STATE);
     }
 
+    /* Dual duel condition */
+    const Game::PushMode pm = game.validatePlayerSlot(slot);
+    const int effSlot = pm.slot;
+
     /* Check player list */
     afl::data::StringList_t players;
-    game.listPlayers(slot, players);
+    game.listPlayers(effSlot, players);
     size_t numPlayers = players.size();
     if (numPlayers == 0) {
         /* If list is empty, they can use PLAYERJOIN instead, which also
@@ -159,11 +169,11 @@ server::host::HostPlayer::substitute(int32_t gameId, int32_t slot, String_t user
            no more questions asked. */
         if (userIndex >= numPlayers) {
             /* Not on list */
-            game.pushPlayerSlot(slot, userId, m_root);
+            game.pushPlayerSlot(pm, userId, m_root);
         } else {
             /* Is on list */
             while (numPlayers > userIndex+1) {
-                game.popPlayerSlot(slot, m_root);
+                game.popPlayerSlot(pm, m_root);
                 --numPlayers;
             }
         }
@@ -175,14 +185,14 @@ server::host::HostPlayer::substitute(int32_t gameId, int32_t slot, String_t user
             throw std::runtime_error(PERMISSION_DENIED);
         }
         while (numPlayers > callerIndex+1) {
-            game.popPlayerSlot(slot, m_root);
+            game.popPlayerSlot(pm, m_root);
             --numPlayers;
         }
         if (callerIndex != userIndex) {
-            game.pushPlayerSlot(slot, userId, m_root);
+            game.pushPlayerSlot(pm, userId, m_root);
         }
     }
-    game.addUserHistoryItem(m_root, "game-subst", afl::string::Format("%s:%d", userId, slot), userId);
+    game.addUserHistoryItem(m_root, "game-subst", afl::string::Format("%s:%d", userId, effSlot), userId);
 }
 
 void
@@ -205,9 +215,13 @@ server::host::HostPlayer::resign(int32_t gameId, int32_t slot, String_t userId)
         throw std::runtime_error(WRONG_GAME_STATE);
     }
 
+    /* Dual duel condition */
+    const Game::PushMode pm = game.validatePlayerSlot(slot);
+    const int effSlot = pm.slot;
+
     /* User must be in the game */
     afl::data::StringList_t players;
-    game.listPlayers(slot, players);
+    game.listPlayers(effSlot, players);
     size_t numPlayers = players.size();
     size_t userIndex = indexOf(players, userId);
     if (userIndex >= numPlayers) {
@@ -222,7 +236,7 @@ server::host::HostPlayer::resign(int32_t gameId, int32_t slot, String_t userId)
 
     /* OK */
     while (numPlayers > userIndex) {
-        game.popPlayerSlot(slot, m_root);
+        game.popPlayerSlot(pm, m_root);
         --numPlayers;
     }
 
@@ -232,8 +246,9 @@ server::host::HostPlayer::resign(int32_t gameId, int32_t slot, String_t userId)
          host may run because all other turns are in. */
     if (userIndex == 0) {
         /* Is this slot dead now? If so, drop it. */
+        /* (but do not remove slots from Dual-Duel game) */
         bool dead = false;
-        if (gameState == HostGame::Running) {
+        if (gameState == HostGame::Running && game.kind().get() != Game::Kind_DualDuel) {
             String_t packedScore = game.turn(game.turnNumber().get()).scores().stringField("timscore").get();
             if (slot <= 0
                 || packedScore.size() < slot*4U
@@ -247,7 +262,7 @@ server::host::HostPlayer::resign(int32_t gameId, int32_t slot, String_t userId)
         }
 
         /* History */
-        game.addUserHistoryItem(m_root, userId == m_session.getUser() ? dead ? "game-resign-dead" : "game-resign" : "game-resign-other", afl::string::Format("%s:%d", userId, slot), userId);
+        game.addUserHistoryItem(m_root, userId == m_session.getUser() ? dead ? "game-resign-dead" : "game-resign" : "game-resign-other", afl::string::Format("%s:%d", userId, effSlot), userId);
 
         /* Pretend that a turn was submitted so if this makes the game empty,
            we do not run immediately; instead, wait for hostDelay() to allow adding a player. */

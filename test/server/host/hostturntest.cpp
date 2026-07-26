@@ -118,7 +118,7 @@ TestHarness::prepareGame(const char* timestamp)
     // Configure the game
     {
         Game g(root(), gid);
-        g.pushPlayerSlot(SLOT_NR, "ua", root());
+        g.pushPlayerSlotOnly(SLOT_NR, "ua", root());
         g.setConfig("timestamp", timestamp);
         IntegerKey(db(), Format("game:bytime:%s", timestamp)).set(gid);
     }
@@ -150,8 +150,6 @@ TestHarness::makeConfig(bool ustt)
 }
 
 /********************************* Tests *********************************/
-
-
 
 /** Test turn file upload (submit()).
     This creates a test setup, where the checkturn script produces a hardcoded result. */
@@ -501,6 +499,99 @@ AFL_TEST("server.host.HostTurn:submit:temp-visible", a)
     i = player2.getInfo(gid);
     a.check("71. turnStates", i.turnStates.isValid());
     a.checkEqual("72. turnStates", (*i.turnStates.get())[2], Game::TurnGreen | Game::TurnIsTemporary);  // Temporary flag now visible
+}
+
+/** Handle turn submission that causes replacement to be dropped. */
+AFL_TEST("server.host.HostTurn:submit:user-replaces", a)
+{
+    // Prepare defaults
+    TestHarness h(false);
+    int32_t gid = h.prepareGame(DEFAULT_TIMESTAMP);
+    String_t dummyTurn = h.createTurn(DEFAULT_TIMESTAMP);
+
+    // Replacement player
+    Game(h.root(), gid).pushPlayerSlotOnly(SLOT_NR, "repl", h.root());
+
+    afl::data::StringList_t playersBefore;
+    Game(h.root(), gid).listPlayers(SLOT_NR, playersBefore);
+    a.checkEqual("01. num players", playersBefore.size(), 2U);
+    a.checkEqual("02. index 0", playersBefore[0], "ua");
+    a.checkEqual("03. index 1", playersBefore[1], "repl");
+
+    // Submit as "ua" (default player)
+    server::host::Session session;
+    session.setUser("ua");
+    server::host::HostTurn testee(session, h.root());
+
+    String_t fileName = Format("games/0001/in/player%d.trn", SLOT_NR);
+
+    // Upload turn successfully
+    HostTurn::Result result = testee.submit(dummyTurn, afl::base::Nothing, afl::base::Nothing, afl::base::Nothing, afl::base::Nothing);
+
+    // Check result
+    a.checkEqual("11. state",         result.state, HostTurn::GreenTurn);
+    a.checkEqual("12. gameId",        result.gameId, gid);
+    a.checkEqual("13. slot",          result.slot, SLOT_NR);
+    a.checkEqual("14. previousState", result.previousState, HostTurn::MissingTurn);
+    a.checkEqual("15. userId",        result.userId, "ua");
+
+    // Verify that turn is in inbox folder
+    a.checkEqual("21. getFile", h.hostFile().getFile(fileName), dummyTurn);
+
+    // Verify that replacement player was removed
+    afl::data::StringList_t playersAfter;
+    Game(h.root(), gid).listPlayers(SLOT_NR, playersAfter);
+    a.checkEqual("31. num players", playersAfter.size(), 1U);
+    a.checkEqual("32. index 0", playersAfter[0], "ua");
+}
+
+/** Handle turn submission that causes replacement to be dropped, dual-duel mode. */
+AFL_TEST("server.host.HostTurn:submit:user-replaces:dd", a)
+{
+    // Prepare defaults
+    TestHarness h(false);
+    int32_t gid = h.prepareGame(DEFAULT_TIMESTAMP);
+    String_t dummyTurn = h.createTurn(DEFAULT_TIMESTAMP);
+    Game g(h.root(), gid);
+    g.kind().set(1);
+
+    // Remove existing player, and add in dual duel mode
+    g.popPlayerSlotOnly(SLOT_NR, h.root());
+    g.pushPlayerSlot(g.validatePlayerSlot(1), "main", h.root());
+    g.pushPlayerSlot(g.validatePlayerSlot(1), "repl", h.root());
+
+    // Validate; check slot 3 although we added to slot 1
+    afl::data::StringList_t playersBefore;
+    Game(h.root(), gid).listPlayers(3, playersBefore);
+    a.checkEqual("01. num players", playersBefore.size(), 2U);
+    a.checkEqual("02. index 0", playersBefore[0], "main");
+    a.checkEqual("03. index 1", playersBefore[1], "repl");
+
+    // Submit as "main" (default player) to slot 3
+    server::host::Session session;
+    session.setUser("main");
+    server::host::HostTurn testee(session, h.root());
+
+    String_t fileName = "games/0001/in/player3.trn";
+
+    // Upload turn successfully
+    HostTurn::Result result = testee.submit(dummyTurn, afl::base::Nothing, afl::base::Nothing, afl::base::Nothing, afl::base::Nothing);
+
+    // Check result
+    a.checkEqual("11. state",         result.state, HostTurn::GreenTurn);
+    a.checkEqual("12. gameId",        result.gameId, gid);
+    a.checkEqual("13. slot",          result.slot, SLOT_NR);
+    a.checkEqual("14. previousState", result.previousState, HostTurn::MissingTurn);
+    a.checkEqual("15. userId",        result.userId, "main");
+
+    // Verify that turn is in inbox folder
+    a.checkEqual("21. getFile", h.hostFile().getFile(fileName), dummyTurn);
+
+    // Verify that replacement player was removed
+    afl::data::StringList_t playersAfter;
+    Game(h.root(), gid).listPlayers(SLOT_NR, playersAfter);
+    a.checkEqual("31. num players", playersAfter.size(), 1U);
+    a.checkEqual("32. index 0", playersAfter[0], "main");
 }
 
 /** Test errors in setTemporary. */

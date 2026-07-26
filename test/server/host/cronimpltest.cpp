@@ -120,7 +120,7 @@ TestHarness::createGame(int gameId, HostGame::State state)
 void
 TestHarness::addPlayer(int gameId, int slot, int playerId)
 {
-    Game(root(), gameId).pushPlayerSlot(slot, Format("%d", playerId), root());
+    Game(root(), gameId).pushPlayerSlotOnly(slot, Format("%d", playerId), root());
 }
 
 void

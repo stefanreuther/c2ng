@@ -31,6 +31,8 @@ namespace server { namespace host {
 
         static const int NUM_PLAYERS = 11;
 
+        static const int Kind_DualDuel = 1;
+
         /** Handle to a slot.
             See Game::getSlot(). */
         class Slot {
@@ -166,7 +168,18 @@ namespace server { namespace host {
             TurnIsTemporary = 16
         };
 
-
+        /** Reference to a slot for push/pop operation. */
+        struct PushMode {
+            enum Mode {                 ///< Mode.
+                Normal,                 ///< Normal (single slot reference).
+                Dual                    ///< Dual duel (slots X and X+2).
+            };
+            Mode mode : 16;             ///< Mode.
+            int16_t slot : 16;          ///< Slot.
+            PushMode(Mode mode, int slot)
+                : mode(mode), slot(static_cast<int16_t>(slot))
+                { }
+        };
 
         /** Constructor.
             \param root Service root
@@ -327,22 +340,56 @@ namespace server { namespace host {
             \return true There exists a slot that is not played */
         bool hasAnyOpenSlot();
 
-        /** Add player to a slot.
+        /** Add player to a slot (single slot).
             If the slot was unplayed, the player becomes primary player; otherwise, the player becomes a replacement.
             This will update the database, host file permissions, and user file installations.
             It will not start a game that becomes full; this must be done by the caller.
+
+            Consider using pushPlayerSlot() instead of this function.
+
             \param slot Slot number
             \param player User Id
             \param root Service root */
-        void pushPlayerSlot(int32_t slot, String_t player, Root& root);
+        void pushPlayerSlotOnly(int32_t slot, String_t player, Root& root);
 
-        /** Remove player from a slot.
+        /** Remove player from a slot (single slot).
             Dropping the last player from a slot makes it unplayed.
             This will update the database, host file permissions, and user file installations.
             It will not affect the scheduler.
+
+            Consider using popPlayerSlot() instead of this function.
+
             \param slot Slot number
             \param root Service root */
-        String_t popPlayerSlot(int32_t slot, Root& root);
+        String_t popPlayerSlotOnly(int32_t slot, Root& root);
+
+        /** Validate a user-supplied slot reference.
+            On success, returns a PushMode to address that slot.
+            On failure, throws std::runtime_error.
+            This determines the game mode and returns an appropriate reference.
+            This does not validate that the slot exists.
+            \param slot User-supplied slot number
+            \return PushMode */
+        PushMode validatePlayerSlot(int32_t slot);
+
+        /** Add player to a slot (with slot reference/PushMode).
+            If the slot was unplayed, the player becomes primary player; otherwise, the player becomes a replacement.
+            This will update the database, host file permissions, and user file installations.
+            It will not start a game that becomes full; this must be done by the caller.
+
+            \param mode Slot reference
+            \param player User Id
+            \param root Service root */
+        void pushPlayerSlot(PushMode mode, String_t player, Root& root);
+
+        /** Remove player from a slot (with slot reference/PushMode).
+            Dropping the last player from a slot makes it unplayed.
+            This will update the database, host file permissions, and user file installations.
+            It will not affect the scheduler.
+
+            \param mode Slot reference
+            \param root Service root */
+        String_t popPlayerSlot(PushMode mode, Root& root);
 
         /** Get all players in a slot.
             \param slot    [in] Slot number

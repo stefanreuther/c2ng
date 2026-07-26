@@ -26,6 +26,7 @@
 #include "server/types.hpp"
 
 const int server::host::Game::NUM_PLAYERS;
+const int server::host::Game::Kind_DualDuel;
 
 using server::interface::HostGame;
 
@@ -34,6 +35,7 @@ namespace {
 
     bool tryLoadRaceNames(server::common::RaceNames& raceNames,
                           String_t dir,
+                          const char* name,
                           server::interface::FileBase& file)
     {
         if (dir.empty()) {
@@ -44,11 +46,21 @@ namespace {
         }
         try {
             afl::charset::CodepageCharset cs(afl::charset::g_codepageLatin1);
-            raceNames.load(afl::string::toBytes(file.getFile(dir + "/race.nm")), cs);
+            raceNames.load(afl::string::toBytes(file.getFile(dir + "/" + name)), cs);
             return true;
         }
         catch (std::exception& e) {
             return false;
+        }
+    }
+
+    const char* getDefaultRaceNameFile(server::host::Game& g)
+    {
+        switch (g.kind().get()) {
+         case server::host::Game::Kind_DualDuel:
+            return "race-dd.nm";
+         default:
+            return "race.nm";
         }
     }
 
@@ -541,7 +553,7 @@ server::host::Game::hasAnyOpenSlot()
 
 // Add player to a slot.
 void
-server::host::Game::pushPlayerSlot(int32_t slot, String_t player, Root& root)
+server::host::Game::pushPlayerSlotOnly(int32_t slot, String_t player, Root& root)
 {
     // ex Game::pushPlayerSlot
     // Add to database
@@ -569,7 +581,7 @@ server::host::Game::pushPlayerSlot(int32_t slot, String_t player, Root& root)
 
 // Remove player from a slot.
 String_t
-server::host::Game::popPlayerSlot(int32_t slot, Root& root)
+server::host::Game::popPlayerSlotOnly(int32_t slot, Root& root)
 {
     // ex Game::popPlayerSlot
     String_t player = getSlot(slot).players().popBack();
@@ -599,6 +611,45 @@ server::host::Game::popPlayerSlot(int32_t slot, Root& root)
         root.log().write(afl::sys::LogListener::Info, LOG_NAME, "install failure", e);
     }
     return player;
+}
+
+// Remove player from a slot (single slot).
+server::host::Game::PushMode
+server::host::Game::validatePlayerSlot(int32_t slot)
+{
+    switch (kind().get()) {
+     case Kind_DualDuel:
+        if (slot <= 2) {
+            return PushMode(PushMode::Dual, slot);
+        } else if (slot <= 4) {
+            return PushMode(PushMode::Dual, slot-2);
+        } else {
+            throw std::runtime_error(server::SLOT_NOT_AVAILABLE);
+        }
+     default:
+        return PushMode(PushMode::Normal, slot);
+    }
+}
+
+// Add player to a slot (with slot reference/PushMode).
+void
+server::host::Game::pushPlayerSlot(PushMode mode, String_t player, Root& root)
+{
+    pushPlayerSlotOnly(mode.slot, player, root);
+    if (mode.mode == PushMode::Dual) {
+        pushPlayerSlotOnly(mode.slot+2, player, root);
+    }
+}
+
+// Remove player from a slot (with slot reference/PushMode).
+String_t
+server::host::Game::popPlayerSlot(PushMode mode, Root& root)
+{
+    String_t result = popPlayerSlotOnly(mode.slot, root);
+    if (mode.mode == PushMode::Dual) {
+        popPlayerSlotOnly(mode.slot+2, root);
+    }
+    return result;
 }
 
 // Get all players in a slot.
@@ -1091,15 +1142,23 @@ server::host::Game::describeSlot(int32_t slot, String_t forUser, Root& root, con
         }
     }
     const bool occupied = result.userIds.size() > 0;
+    const int k = kind().get();
 
-    result.numEditable = numEditable;
-    result.joinable = !occupied
-        && isSlotInGame(slot)
-        && (!isUserOnGameAsPrimary(forUser) || isMultiJoinAllowed());
-    if (!forUser.empty()) {
-        User u(root, forUser);
-        if (!isJoinRestrictionSatisfied(u)) {
-            result.joinable = false;
+    if (k == Kind_DualDuel && slot > 2) {
+        // For DualDuel game, only first two slots are potentially joinable or editable
+        result.numEditable = 0;
+        result.joinable = false;
+    } else {
+        // Normal processing
+        result.numEditable = numEditable;
+        result.joinable = !occupied
+            && isSlotInGame(slot)
+            && (!isUserOnGameAsPrimary(forUser) || isMultiJoinAllowed());
+        if (!forUser.empty()) {
+            User u(root, forUser);
+            if (!isJoinRestrictionSatisfied(u)) {
+                result.joinable = false;
+            }
         }
     }
 
@@ -1218,14 +1277,14 @@ server::host::Game::loadRaceNames(server::common::RaceNames& raceNames, Root& ro
     server::interface::BaseClient(hostFile).setUserContext(String_t());
     server::interface::FileBaseClient hostFileClient(hostFile);
 
-    if (tryLoadRaceNames(raceNames, m_game.stringKey("dir").get() + "/data", hostFileClient)
+    if (tryLoadRaceNames(raceNames, m_game.stringKey("dir").get() + "/data", "race.nm", hostFileClient)
         || tryLoadRaceNames(raceNames,
-                            root.shipListRoot().byName(getConfig("shiplist")).stringField("path").get(), hostFileClient)
+                            root.shipListRoot().byName(getConfig("shiplist")).stringField("path").get(), "race.nm", hostFileClient)
         || tryLoadRaceNames(raceNames,
-                            root.masterRoot().byName(getConfig("master")).stringField("path").get(), hostFileClient)
+                            root.masterRoot().byName(getConfig("master")).stringField("path").get(), "race.nm", hostFileClient)
         || tryLoadRaceNames(raceNames,
-                            root.hostRoot().byName(getConfig("host")).stringField("path").get(), hostFileClient)
-        || tryLoadRaceNames(raceNames, "defaults", hostFileClient))
+                            root.hostRoot().byName(getConfig("host")).stringField("path").get(), "race.nm", hostFileClient)
+        || tryLoadRaceNames(raceNames, "defaults", getDefaultRaceNameFile(*this), hostFileClient))
     {
         // ok
     } else {

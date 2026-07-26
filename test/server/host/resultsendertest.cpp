@@ -121,7 +121,7 @@ AFL_TEST("server.host.ResultSender:basic", a)
     a.checkEqual("01. addGame", gid, 1);
     h.addUser("q");
     Game g(h.root(), gid);
-    g.pushPlayerSlot(5, "q", h.root());
+    g.pushPlayerSlotOnly(5, "q", h.root());
 
     // Send results
     server::host::ResultSender(h.root(), g).sendAllResults();
@@ -147,9 +147,9 @@ AFL_TEST("server.host.ResultSender:multi", a)
     h.addUser("p2");
     h.addUser("b");
     Game g(h.root(), gid);
-    g.pushPlayerSlot(5, "p1", h.root());
-    g.pushPlayerSlot(5, "p2", h.root());
-    g.pushPlayerSlot(6, "b", h.root());
+    g.pushPlayerSlotOnly(5, "p1", h.root());
+    g.pushPlayerSlotOnly(5, "p2", h.root());
+    g.pushPlayerSlotOnly(6, "b", h.root());
 
     // Send results
     server::host::ResultSender(h.root(), g).sendAllResults();
@@ -186,23 +186,23 @@ AFL_TEST("server.host.ResultSender:config", a)
 
     // User a: Fed, has player files, wants zipped results
     h.addUser("a");
-    g.pushPlayerSlot(1, "a", h.root());
+    g.pushPlayerSlotOnly(1, "a", h.root());
     g.setPlayerConfigInt("a", "hasPlayerFiles", 1);
     g.setPlayerConfig("a", "mailgametype", "zip");
 
     // User b: Also Fed, does not have player files, wants raw results
     h.addUser("b");
-    g.pushPlayerSlot(1, "b", h.root());
+    g.pushPlayerSlotOnly(1, "b", h.root());
     g.setPlayerConfig("b", "mailgametype", "rst");
 
     // User c: Lizard, wants just info
     h.addUser("c");
-    g.pushPlayerSlot(2, "c", h.root());
+    g.pushPlayerSlotOnly(2, "c", h.root());
     g.setPlayerConfig("c", "mailgametype", "info");
 
     // User d: Bird, has player files, wants result
     h.addUser("d");
-    g.pushPlayerSlot(3, "d", h.root());
+    g.pushPlayerSlotOnly(3, "d", h.root());
     g.setPlayerConfigInt("d", "hasPlayerFiles", 1);
     g.setPlayerConfig("d", "mailgametype", "rst");
 
@@ -247,7 +247,7 @@ AFL_TEST("server.host.ResultSender:config:profile", a)
     a.checkEqual("01. addGame", gid, 1);
     h.addUser("q");
     Game g(h.root(), gid);
-    g.pushPlayerSlot(5, "q", h.root());
+    g.pushPlayerSlotOnly(5, "q", h.root());
     HashKey(h.db(), "user:q:profile").stringField("mailgametype").set("rst");
 
     // Send results
@@ -273,7 +273,7 @@ AFL_TEST("server.host.ResultSender:config:default-profile", a)
     a.checkEqual("01. addGame", gid, 1);
     h.addUser("q");
     Game g(h.root(), gid);
-    g.pushPlayerSlot(5, "q", h.root());
+    g.pushPlayerSlotOnly(5, "q", h.root());
     HashKey(h.db(), "default:profile").stringField("mailgametype").set("rst");
 
     // Send results
@@ -299,7 +299,7 @@ AFL_TEST("server.host.ResultSender:config:both-profiles", a)
     a.checkEqual("01. addGame", gid, 1);
     h.addUser("q");
     Game g(h.root(), gid);
-    g.pushPlayerSlot(5, "q", h.root());
+    g.pushPlayerSlotOnly(5, "q", h.root());
     HashKey(h.db(), "user:q:profile").stringField("mailgametype").set("rst");
     HashKey(h.db(), "default:profile").stringField("mailgametype").set("info");
 
@@ -326,7 +326,7 @@ AFL_TEST("server.host.ResultSender:config:per-game", a)
     a.checkEqual("01. addGame", gid, 1);
     h.addUser("q");
     Game g(h.root(), gid);
-    g.pushPlayerSlot(5, "q", h.root());
+    g.pushPlayerSlotOnly(5, "q", h.root());
     g.setPlayerConfig("q", "mailgametype", "rst");
     HashKey(h.db(), "user:q:profile").stringField("mailgametype").set("zip");
     HashKey(h.db(), "default:profile").stringField("mailgametype").set("info");
@@ -354,7 +354,7 @@ AFL_TEST("server.host.ResultSender:config:game-default", a)
     a.checkEqual("01. addGame", gid, 1);
     h.addUser("q");
     Game g(h.root(), gid);
-    g.pushPlayerSlot(5, "q", h.root());
+    g.pushPlayerSlotOnly(5, "q", h.root());
     g.setPlayerConfig("q", "mailgametype", "default");
     HashKey(h.db(), "user:q:profile").stringField("mailgametype").set("rst");
     HashKey(h.db(), "default:profile").stringField("mailgametype").set("zip");
@@ -382,7 +382,7 @@ AFL_TEST("server.host.ResultSender:extra-files", a)
     a.checkEqual("01. addGame", gid, 1);
     h.addUser("q");
     Game g(h.root(), gid);
-    g.pushPlayerSlot(5, "q", h.root());
+    g.pushPlayerSlotOnly(5, "q", h.root());
     HashKey(h.db(), "default:profile").stringField("mailgametype").set("rst");
 
     // Add extra files

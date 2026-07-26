@@ -83,12 +83,12 @@ TestHarness::addGame(HostGame& testee)
 
     // Join some users
     server::host::Game g(root(), gid);
-    g.pushPlayerSlot(1, "a", root());       // primary, active
-    g.pushPlayerSlot(2, "b", root());       // primary
-    g.pushPlayerSlot(2, "c", root());       // active
-    g.pushPlayerSlot(3, "d", root());       // primary
-    g.pushPlayerSlot(3, "e", root());       // inactive
-    g.pushPlayerSlot(3, "f", root());       // active
+    g.pushPlayerSlotOnly(1, "a", root());       // primary, active
+    g.pushPlayerSlotOnly(2, "b", root());       // primary
+    g.pushPlayerSlotOnly(2, "c", root());       // active
+    g.pushPlayerSlotOnly(3, "d", root());       // primary
+    g.pushPlayerSlotOnly(3, "e", root());       // inactive
+    g.pushPlayerSlotOnly(3, "f", root());       // active
 
     return gid;
 }
@@ -700,8 +700,8 @@ AFL_TEST("server.host.HostGame:getPermissions", a)
     a.checkEqual("18", testee.getPermissions(gid, "z"), HostGame::Permissions_t() + HostGame::UserIsOwner);
 
     // Combinations
-    server::host::Game(h.root(), gid).pushPlayerSlot(4, "f", h.root());
-    server::host::Game(h.root(), gid).pushPlayerSlot(5, "z", h.root());
+    server::host::Game(h.root(), gid).pushPlayerSlotOnly(4, "f", h.root());
+    server::host::Game(h.root(), gid).pushPlayerSlotOnly(5, "z", h.root());
 
     a.checkEqual("21", testee.getPermissions(gid, "f"), HostGame::Permissions_t() + HostGame::UserIsActive + HostGame::UserIsPrimary);
     a.checkEqual("22", testee.getPermissions(gid, "z"), HostGame::Permissions_t() + HostGame::UserIsActive + HostGame::UserIsPrimary + HostGame::UserIsOwner);

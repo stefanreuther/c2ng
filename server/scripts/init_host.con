@@ -1,3 +1,4 @@
+
 #
 #  Host file
 #
@@ -30,3 +31,14 @@ silent hostfile put defaults/planet.nm <${specs}/planet.nm
 silent hostfile put defaults/storm.nm <${specs}/storm.nm
 silent hostfile put defaults/race.nm <${specs}/race.nm
 silent hostfile put defaults/xyplan.dat <${specs}/xyplan.dat
+
+# Custom racename files:
+#   -east, -west     defaults for east/west faction in dual-duel
+#   -none            defaults for unused slots
+#   -anon            pre-host defaults for custom PlayerRace games
+#   -dd              pre-host defaults for dual-duel
+silent hostfile put defaults/race-east.nm <init/defaults/race-east.nm
+silent hostfile put defaults/race-west.nm <init/defaults/race-west.nm
+silent hostfile put defaults/race-none.nm <init/defaults/race-none.nm
+silent hostfile put defaults/race-anon.nm <init/defaults/race-anon.nm
+silent hostfile put defaults/race-dd.nm <init/defaults/race-dd.nm

@@ -29,6 +29,7 @@
 #include "server/host/configuration.hpp"
 #include "server/host/root.hpp"
 #include "server/host/talkadapter.hpp"
+#include "server/interface/filebaseclient.hpp"
 #include "server/interface/hostplayer.hpp"
 #include "server/interface/mailqueueclient.hpp"
 #include "server/interface/talkforumclient.hpp"
@@ -41,6 +42,7 @@ using afl::net::redis::StringListKey;
 using afl::net::redis::StringSetKey;
 using afl::net::redis::Subtree;
 using afl::string::Format;
+using server::interface::FileBaseClient;
 using server::interface::HostGame;
 using server::interface::HostPlayer;
 
@@ -57,6 +59,9 @@ namespace {
 
         afl::net::CommandHandler& db()
             { return m_db; }
+
+        afl::net::CommandHandler& hostFile()
+            { return m_hostFile; }
 
      private:
         afl::net::redis::InternalDatabase m_db;
@@ -603,6 +608,65 @@ AFL_TEST("server.host.Game:describeSlot", a)
     a.checkEqual("62. joinable", d2.joinable, true);
 }
 
+/** Test describeSlot(), dual-duel. */
+AFL_TEST("server.host.Game:describeSlot:dd", a)
+{
+    // Setup
+    TestHarness h;
+    IntegerSetKey(h.db(), "game:all").add(61);
+    IntegerSetKey(h.db(), "game:state:joining").add(61);
+    StringKey(h.db(), "game:61:state").set("joining");
+    StringKey(h.db(), "game:61:type").set("unlisted");
+    HashKey(h.db(), "game:61:settings").intField("kind").set(1);  // dual-duel
+    HashKey(h.db(), "game:61:player:1:status").intField("slot").set(1);
+    HashKey(h.db(), "game:61:player:2:status").intField("slot").set(1);
+    HashKey(h.db(), "game:61:player:3:status").intField("slot").set(1);
+    HashKey(h.db(), "game:61:player:4:status").intField("slot").set(1);
+
+    // Race names
+    server::common::RaceNames raceNames;
+    afl::charset::CodepageCharset cs(afl::charset::g_codepageLatin1);
+    raceNames.load(game::test::getDefaultRaceNames(), cs);
+
+    // Test
+    server::host::Game g(h.root(), 61);
+    a.check("01. isMultiJoinAllowed", !g.isMultiJoinAllowed());
+
+    HostPlayer::Info s1 = g.describeSlot(1, "a", h.root(), raceNames);
+    HostPlayer::Info s2 = g.describeSlot(2, "a", h.root(), raceNames);
+    HostPlayer::Info s3 = g.describeSlot(3, "a", h.root(), raceNames);
+    HostPlayer::Info s4 = g.describeSlot(4, "a", h.root(), raceNames);
+
+    // Verify
+    // - 1
+    a.checkEqual("11. longName",      s1.longName, "The Solar Federation");
+    a.checkEqual("12. shortName",     s1.shortName, "The Feds");
+    a.checkEqual("13. adjectiveName", s1.adjectiveName, "Fed");
+    a.checkEqual("14. numEditable",   s1.numEditable, 0);
+    a.checkEqual("15. joinable",      s1.joinable, true);
+
+    // - 2
+    a.checkEqual("21. longName",      s2.longName, "The Lizard Alliance");
+    a.checkEqual("22. shortName",     s2.shortName, "The Lizards");
+    a.checkEqual("23. adjectiveName", s2.adjectiveName, "Lizard");
+    a.checkEqual("24. numEditable",   s2.numEditable, 0);
+    a.checkEqual("25. joinable",      s2.joinable, true);
+
+    // - 3
+    a.checkEqual("31. longName",      s3.longName, "The Empire of the Birds");
+    a.checkEqual("32. shortName",     s3.shortName, "The Bird Men");
+    a.checkEqual("33. adjectiveName", s3.adjectiveName, "Bird Man");
+    a.checkEqual("34. numEditable",   s3.numEditable, 0);
+    a.checkEqual("35. joinable",      s3.joinable, false);
+
+    // - 4
+    a.checkEqual("41. longName",      s4.longName, "The Fascist Empire");
+    a.checkEqual("42. shortName",     s4.shortName, "The Fascists");
+    a.checkEqual("43. adjectiveName", s4.adjectiveName, "Fascist");
+    a.checkEqual("44. numEditable",   s4.numEditable, 0);
+    a.checkEqual("45. joinable",      s4.joinable, false);
+}
+
 /** Test describeVictoryCondition(), no condition set. */
 AFL_TEST("server.host.Game:describeVictoryCondition:none", a)
 {
@@ -717,4 +781,145 @@ AFL_TEST("server.host.Game:describeVictoryCondition:referee", a)
     a.check("06. endScoreDescription", !vc.endScoreDescription.isValid());
     a.check("07. referee",              vc.referee.isSame(String_t("judge")));
     a.check("08. refereeDescription",   vc.refereeDescription.isSame(String_t("Dredd")));
+}
+
+/** Test validatePlayerSlot. */
+AFL_TEST("server.host.Game:validatePlayerSlot", a)
+{
+    TestHarness h;
+    IntegerSetKey(h.db(), "game:all").add(61);
+    server::host::Game g(h.root(), 61);
+
+    server::host::Game::PushMode m1 = g.validatePlayerSlot(1);
+    a.checkEqual("01. player 1 slot", m1.slot, 1);
+
+    server::host::Game::PushMode m11 = g.validatePlayerSlot(11);
+    a.checkEqual("11. player 11 slot", m11.slot, 11);
+}
+
+/** Test validatePlayerSlot, dual-duel. */
+AFL_TEST("server.host.Game:validatePlayerSlot:dd", a)
+{
+    TestHarness h;
+    IntegerSetKey(h.db(), "game:all").add(61);
+    HashKey(h.db(), "game:61:settings").intField("kind").set(1);
+    server::host::Game g(h.root(), 61);
+
+    server::host::Game::PushMode m1 = g.validatePlayerSlot(1);
+    a.checkEqual("01. player 1 slot", m1.slot, 1);
+
+    server::host::Game::PushMode m2 = g.validatePlayerSlot(2);
+    a.checkEqual("11. player 2 slot", m2.slot, 2);
+
+    server::host::Game::PushMode m3 = g.validatePlayerSlot(3);
+    a.checkEqual("21. player 3 slot", m3.slot, 1);
+
+    server::host::Game::PushMode m4 = g.validatePlayerSlot(4);
+    a.checkEqual("31. player 4 slot", m4.slot, 2);
+
+    AFL_CHECK_THROWS(a("41. player 5 slot"), g.validatePlayerSlot(5), std::runtime_error);
+    AFL_CHECK_THROWS(a("42. player 11 slot"), g.validatePlayerSlot(11), std::runtime_error);
+}
+
+/** Test pushPlayerSlot, popPlayerSlot. */
+AFL_TEST("server.host.Game:pushPlayerSlot", a)
+{
+    TestHarness h;
+    FileBaseClient(h.hostFile()).createDirectory("gg");
+    FileBaseClient(h.hostFile()).createDirectory("gg/out");
+    FileBaseClient(h.hostFile()).createDirectory("gg/out/all");
+    FileBaseClient(h.hostFile()).createDirectory("gg/out/1");
+    FileBaseClient(h.hostFile()).createDirectory("gg/out/2");
+    FileBaseClient(h.hostFile()).createDirectory("gg/out/3");
+    FileBaseClient(h.hostFile()).createDirectory("gg/out/4");
+
+    IntegerSetKey(h.db(), "game:all").add(61);
+    StringKey(h.db(), "game:61:dir").set("gg");
+    server::host::Game g(h.root(), 61);
+
+    // Push
+    g.pushPlayerSlot(g.validatePlayerSlot(1), "aa", h.root());
+    g.pushPlayerSlot(g.validatePlayerSlot(1), "bb", h.root());
+
+    // Verify push
+    {
+        afl::data::StringList_t players;
+        g.listPlayers(1, players);
+        a.checkEqual("01. length", players.size(), 2U);
+        a.checkEqual("02. first", players[0], "aa");
+        a.checkEqual("03. first", players[1], "bb");
+    }
+    {
+        afl::data::StringList_t players;
+        g.listPlayers(3, players);
+        a.checkEqual("11. length", players.size(), 0U);
+    }
+
+    // Pop
+    String_t bb = g.popPlayerSlot(g.validatePlayerSlot(1), h.root());
+    a.checkEqual("20. popPlayerSlot", bb, "bb");
+
+    // Verify pop
+    {
+        afl::data::StringList_t players;
+        g.listPlayers(1, players);
+        a.checkEqual("21. length", players.size(), 1U);
+        a.checkEqual("22. first", players[0], "aa");
+    }
+}
+
+/** Test pushPlayerSlot, popPlayerSlot, dual-duel. */
+AFL_TEST("server.host.Game:pushPlayerSlot", a)
+{
+    TestHarness h;
+    FileBaseClient(h.hostFile()).createDirectory("gg");
+    FileBaseClient(h.hostFile()).createDirectory("gg/out");
+    FileBaseClient(h.hostFile()).createDirectory("gg/out/all");
+    FileBaseClient(h.hostFile()).createDirectory("gg/out/1");
+    FileBaseClient(h.hostFile()).createDirectory("gg/out/2");
+    FileBaseClient(h.hostFile()).createDirectory("gg/out/3");
+    FileBaseClient(h.hostFile()).createDirectory("gg/out/4");
+
+    IntegerSetKey(h.db(), "game:all").add(61);
+    StringKey(h.db(), "game:61:dir").set("gg");
+    HashKey(h.db(), "game:61:settings").intField("kind").set(1);
+    server::host::Game g(h.root(), 61);
+
+    // Push
+    g.pushPlayerSlot(g.validatePlayerSlot(1), "aa", h.root());
+    g.pushPlayerSlot(g.validatePlayerSlot(1), "bb", h.root());
+
+    // Verify push
+    {
+        afl::data::StringList_t players;
+        g.listPlayers(1, players);
+        a.checkEqual("01. length", players.size(), 2U);
+        a.checkEqual("02. first", players[0], "aa");
+        a.checkEqual("03. first", players[1], "bb");
+    }
+    {
+        afl::data::StringList_t players;
+        g.listPlayers(3, players);
+        a.checkEqual("11. length", players.size(), 2U);
+        a.checkEqual("12. first", players[0], "aa");
+        a.checkEqual("13. first", players[1], "bb");
+    }
+
+    // Pop
+    String_t bb = g.popPlayerSlot(g.validatePlayerSlot(1), h.root());
+    a.checkEqual("20. popPlayerSlot", bb, "bb");
+
+    // Verify pop
+    {
+        afl::data::StringList_t players;
+        g.listPlayers(1, players);
+        a.checkEqual("21. length", players.size(), 1U);
+        a.checkEqual("22. first", players[0], "aa");
+    }
+    {
+        afl::data::StringList_t players;
+        g.listPlayers(1, players);
+        a.checkEqual("31. length", players.size(), 1U);
+        a.checkEqual("32. first", players[0], "aa");
+    }
 }

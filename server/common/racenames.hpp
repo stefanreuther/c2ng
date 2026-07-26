@@ -5,8 +5,9 @@
 #ifndef C2NG_SERVER_COMMON_RACENAMES_HPP
 #define C2NG_SERVER_COMMON_RACENAMES_HPP
 
-#include "game/playerarray.hpp"
+#include "afl/base/growablememory.hpp"
 #include "afl/charset/charset.hpp"
+#include "game/playerarray.hpp"
 
 namespace server { namespace common {
 
@@ -27,6 +28,18 @@ namespace server { namespace common {
             \param cs   Character set
             \throw afl::except::FileProblemException if the data cannot be interpreted as race name file */
         void load(afl::base::ConstBytes_t data, afl::charset::Charset& cs);
+
+        /** Save to array-of-bytes.
+            \param data Output
+            \param cs   Character set */
+        void save(afl::base::GrowableBytes_t& data, afl::charset::Charset& cs) const;
+
+        /** Copy race names.
+            Copies all names for a slot.
+            \param toSlot   Target slot (in this object)
+            \param from     Origin race names
+            \param fromSlot Origin slot (in from) */
+        void copy(int toSlot, const RaceNames& from, int fromSlot);
 
         /** Access short names.
             \return Short names */

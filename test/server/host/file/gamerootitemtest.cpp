@@ -100,29 +100,29 @@ namespace {
         for (int turn = 1; turn <= TURN_NUMBER; ++turn) {
             game.turn(turn).playerId().stringField("1").set("a");
         }
-        game.pushPlayerSlot(1, "a", root);
+        game.pushPlayerSlotOnly(1, "a", root);
 
         // "b" plays Lizard and is replaced by "c" in turn 20
         for (int turn = 1; turn <= TURN_NUMBER; ++turn) {
             game.turn(turn).playerId().stringField("2").set(turn < 20 ? "b" : "c");
         }
-        game.pushPlayerSlot(2, "a", root);
-        game.popPlayerSlot(2, root);
-        game.pushPlayerSlot(2, "c", root);
+        game.pushPlayerSlotOnly(2, "a", root);
+        game.popPlayerSlotOnly(2, root);
+        game.pushPlayerSlotOnly(2, "c", root);
 
         // "d" plays Bird for whole game and has a replacement "e"
         for (int turn = 1; turn <= TURN_NUMBER; ++turn) {
             game.turn(turn).playerId().stringField("3").set("d");
         }
-        game.pushPlayerSlot(3, "d", root);
-        game.pushPlayerSlot(3, "e", root);
+        game.pushPlayerSlotOnly(3, "d", root);
+        game.pushPlayerSlotOnly(3, "e", root);
 
         // "f" plays Klingon, and has replacement "a"
         for (int turn = 1; turn <= TURN_NUMBER; ++turn) {
             game.turn(turn).playerId().stringField("4").set("f");
         }
-        game.pushPlayerSlot(4, "f", root);
-        game.pushPlayerSlot(4, "a", root);
+        game.pushPlayerSlotOnly(4, "f", root);
+        game.pushPlayerSlotOnly(4, "a", root);
     }
 
     /* Check file tree beneath an item for consistency. */

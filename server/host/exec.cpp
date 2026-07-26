@@ -33,6 +33,7 @@
 #include "server/host/rank/victory.hpp"
 #include "server/host/resultsender.hpp"
 #include "server/host/root.hpp"
+#include "server/host/setup.hpp"
 #include "server/host/talkadapter.hpp"
 #include "server/interface/baseclient.hpp"
 #include "server/interface/filebaseclient.hpp"
@@ -686,6 +687,7 @@ server::host::runMaster(util::ProcessRunner& runner, Root& root, int32_t gameId)
         afl::sys::MutexGuard g(root.mutex());
         root.configureReconnect();
         Game game(root, gameId, Game::NoExistanceCheck);
+        performPreHostSetup(root, game);
         gameDir = Exporter(root.hostFile(), root.fileSystem(), root.log()).exportGame(game, root, workdirEntry->getPathName());
     }
 

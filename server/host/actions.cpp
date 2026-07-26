@@ -32,7 +32,7 @@ namespace {
             hostFile.getDirectoryContent(outDir, outContent);
         }
         catch (...) { }
-             
+
         // Clear old value, if any
         fileKey.remove();
 
@@ -104,8 +104,10 @@ server::host::processInactivityKicks(Root& root, int32_t gameId)
         afl::bits::unpackArray<afl::bits::Int16LE>(turnStatus, afl::string::toBytes(game.turn(turn).info().turnStatus().get()));
         for (int32_t i = 1; i <= Game::NUM_PLAYERS; ++i) {
             if (players.contains(i) && turnStatus[i-1] != Game::TurnMissing) {
+                // Player submitted a turn
                 players -= i;
             } else {
+                // Player was not responsible for turn at that time
                 if (primaryPlayers.get(i) != game.turn(turn).playerId().stringField(Format("%d", i)).get()) {
                     players -= i;
                 }
@@ -113,6 +115,22 @@ server::host::processInactivityKicks(Root& root, int32_t gameId)
         }
         if (players.empty()) {
             break;
+        }
+    }
+
+    // Special handling for dual-duel
+    // If player A submits a turn to slot 1 but not 3, do not count either slot as inactive.
+    const int32_t kind = game.kind().get();
+    bool doDrop = true;
+    if (kind == Game::Kind_DualDuel) {
+        doDrop = false;
+        if (!players.contains(1) || !players.contains(3)) {
+            players -= 1;
+            players -= 3;
+        }
+        if (!players.contains(2) || !players.contains(4)) {
+            players -= 2;
+            players -= 4;
         }
     }
 
@@ -125,12 +143,12 @@ server::host::processInactivityKicks(Root& root, int32_t gameId)
             String_t userId;
             while (numPlayers > 0) {
                 // Unsubscribe and save the player
-                userId = game.popPlayerSlot(slot, root);
+                userId = game.popPlayerSlotOnly(slot, root);
                 --numPlayers;
             }
 
             // Is this slot dead now? If so, drop it. */
-            bool dead = dropSlotIfDead(game, slot);
+            bool dead = doDrop && dropSlotIfDead(game, slot);
 
             // History
             game.addUserHistoryItem(root, dead ? "game-resign-dead" : "game-kick", Format("%s:%d", userId, slot), userId);

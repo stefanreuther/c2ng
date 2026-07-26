@@ -252,9 +252,21 @@ server::host::HostTurn::submit(const String_t& blob,
 
         // Maybe we're taking over again for our replacement
         if (!isAdmin) {
-            while (thisPlayerIndex+1 < players.size()) {
-                game.popPlayerSlot(slotNumber, m_root);
-                players.pop_back();
+            try {
+                Game::PushMode pm = game.validatePlayerSlot(slotNumber);
+                while (thisPlayerIndex+1 < players.size()) {
+                    game.popPlayerSlot(pm, m_root);
+                    players.pop_back();
+                }
+            }
+            catch (std::exception& ex) {
+                // validatePlayerSlot failed to resolve the slotNumber.
+                // That is, somebody successfully submitted a turn for player 5 in dual-duel, which should have only four slots -> should not happen
+                m_root.log().write(afl::sys::LogListener::Warn, LOG_NAME,
+                                   afl::string::Format("game %d, player %d, user %s: failure to adjust player list")
+                                   << gameNumber
+                                   << slotNumber
+                                   << (user.size() ? user.c_str() : "(none)"));
             }
         }
 

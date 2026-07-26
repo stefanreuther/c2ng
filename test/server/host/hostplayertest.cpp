@@ -114,6 +114,40 @@ TestHarness::addDefaultRaceNames()
     server::interface::FileBaseClient hostFile(m_hostFile);
     hostFile.createDirectoryTree("defaults");
     hostFile.putFile("defaults/race.nm", afl::string::fromBytes(game::test::getDefaultRaceNames()));
+    hostFile.putFile("defaults/race-dd.nm",
+                     "Player 1                      "
+                     "Player 2                      "
+                     "Player 1 Alt                  "
+                     "Player 2 Alt                  "
+                     "Player 5                      "
+                     "Player 6                      "
+                     "Player 7                      "
+                     "Player 8                      "
+                     "Player 9                      "
+                     "Player 10                     "
+                     "Player 11                     "
+                     "Player 1            "
+                     "Player 2            "
+                     "Player 1 Alt        "
+                     "Player 2 Alt        "
+                     "Player 5            "
+                     "Player 6            "
+                     "Player 7            "
+                     "Player 8            "
+                     "Player 9            "
+                     "Player 10           "
+                     "Player 11           "
+                     "Player 1    "
+                     "Player 2    "
+                     "Player 1 Alt"
+                     "Player 2 Alt"
+                     "Player 5    "
+                     "Player 6    "
+                     "Player 7    "
+                     "Player 8    "
+                     "Player 9    "
+                     "Player 10   "
+                     "Player 11   ");
 }
 
 void
@@ -465,6 +499,105 @@ AFL_TEST("server.host.HostPlayer:substitute:empty", a)
     AFL_CHECK_THROWS(a("11. substitute"), testee.substitute(gid, 2, "u2"), std::exception);
 }
 
+/** Test join(), substitute(), resign() for dual-duel. */
+AFL_TEST("server.host.HostPlayer:join+subst+resign:dual", a)
+{
+    TestHarness h;
+    server::host::Session session;
+    server::host::HostPlayer testee(session, h.root());
+    CronMock cron(a);
+    h.root().setCron(&cron);
+    h.addUsers();
+
+    // Create a game
+    int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
+    a.checkEqual("01. createNewGame", gid, 1);
+
+    // Configure game
+    server::host::Game g(h.root(), gid);
+    g.kind().set(server::host::Game::Kind_DualDuel);
+    for (int i = 4; i <= 11; ++i) {
+        g.getSlot(i).slotStatus().set(0);
+    }
+
+    // Join user
+    HostPlayer::JoinOptions opts;
+    opts.raceChoice = "7,5";
+    cron.expectCall("handleGameChange(1)");
+    testee.join(gid, 3, "u5", opts);
+    cron.checkFinish();
+
+    // Verify database
+    HostPlayer::Info info = testee.getInfo(gid, 1);
+    a.checkEqual("11. raceChoice", info.raceChoice.orElse("-"), "7,5");
+    a.checkEqual("12. num users", info.userIds.size(), 1U);
+    a.checkEqual("13. user", info.userIds[0], "u5");
+
+    info = testee.getInfo(gid, 2);
+    a.checkEqual("21. num users", info.userIds.size(), 0U);
+
+    info = testee.getInfo(gid, 3);
+    a.checkEqual("31. raceChoice", info.raceChoice.orElse("-"), "");
+    a.checkEqual("32. num users", info.userIds.size(), 1U);
+    a.checkEqual("33. user", info.userIds[0], "u5");
+
+    // Substitute
+    testee.substitute(gid, 1, "u1");
+
+    // Verify database
+    info = testee.getInfo(gid, 1);
+    a.checkEqual("41. raceChoice", info.raceChoice.orElse("-"), "7,5");
+    a.checkEqual("42. num users", info.userIds.size(), 2U);
+    a.checkEqual("43. user", info.userIds[0], "u5");
+    a.checkEqual("44. user", info.userIds[1], "u1");
+
+    info = testee.getInfo(gid, 2);
+    a.checkEqual("51. num users", info.userIds.size(), 0U);
+
+    info = testee.getInfo(gid, 3);
+    a.checkEqual("61. raceChoice", info.raceChoice.orElse("-"), "");
+    a.checkEqual("62. num users", info.userIds.size(), 2U);
+    a.checkEqual("63. user", info.userIds[0], "u5");
+    a.checkEqual("64. user", info.userIds[1], "u1");
+
+    // Resign
+    testee.resign(gid, 1, "u1");
+    info = testee.getInfo(gid, 1);
+    a.checkEqual("71. raceChoice", info.raceChoice.orElse("-"), "7,5");
+    a.checkEqual("72. num users", info.userIds.size(), 1U);
+    a.checkEqual("73. user", info.userIds[0], "u5");
+
+    info = testee.getInfo(gid, 2);
+    a.checkEqual("81. num users", info.userIds.size(), 0U);
+
+    info = testee.getInfo(gid, 3);
+    a.checkEqual("91. raceChoice", info.raceChoice.orElse("-"), "");
+    a.checkEqual("92. num users", info.userIds.size(), 1U);
+    a.checkEqual("93. user", info.userIds[0], "u5");
+}
+
+/** Test rejection of out-of-range slots in dual-duel. */
+AFL_TEST("server.host.HostPlayer:join:dual:error-bad-slot", a)
+{
+    TestHarness h;
+    server::host::Session session;
+    server::host::HostPlayer testee(session, h.root());
+    CronMock cron(a);
+    h.root().setCron(&cron);
+    h.addUsers();
+
+    // Create a game
+    int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
+    a.checkEqual("01. createNewGame", gid, 1);
+
+    // Configure game
+    server::host::Game g(h.root(), gid);
+    g.kind().set(server::host::Game::Kind_DualDuel);
+
+    // Join user
+    AFL_CHECK_THROWS(a, testee.join(gid, 5, "u5", HostPlayer::JoinOptions()), std::runtime_error);
+}
+
 /** Test add(). */
 AFL_TEST("server.host.HostPlayer:add", a)
 {
@@ -547,6 +680,53 @@ AFL_TEST("server.host.HostPlayer:getInfo", a)
         }
         a.checkEqual("33. shortName 1", result[1].shortName, "The Feds");
         a.checkEqual("34. shortName 9", result[9].shortName, "The Robots");
+    }
+}
+
+/** Get getInfo() for dual-duel case. */
+AFL_TEST("server.host.HostPlayer:getInfo:dd", a)
+{
+    TestHarness h;
+    server::host::Session session;
+    server::host::HostPlayer testee(session, h.root());
+    h.addUsers();
+    h.addDefaultRaceNames();
+
+    // Create a game
+    int32_t gid = h.createNewGame(HostGame::PublicGame, HostGame::Joining);
+    a.checkEqual("01. createNewGame", gid, 1);
+    {
+        afl::data::StringList_t opts;
+        opts.push_back("kind");
+        opts.push_back("1");
+        server::host::HostGame(session, h.root()).setConfig(gid, opts);
+    }
+
+    // Get information about a slot
+    {
+        HostPlayer::Info i = testee.getInfo(gid, 1);
+        a.checkEqual("11. longName",      i.longName, "Player 1");
+        a.checkEqual("12. joinable",      i.joinable, true);
+    }
+    {
+        HostPlayer::Info i = testee.getInfo(gid, 2);
+        a.checkEqual("21. longName",      i.longName, "Player 2");
+        a.checkEqual("22. joinable",      i.joinable, true);
+    }
+    {
+        HostPlayer::Info i = testee.getInfo(gid, 3);
+        a.checkEqual("31. longName",      i.longName, "Player 1 Alt");
+        a.checkEqual("32. joinable",      i.joinable, false);
+    }
+    {
+        HostPlayer::Info i = testee.getInfo(gid, 4);
+        a.checkEqual("41. longName",      i.longName, "Player 2 Alt");
+        a.checkEqual("42. joinable",      i.joinable, false);
+    }
+    {
+        HostPlayer::Info i = testee.getInfo(gid, 5);
+        a.checkEqual("51. longName",      i.longName, "Player 5");
+        a.checkEqual("52. joinable",      i.joinable, false);
     }
 }
 
@@ -792,10 +972,10 @@ AFL_TEST("server.host.HostPlayer:wrong-game-state", a)
     {
         server::host::Game g(h.root(), gid);
         g.setState(HostGame::Joining, h.root().getForum(), h.root());
-        g.pushPlayerSlot(1, "u1", h.root());
-        g.pushPlayerSlot(1, "u2", h.root());
-        g.pushPlayerSlot(2, "u3", h.root());
-        g.pushPlayerSlot(3, "u4", h.root());
+        g.pushPlayerSlotOnly(1, "u1", h.root());
+        g.pushPlayerSlotOnly(1, "u2", h.root());
+        g.pushPlayerSlotOnly(2, "u3", h.root());
+        g.pushPlayerSlotOnly(3, "u4", h.root());
         g.setState(HostGame::Finished, h.root().getForum(), h.root());
     }
 
