@@ -93,7 +93,7 @@ client::map::KeymapOverlay::handleKey(util::Key_t key, int prefix, const Rendere
         // Quit
         ui::Root& r = m_parent.root();
         m_parent.removeOverlay(this);
-        r.postKeyEvent(key, prefix);
+        r.ungetKeyEvent(key, prefix);
     } else if (util::classifyKey(key & util::Key_Mask) == util::NormalKey) {
         // Not bound, but something that looks like a key (i.e. not a modifier).
         show();

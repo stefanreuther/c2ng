@@ -47,22 +47,20 @@ AFL_TEST("ui.Root", a)
 
     // Post some key events through various channels
     engine.postKey('a', 0);
-    root.postKeyEvent('b', 0);
     root.ungetKeyEvent('c', 0);
     engine.postKey('d', 0);
-    root.postKeyEvent('e', 0);
     root.ungetKeyEvent('f', 0);
 
     // Handle events
     int i = 0;
-    while (w.get().size() < 6) {
+    while (w.get().size() < 4) {
         a.check("21. handleEvent loop", i < 20);
         ++i;
         root.handleEvent();
     }
 
     // Verify result
-    a.checkEqual("31. get", w.get(), "fcbead");
+    a.checkEqual("31. get", w.get(), "fcad");
 }
 
 /*

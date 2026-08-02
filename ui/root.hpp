@@ -25,7 +25,7 @@ namespace ui {
 
         Root also provides basic engine-independant event handling:
         - mouse state tracking (postMouseEvent(), setMousePrefixArgument())
-        - synthetic keyboard events (postKeyEvent(), ungetKeyEvent())
+        - synthetic keyboard events (ungetKeyEvent())
 
         <b>Contained elements:</b>
         - Root provides a ui::ColorScheme to descendants
@@ -123,7 +123,7 @@ namespace ui {
             It does NOT call the regular widget hierarchy's event handling functions.
 
             Use this function instead of calling Engine::handleEvent() directly to keep
-            the local event queue (postKeyEvent() etc.) and deferred redraws working.
+            the local event queue (ungetKeyEvent() etc.) and deferred redraws working.
 
             \param consumer EventConsumer target */
         void handleEventRelative(EventConsumer& consumer);
@@ -132,20 +132,9 @@ namespace ui {
             Makes sure that a future handleEvent() call will eventually process a mouse event even if the mouse state didn't change. */
         void postMouseEvent();
 
-        /** Post a key event.
-            Makes sure that a future handleEvent() call will eventually process the given keyboard event.
-            All synthetic key events will be processed before new user input is received.
-            This is a queue, not a stack, thus key events will be processed in the same order as posted.
-
-            FIXME: maybe we can do without this method
-
-            \param key Key
-            \param prefix Prefix argument */
-        void postKeyEvent(util::Key_t key, int prefix);
-
         /** Unget a key event.
             Makes sure that a future handleEvent() call will eventually process the given keyboard event.
-            This event will be processed before all other keyboard events (postKeyEvent, ungetKeyEvent and real ones).
+            This event will be processed before all other keyboard events (previous ungetKeyEvent and real ones).
             This is a stack, the latest ungetKeyEvent() event will be processed first.
 
             \param key Key

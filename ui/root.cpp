@@ -208,12 +208,6 @@ ui::Root::postMouseEvent()
 }
 
 void
-ui::Root::postKeyEvent(util::Key_t key, int prefix)
-{
-    m_localTaskQueue.pushBackNew(new KeyPoster(key, prefix));
-}
-
-void
 ui::Root::ungetKeyEvent(util::Key_t key, int prefix)
 {
     m_localTaskQueue.pushFrontNew(new KeyPoster(key, prefix));

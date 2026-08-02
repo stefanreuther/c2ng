@@ -148,7 +148,7 @@ client::map::DistanceOverlay::handleKey(util::Key_t key, int prefix, const Rende
         return true;
 
      case util::Key_Quit:
-        m_parent.root().postKeyEvent(key, prefix);
+        m_parent.root().ungetKeyEvent(key, prefix);
         m_parent.removeOverlay(this);
         return true;
 
