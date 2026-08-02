@@ -35,12 +35,13 @@ namespace server { namespace interface {
             int32_t gameId;                             /**< Game Id if known (game). */
             int32_t hostTime;                           /**< Next host time (hosttime). */
             bool isFinished;                            /**< true if game is finished (finished). */
+            bool fileWarningDisabled;                   /**< true if warning about missing files is disabled (nofilewarning). */
             Slots_t slots;                              /**< List of played slots (races). */
             afl::data::StringList_t missingFiles;       /**< List of missing files (missing). */
             afl::data::IntegerList_t conflictSlots;     /**< List of conflicting races (conflict). */
 
             GameInfo()
-                : pathName(), gameName(), hostVersion(), gameId(0), hostTime(0), isFinished(false), slots(),
+                : pathName(), gameName(), hostVersion(), gameId(0), hostTime(0), isFinished(false), fileWarningDisabled(false), slots(),
                   missingFiles(), conflictSlots()
                 { }
         };

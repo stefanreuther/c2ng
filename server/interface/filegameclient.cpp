@@ -90,6 +90,7 @@ server::interface::FileGameClient::unpackGameInfo(GameInfo& result, const afl::d
     result.gameId     = safeToInteger(a("game"));
     result.hostTime   = safeToInteger(a("hosttime"));
     result.isFinished = safeToInteger(a("finished")) != 0;
+    result.fileWarningDisabled = safeToInteger(a("nofilewarning")) != 0;
 
     {
         Access slots = a("races");

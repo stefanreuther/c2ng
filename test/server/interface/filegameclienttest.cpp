@@ -31,6 +31,7 @@ namespace {
         h->setNew("hostversion", new StringValue("Host 2.0"));
         h->setNew("game", new StringValue("7"));
         h->setNew("finished", new StringValue("0"));
+        h->setNew("nofilewarning", new StringValue("1"));
         h->setNew("hosttime", new StringValue("12324"));
         h->setNew("missing", new VectorValue(Vector::create(Segment().pushBackString("xyplan.dat"))));
         h->setNew("conflict", new VectorValue(Vector::create(Segment().pushBackInteger(3))));
@@ -101,6 +102,7 @@ AFL_TEST("server.interface.FileGameClient", a)
         a.checkEqual("23. slots",         gi.slots[1].first, 3);
         a.checkEqual("24. slots",         gi.slots[1].second, "Bird");
         a.checkEqual("25. isFinished",    gi.isFinished, false);
+        a.checkEqual("26. fileWarningDisabled", gi.fileWarningDisabled, true);
     }
 
     // getGameInfo - answer with bogus value (must not crash)

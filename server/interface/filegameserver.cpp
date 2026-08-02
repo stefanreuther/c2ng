@@ -127,13 +127,15 @@ server::interface::FileGameServer::packGameInfo(const FileGame::GameInfo& info)
        @key hostversion:Str  (host version in format "PHost 3.4e")
        @key game:GID         (game ID**)
        @key finished:Int     (0=running, 1=finished**)
+       @key nofilewarning:Int (0=normal, 1=warning for missing files disabled**)
        @key hosttime:Int     (next host time**)
        @key races:StrHash    (maps race numbers to race names for all played races)
        @key missing:StrList  (names of missing/not uploaded game files)
        @key conflict:IntList (list of races that have conflicting data)
 
        ** These are actually directory properties provided by the Host service (see {PROPSET}).
-       Therefore, the "unset" value is an empty string, not 0. */
+       Therefore, the "unset" value can be an empty string.
+       For c2ng, it is always a proper integer. */
     Hash::Ref_t h = Hash::create();
     h->setNew("path", makeStringValue(info.pathName));
     h->setNew("name", makeStringValue(info.gameName));
@@ -141,6 +143,7 @@ server::interface::FileGameServer::packGameInfo(const FileGame::GameInfo& info)
     h->setNew("game", makeIntegerValue(info.gameId));
     h->setNew("hosttime", makeIntegerValue(info.hostTime));
     h->setNew("finished", makeIntegerValue(info.isFinished));
+    h->setNew("nofilewarning", makeIntegerValue(info.fileWarningDisabled));
 
     {
         Vector::Ref_t vec = Vector::create();

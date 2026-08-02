@@ -68,6 +68,7 @@ AFL_TEST("server.interface.FileGameServer:commands", a)
         gi.gameId = 99;
         gi.hostTime = 13579;
         gi.isFinished = false;
+        gi.fileWarningDisabled = true;
         gi.slots.push_back(FileGame::Slot_t(2, "Liz"));
         gi.slots.push_back(FileGame::Slot_t(9, "Bot"));
         gi.missingFiles.push_back("race.nm");
@@ -99,6 +100,7 @@ AFL_TEST("server.interface.FileGameServer:commands", a)
         a.checkEqual("25. conflict",    ap("conflict")[0].toInteger(), 2);
         a.checkEqual("26. conflict",    ap("conflict")[1].toInteger(), 3);
         a.checkEqual("27. conflict",    ap("conflict")[2].toInteger(), 5);
+        a.checkEqual("28. nofilewarning", ap("nofilewarning").toInteger(), 1);
         mock.checkFinish();
     }
 
@@ -113,6 +115,7 @@ AFL_TEST("server.interface.FileGameServer:commands", a)
         gi->gameId = 99;
         gi->hostTime = 13579;
         gi->isFinished = false;
+        gi->fileWarningDisabled = true;
         mock.provideReturnValue<FileGame::GameInfo*>(gi.release());
 
         gi.reset(new FileGame::GameInfo());
@@ -121,6 +124,7 @@ AFL_TEST("server.interface.FileGameServer:commands", a)
         gi->gameId = 77;
         gi->hostTime = 0;
         gi->isFinished = true;
+        gi->fileWarningDisabled = false;
         mock.provideReturnValue<FileGame::GameInfo*>(gi.release());
 
         mock.expectCall("listGameInfo(q)");
@@ -134,6 +138,9 @@ AFL_TEST("server.interface.FileGameServer:commands", a)
         a.checkEqual("43. finished", ap[0]("finished").toInteger(), 0);
         a.checkEqual("44. path",     ap[1]("path").toString(), "q/2");
         a.checkEqual("45. finished", ap[1]("finished").toInteger(), 1);
+
+        a.checkEqual("46. nofilewarning", ap[0]("nofilewarning").toInteger(), 1);
+        a.checkEqual("47. nofilewarning", ap[1]("nofilewarning").toInteger(), 0);
 
         mock.checkFinish();
     }
@@ -295,6 +302,7 @@ AFL_TEST("server.interface.FileGameServer:roundtrip", a)
         gi.gameId = 99;
         gi.hostTime = 13579;
         gi.isFinished = false;
+        gi.fileWarningDisabled = true;
         gi.slots.push_back(FileGame::Slot_t(2, "Liz"));
         gi.missingFiles.push_back("race.nm");
         gi.conflictSlots.push_back(5);
@@ -317,6 +325,7 @@ AFL_TEST("server.interface.FileGameServer:roundtrip", a)
         a.checkEqual("12. missingFiles",  out.missingFiles[0], "race.nm");
         a.checkEqual("13. conflictSlots", out.conflictSlots.size(), 1U);
         a.checkEqual("14. conflictSlots", out.conflictSlots[0], 5);
+        a.checkEqual("15. fileWarningDisabled", out.fileWarningDisabled, true);
         mock.checkFinish();
     }
 
@@ -331,6 +340,7 @@ AFL_TEST("server.interface.FileGameServer:roundtrip", a)
         gi->gameId = 99;
         gi->hostTime = 13579;
         gi->isFinished = false;
+        gi->fileWarningDisabled = false;
         mock.provideReturnValue<FileGame::GameInfo*>(gi.release());
 
         mock.expectCall("listGameInfo(q)");
@@ -342,6 +352,7 @@ AFL_TEST("server.interface.FileGameServer:roundtrip", a)
         a.checkNonNull("32. out",    out[0]);
         a.checkEqual("33. pathName", out[0]->pathName, "q/1");
         a.checkEqual("34. gameId",   out[0]->gameId, 99);
+        a.checkEqual("35. fileWarningDisabled", out[0]->fileWarningDisabled, false);
 
         mock.checkFinish();
     }

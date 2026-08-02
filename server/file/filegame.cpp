@@ -44,6 +44,7 @@ namespace {
         out.gameId       = safeToInteger(dir.getProperty("prop:game"));
         out.hostTime     = safeToInteger(dir.getProperty("prop:hosttime"));
         out.isFinished   = safeToInteger(dir.getProperty("prop:finished")) != 0;
+        out.fileWarningDisabled = safeToInteger(dir.getProperty("prop:nofilewarning")) != 0;
         out.slots        = in.slots;
         out.missingFiles = in.missingFiles;
         out.conflictSlots.clear();
