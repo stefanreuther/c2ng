@@ -33,23 +33,6 @@ namespace {
         out.keyId = in.keyId;
     }
 
-    void copyGameInfo(server::interface::FileGame::GameInfo& out,
-                      const server::file::GameStatus::GameInfo& in,
-                      const String_t& path,
-                      const server::file::DirectoryItem& dir)
-    {
-        out.pathName     = path;
-        out.gameName     = dir.getProperty("prop:name");
-        out.hostVersion  = in.hostVersion;
-        out.gameId       = safeToInteger(dir.getProperty("prop:game"));
-        out.hostTime     = safeToInteger(dir.getProperty("prop:hosttime"));
-        out.isFinished   = safeToInteger(dir.getProperty("prop:finished")) != 0;
-        out.fileWarningDisabled = safeToInteger(dir.getProperty("prop:nofilewarning")) != 0;
-        out.slots        = in.slots;
-        out.missingFiles = in.missingFiles;
-        out.conflictSlots.clear();
-    }
-
     bool matchKey(const server::interface::FileGame::Filter& filter, const server::file::GameStatus::KeyInfo& in)
     {
         if (const String_t* p = filter.keyId.get()) {
@@ -198,4 +181,20 @@ server::file::FileGame::listKeyInfo(const String_t path, const Filter& filter, a
             }
         }
     }
+}
+
+void
+server::file::FileGame::copyGameInfo(GameInfo& out, const GameStatus::GameInfo& in, const String_t& pathName, const DirectoryItem& dir)
+{
+    out.pathName     = pathName;
+    out.gameName     = dir.getProperty("prop:name");
+    out.hostVersion  = in.hostVersion;
+    out.userId       = dir.getOwner();
+    out.gameId       = safeToInteger(dir.getProperty("prop:game"));
+    out.hostTime     = safeToInteger(dir.getProperty("prop:hosttime"));
+    out.isFinished   = safeToInteger(dir.getProperty("prop:finished")) != 0;
+    out.fileWarningDisabled = safeToInteger(dir.getProperty("prop:nofilewarning")) != 0;
+    out.slots        = in.slots;
+    out.missingFiles = in.missingFiles;
+    out.conflictSlots.clear();
 }

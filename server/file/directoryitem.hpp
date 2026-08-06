@@ -236,6 +236,20 @@ namespace server { namespace file {
             \return SnapshotHandler as provided by DirectoryHandler::getSnapshotHandler(); can be null */
         DirectoryHandler::SnapshotHandler* getSnapshotHandler();
 
+        /** Get path name.
+            \return full path name, e.g. "u/fred". */
+        String_t getPathName() const;
+
+        /** Convert permissions string to permission set.
+            \param str String
+            \return set */
+        static Permissions_t getPermissionsFromString(const String_t& str);
+
+        /** Convert permission set to string.
+            \param p Permissions
+            \return string */
+        static String_t getStringFromPermissions(Permissions_t p);
+
      private:
         typedef std::map<String_t, String_t> ControlInfo_t;
         DirectoryItem* m_parent;
@@ -261,10 +275,6 @@ namespace server { namespace file {
         void updateOwner();
 
         void removeSystemContent(Root& root);
-
-        // Utilities
-        static Permissions_t getPermissionsFromString(const String_t& str);
-        static String_t getStringFromPermissions(Permissions_t p);
     };
 
 } }

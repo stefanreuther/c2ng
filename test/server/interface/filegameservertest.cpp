@@ -65,6 +65,7 @@ AFL_TEST("server.interface.FileGameServer:commands", a)
         gi.pathName = "p";
         gi.gameName = "g";
         gi.hostVersion = "Gh 3";
+        gi.userId = "fred";
         gi.gameId = 99;
         gi.hostTime = 13579;
         gi.isFinished = false;
@@ -101,6 +102,7 @@ AFL_TEST("server.interface.FileGameServer:commands", a)
         a.checkEqual("26. conflict",    ap("conflict")[1].toInteger(), 3);
         a.checkEqual("27. conflict",    ap("conflict")[2].toInteger(), 5);
         a.checkEqual("28. nofilewarning", ap("nofilewarning").toInteger(), 1);
+        a.checkEqual("29. user",        ap("user").toString(), "fred");
         mock.checkFinish();
     }
 
@@ -299,6 +301,7 @@ AFL_TEST("server.interface.FileGameServer:roundtrip", a)
         gi.pathName = "p";
         gi.gameName = "g";
         gi.hostVersion = "HV 2.0";
+        gi.userId = "barney";
         gi.gameId = 99;
         gi.hostTime = 13579;
         gi.isFinished = false;
@@ -326,6 +329,7 @@ AFL_TEST("server.interface.FileGameServer:roundtrip", a)
         a.checkEqual("13. conflictSlots", out.conflictSlots.size(), 1U);
         a.checkEqual("14. conflictSlots", out.conflictSlots[0], 5);
         a.checkEqual("15. fileWarningDisabled", out.fileWarningDisabled, true);
+        a.checkEqual("16. userId",        out.userId, "barney");
         mock.checkFinish();
     }
 

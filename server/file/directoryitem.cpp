@@ -411,7 +411,6 @@ void
 server::file::DirectoryItem::listPermissions(std::vector<server::interface::FileBase::Permission>& result) const
 {
     // ex UserDirectory::listPermissions
-    // ASSERT(wasRead());
     for (ControlInfo_t::const_iterator i = m_controlInfo.begin(), e = m_controlInfo.end(); i != e; ++i) {
         if (i->first.size() > 6 && i->first.compare(0, 6, "perms:", 6) == 0) {
             result.push_back(server::interface::FileBase::Permission(i->first.substr(6), i->second));
@@ -424,7 +423,6 @@ void
 server::file::DirectoryItem::setPermission(String_t userId, String_t permission)
 {
     // ex UserDirectory::setPermissions
-    // ASSERT(wasRead());
     setProperty("perms:" + userId, getStringFromPermissions(getPermissionsFromString(permission)));
 }
 
@@ -433,7 +431,6 @@ int
 server::file::DirectoryItem::getVisibilityLevel() const
 {
     // ex UserDirectory::getVisibilityLevel
-    // ASSERT(wasRead());
     // FIXME: this works correctly as long as we have no permissions that are lexically before '*'
     for (ControlInfo_t::const_iterator i = m_controlInfo.begin(), e = m_controlInfo.end(); i != e; ++i) {
         if (i->first.size() > 6 && i->first.compare(0, 6, "perms:", 6) == 0) {
@@ -477,6 +474,22 @@ server::file::DirectoryHandler::SnapshotHandler*
 server::file::DirectoryItem::getSnapshotHandler()
 {
     return m_handler->getSnapshotHandler();
+}
+
+// Get path name.
+String_t
+server::file::DirectoryItem::getPathName() const
+{
+    String_t result;
+    const DirectoryItem* p = this;
+    while (p->m_parent != 0) {
+        if (p != this) {
+            result.insert(0, "/");
+        }
+        result.insert(0, p->getName());
+        p = p->m_parent;
+    }
+    return result;
 }
 
 /** Load control file. */

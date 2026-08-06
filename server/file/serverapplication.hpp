@@ -37,6 +37,7 @@ namespace server { namespace file {
      private:
         afl::net::Name m_listenAddress;
         String_t m_rootDirectory;                    // ex arg_basedir
+        String_t m_shareableDirectories;
         afl::io::Stream::FileSize_t m_maxFileSize;   // ex arg_file_size_limit
         afl::async::Interrupt& m_interrupt;
         bool m_gcEnabled;

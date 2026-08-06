@@ -51,4 +51,14 @@ AFL_TEST("server.file.Root", a)
 
     testee.setMaxFileSize(16777216);
     a.checkEqual("11. getMaxFileSize", testee.getMaxFileSize(), 16777216U);
+
+    testee.setShareableDirectories("a; b/c");
+    a.check("21. share a",     testee.isShareableDirectory("a"));
+    a.check("22. share a/b",   testee.isShareableDirectory("a/b"));
+    a.check("23. share ab",   !testee.isShareableDirectory("ab"));
+    a.check("24. share b",    !testee.isShareableDirectory("b"));
+    a.check("25. share b/c",   testee.isShareableDirectory("b/c"));
+    a.check("26. share b/c/d", testee.isShareableDirectory("b/c/d"));
+    a.check("27. share c",    !testee.isShareableDirectory("c"));
+    a.check("28. share x",    !testee.isShareableDirectory("x"));
 }

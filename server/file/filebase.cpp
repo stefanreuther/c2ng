@@ -5,6 +5,7 @@
 
 #include <stdexcept>
 #include "server/file/filebase.hpp"
+
 #include "afl/io/constmemorystream.hpp"
 #include "afl/io/textfile.hpp"
 #include "server/errors.hpp"
@@ -13,6 +14,7 @@
 #include "server/file/pathresolver.hpp"
 #include "server/file/root.hpp"
 #include "server/file/session.hpp"
+#include "server/file/sharestore.hpp"
 #include "server/types.hpp"
 #include "util/configurationfile.hpp"
 
@@ -274,6 +276,15 @@ server::file::FileBase::removeFile(String_t fileName)
     // @change c2file-ng has different access checking
     PathResolver res(m_root, m_root.rootDirectory(), m_session.getUser());
     Item& it = res.resolveToItem(fileName, DirectoryItem::AllowWrite);
+
+    if (DirectoryItem* dir = dynamic_cast<DirectoryItem*>(&it)) {
+        // If it's a directory, and we estimate the removal to succeed, remove file shares.
+        // If we estimate it to fail, removing the file shares would create an inconsistency.
+        dir->readContent(m_root);
+        if (dir->getNumDirectories() == 0 && dir->getNumFiles() == 0) {
+            removeFileShares(*dir);
+        }
+    }
     res.getDirectory().removeItem(m_root, &it);
 }
 
@@ -328,6 +339,7 @@ server::file::FileBase::removeDirectory(String_t dirName)
     // We can therefore delete them recursively by just going backwards.
     for (size_t i = dirs.size(); i > 0; --i) {
         dirs[i-1]->removeUserContent(m_root);
+        removeFileShares(*dirs[i-1]);
     }
 
     // Finally, delete the directory itself
@@ -347,6 +359,22 @@ server::file::FileBase::setDirectoryPermissions(String_t dirName, String_t userI
     DirectoryItem& dir = res.resolveToDirectory(dirName, DirectoryItem::AllowAccess);
     dir.readContent(m_root);
     dir.setPermission(userId, permission);
+
+    // Publish change
+    const String_t dirOwner = dir.getOwner();
+    if (m_root.isShareableDirectory(dirName) && userId != dirOwner) {
+        const DirectoryItem::Permissions_t perms = DirectoryItem::getPermissionsFromString(permission);
+        const bool publish = perms.contains(DirectoryItem::AllowList) && perms.contains(DirectoryItem::AllowRead);
+
+        ShareStore st;
+        st.load(userId, m_root);
+        if (publish) {
+            st.addShare(dirName, dirOwner);
+        } else {
+            st.removeShare(dirName);
+        }
+        st.saveIfModified(userId, m_root);
+    }
 }
 
 server::file::FileBase::Info
@@ -410,4 +438,31 @@ server::file::FileBase::describeItem(Item& it)
         result.type = IsUnknown;
     }
     return result;
+}
+
+void
+server::file::FileBase::removeFileShares(DirectoryItem& it)
+{
+    // This is the simplest implementation possible.
+    // Possible optimisation 1: collect all ShareStore objects, and write them back as a block after completing the directory removal.
+    //   For now, we execute every permission removal immediately.
+    //   This reduces the risk of leaving a partial directory removal
+    //   (e.g. crash midway in a tree removal, half of directories already gone, permission removal not yet executed).
+    // Possible optimisation 2: cache the ShareStore objects to save the load() operations.
+    //   I estimate the gain to be minor.
+    //   On CA file system, content will already be cached, so the only thing effectively saved is the parsing.
+    const String_t dirName = it.getPathName();
+    if (m_root.isShareableDirectory(dirName)) {
+        it.readContent(m_root);
+
+        std::vector<server::interface::FileBase::Permission> perms;
+        it.listPermissions(perms);
+
+        for (size_t i = 0; i < perms.size(); ++i) {
+            ShareStore st;
+            st.load(perms[i].userId, m_root);
+            st.removeShare(dirName);
+            st.saveIfModified(perms[i].userId, m_root);
+        }
+    }
 }

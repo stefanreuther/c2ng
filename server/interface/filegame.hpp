@@ -32,6 +32,7 @@ namespace server { namespace interface {
             String_t pathName;                          /**< Path name (path). */
             String_t gameName;                          /**< Game name (name). */
             String_t hostVersion;                       /**< Host version if known (hostversion). */
+            String_t userId;                            /**< User Id owning this game directory (not the game!). */
             int32_t gameId;                             /**< Game Id if known (game). */
             int32_t hostTime;                           /**< Next host time (hosttime). */
             bool isFinished;                            /**< true if game is finished (finished). */
@@ -41,7 +42,7 @@ namespace server { namespace interface {
             afl::data::IntegerList_t conflictSlots;     /**< List of conflicting races (conflict). */
 
             GameInfo()
-                : pathName(), gameName(), hostVersion(), gameId(0), hostTime(0), isFinished(false), fileWarningDisabled(false), slots(),
+                : pathName(), gameName(), hostVersion(), userId(), gameId(0), hostTime(0), isFinished(false), fileWarningDisabled(false), slots(),
                   missingFiles(), conflictSlots()
                 { }
         };

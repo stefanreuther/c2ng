@@ -15,7 +15,10 @@
 #include "server/file/internaldirectoryhandler.hpp"
 #include "server/file/root.hpp"
 #include "server/file/session.hpp"
+#include "server/file/sharestore.hpp"
 #include <stdexcept>
+
+using server::file::ShareStore;
 
 #define AFL_CHECK_THROWS_CODE(a, call, code)                            \
                               do {                                      \
@@ -438,6 +441,47 @@ AFL_TEST("server.file.FileBase:directory-properties:permissions", a)
     AFL_CHECK_THROWS_CODE(a("29. setDirectoryProperty"), testee.setDirectoryProperty("listable", "p", "v"),         "403");
     AFL_CHECK_THROWS_CODE(a("30. setDirectoryProperty"), testee.setDirectoryProperty("readable/missing", "p", "v"), "403");
     AFL_CHECK_THROWS_CODE(a("31. setDirectoryProperty"), testee.setDirectoryProperty("listable/missing", "p", "v"), "404");
+}
+
+/** Test directory permissions that turn into share. */
+AFL_TEST("server.file.FileBase:directory-properties:share", a)
+{
+    // Test setup
+    Testbench tb;
+    tb.root.setShareableDirectories("u");
+    server::file::FileBase testee(tb.session, tb.root);
+    testee.createDirectory("u");
+    testee.createDirectory("x");
+    testee.createDirectoryAsUser("u/one", "one");
+    testee.createDirectoryAsUser("x/one", "one");
+    testee.createDirectory("u/one/sub");
+    testee.createDirectory("x/one/sub");
+
+    testee.setDirectoryPermissions("u/one/sub", "two", "rl");
+    testee.setDirectoryPermissions("x/one/sub", "two", "rl");
+
+    // Verify that share for u/one/sub was created
+    {
+        server::file::ShareStore st;
+        st.load("two", tb.root);
+        a.checkEqual("01. num shares", st.getNumShares(), 1U);
+        a.checkEqual("02. path", st.getSharePathName(st.getShareByIndex(0)), "u/one/sub");
+        a.checkEqual("03. user", st.getShareOwner(st.getShareByIndex(0)), "one");
+    }
+
+    // Remove permissions, add self permission - this must leave us with no shares for either user
+    testee.setDirectoryPermissions("u/one/sub", "two", "0");
+    testee.setDirectoryPermissions("u/one/sub", "one", "rl");
+    {
+        server::file::ShareStore st;
+        st.load("two", tb.root);
+        a.checkEqual("01. num shares", st.getNumShares(), 0U);
+    }
+    {
+        server::file::ShareStore st;
+        st.load("one", tb.root);
+        a.checkEqual("01. num shares", st.getNumShares(), 0U);
+    }
 }
 
 /** Test property access vs. file */
@@ -902,6 +946,75 @@ AFL_TEST("server.file.FileBase:removeFile:non-empty-dir:extra-file", a)
     AFL_CHECK_THROWS_CODE(a("21. removeFile"), testee.removeFile("a/b"), "403");
 }
 
+/** Test removal of empty directory, file share is removed. */
+AFL_TEST("server.file.FileBase:removeFile:share-removal", a)
+{
+    using server::interface::FileBase;
+
+    Testbench tb;
+    server::file::FileBase testee(tb.session, tb.root);
+
+    // Create stuff
+    tb.root.setShareableDirectories("a");
+    testee.createDirectoryAsUser("a", "u100");
+    testee.createDirectory("a/b");
+    testee.setDirectoryPermissions("a/b", "u200", "rl");
+
+    // Verify that share exists
+    {
+        ShareStore st;
+        st.load("u200", tb.root);
+        a.checkEqual("01. num", st.getNumShares(), 1U);
+        a.checkEqual("02. path", st.getSharePathName(st.getShareByIndex(0)), "a/b");
+    }
+
+    // Remove directory
+    testee.removeFile("a/b");
+
+    // Verify that share is gone
+    {
+        ShareStore st;
+        st.load("u200", tb.root);
+        a.checkEqual("11. num", st.getNumShares(), 0U);
+    }
+}
+
+/** Test failure to remove non-empty directory, file share is not removed. */
+AFL_TEST("server.file.FileBase:removeFile:share-removal:error", a)
+{
+    using server::interface::FileBase;
+
+    Testbench tb;
+    server::file::FileBase testee(tb.session, tb.root);
+
+    // Create stuff
+    tb.root.setShareableDirectories("a");
+    testee.createDirectoryAsUser("a", "u100");
+    testee.createDirectory("a/b");
+    testee.setDirectoryPermissions("a/b", "u200", "rl");
+    testee.putFile("a/b/t.txt", "hello");
+
+    // Verify that share exists
+    {
+        ShareStore st;
+        st.load("u200", tb.root);
+        a.checkEqual("01. num", st.getNumShares(), 1U);
+        a.checkEqual("02. path", st.getSharePathName(st.getShareByIndex(0)), "a/b");
+    }
+
+    // Remove directory
+    AFL_CHECK_THROWS(a("11. throws"), testee.removeFile("a/b"), std::runtime_error);
+
+    // Verify that share and file are still there
+    {
+        ShareStore st;
+        st.load("u200", tb.root);
+        a.checkEqual("21. num", st.getNumShares(), 1U);
+        a.checkEqual("22. path", st.getSharePathName(st.getShareByIndex(0)), "a/b");
+    }
+    a.checkEqual("31. file", testee.getFile("a/b/t.txt"), "hello");
+}
+
 /** Test removal of a directory tree, base case. */
 AFL_TEST("server.file.FileBase:removeDirectory", a)
 {
@@ -1077,6 +1190,39 @@ AFL_TEST("server.file.FileBase:removeDirectory:permissions", a)
     AFL_CHECK_THROWS_CODE(a("22. removeDirectory"), testee.removeDirectory("listable/d"),  "403");
     AFL_CHECK_THROWS_CODE(a("23. removeDirectory"), testee.removeDirectory("listable/nx"), "404");
     AFL_CHECK_THROWS_CODE(a("24. removeDirectory"), testee.removeDirectory("listable/nx/nx"), "404");
+}
+
+/** Test removeDirectory(), removal of file shares. */
+AFL_TEST("server.file.FileBase:removeDirectory:share-removal", a)
+{
+    Testbench tb;
+    server::file::FileBase testee(tb.session, tb.root);
+
+    tb.root.setShareableDirectories("u");
+    testee.createDirectory("u");
+    testee.createDirectoryAsUser("u/home", "u100");
+    testee.createDirectory("u/home/pub");
+    testee.createDirectory("u/home/pub/sub");
+    testee.putFile("u/home/pub/sub/f.txt", "hello");
+    testee.setDirectoryPermissions("u/home/pub", "u200", "rl");
+
+    // Verify that share exists
+    {
+        ShareStore st;
+        st.load("u200", tb.root);
+        a.checkEqual("01. num", st.getNumShares(), 1U);
+        a.checkEqual("02. path", st.getSharePathName(st.getShareByIndex(0)), "u/home/pub");
+    }
+
+    // Remove directory
+    testee.removeDirectory("u/home");
+
+    // Verify that share is gone
+    {
+        ShareStore st;
+        st.load("u200", tb.root);
+        a.checkEqual("21. num", st.getNumShares(), 0U);
+    }
 }
 
 /** Test getDiskUsage(). */

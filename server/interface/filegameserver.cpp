@@ -125,6 +125,7 @@ server::interface::FileGameServer::packGameInfo(const FileGame::GameInfo& info)
        @key path:Str         (game directory name)
        @key name:Str         (game name**)
        @key hostversion:Str  (host version in format "PHost 3.4e")
+       @key user:Str         (user owning the game directory)
        @key game:GID         (game ID**)
        @key finished:Int     (0=running, 1=finished**)
        @key nofilewarning:Int (0=normal, 1=warning for missing files disabled**)
@@ -140,6 +141,7 @@ server::interface::FileGameServer::packGameInfo(const FileGame::GameInfo& info)
     h->setNew("path", makeStringValue(info.pathName));
     h->setNew("name", makeStringValue(info.gameName));
     h->setNew("hostversion", makeStringValue(info.hostVersion));
+    h->setNew("user", makeStringValue(info.userId));
     h->setNew("game", makeIntegerValue(info.gameId));
     h->setNew("hosttime", makeIntegerValue(info.hostTime));
     h->setNew("finished", makeIntegerValue(info.isFinished));

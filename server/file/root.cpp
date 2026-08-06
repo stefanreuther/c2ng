@@ -6,6 +6,7 @@
 #include "afl/charset/codepage.hpp"
 #include "afl/io/filemapping.hpp"
 #include "afl/string/format.hpp"
+#include "util/string.hpp"
 
 server::file::Root::Root(DirectoryItem& rootDirectory, afl::base::Ref<afl::io::Directory> defaultSpecificationDirectory)
     : m_log(),
@@ -59,6 +60,25 @@ afl::io::Stream::FileSize_t
 server::file::Root::getMaxFileSize() const
 {
     return m_maxFileSize;
+}
+
+void
+server::file::Root::setShareableDirectories(const String_t& list)
+{
+    m_shareableDirectories = util::parsePath(list, ';');
+}
+
+bool
+server::file::Root::isShareableDirectory(const String_t& dir) const
+{
+    for (size_t i = 0; i < m_shareableDirectories.size(); ++i) {
+        if (const char* p = util::strStartsWith(dir, m_shareableDirectories[i].c_str())) {
+            if (*p == '\0' || *p == '/') {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void

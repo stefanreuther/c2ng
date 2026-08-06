@@ -4,6 +4,7 @@
 #ifndef C2NG_SERVER_FILE_FILEGAME_HPP
 #define C2NG_SERVER_FILE_FILEGAME_HPP
 
+#include "server/file/gamestatus.hpp"
 #include "server/interface/filegame.hpp"
 
 namespace server { namespace file {
@@ -22,6 +23,13 @@ namespace server { namespace file {
         virtual void listGameInfo(String_t path, afl::container::PtrVector<GameInfo>& result);
         virtual void getKeyInfo(String_t path, KeyInfo& result);
         virtual void listKeyInfo(String_t path, const Filter& filter, afl::container::PtrVector<KeyInfo>& result);
+
+        /** Create an interface GameInfo.
+            \param [out] out     Result
+            \param [in]  in      Internal game info
+            \param [in]  path    Path name
+            \param [in]  dir     DirectoryItem (for properties) */
+        static void copyGameInfo(GameInfo& out, const GameStatus::GameInfo& in, const String_t& pathName, const DirectoryItem& dir);
 
      private:
         Session& m_session;

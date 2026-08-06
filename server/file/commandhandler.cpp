@@ -10,11 +10,13 @@
 #include "server/errors.hpp"
 #include "server/file/filebase.hpp"
 #include "server/file/filegame.hpp"
+#include "server/file/fileshareimpl.hpp"
 #include "server/file/filesnapshot.hpp"
 #include "server/file/root.hpp"
 #include "server/file/session.hpp"
 #include "server/interface/filebaseserver.hpp"
 #include "server/interface/filegameserver.hpp"
+#include "server/interface/fileshareserver.hpp"
 #include "server/interface/filesnapshotserver.hpp"
 #include "server/types.hpp"
 
@@ -64,6 +66,11 @@ server::file::CommandHandler::handleCommand(const String_t& upcasedCommand, inte
         ok = server::interface::FileGameServer(game).handleCommand(upcasedCommand, args, result);
     }
     if (!ok) {
+        // SHARE commands
+        FileShareImpl share(m_session, m_root);
+        ok = server::interface::FileShareServer(share).handleCommand(upcasedCommand, args, result);
+    }
+    if (!ok) {
         // SNAPSHOT commands
         FileSnapshot snap(m_session, m_root);
         ok = server::interface::FileSnapshotServer(snap).handleCommand(upcasedCommand, args, result);
@@ -104,6 +111,9 @@ server::file::CommandHandler::getHelp()
         "SNAPSHOTCP old new\n"
         "SNAPSHOTRM name\n"
         "SNAPSHOTLIST\n"
+        "SHARESEQ user\n"
+        "SHARELS user\n"
+        "SHARELSGAME user\n"
         "This is c2file-ng\n";
 }
 

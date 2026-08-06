@@ -131,6 +131,7 @@ server::file::ServerApplication::ServerApplication(afl::sys::Environment& env, a
     : Application(LOG_NAME, "FILE", env, fs, net),
       m_listenAddress(DEFAULT_ADDRESS, FILE_PORT),
       m_rootDirectory("."),
+      m_shareableDirectories(),
       m_maxFileSize(10UL*1024*1024),
       m_interrupt(intr),
       m_gcEnabled(true)
@@ -165,6 +166,7 @@ server::file::ServerApplication::serverMain()
     Root root(item, defaultSpecDirectory);
     root.log().addListener(log());
     root.setMaxFileSize(m_maxFileSize);
+    root.setShareableDirectories(m_shareableDirectories);
 
     // Protocol Handler
     server::common::SessionProtocolHandlerFactory<Root, Session, afl::net::resp::ProtocolHandler, CommandHandler> factory(root);
@@ -222,6 +224,15 @@ server::file::ServerApplication::handleConfiguration(const String_t& key, const 
         /* @q File.Threads:Int (Config), HostFile.Threads:Int (Config)
            Ignored in c2file-ng for compatibility reasons.
            Number of threads (=maximum number of parallel connections) */
+        return true;
+    } else if (isInstanceOption(key, "SHAREABLE")) {
+        /* @q File.Shareable:Str (Config), HostFile.Shareable:Str (Config)
+           Semicolon-separated list of directories containing potentially shareable directories.
+           If permissions are set on a directory below one of the given paths,
+           those permissions will be made visible on the FileShare (SHARExxx) interface
+           to inform the receiving user.
+           @since PCC2 2.41.5 */
+        m_shareableDirectories = value;
         return true;
     } else {
         return false;

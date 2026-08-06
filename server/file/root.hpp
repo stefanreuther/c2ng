@@ -13,6 +13,7 @@
 #include "afl/string/nulltranslator.hpp"
 #include "game/playerarray.hpp"
 #include "server/common/racenames.hpp"
+#include "afl/data/stringlist.hpp"
 
 namespace server { namespace file {
 
@@ -42,12 +43,17 @@ namespace server { namespace file {
         afl::io::Stream::FileSize_t getMaxFileSize() const;
         void setMaxFileSize(afl::io::Stream::FileSize_t limit);
 
+        void setShareableDirectories(const String_t& list);
+        bool isShareableDirectory(const String_t& dir) const;
+
      private:
         afl::sys::Log m_log;
 
         DirectoryItem& m_rootDirectory;
 
         afl::io::Stream::FileSize_t m_maxFileSize;
+
+        afl::data::StringList_t m_shareableDirectories;
 
         afl::charset::CodepageCharset m_defaultCharset;
 

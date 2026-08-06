@@ -29,6 +29,7 @@ namespace {
         h->setNew("path", new StringValue(path));
         h->setNew("name", new StringValue(name));
         h->setNew("hostversion", new StringValue("Host 2.0"));
+        h->setNew("user", new StringValue("fred"));
         h->setNew("game", new StringValue("7"));
         h->setNew("finished", new StringValue("0"));
         h->setNew("nofilewarning", new StringValue("1"));
@@ -79,6 +80,7 @@ AFL_TEST("server.interface.FileGameClient", a)
         a.checkEqual("06. conflictSlots", gi.conflictSlots.size(), 0U);
         a.checkEqual("07. slots",         gi.slots.size(), 0U);
         a.checkEqual("08. isFinished",    gi.isFinished, false);
+        a.checkEqual("09. userId",        gi.userId, "");
     }
 
     // getGameInfo - real answer
@@ -103,6 +105,7 @@ AFL_TEST("server.interface.FileGameClient", a)
         a.checkEqual("24. slots",         gi.slots[1].second, "Bird");
         a.checkEqual("25. isFinished",    gi.isFinished, false);
         a.checkEqual("26. fileWarningDisabled", gi.fileWarningDisabled, true);
+        a.checkEqual("27. userId",        gi.userId, "fred");
     }
 
     // getGameInfo - answer with bogus value (must not crash)

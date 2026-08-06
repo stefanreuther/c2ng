@@ -9,9 +9,10 @@
 
 namespace server { namespace file {
 
-    class Session;
-    class Root;
+    class DirectoryItem;
     class Item;
+    class Root;
+    class Session;
 
     /** Implementation of FileBase interface for c2file server. */
     class FileBase : public server::interface::FileBase {
@@ -43,6 +44,7 @@ namespace server { namespace file {
      private:
         void createDirectoryCommon(String_t dirName, String_t userId);
         Info describeItem(Item& it);
+        void removeFileShares(DirectoryItem& it);
 
         Session& m_session;
         Root& m_root;

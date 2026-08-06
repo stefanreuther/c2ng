@@ -1294,11 +1294,16 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/host/setup.cpp server/host/setup.hpp \
-    server/file/ca/packfile.cpp server/file/ca/packfile.hpp \
-    server/file/ca/indexfile.cpp server/file/ca/indexfile.hpp \
-    server/file/filesnapshot.cpp server/file/filesnapshot.hpp \
-    server/interface/filesnapshotserver.cpp \
+FILES_serverlib = server/file/fileshareimpl.cpp \
+    server/file/fileshareimpl.hpp server/file/sharestore.cpp \
+    server/file/sharestore.hpp server/interface/fileshareserver.cpp \
+    server/interface/fileshareserver.hpp \
+    server/interface/fileshareclient.cpp \
+    server/interface/fileshareclient.hpp server/interface/fileshare.hpp \
+    server/host/setup.cpp server/host/setup.hpp server/file/ca/packfile.cpp \
+    server/file/ca/packfile.hpp server/file/ca/indexfile.cpp \
+    server/file/ca/indexfile.hpp server/file/filesnapshot.cpp \
+    server/file/filesnapshot.hpp server/interface/filesnapshotserver.cpp \
     server/interface/filesnapshotserver.hpp \
     server/interface/filesnapshotclient.cpp \
     server/interface/filesnapshotclient.hpp \
@@ -1897,7 +1902,11 @@ DEPEND_c2reshack = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/server/host/setuptest.cpp \
+FILES_testsuite = test/server/file/fileshareimpltest.cpp \
+    test/server/file/sharestoretest.cpp \
+    test/server/interface/fileshareservertest.cpp \
+    test/server/interface/fileshareclienttest.cpp \
+    test/server/interface/filesharetest.cpp test/server/host/setuptest.cpp \
     test/game/v3/baseturnloadertest.cpp test/util/connectionprovidertest.cpp \
     test/ui/reshack/sessiontest.cpp test/ui/reshack/rectangletooltest.cpp \
     test/ui/reshack/pipettetooltest.cpp test/ui/reshack/penciltooltest.cpp \
