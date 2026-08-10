@@ -217,7 +217,7 @@ server::host::CommandHandler::getHelp(String_t topic) const
             " PLAYERADD gid uid\n"
             " PLAYERCHECKFILE gid pid name [DIR dir]\n"
             " PLAYERGETDIR gid pid\n"
-            " PLAYERJOIN gid slot uid\n"
+            " PLAYERJOIN gid slot uid [RACE sel]\n"
             " PLAYERLS gid\n"
             " PLAYERRESIGN gid slot uid\n"
             " PLAYERSETDIR gid pid dir\n"

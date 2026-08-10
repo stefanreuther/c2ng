@@ -32,6 +32,9 @@ server::interface::HostPlayerServer::handleCommand(const String_t& upcasedComman
            Join a game.
            Fails if the slot is already taken.
 
+           The optional RACES parameter defines a race selection for games that require one;
+           it is not validated by this command.
+
            Permissions: admin and game owner can join everyone; user can join public/unlisted games.
 
            @err 404 User does not exist (UID does not exist)
