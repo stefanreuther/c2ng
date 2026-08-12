@@ -23,6 +23,7 @@ namespace server { namespace host {
         virtual void handleGameEnd(Game& game, server::interface::HostGame::Type gameType);
         virtual void handleGameNameChange(Game& game, const String_t& newName);
         virtual void handleGameTypeChange(Game& game, server::interface::HostGame::State gameState, server::interface::HostGame::Type gameType);
+        virtual void handleGameJoin(Game& game, User& user);
 
      private:
         server::interface::TalkForum& m_forum;

@@ -295,6 +295,19 @@ server::interface::TalkForumServer::handleCommand(const String_t& upcasedCommand
         int32_t fid = m_implementation.findForum(toString(args.getNext()));
         result.reset(makeIntegerValue(fid));
         return true;
+    } else if (upcasedCommand == "FORUMWATCH") {
+        /* @q FORUMWATCH forum:FID user:UID (Talk Command)
+           Add user as a watcher to the forum.
+           Performs the same operation as "{USERWATCH} FORUM forum",
+           but does not require a user context.
+           @since 2.41.5 */
+        args.checkArgumentCount(2);
+
+        int32_t fid = toInteger(args.getNext());
+        String_t userId = toString(args.getNext());
+        m_implementation.watchForum(fid, userId);
+        result.reset();
+        return true;
     } else {
         return false;
     }

@@ -35,6 +35,8 @@ AFL_TEST_NOARG("server.interface.TalkForum:interface")
             { return 0; }
         virtual int32_t findForum(String_t /*key*/)
             { return 0; }
+        virtual void watchForum(int32_t /*fid*/, String_t /*userId*/)
+            { }
     };
     Tester t;
 }
@@ -63,6 +65,8 @@ AFL_TEST("server.interface.TalkForum:getValue", a)
             { return 0; }
         virtual int32_t findForum(String_t /*key*/)
             { return 0; }
+        virtual void watchForum(int32_t /*fid*/, String_t /*userId*/)
+            { }
     };
 
     {

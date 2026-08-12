@@ -34,6 +34,7 @@ namespace server { namespace talk {
         virtual afl::data::Value* getStickyThreads(int32_t fid, const ListParameters& params);
         virtual afl::data::Value* getPosts(int32_t fid, const ListParameters& params);
         virtual int32_t findForum(String_t key);
+        virtual void watchForum(int32_t fid, String_t userId);
 
         static afl::data::Value* executeListOperation(const ListParameters& params, afl::net::redis::IntegerSetKey key, const Sorter& sorter);
 

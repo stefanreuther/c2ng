@@ -24,12 +24,18 @@
 #include "server/talk/talkpost.hpp"
 #include "server/types.hpp"
 #include <memory>
+#include "server/talk/forum.hpp"
+#include "server/talk/user.hpp"
 
+using afl::data::Access;
 using afl::data::Access;
 using afl::data::Segment;
 using afl::data::Value;
 using afl::data::Vector;
 using afl::data::VectorValue;
+using server::talk::TalkForum;
+using server::talk::TalkGroup;
+using server::talk::TalkPost;
 
 /** Test executeListOperation(). */
 AFL_TEST("server.talk.TalkForum:executeListOperation", a)
@@ -127,11 +133,6 @@ AFL_TEST("server.talk.TalkForum:executeListOperation", a)
 /** Test commands. */
 AFL_TEST("server.talk.TalkForum:basics", a)
 {
-    using server::talk::TalkPost;
-    using server::talk::TalkForum;
-    using server::talk::TalkGroup;
-    using afl::data::Access;
-
     // Infrastructure
     afl::net::redis::InternalDatabase db;
     server::talk::Root root(db, server::talk::Configuration());
@@ -328,11 +329,6 @@ AFL_TEST("server.talk.TalkForum:basics", a)
 /** Test findForum(). */
 AFL_TEST("server.talk.TalkForum:findForum", a)
 {
-    using server::talk::TalkPost;
-    using server::talk::TalkForum;
-    using server::talk::TalkGroup;
-    using afl::data::Access;
-
     // Infrastructure
     afl::net::redis::InternalDatabase db;
     server::talk::Root root(db, server::talk::Configuration());
@@ -357,4 +353,68 @@ AFL_TEST("server.talk.TalkForum:findForum", a)
 
     a.checkEqual("21. find other", TalkForum(rootSession, root).findForum("other"), 0);
     a.checkEqual("22. find other", TalkForum(userSession, root).findForum("other"), 0);
+}
+
+/** Test watchForum(), success case: root. */
+AFL_TEST("server.talk.TalkForum:watchForum:root", a)
+{
+    afl::net::redis::InternalDatabase db;
+    server::talk::Root root(db, server::talk::Configuration());
+    server::talk::Session rootSession;
+
+    const String_t config[] = { "name", "f" };
+    int32_t fid = TalkForum(rootSession, root).add(config);
+    a.checkEqual("01. forum", fid, 1);
+
+    // Success case
+    TalkForum(rootSession, root).watchForum(fid, "a");
+
+    a.check("11. forum watchers", server::talk::Forum(root, fid).watchers().contains("a"));
+    a.check("12. user watches",   server::talk::User(root, "a").watchedForums().contains(fid));
+}
+
+/** Test watchForum(), success case: user. */
+AFL_TEST("server.talk.TalkForum:watchForum:user", a)
+{
+    afl::net::redis::InternalDatabase db;
+    server::talk::Root root(db, server::talk::Configuration());
+    server::talk::Session rootSession;
+    server::talk::Session userSession;
+    userSession.setUser("a");
+
+    const String_t config[] = { "name", "f" };
+    int32_t fid = TalkForum(rootSession, root).add(config);
+    a.checkEqual("01. forum", fid, 1);
+
+    // Success case
+    TalkForum(userSession, root).watchForum(fid, "a");
+
+    a.check("11. forum watchers", server::talk::Forum(root, fid).watchers().contains("a"));
+    a.check("12. user watches",   server::talk::User(root, "a").watchedForums().contains(fid));
+}
+
+/** Test watchForum(), error case: wrong user. */
+AFL_TEST("server.talk.TalkForum:watchForum:error:wrong-user", a)
+{
+    afl::net::redis::InternalDatabase db;
+    server::talk::Root root(db, server::talk::Configuration());
+    server::talk::Session rootSession;
+    server::talk::Session userSession;
+    userSession.setUser("b");
+
+    const String_t config[] = { "name", "f" };
+    int32_t fid = TalkForum(rootSession, root).add(config);
+    a.checkEqual("01. forum", fid, 1);
+
+    AFL_CHECK_THROWS(a("11. failure"), TalkForum(userSession, root).watchForum(fid, "a"), std::runtime_error);
+}
+
+/** Test watchForum(), error case: nonexistant forum. */
+AFL_TEST("server.talk.TalkForum:watchForum:error:no-forum", a)
+{
+    afl::net::redis::InternalDatabase db;
+    server::talk::Root root(db, server::talk::Configuration());
+    server::talk::Session rootSession;
+
+    AFL_CHECK_THROWS(a("01. failure"), TalkForum(rootSession, root).watchForum(7, "a"), std::runtime_error);
 }

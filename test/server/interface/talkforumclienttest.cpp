@@ -268,5 +268,10 @@ AFL_TEST("server.interface.TalkForumClient", a)
     mock.provideNewResult(server::makeIntegerValue(17));
     a.checkEqual("201. findForum", testee.findForum("news"), 17);
 
+    // watchForum
+    mock.expectCall("FORUMWATCH, 99, fred");
+    mock.provideNewResult(0);
+    AFL_CHECK_SUCCEEDS(a("211. watchForum"), testee.watchForum(99, "fred"));
+
     mock.checkFinish();
 }

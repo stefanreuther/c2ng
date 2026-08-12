@@ -16,10 +16,11 @@
 #include "server/host/installer.hpp"
 #include "server/host/root.hpp"
 #include "server/host/session.hpp"
+#include "server/host/talklistener.hpp"
+#include "server/host/user.hpp"
 #include "server/interface/baseclient.hpp"
 #include "server/interface/filebaseclient.hpp"
 #include "server/interface/hostgame.hpp"
-#include "server/host/user.hpp"
 
 using server::host::Game;
 using server::host::Root;
@@ -91,8 +92,8 @@ server::host::HostPlayer::join(int32_t gameId, int32_t slot, String_t userId, Jo
     }
 
     /* Rank limits mus be satisfied */
+    User u(m_root, userId);
     if (!isAdminAccess) {
-        User u(m_root, userId);
         if (!game.isJoinRestrictionSatisfied(u)) {
             throw std::runtime_error(PERMISSION_DENIED);
         }
@@ -122,6 +123,11 @@ server::host::HostPlayer::join(int32_t gameId, int32_t slot, String_t userId, Jo
     // Reconsider scheduler. Joining can turn a game from "all turns in" to "not all turns in"
     // which would defer an early host.
     m_root.handleGameChange(gameId);
+
+    // Forum integration
+    if (TalkListener* t = m_root.getForum()) {
+        t->handleGameJoin(game, u);
+    }
 }
 
 void

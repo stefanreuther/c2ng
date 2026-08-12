@@ -4,9 +4,10 @@
   */
 
 #include "server/host/talkadapter.hpp"
-#include "server/host/game.hpp"
-#include "afl/string/format.hpp"
 #include "afl/string/char.hpp"
+#include "afl/string/format.hpp"
+#include "server/host/game.hpp"
+#include "server/host/user.hpp"
 
 using server::interface::HostGame;
 
@@ -245,3 +246,30 @@ server::host::TalkAdapter::handleGameTypeChange(Game& game, server::interface::H
     }
 }
 
+void
+server::host::TalkAdapter::handleGameJoin(Game& game, User& user)
+{
+    // This functionality originally lived in the front-end, game.cgi:
+    //     if ($pGame->{forum} && srvUserGet($uc, $q->{SESSION_AUTH_UID}, 'joinautowatch', 1)) {
+    //         srvCall($talk, 'USER', $q->{SESSION_AUTH_UID});
+    //         srvCall($talk, 'USERWATCH', 'FORUM', $pGame->{forum});
+    //     }
+
+    // Ignore all failures (in particular, profile value parsing errors, or server not understanding watchForum() command)
+    try {
+        // Get forum Id
+        const int32_t forumId = game.forumId().get();
+        if (forumId == 0) {
+            return;
+        }
+
+        // Get user configuration
+        std::auto_ptr<afl::data::Value> conf(user.getProfileRaw("joinautowatch"));
+        if (conf.get() == 0 || toInteger(conf.get()) != 0) {
+            m_forum.watchForum(forumId, user.getUserId());
+        }
+    }
+    catch (std::runtime_error& e) {
+        // Ignore
+    }
+}

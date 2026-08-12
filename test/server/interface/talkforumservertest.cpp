@@ -113,6 +113,10 @@ namespace {
                 checkCall(Format("findForum(%d)", key));
                 return consumeReturnValue<int>();
             }
+        virtual void watchForum(int32_t fid, String_t userId)
+            {
+                checkCall(Format("watchForum(%d,%s)", fid, userId));
+            }
 
         static String_t formatListParameters(const ListParameters& params)
             {
@@ -290,6 +294,10 @@ AFL_TEST("server.interface.TalkForumServer:commands", a)
     mock.expectCall("getStickyThreads(6,range(10,20),sort(TIME))");
     mock.provideReturnValue<afl::data::Value*>(server::makeIntegerValue(9));
     a.checkEqual("221. forumlssticky", testee.callInt(Segment().pushBackString("forumlssticky").pushBackInteger(6).pushBackString("sort").pushBackString("Time").pushBackString("limit").pushBackInteger(10).pushBackInteger(20)), 9);
+
+    // watchForum
+    mock.expectCall("watchForum(77,barney)");
+    AFL_CHECK_SUCCEEDS(a("231. watchForum"), testee.callVoid(Segment().pushBackString("FORUMWATCH").pushBackInteger(77).pushBackString("barney")));
 
     mock.checkFinish();
 }
@@ -511,6 +519,10 @@ AFL_TEST("server.interface.TalkForumServer:roundtrip", a)
     mock.expectCall("findForum(bugs)");
     mock.provideReturnValue(23);
     a.checkEqual("161. findForum", level4.findForum("bugs"), 23);
+
+    // watchForum
+    mock.expectCall("watchForum(66,wilma)");
+    AFL_CHECK_SUCCEEDS(a("171. watchForum"), level4.watchForum(66, "wilma"));
 
     mock.checkFinish();
 }

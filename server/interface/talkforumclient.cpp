@@ -150,6 +150,12 @@ server::interface::TalkForumClient::findForum(String_t key)
     return m_commandHandler.callInt(Segment().pushBackString("FORUMBYNAME").pushBackString(key));
 }
 
+void
+server::interface::TalkForumClient::watchForum(int32_t fid, String_t userId)
+{
+    return m_commandHandler.callVoid(Segment().pushBackString("FORUMWATCH").pushBackInteger(fid).pushBackString(userId));
+}
+
 server::interface::TalkForum::Info
 server::interface::TalkForumClient::unpackInfo(const afl::data::Value* value)
 {

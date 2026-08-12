@@ -3,14 +3,16 @@
   *  \brief Class server::talk::TalkForum
   */
 
-#include <stdexcept>
 #include "server/talk/talkforum.hpp"
+
+#include <stdexcept>
+#include "server/errors.hpp"
 #include "server/talk/forum.hpp"
+#include "server/talk/message.hpp"
 #include "server/talk/root.hpp"
 #include "server/talk/session.hpp"
 #include "server/talk/topic.hpp"
-#include "server/talk/message.hpp"
-#include "server/errors.hpp"
+#include "server/talk/user.hpp"
 
 namespace {
     void configureForum(server::talk::Forum& f, server::talk::Root& root, afl::base::Memory<const String_t> config)
@@ -187,6 +189,24 @@ int32_t
 server::talk::TalkForum::findForum(String_t key)
 {
     return m_root.forumMap().intField(key).get();
+}
+
+void
+server::talk::TalkForum::watchForum(int32_t fid, String_t userId)
+{
+    Forum f(m_root, fid);
+    if (!f.exists(m_root)) {
+        throw std::runtime_error(FORUM_NOT_FOUND);
+    }
+
+    if (!m_session.isAdmin() && userId != m_session.getUser()) {
+        throw std::runtime_error(PERMISSION_DENIED);
+    }
+
+    User u(m_root, userId);
+    f.watchers().add(userId);
+    u.watchedForums().add(fid);
+    u.notifiedForums().remove(fid);
 }
 
 afl::data::Value*

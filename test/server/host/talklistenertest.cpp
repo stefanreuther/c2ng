@@ -19,6 +19,8 @@ AFL_TEST_NOARG("server.host.TalkListener")
             { }
         virtual void handleGameTypeChange(server::host::Game& /*game*/, server::interface::HostGame::State /*gameState*/, server::interface::HostGame::Type /*gameType*/)
             { }
+        virtual void handleGameJoin(server::host::Game& /*game*/, server::host::User& /*user*/)
+            { }
     };
     Tester t;
 }

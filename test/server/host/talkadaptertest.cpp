@@ -14,17 +14,21 @@
 #include "afl/net/redis/integersetkey.hpp"
 #include "afl/net/redis/internaldatabase.hpp"
 #include "afl/net/redis/stringkey.hpp"
+#include "afl/string/format.hpp"
 #include "afl/test/testrunner.hpp"
 #include "server/host/game.hpp"
 #include "server/host/root.hpp"
+#include "server/host/user.hpp"
 #include "server/interface/mailqueueclient.hpp"
 #include "util/processrunner.hpp"
 #include <map>
 
-using afl::net::redis::StringKey;
 using afl::net::redis::HashKey;
 using afl::net::redis::IntegerSetKey;
+using afl::net::redis::StringKey;
+using afl::string::Format;
 using server::host::Game;
+using server::host::User;
 
 namespace {
     /** Test harness. Aggregates all our objects. */
@@ -53,11 +57,17 @@ namespace {
         Implements the add/configure/getValue operations required for TalkAdapter. */
     class TalkForumMock : public server::interface::TalkForum {
      public:
+        typedef std::map<String_t, String_t> DataMap_t;
+        typedef std::set<String_t> WatchSet_t;
+
         TalkForumMock(afl::test::Assert a)
             : m_assert(a),
               m_forumCounter(0),
               m_forumData()
             { }
+
+        const WatchSet_t& watches() const
+            { return m_watches; }
 
         // TalkForum interface:
         virtual int32_t add(afl::base::Memory<const String_t> config);
@@ -79,12 +89,14 @@ namespace {
             { throw std::runtime_error("unexpected"); }
         virtual int32_t findForum(String_t /*key*/)
             { throw std::runtime_error("unexpected"); }
+        virtual void watchForum(int32_t fid, String_t userId)
+            { m_watches.insert(Format("%d-%s", fid, userId)); }
 
      private:
-        typedef std::map<String_t, String_t> DataMap_t;
         afl::test::Assert m_assert;
         int m_forumCounter;
         afl::container::PtrMap<int, DataMap_t> m_forumData;
+        WatchSet_t m_watches;
     };
 }
 
@@ -341,4 +353,132 @@ AFL_TEST("server.host.TalkAdapter:handleGameTypeChange:normal", a)
     a.checkEqual("11. forum id", HashKey(h.db(), "game:3:settings").intField("forum").get(), fid);
     a.checkEqual("12. parent",   m.getStringValue(fid, "parent"), "active-unlisted");
     a.checkEqual("13. readperm", m.getStringValue(fid, "readperm"), "g:3");
+}
+
+/** Test watchForum, normal case. */
+AFL_TEST("server.host.TalkAdapter:handleGameJoin:normal", a)
+{
+    TestHarness h;
+    TalkForumMock m(a);
+
+    // Create the game
+    StringKey(h.db(), "game:3:name").set("Game");
+    IntegerSetKey(h.db(), "game:all").add(3);
+    Game g(h.root(), 3);
+
+    // Create forum
+    server::host::TalkAdapter(m).handleGameStart(g, server::interface::HostGame::PublicGame);
+    int32_t fid = HashKey(h.db(), "game:3:settings").intField("forum").get();
+    a.checkEqual("01. forum id", fid, 1);
+
+    // Join a player
+    User u(h.root(), "fred");
+    server::host::TalkAdapter(m).handleGameJoin(g, u);
+
+    // Verify
+    a.checkEqual("11. #subs", m.watches().size(), 1U);
+    a.checkEqual("12. user", m.watches().count("1-fred"), 1U);
+}
+
+/** Test watchForum, disabled by user. */
+AFL_TEST("server.host.TalkAdapter:handleGameJoin:disabled-by-user", a)
+{
+    TestHarness h;
+    TalkForumMock m(a);
+
+    // User profile
+    HashKey(h.db(), "user:fred:profile").intField("joinautowatch").set(0);
+
+    // Create the game
+    StringKey(h.db(), "game:3:name").set("Game");
+    IntegerSetKey(h.db(), "game:all").add(3);
+    Game g(h.root(), 3);
+
+    // Create forum
+    server::host::TalkAdapter(m).handleGameStart(g, server::interface::HostGame::PublicGame);
+    int32_t fid = HashKey(h.db(), "game:3:settings").intField("forum").get();
+    a.checkEqual("01. forum id", fid, 1);
+
+    // Join a player
+    User u(h.root(), "fred");
+    server::host::TalkAdapter(m).handleGameJoin(g, u);
+
+    // Verify
+    a.checkEqual("11. #subs", m.watches().size(), 0U);
+}
+
+/** Test watchForum, disabled in default profile. */
+AFL_TEST("server.host.TalkAdapter:handleGameJoin:disabled-default", a)
+{
+    TestHarness h;
+    TalkForumMock m(a);
+
+    // User profile
+    HashKey(h.db(), "default:profile").intField("joinautowatch").set(0);
+
+    // Create the game
+    StringKey(h.db(), "game:3:name").set("Game");
+    IntegerSetKey(h.db(), "game:all").add(3);
+    Game g(h.root(), 3);
+
+    // Create forum
+    server::host::TalkAdapter(m).handleGameStart(g, server::interface::HostGame::PublicGame);
+    int32_t fid = HashKey(h.db(), "game:3:settings").intField("forum").get();
+    a.checkEqual("01. forum id", fid, 1);
+
+    // Join a player
+    User u(h.root(), "fred");
+    server::host::TalkAdapter(m).handleGameJoin(g, u);
+
+    // Verify
+    a.checkEqual("11. #subs", m.watches().size(), 0U);
+}
+
+/** Test watchForum, no forum. */
+AFL_TEST("server.host.TalkAdapter:handleGameJoin:no-forum", a)
+{
+    TestHarness h;
+    TalkForumMock m(a);
+
+    // User profile
+    HashKey(h.db(), "default:profile").intField("joinautowatch").set(0);
+
+    // Create the game
+    StringKey(h.db(), "game:3:name").set("Game");
+    IntegerSetKey(h.db(), "game:all").add(3);
+    Game g(h.root(), 3);
+
+    // Join a player
+    User u(h.root(), "fred");
+    server::host::TalkAdapter(m).handleGameJoin(g, u);
+
+    // Verify
+    a.checkEqual("01. #subs", m.watches().size(), 0U);
+}
+
+/** Test watchForum, disabled by user. */
+AFL_TEST("server.host.TalkAdapter:handleGameJoin:error:bad-config", a)
+{
+    TestHarness h;
+    TalkForumMock m(a);
+
+    // User profile
+    HashKey(h.db(), "user:fred:profile").stringField("joinautowatch").set("boom");     // not an integer, will fail retrieval as integer
+
+    // Create the game
+    StringKey(h.db(), "game:3:name").set("Game");
+    IntegerSetKey(h.db(), "game:all").add(3);
+    Game g(h.root(), 3);
+
+    // Create forum
+    server::host::TalkAdapter(m).handleGameStart(g, server::interface::HostGame::PublicGame);
+    int32_t fid = HashKey(h.db(), "game:3:settings").intField("forum").get();
+    a.checkEqual("01. forum id", fid, 1);
+
+    // Join a player
+    User u(h.root(), "fred");
+    server::host::TalkAdapter(m).handleGameJoin(g, u);
+
+    // Verify
+    a.checkEqual("11. #subs", m.watches().size(), 0U);
 }

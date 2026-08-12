@@ -119,6 +119,12 @@ namespace server { namespace interface {
             \return forum Id, 0 if not found */
         virtual int32_t findForum(String_t key) = 0;
 
+        /** Watch forum (FORUMWATCH).
+            Add user to a forum as a watcher.
+            This is a simplified one-purpose version of USERWATCH that doesn't need a user context.
+            \param fid Forum Id
+            \param userId User Id */
+        virtual void watchForum(int32_t fid, String_t userId) = 0;
 
         /** Get integer value.
             Convenience wrapper for getValue().

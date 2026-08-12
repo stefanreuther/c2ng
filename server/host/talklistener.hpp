@@ -12,6 +12,7 @@
 namespace server { namespace host {
 
     class Game;
+    class User;
 
     /** Listener for forum-related actions. */
     class TalkListener : public afl::base::Deletable {
@@ -47,6 +48,12 @@ namespace server { namespace host {
             \param gameState Game state (game.getState())
             \param gameType  Game type (game.getType()) */
         virtual void handleGameTypeChange(Game& game, server::interface::HostGame::State gameState, server::interface::HostGame::Type gameType) = 0;
+
+        /** Player joined a game.
+            They may need to be subscribed to the forum.
+            \param game      Game
+            \param user      User */
+        virtual void handleGameJoin(Game& game, User& user) = 0;
     };
 
 } }
