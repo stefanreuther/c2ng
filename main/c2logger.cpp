@@ -25,6 +25,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include "afl/string/string.hpp"
+#include "version.hpp"
 
 static String_t arg_logfile;              // "-log="
 static String_t arg_pidfile;              // "-pid="
@@ -421,9 +422,11 @@ int main(int /*argc*/, char** argv)
             }
             arg_listen_host.assign(host_port, delim - host_port);
             arg_listen_port.assign(delim+1);
-        } else if (std::strcmp(p, "-help") == 0) {
-            std::printf("%s: PCC2 Server Control and Logging Utility (c2ng)\n\n"
-                        "c2logger [-opts] COMMAND [ARGS...]\n\n"
+        } else if (std::strcmp(p, "-help") == 0 || std::strcmp(p, "-h") == 0) {
+            std::printf("PCC2 Server Control and Logging Utility v%s - (c) 2010-2026 Stefan Reuther\n\n"
+                        "Usage:\n"
+                        "%s [-opts] COMMAND [ARGS...]\n\n"
+                        "Options:\n"
                         " -log=LOGFILE     Name of logfile (default: COMMAND.log)\n"
                         " -pid=PIDFILE     Name of pidfile (default: none)\n"
                         " -cd=DIR          Working directory for COMMAND\n"
@@ -431,8 +434,9 @@ int main(int /*argc*/, char** argv)
                         " -listen=H:P      Create listen socket on host/port\n"
                         " -limit=BYTES     Rotate logfile after BYTES (default: 10 meg)\n"
                         " -restart, -kill  Restart/kill program (default: start)\n"
-                        " -fg              Remain in foreground (default: background)\n",
-                        progname);
+                        " -fg              Remain in foreground (default: background)\n\n"
+                        "Report bugs to <Streu@gmx.de>\n",
+                        PCC2_VERSION, progname);
             return 0;
         } else if (p[0] == '-') {
             std::fprintf(stderr, "%s: invalid option '%s'\n", progname, p);

@@ -128,7 +128,7 @@ void
 game::maint::dump::Application::help(afl::io::TextWriter& out)
 {
     afl::string::Translator& tx = translator();
-    out.writeLine(Format(tx("PCC2 File Dump Utility %s - (c) 2010-2025 Stefan Reuther"), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 File Dump Utility v%s - (c) 2010-2026 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-tTYPE] FILE [[-tTYPE] FILE...]\n\n"

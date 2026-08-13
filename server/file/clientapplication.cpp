@@ -510,7 +510,7 @@ server::file::ClientApplication::help()
 {
     Translator& tx = translator();
     TextWriter& out = standardOutput();
-    out.writeLine(Format(tx("PCC2 File Client v%s - (c) 2017-2025 Stefan Reuther"), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 File Client v%s - (c) 2017-2026 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-h]\n"

@@ -6,7 +6,7 @@
 use strict;
 use lib '.';
 
-my $YEAR = 2025;
+my $YEAR = 2026;
 my $page_started = 0;
 my $run_started = 0;
 

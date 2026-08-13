@@ -639,7 +639,7 @@ interpreter::ConsoleApplication::help()
                                "-f preexec-load\tPre-execute \"Load\" statements\n"));
 
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format(tx("PCC2 Script Compiler v%s - (c) 2017-2025 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Script Compiler v%s - (c) 2017-2026 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-h]\n"

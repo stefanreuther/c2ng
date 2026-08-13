@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-07-15 21:20+0200\n"
+"PO-Revision-Date: 2026-08-13 18:40+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:390
@@ -40,7 +40,7 @@ msgstr ""
 "%s\n"
 "Fehler bitte melden an <Streu@gmx.de>"
 
-#: game/maint/configurationapplication.cpp:342
+#: game/maint/configurationapplication.cpp:350
 msgid ""
 "\n"
 "Usage:\n"
@@ -72,7 +72,7 @@ msgstr ""
 "  %0$s BEFEHL [-OPTIONEN]\n"
 "\n"
 "%s\n"
-"Report bugs to <Streu@gmx.de>"
+"Fehler bitte melden an <Streu@gmx.de>"
 
 #: game/v3/trn/dumperapplication.cpp:197
 msgid ""
@@ -222,7 +222,7 @@ msgstr "# - Erweiterte Mission"
 msgid "# - Options"
 msgstr "# - Optionen"
 
-#: game/v3/directoryloader.cpp:137
+#: game/v3/directoryloader.cpp:135
 msgid "# Additional commands"
 msgstr "# Zusaetzliche Befehle"
 
@@ -257,7 +257,7 @@ msgstr "%d %s Gruppe%0$!d%!1{n%}"
 msgid "%d %s launcher%!1{s%}"
 msgstr "%d %s Rohr%!1{e%}"
 
-#: game/map/universe.cpp:513
+#: game/map/universe.cpp:511
 msgid "%d %s ship%!1{s%}"
 msgstr "%d %s Schiff%!1{e%}"
 
@@ -384,7 +384,7 @@ msgstr "%d grav. Triebwerk%!1{e%}"
 #: client/tiles/shipmovementtile.cpp:258 client/tiles/shipmovementtile.cpp:289
 #: client/tiles/starchartheadertile.cpp:91
 #: client/widgets/historypositionlistbox.cpp:141
-#: client/widgets/vcrobjectinfo.cpp:148 game/map/ufotype.cpp:343
+#: client/widgets/vcrobjectinfo.cpp:148 game/map/ufotype.cpp:342
 #: game/spec/info/info.cpp:142 game/spec/info/info.cpp:143
 #: game/spec/info/info.cpp:144 game/spec/info/info.cpp:310
 #: game/spec/info/info.cpp:344 game/spec/info/info.cpp:375
@@ -417,11 +417,11 @@ msgstr "%d kt Vorräte pro Zug für %s"
 msgid "%d kt too little"
 msgstr "%d kt zu wenig"
 
-#: game/map/ufotype.cpp:341
+#: game/map/ufotype.cpp:340
 msgid "%d kt/Bidir."
 msgstr "%d kt/bidir."
 
-#: game/map/ufotype.cpp:342
+#: game/map/ufotype.cpp:341
 msgid "%d kt/Enter only"
 msgstr "%d kt/nur Eingang"
 
@@ -719,8 +719,8 @@ msgstr "%d× planen"
 msgid "%d×Ftr"
 msgstr "%d×Jäg"
 
-#: game/proxy/simulationsetupproxy.cpp:1043
-#: game/proxy/simulationsetupproxy.cpp:1083
+#: game/proxy/simulationsetupproxy.cpp:1037
+#: game/proxy/simulationsetupproxy.cpp:1077
 msgid "%s\t(tech %d, K%d, D%d)"
 msgstr "%s\t(Tech %d, K%d, D%d)"
 
@@ -770,7 +770,7 @@ msgstr "%s (Planet #%d)"
 msgid "%s (ship #%d)"
 msgstr "%s (Schiff #%d)"
 
-#: game/map/universe.cpp:504
+#: game/map/universe.cpp:502
 msgid "%s + %d own ship%!1{s%}"
 msgstr "%s + %d eigen%1{es Schiff%|e Schiffe%}"
 
@@ -954,7 +954,7 @@ msgstr "%s:%d: absoluter Link '%s' als <page id> verwendet"
 msgid "%s:%d: cannot use 'next' on first entry"
 msgstr "%s:%d: im ersten Eintrag kann 'next' nicht benutzt werden"
 
-#: game/config/expressionlists.cpp:149 ui/res/directoryprovider.cpp:182
+#: game/config/expressionlists.cpp:153 ui/res/directoryprovider.cpp:182
 msgid "%s:%d: file format error -- line ignored"
 msgstr "%s:%d: Format-Fehler -- Zeile wurde ignoriert"
 
@@ -1103,8 +1103,8 @@ msgid "(available)"
 msgstr "(verfügbar)"
 
 #: client/applicationparameters.cpp:94
-msgid "(c) copyright 2017-2025 Stefan Reuther <streu@gmx.de>"
-msgstr "(c) copyright 2017-2025 Stefan Reuther <streu@gmx.de>"
+msgid "(c) copyright 2017-2026 Stefan Reuther <streu@gmx.de>"
+msgstr "(c) copyright 2017-2026 Stefan Reuther <streu@gmx.de>"
 
 #: share/resource/core_config.q:84
 msgid "(changed)"
@@ -2125,7 +2125,7 @@ msgstr "Basen"
 msgid "Battle %d"
 msgstr "Kampf %d"
 
-#: game/proxy/vcrdatabaseproxy.cpp:494
+#: game/proxy/vcrdatabaseproxy.cpp:492
 msgid "Battle %d of %d"
 msgstr "Kampf %d von %d"
 
@@ -3076,9 +3076,9 @@ msgstr "Arbeite..."
 msgid "Configuration File"
 msgstr "Konfigurationsdatei"
 
-#: game/maint/configurationapplication.cpp:341
-msgid "Configuration Tool v%s - (c) 2018-2025 Stefan Reuther"
-msgstr "Konfigurationswerkzeug v%s - (c) 2018-2025 Stefan Reuther"
+#: game/maint/configurationapplication.cpp:349
+msgid "Configuration Tool v%s - (c) 2018-2026 Stefan Reuther"
+msgstr "Konfigurationswerkzeug v%s - (c) 2018-2026 Stefan Reuther"
 
 #: client/screens/browserscreen.cpp:77
 msgid "Configure"
@@ -3310,7 +3310,7 @@ msgstr "Daten sind abgelaufen"
 msgid "Death Rays"
 msgstr "Todesstrahlen"
 
-#: game/map/universe.cpp:460
+#: game/map/universe.cpp:458
 msgid "Deep Space %s"
 msgstr "Weltraum %s"
 
@@ -4346,11 +4346,11 @@ msgstr "Raumjäger: %d"
 msgid "File"
 msgstr "Datei"
 
-#: game/v3/directoryloader.cpp:670
+#: game/v3/directoryloader.cpp:539
 msgid "File \"%s\" is empty and will be ignored."
 msgstr "Datei \"%s\" ist leer und wird ignoriert."
 
-#: game/v3/directoryloader.cpp:678
+#: game/v3/directoryloader.cpp:547
 msgid "File \"%s\" is stale and will be ignored."
 msgstr "Datei \"%s\" ist veraltet und wird ignoriert."
 
@@ -4358,7 +4358,7 @@ msgstr "Datei \"%s\" ist veraltet und wird ignoriert."
 msgid "File \"%s\" is unchanged."
 msgstr "Datei \"%s\" ist unverändert."
 
-#: game/v3/directoryloader.cpp:554
+#: game/v3/directoryloader.cpp:425
 msgid ""
 "File \"fizz.bin\" not found. Game data may not be usable with other programs."
 msgstr ""
@@ -4452,9 +4452,8 @@ msgid "File format error"
 msgstr "Dateiformat-Fehler"
 
 #: game/pcc/turnloader.cpp:226 game/pcc/turnloader.cpp:235
-#: game/turnloader.cpp:79 game/turnloader.cpp:90
-#: game/v3/directoryloader.cpp:485 game/v3/resultloader.cpp:265
-#: game/v3/resultloader.cpp:275
+#: game/turnloader.cpp:79 game/turnloader.cpp:90 game/v3/baseturnloader.cpp:119
+#: game/v3/resultloader.cpp:197
 msgid "File has been ignored"
 msgstr "Datei wurde ignoriert"
 
@@ -4479,7 +4478,7 @@ msgstr "In Datei fehlt ein erforderlicher Bereich"
 msgid "File is missing required signature"
 msgstr "Datei hat nicht die erforderliche Kennung"
 
-#: game/v3/directoryloader.cpp:339 game/v3/loader.cpp:725
+#: game/v3/directoryloader.cpp:272 game/v3/loader.cpp:725
 #: game/v3/unpacker.cpp:249
 msgid "File is owned by player %d, should be %d"
 msgstr "Datei gehört Spieler %d, erwartet wurde %d"
@@ -4673,7 +4672,7 @@ msgstr "Kommandocode | Verwürfeln"
 msgid "Friendly Codes | Set to..."
 msgstr "Kommandocode | Setze auf..."
 
-#: game/spec/friendlycode.cpp:221
+#: game/spec/friendlycode.cpp:219
 msgid "Friendly code \"%s\" lacking description"
 msgstr "Kommandocode \"%s\" hat keine Beschreibung"
 
@@ -4794,7 +4793,7 @@ msgstr "Trümmer aufsammeln"
 msgid "Gather resources from a planet"
 msgstr "Ressourcen von einem Planeten aufladen"
 
-#: game/maint/configurationapplication.cpp:350
+#: game/maint/configurationapplication.cpp:358
 msgid ""
 "General:\n"
 "--help\tshow help\n"
@@ -4848,7 +4847,7 @@ msgstr ""
 msgid "Generate this character from the following?"
 msgstr "Dieses Zeichen aus den folgenden generieren?"
 
-#: game/pcc/turnloader.cpp:271 game/v3/resultloader.cpp:343
+#: game/pcc/turnloader.cpp:271 game/v3/resultloader.cpp:214
 msgid "Generating turn commands..."
 msgstr "Erzeuge Turn-Kommandos..."
 
@@ -5582,7 +5581,7 @@ msgstr "Ungültiger Dateikopf"
 msgid "Invalid file name"
 msgstr "Ungültiger Dateiname"
 
-#: game/spec/friendlycode.cpp:227
+#: game/spec/friendlycode.cpp:225
 msgid "Invalid flags for friendly code \"%s\""
 msgstr "Ungültige Attribute für Kommandocode \"%s\""
 
@@ -5890,7 +5889,7 @@ msgstr "Aktualisierung der Beschriftung fehlgeschlagen: %s"
 msgid "Labels not available"
 msgstr "Beschriftungen nicht verfügbar"
 
-#: game/config/expressionlists.cpp:297
+#: game/config/expressionlists.cpp:301
 msgid "Last expressions"
 msgstr "Frühere Ausdrücke"
 
@@ -5906,7 +5905,7 @@ msgstr "Letzte bekannte Fracht"
 msgid "Last known friendly code: %s"
 msgstr "Letzter bekannter Kommandocode: %s"
 
-#: game/config/expressionlists.cpp:306
+#: game/config/expressionlists.cpp:310
 msgid "Last queries"
 msgstr "Letzte Abfragen"
 
@@ -6067,19 +6066,19 @@ msgstr "Lade %d Sternbas%1{is%|en%}..."
 msgid "Loading %d visual contact%!1{s%}..."
 msgstr "Lade %d visuelle%1{n Kontakt%| Kontakte%}..."
 
-#: game/pcc/turnloader.cpp:213 game/v3/resultloader.cpp:242
+#: game/pcc/turnloader.cpp:213 game/v3/resultloader.cpp:174
 msgid "Loading %s RST file..."
 msgstr "Lade %s RST-Datei..."
 
-#: game/pcc/turnloader.cpp:221 game/v3/resultloader.cpp:212
+#: game/pcc/turnloader.cpp:221 game/v3/resultloader.cpp:147
 msgid "Loading %s TRN file..."
 msgstr "Lade %s TRN-Datei..."
 
-#: game/v3/directoryloader.cpp:529 game/v3/resultloader.cpp:319
+#: game/v3/baseturnloader.cpp:173
 msgid "Loading %s backup file..."
 msgstr "Lade %s Backup-Datei..."
 
-#: game/v3/directoryloader.cpp:330
+#: game/v3/directoryloader.cpp:263
 msgid "Loading %s data..."
 msgstr "Lade %s Daten..."
 
@@ -6671,7 +6670,7 @@ msgstr "Geld geladen"
 msgid "Money cost"
 msgstr "Geld-Kosten"
 
-#: client/dialogs/referencesortorder.cpp:242
+#: client/dialogs/referencesortorder.cpp:241
 msgid "More..."
 msgstr "Mehr..."
 
@@ -6916,7 +6915,7 @@ msgstr "Keine Ufos"
 msgid "No backup file configured"
 msgstr "Keine Backup-Datei konfiguriert"
 
-#: game/proxy/simulationsetupproxy.cpp:1127
+#: game/proxy/simulationsetupproxy.cpp:1121
 msgid "No base"
 msgstr "Keine Basis"
 
@@ -7499,84 +7498,84 @@ msgid "PCC2"
 msgstr "PCC2"
 
 #: game/sim/consoleapplication.cpp:348
-msgid "PCC2 Battle Simulation Utility v%s - (c) 2020-2025 Stefan Reuther"
-msgstr "PCC2 Schlachtsimulator v%s - (c) 2020-2025 Stefan Reuther"
+msgid "PCC2 Battle Simulation Utility v%s - (c) 2020-2026 Stefan Reuther"
+msgstr "PCC2 Schlachtsimulator v%s - (c) 2020-2026 Stefan Reuther"
 
 #: server/console/consoleapplication.cpp:289
-msgid "PCC2 Console v%s - (c) 2017-2025 Stefan Reuther"
-msgstr "PCC2 Konsole v%s - (c) 2017-2025 Stefan Reuther"
+msgid "PCC2 Console v%s - (c) 2017-2026 Stefan Reuther"
+msgstr "PCC2 Konsole v%s - (c) 2017-2026 Stefan Reuther"
 
 #: server/dbexport/exportapplication.cpp:96
-msgid "PCC2 Database Export v%s - (c) 2017-2025 Stefan Reuther"
-msgstr "PCC2 Datenbank-Export v%s - (c) 2017-2025 Stefan Reuther"
+msgid "PCC2 Database Export v%s - (c) 2017-2026 Stefan Reuther"
+msgstr "PCC2 Datenbank-Export v%s - (c) 2017-2026 Stefan Reuther"
 
 #: util/doc/application.cpp:665
-msgid "PCC2 Documentation Manager v%s - (c) 2021-2025 Stefan Reuther"
-msgstr "PCC2 Dokumentations-Manager v%s - (c) 2021-2025 Stefan Reuther"
+msgid "PCC2 Documentation Manager v%s - (c) 2021-2026 Stefan Reuther"
+msgstr "PCC2 Dokumentations-Manager v%s - (c) 2021-2026 Stefan Reuther"
 
 #: game/interface/exportapplication.cpp:214
-msgid "PCC2 Export v%s - (c) 2017-2025 Stefan Reuther"
-msgstr "PCC2 Export v%s - (c) 2017-2025 Stefan Reuther"
+msgid "PCC2 Export v%s - (c) 2017-2026 Stefan Reuther"
+msgstr "PCC2 Export v%s - (c) 2017-2026 Stefan Reuther"
 
 #: server/file/clientapplication.cpp:513
-msgid "PCC2 File Client v%s - (c) 2017-2025 Stefan Reuther"
-msgstr "PCC2 Datei-Client v%s - (c) 2017-2025 Stefan Reuther"
+msgid "PCC2 File Client v%s - (c) 2017-2026 Stefan Reuther"
+msgstr "PCC2 Datei-Client v%s - (c) 2017-2026 Stefan Reuther"
 
 #: game/maint/dump/application.cpp:131
-msgid "PCC2 File Dump Utility %s - (c) 2010-2025 Stefan Reuther"
-msgstr "PCC2 File Dump Utility %s - (c) 2010-2025 Stefan Reuther"
+msgid "PCC2 File Dump Utility v%s - (c) 2010-2026 Stefan Reuther"
+msgstr "PCC2 File Dump Utility v%s - (c) 2010-2026 Stefan Reuther"
 
 #: game/maint/raterapplication.cpp:107
-msgid "PCC2 Game Difficulty Rater v%s - (c) 2012-2025 Stefan Reuther"
-msgstr "PCC2 Schwierigkeits-Bewertung v%s - (c) 2012-2025 Stefan Reuther"
+msgid "PCC2 Game Difficulty Rater v%s - (c) 2012-2026 Stefan Reuther"
+msgstr "PCC2 Schwierigkeits-Bewertung v%s - (c) 2012-2026 Stefan Reuther"
 
 #: game/maint/sweepapplication.cpp:129
-msgid "PCC2 Game Directory Cleaner v%s - (c) 2010-2025 Stefan Reuther"
-msgstr "PCC2 Spielverzeichnis-Bereiniger v%s - (c) 2010-2025 Stefan Reuther"
+msgid "PCC2 Game Directory Cleaner v%s - (c) 2010-2026 Stefan Reuther"
+msgstr "PCC2 Spielverzeichnis-Bereiniger v%s - (c) 2010-2026 Stefan Reuther"
 
 #: gfx/codec/application.cpp:120
-msgid "PCC2 Graphics Codec Application v%s - (c) 2024-2025 Stefan Reuther"
-msgstr "PCC2 Grafik-Codecs v%s - (c) 2024-2025 Stefan Reuther"
+msgid "PCC2 Graphics Codec Application v%s - (c) 2024-2026 Stefan Reuther"
+msgstr "PCC2 Grafik-Codecs v%s - (c) 2024-2026 Stefan Reuther"
 
 #: game/maint/messagesearchapplication.cpp:660
-msgid "PCC2 Message Search v%s - (c) 2011-2025 Stefan Reuther"
-msgstr "PCC2 Nachrichten-Suche v%s - (c) 2011-2025 Stefan Reuther"
+msgid "PCC2 Message Search v%s - (c) 2011-2026 Stefan Reuther"
+msgstr "PCC2 Nachrichten-Suche v%s - (c) 2011-2026 Stefan Reuther"
 
 #: server/play/consoleapplication.cpp:243
-msgid "PCC2 Play Server v%s - (c) 2019-2025 Stefan Reuther"
-msgstr "PCC2 Spiel-Server v%s - (c) 2019-2025 Stefan Reuther"
+msgid "PCC2 Play Server v%s - (c) 2019-2026 Stefan Reuther"
+msgstr "PCC2 Spiel-Server v%s - (c) 2019-2026 Stefan Reuther"
 
 #: util/plugin/dialogapplication.cpp:140
 msgid "PCC2 Plugin Installer"
 msgstr "PCC2-Plugin-Installer"
 
 #: util/plugin/consoleapplication.cpp:389
-msgid "PCC2 Plugin Manager v%s - (c) 2015-2025 Stefan Reuther"
-msgstr "PCC2 Plugin-Manager v%s - (c) 2015-2025 Stefan Reuther"
+msgid "PCC2 Plugin Manager v%s - (c) 2015-2026 Stefan Reuther"
+msgstr "PCC2 Plugin-Manager v%s - (c) 2015-2026 Stefan Reuther"
 
 #: gfx/gen/application.cpp:163
-msgid "PCC2 Procedural Graphics Generator v%s - (c) 2017-2025 Stefan Reuther"
-msgstr "PCC2 Prozeduraler Grafik-Generator v%s - (c) 2017-2025 Stefan Reuther"
+msgid "PCC2 Procedural Graphics Generator v%s - (c) 2017-2026 Stefan Reuther"
+msgstr "PCC2 Prozeduraler Grafik-Generator v%s - (c) 2017-2026 Stefan Reuther"
 
 #: util/resourcefileapplication.cpp:337
-msgid "PCC2 Resource File Utility v%s - (c) 2023-2025 Stefan Reuther"
-msgstr "PCC2 Ressourcendatei-Werkzeug v%s - (c) 2023-2025 Stefan Reuther"
+msgid "PCC2 Resource File Utility v%s - (c) 2023-2026 Stefan Reuther"
+msgstr "PCC2 Ressourcendatei-Werkzeug v%s - (c) 2023-2026 Stefan Reuther"
 
 #: game/v3/unpackapplication.cpp:214
-msgid "PCC2 Result File Unpacker v%s - (c) 2010-2025 Stefan Reuther"
-msgstr "PCC2 Result-Entpacker v%s - (c) 2010-2025 Stefan Reuther"
+msgid "PCC2 Result File Unpacker v%s - (c) 2010-2026 Stefan Reuther"
+msgstr "PCC2 Result-Entpacker v%s - (c) 2010-2026 Stefan Reuther"
 
 #: interpreter/consoleapplication.cpp:642
-msgid "PCC2 Script Compiler v%s - (c) 2017-2025 Stefan Reuther"
-msgstr "PCC2 Script-Compiler v%s - (c) 2017-2025 Stefan Reuther"
+msgid "PCC2 Script Compiler v%s - (c) 2017-2026 Stefan Reuther"
+msgstr "PCC2 Script-Compiler v%s - (c) 2017-2026 Stefan Reuther"
 
 #: game/interface/scriptapplication.cpp:432
-msgid "PCC2 Script Engine v%s - (c) 2017-2025 Stefan Reuther"
-msgstr "PCC2 Script-Engine v%s - (c) 2017-2025 Stefan Reuther"
+msgid "PCC2 Script Engine v%s - (c) 2017-2026 Stefan Reuther"
+msgstr "PCC2 Script-Engine v%s - (c) 2017-2026 Stefan Reuther"
 
 #: game/v3/maketurnapplication.cpp:135
-msgid "PCC2 Turn File Compiler v%s - (c) 2010-2025 Stefan Reuther"
-msgstr "PCC2 Turn-File-Compiler v%s - (c) 2010-2025 Stefan Reuther"
+msgid "PCC2 Turn File Compiler v%s - (c) 2010-2026 Stefan Reuther"
+msgstr "PCC2 Turn-File-Compiler v%s - (c) 2010-2026 Stefan Reuther"
 
 #: client/si/userside.cpp:31
 msgid "PCC2 is currently executing a script."
@@ -7693,7 +7692,7 @@ msgstr ""
 "Daten zu Planet #%d erhalten, obwohl Planet angeblich nicht existiert, Host "
 "verwirrt?"
 
-#: game/map/planet.cpp:568
+#: game/map/planet.cpp:567
 msgid "Planet #%d: %s"
 msgstr "Planet #%d: %s"
 
@@ -7877,11 +7876,11 @@ msgstr "Position"
 msgid "Pre-Tribal"
 msgstr "Pre-Tribal"
 
-#: game/config/expressionlists.cpp:299
+#: game/config/expressionlists.cpp:303
 msgid "Predefined expressions"
 msgstr "Vordefinierte Ausdrücke"
 
-#: game/config/expressionlists.cpp:308
+#: game/config/expressionlists.cpp:312
 msgid "Predefined queries"
 msgstr "Vordefinierte Abfragen"
 
@@ -8065,11 +8064,11 @@ msgstr "R - Wiederholung"
 msgid "RGA max. %d turn%!1{s%}"
 msgstr "RGA max. %d %1{Zug%|Züge%}"
 
-#: game/pcc/turnloader.cpp:64 game/v3/resultloader.cpp:67
+#: game/pcc/turnloader.cpp:64 game/v3/resultloader.cpp:64
 msgid "RST"
 msgstr "RST"
 
-#: game/v3/resultloader.cpp:65
+#: game/v3/resultloader.cpp:62
 msgid "RST + TRN"
 msgstr "RST + TRN"
 
@@ -10903,8 +10902,8 @@ msgid "Turn %d"
 msgstr "Zug %d"
 
 #: game/v3/trn/dumperapplication.cpp:196 game/v3/trn/dumperapplication.cpp:233
-msgid "Turn File Decompiler v%s - (c) 2001-2025 Stefan Reuther"
-msgstr "Turn File Decompiler v%s - (c) 2001-2025 Stefan Reuther"
+msgid "Turn File Decompiler v%s - (c) 2001-2026 Stefan Reuther"
+msgstr "Turn File Decompiler v%s - (c) 2001-2026 Stefan Reuther"
 
 #: client/dialogs/turnlistdialog.cpp:112 client/dialogs/turnlistdialog.cpp:251
 #: client/dialogs/turnlistdialog.cpp:259
@@ -11012,7 +11011,7 @@ msgstr "UTF-8"
 msgid "Ufo #%d"
 msgstr "Ufo #%d"
 
-#: game/map/ufotype.cpp:351
+#: game/map/ufotype.cpp:350
 msgid "Ufo #%d and wormhole #%d do not match."
 msgstr "Ufo #%d und Wurmloch #%d passen nicht zueinander."
 
@@ -11029,11 +11028,11 @@ msgstr "Ufo-Informationen"
 msgid "Ufos"
 msgstr "Ufos"
 
-#: game/v3/resultloader.cpp:255
+#: game/v3/resultloader.cpp:187
 msgid "Unable to create backup file"
 msgstr "Backup-Datei kann nicht erzeugt werden"
 
-#: game/config/expressionlists.cpp:202
+#: game/config/expressionlists.cpp:206
 msgid "Unable to create file"
 msgstr "Datei kann nicht angelegt werden"
 
@@ -11115,7 +11114,7 @@ msgid "Unable to save file %s: %s"
 msgstr "Datei kann nicht gespeichert werden: %s"
 
 #: client/si/commands.cpp:430 game/pcc/turnloader.cpp:128
-#: game/v3/directoryloader.cpp:233 game/v3/resultloader.cpp:122
+#: game/v3/directoryloader.cpp:228 game/v3/resultloader.cpp:119
 msgid "Unable to save game"
 msgstr "Spiel kann nicht gespeichert werden"
 
@@ -11159,7 +11158,7 @@ msgstr "Unbewaffnet"
 msgid "Unarmed ships"
 msgstr "Unbewaffnete Schiffe"
 
-#: game/v3/directoryloader.cpp:702 game/v3/loader.cpp:782
+#: game/v3/directoryloader.cpp:571 game/v3/loader.cpp:782
 #: game/v3/unpacker.cpp:841
 msgid "Unbelievable number of visual contacts"
 msgstr "Unglaubliche Anzahl gesichteter Schiffe"
@@ -11452,7 +11451,7 @@ msgstr "Nicht unterstütztes Kompressionsverfahren"
 msgid "Unsupported feature"
 msgstr "Nicht unterstützte Funktion"
 
-#: game/score/loader.cpp:128 game/score/loader.cpp:62
+#: game/score/loader.cpp:127 game/score/loader.cpp:62
 #: game/vcr/flak/setup.cpp:324
 msgid "Unsupported file format"
 msgstr "Datei-Format wird nicht unterstützt"
@@ -11788,7 +11787,7 @@ msgid ""
 "%s\n"
 "Report bugs to <Streu@gmx.de>"
 msgstr ""
-"Usage:\n"
+"Aufruf:\n"
 "  %s [-h]\n"
 "  %$0s [-nlx] [-a|spielernummern] [spielverz [stammverz]]\n"
 "\n"
@@ -12217,7 +12216,7 @@ msgstr "Warnung: Knoten hat einmalige Sekundär-Id"
 msgid "Warning: node is empty (no children and no content)"
 msgstr "Warnung: Knoten ist leer (keine Unterknoten und kein Inhalt)"
 
-#: game/maint/configurationapplication.cpp:196
+#: game/maint/configurationapplication.cpp:193
 msgid "Warning: value for \"%s\" is too long (%d > %d)"
 msgstr "Warnung: Wert für \"%s\" ist zu lang (%d > %d)"
 
@@ -12377,7 +12376,7 @@ msgstr ""
 msgid "Working..."
 msgstr "Arbeitet..."
 
-#: game/map/ufotype.cpp:334
+#: game/map/ufotype.cpp:333
 msgid "Wormhole #%d"
 msgstr "Wurmloch #%d"
 
@@ -12393,7 +12392,7 @@ msgstr "Schreiben"
 msgid "Write to file..."
 msgstr "In Datei schreiben..."
 
-#: game/v3/directoryloader.cpp:559
+#: game/v3/directoryloader.cpp:430
 msgid "Writing %s data..."
 msgstr "Schreibe %s Daten..."
 
@@ -13067,11 +13066,11 @@ msgstr "jedes Mal"
 msgid "expecting \",\", found \"%s\""
 msgstr "Erwarte \"NAME=WERT\" statt \"%s\""
 
-#: game/maint/configurationapplication.cpp:252
+#: game/maint/configurationapplication.cpp:260
 msgid "expecting \"KEY=VALUE\" for option \"-A\""
 msgstr "Erwarte \"NAME=WERT\" für Option \"-A\""
 
-#: game/maint/configurationapplication.cpp:244
+#: game/maint/configurationapplication.cpp:252
 msgid "expecting \"KEY=VALUE\" for option \"-D\""
 msgstr "Erwarte \"NAME=WERT\" für Option \"-D\""
 
@@ -13095,7 +13094,7 @@ msgstr "kämpfend"
 msgid "flat"
 msgstr "flach"
 
-#: game/spec/friendlycodelist.cpp:176
+#: game/spec/friendlycodelist.cpp:175
 msgid "friendly code too long; truncated"
 msgstr "Kommandocode war zu lang und wurde gekürzt"
 
@@ -13226,7 +13225,7 @@ msgstr "Ungültige Option '%s' angegeben. Mit '%s -h' erhalten Sie Hilfe."
 msgid "invalid option specified"
 msgstr "Ungültige Option angegeben."
 
-#: game/maint/configurationapplication.cpp:318
+#: game/maint/configurationapplication.cpp:326
 #: game/maint/dump/application.cpp:60 game/maint/raterapplication.cpp:74
 #: game/maint/sweepapplication.cpp:65 game/v3/maketurnapplication.cpp:72
 #: game/v3/trn/dumperapplication.cpp:99 game/v3/unpackapplication.cpp:96
@@ -13360,7 +13359,7 @@ msgstr "abgebaut"
 msgid "minimal"
 msgstr "minimal"
 
-#: game/parser/messageparser.cpp:417 game/spec/friendlycodelist.cpp:171
+#: game/parser/messageparser.cpp:417 game/spec/friendlycodelist.cpp:170
 #: game/spec/missionlist.cpp:202
 msgid "missing delimiter"
 msgstr "fehlendes Trennzeichen"
@@ -13413,11 +13412,11 @@ msgstr ""
 "wenn die Eingabe Befehle sind, muss eine Ausgabedatei angegeben werden ('-o "
 "DATEI')"
 
-#: game/map/universe.cpp:449 share/resource/core_game.q:475
+#: game/map/universe.cpp:447 share/resource/core_game.q:475
 msgid "near %s (#%d)"
 msgstr "nahe %s (#%d)"
 
-#: game/map/universe.cpp:448 share/resource/core_game.q:475
+#: game/map/universe.cpp:446 share/resource/core_game.q:475
 msgid "near %s (Planet #%d)"
 msgstr "nahe %s (Planet #%d)"
 
@@ -13427,7 +13426,7 @@ msgstr ""
 "benötige zwei Verzeichnisnamen (Quelle, Ziel). Mit '%s -h' erhalten Sie "
 "Hilfe."
 
-#: game/v3/directoryloader.cpp:177
+#: game/v3/directoryloader.cpp:172
 msgid "new RST"
 msgstr "neues RST"
 
@@ -13553,8 +13552,8 @@ msgstr "unerwartete Nicht-Option. Mit \"%s -h\" erhalten Sie Hilfe"
 #: client/widgets/simulationobjectinfo.cpp:358
 #: client/widgets/simulationobjectinfo.cpp:367 game/map/info/info.cpp:1421
 #: game/proxy/simulationsetupproxy.cpp:103
-#: game/proxy/simulationsetupproxy.cpp:1039
-#: game/proxy/simulationsetupproxy.cpp:1079
+#: game/proxy/simulationsetupproxy.cpp:1033
+#: game/proxy/simulationsetupproxy.cpp:1073
 #: game/proxy/simulationsetupproxy.cpp:137
 #: game/proxy/simulationsetupproxy.cpp:92 game/searchquery.cpp:339
 #: game/sim/ability.cpp:40 game/sim/configuration.cpp:169
@@ -14042,7 +14041,7 @@ msgstr "unbesetzt"
 msgid "unowned planet"
 msgstr "unbesetzter Planet"
 
-#: game/v3/directoryloader.cpp:179
+#: game/v3/directoryloader.cpp:174
 msgid "unpacked"
 msgstr "entpackt"
 
@@ -14122,7 +14121,7 @@ msgstr "sehr instabil (<80%)"
 msgid "warm"
 msgstr "warm"
 
-#: game/maint/configurationapplication.cpp:332
+#: game/maint/configurationapplication.cpp:340
 msgid "warning: no action specified"
 msgstr "Warnung: keine Aktion angegeben"
 
@@ -14171,7 +14170,7 @@ msgstr "ja"
 msgid "yes (skipped by default)"
 msgstr "ja (standardmäßig übersprungen)"
 
-#: game/interface/globalproperty.cpp:47
+#: game/interface/globalproperty.cpp:46
 #: game/spec/standardcomponentnameprovider.cpp:153
 msgid "{lang}en"
 msgstr "de"

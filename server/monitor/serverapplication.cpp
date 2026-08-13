@@ -92,7 +92,7 @@ server::monitor::ServerApplication::serverMain()
         afl::base::Ptr<afl::io::Stream> file = fileSystem().openFileNT(m_statusFileName, afl::io::FileSystem::OpenRead);
         if (file.get() != 0) {
             m_status.load(*file);
-            log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format("Status read from \"%s\".", m_statusFileName));
+            log().write(afl::sys::LogListener::Info, LOG_NAME, Format("Status read from \"%s\".", m_statusFileName));
         }
     }
 
@@ -106,7 +106,7 @@ server::monitor::ServerApplication::serverMain()
     // Run it
     ProtocolHandlerFactory factory(disp);
     afl::net::Server server(networkStack().listen(m_listenAddress, 10), factory);
-    log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format("Listening on %s", m_listenAddress.toString()));
+    log().write(afl::sys::LogListener::Info, LOG_NAME, Format("Listening on %s", m_listenAddress.toString()));
     afl::sys::Thread serverThread("monitor.server", server);
     serverThread.start();
 
@@ -163,7 +163,7 @@ server::monitor::ServerApplication::handleConfiguration(const String_t& key, con
            Whereas a typical value for -classic would be 10, typical values for -ng are 60..300. */
         int32_t n;
         if (!afl::string::strToInteger(value, n) || n <= 0 || n > 86400) {
-            throw afl::except::CommandLineException(afl::string::Format("Invalid number for '%s'", key));
+            throw afl::except::CommandLineException(Format("Invalid number for '%s'", key));
         }
         m_updateInterval = n;
         return true;
@@ -173,7 +173,7 @@ server::monitor::ServerApplication::handleConfiguration(const String_t& key, con
            @since PCC2 2.40.5 */
         int32_t n;
         if (!afl::string::strToInteger(value, n) || n <= 0 || n > 40*86400) {
-            throw afl::except::CommandLineException(afl::string::Format("Invalid number for '%s'", key));
+            throw afl::except::CommandLineException(Format("Invalid number for '%s'", key));
         }
         m_saveInterval = n;
         return true;
@@ -192,7 +192,7 @@ server::monitor::ServerApplication::handleConfiguration(const String_t& key, con
 String_t
 server::monitor::ServerApplication::getApplicationName() const
 {
-    return afl::string::Format("PCC2 Monitor Server v%s - (c) 2017-2025 Stefan Reuther", PCC2_VERSION);
+    return Format("PCC2 Monitor Server v%s - (c) 2017-2026 Stefan Reuther", PCC2_VERSION);
 }
 
 String_t
@@ -207,6 +207,6 @@ server::monitor::ServerApplication::doSave()
     if (!m_statusFileName.empty()) {
         afl::base::Ref<afl::io::Stream> file = fileSystem().openFile(m_statusFileName, afl::io::FileSystem::Create);
         m_status.save(*file);
-        log().write(afl::sys::LogListener::Info, LOG_NAME, afl::string::Format("Status saved to \"%s\".", m_statusFileName));
+        log().write(afl::sys::LogListener::Info, LOG_NAME, Format("Status saved to \"%s\".", m_statusFileName));
     }
 }

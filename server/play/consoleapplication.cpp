@@ -240,7 +240,7 @@ server::play::ConsoleApplication::help()
                                "--language=CODE\tLanguage to use for game\n"));
 
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format(tx("PCC2 Play Server v%s - (c) 2019-2025 Stefan Reuther").c_str(), PCC2_VERSION));
+    out.writeLine(Format(tx("PCC2 Play Server v%s - (c) 2019-2026 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
     out.writeLine(Format(tx("Usage:\n"
                             "  %s [-h]\n"
@@ -249,7 +249,7 @@ server::play::ConsoleApplication::help()
                             "GAMEDIR can be a local directory, or c2file://USER@HOST:PORT/DIR.\n\n"
                             "%s"
                             "\n"
-                            "Report bugs to <Streu@gmx.de>").c_str(),
+                            "Report bugs to <Streu@gmx.de>"),
                          environment().getInvocationName(),
                          options));
     exit(0);
