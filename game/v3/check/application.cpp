@@ -11,6 +11,7 @@
 #include "afl/io/textfile.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
+#include "afl/string/translator.hpp"
 #include "afl/sys/standardcommandlineparser.hpp"
 #include "game/v3/check/checker.hpp"
 #include "game/v3/check/configuration.hpp"
@@ -19,6 +20,7 @@
 
 using afl::base::Optional;
 using afl::string::Format;
+using afl::string::Translator;
 
 game::v3::check::Application::Application(afl::sys::Environment& env, afl::io::FileSystem& fs)
     : util::Application(env, fs)
@@ -34,6 +36,7 @@ game::v3::check::Application::appMain()
     Configuration config;
 
     // ex check.pas:ParseArgs
+    Translator& tx = translator();
     afl::sys::StandardCommandLineParser parser(environment().getCommandLine());
     bool opt;
     String_t text;
@@ -52,7 +55,7 @@ game::v3::check::Application::appMain()
             } else if (text == "h" || text == "help") {
                 help();
             } else {
-                errorExit(Format("Invalid option \"%s\"", text));
+                errorExit(Format(tx("invalid option '%s' specified. Use '%s -h' for help."), text, environment().getInvocationName()));
             }
         } else {
             int n;
@@ -63,14 +66,14 @@ game::v3::check::Application::appMain()
             } else if (!rootdir.isValid()) {
                 rootdir = text;
             } else {
-                errorExit("Command line syntax error");
+                errorExit(tx("too many arguments"));
             }
         }
     }
 
     // Validate
     if (player == 0) {
-        errorExit("Missing player number");
+        errorExit(tx("missing player number"));
     }
 
     // Prepare environment
@@ -104,26 +107,27 @@ game::v3::check::Application::appMain()
 void
 game::v3::check::Application::help()
 {
+    Translator& tx = translator();
     afl::io::TextWriter& out = standardOutput();
-    out.writeLine(Format("Turn Checker v%s - (c) 2005-2026 Stefan Reuther", PCC2_VERSION));
+    out.writeLine(Format(tx("Turn Checker v%s - (c) 2005-2026 Stefan Reuther"), PCC2_VERSION));
     out.writeLine();
-    out.writeLine(Format("Usage:\n"
-                         "  %s -h\n"
-                         "  %0$s [-rHcpz] PLAYER [GAMEDIR [ROOTDIR]]\n\n"
-                         "%s\n"
-                         "Report bugs to <Streu@gmx.de>",
+    out.writeLine(Format(tx("Usage:\n"
+                            "  %s -h\n"
+                            "  %0$s [-rHcpz] PLAYER [GAMEDIR [ROOTDIR]]\n\n"
+                            "%s\n"
+                            "Report bugs to <Streu@gmx.de>"),
                          environment().getInvocationName(),
-                         util::formatOptions("Parameters:\n"
-                                             "PLAYER\tplayer number, 1..11\n"
-                                             "GAMEDIR\tgame directory, defaults to current directory\n"
-                                             "ROOTDIR\troot directory, defaults to builtin defaults\n"
-                                             "\n"
-                                             "Options:\n"
-                                             "-h\tHelp\n"
-                                             "-r\tCheck result + turn file. Default: validate unpacked\n"
-                                             "-H\tWrite log file in HTML format (check.htm). Default: text file (check.log)\n"
-                                             "-c\tValidate checksums.\n"
-                                             "-p\tBe extra picky.\n"
-                                             "-z\tDo not warn about '-1' values\n")));
+                         util::formatOptions(tx("Parameters:\n"
+                                                "PLAYER\tplayer number, 1..11\n"
+                                                "GAMEDIR\tgame directory, defaults to current directory\n"
+                                                "ROOTDIR\troot directory, defaults to builtin defaults\n"
+                                                "\n"
+                                                "Options:\n"
+                                                "-h\tHelp\n"
+                                                "-r\tCheck result + turn file. Default: validate unpacked\n"
+                                                "-H\tWrite log file in HTML format (check.htm). Default: text file (check.log)\n"
+                                                "-c\tValidate checksums.\n"
+                                                "-p\tBe extra picky.\n"
+                                                "-z\tDo not warn about '-1' values\n"))));
     exit(0);
 }

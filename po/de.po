@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-08-13 18:40+0200\n"
+"PO-Revision-Date: 2026-08-13 19:34+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:390
@@ -7616,6 +7616,35 @@ msgstr "Parameter zu \"-bpp\" muss 8, 16 oder 32 sein"
 msgid "Parameter to \"-size\" is out of range"
 msgstr "Parameter zu \"-size\" außerhalb des gültigen Bereichs"
 
+#: game/v3/check/application.cpp:120
+msgid ""
+"Parameters:\n"
+"PLAYER\tplayer number, 1..11\n"
+"GAMEDIR\tgame directory, defaults to current directory\n"
+"ROOTDIR\troot directory, defaults to builtin defaults\n"
+"\n"
+"Options:\n"
+"-h\tHelp\n"
+"-r\tCheck result + turn file. Default: validate unpacked\n"
+"-H\tWrite log file in HTML format (check.htm). Default: text file (check."
+"log)\n"
+"-c\tValidate checksums.\n"
+"-p\tBe extra picky.\n"
+"-z\tDo not warn about '-1' values"
+msgstr ""
+"Parameter:\n"
+"PLAYER\tSpielernummer, 1..11\n"
+"GAMEDIR\tSpielverzeichnis; Standard: aktuelles Verzeichnis\n"
+"ROOTDIR\tWurzelverzeichnis; Standard: eingebaut\n"
+"\n"
+"Optionen:\n"
+"-h\tHilfe\n"
+"-r\tPrüfe Result+Turn-Dateien. Standard: entpackte Dateien\n"
+"-H\tSchreibe Protokoll als HTML-Datei (check.htm). Standard: Textdatei (check.log)\n"
+"-c\tPrüfsummen prüfen\n"
+"-p\tPrüfe besonders streng\n"
+"-z\tKeine Warnungen über '-1'-Werte"
+
 #: util/net.cpp:64
 msgid "Parse error"
 msgstr "Parse-Fehler"
@@ -10901,6 +10930,10 @@ msgstr "Tritanium-Kosten"
 msgid "Turn %d"
 msgstr "Zug %d"
 
+#: game/v3/check/application.cpp:112
+msgid "Turn Checker v%s - (c) 2005-2026 Stefan Reuther"
+msgstr "Turn Checker v%s - (c) 2005-2026 Stefan Reuther"
+
 #: game/v3/trn/dumperapplication.cpp:196 game/v3/trn/dumperapplication.cpp:233
 msgid "Turn File Decompiler v%s - (c) 2001-2026 Stefan Reuther"
 msgstr "Turn File Decompiler v%s - (c) 2001-2026 Stefan Reuther"
@@ -11488,6 +11521,22 @@ msgstr "Daten hochladen..."
 #: share/resource/core_tiles.q:438
 msgid "Usage"
 msgstr "Verbrauch"
+
+#: game/v3/check/application.cpp:114
+msgid ""
+"Usage:\n"
+"  %s -h\n"
+"  %0$s [-rHcpz] PLAYER [GAMEDIR [ROOTDIR]]\n"
+"\n"
+"%s\n"
+"Report bugs to <Streu@gmx.de>"
+msgstr ""
+"Aufruf:\n"
+"  %s [-h]\n"
+"  %0$s [-rHcpz] PLAYER [GAMEDIR [ROOTDIR]]\n"
+"\n"
+"%s\n"
+"Fehler bitte melden an <Streu@gmx.de>"
 
 #: util/resourcefileapplication.cpp:339
 msgid ""
@@ -13214,7 +13263,7 @@ msgid "invalid number of threads, '%s'"
 msgstr "Ungültige Anzahl Threads, '%s'"
 
 #: game/interface/scriptapplication.cpp:402 game/sim/consoleapplication.cpp:335
-#: interpreter/consoleapplication.cpp:568
+#: game/v3/check/application.cpp:58 interpreter/consoleapplication.cpp:568
 #: interpreter/consoleapplication.cpp:607
 #: server/play/consoleapplication.cpp:120 util/resourcefileapplication.cpp:303
 #: util/resourcefileapplication.cpp:86
@@ -13394,7 +13443,7 @@ msgstr "fehlende Knoten-Id"
 msgid "missing output file name"
 msgstr "fehlender Ausgabedatei-Name"
 
-#: server/play/consoleapplication.cpp:140
+#: game/v3/check/application.cpp:76 server/play/consoleapplication.cpp:140
 msgid "missing player number"
 msgstr "fehlende Spielernummer"
 
@@ -13920,10 +13969,10 @@ msgid "too long"
 msgstr "zu lange"
 
 #: game/interface/exportapplication.cpp:118 game/maint/sweepapplication.cpp:78
-#: game/v3/maketurnapplication.cpp:79 game/v3/trn/dumperapplication.cpp:104
-#: game/v3/unpackapplication.cpp:111 gfx/codec/application.cpp:162
-#: server/play/consoleapplication.cpp:134 util/doc/application.cpp:441
-#: util/doc/application.cpp:635
+#: game/v3/check/application.cpp:69 game/v3/maketurnapplication.cpp:79
+#: game/v3/trn/dumperapplication.cpp:104 game/v3/unpackapplication.cpp:111
+#: gfx/codec/application.cpp:162 server/play/consoleapplication.cpp:134
+#: util/doc/application.cpp:441 util/doc/application.cpp:635
 msgid "too many arguments"
 msgstr "zu viele Parameter"
 
