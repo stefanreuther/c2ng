@@ -1294,7 +1294,8 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/file/fileshareimpl.cpp \
+FILES_serverlib = server/console/clientpool.cpp \
+    server/console/clientpool.hpp server/file/fileshareimpl.cpp \
     server/file/fileshareimpl.hpp server/file/sharestore.cpp \
     server/file/sharestore.hpp server/interface/fileshareserver.cpp \
     server/interface/fileshareserver.hpp \
@@ -1902,7 +1903,8 @@ DEPEND_c2reshack = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/server/file/fileshareimpltest.cpp \
+FILES_testsuite = test/server/console/clientpooltest.cpp \
+    test/server/file/fileshareimpltest.cpp \
     test/server/file/sharestoretest.cpp \
     test/server/interface/fileshareservertest.cpp \
     test/server/interface/fileshareclienttest.cpp \

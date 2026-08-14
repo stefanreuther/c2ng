@@ -4,27 +4,29 @@
 
 #include <stdexcept>
 #include "server/console/connectioncontextfactory.hpp"
+#include "afl/net/resp/client.hpp"
 #include "afl/string/format.hpp"
 #include "afl/string/parse.hpp"
 #include "afl/sys/time.hpp"
 #include "server/console/context.hpp"
 #include "server/types.hpp"
-#include "server/ports.hpp"
 
 class server::console::ConnectionContextFactory::Impl : public Context {
  public:
-    explicit Impl(String_t name, afl::net::resp::Client& client);
+    explicit Impl(const String_t& name, ClientPool& pool, ClientPool::Index_t index);
     virtual bool call(const String_t& cmd, interpreter::Arguments args, Parser& parser, std::auto_ptr<afl::data::Value>& result);
     virtual String_t getName();
 
  private:
-    String_t m_name;
-    afl::net::resp::Client& m_client;
+    const String_t m_name;
+    ClientPool& m_pool;
+    const ClientPool::Index_t m_index;
 };
 
-server::console::ConnectionContextFactory::Impl::Impl(String_t name, afl::net::resp::Client& client)
+server::console::ConnectionContextFactory::Impl::Impl(const String_t& name, ClientPool& pool, ClientPool::Index_t index)
     : m_name(name),
-      m_client(client)
+      m_pool(pool),
+      m_index(index)
 { }
 
 bool
@@ -40,9 +42,6 @@ server::console::ConnectionContextFactory::Impl::call(const String_t& cmd, inter
         if (!afl::string::strToInteger(toString(args.getNext()), n) || n <= 0) {
             throw std::runtime_error("Expecting number");
         }
-        //     if (client.maybeReconnect(host, port)) {
-        //         std::cout << "(auto-reconnecting to " << host << ":" << port << "...)\n";
-        //     }
 
         // Build command
         afl::data::Segment seg;
@@ -51,9 +50,10 @@ server::console::ConnectionContextFactory::Impl::call(const String_t& cmd, inter
         }
 
         // Loop
+        afl::net::resp::Client& client = m_pool.get(m_index);
         uint32_t startTicks = afl::sys::Time::getTickCounter();
         for (int32_t i = 0; i < n; ++i) {
-            m_client.callVoid(seg);
+            client.callVoid(seg);
         }
         uint32_t endTicks = afl::sys::Time::getTickCounter();
         uint32_t elapsed = endTicks - startTicks;
@@ -63,13 +63,13 @@ server::console::ConnectionContextFactory::Impl::call(const String_t& cmd, inter
         return true;
     }
 
-    // FIXME:
-    // if (cmd[0] == "reconnect" || cmd[0] == "reset") {
-    //     // Reconnect
-    //     std::cout << "(reconnecting to " << host << ":" << port << "...)\n";
-    //     client.connect(host, port);
-    //     return makeStringValue("OK");
-    // }
+    if (cmd == "reconnect" || cmd == "reset") {
+        // Force reconnect
+        m_pool.reset(m_index);
+        m_pool.get(m_index);
+        result.reset(makeStringValue("OK"));
+        return true;
+    }
 
     // Process command directly
     afl::data::Segment seg;
@@ -81,11 +81,7 @@ server::console::ConnectionContextFactory::Impl::call(const String_t& cmd, inter
     while (args.getNumArgs() > 0) {
         seg.pushBack(args.getNext());
     }
-    // FIXME: visibly deal with reconnect
-    //     if (client.maybeReconnect(host, port)) {
-    //         std::cout << "(auto-reconnecting to " << host << ":" << port << "...)\n";
-    //     }
-    result.reset(m_client.call(seg));
+    result.reset(m_pool.get(m_index).call(seg));
     return true;
 }
 
@@ -97,14 +93,14 @@ server::console::ConnectionContextFactory::Impl::getName()
 
 /************************ ConnectionContextFactory ***********************/
 
-server::console::ConnectionContextFactory::ConnectionContextFactory(String_t name, uint16_t defaultPort, afl::net::NetworkStack& stack)
+server::console::ConnectionContextFactory::ConnectionContextFactory(String_t name, ClientPool& pool, ClientPool::Index_t index)
     : m_name(name),
-      m_address(DEFAULT_ADDRESS, defaultPort),
-      m_networkStack(stack),
-      m_client()
+      m_pool(pool),
+      m_index(index)
 {
     // ex ConnectionContext::ConnectionContext
 }
+
 server::console::ConnectionContextFactory::~ConnectionContextFactory()
 { }
 
@@ -117,24 +113,15 @@ server::console::ConnectionContextFactory::getCommandName()
 server::console::Context*
 server::console::ConnectionContextFactory::create()
 {
-    if (m_client.get() == 0) {
-        // FIXME: std::cout << "(connecting to " << host << ":" << port << "...)\n";
-        m_client.reset(new afl::net::resp::Client(m_networkStack, m_address));
-    }
-    return new Impl(m_name, *m_client);
+    // Make sure that we connect when the context is entered
+    m_pool.get(m_index);
+
+    // Create context handler
+    return new Impl(m_name, m_pool, m_index);
 }
 
 bool
-server::console::ConnectionContextFactory::handleConfiguration(const String_t& key, const String_t& value)
+server::console::ConnectionContextFactory::handleConfiguration(const String_t& /*key*/, const String_t& /*value*/)
 {
-    // ex ConnectionContext::checkConfig
-    if (afl::string::strCaseCompare(key, m_name + ".host") == 0) {
-        m_address.setName(value);
-        return true;
-    } else if (afl::string::strCaseCompare(key, m_name + ".port") == 0) {
-        m_address.setService(value);
-        return true;
-    } else {
-        return false;
-    }
+    return false;
 }

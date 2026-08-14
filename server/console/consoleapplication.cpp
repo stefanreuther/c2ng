@@ -138,6 +138,7 @@ server::console::ConsoleApplication::ConsoleApplication(afl::sys::Environment& e
     : Application(env, fs),
       ConfigurationHandler(log(), "console"),
       m_networkStack(net),
+      m_pool(net),
       m_environment(),
       m_contextStack(),
       m_macros(m_environment)
@@ -146,16 +147,16 @@ server::console::ConsoleApplication::ConsoleApplication(afl::sys::Environment& e
     m_contextStack.pushBackNew(new RootContext(*this));
 
     // Available contexts
-    m_availableContexts.pushBackNew(new ConnectionContextFactory("doc", DOC_PORT, m_networkStack));
-    m_availableContexts.pushBackNew(new ConnectionContextFactory("download", DOWNLOAD_PORT, m_networkStack));
-    m_availableContexts.pushBackNew(new ConnectionContextFactory("file", FILE_PORT, m_networkStack));
-    m_availableContexts.pushBackNew(new ConnectionContextFactory("format", FORMAT_PORT, m_networkStack));
-    m_availableContexts.pushBackNew(new ConnectionContextFactory("host", HOST_PORT, m_networkStack));
-    m_availableContexts.pushBackNew(new ConnectionContextFactory("hostfile", HOSTFILE_PORT, m_networkStack));
-    m_availableContexts.pushBackNew(new ConnectionContextFactory("mailout", MAILOUT_PORT, m_networkStack));
-    m_availableContexts.pushBackNew(new ConnectionContextFactory("redis", DB_PORT, m_networkStack));
-    m_availableContexts.pushBackNew(new ConnectionContextFactory("talk", TALK_PORT, m_networkStack));
-    m_availableContexts.pushBackNew(new ConnectionContextFactory("user", USER_PORT, m_networkStack));
+    addConnectionContext("doc", DOC_PORT);
+    addConnectionContext("download", DOWNLOAD_PORT);
+    addConnectionContext("file", FILE_PORT);
+    addConnectionContext("format", FORMAT_PORT);
+    addConnectionContext("host", HOST_PORT);
+    addConnectionContext("hostfile", HOSTFILE_PORT);
+    addConnectionContext("mailout", MAILOUT_PORT);
+    addConnectionContext("redis", DB_PORT);
+    addConnectionContext("talk", TALK_PORT);
+    addConnectionContext("user", USER_PORT);
     m_availableContexts.pushBackNew(new RouterContextFactory("router", m_networkStack));
 
     // Be quiet by default.
@@ -342,6 +343,9 @@ bool
 server::console::ConsoleApplication::handleConfiguration(const String_t& key, const String_t& value)
 {
     bool ok = false;
+    if (m_pool.handleConfiguration(key, value)) {
+        ok = true;
+    }
     for (size_t i = 0, n = m_availableContexts.size(); i < n; ++i) {
         if (m_availableContexts[i]->handleConfiguration(key, value)) {
             ok = true;
@@ -455,4 +459,12 @@ server::console::ConsoleApplication::call(const String_t& cmd, interpreter::Argu
     }
 
     return m_contextStack.back()->call(cmd, args, parser, result);
+}
+
+server::console::ClientPool::Index_t
+server::console::ConsoleApplication::addConnectionContext(String_t name, uint16_t defaultPort)
+{
+    ClientPool::Index_t idx = m_pool.create(name, defaultPort);
+    m_availableContexts.pushBackNew(new ConnectionContextFactory(name, m_pool, idx));
+    return idx;
 }

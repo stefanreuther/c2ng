@@ -6,15 +6,13 @@
 
 #include <memory>
 #include "server/console/contextfactory.hpp"
-#include "afl/net/name.hpp"
-#include "afl/net/resp/client.hpp"
-#include "afl/net/networkstack.hpp"
+#include "server/console/clientpool.hpp"
 
 namespace server { namespace console {
 
     class ConnectionContextFactory : public ContextFactory {
      public:
-        ConnectionContextFactory(String_t name, uint16_t defaultPort, afl::net::NetworkStack& stack);
+        ConnectionContextFactory(String_t name, ClientPool& pool, ClientPool::Index_t index);
         ~ConnectionContextFactory();
 
         virtual String_t getCommandName();
@@ -24,10 +22,9 @@ namespace server { namespace console {
      private:
         class Impl;
 
-        String_t m_name;
-        afl::net::Name m_address;
-        afl::net::NetworkStack& m_networkStack;
-        std::auto_ptr<afl::net::resp::Client> m_client;
+        const String_t m_name;
+        ClientPool& m_pool;
+        const ClientPool::Index_t m_index;
     };
 
 } }

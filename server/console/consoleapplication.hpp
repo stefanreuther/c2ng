@@ -10,6 +10,7 @@
 #include "afl/net/networkstack.hpp"
 #include "afl/net/tunnel/tunnelablenetworkstack.hpp"
 #include "server/configurationhandler.hpp"
+#include "server/console/clientpool.hpp"
 #include "server/console/colorterminal.hpp"
 #include "server/console/commandhandler.hpp"
 #include "server/console/context.hpp"
@@ -75,6 +76,9 @@ namespace server { namespace console {
         /** Network stack instance. */
         afl::net::tunnel::TunnelableNetworkStack m_networkStack;
 
+        /** Pool of RESP clients. */
+        ClientPool m_pool;
+
         /** Available Contexts.
             (Must be before m_contextStack to satisfy the guarantee that Context objects don't outlive their ContextFactory.) */
         afl::container::PtrVector<ContextFactory> m_availableContexts;
@@ -88,6 +92,8 @@ namespace server { namespace console {
         /** Macros.
             This CommandHandler must be long-lived because it stores state. */
         MacroCommandHandler m_macros;
+
+        ClientPool::Index_t addConnectionContext(String_t name, uint16_t defaultPort);
     };
 
 } }
