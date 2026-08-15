@@ -185,6 +185,17 @@ namespace util {
         \param delim Delimiter
         \return list */
     afl::data::StringList_t parsePath(const String_t& str, char delim);
+
+    /** Check for specific option.
+        \param opt   String received from user
+        \param match Option name
+        \return true if \c opt is "-match" or "--match" */
+    bool isOption(const String_t& opt, const char* match);
+
+    /** Check for any option.
+        \param opt   String received from user
+        \return true if \c opt starts with a "-" */
+    bool isOption(const String_t& opt);
 }
 
 #endif

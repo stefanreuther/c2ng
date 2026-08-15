@@ -32,3 +32,7 @@ server::console::NullTerminal::printResultSuffix()
 void
 server::console::NullTerminal::printMessage(String_t /*s*/)
 { }
+
+void
+server::console::NullTerminal::printOutput(String_t /*s*/)
+{ }

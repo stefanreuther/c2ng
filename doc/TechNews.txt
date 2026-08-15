@@ -10,6 +10,14 @@ PCC2ng NEWS FILE - Technical Version
 2.41.5
 ------
 
+## c2dbexport
+
+  The c2dbexport utility has been removed. The functionality has been
+  integrated into c2console.
+
+  Replace `c2dbexport ...` by `c2console export ...`.
+
+
 ## c2file-server
 
   The content-addressable backend now supports snapshots (tags) and
@@ -30,6 +38,12 @@ PCC2ng NEWS FILE - Technical Version
   its variations, including deltified objects. git will also create a
   "packed-refs" file. c2file-server cannot natively deal with that,
   and will unpack and delete it.
+
+  The file server now supports telling users about incoming file
+  shares. To enable, configure FILE.SHAREABLE as a semicolon-separated
+  list of directories for which this feature shall be active. The
+  server will then track permissions (SETPERM), and allow receivers to
+  retrieve them (SHARELS).
 
 
 

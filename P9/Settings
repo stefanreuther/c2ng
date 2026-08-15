@@ -1294,7 +1294,9 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/console/clientpool.cpp \
+FILES_serverlib = server/console/dbexporter.cpp \
+    server/console/dbexporter.hpp server/console/exportcontextfactory.cpp \
+    server/console/exportcontextfactory.hpp server/console/clientpool.cpp \
     server/console/clientpool.hpp server/file/fileshareimpl.cpp \
     server/file/fileshareimpl.hpp server/file/sharestore.cpp \
     server/file/sharestore.hpp server/interface/fileshareserver.cpp \
@@ -1478,11 +1480,8 @@ FILES_serverlib = server/console/clientpool.cpp \
     server/mailout/configuration.cpp server/mailout/configuration.hpp \
     server/mailout/serverapplication.cpp \
     server/mailout/serverapplication.hpp server/mailout/root.hpp \
-    server/dbexport/dbexporter.cpp server/dbexport/dbexporter.hpp \
-    server/dbexport/exportapplication.cpp \
-    server/dbexport/exportapplication.hpp server/nntp/root.cpp \
-    server/nntp/linehandler.cpp server/nntp/linehandler.hpp \
-    server/nntp/session.hpp server/nntp/root.hpp \
+    server/nntp/root.cpp server/nntp/linehandler.cpp \
+    server/nntp/linehandler.hpp server/nntp/session.hpp server/nntp/root.hpp \
     server/nntp/serverapplication.cpp server/nntp/serverapplication.hpp \
     server/ports.hpp server/console/routercontextfactory.cpp \
     server/console/routercontextfactory.hpp \
@@ -1845,11 +1844,6 @@ FILES_c2console = main/c2console.cpp
 TYPE_c2console = app
 DEPEND_c2console = serverlib gamelib afl
 
-TARGETS += c2dbexport
-FILES_c2dbexport = main/c2dbexport.cpp
-TYPE_c2dbexport = app
-DEPEND_c2dbexport = serverlib gamelib afl
-
 TARGETS += c2nntp-server
 FILES_c2nntp-server = main/c2nntpserver.cpp
 TYPE_c2nntp-server = app
@@ -1903,7 +1897,8 @@ DEPEND_c2reshack = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/server/console/clientpooltest.cpp \
+FILES_testsuite = test/server/console/dbexportertest.cpp \
+    test/server/console/clientpooltest.cpp \
     test/server/file/fileshareimpltest.cpp \
     test/server/file/sharestoretest.cpp \
     test/server/interface/fileshareservertest.cpp \
@@ -2309,7 +2304,6 @@ FILES_testsuite = test/server/console/clientpooltest.cpp \
     test/server/file/clientdirectoryhandlertest.cpp \
     test/server/file/clientdirectorytest.cpp \
     test/server/doc/documentationimpltest.cpp \
-    test/server/dbexport/dbexportertest.cpp \
     test/server/console/terminaltest.cpp \
     test/server/console/stringcommandhandlertest.cpp \
     test/server/console/routercontextfactorytest.cpp \

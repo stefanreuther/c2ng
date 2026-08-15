@@ -8,7 +8,6 @@ my @manpages = qw(
     c2compiler
     c2configtool
     c2console
-    c2dbexport
     c2docmanager
     c2doc-server
     c2dump

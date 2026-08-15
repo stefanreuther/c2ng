@@ -25,6 +25,8 @@ AFL_TEST_NOARG("server.console.Terminal:interface")
             { }
         virtual void printMessage(String_t /*s*/)
             { }
+        virtual void printOutput(String_t /*s*/)
+            { }
     };
     Tester t;
 }

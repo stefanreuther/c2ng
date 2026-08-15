@@ -18,6 +18,7 @@
 #include "server/console/connectioncontextfactory.hpp"
 #include "server/console/context.hpp"
 #include "server/console/contextfactory.hpp"
+#include "server/console/exportcontextfactory.hpp"
 #include "server/console/filecommandhandler.hpp"
 #include "server/console/fundamentalcommandhandler.hpp"
 #include "server/console/integercommandhandler.hpp"
@@ -28,8 +29,8 @@
 #include "server/console/terminal.hpp"
 #include "server/ports.hpp"
 #include "server/types.hpp"
-#include "version.hpp"
 #include "util/string.hpp"
+#include "version.hpp"
 
 #ifdef TARGET_OS_POSIX
 # include <unistd.h>
@@ -158,6 +159,7 @@ server::console::ConsoleApplication::ConsoleApplication(afl::sys::Environment& e
     addConnectionContext("talk", TALK_PORT);
     addConnectionContext("user", USER_PORT);
     m_availableContexts.pushBackNew(new RouterContextFactory("router", m_networkStack));
+    m_availableContexts.pushBackNew(new ExportContextFactory(m_pool, m_pool.find("redis")));
 
     // Be quiet by default.
     consoleLogger().setConfiguration("*@-Info=hide", translator());

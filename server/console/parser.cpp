@@ -542,3 +542,54 @@ server::console::Parser::handleInclude(afl::data::StringList_t& cmd, bool& hadLE
     }
     hadLE = false;
 }
+
+String_t
+server::console::Parser::quoteConsoleString(const String_t& input)
+{
+    // Check for unprintable characters
+    bool isPrintable = true;
+    for (String_t::size_type i = 0; i < input.size(); ++i) {
+        if (input[i] < ' ' || input[i] >= 127) {
+            isPrintable = false;
+            break;
+        }
+    }
+
+    // Format it
+    if (input.empty()) {
+        return "\"\"";
+    } else if (isPrintable && input.find_first_of(" \"\'<|${}#") == input.npos) {
+        // Nothing special
+        return input;
+    } else if (isPrintable && input.find_first_of("\"\\$") == input.npos) {
+        // Simple double-quote
+        return "\"" + input + "\"";
+    } else if (isPrintable && input.find_first_of("\'") == input.npos) {
+        // Simple single-quote
+        return "'" + input + "'";
+    } else {
+        // Full version
+        String_t result = "\"";
+        for (String_t::size_type i = 0; i < input.size(); ++i) {
+            uint8_t ch = input[i];
+            if (ch == '"' || ch == '\\' || ch == '$') {
+                result += '\\';
+                result += char(ch);
+            } else if (ch == '\r') {
+                result += "\\r";
+            } else if (ch == '\n') {
+                result += "\\n";
+            } else if (ch == '\t') {
+                result += "\\t";
+            } else if (ch == '\0') {
+                result += "\\0";
+            } else if (ch >= ' ' && ch < 127) {
+                result += char(ch);
+            } else {
+                result += Format("\\x%02X", ch);
+            }
+        }
+        result += "\"";
+        return result;
+    }
+}

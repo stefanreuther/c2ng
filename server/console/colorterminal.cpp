@@ -53,3 +53,9 @@ server::console::ColorTerminal::printMessage(String_t s)
     m_outputStream.writeLine(s);
     m_outputStream.flush();
 }
+
+void
+server::console::ColorTerminal::printOutput(String_t s)
+{
+    m_outputStream.writeLine(s);
+}

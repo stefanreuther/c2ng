@@ -61,6 +61,11 @@ namespace server { namespace console {
             \return terminal as passed to constructor */
         Terminal& terminal();
 
+        /** Quote as console string.
+            \param input Text to encode
+            \return quoted text that, when parsed by Parser, produces the given input */
+        static String_t quoteConsoleString(const String_t& input);
+
      private:
         void handleInclude(afl::data::StringList_t& cmd, bool& hadLE);
 

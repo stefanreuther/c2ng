@@ -20,6 +20,7 @@ namespace server { namespace console {
         virtual void printResultPrefix();
         virtual void printResultSuffix();
         virtual void printMessage(String_t s);
+        virtual void printOutput(String_t s);
     };
 
 } }

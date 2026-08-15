@@ -41,6 +41,11 @@ namespace server { namespace console {
             \param s message */
         virtual void printMessage(String_t s) = 0;
 
+        /** Print a bulk output message.
+            Like printMessage(), but should optimize for performance, not interactive use.
+            \param s message */
+        virtual void printOutput(String_t s) = 0;
+
         /** Convert a ContextStack_t into a string to use as a prompt.
             \param st Current context stack
             \return Prompt */

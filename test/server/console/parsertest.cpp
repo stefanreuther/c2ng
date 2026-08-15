@@ -18,6 +18,7 @@
 #include "server/types.hpp"
 #include <stdexcept>
 
+using server::console::Parser;
 using server::test::ConsoleCommandHandlerMock;
 
 /** Test basic evaluation. */
@@ -28,7 +29,7 @@ AFL_TEST("server.console.Parser:evaluateString", a)
     server::console::NullTerminal term;
     afl::io::NullFileSystem fs;
     ConsoleCommandHandlerMock mock(a);
-    server::console::Parser testee(env, term, fs, mock);
+    Parser testee(env, term, fs, mock);
 
     // Trivial cases
     // - empty
@@ -111,7 +112,7 @@ AFL_TEST("server.console.Parser:evaluateString:strings", a)
     server::console::NullTerminal term;
     afl::io::NullFileSystem fs;
     ConsoleCommandHandlerMock mock(a);
-    server::console::Parser testee(env, term, fs, mock);
+    Parser testee(env, term, fs, mock);
 
     // - double quoted
     {
@@ -230,7 +231,7 @@ AFL_TEST("server.console.Parser:evaluateString:pipe", a)
     server::console::NullTerminal term;
     afl::io::NullFileSystem fs;
     ConsoleCommandHandlerMock mock(a);
-    server::console::Parser testee(env, term, fs, mock);
+    Parser testee(env, term, fs, mock);
 
     // 2-element pipe
     {
@@ -283,7 +284,7 @@ AFL_TEST("server.console.Parser:evaluateString:variables", a)
     server::console::NullTerminal term;
     afl::io::NullFileSystem fs;
     ConsoleCommandHandlerMock mock(a);
-    server::console::Parser testee(env, term, fs, mock);
+    Parser testee(env, term, fs, mock);
 
     env.setNew("a", server::console::Environment::ValuePtr_t(server::makeIntegerValue(3)));
     env.setNew("q", server::console::Environment::ValuePtr_t(server::makeIntegerValue(7)));
@@ -340,7 +341,7 @@ AFL_TEST("server.console.Parser:evaluateString:errors", a)
     server::console::NullTerminal term;
     afl::io::NullFileSystem fs;
     ConsoleCommandHandlerMock mock(a);
-    server::console::Parser testee(env, term, fs, mock);
+    Parser testee(env, term, fs, mock);
     std::auto_ptr<afl::data::Value> p;
 
     // No verb in pipe
@@ -377,7 +378,7 @@ AFL_TEST("server.console.Parser:evaluateStringToBool", a)
     server::console::NullTerminal term;
     afl::io::NullFileSystem fs;
     ConsoleCommandHandlerMock mock(a);
-    server::console::Parser testee(env, term, fs, mock);
+    Parser testee(env, term, fs, mock);
 
     // Null
     mock.expectCall("g|1");
@@ -415,7 +416,7 @@ AFL_TEST("server.console.Parser:evaluateString:pipe:empty", a)
     server::console::NullTerminal term;
     afl::io::NullFileSystem fs;
     ConsoleCommandHandlerMock mock(a);
-    server::console::Parser testee(env, term, fs, mock);
+    Parser testee(env, term, fs, mock);
 
     // Pipe with empty array result
     mock.expectCall("a");
@@ -438,7 +439,7 @@ AFL_TEST("server.console.Parser:evaluateString:pipe:typed", a)
     server::console::NullTerminal term;
     afl::io::NullFileSystem fs;
     ConsoleCommandHandlerMock mock(a);
-    server::console::Parser testee(env, term, fs, mock);
+    Parser testee(env, term, fs, mock);
 
     // Pipe with empty array result
     mock.expectCall("bo");
@@ -458,4 +459,24 @@ AFL_TEST("server.console.Parser:evaluateString:pipe:typed", a)
     a.checkEqual("02. result", server::toString(p.get()), "s");
 
     mock.checkFinish();
+}
+
+/** Test quoteConsoleString. */
+AFL_TEST("server.console.Parser:quoteConsoleString", a)
+{
+    a.checkEqual("01. empty string",                      Parser::quoteConsoleString(""), "\"\"");
+    a.checkEqual("02. single word",                       Parser::quoteConsoleString("ab"), "ab");
+    a.checkEqual("03. single quote quoted using doubles", Parser::quoteConsoleString("'"), "\"'\"");
+    a.checkEqual("04. double quote quoted using single",  Parser::quoteConsoleString("\""), "'\"'");
+    a.checkEqual("05. dollar quoted using single",        Parser::quoteConsoleString("$"), "'$'");
+    a.checkEqual("06. double quotes preferred",           Parser::quoteConsoleString("{}"), "\"{}\"");
+    a.checkEqual("07. double quotes preferred",           Parser::quoteConsoleString("'{}'"), "\"'{}'\"");
+    a.checkEqual("08. dollar forces singles",             Parser::quoteConsoleString("{$}"), "'{$}'");
+    a.checkEqual("09. single fources doubles",            Parser::quoteConsoleString("{'$}"), "\"{'\\$}\"");
+
+    a.checkEqual("51. cr",  Parser::quoteConsoleString("\r"), "\"\\r\"");
+    a.checkEqual("52. nl",  Parser::quoteConsoleString("\n"), "\"\\n\"");
+    a.checkEqual("53. tab", Parser::quoteConsoleString("\t"), "\"\\t\"");
+    a.checkEqual("54. nul", Parser::quoteConsoleString(String_t(1, '\0')), "\"\\0\"");
+    a.checkEqual("55. ext", Parser::quoteConsoleString("\x99"), "\"\\x99\"");
 }

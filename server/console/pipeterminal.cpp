@@ -41,3 +41,9 @@ server::console::PipeTerminal::printMessage(String_t s)
     m_outputStream.writeLine(s);
     m_outputStream.flush();
 }
+
+void
+server::console::PipeTerminal::printOutput(String_t s)
+{
+    m_outputStream.writeLine(s);
+}

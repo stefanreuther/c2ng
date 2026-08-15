@@ -456,3 +456,28 @@ AFL_TEST("util.String:parsePath:empty-element", a)
     a.checkEqual("idx0", x[0], "a");
     a.checkEqual("idx1", x[1], "c");
 }
+
+/** Test isOption. */
+AFL_TEST("util.String:isOption/1", a)
+{
+    a.check("empty",  !util::isOption(""));
+    a.check("one+x",   util::isOption("-x"));
+    a.check("two+x",   util::isOption("--x"));
+    a.check("one",     util::isOption("-"));
+    a.check("two",     util::isOption("--"));
+    a.check("x",      !util::isOption("x"));
+}
+
+AFL_TEST("util.String:isOption/2", a)
+{
+    a.check("empty",  !util::isOption("",     "x"));
+    a.check("one+x",   util::isOption("-x",   "x"));
+    a.check("two+x",   util::isOption("--x",  "x"));
+    a.check("one",    !util::isOption("-",    "x"));
+    a.check("two",    !util::isOption("--",   "x"));
+    a.check("x",      !util::isOption("x",    "x"));
+    a.check("one+y",  !util::isOption("-y",   "x"));
+    a.check("two+y",  !util::isOption("--y",  "x"));
+    a.check("one+x2", !util::isOption("-x2",  "x"));
+    a.check("two+x2", !util::isOption("--x2", "x"));
+}

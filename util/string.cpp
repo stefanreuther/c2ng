@@ -507,3 +507,16 @@ util::parsePath(const String_t& str, char delim)
     addPathElement(path, str.substr(i));
     return path;
 }
+
+bool
+util::isOption(const String_t& opt, const char* match)
+{
+    size_t n = opt.find_first_not_of('-');
+    return ((n == 1 || n == 2) && opt.substr(n) == match);
+}
+
+bool
+util::isOption(const String_t& opt)
+{
+    return !opt.empty() && opt[0] == '-';
+}
