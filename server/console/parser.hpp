@@ -61,6 +61,10 @@ namespace server { namespace console {
             \return terminal as passed to constructor */
         Terminal& terminal();
 
+        /** Access file system.
+            \return file system as passed to constructor */
+        afl::io::FileSystem& fileSystem();
+
         /** Quote as console string.
             \param input Text to encode
             \return quoted text that, when parsed by Parser, produces the given input */

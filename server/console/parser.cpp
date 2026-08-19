@@ -512,6 +512,13 @@ server::console::Parser::terminal()
     return m_terminal;
 }
 
+// Access file system.
+afl::io::FileSystem&
+server::console::Parser::fileSystem()
+{
+    return m_fileSystem;
+}
+
 void
 server::console::Parser::handleInclude(afl::data::StringList_t& cmd, bool& hadLE)
 {

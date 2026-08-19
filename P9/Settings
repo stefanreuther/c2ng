@@ -1294,7 +1294,8 @@ DEPEND_guilib = afl
 PROJ_AUTO += guilib:gfx/*.cpp,gfx/*.hpp,ui/*.cpp,ui/*.hpp,client/*.cpp,client/*.hpp
 
 TARGETS += serverlib
-FILES_serverlib = server/console/dbexporter.cpp \
+FILES_serverlib = server/console/fileexporter.cpp \
+    server/console/fileexporter.hpp server/console/dbexporter.cpp \
     server/console/dbexporter.hpp server/console/exportcontextfactory.cpp \
     server/console/exportcontextfactory.hpp server/console/clientpool.cpp \
     server/console/clientpool.hpp server/file/fileshareimpl.cpp \
@@ -1897,7 +1898,8 @@ DEPEND_c2reshack = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/server/console/dbexportertest.cpp \
+FILES_testsuite = test/server/console/fileexportertest.cpp \
+    test/server/console/dbexportertest.cpp \
     test/server/console/clientpooltest.cpp \
     test/server/file/fileshareimpltest.cpp \
     test/server/file/sharestoretest.cpp \

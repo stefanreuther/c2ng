@@ -21,6 +21,21 @@
 using server::console::Parser;
 using server::test::ConsoleCommandHandlerMock;
 
+/** Test accessors. */
+AFL_TEST("server.console.Parser:accessor", a)
+{
+    // Set up
+    server::console::Environment env;
+    server::console::NullTerminal term;
+    afl::io::NullFileSystem fs;
+    ConsoleCommandHandlerMock mock(a);
+    Parser testee(env, term, fs, mock);
+
+    // Verify
+    a.checkEqual("01. terminal", &testee.terminal(), &term);
+    a.checkEqual("02. fileSystem", &testee.fileSystem(), &fs);
+}
+
 /** Test basic evaluation. */
 AFL_TEST("server.console.Parser:evaluateString", a)
 {
