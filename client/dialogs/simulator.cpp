@@ -6,6 +6,7 @@
 #include "client/dialogs/simulator.hpp"
 #include "afl/string/format.hpp"
 #include "client/dialogs/choosehull.hpp"
+#include "client/dialogs/export.hpp"
 #include "client/dialogs/friendlycodedialog.hpp"
 #include "client/dialogs/helpdialog.hpp"
 #include "client/dialogs/sessionfileselectiondialog.hpp"
@@ -24,6 +25,7 @@
 #include "client/widgets/simulationobjectinfo.hpp"
 #include "client/widgets/stoppablebusyindicator.hpp"
 #include "game/proxy/simulationadaptorfromsession.hpp"
+#include "game/proxy/simulationexportadaptor.hpp"
 #include "game/proxy/simulationrunproxy.hpp"
 #include "game/proxy/simulationsetupproxy.hpp"
 #include "game/sim/ship.hpp"
@@ -264,6 +266,7 @@ namespace {
         void onEditAbilities();
         void onEditAlliances();
         void onFleetCostSummary();
+        void onExport();
         void onEditConfiguration();
         void onUpdateThis();
         void onWriteBackThis();
@@ -732,7 +735,8 @@ SimulatorDialog::onExtraMenu()
     enum {
         IdOptions,
         IdAlliances,
-        IdFleetCost
+        IdFleetCost,
+        IdExport
     };
 
     ui::widgets::StringListbox list(m_root.provider(), m_root.colorScheme());
@@ -740,6 +744,7 @@ SimulatorDialog::onExtraMenu()
     list.addItem(IdAlliances, m_translator("Alliances...\t[Ctrl-A]"));
     if (m_list.getNumItems() > 0) {
         list.addItem(IdFleetCost, m_translator("Fleet Cost Comparison...\t[Ctrl-C]"));
+        list.addItem(IdExport, m_translator("Export..."));
     }
 
     const gfx::Point pt = m_extraButton.getExtent().getBottomLeft();
@@ -754,6 +759,9 @@ SimulatorDialog::onExtraMenu()
             break;
          case IdFleetCost:
             onFleetCostSummary();
+            break;
+         case IdExport:
+            onExport();
             break;
         }
     }
@@ -1375,6 +1383,17 @@ SimulatorDialog::onFleetCostSummary()
 {
     if (isAtObject()) {
         client::dialogs::showSimulationFleetCost(m_root, m_gameSender, m_proxy, m_translator);
+    }
+}
+
+void
+SimulatorDialog::onExport()
+{
+    if (isAtObject()) {
+        client::dialogs::doExport(m_root,
+                                  m_proxy.adaptorSender().makeTemporary(game::proxy::makeSimulationExportAdaptor()),
+                                  m_gameSender,
+                                  m_translator);
     }
 }
 

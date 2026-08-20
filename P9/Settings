@@ -12,7 +12,10 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/v3/baseturnloader.cpp game/v3/baseturnloader.hpp \
+FILES_gamelib = game/proxy/simulationexportadaptor.cpp \
+    game/proxy/simulationexportadaptor.hpp \
+    game/interface/simobjectcontext.cpp game/interface/simobjectcontext.hpp \
+    game/v3/baseturnloader.cpp game/v3/baseturnloader.hpp \
     util/connectionprovider.cpp util/connectionprovider.hpp \
     util/characternamelist.cpp util/characternamelist.hpp \
     util/waitindicator.cpp util/waitindicator.hpp game/v3/passwordapplet.cpp \
@@ -1898,7 +1901,9 @@ DEPEND_c2reshack = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/server/console/fileexportertest.cpp \
+FILES_testsuite = test/game/proxy/simulationexportadaptortest.cpp \
+    test/game/interface/simobjectcontexttest.cpp \
+    test/server/console/fileexportertest.cpp \
     test/server/console/dbexportertest.cpp \
     test/server/console/clientpooltest.cpp \
     test/server/file/fileshareimpltest.cpp \

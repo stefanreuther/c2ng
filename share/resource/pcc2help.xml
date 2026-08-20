@@ -2169,6 +2169,13 @@
         <ki key="F1">(ship) Show this ship on <a href="pcc2:shipscreen">ship screen</a> if possible;</ki>
         <ki key="F2">(planet) Show this planet on <a href="pcc2:planetscreen">planet screen</a> if possible;</ki>
         <ki key="F4">Show this unit on <a href="pcc2:starchart">starchart</a> if possible;</ki>
+        <ki key="F10">Popup menu with additional functions:
+        <ul>
+          <li><a href="pcc2:simopts">Options</a>;</li>
+          <li><a href="pcc2:simallies">Alliances</a>;</li>
+          <li><a href="pcc2:fleetcost">Fleet cost comparison</a>;</li>
+          <li><a href="pcc2:export">Export</a>.</li>
+        </ul></ki>
         <ki key="Ctrl-Up, Ctrl-Down">(ship) Move ship up&#47;down (has no effect on simulation);</ki>
         <ki key="1">(ship) Edit primary weapon (beams);</ki>
         <ki key="2">(ship) Edit secondary weapon (torpedoes, fighters);</ki>
@@ -3291,6 +3298,7 @@
           It is also available using <kbd>E</kbd> on the
           <a href="pcc2:listship">List Ship</a> cargo summary,
           <a href="pcc2:fleetcost">Fleet Cost comparison</a>,
+          <a href="pcc2:bsim">Battle Simulator</a>,
           and <a href="pcc2:buildship">Ship Building</a> detailed bill.</di>
       </dl>
     </page>

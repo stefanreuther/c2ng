@@ -1591,6 +1591,10 @@ Some of the ship properties can be assigned.
 If that would violate any constraint of a fleet (i.e. you try to change the speed of an ordinary member),
 the assignment is silently ignored.
 --------------------------------------------------------------------------------
+@group Simulation Participant Property
+This section describes properties of battle simulation participants.
+As of August 2026, they are accessible using the <a href="pcc2:export">Export</a> user interface.
+--------------------------------------------------------------------------------
 @group Storm Command
 These commands are valid at ion storms.
 
@@ -1706,6 +1710,8 @@ and {@group Global Command|global commands}.
 --------------------------------------------------------------------------------
 @version PCC2 2.40
 First "Next Generation" version.
+--------------------------------------------------------------------------------
+@version PCC2 2.1
 --------------------------------------------------------------------------------
 @version PCC2 2.0.17
 --------------------------------------------------------------------------------
