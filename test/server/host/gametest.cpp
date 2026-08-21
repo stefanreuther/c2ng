@@ -869,7 +869,7 @@ AFL_TEST("server.host.Game:pushPlayerSlot", a)
 }
 
 /** Test pushPlayerSlot, popPlayerSlot, dual-duel. */
-AFL_TEST("server.host.Game:pushPlayerSlot", a)
+AFL_TEST("server.host.Game:pushPlayerSlot:dd", a)
 {
     TestHarness h;
     FileBaseClient(h.hostFile()).createDirectory("gg");

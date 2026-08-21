@@ -300,7 +300,7 @@ server::interface::TalkForumServer::handleCommand(const String_t& upcasedCommand
            Add user as a watcher to the forum.
            Performs the same operation as "{USERWATCH} FORUM forum",
            but does not require a user context.
-           @since 2.41.5 */
+           @since PCC2 2.41.5 */
         args.checkArgumentCount(2);
 
         int32_t fid = toInteger(args.getNext());
