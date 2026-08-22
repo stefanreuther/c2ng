@@ -13,6 +13,8 @@
 #include "afl/string/parse.hpp"
 #include "afl/sys/standardcommandlineparser.hpp"
 #include "afl/sys/time.hpp"
+#include "game/exception.hpp"
+#include "game/interface/simobjectcontext.hpp"
 #include "game/limits.hpp"
 #include "game/sim/configuration.hpp"
 #include "game/sim/loader.hpp"
@@ -26,11 +28,13 @@
 #include "game/sim/simplerunner.hpp"
 #include "game/specificationloader.hpp"
 #include "game/v3/rootloader.hpp"
+#include "interpreter/error.hpp"
+#include "interpreter/exporter/configuration.hpp"
+#include "interpreter/metacontext.hpp"
 #include "util/charsetfactory.hpp"
 #include "util/stopsignal.hpp"
 #include "util/string.hpp"
 #include "version.hpp"
-#include "game/exception.hpp"
 
 using afl::base::Optional;
 using afl::base::Ptr;
@@ -155,13 +159,17 @@ struct game::sim::ConsoleApplication::Parameters {
     Optional<Configuration::BalancingMode> balancingMode;  // --balance
     Optional<uint32_t> seed;                               // --seed
     std::vector<String_t> loadFileNames;                   // file names
+    Optional<String_t> exportFileName;                     // --export=X
+    interpreter::exporter::Configuration exportConfig;     // -f, -t, -O, -c
+    bool exportFields;                                     // -F
 
     Parameters()
         : hadAction(false), saveFileName(), enableReport(false), enableVerify(false), gameDirectoryName(), rootDirectoryName(),
           numThreads(0), charsetName(), runSimCount(), runSimSeries(false),
           vcrMode(), engineShieldBonus(), scottyBonus(), randomLeftRight(),
           honorAlliances(), onlyOneSimulation(), seedControl(), randomizeFCodesOnEveryFight(),
-          balancingMode(), loadFileNames()
+          balancingMode(), loadFileNames(),
+          exportFileName(), exportConfig(), exportFields(false)
         { }
 };
 
@@ -238,6 +246,12 @@ game::sim::ConsoleApplication::appMain()
         showSetup(setup, session);
     }
 
+    // Export
+    if (const String_t* fn = p.exportFileName.get()) {
+        loadSession(session, p, *cs);
+        exportSetup(setup, session, *fn, p);
+    }
+
     // Sim
     if (p.runSimSeries || p.runSimCount.isValid()) {
         loadSession(session, p, *cs);
@@ -266,6 +280,9 @@ game::sim::ConsoleApplication::parseCommandLine(Parameters& p)
             } else if (text == "r" || text == "report") {
                 // Report; in mergeccb this is '-r'
                 p.enableReport = true;
+                p.hadAction = true;
+            } else if (text == "e" || text == "export") {
+                p.exportFileName = parser.getRequiredParameter(text);
                 p.hadAction = true;
             } else if (text == "verify") {
                 p.enableVerify = true;
@@ -331,6 +348,25 @@ game::sim::ConsoleApplication::parseCommandLine(Parameters& p)
                     errorExit(Format(tx("invalid seed, '%s'"), param));
                 }
                 p.seed = n;
+            } else if (text == "f") {
+                String_t pp = parser.getRequiredParameter(text);
+                try {
+                    p.exportConfig.fieldList().addList(pp);
+                }
+                catch (interpreter::Error& e) {
+                    errorExit(Format("'-f %s': %s", pp, e.what()));
+                }
+            } else if (text == "t") {
+                p.exportConfig.setFormatByName(parser.getRequiredParameter(text), tx);
+            } else if (text == "O") {
+                p.exportConfig.setCharsetByName(parser.getRequiredParameter(text), tx);
+            } else if (text == "F") {
+                p.exportFields = true;
+            } else if (text == "c") {
+                Ref<Stream> file = fileSystem().openFile(parser.getRequiredParameter(text), FileSystem::OpenRead);
+                interpreter::exporter::Configuration tmpConfig(p.exportConfig);
+                tmpConfig.load(*file, tx);
+                p.exportConfig = tmpConfig;
             } else {
                 errorExit(Format(tx("invalid option '%s' specified. Use '%s -h' for help."), text, environment().getInvocationName()));
             }
@@ -357,6 +393,7 @@ game::sim::ConsoleApplication::help()
                          util::formatOptions(tx("Actions (at least one):\n"
                                                 "--save/-o OUT.ccb\tSave combined .ccb file\n"
                                                 "--report/-r\tReport ships\n"
+                                                "--export/-e FILE\tExport\n"
                                                 "--verify\tVerify simulation against ship list\n"
                                                 "--run N\tRun N simulations\n"
                                                 "--run-series\tRun a series\n"
@@ -379,7 +416,14 @@ game::sim::ConsoleApplication::help()
                                                 "--[no-]seed-control\tSeed control\n"
                                                 "--[no-]random-fc\tRandom friendly codes on every fight\n"
                                                 "--balance=MODE\tSet balancing mode (none, 360, master)\n"
-                                                "--seed=N\tSet random-number seed\n"))));
+                                                "--seed=N\tSet random-number seed\n"
+                                                "\n"
+                                                "Export options:\n"
+                                                "-f FIELD@WIDTH\tAdd field to export\n"
+                                                "-t TYPE\tSet output file format/type\n"
+                                                "-O CHARSET\tSet output file character set (default: UTF-8)\n"
+                                                "-F\tExport list of fields instead of game data\n"
+                                                "-c FILE\tRead configuration from file\n"))));
     out.flush();
     exit(0);
 }
@@ -500,6 +544,35 @@ game::sim::ConsoleApplication::showSetup(const Setup& setup, const Session& sess
             out.writeLine(line);
         }
     }
+}
+
+void
+game::sim::ConsoleApplication::exportSetup(Setup& setup, const Session& session, const String_t& out, Parameters& p)
+{
+    // Must have objects
+    if (setup.getNumObjects() == 0) {
+        errorExit(translator()("Battle setup is empty, cannot export"));
+    }
+
+    // Default fields if none given
+    if (p.exportConfig.fieldList().size() == 0) {
+        if (p.exportFields) {
+            p.exportConfig.fieldList().addList("NAME@-30,TYPE@-10");
+        } else {
+            p.exportConfig.fieldList().addList("ID@5,NAME@-20,OWNER$@6,HULL@-30");
+        }
+    }
+
+    // Export requires a heap-allocated sim session
+    Ref<game::sim::Session> simSession = *new game::sim::Session();
+    simSession->setup() = setup;
+
+    Ref<Stream> outFile = fileSystem().openFile(out, FileSystem::Create);
+    std::auto_ptr<interpreter::Context> ctx(new game::interface::SimObjectContext(simSession, *session.root, *session.shipList, 0, translator()));
+    if (p.exportFields) {
+        ctx.reset(interpreter::MetaContext::create(*ctx));
+    }
+    p.exportConfig.exportFile(*ctx, *outFile);
 }
 
 void

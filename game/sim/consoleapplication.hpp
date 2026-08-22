@@ -40,6 +40,7 @@ namespace game { namespace sim {
         void loadSession(Session& session, const Parameters& params, afl::charset::Charset& charset);
         void verifySetup(const Setup& setup, const Session& session);
         void showSetup(const Setup& setup, const Session& session);
+        void exportSetup(Setup& setup, const Session& session, const String_t& out, Parameters& p);
         void runSimulation(Setup& setup, const Session& session, const Parameters& params);
         void showClassResults(const Setup& setup, const Session& session, const ResultList& resultList);
         void showUnitResults(const Setup& setup, const Session& session, const ResultList& resultList);

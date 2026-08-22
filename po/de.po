@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-08-13 19:34+0200\n"
+"PO-Revision-Date: 2026-08-22 16:30+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:390
@@ -1590,11 +1590,12 @@ msgstr ""
 msgid "Accept"
 msgstr "Akzeptieren"
 
-#: game/sim/consoleapplication.cpp:357
+#: game/sim/consoleapplication.cpp:393
 msgid ""
 "Actions (at least one):\n"
 "--save/-o OUT.ccb\tSave combined .ccb file\n"
 "--report/-r\tReport ships\n"
+"--export/-e FILE\tExport\n"
 "--verify\tVerify simulation against ship list\n"
 "--run N\tRun N simulations\n"
 "--run-series\tRun a series\n"
@@ -1617,11 +1618,19 @@ msgid ""
 "--[no-]seed-control\tSeed control\n"
 "--[no-]random-fc\tRandom friendly codes on every fight\n"
 "--balance=MODE\tSet balancing mode (none, 360, master)\n"
-"--seed=N\tSet random-number seed"
+"--seed=N\tSet random-number seed\n"
+"\n"
+"Export options:\n"
+"-f FIELD@WIDTH\tAdd field to export\n"
+"-t TYPE\tSet output file format/type\n"
+"-O CHARSET\tSet output file character set (default: UTF-8)\n"
+"-F\tExport list of fields instead of game data\n"
+"-c FILE\tRead configuration from file"
 msgstr ""
 "Aktionen (mindestens eine):\n"
 "--save/-o OUT.ccb\tKombinierte .ccb-Datei speichern\n"
 "--report/-r\tBericht über Schiffe\n"
+"--export/-e DATEI\tExport\n"
 "--verify\tPrüfe Simulation gegen Schiffsliste\n"
 "--run N\tN Simulationen ausführen\n"
 "--run-series\tEine Serie ausführen\n"
@@ -1644,7 +1653,14 @@ msgstr ""
 "--[no-]seed-control\tStartwert steuern\n"
 "--[no-]random-fc\tKommandocodes für jeden Kampf verwürfeln\n"
 "--balance=MODUS\tLinks/Rechts-Ausgleich (none, 360, master)\n"
-"--seed=N\tStartwert für Zufallsgenerator"
+"--seed=N\tStartwert für Zufallsgenerator\n"
+"\n"
+"Export-Optionen:\n"
+"-f FELD@BREITE\tFeld hinzufügen\n"
+"-t TYP\tAusgabedateiformat setzen\n"
+"-O ZEICHENSATZ\tAusgabe-Zeichensatz setzen (Standard: UTF-8)\n"
+"-F\tExportiere Liste der Felder, nicht Spieldaten\n"
+"-c DATEI\tKonfiguration aus Datei lesen"
 
 #: client/screens/browserscreen.cpp:1029
 msgid "Actions..."
@@ -2146,6 +2162,10 @@ msgstr "Kampf-Simulator"
 msgid "Battle cannot be played!"
 msgstr "Kampf kann nicht wiedergegeben werden!"
 
+#: game/sim/consoleapplication.cpp:554
+msgid "Battle setup is empty, cannot export"
+msgstr "Kampfaufstellung ist leer, kann nicht exportiert werden"
+
 #: game/vcr/classic/utils.cpp:39
 msgid "Battle timed out (too long)."
 msgstr "Zeitlimit überschritten."
@@ -2513,7 +2533,7 @@ msgstr "Kampfschiffe"
 msgid "Capital ships"
 msgstr "Kampfschiffe"
 
-#: client/dialogs/simulationresult.cpp:66 game/sim/consoleapplication.cpp:623
+#: client/dialogs/simulationresult.cpp:66 game/sim/consoleapplication.cpp:696
 msgid "Captured"
 msgstr "Erobert"
 
@@ -2735,7 +2755,7 @@ msgstr "Mit wievielen Clans angreifen?"
 msgid "Class %d (%s)"
 msgstr "Klasse %d (%s)"
 
-#: game/sim/consoleapplication.cpp:582
+#: game/sim/consoleapplication.cpp:655
 msgid ""
 "Class Results\n"
 "-------------"
@@ -3176,7 +3196,7 @@ msgstr "Verzeichnis \"%s\" kann nicht erstellt werden: %s"
 msgid "Crew"
 msgstr "Crew"
 
-#: game/sim/consoleapplication.cpp:637 game/sim/resultlist.cpp:299
+#: game/sim/consoleapplication.cpp:710 game/sim/resultlist.cpp:299
 msgid "Crew Left"
 msgstr "Crew überlebt"
 
@@ -3261,7 +3281,7 @@ msgstr "Schaden"
 msgid "Damage speed limit"
 msgstr "Geschwindigkeitslimit wegen Schaden"
 
-#: game/sim/consoleapplication.cpp:627
+#: game/sim/consoleapplication.cpp:700
 msgid "Damage taken"
 msgstr "Schaden"
 
@@ -3332,7 +3352,7 @@ msgstr "Standardwert"
 msgid "Defense"
 msgstr "Verteidigung"
 
-#: game/sim/consoleapplication.cpp:630 game/sim/resultlist.cpp:296
+#: game/sim/consoleapplication.cpp:703 game/sim/resultlist.cpp:296
 msgid "Defense Lost"
 msgstr "Verteid. verloren"
 
@@ -4330,11 +4350,11 @@ msgstr "Jäger Räum-Rate"
 msgid "Fighters"
 msgstr "Raumjäger"
 
-#: game/sim/consoleapplication.cpp:640 game/sim/resultlist.cpp:301
+#: game/sim/consoleapplication.cpp:713 game/sim/resultlist.cpp:301
 msgid "Fighters Left"
 msgstr "Raumjäger übrig"
 
-#: game/sim/consoleapplication.cpp:639 game/sim/resultlist.cpp:300
+#: game/sim/consoleapplication.cpp:712 game/sim/resultlist.cpp:300
 msgid "Fighters Lost"
 msgstr "Raumjäger verl."
 
@@ -4635,7 +4655,7 @@ msgstr "Nachricht weiterleiten"
 msgid "Forward..."
 msgstr "Weiterleiten..."
 
-#: client/dialogs/simulationresult.cpp:64 game/sim/consoleapplication.cpp:622
+#: client/dialogs/simulationresult.cpp:64 game/sim/consoleapplication.cpp:695
 msgid "Fought"
 msgstr "Gekämpft"
 
@@ -5252,7 +5272,7 @@ msgstr "I - Invertieren"
 msgid "I do not know how to generate this character."
 msgstr "Ich kann dieses Zeichen nicht generieren."
 
-#: game/sim/consoleapplication.cpp:472
+#: game/sim/consoleapplication.cpp:516
 msgid ""
 "ID# Pl  Type             Name             Eng  Beams   T/F  Ammo  Dam%  Lvl"
 msgstr ""
@@ -6026,7 +6046,7 @@ msgstr "%d Kampf-Aufzeichnung%!1{en%} (FLAK) geladen..."
 msgid "Loaded %d combat recording%!1{s%}..."
 msgstr "%d Kampf-Aufzeichnung%!1{en%} geladen..."
 
-#: game/sim/consoleapplication.cpp:399
+#: game/sim/consoleapplication.cpp:443
 msgid "Loaded %s (%d unit%!1{s%})"
 msgstr "%s geladen (%d Einheit%!1{en%})"
 
@@ -6397,7 +6417,7 @@ msgstr "Nachrichten"
 msgid "Min Ftr Aboard"
 msgstr "Unbenutzte Jäger"
 
-#: game/sim/consoleapplication.cpp:633 game/sim/consoleapplication.cpp:641
+#: game/sim/consoleapplication.cpp:706 game/sim/consoleapplication.cpp:714
 msgid "Min Ftr aboard"
 msgstr "Unbenutzte Jäger"
 
@@ -7296,7 +7316,7 @@ msgstr ""
 "-t TYP\tAusgabedateiformat setzen\n"
 "-o DATEI\tAusgabedateiname setzen (Standard: stdout)\n"
 "-O ZEICHENSATZ\tAusgabe-Zeichensatz setzen (Standard: UTF-8)\n"
-"-F\tExportiere Liste der Felder, nicth Spieldaten\n"
+"-F\tExportiere Liste der Felder, nicht Spieldaten\n"
 "-c DATEI\tKonfiguration aus Datei lesen\n"
 "-v\tLog-Meldungen anzeigen\n"
 "\n"
@@ -7497,7 +7517,7 @@ msgstr "PCC1"
 msgid "PCC2"
 msgstr "PCC2"
 
-#: game/sim/consoleapplication.cpp:348
+#: game/sim/consoleapplication.cpp:384
 msgid "PCC2 Battle Simulation Utility v%s - (c) 2020-2026 Stefan Reuther"
 msgstr "PCC2 Schlachtsimulator v%s - (c) 2020-2026 Stefan Reuther"
 
@@ -8443,7 +8463,7 @@ msgstr "Result-Datei verfügbar"
 msgid "Result file is not a regular file"
 msgstr "Result-Datei ist keine reguläre Datei"
 
-#: game/sim/consoleapplication.cpp:570
+#: game/sim/consoleapplication.cpp:643
 msgid "Results after %d simulation%!1{s%}"
 msgstr "Ergebnisse nach %d Simulation%!1{en%}"
 
@@ -8525,7 +8545,7 @@ msgstr "S - Raumschiffe"
 msgid "SB Defense: %d; Fighters: %d; Damage: %d%%"
 msgstr "SB-Verteidigung: %d; Raumjäger: %d; Schaden: %d%%"
 
-#: game/sim/consoleapplication.cpp:631 game/sim/resultlist.cpp:297
+#: game/sim/consoleapplication.cpp:704 game/sim/resultlist.cpp:297
 msgid "SB Ftrs Lost"
 msgstr "SB-Jäger verl."
 
@@ -8599,7 +8619,7 @@ msgstr "Diese Nachricht speichern"
 msgid "Save this battle"
 msgstr "Diesen Kampf speichern"
 
-#: game/sim/consoleapplication.cpp:414
+#: game/sim/consoleapplication.cpp:458
 msgid "Saved %s (%d unit%!1{s%})"
 msgstr "%s gespeichert (%d Einheit%!1{en%})"
 
@@ -9032,7 +9052,7 @@ msgstr "Schild-Bonus"
 msgid "Shield Generator"
 msgstr "Schildgenerator"
 
-#: game/sim/consoleapplication.cpp:628
+#: game/sim/consoleapplication.cpp:701
 msgid "Shields"
 msgstr "Schilde"
 
@@ -9349,7 +9369,7 @@ msgstr "Simulieren!"
 msgid "Simulation Results"
 msgstr "Simulations-Ergebnisse"
 
-#: game/sim/consoleapplication.cpp:554
+#: game/sim/consoleapplication.cpp:627
 msgid "Simulation did not produce any battles."
 msgstr "Simulation ergab keine Kämpfe."
 
@@ -9755,7 +9775,7 @@ msgstr "Reparatur mit Vorräten"
 msgid "Supports %s %ss"
 msgstr "Erlaubt bis zu %s %s."
 
-#: client/dialogs/simulationresult.cpp:65 game/sim/consoleapplication.cpp:621
+#: client/dialogs/simulationresult.cpp:65 game/sim/consoleapplication.cpp:694
 msgid "Survived"
 msgstr "Überlebt"
 
@@ -10788,15 +10808,15 @@ msgstr "Torpedos: %d"
 msgid "Torps Fired"
 msgstr "Gefeuerte Torpedos"
 
-#: game/sim/consoleapplication.cpp:645 game/sim/resultlist.cpp:304
+#: game/sim/consoleapplication.cpp:718 game/sim/resultlist.cpp:304
 msgid "Torps Hit"
 msgstr "Torpedotreffer"
 
-#: game/sim/consoleapplication.cpp:643
+#: game/sim/consoleapplication.cpp:716
 msgid "Torps Launched"
 msgstr "Gefeuerte Torpedos"
 
-#: game/sim/consoleapplication.cpp:644 game/sim/resultlist.cpp:303
+#: game/sim/consoleapplication.cpp:717 game/sim/resultlist.cpp:303
 msgid "Torps Left"
 msgstr "Verbleibende Torpedos"
 
@@ -11248,7 +11268,7 @@ msgstr "Entfernen von \"%s\" ist möglicherweise unvollständig."
 msgid "Unit"
 msgstr "Einheit"
 
-#: game/sim/consoleapplication.cpp:613
+#: game/sim/consoleapplication.cpp:686
 msgid ""
 "Unit Results\n"
 "------------"
@@ -11884,7 +11904,7 @@ msgstr ""
 "\n"
 "Fehler bitte melden an <Streu@gmx.de>"
 
-#: game/sim/consoleapplication.cpp:350
+#: game/sim/consoleapplication.cpp:386
 msgid ""
 "Usage:\n"
 "  %s [-h]\n"
@@ -12066,7 +12086,7 @@ msgstr "VCR-Optionen [O]"
 msgid "VERY dangerous"
 msgstr "SEHR gefährlich"
 
-#: game/sim/consoleapplication.cpp:460
+#: game/sim/consoleapplication.cpp:504
 msgid "Verification succeeded"
 msgstr "Prüfung erfolgreich"
 
@@ -12981,7 +13001,7 @@ msgstr "kühl"
 msgid "current turn"
 msgstr "aktueller Zug"
 
-#: game/sim/consoleapplication.cpp:478
+#: game/sim/consoleapplication.cpp:522
 msgid "custom"
 msgstr "selbstdefiniert"
 
@@ -13197,7 +13217,7 @@ msgstr "Ungültiger Befehl '%s'. Mit '%s -h' erhalten Sie Hilfe."
 msgid "invalid edit command \"%s\""
 msgstr "Ungültiger Bearbeitungs-Befehl \"%s\""
 
-#: game/sim/consoleapplication.cpp:310
+#: game/sim/consoleapplication.cpp:327
 msgid "invalid engine/shield bonus, '%s'"
 msgstr "Ungültiger Triebwerk-Schild-Bonus, '%s'"
 
@@ -13217,15 +13237,15 @@ msgstr "Ungültige Missions-Nummer"
 msgid "invalid number"
 msgstr "Ungültige Zahl"
 
-#: game/sim/consoleapplication.cpp:297
+#: game/sim/consoleapplication.cpp:314
 msgid "invalid number of simulations, '%s'"
 msgstr "Ungültige Anzahl Simulationen, '%s'"
 
-#: game/sim/consoleapplication.cpp:280
+#: game/sim/consoleapplication.cpp:297
 msgid "invalid number of threads, '%s'"
 msgstr "Ungültige Anzahl Threads, '%s'"
 
-#: game/interface/scriptapplication.cpp:402 game/sim/consoleapplication.cpp:335
+#: game/interface/scriptapplication.cpp:402 game/sim/consoleapplication.cpp:371
 #: game/v3/check/application.cpp:58 interpreter/consoleapplication.cpp:568
 #: interpreter/consoleapplication.cpp:607
 #: server/play/consoleapplication.cpp:120 util/resourcefileapplication.cpp:303
@@ -13259,7 +13279,7 @@ msgstr "Ungültige Option angegeben. Mit '%s -h' erhalten Sie Hilfe."
 msgid "invalid output format specified"
 msgstr "ungültiges Ausgabeformat angegeben"
 
-#: game/sim/consoleapplication.cpp:331
+#: game/sim/consoleapplication.cpp:348
 msgid "invalid seed, '%s'"
 msgstr "Ungültiger Startwert, '%s'"
 
@@ -13454,7 +13474,7 @@ msgstr "nein"
 msgid "no (shown by default)"
 msgstr "nein (standardmäßig sichtbar)"
 
-#: game/sim/consoleapplication.cpp:205
+#: game/sim/consoleapplication.cpp:213
 msgid "no action specified"
 msgstr "keine Aktion angegeben"
 
@@ -13499,7 +13519,7 @@ msgstr "kein Filter angegeben. Zum Löschen (\"-d\") wird ein Filter benötigt"
 msgid "no game data available for player %d"
 msgstr "keine Spieldaten für Spieler %d verfügbar"
 
-#: game/interface/scriptapplication.cpp:199 game/sim/consoleapplication.cpp:437
+#: game/interface/scriptapplication.cpp:199 game/sim/consoleapplication.cpp:481
 #: server/play/consoleapplication.cpp:166
 msgid "no game data found"
 msgstr "keine Spieldaten gefunden"
@@ -13508,7 +13528,7 @@ msgstr "keine Spieldaten gefunden"
 msgid "no game data found in directory \"%s\""
 msgstr "keine Spieldaten gefunden in Verzeichnis \"%s\""
 
-#: game/sim/consoleapplication.cpp:202
+#: game/sim/consoleapplication.cpp:210
 msgid "no input files specified"
 msgstr "keine Eingabedateien angegeben"
 
@@ -13560,7 +13580,7 @@ msgstr "unerwartete Nicht-Option. Mit \"%s -h\" erhalten Sie Hilfe"
 #: game/proxy/simulationsetupproxy.cpp:137
 #: game/proxy/simulationsetupproxy.cpp:92 game/searchquery.cpp:339
 #: game/sim/ability.cpp:40 game/sim/configuration.cpp:169
-#: game/sim/consoleapplication.cpp:599 game/spec/info/info.cpp:160
+#: game/sim/consoleapplication.cpp:672 game/spec/info/info.cpp:160
 #: game/tables/basemissionname.cpp:18 game/tables/mineralmassclassname.cpp:26
 #: game/tables/nativegovernmentname.cpp:11 game/tables/nativeracename.cpp:11
 #: game/v3/udata/messagebuilder.cpp:378 game/vcr/objectinfo.cpp:127
@@ -13717,7 +13737,7 @@ msgstr "eigene Schiffe"
 msgid "own units"
 msgstr "eigene Einheiten"
 
-#: game/sim/consoleapplication.cpp:101 game/sim/consoleapplication.cpp:114
+#: game/sim/consoleapplication.cpp:105 game/sim/consoleapplication.cpp:118
 msgid "parameter '%s' to '--%s' is not valid"
 msgstr "Parameter '%s' zu '--%s' ist nicht gültig"
 
@@ -13734,11 +13754,11 @@ msgstr "Parameter '%s' zu '--%s' ist nicht gültig"
 msgid "parameter for \"-%s\" is invalid"
 msgstr "Parameter für \"-%s\" ist ungültig"
 
-#: game/sim/consoleapplication.cpp:63
+#: game/sim/consoleapplication.cpp:67
 msgid "parameter to '--%s' must be 'yes' or 'no'"
 msgstr "Parameter zu '--%s' muss 'yes' oder 'no' sein"
 
-#: game/interface/scriptapplication.cpp:389 game/sim/consoleapplication.cpp:291
+#: game/interface/scriptapplication.cpp:389 game/sim/consoleapplication.cpp:308
 #: interpreter/consoleapplication.cpp:600
 msgid "parameter to '--log' is not valid"
 msgstr "Parameter zu '--log' ist nicht gültig"
@@ -13832,7 +13852,7 @@ msgstr "Schiffe"
 msgid "simple"
 msgstr "einfach"
 
-#: game/sim/consoleapplication.cpp:457
+#: game/sim/consoleapplication.cpp:501
 msgid "simulation does not match ship list"
 msgstr "Simulation und Schiffsliste passen nicht zusammen"
 
@@ -13887,7 +13907,7 @@ msgstr "für das gewählte Format muss eine Ausgabedatei angegeben werden ('-o')
 #: game/interface/exportapplication.cpp:73
 #: game/interface/scriptapplication.cpp:367 game/maint/dump/application.cpp:57
 #: game/maint/messagesearchapplication.cpp:516
-#: game/sim/consoleapplication.cpp:213 game/v3/trn/dumperapplication.cpp:71
+#: game/sim/consoleapplication.cpp:221 game/v3/trn/dumperapplication.cpp:71
 #: interpreter/consoleapplication.cpp:578
 #: interpreter/exporter/configuration.cpp:84
 #: server/play/consoleapplication.cpp:102 util/doc/application.cpp:433
@@ -13968,7 +13988,7 @@ msgid "ufos"
 msgstr "Ufos"
 
 #: game/interface/exportapplication.cpp:173
-#: game/interface/scriptapplication.cpp:226 game/sim/consoleapplication.cpp:445
+#: game/interface/scriptapplication.cpp:226 game/sim/consoleapplication.cpp:489
 #: server/play/consoleapplication.cpp:181
 msgid "unable to load ship list"
 msgstr "Kann Schiffsliste nicht laden"
