@@ -190,7 +190,9 @@ interpreter::exporter::TextExporter::writeDivider()
         total += 3*m_widths.size() + 1;
     } else {
         // 1 extra space per field, except for last one
-        total += m_widths.size() - 1;
+        if (!m_widths.empty()) {
+            total += m_widths.size() - 1;
+        }
     }
     m_file.writeLine(String_t(total, '-'));
 }

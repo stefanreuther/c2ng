@@ -114,6 +114,24 @@ namespace {
         outputText.flush();
         return afl::string::fromBytes(outputStream.getContent());
     }
+
+    void renderNull(bool boxes)
+    {
+        // Empty field list
+        interpreter::exporter::FieldList list;
+
+        // Exporter
+        afl::io::InternalStream outputStream;
+        afl::io::TextFile outputText(outputStream);
+        interpreter::exporter::TextExporter testee(outputText, boxes);
+
+        // Render empty table
+        testee.startTable(list, afl::base::Nothing);
+        testee.startRecord();
+        testee.endRecord();
+        testee.endTable();
+        outputText.flush();
+    }
 }
 
 
@@ -197,4 +215,15 @@ AFL_TEST("interpreter.exporter.TextExporter:box:long", a)
                  "|    13 |\n"
                  "|    14 |\n"
                  "---------\n");
+}
+
+/** Null job. This used to crash. */
+AFL_TEST("interpreter.exporter.TextExporter:table:null", a)
+{
+    AFL_CHECK_SUCCEEDS(a, renderNull(false));
+}
+
+AFL_TEST("interpreter.exporter.TextExporter:box:null", a)
+{
+    AFL_CHECK_SUCCEEDS(a, renderNull(true));
 }
