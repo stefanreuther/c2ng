@@ -233,6 +233,7 @@ AFL_TEST("interpreter.test.ContextVerifier:verifyInteger", a)
 
     AFL_CHECK_SUCCEEDS(a("01. ok"), testee.verifyInteger("I", 7));
     AFL_CHECK_THROWS(a("02. fail: name"), testee.verifyInteger("J", 7), AssertionFailedException);
+    AFL_CHECK_SUCCEEDS(a("02. float ok"), testee.verifyFloat("I", 7, 0.01));
 
     AFL_CHECK_THROWS(a("11. verifyBoolean"), testee.verifyBoolean("I", true), AssertionFailedException);
     AFL_CHECK_THROWS(a("12. verifyString"),  testee.verifyString("I", "s"), AssertionFailedException);
@@ -253,6 +254,7 @@ AFL_TEST("interpreter.test.ContextVerifier:verifyBoolean", a)
     AFL_CHECK_THROWS(a("11. verifyInteger"), testee.verifyInteger("B", true), AssertionFailedException);
     AFL_CHECK_THROWS(a("12. verifyString"),  testee.verifyString("B", "s"), AssertionFailedException);
     AFL_CHECK_THROWS(a("13. verifyNull"),    testee.verifyNull("B"), AssertionFailedException);
+    AFL_CHECK_THROWS(a("14. verifyFloat"),   testee.verifyFloat("B", 1, 0.01), AssertionFailedException);
 }
 
 /** Test verifyString.
@@ -269,6 +271,7 @@ AFL_TEST("interpreter.test.ContextVerifier:verifyString", a)
     AFL_CHECK_THROWS(a("11. verifyInteger"), testee.verifyInteger("S", 42), AssertionFailedException);
     AFL_CHECK_THROWS(a("12. verifyBoolean"), testee.verifyBoolean("S", true), AssertionFailedException);
     AFL_CHECK_THROWS(a("13. verifyNull"),    testee.verifyNull("S"), AssertionFailedException);
+    AFL_CHECK_THROWS(a("14. verifyFloat"),   testee.verifyFloat("S", 7, 0.01), AssertionFailedException);
 }
 
 /** Test verifyNull.
@@ -283,6 +286,23 @@ AFL_TEST("interpreter.test.ContextVerifier:verifyNull", a)
     AFL_CHECK_THROWS(a("02. fail: name"), testee.verifyNull("Q"), AssertionFailedException);
 
     AFL_CHECK_THROWS(a("11. verifyInteger"), testee.verifyInteger("N", 7), AssertionFailedException);
+    AFL_CHECK_THROWS(a("12. verifyBoolean"), testee.verifyBoolean("N", true), AssertionFailedException);
+    AFL_CHECK_THROWS(a("13. verifyString"),  testee.verifyString("N", "s"), AssertionFailedException);
+    AFL_CHECK_THROWS(a("14. verifyFloat"),   testee.verifyFloat("N", 7, 0.01), AssertionFailedException);
+}
+
+/** Test verifyFloat.
+    A: create a context with a float.
+    E: verifyFloat succeeds for that property, fails for others. Other type checks fail. */
+AFL_TEST("interpreter.test.ContextVerifier:verifyFloat", a)
+{
+    TestContext ctx(a, "N", interpreter::thFloat, new afl::data::FloatValue(2.5));
+    interpreter::test::ContextVerifier testee(ctx, a);
+
+    AFL_CHECK_SUCCEEDS(a("01. verifyFloat"), testee.verifyFloat("N", 2.5, 0.0001));
+    AFL_CHECK_THROWS(a("02. fail: name"), testee.verifyNull("Q"), AssertionFailedException);
+
+    AFL_CHECK_THROWS(a("11. verifyInteger"), testee.verifyInteger("N", 2), AssertionFailedException);
     AFL_CHECK_THROWS(a("12. verifyBoolean"), testee.verifyBoolean("N", true), AssertionFailedException);
     AFL_CHECK_THROWS(a("13. verifyString"),  testee.verifyString("N", "s"), AssertionFailedException);
 }

@@ -5,9 +5,12 @@
 
 #include "game/proxy/simulationrunproxy.hpp"
 
+#include "afl/io/filemapping.hpp"
+#include "afl/io/internalfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/thread.hpp"
 #include "afl/test/testrunner.hpp"
+#include "game/proxy/exportproxy.hpp"
 #include "game/proxy/simulationadaptorfromsession.hpp"
 #include "game/proxy/simulationsetupproxy.hpp"
 #include "game/proxy/vcrdatabaseproxy.hpp"
@@ -16,6 +19,7 @@
 #include "game/test/sessionthread.hpp"
 #include "game/test/shiplist.hpp"
 #include "game/test/waitindicator.hpp"
+#include "util/io.hpp"
 
 using game::test::SessionThread;
 using game::test::WaitIndicator;
@@ -280,4 +284,72 @@ AFL_TEST("game.proxy.SimulationRunProxy:makeUnitResultBattleAdaptor", a)
     dbProxy.getStatus(ind, st);
     a.checkEqual("11. numBattles", st.numBattles, 1U);
     a.checkEqual("12. currentBattle", st.currentBattle, 0U);
+}
+
+/** Test export.
+    A: create session and set up a simulation. Call runFinite(1). Create ExportProxy, ExportAdaptor; export.
+    E: verify export result */
+AFL_TEST("game.proxy.SimulationRunProxy:export", a)
+{
+    afl::io::InternalFileSystem fs;
+    SessionThread h(fs);
+    WaitIndicator ind;
+    prepare(h);
+
+    // Create two hostile ships
+    SimulationSetupProxy setup(h.gameSender().makeTemporary(new SimulationAdaptorFromSession()), ind);
+    setup.addShip(ind, 0, 2);
+    setup.setOwner(1, 3);
+
+    // Run one simulation
+    SimulationRunProxy t(setup.adaptorSender(), ind);
+    Counter c;
+    t.sig_stop.add(&c, &Counter::increment);
+    t.runFinite(1);
+    h.sync();
+    ind.processQueue();
+
+    // Export class results
+    {
+        String_t classErr;
+        game::proxy::ExportProxy classExporter(t.makeClassResultExportAdaptor(), ind);
+        classExporter.clear();
+        classExporter.add(0, "LABEL", 5);
+        classExporter.add(1, "COUNT", 5);
+        classExporter.setFormat(interpreter::exporter::CommaSVFormat);
+        classExporter.setCharsetIndex(util::CharsetFactory::UNICODE_INDEX);
+        classExporter.exportFile(ind, "/class.txt", classErr);
+        h.sync();
+        ind.processQueue();
+
+        a.checkEqual("class export error", classErr, "");
+        a.checkEqual("class export result",
+                     util::normalizeLinefeeds(fs.openFile("/class.txt", afl::io::FileSystem::OpenRead)
+                                              ->createVirtualMapping()
+                                              ->get()),
+                     "\"LABEL\",\"COUNT\"\n"
+                     "1\xc3\x97 (100.0%),1\n");
+    }
+
+    // Export unit results
+    {
+        String_t unitErr;
+        game::proxy::ExportProxy unitExporter(t.makeUnitResultExportAdaptor(), ind);
+        unitExporter.clear();
+        unitExporter.add(0, "ID", 5);
+        unitExporter.add(1, "OWNER$", 6);
+        unitExporter.setFormat(interpreter::exporter::CommaSVFormat);
+        unitExporter.exportFile(ind, "/unit.txt", unitErr);
+        h.sync();
+        ind.processQueue();
+
+        a.checkEqual("unit export error", unitErr, "");
+        a.checkEqual("unit export result",
+                     util::normalizeLinefeeds(fs.openFile("/unit.txt", afl::io::FileSystem::OpenRead)
+                                              ->createVirtualMapping()
+                                              ->get()),
+                     "\"ID\",\"OWNER$\"\n"
+                     "1,12\n"
+                     "2,3\n");
+    }
 }

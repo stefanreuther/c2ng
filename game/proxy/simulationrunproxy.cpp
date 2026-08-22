@@ -7,6 +7,8 @@
 #include "afl/except/assertionfailedexception.hpp"
 #include "afl/string/format.hpp"
 #include "game/game.hpp"
+#include "game/interface/simclassresultcontext.hpp"
+#include "game/interface/simunitresultcontext.hpp"
 #include "game/root.hpp"
 #include "game/session.hpp"
 #include "game/sim/parallelrunner.hpp"
@@ -17,10 +19,14 @@
 #include "game/sim/simplerunner.hpp"
 #include "util/randomnumbergenerator.hpp"
 
+using afl::string::Format;
+using afl::except::checkAssertion;
+using game::interface::SimClassResultContext;
+using game::interface::SimUnitResultContext;
+
 namespace {
     const char*const LOG_NAME = "game.proxy.sim.run";
     const afl::sys::LogListener::Level LOG_LEVEL = afl::sys::LogListener::Trace;
-    using afl::string::Format;
 }
 
 /*
@@ -43,6 +49,8 @@ class game::proxy::SimulationRunProxy::Trampoline {
 
     VcrDatabaseAdaptor* makeClassResultBattleAdaptor(size_t index);
     VcrDatabaseAdaptor* makeUnitResultBattleAdaptor(size_t index, UnitInfo_t::Type type, bool max);
+    ExportAdaptor* makeClassResultExportAdaptor();
+    ExportAdaptor* makeUnitResultExportAdaptor();
 
  private:
     util::RequestSender<SimulationRunProxy> m_reply;
@@ -70,12 +78,12 @@ class game::proxy::SimulationRunProxy::Adaptor : public VcrDatabaseAdaptor {
         { }
     virtual afl::base::Ref<const Root> getRoot() const
         {
-            afl::except::checkAssertion(m_trampoline.m_root.get() != 0, "<SimulationRunProxy.Adaptor.Root>");
+            checkAssertion(m_trampoline.m_root.get() != 0, "<SimulationRunProxy.Adaptor.Root>");
             return *m_trampoline.m_root;
         }
     virtual afl::base::Ref<const game::spec::ShipList> getShipList() const
         {
-            afl::except::checkAssertion(m_trampoline.m_shipList.get() != 0, "<SimulationRunProxy.Adaptor.ShipList>");
+            checkAssertion(m_trampoline.m_shipList.get() != 0, "<SimulationRunProxy.Adaptor.ShipList>");
             return *m_trampoline.m_shipList;
         }
     virtual const TeamSettings* getTeamSettings() const
@@ -186,15 +194,15 @@ inline game::proxy::VcrDatabaseAdaptor*
 game::proxy::SimulationRunProxy::Trampoline::makeClassResultBattleAdaptor(size_t index)
 {
     // Must have runner
-    afl::except::checkAssertion(m_runner.get() != 0, "<makeClassResultBattleAdaptor.Runner>");
+    checkAssertion(m_runner.get() != 0, "<makeClassResultBattleAdaptor.Runner>");
 
     // Must have class result
     const game::sim::ClassResult* r = m_runner->resultList().getClassResult(index);
-    afl::except::checkAssertion(r != 0, "<makeClassResultBattleAdaptor.ClassResult>");
+    checkAssertion(r != 0, "<makeClassResultBattleAdaptor.ClassResult>");
 
     // Must have sample battle
     game::sim::Database_t b = r->getSampleBattle();
-    afl::except::checkAssertion(b.get() != 0, "<makeClassResultBattleAdaptor.Database>");
+    checkAssertion(b.get() != 0, "<makeClassResultBattleAdaptor.Database>");
 
     return new Adaptor(*this, *b);
 }
@@ -203,13 +211,84 @@ inline game::proxy::VcrDatabaseAdaptor*
 game::proxy::SimulationRunProxy::Trampoline::makeUnitResultBattleAdaptor(size_t index, UnitInfo_t::Type type, bool max)
 {
     // Must have runner
-    afl::except::checkAssertion(m_runner.get() != 0, "<makeUnitResultBattleAdaptor.Runner>");
+    checkAssertion(m_runner.get() != 0, "<makeUnitResultBattleAdaptor.Runner>");
 
     // Must have sample battle
     game::sim::Database_t b = m_runner->resultList().getUnitSampleBattle(index, type, max);
-    afl::except::checkAssertion(b.get() != 0, "<makeClassResultBattleAdaptor.Database>");
+    checkAssertion(b.get() != 0, "<makeClassResultBattleAdaptor.Database>");
 
     return new Adaptor(*this, *b);
+}
+
+game::proxy::ExportAdaptor*
+game::proxy::SimulationRunProxy::Trampoline::makeClassResultExportAdaptor()
+{
+    // Must have runner and environment
+    checkAssertion(m_runner.get() != 0, "<makeClassResultBattleAdaptor.Runner>");
+    checkAssertion(m_root.get() != 0, "<makeClassResultBattleAdaptor.Root>");
+
+    class ClassAdaptor : public ExportAdaptor {
+     public:
+        ClassAdaptor(Trampoline& tpl)
+            : m_trampoline(tpl)
+            { }
+        virtual void initConfiguration(interpreter::exporter::Configuration& config)
+            {
+                PlayerSet_t participants = m_trampoline.m_sim->setup().getInvolvedPlayers();
+                config.fieldList().addList("LABEL@-20,RATIO@10");
+                for (int i = 1; i <= SimClassResultContext::MAX_PLAYERS; ++i) {
+                    if (participants.contains(i)) {
+                        config.fieldList().add(Format("PLAYER%d@8", i));
+                    }
+                }
+            }
+        virtual void saveConfiguration(const interpreter::exporter::Configuration& /*config*/)
+            { }
+        virtual interpreter::Context* createContext()
+            { return SimClassResultContext::create(m_trampoline.m_runner->resultList(), m_trampoline.m_root->userConfiguration().getNumberFormatter()); }
+        virtual afl::io::FileSystem& fileSystem()
+            { return m_trampoline.m_fileSystem; }
+        virtual afl::string::Translator& translator()
+            { return m_trampoline.m_translator; }
+     private:
+        Trampoline& m_trampoline;
+    };
+    return new ClassAdaptor(*this);
+}
+
+game::proxy::ExportAdaptor*
+game::proxy::SimulationRunProxy::Trampoline::makeUnitResultExportAdaptor()
+{
+    // Must have runner and environment
+    checkAssertion(m_runner.get() != 0, "<makeUnitResultBattleAdaptor.Runner>");
+    checkAssertion(m_root.get() != 0, "<makeUnitResultBattleAdaptor.Root>");
+    checkAssertion(m_shipList.get() != 0, "<makeUnitResultBattleAdaptor.ShipList>");
+
+    class UnitAdaptor : public ExportAdaptor {
+     public:
+        UnitAdaptor(Trampoline& tpl)
+            : m_trampoline(tpl)
+            { }
+        virtual void initConfiguration(interpreter::exporter::Configuration& config)
+            { config.fieldList().addList("ID@5,NAME@-20,OWNER$@6,HULL@-30,FIGHTS@5,FIGHTS.WON@5,FIGHTS.CAPTURED@5,RESULT.DAMAGE@15,RESULT.SHIELD@15,RESULT.CREW@15"); }
+        virtual void saveConfiguration(const interpreter::exporter::Configuration& /*config*/)
+            { }
+        virtual interpreter::Context* createContext()
+            {
+                return SimUnitResultContext::create(m_trampoline.m_runner->resultList(),
+                                                    m_trampoline.m_sim,
+                                                    *m_trampoline.m_root,
+                                                    *m_trampoline.m_shipList,
+                                                    m_trampoline.m_translator);
+            }
+        virtual afl::io::FileSystem& fileSystem()
+            { return m_trampoline.m_fileSystem; }
+        virtual afl::string::Translator& translator()
+            { return m_trampoline.m_translator; }
+     private:
+        Trampoline& m_trampoline;
+    };
+    return new UnitAdaptor(*this);
 }
 
 void
@@ -390,6 +469,28 @@ game::proxy::SimulationRunProxy::makeUnitResultBattleAdaptor(size_t index, UnitI
         bool m_max;
     };
     return m_request.makeTemporary(new AdaptorFromTrampoline(index, type, max));
+}
+
+util::RequestSender<game::proxy::ExportAdaptor>
+game::proxy::SimulationRunProxy::makeClassResultExportAdaptor()
+{
+    class AdaptorFromTrampoline : public afl::base::Closure<ExportAdaptor*(Trampoline&)> {
+     public:
+        virtual ExportAdaptor* call(Trampoline& tpl)
+            { return tpl.makeClassResultExportAdaptor(); }
+    };
+    return m_request.makeTemporary(new AdaptorFromTrampoline());
+}
+
+util::RequestSender<game::proxy::ExportAdaptor>
+game::proxy::SimulationRunProxy::makeUnitResultExportAdaptor()
+{
+    class AdaptorFromTrampoline : public afl::base::Closure<ExportAdaptor*(Trampoline&)> {
+     public:
+        virtual ExportAdaptor* call(Trampoline& tpl)
+            { return tpl.makeUnitResultExportAdaptor(); }
+    };
+    return m_request.makeTemporary(new AdaptorFromTrampoline());
 }
 
 afl::base::Ptr<util::StopSignal>

@@ -8,6 +8,7 @@
 #include <vector>
 #include "afl/base/ptr.hpp"
 #include "afl/base/signal.hpp"
+#include "game/proxy/exportadaptor.hpp"
 #include "game/proxy/simulationadaptor.hpp"
 #include "game/proxy/vcrdatabaseadaptor.hpp"
 #include "game/sim/resultlist.hpp"
@@ -127,6 +128,18 @@ namespace game { namespace proxy {
             \return Adaptor; usable at least as long as the SimulationRunProxy is valid
             \see game::sim::ResultList::getUnitSampleBattle */
         util::RequestSender<VcrDatabaseAdaptor> makeUnitResultBattleAdaptor(size_t index, UnitInfo_t::Type type, bool max);
+
+        /** Get access to class results.
+            Creates an Adaptor for use with ExportProxy.
+            \return Adaptor; usable at least as long as the SimulationRunProxy is valid
+            \see game::interface::SimClassResultContext */
+        util::RequestSender<ExportAdaptor> makeClassResultExportAdaptor();
+
+        /** Get access to unit results.
+            Creates an Adaptor for use with ExportProxy.
+            \return Adaptor; usable at least as long as the SimulationRunProxy is valid
+            \see game::interface::SimUnitResultContext */
+        util::RequestSender<ExportAdaptor> makeUnitResultExportAdaptor();
 
         /** Signal: data update.
             This signal is raised when new data is available for retrieval using member functions.

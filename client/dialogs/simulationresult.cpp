@@ -8,6 +8,7 @@
 #include "afl/base/deleter.hpp"
 #include "afl/string/format.hpp"
 #include "afl/sys/log.hpp"
+#include "client/dialogs/export.hpp"
 #include "client/dialogs/vcrplayer.hpp"
 #include "client/downlink.hpp"
 #include "client/widgets/helpwidget.hpp"
@@ -171,6 +172,8 @@ namespace {
         void onEdit();
         void onWatchClassSample();
         void onLinkClick(String_t link);
+        void onExportUnits();
+        void onExportClasses();
 
         void playBattle(util::RequestSender<game::proxy::VcrDatabaseAdaptor> adaptor);
 
@@ -203,7 +206,7 @@ namespace {
         // Signals
         afl::base::SignalConnection conn_update;
 
-        Button& addResultButtons(ui::Group& out, afl::base::Deleter& del, String_t text, util::Key_t key);
+        Button& addResultButtons(ui::Group& out, afl::base::Deleter& del, String_t text, util::Key_t key, bool isUnit);
     };
 }
 
@@ -294,8 +297,8 @@ SimulationResultDialog::run()
     resultTab.add(resultContent);
     resultTab.add(m_summaryLine2);
 
-    Button& btnEnter = addResultButtons(summaryTab, del, m_translator("ENTER - Watch sample"), util::Key_Return);
-    Button& btnEdit  = addResultButtons(resultTab, del, m_translator("E - Edit this unit"), 'e');
+    Button& btnEnter = addResultButtons(summaryTab, del, m_translator("ENTER - Watch sample"), util::Key_Return, false);
+    Button& btnEdit  = addResultButtons(resultTab, del, m_translator("E - Edit this unit"), 'e', true);
 
     ui::CardGroup& cards = del.addNew(new ui::CardGroup());
     cards.add(summaryTab);
@@ -431,6 +434,18 @@ SimulationResultDialog::onLinkClick(String_t link)
 }
 
 void
+SimulationResultDialog::onExportUnits()
+{
+    client::dialogs::doExport(m_root, m_runProxy.makeUnitResultExportAdaptor(), m_gameSender, m_translator);
+}
+
+void
+SimulationResultDialog::onExportClasses()
+{
+    client::dialogs::doExport(m_root, m_runProxy.makeClassResultExportAdaptor(), m_gameSender, m_translator);
+}
+
+void
 SimulationResultDialog::playBattle(util::RequestSender<game::proxy::VcrDatabaseAdaptor> adaptor)
 {
     afl::sys::Log log; // FIXME: for now, ground the logs
@@ -473,7 +488,7 @@ SimulationResultDialog::getResult() const
 }
 
 Button&
-SimulationResultDialog::addResultButtons(ui::Group& out, afl::base::Deleter& del, String_t text, util::Key_t key)
+SimulationResultDialog::addResultButtons(ui::Group& out, afl::base::Deleter& del, String_t text, util::Key_t key, bool isUnit)
 {
     // Buttons
     Button& btnClose  = del.addNew(new Button(m_translator("Close"),         util::Key_Escape, m_root));
@@ -482,6 +497,7 @@ SimulationResultDialog::addResultButtons(ui::Group& out, afl::base::Deleter& del
     Button& btnSeries = del.addNew(new Button(m_translator("S - Series"),    's',              m_root));
     Button& btnRepeat = del.addNew(new Button(m_translator("R - Repeat"),    'r',              m_root));
     Button& btnView   = del.addNew(new Button(text,                          key,              m_root));
+    Button& btnExport = del.addNew(new Button(m_translator("X - Export"),    'x',              m_root));
 
     client::widgets::HelpWidget& help = del.addNew(new client::widgets::HelpWidget(m_root, m_translator, m_gameSender, "pcc2:simresult"));
 
@@ -490,6 +506,11 @@ SimulationResultDialog::addResultButtons(ui::Group& out, afl::base::Deleter& del
     btnOnce.sig_fire.add(this, &SimulationResultDialog::runOnce);
     btnSeries.sig_fire.add(this, &SimulationResultDialog::runSeries);
     btnRepeat.sig_fire.add(this, &SimulationResultDialog::runInfinite);
+    if (isUnit) {
+        btnExport.sig_fire.add(this, &SimulationResultDialog::onExportUnits);
+    } else {
+        btnExport.sig_fire.add(this, &SimulationResultDialog::onExportClasses);
+    }
 
     // First line
     ui::Group& g1 = del.addNew(new ui::Group(ui::layout::HBox::instance5));
@@ -497,6 +518,7 @@ SimulationResultDialog::addResultButtons(ui::Group& out, afl::base::Deleter& del
     g1.add(btnSeries);
     g1.add(btnRepeat);
     g1.add(del.addNew(new ui::Spacer()));
+    g1.add(btnExport);
     out.add(g1);
 
     // Second line

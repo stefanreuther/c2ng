@@ -44,6 +44,13 @@ namespace interpreter { namespace test {
             \param value Expected value */
         void verifyString(const char* name, const char* value) const;
 
+        /** Verify float property.
+            Look up the named property and check that it produces the desired float value, within range.
+            \param name  Name
+            \param value Expected value
+            \param delta Permissible difference */
+        void verifyFloat(const char* name, double value, double delta) const;
+
         /** Verify null property.
             Look up the named property and check that it is null.
             \param name Name */

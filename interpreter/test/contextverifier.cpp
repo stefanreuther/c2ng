@@ -137,6 +137,13 @@ interpreter::test::ContextVerifier::verifyString(const char* name, const char* v
 }
 
 void
+interpreter::test::ContextVerifier::verifyFloat(const char* name, double value, double delta) const
+{
+    Assert me(m_assert(name));
+    verifyNewFloat(me, getValue(name), value, delta);
+}
+
+void
 interpreter::test::ContextVerifier::verifyNull(const char* name) const
 {
     Assert me(m_assert(name));

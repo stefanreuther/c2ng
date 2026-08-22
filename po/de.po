@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-08-22 16:30+0200\n"
+"PO-Revision-Date: 2026-08-30 21:21+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:390
@@ -560,7 +560,7 @@ msgstr ""
 msgid "%d ship%!1{s%} terraforming"
 msgstr "%d Schiff%!1{e terraformen%| terraformt%}"
 
-#: client/dialogs/simulationresult.cpp:334
+#: client/dialogs/simulationresult.cpp:337
 msgid "%d simulation%!1{s%}"
 msgstr "%d Simulation%!1{en%}"
 
@@ -2533,7 +2533,7 @@ msgstr "Kampfschiffe"
 msgid "Capital ships"
 msgstr "Kampfschiffe"
 
-#: client/dialogs/simulationresult.cpp:66 game/sim/consoleapplication.cpp:696
+#: client/dialogs/simulationresult.cpp:67 game/sim/consoleapplication.cpp:696
 msgid "Captured"
 msgstr "Erobert"
 
@@ -2846,7 +2846,7 @@ msgstr "Klone, und baue ein %s"
 #: client/dialogs/searchdialog.cpp:336 client/dialogs/shipcostcalculator.cpp:73
 #: client/dialogs/simpleconsole.cpp:22
 #: client/dialogs/simulationfleetcost.cpp:160
-#: client/dialogs/simulationresult.cpp:479 client/dialogs/simulator.cpp:346
+#: client/dialogs/simulationresult.cpp:494 client/dialogs/simulator.cpp:346
 #: client/dialogs/specbrowserdialog.cpp:323 client/dialogs/ufoinfo.cpp:180
 #: client/vcr/flak/playbackscreen.cpp:147 ui/reshack/dialogs.cpp:224
 #: ui/reshack/fonteditor.cpp:224 ui/reshack/pictureeditor.cpp:213
@@ -3424,7 +3424,7 @@ msgstr "Desktop"
 msgid "Destroy"
 msgstr "Zerstören"
 
-#: client/dialogs/simulationresult.cpp:306
+#: client/dialogs/simulationresult.cpp:309
 #: client/widgets/simulationobjectinfo.cpp:482
 msgid "Details"
 msgstr "Details"
@@ -3686,7 +3686,7 @@ msgstr "Duranium-Kosten"
 msgid "E - Add Equal"
 msgstr "E - Gleichmäßig verteilen"
 
-#: client/dialogs/simulationresult.cpp:298
+#: client/dialogs/simulationresult.cpp:301
 msgid "E - Edit this unit"
 msgstr "E - Einheit bearbeiten"
 
@@ -3700,7 +3700,7 @@ msgstr "E - Export"
 msgid "E.T.A."
 msgstr "Reisezeit"
 
-#: client/dialogs/simulationresult.cpp:297
+#: client/dialogs/simulationresult.cpp:300
 msgid "ENTER - Watch sample"
 msgstr "Enter - Beispiel ansehen"
 
@@ -4655,7 +4655,7 @@ msgstr "Nachricht weiterleiten"
 msgid "Forward..."
 msgstr "Weiterleiten..."
 
-#: client/dialogs/simulationresult.cpp:64 game/sim/consoleapplication.cpp:695
+#: client/dialogs/simulationresult.cpp:65 game/sim/consoleapplication.cpp:695
 msgid "Fought"
 msgstr "Gekämpft"
 
@@ -5148,7 +5148,7 @@ msgstr "Höhe"
 #: client/dialogs/sellsuppliesdialog.cpp:62
 #: client/dialogs/shipcostcalculator.cpp:72
 #: client/dialogs/simulationfleetcost.cpp:163
-#: client/dialogs/simulationresult.cpp:480 client/dialogs/simulator.cpp:347
+#: client/dialogs/simulationresult.cpp:495 client/dialogs/simulator.cpp:347
 #: client/dialogs/specbrowserdialog.cpp:324
 #: client/dialogs/taxationdialog.cpp:610 client/dialogs/ufoinfo.cpp:178
 #: client/dialogs/vcrselection.cpp:81 client/dialogs/visualscandialog.cpp:692
@@ -8102,7 +8102,7 @@ msgstr "Bietet"
 msgid "Q-Pos"
 msgstr "Q-Pos"
 
-#: client/dialogs/simulationresult.cpp:483
+#: client/dialogs/simulationresult.cpp:498
 msgid "R - Repeat"
 msgstr "R - Wiederholung"
 
@@ -8533,7 +8533,7 @@ msgstr "S - Speichern"
 msgid "S - Sell Supplies"
 msgstr "S - Vorräte verk."
 
-#: client/dialogs/simulationresult.cpp:482
+#: client/dialogs/simulationresult.cpp:497
 msgid "S - Series"
 msgstr "S - Serie"
 
@@ -9365,7 +9365,7 @@ msgstr "Silikonoide"
 msgid "Simulate!"
 msgstr "Simulieren!"
 
-#: client/dialogs/simulationresult.cpp:280
+#: client/dialogs/simulationresult.cpp:283
 msgid "Simulation Results"
 msgstr "Simulations-Ergebnisse"
 
@@ -9502,7 +9502,7 @@ msgstr "Schiffe nach Anzahl Jäger-Startrampen sortieren"
 msgid "Sort ships by tech level"
 msgstr "Schiffe nach Tech sortieren"
 
-#: client/dialogs/simulationresult.cpp:481
+#: client/dialogs/simulationresult.cpp:496
 msgid "Space - Again"
 msgstr "Leertaste - Noch einmal"
 
@@ -9775,7 +9775,7 @@ msgstr "Reparatur mit Vorräten"
 msgid "Supports %s %ss"
 msgstr "Erlaubt bis zu %s %s."
 
-#: client/dialogs/simulationresult.cpp:65 game/sim/consoleapplication.cpp:694
+#: client/dialogs/simulationresult.cpp:66 game/sim/consoleapplication.cpp:694
 msgid "Survived"
 msgstr "Überlebt"
 
@@ -10863,7 +10863,7 @@ msgstr "Tritanium gesamt"
 msgid "Total ships in game"
 msgstr "Schiffe im Spiel"
 
-#: client/dialogs/simulationresult.cpp:305 game/map/info/browser.cpp:174
+#: client/dialogs/simulationresult.cpp:308 game/map/info/browser.cpp:174
 msgid "Totals"
 msgstr "Gesamt"
 
@@ -12456,6 +12456,10 @@ msgstr "X"
 msgid "X - Execute"
 msgstr "X - Ausführen"
 
+#: client/dialogs/simulationresult.cpp:500
+msgid "X - Export"
+msgstr "X - Export"
+
 #: game/parser/messagevalue.cpp:242
 msgid "X Movement"
 msgstr "X-Bewegung"
@@ -12890,7 +12894,7 @@ msgstr "verfügbar"
 msgid "available?"
 msgstr "verfügbar?"
 
-#: client/dialogs/simulationresult.cpp:71
+#: client/dialogs/simulationresult.cpp:72
 msgid "average"
 msgstr "Mittel"
 
@@ -13360,7 +13364,7 @@ msgstr "manuell"
 msgid "marked units"
 msgstr "markierte Einheiten"
 
-#: client/dialogs/simulationresult.cpp:72
+#: client/dialogs/simulationresult.cpp:73
 msgid "max."
 msgstr "max."
 
@@ -13374,7 +13378,7 @@ msgstr "max."
 msgid "mc"
 msgstr "mc"
 
-#: client/dialogs/simulationresult.cpp:70
+#: client/dialogs/simulationresult.cpp:71
 msgid "min."
 msgstr "min."
 

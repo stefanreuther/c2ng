@@ -2418,6 +2418,7 @@
         <ki key="R">Repeat indefinitely, until canceled with a key;</ki>
         <ki key="Enter">From totals tab, <a href="pcc2:vcr">watch sample battle</a> that produces this result;</ki>
         <ki key="E">From details tab, close result screen and place cursor on current ship;</ki>
+        <ki key="X"><a href="pcc2:export">Export</a> totals/details;</ki>
         <ki key="ESC">Exit.</ki>
       </kl>
 
@@ -3299,6 +3300,7 @@
           <a href="pcc2:listship">List Ship</a> cargo summary,
           <a href="pcc2:fleetcost">Fleet Cost comparison</a>,
           <a href="pcc2:bsim">Battle Simulator</a>,
+          <a href="pcc2:simresult">Simulation result</a>,
           and <a href="pcc2:buildship">Ship Building</a> detailed bill.</di>
       </dl>
     </page>

@@ -1591,9 +1591,24 @@ Some of the ship properties can be assigned.
 If that would violate any constraint of a fleet (i.e. you try to change the speed of an ordinary member),
 the assignment is silently ignored.
 --------------------------------------------------------------------------------
+@group Simulation Class Result Property
+This section describes properties of battle simulation class result.
+A class result is a particular combination of surviving unit counts ("2 Feds survived 30% of all time").
+
+As of August 2026, these properties are accessible using the <a href="pcc2:export">Export</a> user interface
+from the <a href="pcc2:simresult">result screen</a>.
+--------------------------------------------------------------------------------
 @group Simulation Participant Property
 This section describes properties of battle simulation participants.
 As of August 2026, they are accessible using the <a href="pcc2:export">Export</a> user interface.
+--------------------------------------------------------------------------------
+@group Simulation Unit Result Property
+This section describes properties of battle simulation unit result (per participant).
+As of August 2026, they are accessible using the <a href="pcc2:export">Export</a> user interface
+from the <a href="pcc2:simresult">result screen</a>.
+Each property is EMPTY if not applicable to the respective unit.
+
+In addition to these properties, the {@group Simulation Participant Property|Simulation Participant Properties} are also available in this context.
 --------------------------------------------------------------------------------
 @group Storm Command
 These commands are valid at ion storms.
