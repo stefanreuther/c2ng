@@ -1,10 +1,32 @@
 PCC2ng NEWS FILE
 ================
 
+2.41.5
+------
+
+  PCC2ng now tries to prevent that you accidentally lose an auto task.
+  Auto tasks now remain for one turn before disappearing. In
+  particular, accidentally leaving the task screen with a half-setup
+  task will no longer discard the task.
+
+  For the SDL2 build, the window is now resizable and will zoom
+  accordingly. In particular, it can be toggled full-screen.
+
+  You can now export a simulation setup or simulation results into
+  CSV, HTML, etc., using the regular Export interface. This provides a
+  replacement to the ad-hoc "Print" feature that PCC1 offered to get
+  data out of it.
+
+  This release also adds some more obscure utilities to complete the
+  toolchest; in particular, `c2dump` and `c2reshack` that previously
+  were in PCC2 only, and updates to the server-side utilities for
+  PlanetsCentral.
+
+
 2.41.4
 ------
 
-  Performance improvemments: control screens should now "feel" as fast
+  Performance improvements: control screens should now "feel" as fast
   as in PCC2.
 
   Auto waypoints are now shown on the map - a PCC1 feature that never

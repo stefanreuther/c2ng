@@ -48,9 +48,8 @@ Status
   comparable to PCC1/PCC2. It is pretty solid and mature and can be
   used by everyone.
 
-  The user interface is still rough at times; I hope to clean that up
-  in the future. In particular, it flickers a bit more than I like to
-  admit.
+  It is catching up on features, and as of 2026, there shouldn't be
+  anything major missing.
 
 
 User Features
@@ -76,7 +75,7 @@ User Features
     is using. In particular, it allows painless full-screen mode on
     current computers.
 
-  All the features of PCC1/PCC2 .......................... 99.9% done
+  All the features of PCC1/PCC2 ................................ done
     Scripting. Battle simulator. History. Zoomable map. And so on.
     New features nowadays often get born in PCC2ng.
 
@@ -173,6 +172,7 @@ Program List
     . c2check: turn checker
     . c2compiler: script compiler
     . c2configtool: configuration handler
+    . c2dump: data dump
     . c2export: game data export
     . c2gfxcodec: graphics codecs
     . c2gfxgen: procedural graphics generation
@@ -181,6 +181,7 @@ Program List
     . c2plugin: plugin manager
     . c2pluginw: plugin manager (simple GUI)
     . c2rater: game rating computer
+    . c2reshack: resource editor
     . c2restool: resource file manager
     . c2script: scripting engine
     . c2simtool: battle simulator command-line tool
@@ -190,7 +191,6 @@ Program List
 
   - PlanetsCentral
     . c2console: console
-    . c2dbexport: database exporter
     . c2docmanager: manage documentation for c2doc-server
     . c2doc-server: documentation server
     . c2fileclient: file client
@@ -214,7 +214,6 @@ Future Milestones
   - complete the Nu integration
   - more server integration
   - fancier GUI and more graphics resolutions!
-  - implement internationalisation and help
   - can we integrate forums/activities?
   - more operating systems (Android!)
   - C++11/17

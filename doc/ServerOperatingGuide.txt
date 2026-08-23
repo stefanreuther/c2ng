@@ -30,7 +30,7 @@ Overview
 General
 -------
 
-  For an overview, see doc/PlanetsCentral_2019.svg (Inkscape SVG).
+  For an overview, see doc/PlanetsCentral_2026.svg (Inkscape SVG).
   This shows the actual setup of the software behind
   planetscentral.com. The numbers in the speech bubbles are port
   numbers. The bold ones are externally visible and should be fixed.
