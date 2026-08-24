@@ -106,6 +106,9 @@ Upon account creation, {default:profilecopy} is copied into the user profile.
 @key talkratescore:Int               Rate-limiting score
 @key talkratetime:Int                Nonzero: time when rate-limiting score was set
 
+<h2>File Sharing</h2>
+@key fileshareseq:Int                Last seen file sharing sequence number; see {SHARESEQ}
+
 <h2>Antispam</h2>
 @key spam:Int                        1=identified as spammer, 0=not a spammer, 2=not a spammer but can see spam
 ---
