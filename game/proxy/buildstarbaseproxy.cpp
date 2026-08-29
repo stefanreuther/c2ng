@@ -12,6 +12,10 @@
 #include "game/root.hpp"
 #include "game/turn.hpp"
 
+namespace {
+    const char*const LOG_NAME = "game.proxy";
+}
+
 class game::proxy::BuildStarbaseProxy::Trampoline {
  public:
     Trampoline(Session& session)
@@ -64,8 +68,7 @@ class game::proxy::BuildStarbaseProxy::Trampoline {
                 }
             }
             catch (std::exception& e) {
-                // FIXME: log it
-                (void) e;
+                m_session.log().write(afl::sys::LogListener::Warn, LOG_NAME, m_session.translator()("Exception in background thread"), e);
             }
         }
 

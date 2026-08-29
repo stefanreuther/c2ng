@@ -169,3 +169,32 @@ AFL_TEST("game.proxy.BuildStarbaseProxy:missing-resources", a)
     a.checkEqual("04. remaining", st.remaining.toCargoSpecString(), "-302T 2880D 3660M 100$");
     a.checkEqual("05. missing",   st.missing.toCargoSpecString(),   "302T");
 }
+
+/** Test failure during commit.
+    A: create session containing a planet. Call init(). Remove cargo, commit.
+    E: no crash. */
+AFL_TEST("game.proxy.BuildStarbaseProxy:commit-fail", a)
+{
+    SessionThread h;
+    prepare(h);
+    Planet& p = addPlanet(h);
+
+    BuildStarbaseProxy testee(h.gameSender());
+
+    // Prepare
+    WaitIndicator ind;
+    BuildStarbaseProxy::Status st;
+    testee.init(ind, PLANET_ID, st);
+
+    // Verify status
+    a.checkEqual("01. mode", st.mode, BuildStarbaseProxy::CanBuild);
+
+    // Drop all Tritanium
+    p.setCargo(Element::Tritanium, 0);
+
+    // Commit
+    testee.commit(ind);
+
+    // Verify
+    a.checkEqual("11. isBuildingBase", p.isBuildingBase(), false);
+}
