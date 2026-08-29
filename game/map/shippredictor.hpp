@@ -108,8 +108,9 @@ namespace game { namespace map {
 
         /** Compute one turn.
             This will compute all changes for the ship.
-            It will also update the towed ship predictor, if any. */
-        void computeTurn();
+            It will also update the towed ship predictor, if any.
+            \return true on success, false if preconditions failed and turn could not be computed */
+        bool computeTurn();
 
         /** Compute this ship's movement.
             Stops when movement is over or time runs out. */

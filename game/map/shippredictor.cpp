@@ -730,7 +730,7 @@ game::map::ShipPredictor::getUsedProperties() const
 }
 
 // Compute one turn.
-void
+bool
 game::map::ShipPredictor::computeTurn()
 {
     // ex GShipTurnPredictor::computeTurn
@@ -738,7 +738,7 @@ game::map::ShipPredictor::computeTurn()
 
     // is this actually a predictable ship?
     if (!m_valid) {
-        return;
+        return false;
     }
 
     // where are we?
@@ -746,8 +746,7 @@ game::map::ShipPredictor::computeTurn()
     const Ship* real_ship = m_universe.ships().get(m_shipId);
     const game::spec::Hull* pHull = m_shipList.hulls().get(m_ship.hullType.orElse(0));
     if (real_ship == 0 || pHull == 0) {
-        ++m_numTurns; // FIXME: needed to make the computeMovement() loop exit eventually. Give this function a success return instead?
-        return;
+        return false;
     }
 
     // Training
@@ -1135,6 +1134,7 @@ game::map::ShipPredictor::computeTurn()
 
     // Turn is over.
     ++m_numTurns;
+    return true;
 }
 
 // Compute this ship's movement.
@@ -1146,7 +1146,9 @@ game::map::ShipPredictor::computeMovement()
     if (m_valid) {
         const int final_turn = m_numTurns + MOVEMENT_TIME_LIMIT;
         while ((m_ship.waypointDX.orElse(0) || m_ship.waypointDY.orElse(0)) && m_numTurns < final_turn) {
-            computeTurn();
+            if (!computeTurn()) {
+                break;
+            }
             if (m_ship.neutronium.orElse(0) < 0) {
                 m_ship.neutronium = 0;
             }

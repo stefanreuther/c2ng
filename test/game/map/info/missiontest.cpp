@@ -112,7 +112,7 @@ AFL_TEST("game.map.info.Mission:renderShipPredictorUsedProperties:fcode+mission"
     // Predict
     game::map::ShipPredictor pred(env.univ, 99, env.scoreDefinitions, env.shipList,
                                   env.mapConfig, *env.config, env.hostVersion, env.key);
-    pred.computeTurn();
+    a.check("00. computeTurn", pred.computeTurn());
     a.checkEqual("01. getNumTurns", pred.getNumTurns(), 1);
     a.check("02. UsedMission",      pred.getUsedProperties().contains(game::map::ShipPredictor::UsedMission));
     a.check("03. UsedFCode",        pred.getUsedProperties().contains(game::map::ShipPredictor::UsedFCode));
@@ -163,7 +163,7 @@ AFL_TEST("game.map.info.Mission:renderShipPredictorUsedProperties:damage", a)
     // Predict
     game::map::ShipPredictor pred(env.univ, 99, env.scoreDefinitions, env.shipList,
                                   env.mapConfig, *env.config, env.hostVersion, env.key);
-    pred.computeTurn();
+    a.check("00. computeTurn", pred.computeTurn());
     a.checkEqual("01. getNumTurns", pred.getNumTurns(), 1);
     a.check("02. UsedRepair",       pred.getUsedProperties().contains(game::map::ShipPredictor::UsedRepair));
     a.check("03. UsedDamageLimit",  pred.getUsedProperties().contains(game::map::ShipPredictor::UsedDamageLimit));
@@ -193,7 +193,7 @@ AFL_TEST("game.map.info.Mission:renderShipPredictorUsedProperties:towee", a)
     // Predict
     game::map::ShipPredictor pred(env.univ, 99, env.scoreDefinitions, env.shipList, env.mapConfig, *env.config, env.hostVersion, env.key);
     pred.addTowee();
-    pred.computeTurn();
+    a.check("00. computeTurn", pred.computeTurn());
     a.checkEqual("01. getNumTurns", pred.getNumTurns(), 1);
     a.check("02. UsedTowee", pred.getUsedProperties().contains(game::map::ShipPredictor::UsedTowee));
 

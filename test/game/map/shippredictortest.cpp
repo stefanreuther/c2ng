@@ -275,7 +275,7 @@ namespace {
         ShipPredictor testee(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
         a.checkEqual("getWaypoint X", testee.getWaypoint().getX(), X + distance);
         a.checkEqual("getWaypoint Y", testee.getWaypoint().getY(), Y);
-        testee.computeTurn();
+        a.check("computeTurn", testee.computeTurn());
 
         a.checkEqual("getMovementFuelUsed", testee.getMovementFuelUsed(), expected);
         a.checkEqual("getCloakFuelUsed",    testee.getCloakFuelUsed(), 0);
@@ -301,7 +301,7 @@ namespace {
         ShipPredictor testee(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
         a.checkEqual("getWaypoint X", testee.getWaypoint().getX(), X + 75);
         a.checkEqual("getWaypoint Y", testee.getWaypoint().getY(), Y + 34);
-        testee.computeTurn();
+        a.check("computeTurn", testee.computeTurn());
 
         a.checkEqual("getMovementFuelUsed", testee.getMovementFuelUsed(), need);
         a.checkEqual("getCloakFuelUsed",    testee.getCloakFuelUsed(), 0);
@@ -334,7 +334,7 @@ namespace {
         game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
 
         ShipPredictor testee(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, key);
-        testee.computeTurn();
+        a(label).check("computeTurn", testee.computeTurn());
 
         a(label).checkEqual("Tritanium",   testee.getCargo(Element::Tritanium),  tritaniumAfter);
         a(label).checkEqual("Duranium",    testee.getCargo(Element::Duranium),   duraniumAfter);
@@ -370,7 +370,7 @@ namespace {
         game::test::RegistrationKey key(game::RegistrationKey::Registered, 10);
 
         ShipPredictor testee(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, key);
-        testee.computeTurn();
+        a(label).check("computeTurn", testee.computeTurn());
 
         a(label).checkEqual("Tritanium",   testee.getCargo(Element::Tritanium),  tritaniumAfter);
         a(label).checkEqual("Duranium",    testee.getCargo(Element::Duranium),   duraniumAfter);
@@ -396,7 +396,7 @@ namespace {
         finish(t);
 
         ShipPredictor testee(t.univ, SHIP_ID, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
-        testee.computeTurn();
+        a(label).check("computeTurn", testee.computeTurn());
 
         a(label).checkEqual("getX", testee.getPosition().getX(), X + movedDX);
         a(label).checkEqual("getY", testee.getPosition().getY(), Y + movedDY);
@@ -411,7 +411,7 @@ AFL_TEST("game.map.ShipPredictor:error:no-ship", a)
     TestHarness t;
     ShipPredictor p(t.univ, 99, t.shipScores, t.shipList, t.mapConfig, *t.config, t.hostVersion, t.key);
     p.computeMovement();
-    p.computeTurn();
+    a.check("00. computeTurn", !p.computeTurn());
     a.checkEqual("01. getNumTurns", p.getNumTurns(), 0);
 
     // For coverage...
