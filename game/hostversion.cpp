@@ -281,8 +281,6 @@ game::HostVersion::isExactHyperjumpDistance2(int32_t distSquared) const
     // ex shipacc.pas:IsExactHyperjump
     if (m_kind != PHost && m_version < MKVERSION(3,20,0)) {
         // These hosts do waypoint trimming, so all jumps are inexact.
-        // FIXME: PCC 1.x additionally tests for Dosplan TRN format
-        // and Host < 3.22.019, because those trim waypoints too early.
         return false;
     } else {
         // PHost tests >=340, <=360; Host tests >340, <360

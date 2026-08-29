@@ -1,24 +1,19 @@
 /**
   *  \file game/v3/unpacker.cpp
   *  \brief Class game::v3::Unpacker
-  *
-  *  FIXME: this has some code duplication to stuff elsewhere, such as target decoding, index file, etc.
-  *  It's probably not entirely worth to factor that out.
-  *
-  *  FIXME: can we template the hell out of this to remove the ship/planet/base code duplication?
   */
 
 #include "game/v3/unpacker.hpp"
 #include "afl/base/inlinememory.hpp"
+#include "afl/charset/codepage.hpp"
 #include "afl/checksums/bytesum.hpp"
 #include "afl/except/fileformatexception.hpp"
 #include "afl/string/format.hpp"
 #include "game/v3/registry.hpp"
 #include "game/v3/resultfile.hpp"
-#include "util/translation.hpp"
-#include "game/v3/writer.hpp"
 #include "game/v3/utils.hpp"
-#include "afl/charset/codepage.hpp"
+#include "game/v3/writer.hpp"
+#include "util/translation.hpp"
 
 namespace gt = game::v3::structures;
 using afl::base::GrowableMemory;
@@ -306,9 +301,6 @@ game::v3::Unpacker::finish(afl::io::Directory& dir, ResultFile& file)
         file.seekToSection(ResultFile::SkoreSection);
         unpackSkore(dir, file);
     }
-
-    // FIXME: we don't unpack the LEECH file yet. Should we?
-    // FIXME: we don't update the FIZZ file yet. Should we? PCC 1.x and CCUNPACK don't.
 
     // Create blank files
     createBlankFiles(dir);

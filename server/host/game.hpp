@@ -112,7 +112,6 @@ namespace server { namespace host {
 
         /** Handle to a turn.
             \see Game::turn() */
-        // FIXME: the interface is subject to debate
         class Turn {
          public:
             /** Constructor.

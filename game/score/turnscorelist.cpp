@@ -99,7 +99,6 @@ game::score::TurnScoreList::addMessageInformation(const game::parser::MessageInf
             // We have an identifier; check for a name
             // @change PCC2 would translate "Score #%d", we don't.
             // For one, we don't have a translator; for another, this means the name-based matching will work across language changes.
-            // FIXME: how about well-known scores that don't need a description, namely: ScoreId_BuildPoints?
             desc.name = scoreName.orElse(afl::string::Format("Score #%d", scoreId));
             desc.scoreId = scoreId;
         } else if (const String_t* name = scoreName.get()) {

@@ -150,9 +150,6 @@ namespace {
         \param[in]  world  Interpreter world */
     void compileMatchExpression(interpreter::BytecodeObject& bco, const String_t& expr, bool negate, interpreter::World& world)
     {
-        // FIXME: this uses compileValue() (same as PCC2) and therefore does not benefit
-        // from the shorter code compileCondition() can create.
-
         // Parse expression
         interpreter::Tokenizer tok(expr);
         afl::base::Deleter del;

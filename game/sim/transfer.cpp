@@ -277,7 +277,6 @@ game::sim::Transfer::copyPlanetFromGame(Planet& out, const game::map::Planet& in
     out.setFriendlyCode(in.getFriendlyCode().orElse(NULL_FCODE));
 
     // Damage/Shield
-    // FIXME: can we do better?
     out.setDamage(0);
     out.setShield(100);
 

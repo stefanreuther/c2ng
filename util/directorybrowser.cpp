@@ -246,7 +246,6 @@ util::DirectoryBrowser::loadContent()
     }
 
     // Reset origin.
-    // FIXME: pass it as parameter? Only game::browser needs it as member.
     m_pathOrigin.reset();
 }
 

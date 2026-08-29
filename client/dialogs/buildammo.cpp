@@ -391,7 +391,6 @@ Dialog::onSelectionChange()
 void
 Dialog::onSpecificationChange(const gsi::PageContent& content, game::spec::info::Page /*page*/)
 {
-    // FIXME: show an image?
     ui::rich::Document& doc = m_infoView.getDocument();
     doc.clear();
     doc.add(util::rich::Text(content.title).withStyle(util::rich::StyleAttribute::Big).withColor(SkinColor::Heading));

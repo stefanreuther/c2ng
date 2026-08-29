@@ -1462,10 +1462,6 @@ interpreter::Process::suspendForUI()
 {
     // ex IntExecutionContext::suspendForUI, sort-of
     // ex ccexec.pas:ForceInterpreterCallback, sort-of
-    // FIXME: original code verifies that process is actually running
-    // FIXME: pre-execute jumps and frame terminations to cause the process to execute prematurely
-    // - be careful with frames catching UI.RESULT
-    // - be careful with return values
     suspend(std::auto_ptr<Task_t>());
 }
 
@@ -1829,7 +1825,7 @@ interpreter::Process::handleAddHook()
     // Verify name
     String_t hookName = "ON " + toString(m_valueStack.top(1), false);
     NameMap_t::Index_t pos = m_world.globalPropertyNames().addMaybe(hookName);
-    BCOPtr_t hook; // FIXME: can we make this use BCORef?
+    BCOPtr_t hook;
     if (m_world.globalValues()[pos] == 0) {
         /* Create it */
         hook = BytecodeObject::create(true).asPtr();

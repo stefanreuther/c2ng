@@ -42,7 +42,6 @@ server::host::rank::ScoreFileReader::handleLine(const String_t& /*fileName*/, in
     /* Must be an assignment */
     String_t::size_type p = line.find('=');
     if (p == line.npos) {
-        // FIXME: log it?
         return;
     }
 
@@ -60,7 +59,7 @@ server::host::rank::ScoreFileReader::handleLine(const String_t& /*fileName*/, in
             m_values[player-1] = score;
         }
     } else {
-        // FIXME?
+        // ignore
     }
 }
 

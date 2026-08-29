@@ -753,7 +753,7 @@ game::v3::Loader::loadResult(Turn& turn, const Root& root, Game& game, afl::io::
     result.seekToSection(ResultFile::MessageSection);
     loadInbox(turn.inbox(), file, gen.getTurnNumber());
 
-    // SHIPXY (must be after SHIP) <-- FIXME: why this comment (from PCC2)?
+    // SHIPXY
     result.seekToSection(ResultFile::ShipXYSection);
     loadShipXY(turn.universe(), file, result.getNumShipCoordinates() * sizeof(gt::ShipXY), LoadBoth, source, PlayerSet_t());
 

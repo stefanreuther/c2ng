@@ -350,11 +350,6 @@ game::vcr::Object::getSubtitle(const TeamSettings* teamSettings, const Root& roo
 {
     int viewpointPlayer = teamSettings != 0 ? teamSettings->getViewpointPlayer() : 0;
 
-    // FIXME: this i18n approach is far from perfect
-    // We have the following combinations:
-    //    {A <race>|Our} {<Level>|(nothing)} {planet|<type>|starship}
-    // Giving a total of 2x2x3 = 12 sentences.
-
     // Object title
     String_t adj = (getOwner() == viewpointPlayer
                     ? tx("our")

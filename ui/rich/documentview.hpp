@@ -66,7 +66,6 @@ namespace ui { namespace rich {
      private:
         void setHoverLink(Document::LinkId_t link);
         void setLink(Document::LinkId_t link);
-        int getScrollStep() const;
         void updateScrollable();
 
         gfx::ResourceProvider& m_provider;

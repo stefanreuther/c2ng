@@ -220,7 +220,6 @@ server::interface::TalkPost::Info
 server::talk::Message::describe(const Root& root)
 {
     // ex Message::describe
-    // FIXME: can we use HMGET?
     server::interface::TalkPost::Info info;
     info.threadId     = topicId().get();
     info.parentPostId = parentMessageId().get();

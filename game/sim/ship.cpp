@@ -373,8 +373,6 @@ game::sim::Ship::isMatchingShipList(const game::spec::ShipList& shipList) const
     }
 
     /* valid hull? */
-    /* FIXME: we cannot handle these during simulation so we should
-       avoid even loading them. */
     const Hull* hull = shipList.hulls().get(getHullType());
     if (hull == 0) {
         return false;

@@ -75,9 +75,6 @@ namespace gfx {
             \param bg    background color, or GFX_TRANSPARENT.
             \param pat   fill pattern.
             \param alpha alpha value for transparency. */
-        // FIXME: change this signature to something better:
-        // - drawSolidRectangle
-        // - transparent background explicit
         virtual void drawBar(Rectangle rect, Color_t color, Color_t bg, const FillPattern& pat, Alpha_t alpha) = 0;
 
         /** Copy other surface (pixmap).
@@ -105,7 +102,6 @@ namespace gfx {
             Note that this function has no constraints on the bytes_per_line
             parameter. bytes_per_line can also be zero or negative for
             interesting effects. */
-        // FIXME: can we fit Memory<> in here?
         virtual void blitPattern(Rectangle rect, const Point& pt, int bytesPerLine, const uint8_t* data, Color_t color, Color_t bg, Alpha_t alpha) = 0;
 
         /** Compute clipping rectangle. This can be used to optimize

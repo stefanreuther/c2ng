@@ -275,8 +275,6 @@ int32_t
 server::host::HostTool::getDifficulty(String_t id)
 {
     // ex doHostRating
-    m_session.checkAdmin();     // FIXME: needed?
-
     if (!m_tree.all().contains(id)) {
         throw std::runtime_error(ITEM_NOT_FOUND);
     }

@@ -55,7 +55,7 @@ namespace gfx { namespace sdl2 {
         void clearWindowStuff();
 
         // Mouse grab
-        bool m_disableGrab;                ///< If set, mouse grab is disabled. FIXME: make this configurable
+        bool m_disableGrab;                ///< If set, mouse grab is disabled.
         bool m_grabEnabled;                ///< Current state of mouse grab. true: enabled, reporting relative movement. false: disabled.
         uint32_t m_grabDelay;              ///< Mouse grab delay, ms. Suppress mouse movement after enabling grab.
         uint32_t m_grabEnableTime;         ///< Time of last grab enable.

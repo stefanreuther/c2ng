@@ -81,7 +81,6 @@ namespace {
         void provideReturnValue(afl::data::Value* p)
             { CallReceiver::provideReturnValue(p); }
 
-        // FIXME: copy from TalkForumMock
         static String_t formatListParameters(const ListParameters& params)
             {
                 String_t result;

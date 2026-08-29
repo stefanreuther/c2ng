@@ -102,7 +102,6 @@ game::browser::Account::getEncoded(String_t key) const
 bool
 game::browser::Account::isValid() const
 {
-    // FIXME: should verify thet USER,TYPE,HOST are actually persistent
     return get(USER_KEY) != 0
         && get(TYPE_KEY) != 0
         && get(HOST_KEY) != 0;

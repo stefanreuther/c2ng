@@ -226,7 +226,6 @@ namespace game {
         std::auto_ptr<afl::charset::Charset> m_charset;
 
         /** Turn loader. */
-        // FIXME: this is incomplete; possibly change it again
         afl::base::Ptr<TurnLoader> m_turnLoader;
 
         /** Actions. */

@@ -514,7 +514,6 @@ const game::map::ShipHistoryData::Track*
 game::map::Ship::getHistoryLocation(int turnNr) const
 {
     // ex GShip::getHistoryEntry
-    // FIXME: if turnNr==current, we want to report the computed mass, speed, heading here! See db::Loader.
     return getShipHistory(m_historyData, turnNr);
 }
 

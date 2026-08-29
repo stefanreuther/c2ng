@@ -73,7 +73,6 @@ namespace {
             }
 
      private:
-        // FIXME: duplicate from TalkForumServer test
         static String_t formatListParameters(const ListParameters& params)
             {
                 String_t result;

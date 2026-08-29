@@ -73,7 +73,6 @@ game::HistoryTurn::handleLoadSucceeded(afl::base::Ref<Turn> turn)
         m_status = Loaded;
 
         m_timestamp = turn->getTimestamp();
-        // FIXME: validate turn? Must be non-null and have correct number
     }
 }
 

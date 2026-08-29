@@ -79,7 +79,6 @@ game::sim::Setup::operator=(const Setup& other)
 game::sim::Planet&
 game::sim::Setup::addPlanet()
 {
-    // FIXME: PCC2 resets the planet to standard values (and marks it dirty); do we need this?
     if (!m_planet.get()) {
         m_planet.reset(new Planet());
         m_structureChanged = true;

@@ -177,11 +177,10 @@ server::interface::TalkThread::Info
 server::talk::Topic::describe()
 {
     // ex Topic::describe
-    // FIXME: can we use HMGET?
     server::interface::TalkThread::Info result;
     result.subject = subject().get();
     result.forumId = forumId().get();
-    result.firstPostId = firstPostingId().get(); // FIXME: name clash
+    result.firstPostId = firstPostingId().get();
     result.lastPostId = lastPostId().get();
     result.lastTime = lastTime().get();
     result.isSticky = isSticky();

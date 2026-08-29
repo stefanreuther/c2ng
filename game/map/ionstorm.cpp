@@ -1,10 +1,6 @@
 /**
   *  \file game/map/ionstorm.cpp
   *  \brief Class game::map::IonStorm
-  *
-  *  FIXME: as of 20200815, setters do not mark an IonStorm changed.
-  *  The trivial solution, using Updater, does not work because IntegerProperty_t
-  *  is not comparable.
   */
 
 #include <cmath>

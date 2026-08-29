@@ -389,8 +389,6 @@ ui::reshack::FontEditor::FontEditorWindow::handleKey(util::Key_t key, int /*pref
         storeCurrentCharacter();
         if (pickCharacter(tx("Overlay Character"), key == 'O').get(ch)) {
             if (const BitmapGlyph* g = m_font->getGlyph(ch)) {
-                // FIXME: it would make sense to use "maximum" logic, i.e. never
-                // draw a FC_HALF pixel above a FC_WHITE pixel.
                 g->drawColored(*m_painter.getPixmap()->makeCanvas(), gfx::Point(0, 0), Palette::FC_White, Palette::FC_Half);
                 m_painter.requestRedraw();
             }

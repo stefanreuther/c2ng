@@ -192,8 +192,6 @@ namespace game { namespace sim {
 
         /*
          *  Flags
-         *
-         *  FIXME: the names are taken from PCC2 and probably sub-par.
          */
 
         static const int32_t fl_RandomFC          = 1;    ///< Friendly code randomisation enabled.

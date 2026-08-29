@@ -22,7 +22,7 @@ int main(int, char** argv)
     afl::io::FileSystem& fs = afl::io::FileSystem::getInstance();
     afl::net::NetworkStack& net = afl::net::NetworkStack::getInstance();
 
-    // Infrastructure (FIXME).
+    // Infrastructure
 #if 1
     util::Translator tx;
     tx.loadDefaultTranslation(fs, env);

@@ -83,7 +83,6 @@ server::format::HullPacker::unpack(const String_t& data, afl::charset::Charset& 
     while (in.read(afl::base::fromObject(hull)) == sizeof(hull)) {
         // Remap picture numbers.
         // It's ugly to do this here, but this makes it somehow consistent with c2server.
-        // FIXME: do we need this?
         ++hullId;
         int picId = hullId == 104 ? 152 : hullId == 105 ? 153 : hull.pictureNumber;
 

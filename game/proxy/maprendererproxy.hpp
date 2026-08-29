@@ -26,9 +26,6 @@ namespace game { namespace proxy {
         - configure parameters; in particular, range */
     class MapRendererProxy {
      public:
-        // FIXME: This will re-render and update the observer whenever anything changes.
-        // Add some way to combine these requests.
-
         /** Constructor.
             \param gameSender Game sender
             \param dispatcher Dispatcher to receive replies on */

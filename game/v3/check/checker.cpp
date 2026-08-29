@@ -1496,7 +1496,6 @@ game::v3::check::Checker::flowCheckOrbits()
                 && ships[sid-1].dis->y == planets[pid-1].y
                 && ships[sid-1].dis->owner == pdis->owner)
             {
-                // FIXME: test owner?
                 note = " and orbit";
                 break;
             }

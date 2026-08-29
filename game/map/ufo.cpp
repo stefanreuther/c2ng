@@ -349,9 +349,6 @@ game::map::Ufo::addMessageInformation(const game::parser::MessageInformation& in
     namespace gp = game::parser;
     assert(info.getObjectId() == getId());
     if (info.getTurnNumber() >= m_turnLastSeen) {
-        // FIXME: limit to !isSeenThisTurn()?
-        // FIXME: some cleverer merging (accept old value if existing value is unknown? does this happen?)
-
         m_turnLastSeen = info.getTurnNumber();
 
         // -- Scalars --

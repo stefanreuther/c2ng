@@ -184,7 +184,7 @@ AFL_TEST("server.interface.HostGameClient:commands", a)
     mock.provideNewResult(server::makeStringValue("pmaster"));
     a.checkEqual("51. getConfig", testee.getConfig(7, "master"), "pmaster");
 
-    // GAMEMGET [FIXME: needed?]
+    // GAMEMGET
     {
         afl::data::StringList_t keys;
         keys.push_back("k1");
@@ -260,7 +260,7 @@ AFL_TEST("server.interface.HostGameClient:commands", a)
         a.checkEqual("163. numFinishedGames", t.numFinishedGames, 230);
     }
 
-    // GAMEUPDATE [FIXME: needed?]
+    // GAMEUPDATE
     {
         afl::data::IntegerList_t ids;
         ids.push_back(32);

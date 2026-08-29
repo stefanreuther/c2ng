@@ -73,7 +73,6 @@ server::interface::TalkGroupServer::handleCommand(const String_t& upcasedCommand
         String_t groupId = toString(args.getNext());
         String_t field = toString(args.getNext());
 
-        // FIXME: c2talk classic passes on null values as is; this stringifies.
         result.reset(makeStringValue(m_implementation.getField(groupId, field)));
         return true;
     } else if (upcasedCommand == "GROUPLS") {

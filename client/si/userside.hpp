@@ -71,7 +71,6 @@ namespace client { namespace si {
 
         /** Access UserSide sender.
             @return sender */
-        // FIXME: can we get along without exporting this?
         util::RequestSender<UserSide> userSender()
             { return m_receiver.getSender(); }
 

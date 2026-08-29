@@ -25,8 +25,6 @@ game::browser::RootFolder::setOptions(Options_t opts)
 void
 game::browser::RootFolder::loadContent(afl::container::PtrVector<Folder>& result)
 {
-    // FIXME: favorites
-
     if (!m_options.contains(HideFileSystem)) {
         result.pushBackNew(new FileSystemRootFolder(m_parent));
     }

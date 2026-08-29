@@ -80,7 +80,6 @@ namespace {
                 return consumeReturnValue<afl::data::Value*>();
             }
 
-        // FIXME: copied..
         static String_t formatListParameters(const ListParameters& params, const FilterParameters& filter)
             {
                 String_t result;

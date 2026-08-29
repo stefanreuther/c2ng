@@ -20,7 +20,7 @@ int main(int, char** argv)
     afl::sys::Environment& env = afl::sys::Environment::getInstance(argv);
     afl::io::FileSystem& fs = afl::io::FileSystem::getInstance();
 
-    // Infrastructure (FIXME).
+    // Infrastructure
     util::Translator tx;
     tx.loadDefaultTranslation(fs, env);
     afl::string::Translator::setSystemInstance(std::auto_ptr<afl::string::Translator>(new afl::string::ProxyTranslator(tx)));

@@ -152,7 +152,7 @@ namespace game {
             \param player [in] Player number.
             \param turn [in] First turn number to inquire.
             \param status [out] Status goes here
-            \param root [in] Root FIXME: change to UserConfiguration? */
+            \param root [in] Root */
         virtual void getHistoryStatus(int player, int turn, afl::base::Memory<HistoryStatus> status, const Root& root) = 0;
 
         /** Load history turn.

@@ -141,7 +141,6 @@ game::sim::Planet::getNumBaseTorpedoesAsType(int type, const game::spec::ShipLis
         }
     }
 
-    // FIXME: some range checking here?
     return totalCost;
 }
 

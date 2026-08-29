@@ -348,16 +348,3 @@ ui::rich::DocumentView::setLink(Document::LinkId_t link)
                                : Document::Link));
     }
 }
-
-int
-ui::rich::DocumentView::getScrollStep() const
-{
-    // ex UIRichDocument::getScrollStep
-    // FIXME: retire?
-    // int n = font_heights[FONT_NORMAL];
-    // if (n <= 0) {
-    //     n = 1;
-    // }
-    // return n;
-    return 1;
-}

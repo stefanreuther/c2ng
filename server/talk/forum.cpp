@@ -228,7 +228,6 @@ server::interface::TalkForum::Info
 server::talk::Forum::describe(const server::talk::render::Context& ctx, const server::talk::render::Options& opts, Root& root)
 {
     // ex Forum::describe
-    // FIXME: can we use HMGET?
     server::interface::TalkForum::Info result;
     result.name = name().get();
     result.parentGroup = getParent();

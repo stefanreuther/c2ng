@@ -384,7 +384,6 @@ client::vcr::flak::ThreeDRenderer::draw(gfx::Canvas& can, const gfx::Rectangle& 
     const double azimut = m_settings.getCameraAzimuth(), height = m_settings.getCameraHeight() + util::PI/2;
 
     Mat4f proj = Mat4f::perspective(45 * util::PI/180, double(area.getWidth()) / area.getHeight(), 0.1);
-    // FIXME: var projSky = WM.mClone(proj);
     proj.translate(Vec3f(0, float(m_settings.getCameraRaise() / RAISE_UNIT), 0));
 
     Mat4f mvm = Mat4f::identity();
@@ -400,11 +399,6 @@ client::vcr::flak::ThreeDRenderer::draw(gfx::Canvas& can, const gfx::Rectangle& 
 
     // Start drawing
     m_context->start(area, can);
-
-    // FIXME: Skybox
-    // if (fv._sky) {
-    //     fv._sky.render(projSky, mvm);
-    // }
 
     // Smoke
     renderSmoke(m_state.smoke(), proj, mvm, *m_smokeRenderer, m_settings.getCameraHeight(), m_settings.getCameraAzimuth());

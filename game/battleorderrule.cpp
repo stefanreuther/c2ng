@@ -120,7 +120,6 @@ game::BattleOrderRule::getShipBattleOrder(const String_t& friendlyCode,
         if (value == 1000) {
             // 4.1e rule: Kill gets 1000, capital gets 1002, freighters get 1004.
             // (before: capital gets 1000, freighters get 1002)
-            // FIXME: handle <4.1e
             if (hasKillMission) {
                 value = 1000;
             } else if (hasWeapons) {

@@ -56,10 +56,10 @@ namespace ui { namespace widgets {
      private:
         Root& m_root;
 
-        int m_columns;          // FIXME m_numColumns
-        int m_lines;            // FIXME m_numLines
+        int m_columns;
+        int m_lines;
 
-        int m_currentColumns;   // FIXME m_numCurrentColumns
+        int m_currentColumns;
         int m_currentColumnWidth;
         int m_currentLines;
 

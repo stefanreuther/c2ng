@@ -28,7 +28,6 @@ namespace server { namespace interface {
         virtual String_t getField(String_t groupId, String_t fieldName) = 0;
         virtual void list(String_t groupId, afl::data::StringList_t& groups, afl::data::IntegerList_t& forums) = 0;
         virtual Description getDescription(String_t groupId) = 0;
-        // FIXME: use Memory<String> here?
         virtual void getDescriptions(const afl::data::StringList_t& groups, afl::container::PtrVector<Description>& results) = 0;
     };
 

@@ -1,8 +1,6 @@
 /**
   *  \file game/map/minefield.cpp
   *  \brief Class game::map::Minefield
-  *
-  *  FIXME: consider where we have to raise sig_change.
   */
 
 #include <cmath>

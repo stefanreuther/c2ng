@@ -27,7 +27,6 @@ namespace {
         \param name [in/out] Resource name */
     String_t convertName(String_t name, FileSystem& fs)
     {
-        // FIXME: this is recursive, but can probably be written iterative
         String_t::size_type p = name.find('.');
         if (p != String_t::npos) {
             return fs.makePathName(name.substr(0, p), convertName(name.substr(p+1), fs));

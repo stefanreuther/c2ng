@@ -286,7 +286,7 @@ AFL_TEST("game.pcc.BrowserHandler:callServerWithFile", a)
     Environment env;
 
     static const WebPage::Response RESP[] = {
-        // FIXME: for now, PageRequest cannot handle form uplodads (multipart/form-data),
+        // For now, PageRequest cannot handle form uplodads (multipart/form-data),
         // so we cannot verify the content of the message.
         { "POST", 0, 0, 0, "{\"result\":42}" },
     };
@@ -311,7 +311,7 @@ AFL_TEST("game.pcc.BrowserHandler:callServerWithFile:error:bad-url", a)
     Environment env;
 
     static const WebPage::Response RESP[] = {
-        // FIXME: for now, PageRequest cannot handle form uplodads (multipart/form-data),
+        // For now, PageRequest cannot handle form uplodads (multipart/form-data),
         // so we cannot verify the content of the message.
         { "POST", 0, 0, 0, "{\"result\":42}" },
     };
@@ -702,7 +702,6 @@ AFL_TEST("game.pcc.BrowserHandler:putFilePreAuthenticated", a)
 
     // Web server side
     static const WebPage::Response FILE_RESPONSE[] = {
-        // FIXME: cannot match on file content right now; see callServerWithFile
         { "POST", 0, 0 /*"api_token:cookie|action:put|file:u/user_id/test.txt|data:FileContent"*/, 0, "{\"result\":1}" }
     };
     env.webServer.addNewPage("planetscentral.com:443", "/api/file.cgi", new WebPage(FILE_RESPONSE));
@@ -799,7 +798,6 @@ AFL_TEST("game.pcc.BrowserHandler:uploadTurnPreAuthenticated", a)
 
     // Web server side
     static const WebPage::Response HOST_RESPONSE[] = {
-        // FIXME: cannot match on file content right now; see callServerWithFile
         { "POST", 0, 0 /*"api_token:cookie|action:trn|gid:42|slot:7|data:FileContent"*/, 0, "{\"result\":1}" }
     };
     env.webServer.addNewPage("planetscentral.com:443", "/api/host.cgi", new WebPage(HOST_RESPONSE));

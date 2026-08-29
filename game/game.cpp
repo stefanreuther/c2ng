@@ -83,13 +83,12 @@ game::Game::setViewpointTurnNumber(int nr)
         // Update
         if (&oldTurn != &newTurn) {
             // Transfer selection to new turn
-            // FIXME: the limitToExistingObjects() will unmark objects that don't exist in the new turn.
+            // The limitToExistingObjects() will unmark objects that don't exist in the new turn.
             // It would be nice if we could avoid that.
             // However, the copyFrom() will already unmark nonexistant objects,
             // effectively doing the equivalent of limitToExistingObjects().
             // Until we can somehow avoid that, keep the limitToExistingObjects().
             m_selections.copyFrom(oldTurn.universe(), m_selections.getCurrentLayer());
-
             m_selections.copyTo(newTurn.universe(), m_selections.getCurrentLayer());
             m_selections.limitToExistingObjects(newTurn.universe(), m_selections.getCurrentLayer());
 
@@ -244,7 +243,7 @@ game::Game::synchronizeTeamsFromAlliances()
 
     const game::alliance::Container& allies = currentTurn().alliances();
     TeamSettings& teams = teamSettings();
-    const int me = getViewpointPlayer();       // FIXME: was: getRealPlayerId();
+    const int me = getViewpointPlayer();
     const int myTeam = teams.getPlayerTeam(me);
 
     if (!allies.getLevels().empty()) {

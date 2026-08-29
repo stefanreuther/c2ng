@@ -217,7 +217,6 @@ AFL_TEST("game.pcc.ServerTransport:put", a)
 
     // Web server side
     static const WebPage::Response FILE_RESPONSE[] = {
-        // FIXME: cannot match on file POST operation currently
         { "POST", 0, 0, 0, "{\"result\":1}" },
     };
     env.webServer.addNewPage("example.com:443", "/api/file.cgi", new WebPage(FILE_RESPONSE));
@@ -236,7 +235,6 @@ AFL_TEST("game.pcc.ServerTransport:put:turn", a)
 
     // Web server side
     static const WebPage::Response FILE_RESPONSE[] = {
-        // FIXME: cannot match on file POST operation currently
         { "POST", 0, 0, 0, "{\"result\":1,\"output\":\"text\\ntext\",\"allowtemp\":1}" },
     };
     env.webServer.addNewPage("example.com:443", "/api/host.cgi", new WebPage(FILE_RESPONSE));
@@ -259,7 +257,6 @@ AFL_TEST("game.pcc.ServerTransport:put:error", a)
 
     // Web server side
     static const WebPage::Response FILE_RESPONSE[] = {
-        // FIXME: cannot match on file POST operation currently
         { "POST", 0, 0, 0, "{\"result\":0,\"error\":\"boom\"}" },
     };
     env.webServer.addNewPage("example.com:443", "/api/file.cgi", new WebPage(FILE_RESPONSE));
@@ -278,7 +275,6 @@ AFL_TEST("game.pcc.ServerTransport:put:turn:error", a)
 
     // Web server side
     static const WebPage::Response FILE_RESPONSE[] = {
-        // FIXME: cannot match on file POST operation currently
         { "POST", 0, 0, 0, "{\"result\":0,\"error\":\"boom\"}" },
     };
     env.webServer.addNewPage("example.com:443", "/api/host.cgi", new WebPage(FILE_RESPONSE));

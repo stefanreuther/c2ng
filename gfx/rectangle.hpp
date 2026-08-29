@@ -147,7 +147,6 @@ namespace gfx {
             \return true if point is within rectangle */
         bool contains(int px, int py) const
             {
-                // FIXME: improvement possible
                 px -= m_left;
                 py -= m_top;
                 return px >= 0 && py >= 0 && px < m_width && py < m_height;

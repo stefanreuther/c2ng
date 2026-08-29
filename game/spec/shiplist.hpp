@@ -163,7 +163,7 @@ namespace game { namespace spec {
         const Hull* findSpecimenHullForFunction(int basicFunctionId, const game::config::HostConfiguration& config, PlayerSet_t playerLimit, PlayerSet_t buildLimit, bool unique) const;
 
         /** Get player mask for special function.
-            \param basicFunctionId [in] basic function, hf_XXX (FIXME)
+            \param basicFunctionId [in] basic function
             \param hullNr [in] Hull number
             \param config [in] Host configuration
             \param levelLimit [in] List only functions accessible at these levels

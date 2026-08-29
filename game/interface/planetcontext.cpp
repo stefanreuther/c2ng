@@ -233,7 +233,6 @@ game::interface::PlanetContext::PlanetContext(Id_t id, Session& session, const a
       m_turn(turn)
 {
     // ex IntPlanetContext::IntPlanetContext (sort-of)
-    // FIXME: ShipContext takes and keeps a ship list. Should we do the same?
 }
 
 game::interface::PlanetContext::~PlanetContext()

@@ -101,7 +101,6 @@ server::user::UserManagement::remove(String_t userId)
             "infowebsite", "infocountry", "infotown", "infooccupation", "infobirthday",
 
             // preferences we no longer need
-            //   FIXME: should these be deleted by owning microservices?
             "language",
             "mailgametype", "mailpmtype",
             "talkautowatch", "talkwatchindividual", "talkautolink", "talkautosmiley",

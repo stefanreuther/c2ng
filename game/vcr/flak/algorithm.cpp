@@ -1113,7 +1113,6 @@ int32_t
 game::vcr::flak::Algorithm::moveObjectTowards(Object& obj, Position toPos)
 {
     // ex FlakObject::moveTowards, flak.pas:FlakObjectMoveTowards
-    // FIXME: PCC1 performs optimisation here if position.y=to_pos.y (common case for 1:1 fight)
     const double dist = obj.position.distanceTo(toPos);
     const double newDist = dist - obj.speed;
     if (newDist <= 0) {
@@ -1305,7 +1304,6 @@ void
 game::vcr::flak::Algorithm::doPlayerGC(Player& p)
 {
     // ex FlakPlayer::doPlayerGC, FlakPlayerGC
-    // FIXME: Pascal version has an optimisation with an additional 'have_any_died' flag
     size_t out = 0;
     for (size_t i = 0, n = p.stuff.size(); i < n; ++i) {
         if (p.stuff[i]->kind != oDeleteMe) {
@@ -1552,7 +1550,6 @@ game::vcr::flak::Algorithm::fireBeams(const Fleet& fleet, const Environment& env
                 double min_dist = 0;
                 for (size_t i = 0; i < m_playerIndex.size(); ++i) {
                     Player& pl = *m_playerIndex[i];
-                    // FIXME: PCC1 checks '&& have_any_fighters' as additional optimisation
                     if (pl.number == ship.data.player) {
                         continue;
                     }

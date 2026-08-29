@@ -75,7 +75,6 @@ game::spec::ModifiedHullFunctionList::getFunctionDefinition(Function_t id, HullF
         return true;
     } else {
         // It's an unmodified function
-        // FIXME: make validation stronger
         if (id >= 0) {
             def = HullFunction(id);
             return true;

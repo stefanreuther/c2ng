@@ -38,7 +38,6 @@ void
 gfx::Rectangle::intersect(const Rectangle& r) throw()
 {
     // ex GfxRect::clipSize
-    // FIXME: this algorithm sucks
     register long sw = m_width, sh = m_height;
     if (m_left < r.m_left) {
         sw += m_left - r.m_left, m_left = r.m_left;

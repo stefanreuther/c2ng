@@ -186,7 +186,6 @@ util::rich::Text
 util::rich::Parser::parse()
 {
     // ex RichParser::parse
-    // FIXME: like the <p> handling, this is almost a copy of parseText.
     bool haveSpace = true;
     Text result;
     while (1) {

@@ -148,7 +148,6 @@ namespace {
         /* SDL-1.2.2 on Windows does not assign Unicode numbers to numpad keys, so we'll
            do it here instead. We do not want Shift to be a temporary Numlock replacement,
            though, to accept Shift-Arrows as Shift-Arrows, not digits. */
-        // FIXME: needed?
         bool shifted = (mod & KMOD_NUM) != 0;
 
         switch (sym) {

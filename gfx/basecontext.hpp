@@ -198,7 +198,6 @@ inline gfx::BaseContext&
 gfx::BaseContext::setFillPattern(const FillPattern& pat)
 {
     // ex GfxContext::setFillPattern
-    // FIXME: remove because we have fillPattern()?
     m_fillPattern = pat;
     return *this;
 }
