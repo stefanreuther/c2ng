@@ -7,6 +7,8 @@
 
 #include <vector>
 #include "afl/base/ref.hpp"
+#include "afl/string/translator.hpp"
+#include "afl/sys/loglistener.hpp"
 #include "gfx/timer.hpp"
 
 namespace gfx {
@@ -46,12 +48,14 @@ namespace gfx {
         /** Handle elapsed time.
             If any timer fires within that interval, process its callback.
             \param time Elapsed time (milliseconds, getTickCounter() difference)
+            \param log  Logger
+            \param tx   Translator
 
             Call from user-interface event acquisition method; see class description.
 
             \retval true Some timers fired
             \retval false No progress */
-        bool handleElapsedTime(afl::sys::Timeout_t time);
+        bool handleElapsedTime(afl::sys::Timeout_t time, afl::sys::LogListener& log, afl::string::Translator& tx);
 
      private:
         /*

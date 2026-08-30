@@ -1,9 +1,14 @@
 /**
   *  \file gfx/timerqueue.cpp
+  *  \brief Class gfx::TimerQueue
   */
 
 #include <algorithm>
 #include "gfx/timerqueue.hpp"
+
+namespace {
+    const char*const LOG_NAME = "gfx.timer";
+}
 
 class gfx::TimerQueue::TimerImpl : public gfx::Timer {
  public:
@@ -98,7 +103,7 @@ gfx::TimerQueue::getNextTimeout()
 }
 
 bool
-gfx::TimerQueue::handleElapsedTime(afl::sys::Timeout_t time)
+gfx::TimerQueue::handleElapsedTime(afl::sys::Timeout_t time, afl::sys::LogListener& log, afl::string::Translator& tx)
 {
     bool did = false;
     for (size_t i = 0, n = m_timers.size(); i < n; ++i) {
@@ -109,8 +114,8 @@ gfx::TimerQueue::handleElapsedTime(afl::sys::Timeout_t time)
                 }
             }
         }
-        catch (...) {
-            // FIXME: log?
+        catch (std::exception& e) {
+            log.write(afl::sys::LogListener::Warn, LOG_NAME, tx("Exception in background thread"), e);
         }
     }
     cleanup();

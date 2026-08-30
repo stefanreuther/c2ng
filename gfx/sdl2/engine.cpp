@@ -474,7 +474,7 @@ gfx::sdl2::Engine::handleEvent(EventConsumer& consumer, bool relativeMouseMoveme
             const uint32_t elapsed = afl::sys::Time::getTickCounter() - start;
 
             // Evaluate result
-            const bool timerResult = m_timerQueue.handleElapsedTime(elapsed);
+            const bool timerResult = m_timerQueue.handleElapsedTime(elapsed, m_log, m_translator);
             const bool eventResult = eventStatus && convertEvent(ev, consumer, relativeMouseMovement);
             if (timerResult || eventResult) {
                 break;

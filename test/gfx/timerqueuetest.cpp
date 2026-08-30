@@ -7,6 +7,8 @@
 
 #include "afl/test/testrunner.hpp"
 #include <string>
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
 
 namespace {
     class Handler {
@@ -27,6 +29,8 @@ namespace {
 /** Basic functionality test. */
 AFL_TEST("gfx.TimerQueue:sequence", a)
 {
+    afl::sys::Log log;
+    afl::string::NullTranslator tx;
     std::string acc;
     Handler h1(acc, "1");
     Handler h2(acc, "2");
@@ -48,15 +52,15 @@ AFL_TEST("gfx.TimerQueue:sequence", a)
     a.checkEqual("11. getNextTimeout", testee.getNextTimeout(), 100U);
     a.checkEqual("12. acc", acc, "");
 
-    testee.handleElapsedTime(60);
+    testee.handleElapsedTime(60, log, tx);
     a.checkEqual("21. getNextTimeout", testee.getNextTimeout(), 40U);
     a.checkEqual("22. acc", acc, "");
 
-    testee.handleElapsedTime(60);
+    testee.handleElapsedTime(60, log, tx);
     a.checkEqual("31. getNextTimeout", testee.getNextTimeout(), 80U);
     a.checkEqual("32. acc", acc, "1");
 
-    testee.handleElapsedTime(80);
+    testee.handleElapsedTime(80, log, tx);
     a.checkEqual("41. getNextTimeout", testee.getNextTimeout(), afl::sys::INFINITE_TIMEOUT);
     a.checkEqual("42. acc", acc, "12");
 

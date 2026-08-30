@@ -374,7 +374,7 @@ gfx::sdl::Engine::handleEvent(EventConsumer& consumer, bool relativeMouseMovemen
             }
 
             // Evaluate result
-            bool timerResult = m_timerQueue.handleElapsedTime(elapsed);
+            bool timerResult = m_timerQueue.handleElapsedTime(elapsed, m_log, m_translator);
             bool eventResult = eventStatus && convertEvent(ev, consumer, relativeMouseMovement);
             if (timerResult || eventResult) {
                 break;

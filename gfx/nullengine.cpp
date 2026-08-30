@@ -5,9 +5,11 @@
 
 #include <memory>
 #include "gfx/nullengine.hpp"
-#include "gfx/rgbapixmap.hpp"
+#include "afl/string/nulltranslator.hpp"
+#include "afl/sys/log.hpp"
 #include "afl/sys/mutexguard.hpp"
 #include "afl/sys/time.hpp"
+#include "gfx/rgbapixmap.hpp"
 #include "gfx/windowparameters.hpp"
 
 gfx::NullEngine::NullEngine()
@@ -38,12 +40,14 @@ void
 gfx::NullEngine::handleEvent(EventConsumer& consumer, bool /*relativeMouseMovement*/)
 {
     uint32_t t = afl::sys::Time::getTickCounter();
+    afl::sys::Log nullLog;
+    afl::string::NullTranslator tx;
     while (1) {
         bool result = m_wake.wait(m_timers.getNextTimeout());
         uint32_t now = afl::sys::Time::getTickCounter();
 
         // Process timers
-        bool did = m_timers.handleElapsedTime(now - t);
+        bool did = m_timers.handleElapsedTime(now - t, nullLog, tx);
         t = now;
 
         // Got the semaphore? This means we have an element in the queue.
