@@ -21,9 +21,16 @@ client::tiles::HistoryAdaptor::HistoryAdaptor(util::RequestSender<game::Session>
     : m_shipId(),
       m_locations(),
       m_turnNumber(),
+      m_useThousandsSeparator(),
+      m_useClans(),
       m_proxy(gameSender, reply),
-      conn_proxyChange(m_proxy.sig_change.add(this, &HistoryAdaptor::onChange))
-{ }
+      m_configProxy(gameSender, reply),
+      conn_proxyChange(m_proxy.sig_change.add(this, &HistoryAdaptor::onChange)),
+      conn_configChange(m_configProxy.sig_intOptionChange.add(this, &HistoryAdaptor::onConfigChange))
+{
+    m_configProxy.observeOption(IdThousands, game::config::UserConfiguration::Display_ThousandsSep);
+    m_configProxy.observeOption(IdClans,     game::config::UserConfiguration::Display_Clans);
+}
 
 client::tiles::HistoryAdaptor::~HistoryAdaptor()
 { }
@@ -44,6 +51,12 @@ const game::map::ShipLocationInfos_t&
 client::tiles::HistoryAdaptor::getPositionList() const
 {
     return m_locations;
+}
+
+util::NumberFormatter
+client::tiles::HistoryAdaptor::getNumberFormatter() const
+{
+    return util::NumberFormatter(m_useThousandsSeparator, m_useClans);
 }
 
 int
@@ -69,6 +82,31 @@ client::tiles::HistoryAdaptor::getCurrentTurnInformation() const
         return &m_locations[pos];
     } else {
         return 0;
+    }
+}
+
+void
+client::tiles::HistoryAdaptor::onConfigChange(int id, int32_t value)
+{
+    bool newValue = (value != 0);
+    bool change = false;
+    switch (id) {
+     case IdThousands:
+        if (newValue != m_useThousandsSeparator) {
+            m_useThousandsSeparator = newValue;
+            change = true;
+        }
+        break;
+     case IdClans:
+        if (newValue != m_useClans) {
+            m_useClans = newValue;
+            change = true;
+        }
+        break;
+    }
+    if (change) {
+        sig_listChange.raise();
+        sig_turnChange.raise();
     }
 }
 

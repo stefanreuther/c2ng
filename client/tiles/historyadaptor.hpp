@@ -8,7 +8,9 @@
 #include "afl/base/optional.hpp"
 #include "afl/base/signal.hpp"
 #include "afl/base/signalconnection.hpp"
+#include "game/proxy/configurationobserverproxy.hpp"
 #include "game/proxy/historyshipproxy.hpp"
+#include "util/numberformatter.hpp"
 
 namespace client { namespace tiles {
 
@@ -19,6 +21,9 @@ namespace client { namespace tiles {
 
         HistoryAdaptor contains a HistoryShipProxy,
         and manages information being passed back and forth.
+
+        For convenience, HistoryAdaptor also embeds a ConfigurationObserverProxy,
+        and uses it to provide a NumberFormatter.
 
         To use, observe the desired event and inquire data as needed. */
     class HistoryAdaptor {
@@ -43,6 +48,10 @@ namespace client { namespace tiles {
             @return last position list reported by HistoryShipProxy */
         const game::map::ShipLocationInfos_t& getPositionList() const;
 
+        /** Get number formatter.
+            @return NumberFormatter instance */
+        util::NumberFormatter getNumberFormatter() const;
+
         /** Get turn number.
             @return last selected turn number */
         int getTurnNumber() const;
@@ -57,24 +66,33 @@ namespace client { namespace tiles {
         const game::map::ShipLocationInfo* getCurrentTurnInformation() const;
 
         /** Signal: list change.
-            Called when game side reports a new list, e.g. for a new ship.
+            Called when game side reports a new list, e.g. for a new ship,
+            or when the NumberFormatter instance changes.
             Listener should call getPositionList(), getTurnNumber(). */
         afl::base::Signal<void()> sig_listChange;
 
         /** Signal: turn change.
-            Called when the turn number changed (setTurnNumber), or game side provides appropriate change.
+            Called when the turn number changed (setTurnNumber), or game side provides appropriate change,
+            or when the NumberFormatter instance changes.
             Listener should call getTurnNumber(), getCurrentTurnInformation(). */
         afl::base::Signal<void()> sig_turnChange;
 
      private:
+        enum { IdThousands, IdClans };
+
         game::Id_t m_shipId;
         game::map::ShipLocationInfos_t m_locations;
         int m_turnNumber;
+        bool m_useThousandsSeparator;
+        bool m_useClans;
 
         game::proxy::HistoryShipProxy m_proxy;
+        game::proxy::ConfigurationObserverProxy m_configProxy;
         afl::base::SignalConnection conn_proxyChange;
+        afl::base::SignalConnection conn_configChange;
 
         void onChange(const game::proxy::HistoryShipProxy::Status& st);
+        void onConfigChange(int id, int32_t value);
     };
 
     /** Find a turn number in a ShipLocationInfos_t.

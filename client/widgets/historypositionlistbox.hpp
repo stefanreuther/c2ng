@@ -9,6 +9,7 @@
 #include "game/map/shipinfo.hpp"
 #include "ui/root.hpp"
 #include "ui/widgets/abstractlistbox.hpp"
+#include "util/numberformatter.hpp"
 
 namespace client { namespace widgets {
 
@@ -39,8 +40,9 @@ namespace client { namespace widgets {
         void setWidth(int width);
 
         /** Set content.
-            @param content New content */
-        void setContent(const Infos_t& content);
+            @param content New content
+            @param fmt     Number formatter */
+        void setContent(const Infos_t& content, util::NumberFormatter fmt);
 
         /** Set current turn number.
             Scroll to approriate position.
@@ -66,6 +68,7 @@ namespace client { namespace widgets {
         ui::Root& m_root;
         afl::string::Translator& m_translator;
         Infos_t m_content;
+        util::NumberFormatter m_formatter;
 
         int m_numLines;
         int m_width;

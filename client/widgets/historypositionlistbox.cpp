@@ -27,6 +27,7 @@ client::widgets::HistoryPositionListbox::HistoryPositionListbox(ui::Root& root, 
     : m_root(root),
       m_translator(tx),
       m_content(),
+      m_formatter(false, false),
       m_numLines(5),
       m_width(100)
 { }
@@ -47,9 +48,10 @@ client::widgets::HistoryPositionListbox::setWidth(int width)
 }
 
 void
-client::widgets::HistoryPositionListbox::setContent(const Infos_t& content)
+client::widgets::HistoryPositionListbox::setContent(const Infos_t& content, util::NumberFormatter fmt)
 {
     m_content = content;
+    m_formatter = fmt;
     handleModelChange();
 }
 
@@ -136,9 +138,8 @@ client::widgets::HistoryPositionListbox::drawItem(gfx::Canvas& can, gfx::Rectang
         int mass;
         if (p->mass.get(mass)) {
             ctx.setTextAlign(gfx::RightAlign, gfx::TopAlign);
-            // FIXME: formatNumber
             massArea.consumeRightX(5);
-            outTextF(ctx, massArea, afl::string::Format(m_translator("%d kt"), /*numToString*/(mass)));
+            outTextF(ctx, massArea, afl::string::Format(m_translator("%d kt"), m_formatter.formatNumber(mass)));
         }
 
         // Position

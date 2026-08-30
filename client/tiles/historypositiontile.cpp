@@ -84,7 +84,7 @@ client::tiles::HistoryPositionTile::onListChange(const HistoryAdaptor& adaptor)
 {
     // Save turn number. setContent() may create events that destroy it, so we restore it later.
     const int turnNumber = adaptor.getTurnNumber();
-    m_list.setContent(adaptor.getPositionList());
+    m_list.setContent(adaptor.getPositionList(), adaptor.getNumberFormatter());
     m_list.setCurrentTurnNumber(turnNumber);
 }
 
