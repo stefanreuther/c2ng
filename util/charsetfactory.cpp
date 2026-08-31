@@ -163,6 +163,28 @@ util::CharsetFactory::findIndexByKey(String_t name) const
     return afl::base::Nothing;
 }
 
+String_t
+util::CharsetFactory::Names::get(int32_t a) const
+{
+    return m_longStyle
+        ? CharsetFactory().getCharsetDescription(a, m_translator)
+        : CharsetFactory().getCharsetName(a, m_translator);
+}
+
+bool
+util::CharsetFactory::Names::getFirstKey(int32_t& a) const
+{
+    a = 0;
+    return a < int32_t(CharsetFactory().getNumCharsets());
+}
+
+bool
+util::CharsetFactory::Names::getNextKey(int32_t& a) const
+{
+    ++a;
+    return a < int32_t(CharsetFactory().getNumCharsets());
+}
+
 // CharsetFactory:
 afl::charset::Charset*
 util::CharsetFactory::createCharset(String_t name)

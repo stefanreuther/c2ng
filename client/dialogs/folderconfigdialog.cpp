@@ -11,6 +11,8 @@
 #include "ui/widgets/stringlistbox.hpp"
 #include "util/charsetfactory.hpp"
 
+using util::CharsetFactory;
+
 namespace {
     typedef game::proxy::BrowserProxy::Configuration State_t;
 
@@ -34,35 +36,6 @@ namespace {
         ID_CHARSET,
         ID_FINISHED,
         ID_READONLY
-    };
-
-    // ex client/widgets/expformat.cc:CharsetNames
-    // FIXME: move to a generic place?
-    class CharsetNames : public afl::functional::StringTable_t {
-     public:
-        CharsetNames(bool longStyle, afl::string::Translator& tx)
-            : m_longStyle(longStyle),
-              m_translator(tx)
-            { }
-        virtual String_t get(int32_t a) const
-            {
-                return m_longStyle
-                    ? util::CharsetFactory().getCharsetDescription(a, m_translator)
-                    : util::CharsetFactory().getCharsetName(a, m_translator);
-            }
-        virtual bool getFirstKey(int32_t& a) const
-            {
-                a = 0;
-                return a < int32_t(util::CharsetFactory().getNumCharsets());
-            }
-        virtual bool getNextKey(int32_t& a) const
-            {
-                ++a;
-                return a < int32_t(util::CharsetFactory().getNumCharsets());
-            }
-     private:
-        bool m_longStyle;
-        afl::string::Translator& m_translator;
     };
 
     bool doList(ui::Root& root, afl::string::Translator& tx, const String_t title, int32_t& current, const afl::functional::StringTable_t& tab)
@@ -99,7 +72,7 @@ Dialog::Dialog(ui::Root& root, State_t& state, afl::string::Translator& tx)
     }
     if (m_state.readOnly.isValid()) {
         m_grid.addItem(ID_READONLY, 'r', tx("Open game read-only"))
-            .addPossibleValues(CharsetNames(false, tx));
+            .addPossibleValues(CharsetFactory::Names(false, tx));
     }
 }
 
@@ -120,8 +93,8 @@ Dialog::updateData()
         if (p->empty()) {
             name = tx("default");
         } else {
-            util::CharsetFactory::Index_t index;
-            util::CharsetFactory f;
+            CharsetFactory::Index_t index;
+            CharsetFactory f;
             if (f.findIndexByKey(*p).get(index)) {
                 name = f.getCharsetName(index, m_translator);
             } else {
@@ -144,12 +117,11 @@ Dialog::onOptionClick(int id)
     switch (id) {
      case ID_CHARSET: {
         // Convert name to proper index
-        using util::CharsetFactory;
         const CharsetFactory::Index_t index = CharsetFactory().findIndexByKey(m_state.charsetId.orElse("")).orElse(CharsetFactory::LATIN1_INDEX);
 
         // List dialog uses int32_t
         int32_t i = int32_t(index);
-        if (doList(m_root, m_translator, m_translator("Character Set"), i, CharsetNames(true, m_translator))) {
+        if (doList(m_root, m_translator, m_translator("Character Set"), i, CharsetFactory::Names(true, m_translator))) {
             m_state.charsetId = CharsetFactory().getCharsetKey(CharsetFactory::Index_t(i));
             updateData();
         }

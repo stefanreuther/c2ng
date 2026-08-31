@@ -8,6 +8,7 @@
 #include "afl/base/optional.hpp"
 #include "afl/charset/charsetfactory.hpp"
 #include "afl/string/translator.hpp"
+#include "afl/functional/stringtable.hpp"
 
 namespace util {
 
@@ -72,11 +73,35 @@ namespace util {
             \return Resulting index if found */
         afl::base::Optional<Index_t> findIndexByKey(String_t name) const;
 
+        /** StringTable containing all character set names. */
+        class Names;
+
         // CharsetFactory:
         virtual afl::charset::Charset* createCharset(String_t name);
     };
 
 }
+
+class util::CharsetFactory::Names : public afl::functional::StringTable_t {
+    // ex client/widgets/expformat.cc:CharsetNames
+ public:
+    /** Constructor.
+        \param longStyle   true to return long names (getCharsetDescription), false to return short names (getCharsetName)
+        \param tx          Translator */
+    Names(bool longStyle, afl::string::Translator& tx)
+        : m_longStyle(longStyle),
+          m_translator(tx)
+        { }
+
+    // StringTable_t:
+    virtual String_t get(int32_t a) const;
+    virtual bool getFirstKey(int32_t& a) const;
+    virtual bool getNextKey(int32_t& a) const;
+
+ private:
+    bool m_longStyle;
+    afl::string::Translator& m_translator;
+};
 
 inline
 util::CharsetFactory::CharsetFactory()

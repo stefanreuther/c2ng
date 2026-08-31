@@ -101,3 +101,29 @@ AFL_TEST("util.CharsetFactory:errors", a)
     a.checkEqual("05. getCharsetName",        testee.getCharsetName(99999, tx), "");
     a.checkEqual("06. getCharsetDescription", testee.getCharsetDescription(99999, tx), "");
 }
+
+/** Test iteration using StringTable interface, short names. */
+AFL_TEST("util.CharsetFactory:iteration:stringtable:short", a)
+{
+    afl::string::NullTranslator tx;
+    util::CharsetFactory::Names names(false, tx);
+
+    int32_t index;
+    a.check("01. getFirst", names.getFirstKey(index));
+    do {
+        a.checkEqual("11. name", util::CharsetFactory().getCharsetName(util::CharsetFactory::Index_t(index), tx), names.get(index));
+    } while (names.getNextKey(index));
+}
+
+/** Test iteration using StringTable interface, long names. */
+AFL_TEST("util.CharsetFactory:iteration:stringtable:long", a)
+{
+    afl::string::NullTranslator tx;
+    util::CharsetFactory::Names names(true, tx);
+
+    int32_t index;
+    a.check("01. getFirst", names.getFirstKey(index));
+    do {
+        a.checkEqual("11. name", util::CharsetFactory().getCharsetDescription(util::CharsetFactory::Index_t(index), tx), names.get(index));
+    } while (names.getNextKey(index));
+}

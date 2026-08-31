@@ -483,9 +483,7 @@ ExportDialog::changeCharset()
     // WExportFormatControl::changeCharset()
     CharsetFactory f;
     StringListbox listBox(m_root.provider(), m_root.colorScheme());
-    for (size_t i = 0, n = f.getNumCharsets(); i < n; ++i) {
-        listBox.addItem(int(i), f.getCharsetDescription(i, m_translator));
-    }
+    listBox.addItems(CharsetFactory::Names(true, m_translator));
     listBox.setCurrentKey(int(m_config.getCharsetIndex()));
     if (listBox.doStandardDialog(m_translator("Change Character Set"), String_t(), 0, m_root, m_translator)) {
         int32_t key;
