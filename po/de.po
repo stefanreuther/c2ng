@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-08-30 21:21+0200\n"
+"PO-Revision-Date: 2026-09-12 09:17+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:390
@@ -140,7 +140,7 @@ msgstr " (+%d kt Tarnung)"
 msgid " (+%d kt)"
 msgstr " (+%d kt)"
 
-#: ui/reshack/fonteditor.cpp:601
+#: ui/reshack/fonteditor.cpp:599
 msgid " (font, height %d pixels)"
 msgstr " (Font, Höhe %d Pixel)"
 
@@ -383,7 +383,7 @@ msgstr "%d grav. Triebwerk%!1{e%}"
 
 #: client/tiles/shipmovementtile.cpp:258 client/tiles/shipmovementtile.cpp:289
 #: client/tiles/starchartheadertile.cpp:91
-#: client/widgets/historypositionlistbox.cpp:141
+#: client/widgets/historypositionlistbox.cpp:142
 #: client/widgets/vcrobjectinfo.cpp:148 game/map/ufotype.cpp:342
 #: game/spec/info/info.cpp:142 game/spec/info/info.cpp:143
 #: game/spec/info/info.cpp:144 game/spec/info/info.cpp:310
@@ -531,6 +531,10 @@ msgstr "%d oder mehr"
 msgid "%d per turn for %s each"
 msgstr "%d pro Zug für je %s"
 
+#: client/dialogs/selectionmanager.cpp:213
+msgid "%d planet%!1{s%}"
+msgstr "%d Planet%!1{en%}"
+
 #: game/maint/sweepapplication.cpp:120
 msgid "%d player%1{'s%|s'%} data remains."
 msgstr "Daten von %d Spieler%!1{n%} verbleiben."
@@ -542,6 +546,10 @@ msgstr "%d Plugin%!1{s%} installiert."
 #: client/dialogs/searchdialog.cpp:554
 msgid "%d result%!1{s%}"
 msgstr "%d Ergebnis%!1{se%}"
+
+#: client/dialogs/selectionmanager.cpp:216
+msgid "%d ship%!1{s%}"
+msgstr "%d Schiff%!1{e%}"
 
 #: game/map/planeteffectors.cpp:81
 msgid "%d ship%!1{s%} hissing (+%d)"
@@ -954,7 +962,7 @@ msgstr "%s:%d: absoluter Link '%s' als <page id> verwendet"
 msgid "%s:%d: cannot use 'next' on first entry"
 msgstr "%s:%d: im ersten Eintrag kann 'next' nicht benutzt werden"
 
-#: game/config/expressionlists.cpp:153 ui/res/directoryprovider.cpp:182
+#: game/config/expressionlists.cpp:153 ui/res/directoryprovider.cpp:181
 msgid "%s:%d: file format error -- line ignored"
 msgstr "%s:%d: Format-Fehler -- Zeile wurde ignoriert"
 
@@ -2613,7 +2621,7 @@ msgstr "Zentrum bei"
 msgid "Chance to win ground combat: %d%%"
 msgstr "Siegchange im Bodenkampf: %d%%"
 
-#: client/dialogs/export.cpp:490
+#: client/dialogs/export.cpp:488
 msgid "Change Character Set"
 msgstr "Zeichensatz ändern"
 
@@ -2678,11 +2686,11 @@ msgstr "Änderungen werden nächsten Zug wirksam."
 msgid "Character Coverage"
 msgstr "Zeichensatz-Abdeckung"
 
-#: client/dialogs/folderconfigdialog.cpp:152
+#: client/dialogs/folderconfigdialog.cpp:124
 msgid "Character Set"
 msgstr "Zeichensatz"
 
-#: client/dialogs/export.cpp:119 client/dialogs/folderconfigdialog.cpp:91
+#: client/dialogs/export.cpp:119 client/dialogs/folderconfigdialog.cpp:64
 msgid "Character set"
 msgstr "Zeichensatz"
 
@@ -2690,15 +2698,15 @@ msgstr "Zeichensatz"
 msgid "Checksum error"
 msgstr "Prüfsummenfehler"
 
-#: game/v3/unpacker.cpp:456
+#: game/v3/unpacker.cpp:448
 msgid "Checksum mismatch in base section"
 msgstr "Prüfsummenfehler in Sternenbasen-Bereich"
 
-#: game/v3/unpacker.cpp:422
+#: game/v3/unpacker.cpp:414
 msgid "Checksum mismatch in planet section"
 msgstr "Prüfsummenfehler in Planeten-Bereich"
 
-#: game/v3/unpacker.cpp:388
+#: game/v3/unpacker.cpp:380
 msgid "Checksum mismatch in ship section"
 msgstr "Prüfsummenfehler in Schiffs-Bereich"
 
@@ -3244,7 +3252,7 @@ msgstr "Selbstdefiniertes Schiff"
 msgid "Cycle units (PgUp/PgDn)"
 msgstr "Einheiten blättern (Bild\\u2193/\\u2191)"
 
-#: ui/reshack/fonteditor.cpp:521
+#: ui/reshack/fonteditor.cpp:519
 msgid "Cyrillic (CP866)"
 msgstr "Kyrillisch (CP866)"
 
@@ -3540,7 +3548,7 @@ msgstr ""
 
 #: client/dialogs/selectionmanager.cpp:397
 msgid "Do you want to clear all selection layers?"
-msgstr "Möchtest du wirklich alle Auswahlen löschen?"
+msgstr "Möchtest du wirklich alle Ebenen löschen?"
 
 #: client/dialogs/selectionmanager.cpp:386
 msgid "Do you want to clear this selection layer?"
@@ -3788,7 +3796,7 @@ msgstr "Ausweichend"
 msgid "Email address"
 msgstr "Email-Adresse"
 
-#: ui/reshack/fonteditor.cpp:517
+#: ui/reshack/fonteditor.cpp:515
 msgid "Encoding"
 msgstr "Kodierung"
 
@@ -3808,7 +3816,7 @@ msgstr "Ende-X"
 msgid "End Y"
 msgstr "Ende-Y"
 
-#: interpreter/process.cpp:2030
+#: interpreter/process.cpp:2026
 msgid "Ended"
 msgstr "Beendet"
 
@@ -3989,7 +3997,7 @@ msgstr "Datei %s gelöscht."
 #: client/dialogs/scriptcommanddialog.cpp:132 client/help.cpp:103
 #: client/help.cpp:89 game/proxy/maintenanceproxy.cpp:101
 #: game/proxy/maintenanceproxy.cpp:173 game/proxy/maintenanceproxy.cpp:213
-#: ui/reshack/fonteditor.cpp:628 ui/reshack/fonteditor.cpp:631
+#: ui/reshack/fonteditor.cpp:626 ui/reshack/fonteditor.cpp:629
 #: ui/reshack/pictureeditor.cpp:341 ui/reshack/pictureeditor.cpp:344
 msgid "Error"
 msgstr "Fehler"
@@ -4018,7 +4026,7 @@ msgstr "Fehler beim Ausführen der Anweisung: %s"
 msgid "Error in user-interface thread"
 msgstr "Fehler im User-Interface-Thread"
 
-#: gfx/sdl/engine.cpp:216 gfx/sdl2/engine.cpp:321
+#: gfx/sdl/engine.cpp:216 gfx/sdl2/engine.cpp:320
 msgid "Error initializing SDL: %s"
 msgstr "Fehler beim Initialisieren der SDL: %s"
 
@@ -4050,8 +4058,8 @@ msgstr "Fehler beim Speichern der Konfiguration"
 msgid "Error scanning help file"
 msgstr "Fehler beim Einlesen der Hilfedatei"
 
-#: gfx/sdl2/engine.cpp:356 gfx/sdl2/engine.cpp:375 gfx/sdl2/engine.cpp:383
-#: gfx/sdl2/engine.cpp:404
+#: gfx/sdl2/engine.cpp:355 gfx/sdl2/engine.cpp:374 gfx/sdl2/engine.cpp:382
+#: gfx/sdl2/engine.cpp:403
 msgid "Error setting video mode (%s): %s"
 msgstr "Fehler beim Einstellen des Grafikmodus (%s): %s"
 
@@ -4085,6 +4093,7 @@ msgstr "Fehler: unbekannte Kachel \"%s\""
 msgid "Event Callback"
 msgstr "Ereignis-Callback"
 
+#: game/proxy/buildstarbaseproxy.cpp:71 gfx/timerqueue.cpp:118
 #: util/requestthread.cpp:87
 msgid "Exception in background thread"
 msgstr "Ausnahme in Hintergrund-Thread"
@@ -4200,7 +4209,7 @@ msgstr "Ausdruck wahr"
 msgid "Extended Mission"
 msgstr "Erweiterte Mission"
 
-#: game/v3/unpacker.cpp:891
+#: game/v3/unpacker.cpp:883
 msgid "Extended Ufo database exists but is empty."
 msgstr "Erweiterte Ufo-Datei existiert, ist aber leer."
 
@@ -4282,7 +4291,7 @@ msgstr "VON: %s"
 msgid "Factories"
 msgstr "Fabriken"
 
-#: interpreter/process.cpp:2032
+#: interpreter/process.cpp:2028
 msgid "Failed"
 msgstr "Fehlgeschlagen"
 
@@ -4401,7 +4410,7 @@ msgstr "Datei '%s' gehört nicht zum aktuellen Zug; übersprungen"
 msgid "File Format"
 msgstr "Dateiformat"
 
-#: ui/reshack/fonteditor.cpp:511 ui/reshack/pictureeditor.cpp:120
+#: ui/reshack/fonteditor.cpp:509 ui/reshack/pictureeditor.cpp:120
 msgid "File Name"
 msgstr "Dateiname"
 
@@ -4499,7 +4508,7 @@ msgid "File is missing required signature"
 msgstr "Datei hat nicht die erforderliche Kennung"
 
 #: game/v3/directoryloader.cpp:272 game/v3/loader.cpp:725
-#: game/v3/unpacker.cpp:249
+#: game/v3/unpacker.cpp:244
 msgid "File is owned by player %d, should be %d"
 msgstr "Datei gehört Spieler %d, erwartet wurde %d"
 
@@ -4598,7 +4607,7 @@ msgstr "Flotten-Bildschirm"
 msgid "Fleets"
 msgstr "Flotten"
 
-#: client/dialogs/folderconfigdialog.cpp:111
+#: client/dialogs/folderconfigdialog.cpp:84
 msgid "Folder Configuration"
 msgstr "Ordner-Konfiguration"
 
@@ -4606,7 +4615,7 @@ msgstr "Ordner-Konfiguration"
 msgid "Follow fleet"
 msgstr "Flotte verfolgen"
 
-#: ui/reshack/fonteditor.cpp:425
+#: ui/reshack/fonteditor.cpp:423
 msgid "Font Editor"
 msgstr "Font-Editor"
 
@@ -4618,7 +4627,7 @@ msgstr "Font-Höhe"
 msgid "Font Import"
 msgstr "Font-Import"
 
-#: ui/reshack/fonteditor.cpp:514
+#: ui/reshack/fonteditor.cpp:512
 msgid "Font Name"
 msgstr "Font-Name"
 
@@ -4713,7 +4722,7 @@ msgstr "Von"
 msgid "From storage: %s"
 msgstr "Lagerbestand: %s"
 
-#: interpreter/process.cpp:2026
+#: interpreter/process.cpp:2022
 msgid "Frozen"
 msgstr "Eingefroren"
 
@@ -4797,7 +4806,7 @@ msgstr "Spiel-Konfigurationsdatei"
 msgid "Game directory lost"
 msgstr "Spielverzeichnis verloren"
 
-#: client/dialogs/folderconfigdialog.cpp:96
+#: client/dialogs/folderconfigdialog.cpp:69
 msgid "Game is finished"
 msgstr "Spiel ist beendet"
 
@@ -5293,7 +5302,7 @@ msgstr "ISO 8859-2 (Latin-2)"
 msgid "Id"
 msgstr "Id"
 
-#: game/vcr/object.cpp:379
+#: game/vcr/object.cpp:374
 msgid "Id #%d, %s %s"
 msgstr "Id #%d, %s %s"
 
@@ -5676,19 +5685,19 @@ msgstr "Ungültige Minenfeld-Id #%d, Minenfeld wird ignoriert"
 msgid "Invalid number"
 msgstr "Ungültige Zahl"
 
-#: game/v3/unpacker.cpp:446
+#: game/v3/unpacker.cpp:438
 msgid "Invalid number of bases"
 msgstr "Ungültige Anzahl Sternbasen"
 
-#: game/v3/unpacker.cpp:412
+#: game/v3/unpacker.cpp:404
 msgid "Invalid number of planets"
 msgstr "Ungültige Anzahl Planeten"
 
-#: game/v3/unpacker.cpp:378
+#: game/v3/unpacker.cpp:370
 msgid "Invalid number of ships"
 msgstr "Ungültige Anzahl Schiffe"
 
-#: game/v3/unpacker.cpp:634
+#: game/v3/unpacker.cpp:626
 msgid "Invalid number of targets"
 msgstr "Ungültige Anzahl Sichtungen"
 
@@ -5868,7 +5877,7 @@ msgstr "Taste %s"
 msgid "Key '%s' in '%s'"
 msgstr "Taste '%s' in '%s'"
 
-#: gfx/sdl/engine.cpp:472 gfx/sdl2/engine.cpp:599
+#: gfx/sdl/engine.cpp:472 gfx/sdl2/engine.cpp:598
 msgid "Key not mapped: 0x%x"
 msgstr "Taste nicht erkannt: 0x%x"
 
@@ -6008,7 +6017,7 @@ msgstr "Nachricht laden"
 msgid "Load Selection"
 msgstr "Auswahl laden"
 
-#: client/dialogs/export.cpp:523 client/dialogs/export.cpp:530
+#: client/dialogs/export.cpp:521 client/dialogs/export.cpp:528
 msgid "Load Settings"
 msgstr "Einstellungen laden"
 
@@ -6369,7 +6378,7 @@ msgstr "Nachricht"
 msgid "Message Summary"
 msgstr "Nachrichten-Übersicht"
 
-#: game/v3/unpacker.cpp:729 game/v3/unpacker.cpp:741
+#: game/v3/unpacker.cpp:721 game/v3/unpacker.cpp:733
 msgid "Message file is invalid"
 msgstr "Nachrichtendatei ist ungültig"
 
@@ -7230,7 +7239,7 @@ msgstr "Zwischenspeicher: %d %s"
 msgid "Only %d more supported!"
 msgstr "Nur noch %d weitere möglich!"
 
-#: client/dialogs/folderconfigdialog.cpp:101
+#: client/dialogs/folderconfigdialog.cpp:74
 msgid "Open game read-only"
 msgstr "Nur zum Ansehen öffnen"
 
@@ -8515,11 +8524,11 @@ msgstr "Rund (kreisförmig, PWrap)"
 msgid "Run"
 msgstr "Ausführen"
 
-#: interpreter/process.cpp:2027
+#: interpreter/process.cpp:2023
 msgid "Runnable"
 msgstr "Auszuführen"
 
-#: interpreter/process.cpp:2028
+#: interpreter/process.cpp:2024
 msgid "Running"
 msgstr "Läuft"
 
@@ -8570,7 +8579,7 @@ msgstr "Alle Nachrichten speichern"
 msgid "Save All Selections"
 msgstr "Alle Auswahlen speichern"
 
-#: ui/reshack/fonteditor.cpp:504
+#: ui/reshack/fonteditor.cpp:502
 msgid "Save Font"
 msgstr "Font speichern"
 
@@ -8586,8 +8595,8 @@ msgstr "Seite speichern"
 msgid "Save Selection"
 msgstr "Auswahl speichern"
 
-#: client/dialogs/export.cpp:169 client/dialogs/export.cpp:504
-#: client/dialogs/export.cpp:511
+#: client/dialogs/export.cpp:169 client/dialogs/export.cpp:502
+#: client/dialogs/export.cpp:509
 msgid "Save Settings"
 msgstr "Einstellungen speichern"
 
@@ -9783,7 +9792,7 @@ msgstr "Überlebt"
 msgid "Suspend"
 msgstr "Anhalten"
 
-#: interpreter/process.cpp:2025
+#: interpreter/process.cpp:2021
 msgid "Suspended"
 msgstr "Angehalten"
 
@@ -9819,7 +9828,7 @@ msgstr "Syntax-Fehler"
 msgid "Syntax error, line has been ignored"
 msgstr "Syntaxfehler, Zeile wurde ignoriert"
 
-#: ui/reshack/fonteditor.cpp:520
+#: ui/reshack/fonteditor.cpp:518
 msgid "System"
 msgstr "System"
 
@@ -9997,7 +10006,7 @@ msgstr "Zwischenspeicher #%d"
 msgid "Terminate"
 msgstr "Beenden"
 
-#: interpreter/process.cpp:2031
+#: interpreter/process.cpp:2027
 msgid "Terminated"
 msgstr "Beendet"
 
@@ -10972,7 +10981,7 @@ msgstr "Turn-Datei gehört zu Spieler %d"
 msgid "Turn file contains %d attachment%!1{s%}"
 msgstr "Turn-Datei enthält %d Datei-An%!1{änge%|ang%}"
 
-#: game/v3/loader.cpp:826 game/v3/unpacker.cpp:1003
+#: game/v3/loader.cpp:826 game/v3/unpacker.cpp:995
 msgid "Turn file contains invalid command code %d"
 msgstr "Turn-Datei enthält ungültigen Befehl %d"
 
@@ -10980,15 +10989,15 @@ msgstr "Turn-Datei enthält ungültigen Befehl %d"
 msgid "Turn file has wrong timestamp (%s != %s)"
 msgstr "Turn-Datei hat falschen Zeitstempel (%s != %s)"
 
-#: game/v3/loader.cpp:844 game/v3/unpacker.cpp:1018
+#: game/v3/loader.cpp:844 game/v3/unpacker.cpp:1010
 msgid "Turn file refers to non-existant planet %d"
 msgstr "Turn-Datei verweist auf nicht-existierenden Planeten %d"
 
-#: game/v3/loader.cpp:834 game/v3/unpacker.cpp:1010
+#: game/v3/loader.cpp:834 game/v3/unpacker.cpp:1002
 msgid "Turn file refers to non-existant ship %d"
 msgstr "Turn-Datei verweist auf nicht-existierendes Schiff %d"
 
-#: game/v3/loader.cpp:854 game/v3/unpacker.cpp:1026
+#: game/v3/loader.cpp:854 game/v3/unpacker.cpp:1018
 msgid "Turn file refers to non-existant starbase %d"
 msgstr "Turn-Datei verweist auf nicht existierende Sternenbasis %d"
 
@@ -11130,7 +11139,7 @@ msgstr ""
 "Simulation kann nicht geladen werden.\n"
 "%s"
 
-#: client/dialogs/export.cpp:530
+#: client/dialogs/export.cpp:528
 msgid "Unable to load: %s"
 msgstr "Kann nicht geladen werden: %s"
 
@@ -11158,7 +11167,7 @@ msgstr "Profil-Verzeichnis kann nicht geöffnet werden"
 msgid "Unable to save %s: %s"
 msgstr "%s kann nicht gespeichert werden: %s"
 
-#: ui/reshack/fonteditor.cpp:628 ui/reshack/fonteditor.cpp:631
+#: ui/reshack/fonteditor.cpp:626 ui/reshack/fonteditor.cpp:629
 #: ui/reshack/pictureeditor.cpp:341 ui/reshack/pictureeditor.cpp:344
 msgid "Unable to save file %s: %s"
 msgstr "Datei kann nicht gespeichert werden: %s"
@@ -11180,7 +11189,7 @@ msgstr ""
 "Simulation kann nicht gespeichert werden.\n"
 "%s"
 
-#: client/dialogs/export.cpp:511
+#: client/dialogs/export.cpp:509
 msgid "Unable to save: %s"
 msgstr "Kann nicht gespeichert werden: %s"
 
@@ -11209,7 +11218,7 @@ msgid "Unarmed ships"
 msgstr "Unbewaffnete Schiffe"
 
 #: game/v3/directoryloader.cpp:571 game/v3/loader.cpp:782
-#: game/v3/unpacker.cpp:841
+#: game/v3/unpacker.cpp:833
 msgid "Unbelievable number of visual contacts"
 msgstr "Unglaubliche Anzahl gesichteter Schiffe"
 
@@ -11226,7 +11235,7 @@ msgstr "Unklassifiziert"
 msgid "Undo Supply Sale"
 msgstr "Vorräte Verkaufen - Rückgängig"
 
-#: ui/reshack/fonteditor.cpp:425
+#: ui/reshack/fonteditor.cpp:423
 msgid "Undo changes to this character and restore previous content?"
 msgstr ""
 "Bearbeitung dieses Zeichens rückgängig machen und vorigen Inhalt "
@@ -11244,7 +11253,7 @@ msgstr "Unerwartetes Objekt"
 msgid "Unhandled exception while loading \"%s\""
 msgstr "Unbehandelte Ausnahme beim Laden von \"%s\""
 
-#: ui/reshack/fonteditor.cpp:522
+#: ui/reshack/fonteditor.cpp:520
 msgid "Unicode"
 msgstr "Unicode"
 
@@ -11392,7 +11401,7 @@ msgstr "Markierung gefundener Objekte aufheben"
 msgid "Unmark these starbases"
 msgstr "Markierung dieser Sternenbasen aufheben"
 
-#: ui/reshack/fonteditor.cpp:592 ui/reshack/pictureeditor.cpp:301
+#: ui/reshack/fonteditor.cpp:590 ui/reshack/pictureeditor.cpp:301
 msgid "Unnamed"
 msgstr "Unbenannt"
 
@@ -11425,15 +11434,15 @@ msgstr "Unpack | Fehlerkorrektur"
 msgid "Unpack | Race name changes"
 msgstr "Unpack | Änderungen der Völkernamen"
 
-#: game/v3/unpacker.cpp:910
+#: game/v3/unpacker.cpp:902
 msgid "Unpacked %d additional Ufo%!1{s%}."
 msgstr "%d %1{weiteres Ufo%|weitere Ufos%} entpackt."
 
-#: game/v3/unpacker.cpp:695
+#: game/v3/unpacker.cpp:687
 msgid "Unpacked %d combat recording%!1{s%}."
 msgstr "%d Kampf-Bericht%!1{e%} entpackt."
 
-#: game/v3/unpacker.cpp:773
+#: game/v3/unpacker.cpp:765
 msgid "Unpacked %d message%!1{s%}."
 msgstr "%d Nachricht%!1{en%} entpackt."
 
@@ -11441,7 +11450,7 @@ msgstr "%d Nachricht%!1{en%} entpackt."
 msgid "Unpacked %d new attachment%!1{s%}."
 msgstr "%d Anh%1{ang%|änge%} entpackt."
 
-#: game/v3/unpacker.cpp:533
+#: game/v3/unpacker.cpp:525
 msgid "Unpacked %d planet%!1{s%}."
 msgstr "%d Planet%!1{en%} entpackt."
 
@@ -11449,31 +11458,31 @@ msgstr "%d Planet%!1{en%} entpackt."
 msgid "Unpacked %d result file%!1{s%}."
 msgstr "%d Result-Datei%!1{en%} entpackt."
 
-#: game/v3/unpacker.cpp:497
+#: game/v3/unpacker.cpp:489
 msgid "Unpacked %d ship%!1{s%}."
 msgstr "%d Schiff%!1{e%} entpackt."
 
-#: game/v3/unpacker.cpp:569
+#: game/v3/unpacker.cpp:561
 msgid "Unpacked %d starbase%!1{s%}."
 msgstr "%d Sternenbas%1{is%|en%} entpackt."
 
-#: game/v3/unpacker.cpp:660
+#: game/v3/unpacker.cpp:652
 msgid "Unpacked %d visual contact%!1{s%} to \"target%d.dat\"."
 msgstr "%d Schiffssichtung%!1{en%} nach \"target%d.dat\" entpackt."
 
-#: game/v3/unpacker.cpp:607
+#: game/v3/unpacker.cpp:599
 msgid "Unpacked %d visual contact%!1{s%} to \"target%d.ext\"."
 msgstr "%d Schiffssichtung%!1{en%} nach \"target%d.ext\" entpackt."
 
-#: game/v3/unpacker.cpp:662
+#: game/v3/unpacker.cpp:654
 msgid "Unpacked %d visual contact%!1{s%}."
 msgstr "%d Schiffssichtung%!1{en%} entpackt."
 
-#: game/v3/unpacker.cpp:712
+#: game/v3/unpacker.cpp:704
 msgid "Unpacked ship location file with %d entries."
 msgstr "Schiffs-Positionsdatei mit %d Einträgen entpackt."
 
-#: game/v3/unpacker.cpp:860
+#: game/v3/unpacker.cpp:852
 msgid "Unpacked version 3.5 object file (kore)."
 msgstr "Version-3.5-Objekt-Datei (kore) entpackt."
 
@@ -12074,7 +12083,7 @@ msgstr "VCR-Algorithmus akzeptiert nicht (inkompatible Version?)"
 msgid "VCR algorithm does not accept (wrong shiplist?)"
 msgstr "VCR-Algorithmus akzeptiert nicht (falsche Schiffsliste?)"
 
-#: game/v3/unpacker.cpp:684
+#: game/v3/unpacker.cpp:676
 msgid "VCR file is invalid"
 msgstr "VCR-Datei ist ungültig"
 
@@ -12098,7 +12107,7 @@ msgstr "Vertikale Ausrichtung"
 msgid "Video driver: %s (%dk%s)"
 msgstr "Video-Treiber: %s (%dk%s)"
 
-#: gfx/sdl2/engine.cpp:399
+#: gfx/sdl2/engine.cpp:398
 msgid "Video driver: %s%s"
 msgstr "Video-Treiber: %s%s"
 
@@ -12177,7 +12186,7 @@ msgstr ""
 msgid "Wait One Turn"
 msgstr "Warte einen Zug"
 
-#: interpreter/process.cpp:2029
+#: interpreter/process.cpp:2025
 msgid "Waiting"
 msgstr "Wartet"
 
@@ -12821,7 +12830,7 @@ msgstr "[n.ä.]"
 msgid "[max]"
 msgstr "[max]"
 
-#: game/vcr/object.cpp:361
+#: game/vcr/object.cpp:356
 msgid "a %s"
 msgstr "ein %s"
 
@@ -12841,7 +12850,7 @@ msgstr "annehmen"
 msgid "aggressor"
 msgstr "Aggressor"
 
-#: game/searchquery.cpp:337
+#: game/searchquery.cpp:334
 msgid "all"
 msgstr "alle"
 
@@ -13034,7 +13043,7 @@ msgstr "gefährlich"
 msgid "death ray"
 msgstr "Todesstrahl"
 
-#: client/dialogs/folderconfigdialog.cpp:121
+#: client/dialogs/folderconfigdialog.cpp:94
 msgid "default"
 msgstr "Standard"
 
@@ -13461,10 +13470,10 @@ msgstr ""
 msgid "new RST"
 msgstr "neues RST"
 
-#: client/dialogs/folderconfigdialog.cpp:134
-#: client/dialogs/folderconfigdialog.cpp:137
-#: client/dialogs/folderconfigdialog.cpp:93
-#: client/dialogs/folderconfigdialog.cpp:98
+#: client/dialogs/folderconfigdialog.cpp:107
+#: client/dialogs/folderconfigdialog.cpp:110
+#: client/dialogs/folderconfigdialog.cpp:66
+#: client/dialogs/folderconfigdialog.cpp:71
 #: client/dialogs/globalactions.cpp:296 client/dialogs/globalactions.cpp:319
 #: client/dialogs/searchdialog.cpp:60 client/dialogs/simulationabilities.cpp:23
 #: client/dialogs/ufoinfo.cpp:389 client/dialogs/vcroptions.cpp:40
@@ -13582,7 +13591,7 @@ msgstr "unerwartete Nicht-Option. Mit \"%s -h\" erhalten Sie Hilfe"
 #: game/proxy/simulationsetupproxy.cpp:1033
 #: game/proxy/simulationsetupproxy.cpp:1073
 #: game/proxy/simulationsetupproxy.cpp:137
-#: game/proxy/simulationsetupproxy.cpp:92 game/searchquery.cpp:339
+#: game/proxy/simulationsetupproxy.cpp:92 game/searchquery.cpp:336
 #: game/sim/ability.cpp:40 game/sim/configuration.cpp:169
 #: game/sim/consoleapplication.cpp:672 game/spec/info/info.cpp:160
 #: game/tables/basemissionname.cpp:18 game/tables/mineralmassclassname.cpp:26
@@ -13699,11 +13708,11 @@ msgstr "Option '-O' benötigt eine Zahl zwischen %d und %d als Parameter"
 msgid "option '-P' needs a player number as parameter"
 msgstr "Option '-P' benötigt eine Spielernummer als Parameter"
 
-#: game/searchquery.cpp:354
+#: game/searchquery.cpp:351
 msgid "others"
 msgstr "andere"
 
-#: game/vcr/object.cpp:360
+#: game/vcr/object.cpp:355
 msgid "our"
 msgstr "unser"
 
@@ -13767,11 +13776,11 @@ msgstr "Parameter zu '--%s' muss 'yes' oder 'no' sein"
 msgid "parameter to '--log' is not valid"
 msgstr "Parameter zu '--log' ist nicht gültig"
 
-#: game/vcr/object.cpp:372
+#: game/vcr/object.cpp:367
 msgid "planet"
 msgstr "Planet"
 
-#: game/searchquery.cpp:346
+#: game/searchquery.cpp:343
 msgid "planets"
 msgstr "Planeten"
 
@@ -13848,7 +13857,7 @@ msgstr "verstreut"
 msgid "ship"
 msgstr "Schiff"
 
-#: game/searchquery.cpp:343
+#: game/searchquery.cpp:340
 msgid "ships"
 msgstr "Schiffe"
 
@@ -13876,11 +13885,11 @@ msgstr "stabil (<15%)"
 msgid "standard"
 msgstr "Standard"
 
-#: game/searchquery.cpp:348
+#: game/searchquery.cpp:345
 msgid "starbases"
 msgstr "Sternenbasen"
 
-#: game/vcr/object.cpp:376
+#: game/vcr/object.cpp:371
 msgid "starship"
 msgstr "Raumschiff"
 
@@ -13987,7 +13996,7 @@ msgstr "tropisch"
 msgid "turn %d"
 msgstr "Zug %d"
 
-#: game/searchquery.cpp:351
+#: game/searchquery.cpp:348
 msgid "ufos"
 msgstr "Ufos"
 
@@ -14018,7 +14027,7 @@ msgstr "unzufrieden"
 #: client/tiles/historymovementtile.cpp:115
 #: client/tiles/historymovementtile.cpp:133
 #: client/tiles/historymovementtile.cpp:151
-#: client/widgets/historypositionlistbox.cpp:146
+#: client/widgets/historypositionlistbox.cpp:147
 #: client/widgets/historyshiplistbox.cpp:143 game/proxy/ionstormproxy.cpp:102
 #: game/proxy/ionstormproxy.cpp:113 game/proxy/ionstormproxy.cpp:83
 #: game/proxy/ionstormproxy.cpp:92 game/proxy/minefieldproxy.cpp:210
@@ -14176,10 +14185,10 @@ msgstr "sterben nicht wenn weniger als %s"
 msgid "wraps to %4d,%4d"
 msgstr "abgebildet auf %4d,%4d"
 
-#: client/dialogs/folderconfigdialog.cpp:134
-#: client/dialogs/folderconfigdialog.cpp:137
-#: client/dialogs/folderconfigdialog.cpp:92
-#: client/dialogs/folderconfigdialog.cpp:97
+#: client/dialogs/folderconfigdialog.cpp:107
+#: client/dialogs/folderconfigdialog.cpp:110
+#: client/dialogs/folderconfigdialog.cpp:65
+#: client/dialogs/folderconfigdialog.cpp:70
 #: client/dialogs/globalactions.cpp:295 client/dialogs/globalactions.cpp:319
 #: client/dialogs/searchdialog.cpp:61 client/dialogs/simulationabilities.cpp:24
 #: client/dialogs/ufoinfo.cpp:389 client/dialogs/vcroptions.cpp:41

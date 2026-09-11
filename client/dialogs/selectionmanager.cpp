@@ -210,10 +210,10 @@ SelectionList::drawItem(gfx::Canvas& can, gfx::Rectangle area, size_t item, Item
         // Label
         String_t text;
         if (size_t n = m_info.layers[item].numPlanets) {
-            util::addListItem(text, ", ", afl::string::Format("%d planet%!1{s%}", n));
+            util::addListItem(text, ", ", afl::string::Format(m_translator("%d planet%!1{s%}"), n));
         }
         if (size_t n = m_info.layers[item].numShips) {
-            util::addListItem(text, ", ", afl::string::Format("%d ship%!1{s%}", n));
+            util::addListItem(text, ", ", afl::string::Format(m_translator("%d ship%!1{s%}"), n));
         }
         outTextF(ctx, area, text);
     }
