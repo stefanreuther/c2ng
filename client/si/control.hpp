@@ -10,6 +10,7 @@
 #include "client/si/outputstate.hpp"
 #include "client/si/requestlink2.hpp"
 #include "game/interface/contextprovider.hpp"
+#include "game/interface/scripttask.hpp"
 #include "game/reference.hpp"
 #include "interpreter/error.hpp"
 #include "interpreter/process.hpp"
@@ -19,7 +20,6 @@
 namespace client { namespace si {
 
     class UserSide;
-    class ScriptTask;
 
 
     /** Script/UI Interaction: per-context adaption.
@@ -101,7 +101,7 @@ namespace client { namespace si {
             Typically, you call executeTaskWait(), then enter your event loop; see "User-Interface Callouts".
 
             @see UserSide::executeTaskWait(), ScriptSide::executeTaskWait() */
-        void executeTaskWait(std::auto_ptr<ScriptTask> task);
+        void executeTaskWait(std::auto_ptr<game::interface::ScriptTask> task);
 
         /** Continue a detached process.
             Will execute the process and others in its group.
@@ -271,7 +271,7 @@ namespace client { namespace si {
         void dialogHandleEndDialog(RequestLink2 link, int code, OutputState& out, ui::EventLoop& loop, int n);
 
      private:
-        void executeTaskInternal(std::auto_ptr<ScriptTask> task, String_t name);
+        void executeTaskInternal(std::auto_ptr<game::interface::ScriptTask> task, String_t name);
 
         /** UserSide instance. */
         UserSide& m_interface;

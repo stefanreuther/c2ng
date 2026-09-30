@@ -96,7 +96,7 @@ namespace {
         ActionSimulator
     };
 
-    class ScriptInitializer : public client::si::ScriptTask {
+    class ScriptInitializer : public game::interface::ScriptTask {
      public:
         ScriptInitializer(afl::base::Ref<afl::io::Directory> resourceDirectory, util::ProfileDirectory& profile)
             : m_resourceDirectory(resourceDirectory),
@@ -664,7 +664,7 @@ client::Application::appMain(gfx::Engine& engine)
     // (The NullControl will make us essentially responsive to UI from scripts.)
     {
         client::si::NullControl ctl(userSide);
-        std::auto_ptr<client::si::ScriptTask> t(new ScriptInitializer(resourceDirectory, profile));
+        std::auto_ptr<game::interface::ScriptTask> t(new ScriptInitializer(resourceDirectory, profile));
         ctl.executeTaskWait(t);
     }
 

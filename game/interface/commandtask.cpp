@@ -1,42 +1,44 @@
 /**
-  *  \file client/si/commandtask.cpp
+  *  \file game/interface/commandtask.cpp
+  *  \brief Class game::interface::CommandTask
   */
 
-#include "client/si/commandtask.hpp"
-#include "interpreter/statementcompiler.hpp"
-#include "interpreter/memorycommandsource.hpp"
+#include "game/interface/commandtask.hpp"
+
+#include "afl/sys/loglistener.hpp"
 #include "interpreter/defaultstatementcompilationcontext.hpp"
-#include "interpreter/error.hpp"
-#include "interpreter/contextreceiver.hpp"
+#include "interpreter/memorycommandsource.hpp"
+#include "interpreter/statementcompiler.hpp"
 #include "interpreter/values.hpp"
 
+using afl::sys::LogListener;
 using interpreter::Process;
 using interpreter::ProcessList;
 using interpreter::StatementCompiler;
 
 namespace {
-    class DefaultFinalizer : public interpreter::Process::Finalizer {
+    /* Finalizer used for logging the process result */
+    class DefaultFinalizer : public Process::Finalizer {
      public:
         DefaultFinalizer(game::Session& session, bool showResult)
             : m_session(session),
               m_showResult(showResult)
             { }
-        virtual void finalizeProcess(interpreter::Process& p)
+        virtual void finalizeProcess(Process& p)
             {
-                using afl::sys::LogListener;
                 LogListener& log = m_session.log();
                 switch (p.getState()) {
-                 case interpreter::Process::Suspended:
-                    log.write(LogListener::Info, "script.state", m_session.translator().translateString("Suspended."));
+                 case Process::Suspended:
+                    log.write(LogListener::Info, "script.state", m_session.translator()("Suspended."));
                     break;
-                 case interpreter::Process::Frozen:
-                    log.write(LogListener::Info, "script.state", m_session.translator().translateString("Frozen."));
+                 case Process::Frozen:
+                    log.write(LogListener::Info, "script.state", m_session.translator()("Frozen."));
                     break;
-                 case interpreter::Process::Runnable:
-                 case interpreter::Process::Running:
-                 case interpreter::Process::Waiting:
+                 case Process::Runnable:
+                 case Process::Running:
+                 case Process::Waiting:
                     break;
-                 case interpreter::Process::Ended:
+                 case Process::Ended:
                     if (m_showResult) {
                         const afl::data::Value* result = p.getResult();
                         if (result == 0) {
@@ -46,15 +48,15 @@ namespace {
                         }
                     }
                     break;
-                 case interpreter::Process::Terminated:
+                 case Process::Terminated:
                     // Terminated, i.e. "End" statement. Log only when user specified an expression,
                     // to tell them why they don't get a result.
                     if (m_showResult) {
-                        log.write(LogListener::Info, "script.state", m_session.translator().translateString("Terminated."));
+                        log.write(LogListener::Info, "script.state", m_session.translator()("Terminated."));
                     }
                     break;
 
-                 case interpreter::Process::Failed:
+                 case Process::Failed:
                     // Logged by ProcessList::run.
                     break;
                 }
@@ -65,7 +67,7 @@ namespace {
     };
 }
 
-client::si::CommandTask::CommandTask(String_t command, bool verbose, String_t name, std::auto_ptr<game::interface::ContextProvider> ctxp)
+game::interface::CommandTask::CommandTask(String_t command, bool verbose, String_t name, std::auto_ptr<ContextProvider> ctxp)
     : m_command(command),
       m_verbose(verbose),
       m_name(name),
@@ -73,16 +75,16 @@ client::si::CommandTask::CommandTask(String_t command, bool verbose, String_t na
 { }
 
 void
-client::si::CommandTask::execute(uint32_t pgid, game::Session& session)
+game::interface::CommandTask::execute(uint32_t pgid, Session& session)
 {
     // Log it
     if (m_verbose) {
-        session.log().write(afl::sys::LogListener::Info, "script.input", m_command);
+        session.log().write(LogListener::Info, "script.input", m_command);
     }
 
     // Create process
-    interpreter::ProcessList& processList = session.processList();
-    interpreter::Process& proc = processList.create(session.world(), m_name);
+    ProcessList& processList = session.processList();
+    Process& proc = processList.create(session.world(), m_name);
 
     // Create BCO
     interpreter::BCORef_t bco = interpreter::BytecodeObject::create(true);

@@ -440,7 +440,7 @@ void
 TreePage::onEdit()
 {
     // ex WConfigEditor::onEdit (sort-of)
-    class Task : public client::si::ScriptTask {
+    class Task : public game::interface::ScriptTask {
      public:
         Task(const VariableReference& ref, size_t index)
             : m_reference(ref), m_index(index)
@@ -469,7 +469,7 @@ TreePage::onEdit()
     const ConfigurationEditorProxy::Infos_t& infos = proxy().getValues();
     if (currentIndex < infos.size() && infos[currentIndex].type == ConfigurationEditorContext::ScriptEditor) {
         if (client::si::Control* ctl = userSide().getControl()) {
-            ctl->executeTaskWait(std::auto_ptr<client::si::ScriptTask>(new Task(m_reference, currentIndex)));
+            ctl->executeTaskWait(std::auto_ptr<game::interface::ScriptTask>(new Task(m_reference, currentIndex)));
         }
     }
 }

@@ -7,11 +7,11 @@
 #include "afl/string/format.hpp"
 #include "client/dialogs/inboxdialog.hpp"
 #include "client/si/control.hpp"
-#include "client/si/scripttask.hpp"
 #include "client/vcr/classic/playbackscreen.hpp"
 #include "client/widgets/keymapwidget.hpp"
 #include "client/widgets/messageactionpanel.hpp"
 #include "game/game.hpp"
+#include "game/interface/scripttask.hpp"
 #include "game/root.hpp"
 #include "game/turn.hpp"
 #include "gfx/complex.hpp"
@@ -199,7 +199,7 @@ namespace {
                 // If the inbound process already requested a context change, bad things would happen if we start another process here.
                 // Therefore, we rather lose the init hooks in this case.
                 // (This will not normally happen because if first=true, there will be no inbound process.)
-                class InitTask : public client::si::ScriptTask {
+                class InitTask : public game::interface::ScriptTask {
                  public:
                     virtual void execute(uint32_t pgid, game::Session& session)
                         {
@@ -242,7 +242,7 @@ namespace {
                 };
 
                 if (first && !m_loop.isStopped()) {
-                    std::auto_ptr<client::si::ScriptTask> p(new InitTask());
+                    std::auto_ptr<game::interface::ScriptTask> p(new InitTask());
                     executeTaskWait(p);
                 }
 

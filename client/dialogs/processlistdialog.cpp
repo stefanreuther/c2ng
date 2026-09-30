@@ -59,7 +59,7 @@ namespace {
         uint32_t pgid = proxy.commit(link);
 
         // Run that process group by moving it into the one provided by ScriptSide
-        class Task : public client::si::ScriptTask {
+        class Task : public game::interface::ScriptTask {
          public:
             Task(uint32_t pgid)
                 : m_pgid(pgid)
@@ -69,7 +69,7 @@ namespace {
          private:
             uint32_t m_pgid;
         };
-        ctl.executeTaskWait(std::auto_ptr<client::si::ScriptTask>(new Task(pgid)));
+        ctl.executeTaskWait(std::auto_ptr<game::interface::ScriptTask>(new Task(pgid)));
     }
 
 

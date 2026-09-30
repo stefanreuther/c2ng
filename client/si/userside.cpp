@@ -269,7 +269,7 @@ client::si::UserSide::continueProcessWait(uint32_t waitId, RequestLink2 link)
 
 // Execute a task.
 void
-client::si::UserSide::executeTaskWait(uint32_t waitId, std::auto_ptr<ScriptTask> task)
+client::si::UserSide::executeTaskWait(uint32_t waitId, std::auto_ptr<game::interface::ScriptTask> task)
 {
     m_scriptSender.postRequest(&ScriptSide::executeTaskWait, waitId, task);
 }

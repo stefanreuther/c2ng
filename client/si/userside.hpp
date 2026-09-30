@@ -8,9 +8,9 @@
 #include <vector>
 #include "client/screenhistory.hpp"
 #include "client/si/requestlink2.hpp"
-#include "client/si/scripttask.hpp"
 #include "game/extraidentifier.hpp"
 #include "game/interface/contextprovider.hpp"
+#include "game/interface/scripttask.hpp"
 #include "game/session.hpp"
 #include "interpreter/process.hpp"
 #include "ui/root.hpp"
@@ -242,7 +242,7 @@ namespace client { namespace si {
             @param task     The task
 
             @see ScriptSide::executeTaskWait */
-        void executeTaskWait(uint32_t waitId, std::auto_ptr<ScriptTask> task);
+        void executeTaskWait(uint32_t waitId, std::auto_ptr<game::interface::ScriptTask> task);
 
         /** Create ContextProvider.
             Calls the current Control's createContextProvider, if any.

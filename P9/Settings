@@ -12,7 +12,9 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/interface/simclassresultcontext.cpp \
+FILES_gamelib = game/interface/commandtask.cpp \
+    game/interface/commandtask.hpp game/interface/scripttask.hpp \
+    game/interface/simclassresultcontext.cpp \
     game/interface/simclassresultcontext.hpp \
     game/interface/simunitresultcontext.cpp \
     game/interface/simunitresultcontext.hpp \
@@ -1098,9 +1100,7 @@ FILES_guilib = ui/reshack/win32import.cpp ui/reshack/win32import.hpp \
     client/cargotransfer.hpp client/widgets/shipspeedwidget.cpp \
     client/widgets/shipspeedwidget.hpp client/dialogs/shipspeeddialog.cpp \
     client/dialogs/shipspeeddialog.hpp client/dialogs/keymapdialog.cpp \
-    client/dialogs/keymapdialog.hpp client/si/commandtask.cpp \
-    client/si/commandtask.hpp client/si/scripttask.hpp \
-    client/dialogs/screenhistorydialog.cpp \
+    client/dialogs/keymapdialog.hpp client/dialogs/screenhistorydialog.cpp \
     client/dialogs/screenhistorydialog.hpp \
     client/proxy/screenhistoryproxy.cpp client/proxy/screenhistoryproxy.hpp \
     client/screenhistory.cpp client/screenhistory.hpp \
@@ -1905,7 +1905,9 @@ DEPEND_c2reshack = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/game/interface/simclassresultcontexttest.cpp \
+FILES_testsuite = test/game/interface/commandtasktest.cpp \
+    test/game/interface/scripttasktest.cpp \
+    test/game/interface/simclassresultcontexttest.cpp \
     test/game/interface/simunitresultcontexttest.cpp \
     test/game/proxy/simulationexportadaptortest.cpp \
     test/game/interface/simobjectcontexttest.cpp \

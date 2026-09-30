@@ -521,7 +521,7 @@ SelectionManager::addButton(afl::base::Deleter& del, ui::Group& group, String_t 
 void
 SelectionManager::executeScriptOperationWait(String_t funcName, String_t title, String_t flags)
 {
-    class Task : public client::si::ScriptTask {
+    class Task : public game::interface::ScriptTask {
      public:
         Task(String_t funcName, String_t title, String_t flags)
             : m_funcName(funcName), m_title(title), m_flags(flags)
@@ -555,7 +555,7 @@ SelectionManager::executeScriptOperationWait(String_t funcName, String_t title, 
         String_t m_title;
         String_t m_flags;
     };
-    executeTaskWait(std::auto_ptr<client::si::ScriptTask>(new Task(funcName, title, flags)));
+    executeTaskWait(std::auto_ptr<game::interface::ScriptTask>(new Task(funcName, title, flags)));
 }
 
 namespace {

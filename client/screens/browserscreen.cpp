@@ -19,10 +19,10 @@
 #include "client/downlink.hpp"
 #include "client/help.hpp"
 #include "client/si/nullcontrol.hpp"
-#include "client/si/scripttask.hpp"
 #include "client/widgets/helpwidget.hpp"
 #include "game/exception.hpp"
 #include "game/interface/plugins.hpp"
+#include "game/interface/scripttask.hpp"
 #include "game/playerlist.hpp"
 #include "game/proxy/attachmentproxy.hpp"
 #include "game/proxy/maintenanceadaptor.hpp"
@@ -565,7 +565,7 @@ client::screens::BrowserScreen::onKeyPlugin(int)
             }
         virtual void loadPlugin(const String_t& id)
             {
-                class Task : public client::si::ScriptTask {
+                class Task : public game::interface::ScriptTask {
                  public:
                     Task(const String_t& id)
                         : m_id(id)
@@ -584,7 +584,7 @@ client::screens::BrowserScreen::onKeyPlugin(int)
                     const String_t m_id;
                 };
 
-                client::si::NullControl(m_userSide).executeTaskWait(std::auto_ptr<client::si::ScriptTask>(new Task(id)));
+                client::si::NullControl(m_userSide).executeTaskWait(std::auto_ptr<game::interface::ScriptTask>(new Task(id)));
             }
      private:
         client::si::UserSide& m_userSide;

@@ -10,7 +10,7 @@
 #include "afl/base/signalconnection.hpp"
 #include "afl/base/weaktarget.hpp"
 #include "afl/data/value.hpp"
-#include "client/si/scripttask.hpp"
+#include "game/interface/scripttask.hpp"
 #include "game/extra.hpp"
 #include "game/interface/contextprovider.hpp"
 #include "game/session.hpp"
@@ -76,7 +76,7 @@ namespace client { namespace si {
 
             @param waitId   Wait Id for the onTaskComplete() callback
             @param task     The task; must not be null */
-        void executeTaskWait(uint32_t waitId, std::auto_ptr<ScriptTask> task);
+        void executeTaskWait(uint32_t waitId, std::auto_ptr<game::interface::ScriptTask> task);
 
         /** Continue a detached process.
             Executes the process identified by the given RequestLink2 (and all other processes in the same process group).

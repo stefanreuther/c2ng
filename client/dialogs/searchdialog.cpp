@@ -941,7 +941,7 @@ client::dialogs::doSearchDialog(const game::SearchQuery& initialQuery,
         };
 
         /* Task to invoke "UI.GlobalActions <TheSearchResult>" */
-        class TransferTask : public client::si::ScriptTask {
+        class TransferTask : public game::interface::ScriptTask {
          public:
             TransferTask(const game::ref::List& list)
                 : m_listData(*new game::interface::ReferenceListContext::Data())
@@ -965,7 +965,7 @@ client::dialogs::doSearchDialog(const game::SearchQuery& initialQuery,
         };
 
         /* Invoke the task */
-        ExtraControl(iface, iface.root(), out).executeTaskWait(std::auto_ptr<client::si::ScriptTask>(new TransferTask(list)));
+        ExtraControl(iface, iface.root(), out).executeTaskWait(std::auto_ptr<game::interface::ScriptTask>(new TransferTask(list)));
     }
 }
 

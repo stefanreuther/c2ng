@@ -26,9 +26,9 @@
 
 using client::si::OutputState;
 using client::si::RequestLink2;
-using client::si::ScriptTask;
 using game::interface::GlobalActionContext;
 using game::interface::GlobalActions;
+using game::interface::ScriptTask;
 using interpreter::VariableReference;
 using ui::widgets::TreeListbox;
 

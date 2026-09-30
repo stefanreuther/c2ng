@@ -49,7 +49,7 @@ client::si::ScriptSide::sender()
 
 // Execute a script-based task.
 void
-client::si::ScriptSide::executeTaskWait(uint32_t waitId, std::auto_ptr<ScriptTask> task)
+client::si::ScriptSide::executeTaskWait(uint32_t waitId, std::auto_ptr<game::interface::ScriptTask> task)
 {
     // Populate process group
     ProcessList& processList = m_session.processList();

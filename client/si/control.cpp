@@ -6,10 +6,10 @@
 #include "client/si/control.hpp"
 #include "afl/string/format.hpp"
 #include "client/dialogs/consoledialog.hpp"
-#include "client/si/commandtask.hpp"
 #include "client/si/keymaphandler.hpp"
 #include "client/si/userside.hpp"
 #include "client/widgets/decayingmessage.hpp"
+#include "game/interface/commandtask.hpp"
 #include "game/interface/referencecontext.hpp"
 #include "interpreter/values.hpp"
 
@@ -44,7 +44,7 @@ client::si::Control::executeCommandWait(String_t command, bool verbose, String_t
 {
     // replaces int/simple.h:executeStatement (using command "C2$Eval atom, prefix" or similar)
     std::auto_ptr<game::interface::ContextProvider> ctxp(createContextProvider());
-    std::auto_ptr<ScriptTask> t(new CommandTask(command, verbose, name, ctxp));
+    std::auto_ptr<game::interface::ScriptTask> t(new game::interface::CommandTask(command, verbose, name, ctxp));
     executeTaskInternal(t, Format("executeCommandWait('%s')", name));
 }
 
@@ -59,7 +59,7 @@ client::si::Control::executeHookWait(String_t name)
 void
 client::si::Control::executeKeyCommandWait(String_t keymapName, util::Key_t key, int prefix)
 {
-    class Task : public ScriptTask {
+    class Task : public game::interface::ScriptTask {
      public:
         Task(String_t keymapName, util::Key_t key, int prefix, std::auto_ptr<game::interface::ContextProvider> ctxp)
             : m_keymapName(keymapName), m_key(key), m_prefix(prefix), m_contextProvider(ctxp)
@@ -69,10 +69,10 @@ client::si::Control::executeKeyCommandWait(String_t keymapName, util::Key_t key,
                 util::KeymapRef_t k = session.world().keymaps().getKeymapByName(m_keymapName);
                 util::Atom_t a = (k != 0 ? k->lookupCommand(m_key) : 0);
                 if (a != 0) {
-                    CommandTask(afl::string::Format("C2$Eval %d, %d, %s", a, m_prefix, interpreter::quoteString(util::formatKey(m_key))),
-                                false,
-                                afl::string::Format(session.translator()("Key '%s' in '%s'").c_str(), util::formatKey(m_key), m_keymapName),
-                                m_contextProvider).execute(pgid, session);
+                    game::interface::CommandTask(afl::string::Format("C2$Eval %d, %d, %s", a, m_prefix, interpreter::quoteString(util::formatKey(m_key))),
+                                                 false,
+                                                 afl::string::Format(session.translator()("Key '%s' in '%s'").c_str(), util::formatKey(m_key), m_keymapName),
+                                                 m_contextProvider).execute(pgid, session);
                 }
             }
      private:
@@ -83,7 +83,7 @@ client::si::Control::executeKeyCommandWait(String_t keymapName, util::Key_t key,
         std::auto_ptr<game::interface::ContextProvider> m_contextProvider;
     };
     std::auto_ptr<game::interface::ContextProvider> ctxp(createContextProvider());
-    std::auto_ptr<ScriptTask> t(new Task(keymapName, key, prefix, ctxp));
+    std::auto_ptr<game::interface::ScriptTask> t(new Task(keymapName, key, prefix, ctxp));
     executeTaskInternal(t, Format("executeKeyCommandWait('%s')", util::formatKey(key)));
 }
 
@@ -91,7 +91,7 @@ client::si::Control::executeKeyCommandWait(String_t keymapName, util::Key_t key,
 void
 client::si::Control::executeGoToReferenceWait(String_t taskName, game::Reference ref, ReferenceMode mode)
 {
-    class ReferenceTask : public client::si::ScriptTask {
+    class ReferenceTask : public game::interface::ScriptTask {
      public:
         ReferenceTask(String_t taskName, game::Reference ref, const char* name)
             : m_taskName(taskName), m_ref(ref), m_name(name)
@@ -125,7 +125,7 @@ client::si::Control::executeGoToReferenceWait(String_t taskName, game::Reference
          case ShowOnMap: name = "UI.GOTOREFERENCELOCATION"; break;
         }
         if (name != 0) {
-            std::auto_ptr<client::si::ScriptTask> t(new ReferenceTask(taskName, ref, name));
+            std::auto_ptr<game::interface::ScriptTask> t(new ReferenceTask(taskName, ref, name));
             executeTaskInternal(t, "executeGoToReferenceWait()");
         }
     }
@@ -133,7 +133,7 @@ client::si::Control::executeGoToReferenceWait(String_t taskName, game::Reference
 
 // Execute a script task.
 void
-client::si::Control::executeTaskWait(std::auto_ptr<ScriptTask> task)
+client::si::Control::executeTaskWait(std::auto_ptr<game::interface::ScriptTask> task)
 {
     executeTaskInternal(task, "executeTaskWait()");
 }
@@ -260,7 +260,7 @@ client::si::Control::dialogHandleEndDialog(RequestLink2 link, int /*code*/, Outp
 }
 
 void
-client::si::Control::executeTaskInternal(std::auto_ptr<ScriptTask> task, String_t name)
+client::si::Control::executeTaskInternal(std::auto_ptr<game::interface::ScriptTask> task, String_t name)
 {
     bool prev = m_interface.setWaiting(true);
     m_interface.mainLog().write(LogListener::Trace, LOG_NAME, Format("<c%d> %s", m_id, name));
