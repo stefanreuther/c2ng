@@ -22,6 +22,8 @@ namespace {
         "SHIPLABELS",
         "PLANETLABELS",
         "FIND",
+        "TASKCOMMANDS",
+        "COMMANDS",
     };
 
     const size_t LRU_LIMIT = 5;
@@ -311,6 +313,17 @@ game::config::ExpressionLists::getHeading(Area a, Kind k, afl::string::Translato
          case Predefined:
             return tx("Predefined queries");
         }
+        break;
+
+     case TaskCommands:
+     case Commands:
+        switch (k) {
+         case Recent:
+            return tx("Last commands");
+         case Predefined:
+            return tx("Predefined commands");
+        }
+        break;
     }
     return String_t();
 }

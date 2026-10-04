@@ -4103,7 +4103,11 @@ client::si::IFUIInputCommand(game::Session& /*session*/, ScriptSide& si, Request
             {
                 UserSide& ui = ctl.interface();
 
-                client::dialogs::ScriptCommandDialog dlg(m_prompt, ui);
+                game::config::ExpressionLists::Area area =
+                    (m_flags & EnforceTask) != 0
+                    ? game::config::ExpressionLists::TaskCommands
+                    : game::config::ExpressionLists::Commands;
+                client::dialogs::ScriptCommandDialog dlg(m_prompt, ui, area);
                 dlg.setTitle(m_title);
                 dlg.setHelp(m_helpId);
                 dlg.setCommand(m_defaultText);

@@ -6,8 +6,10 @@
 #define C2NG_CLIENT_DIALOGS_SCRIPTCOMMANDDIALOG_HPP
 
 #include "client/si/userside.hpp"
+#include "game/proxy/expressionlistproxy.hpp"
 #include "gfx/keyeventconsumer.hpp"
 #include "ui/eventloop.hpp"
+#include "ui/widgets/button.hpp"
 #include "ui/widgets/inputline.hpp"
 
 namespace client { namespace dialogs {
@@ -18,8 +20,9 @@ namespace client { namespace dialogs {
      public:
         /** Constructor.
             @param prompt      Prompt
-            @param userSide    UserSide (for UI Root, Translator, game sender, ContextProvider) */
-        ScriptCommandDialog(String_t prompt, client::si::UserSide& userSide);
+            @param userSide    UserSide (for UI Root, Translator, game sender, ContextProvider)
+            @param area        Area in expression list history (ExpressionLists) for completion */
+        ScriptCommandDialog(String_t prompt, client::si::UserSide& userSide, game::config::ExpressionLists::Area area);
 
         /** Set command.
             Predefines the content of the input field.
@@ -62,13 +65,16 @@ namespace client { namespace dialogs {
         bool m_enforceTask;
 
         ui::widgets::InputLine m_input;
+        ui::widgets::Button m_historyButton;
         ui::EventLoop m_loop;
+        game::proxy::ExpressionListProxy m_exProxy;
 
         // KeyEventConsumer:
         virtual bool handleKey(util::Key_t key, int prefix);
 
         // Other event handlers:
         void onOK();
+        void onHistory();
     };
 
 

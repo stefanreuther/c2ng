@@ -1,7 +1,7 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-09-12 09:17+0200\n"
+"PO-Revision-Date: 2026-10-04 19:03+0200\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
 #: util/plugin/consoleapplication.cpp:390
@@ -962,7 +962,7 @@ msgstr "%s:%d: absoluter Link '%s' als <page id> verwendet"
 msgid "%s:%d: cannot use 'next' on first entry"
 msgstr "%s:%d: im ersten Eintrag kann 'next' nicht benutzt werden"
 
-#: game/config/expressionlists.cpp:153 ui/res/directoryprovider.cpp:181
+#: game/config/expressionlists.cpp:155 ui/res/directoryprovider.cpp:181
 msgid "%s:%d: file format error -- line ignored"
 msgstr "%s:%d: Format-Fehler -- Zeile wurde ignoriert"
 
@@ -2633,7 +2633,7 @@ msgstr "Kodierung ändern"
 msgid "Change File Type"
 msgstr "Dateityp ändern"
 
-#: client/si/commands.cpp:4247
+#: client/si/commands.cpp:4251
 msgid "Change Friendly Code"
 msgstr "Kommandocode ändern"
 
@@ -3092,7 +3092,7 @@ msgstr "%d Datei%!1{en%} übersetzt."
 msgid "Compiling starchart..."
 msgstr "Erstelle Sternkarte..."
 
-#: client/dialogs/scriptcommanddialog.cpp:168
+#: client/dialogs/scriptcommanddialog.cpp:193
 msgid "Completions"
 msgstr "Vervollständigungen"
 
@@ -3415,7 +3415,7 @@ msgstr "Diese Zeichnung löschen (y/n)?"
 msgid "Delete this message?"
 msgstr "Diese Nachricht löschen?"
 
-#: game/map/minefield.cpp:71
+#: game/map/minefield.cpp:69
 msgid "Deleted Mine Field #%d"
 msgstr "Gelöschtes Minenfeld #%d"
 
@@ -3994,7 +3994,7 @@ msgid "Erased file %s."
 msgstr "Datei %s gelöscht."
 
 #: client/dialogs/labelconfig.cpp:279
-#: client/dialogs/scriptcommanddialog.cpp:132 client/help.cpp:103
+#: client/dialogs/scriptcommanddialog.cpp:143 client/help.cpp:103
 #: client/help.cpp:89 game/proxy/maintenanceproxy.cpp:101
 #: game/proxy/maintenanceproxy.cpp:173 game/proxy/maintenanceproxy.cpp:213
 #: ui/reshack/fonteditor.cpp:626 ui/reshack/fonteditor.cpp:629
@@ -4726,7 +4726,7 @@ msgstr "Lagerbestand: %s"
 msgid "Frozen"
 msgstr "Eingefroren"
 
-#: client/si/commandtask.cpp:33
+#: game/interface/commandtask.cpp:35
 msgid "Frozen."
 msgstr "Eingefroren."
 
@@ -5798,7 +5798,7 @@ msgstr "Ionensturm-Informationen"
 msgid "Ion Storms"
 msgstr "Ionenstürme"
 
-#: game/map/ionstorm.cpp:220
+#: game/map/ionstorm.cpp:216
 msgid "Ion storm #%d"
 msgstr "Ionensturm #%d"
 
@@ -5918,7 +5918,11 @@ msgstr "Aktualisierung der Beschriftung fehlgeschlagen: %s"
 msgid "Labels not available"
 msgstr "Beschriftungen nicht verfügbar"
 
-#: game/config/expressionlists.cpp:301
+#: game/config/expressionlists.cpp:322
+msgid "Last commands"
+msgstr "Frühere Befehle"
+
+#: game/config/expressionlists.cpp:303
 msgid "Last expressions"
 msgstr "Frühere Ausdrücke"
 
@@ -5934,7 +5938,7 @@ msgstr "Letzte bekannte Fracht"
 msgid "Last known friendly code: %s"
 msgstr "Letzter bekannter Kommandocode: %s"
 
-#: game/config/expressionlists.cpp:310
+#: game/config/expressionlists.cpp:312
 msgid "Last queries"
 msgstr "Letzte Abfragen"
 
@@ -5986,12 +5990,12 @@ msgstr "Stufe %d"
 msgid "Line"
 msgstr "Linie"
 
-#: client/si/commands.cpp:4454
+#: client/si/commands.cpp:4458
 msgid "List Fleets"
 msgstr "Flotten-Liste"
 
 #: client/dialogs/navchartdialog.cpp:513
-#: client/dialogs/visualscandialog.cpp:1079 client/si/commands.cpp:4629
+#: client/dialogs/visualscandialog.cpp:1079 client/si/commands.cpp:4633
 msgid "List Ships"
 msgstr "Schiffe"
 
@@ -6369,7 +6373,7 @@ msgstr "Teil von Flotte #%d"
 msgid "Merge Selection"
 msgstr "Auswahl hinzufügen"
 
-#: client/si/commands.cpp:4736 client/si/commands.cpp:853
+#: client/si/commands.cpp:4740 client/si/commands.cpp:853
 #: share/resource/core.q:59
 msgid "Message"
 msgstr "Nachricht"
@@ -6430,7 +6434,7 @@ msgstr "Unbenutzte Jäger"
 msgid "Min Ftr aboard"
 msgstr "Unbenutzte Jäger"
 
-#: game/map/minefield.cpp:76
+#: game/map/minefield.cpp:74
 msgid "Mine Field #%d"
 msgstr "Minenfeld #%d"
 
@@ -7199,8 +7203,8 @@ msgstr "O - Optionen"
 #: client/dialogs/turnlistdialog.cpp:113
 #: client/dialogs/visualscandialog.cpp:1080
 #: client/dialogs/visualscandialog.cpp:915 client/si/commands.cpp:2017
-#: client/si/commands.cpp:4453 client/si/commands.cpp:4517
-#: client/si/commands.cpp:4628 client/si/commands.cpp:4737
+#: client/si/commands.cpp:4457 client/si/commands.cpp:4521
+#: client/si/commands.cpp:4632 client/si/commands.cpp:4741
 #: client/widgets/markercolorselector.cpp:80 share/resource/core.q:87
 #: share/resource/core_config.q:72 share/resource/core_ui.q:1056
 #: share/resource/core_ui.q:1228 share/resource/core_ui.q:1235
@@ -7931,11 +7935,15 @@ msgstr "Position"
 msgid "Pre-Tribal"
 msgstr "Pre-Tribal"
 
-#: game/config/expressionlists.cpp:303
+#: game/config/expressionlists.cpp:324
+msgid "Predefined commands"
+msgstr "Vordefinierte Befehle"
+
+#: game/config/expressionlists.cpp:305
 msgid "Predefined expressions"
 msgstr "Vordefinierte Ausdrücke"
 
-#: game/config/expressionlists.cpp:312
+#: game/config/expressionlists.cpp:314
 msgid "Predefined queries"
 msgstr "Vordefinierte Abfragen"
 
@@ -9141,7 +9149,7 @@ msgstr "Schiffs-Liste"
 msgid "Ship Mission"
 msgstr "Schiffs-Mission"
 
-#: client/si/commands.cpp:4518
+#: client/si/commands.cpp:4522
 msgid "Ship Prediction"
 msgstr "Schiffs-Vorhersage"
 
@@ -9796,7 +9804,7 @@ msgstr "Anhalten"
 msgid "Suspended"
 msgstr "Angehalten"
 
-#: client/si/commandtask.cpp:30
+#: game/interface/commandtask.cpp:32
 msgid "Suspended."
 msgstr "Angehalten."
 
@@ -10010,7 +10018,7 @@ msgstr "Beenden"
 msgid "Terminated"
 msgstr "Beendet"
 
-#: client/si/commandtask.cpp:53
+#: game/interface/commandtask.cpp:55
 msgid "Terminated."
 msgstr "Beendet."
 
@@ -10455,7 +10463,7 @@ msgstr ""
 "Dies ist ein ASCII-Zeichen.\n"
 "C-Kodierung: '\\%03o', '\\x%0$02X'"
 
-#: client/dialogs/scriptcommanddialog.cpp:132
+#: client/dialogs/scriptcommanddialog.cpp:143
 msgid "This is not a valid auto task command."
 msgstr "Dies ist kein gültiger Befehl für eine Aufgabe."
 
@@ -11091,7 +11099,7 @@ msgstr "Ufos"
 msgid "Unable to create backup file"
 msgstr "Backup-Datei kann nicht erzeugt werden"
 
-#: game/config/expressionlists.cpp:206
+#: game/config/expressionlists.cpp:208
 msgid "Unable to create file"
 msgstr "Datei kann nicht angelegt werden"
 
@@ -12374,7 +12382,7 @@ msgstr "Wirkungen der Waffen"
 msgid "Weapons"
 msgstr "Waffen"
 
-#: game/map/minefield.cpp:74
+#: game/map/minefield.cpp:72
 msgid "Web Mine Field #%d"
 msgstr "Fangminenfeld #%d"
 

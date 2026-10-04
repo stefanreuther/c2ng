@@ -7,17 +7,20 @@
 #include "afl/base/deleter.hpp"
 #include "afl/charset/utf8.hpp"
 #include "client/downlink.hpp"
+#include "client/widgets/expressionlist.hpp"
 #include "client/widgets/helpwidget.hpp"
 #include "game/interface/completionlist.hpp"
 #include "game/proxy/scripteditorproxy.hpp"
 #include "interpreter/taskeditor.hpp"
 #include "ui/dialogs/messagebox.hpp"
+#include "ui/layout/hbox.hpp"
 #include "ui/layout/vbox.hpp"
 #include "ui/widgets/keyforwarder.hpp"
 #include "ui/widgets/quit.hpp"
 #include "ui/widgets/standarddialogbuttons.hpp"
 #include "ui/widgets/statictext.hpp"
 #include "ui/widgets/stringlistbox.hpp"
+#include "util/unicodechars.hpp"
 
 using ui::widgets::InputLine;
 
@@ -31,7 +34,7 @@ namespace {
     }
 }
 
-client::dialogs::ScriptCommandDialog::ScriptCommandDialog(String_t prompt, client::si::UserSide& userSide)
+client::dialogs::ScriptCommandDialog::ScriptCommandDialog(String_t prompt, client::si::UserSide& userSide, game::config::ExpressionLists::Area area)
     : m_prompt(prompt),
       m_title(prompt),
       m_help(),
@@ -39,8 +42,12 @@ client::dialogs::ScriptCommandDialog::ScriptCommandDialog(String_t prompt, clien
       m_onlyCommands(false),
       m_enforceTask(false),
       m_input(4000, 35, userSide.root()),
-      m_loop(userSide.root())
-{ }
+      m_historyButton(UTF_DOWN_ARROW, util::Key_Down, userSide.root()),
+      m_loop(userSide.root()),
+      m_exProxy(userSide.gameSender(), area)
+{
+    m_historyButton.sig_fire.add(this, &ScriptCommandDialog::onHistory);
+}
 
 void
 client::dialogs::ScriptCommandDialog::setCommand(String_t cmd)
@@ -88,7 +95,11 @@ client::dialogs::ScriptCommandDialog::run()
     afl::base::Deleter del;
     ui::Window& win = del.addNew(new ui::Window(m_title, root.provider(), root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
     win.add(del.addNew(new ui::widgets::StaticText(m_prompt, util::SkinColor::Static, "+", root.provider())));
-    win.add(m_input);
+
+    ui::Group& g = del.addNew(new ui::Group(ui::layout::HBox::instance0));
+    g.add(m_input);
+    g.add(m_historyButton);
+    win.add(g);
 
     ui::widgets::StandardDialogButtons& btn = del.addNew(new ui::widgets::StandardDialogButtons(root, tx));
     win.add(btn);
@@ -132,8 +143,22 @@ client::dialogs::ScriptCommandDialog::onOK()
         ui::dialogs::MessageBox(tx("This is not a valid auto task command."), tx("Error"), m_userSide.root())
             .doOkDialog(tx);
     } else {
+        m_exProxy.pushRecent(String_t(), afl::string::strTrim(m_input.getText()));
         m_loop.stop(1);
     }
+}
+
+void
+client::dialogs::ScriptCommandDialog::onHistory()
+{
+    m_input.requestFocus();
+    String_t value = m_input.getText();
+    String_t flags;
+    Downlink link(m_userSide);
+    if (client::widgets::doExpressionListPopup(m_userSide.root(), link, m_exProxy, m_historyButton.getExtent().getBottomLeft(), value, flags)) {
+        m_input.setText(value);
+    }
+    m_input.requestFocus();
 }
 
 void

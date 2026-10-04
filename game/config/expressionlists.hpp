@@ -25,9 +25,11 @@ namespace game { namespace config {
         enum Area {
             ShipLabels,             ///< Ship labels. Flags are not used.
             PlanetLabels,           ///< Planet labels. Flags are not used.
-            Search                  ///< Search expressions. Flags contain object and/or query type.
+            Search,                 ///< Search expressions. Flags contain object and/or query type.
+            TaskCommands,           ///< Auto task commands. Flags are not used.
+            Commands                ///< Other commands (global actions). Flags are not used.
         };
-        static const size_t NUM_AREAS = static_cast<size_t>(Search) + 1;
+        static const size_t NUM_AREAS = static_cast<size_t>(Commands) + 1;
 
         /** Kinds of list.
             Note that this is the order in which lists appear in pack(). */

@@ -61,7 +61,6 @@ AFL_TEST("game.config.ExpressionLists:pack", a)
 {
     ExpressionLists testee;
 
-    // Verify get()
     ExpressionList* r = testee.get(ExpressionLists::ShipLabels, ExpressionLists::Recent);
     r->pushBackNew(new ExpressionList::Item("recent1", "[b]", "value r1"));
     r->pushBackNew(new ExpressionList::Item("recent2", "[c]", "value r2"));
@@ -101,6 +100,106 @@ AFL_TEST("game.config.ExpressionLists:pack", a)
     a.checkEqual("62. flags", list[5].flags, "[y]");
     a.checkEqual("63. value", list[5].value, "value p2");
     a.checkEqual("64. isHeading", list[5].isHeading, false);
+}
+
+AFL_TEST("game.config.ExpressionLists:pack:search", a)
+{
+    ExpressionLists testee;
+
+    ExpressionList* r = testee.get(ExpressionLists::Search, ExpressionLists::Recent);
+    r->pushBackNew(new ExpressionList::Item("r", "[b]", "vr"));
+
+    ExpressionList* p = testee.get(ExpressionLists::Search, ExpressionLists::Predefined);
+    p->pushBackNew(new ExpressionList::Item("p", "[x]", "vp"));
+
+    // Pack
+    afl::string::NullTranslator tx;
+    ExpressionLists::Items_t list;
+    testee.pack(list, ExpressionLists::Search, tx);
+
+    // Verify
+    a.checkEqual("01", list.size(), 4U);
+
+    a.checkEqual("11. name", list[0].name, "Last queries");
+    a.checkEqual("12. isHeading", list[0].isHeading, true);
+
+    a.checkEqual("21. name", list[1].name, "r");
+    a.checkEqual("22. flags", list[1].flags, "[b]");
+    a.checkEqual("23. value", list[1].value, "vr");
+    a.checkEqual("24. isHeading", list[1].isHeading, false);
+
+    a.checkEqual("31. name", list[2].name, "Predefined queries");
+    a.checkEqual("32. isHeading", list[2].isHeading, true);
+
+    a.checkEqual("41. name", list[3].name, "p");
+    a.checkEqual("42. flags", list[3].flags, "[x]");
+    a.checkEqual("43. value", list[3].value, "vp");
+    a.checkEqual("44. isHeading", list[3].isHeading, false);
+}
+
+AFL_TEST("game.config.ExpressionLists:pack:commands", a)
+{
+    ExpressionLists testee;
+
+    ExpressionList* r = testee.get(ExpressionLists::TaskCommands, ExpressionLists::Recent);
+    r->pushBackNew(new ExpressionList::Item("r", "[b]", "vr"));
+
+    ExpressionList* p = testee.get(ExpressionLists::TaskCommands, ExpressionLists::Predefined);
+    p->pushBackNew(new ExpressionList::Item("p", "[x]", "vp"));
+
+    // Pack
+    afl::string::NullTranslator tx;
+    ExpressionLists::Items_t list;
+    testee.pack(list, ExpressionLists::TaskCommands, tx);
+
+    // Verify
+    a.checkEqual("01", list.size(), 4U);
+
+    a.checkEqual("11. name", list[0].name, "Last commands");
+    a.checkEqual("12. isHeading", list[0].isHeading, true);
+
+    a.checkEqual("21. name", list[1].name, "r");
+    a.checkEqual("22. flags", list[1].flags, "[b]");
+    a.checkEqual("23. value", list[1].value, "vr");
+    a.checkEqual("24. isHeading", list[1].isHeading, false);
+
+    a.checkEqual("31. name", list[2].name, "Predefined commands");
+    a.checkEqual("32. isHeading", list[2].isHeading, true);
+
+    a.checkEqual("41. name", list[3].name, "p");
+    a.checkEqual("42. flags", list[3].flags, "[x]");
+    a.checkEqual("43. value", list[3].value, "vp");
+    a.checkEqual("44. isHeading", list[3].isHeading, false);
+}
+
+AFL_TEST("game.config.ExpressionLists:pack:commands-only", a)
+{
+    ExpressionLists testee;
+
+    ExpressionList* r = testee.get(ExpressionLists::TaskCommands, ExpressionLists::Recent);
+    r->pushBackNew(new ExpressionList::Item("r", "[b]", "vr"));
+
+    // Pack
+    afl::string::NullTranslator tx;
+    ExpressionLists::Items_t list;
+    testee.pack(list, ExpressionLists::TaskCommands, tx);
+
+    // Verify
+    a.checkEqual("01", list.size(), 1U);
+
+    a.checkEqual("11. name", list[0].name, "r");
+    a.checkEqual("12. flags", list[0].flags, "[b]");
+    a.checkEqual("13. value", list[0].value, "vr");
+    a.checkEqual("14. isHeading", list[0].isHeading, false);
+}
+
+AFL_TEST("game.config.ExpressionLists:pack:empty", a)
+{
+    ExpressionLists testee;
+    afl::string::NullTranslator tx;
+    ExpressionLists::Items_t list;
+    testee.pack(list, ExpressionLists::TaskCommands, tx);
+    a.checkEqual("01. size", list.size(), 0U);
 }
 
 AFL_TEST("game.config.ExpressionLists:loadRecentFiles", a)
