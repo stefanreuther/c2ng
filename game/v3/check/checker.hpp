@@ -67,9 +67,9 @@ namespace game { namespace v3 { namespace check {
             { return m_config; }
 
         bool hadAnyError() const
-            { return had_any_error; }
+            { return m_hadAnyError; }
         bool hadChecksumError() const
-            { return had_ck_error; }
+            { return m_hadChecksumError; }
 
      private:
         struct PlanetEntry {
@@ -97,7 +97,10 @@ namespace game { namespace v3 { namespace check {
             game::v3::GenFile gen;
         };
 
-        bool had_ck_error;
+        bool m_hadChecksumError;
+        bool m_explainedEditable;
+        bool m_explainedInvariant;
+        bool m_explainedTransfer;
 
         // Log File Output
         void logAbort(const String_t& s);
@@ -149,9 +152,9 @@ namespace game { namespace v3 { namespace check {
         bool isActive(int pl) const;
 
         // Checks
-        bool had_any_error;
-        bool had_error;
-        String_t ctx;
+        bool m_hadAnyError;
+        bool m_hadError;
+        String_t m_context;
 
         void rangeCheckSingleValue(const String_t& s, int32_t val, int32_t min, int32_t max);
         void rangeCheckCost(const game::v3::structures::Cost& cost);

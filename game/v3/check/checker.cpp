@@ -44,7 +44,10 @@ game::v3::check::Checker::Checker(afl::io::Directory& gamedir,
       error(error),
       m_config(),
       m_translator(tx),
-      had_ck_error(false),
+      m_hadChecksumError(false),
+      m_explainedEditable(false),
+      m_explainedInvariant(false),
+      m_explainedTransfer(false),
       had_divi(false),
       html_fmt(hRaw),
       ships(),
@@ -54,9 +57,9 @@ game::v3::check::Checker::Checker(afl::io::Directory& gamedir,
       hulls(),
       engines(),
       truehull(),
-      had_any_error(false),
-      had_error(false),
-      ctx()
+      m_hadAnyError(false),
+      m_hadError(false),
+      m_context()
 { }
 
 game::v3::check::Checker::~Checker()
@@ -81,7 +84,7 @@ game::v3::check::Checker::run()
         log.writeText("<pre>");
     }
     try {
-        had_error = false;
+        m_hadError = false;
         if (m_config.isResultMode()) {
             uint8_t rst_timestamp[18];
             logStr("Loading Result File:");
@@ -100,16 +103,16 @@ game::v3::check::Checker::run()
             }
         }
         loadSpecs();
-        if (had_error) {
+        if (m_hadError) {
             // @change This branch not in check.pas 0.5
             logStr("Loading failed.");
-            had_any_error = true;
+            m_hadAnyError = true;
         } else {
             logStr("Checking:");
-            had_error = false;
-            had_any_error = false;
+            m_hadError = false;
+            m_hadAnyError = false;
             rangeCheckSpecs();
-            if (had_error) {
+            if (m_hadError) {
                 logItem("Spec file check", "failed");
                 logStr("c2check cannot handle these specification files.");
                 logStr("If you see this message on a correct ship list,");
@@ -126,9 +129,9 @@ game::v3::check::Checker::run()
             flowCheckFreeSpace();
             logCheck("Space flow check");
             logStr("");
-            if (had_any_error) {
+            if (m_hadAnyError) {
                 logStrB("Turn is invalid.");
-            } else if (had_ck_error) {
+            } else if (m_hadChecksumError) {
                 logStrB("Turn has checksum errors.");
             } else {
                 logStrB("Turn is OK.");
@@ -137,15 +140,15 @@ game::v3::check::Checker::run()
     }
     catch (afl::except::FileFormatException& e) {
         logAbort(Format("SYNTAX: %s: %s", e.getFileName(), e.what()));
-        had_any_error = true;
+        m_hadAnyError = true;
     }
     catch (afl::except::FileProblemException& e) {
         logAbort(Format("FATAL: %s: %s", e.getFileName(), e.what()));
-        had_any_error = true;
+        m_hadAnyError = true;
     }
     catch (std::exception& e) {
         logAbort(Format("FATAL: %s", e.what()));
-        had_any_error = true;
+        m_hadAnyError = true;
     }
     if (m_config.isHtmlMode()) {
         log.writeLine("</pre>");
@@ -285,10 +288,10 @@ void
 game::v3::check::Checker::logCheck(const String_t& title)
 {
     // ex check.pas:LogCheck
-    if (had_error) {
+    if (m_hadError) {
         logItem(title, "failed");
-        had_any_error = true;
-        had_error = false;
+        m_hadAnyError = true;
+        m_hadError = false;
     } else {
         logItem(title, "succeeded");
     }
@@ -320,7 +323,7 @@ game::v3::check::Checker::checkChecksum(const String_t& title, uint32_t soll, ui
         logStr(Format("    Stored value is %d", ist));
         logStr(Format("    Should be %d as computed from data", soll));
         logDivi();
-        had_ck_error = true;
+        m_hadChecksumError = true;
     }
 }
 
@@ -444,19 +447,19 @@ game::v3::check::Checker::loadGen(DirStuff& stuff)
 
     if (gen.playerId != m_player) {
         logBlock(Format("INVALID: %s belongs to player %d, not %d", ndat, int(gen.playerId), m_player));
-        had_error = true;
+        m_hadError = true;
     }
     if (gen.newPasswordFlag != 0 && gen.newPasswordFlag != 13) {
         logBlock(Format("INVALID: password flag has invalid value %d'", int(gen.newPasswordFlag)));
-        had_error = true;
+        m_hadError = true;
     }
     if (gen.turnNumber <= 0) {
         logBlock(Format("INVALID: turn number has invalid value %d", int(gen.turnNumber)));
-        had_error = true;
+        m_hadError = true;
     }
     if (!checkTimestamp(gen.timestamp)) {
         logBlock("INVALID: time stamp has an invalid format");
-        had_error = true;
+        m_hadError = true;
     }
     checkChecksum(ndat + " timestamp", checksum(gen.timestamp), gen.timestampChecksum);
 }
@@ -632,7 +635,7 @@ game::v3::check::Checker::loadChecksums(const DirStuff& stuff)
                     logStr(Format("CHECKSUM: Checksum for ship %d is not contained in file %s.", i, n));
                     logStr("    Ships above that Id are not checked.");
                     logDivi();
-                    had_ck_error = true;
+                    m_hadChecksumError = true;
                     break;
                 }
                 filesum = data[i+1500-1];
@@ -925,11 +928,11 @@ game::v3::check::Checker::rangeCheckSingleValue(const String_t& s, int32_t val, 
         return;
     }
     logDivi();
-    logStr(Format("RANGE: %s: %s out of allowed range.", ctx, s));
+    logStr(Format("RANGE: %s: %s out of allowed range.", m_context, s));
     logStr(Format("    Value is %d", val));
     logStr(Format("    Allowed range is %d .. %d", min, max));
     logDivi();
-    had_error = true;
+    m_hadError = true;
 }
 
 void
@@ -947,26 +950,26 @@ game::v3::check::Checker::rangeCheckSpecs()
 {
     // ex check.pas:RangeCheckSpecs
     for (int i = 1; i <= NUM_ENGINE_TYPES; ++i) {
-        ctx = Format("Engine %d", i);
+        m_context = Format("Engine %d", i);
         rangeCheckCost(engines[i-1].cost);
         rangeCheckSingleValue("Tech level", engines[i-1].techLevel, 1, 10);
     }
 
     for (int i = 1; i <= NUM_BEAM_TYPES; ++i) {
-        ctx = Format("Beam %d", i);
+        m_context = Format("Beam %d", i);
         rangeCheckCost(beams[i-1].cost);
         rangeCheckSingleValue("Tech level", beams[i-1].techLevel, 1, 10);
     }
 
     for (int i = 1; i <= NUM_TORPEDO_TYPES; ++i) {
-        ctx = Format("Torpedo %d", i);
+        m_context = Format("Torpedo %d", i);
         rangeCheckCost(torps[i-1].launcherCost);
         rangeCheckSingleValue("Torp MC cost", torps[i-1].torpedoCost, 0, MAXINT);
         rangeCheckSingleValue("Tech level", torps[i-1].techLevel, 1, 10);
     }
 
     for (int i = 1; i <= NUM_HULL_TYPES; ++i) {
-        ctx = Format("Hull %d", i);
+        m_context = Format("Hull %d", i);
         rangeCheckSingleValue("MC cost", hulls[i-1].money, 0, MAXINT);
         rangeCheckSingleValue("Tri cost", hulls[i-1].tritanium, 0, MAXINT);
         rangeCheckSingleValue("Dur cost", hulls[i-1].duranium, 0, MAXINT);
@@ -981,7 +984,7 @@ game::v3::check::Checker::rangeCheckSpecs()
     }
 
     for (int i = 1; i <= 11; ++i) {
-        ctx = Format("Truehull player %d", i);
+        m_context = Format("Truehull player %d", i);
         for (int j = 1; j <= 20; ++j) {
             rangeCheckSingleValue(Format("Slot %d", j), truehull[i-1][j-1], 0, NUM_HULL_TYPES);
         }
@@ -992,11 +995,10 @@ void
 game::v3::check::Checker::checkEditable(const String_t& s, int32_t dat, int32_t dis, int32_t min, int32_t max)
 {
     // ex check.pas:CheckEditable
-    static bool explained = false;    // FIXME
     if (dat != dis || m_config.isPickyMode()) {
         if (dat < min || dat > max) {
             logDivi();
-            logStr(Format("RANGE: %s: %s out of allowed range.", ctx, s));
+            logStr(Format("RANGE: %s: %s out of allowed range.", m_context, s));
             logStr(Format("    Value is %d", dat));
             if (min == max) {
                 logStr(Format("    Allowed value is %d", min));
@@ -1006,14 +1008,14 @@ game::v3::check::Checker::checkEditable(const String_t& s, int32_t dat, int32_t 
             logStr(Format("    Original value was %d", dis));
             if (dat == dis) {
                 logStr("    The original value is already out of range.");
-                if (!explained) {
+                if (!m_explainedEditable) {
                     logStr("    This means the host made a mistake by putting this value here.");
                     logStr("    It can still confuse some programs (including host itself).");
-                    explained = true;
+                    m_explainedEditable = true;
                 }
             }
             logDivi();
-            had_error = true;
+            m_hadError = true;
         }
     }
 }
@@ -1022,21 +1024,20 @@ void
 game::v3::check::Checker::checkInvariant(const String_t& s, int32_t dat, int32_t dis, int32_t min, int32_t max)
 {
     // ex check.pas:CheckInvariant
-    static bool explained = false;    // FIXME
     if (dat != dis) {
         logDivi();
-        logStr(Format("INVALID: %s: %s was modified.", ctx, s));
+        logStr(Format("INVALID: %s: %s was modified.", m_context, s));
         logStr(Format("    Value is %d", dat));
         logStr(Format("    Original value was %d", dis));
-        if (!explained) {
+        if (!m_explainedInvariant) {
             logStr("    This is not permitted by the rules, and will not be transmitted");
             logStr("    to the host. Some of the following errors may be consequences of");
             logStr("    this one. CHECK will continue with the old value, because that's");
             logStr("    what the host will see.");
-            explained = true;
+            m_explainedInvariant = true;
         }
         logDivi();
-        had_error = true;
+        m_hadError = true;
     }
     rangeCheckSingleValue(s, dis, min, max);
 }
@@ -1045,7 +1046,6 @@ void
 game::v3::check::Checker::checkTransfer(const String_t& name, const game::v3::structures::ShipTransfer& dat, const game::v3::structures::ShipTransfer& dis)
 {
     // ex check.pas:RangeCheckShips:CheckTransfer
-    static bool explained = false;   // FIXME
     checkEditable (name + " Colonists",   dat.colonists, dis.colonists, 0, 10000);
     checkEditable (name + " Neutronium",  dat.ore[0], dis.ore[0], 0, 10000);
     checkEditable (name + " Tritanium",   dat.ore[1], dis.ore[1], 0, 10000);
@@ -1065,14 +1065,14 @@ game::v3::check::Checker::checkTransfer(const String_t& name, const game::v3::st
             // Also, Tims Maketurn does not send these empty transfers at all.
             // This problem is found very often in turns on PlanetsCentral (>150x).
             logDivi();
-            logStr(Format("INVALID: %s: %s order is empty but has target.", ctx, name));
-            if (!explained) {
+            logStr(Format("INVALID: %s: %s order is empty but has target.", m_context, name));
+            if (!m_explainedTransfer) {
                 logStr("    Such orders are sometimes created by PLANETS.EXE in local data files.");
                 logStr("    They might trigger false cheat alerts in the host, and should");
                 logStr("    therefore not be sent to the host.");
-                explained = true;
+                m_explainedTransfer = true;
             }
-            had_error = true;
+            m_hadError = true;
             logDivi();
         }
     }
@@ -1088,10 +1088,10 @@ game::v3::check::Checker::checkTransferTarget(const String_t& name, const game::
         if (dat.targetId != i) {
             // This is a yellow alert for PHost.
             logDivi();
-            logStr(Format("RANGE: %s: %s order has invalid target.", ctx, name));
+            logStr(Format("RANGE: %s: %s order has invalid target.", m_context, name));
             logStr(Format("    Value is %d", int(dat.targetId)));
             logStr(Format("    Expected value is %d", i));
-            had_error = true;
+            m_hadError = true;
             logDivi();
         }
     }
@@ -1107,7 +1107,7 @@ game::v3::check::Checker::rangeCheckShips()
         if (!dat || !dis) {
             continue;
         }
-        ctx = Format("Ship %d", i);
+        m_context = Format("Ship %d", i);
 
         int cargo, fuel, crew;
         int hullType = dis->hullType;
@@ -1164,7 +1164,7 @@ game::v3::check::Checker::checkComponent(const String_t& what, int want, int hav
     // ex check.pas:CheckComponent
     if (want > max || want > have) {
         logDivi();
-        logStr(Format("RANGE: %s", ctx));
+        logStr(Format("RANGE: %s", m_context));
         logStr(Format("    Attempt to build ship with %d %d", want, what));
         if (want > max) {
             logStr(Format("    Maximum allowed by hull is %d", max));
@@ -1173,7 +1173,7 @@ game::v3::check::Checker::checkComponent(const String_t& what, int want, int hav
             logStr(Format("    Available in storage are %d", have));
         }
         logDivi();
-        had_error = true;
+        m_hadError = true;
     }
 }
 
@@ -1187,7 +1187,7 @@ game::v3::check::Checker::rangeCheckPlanets()
         if (dat == 0 || dis == 0) {
             continue;
         }
-        ctx = Format("Planet %d", i);
+        m_context = Format("Planet %d", i);
         checkInvariant("Owner", dat->owner, dis->owner, 0, 11);
         if (isActive(dis->owner)) {
             // editable planet
@@ -1205,7 +1205,7 @@ game::v3::check::Checker::rangeCheckPlanets()
             checkEditable ("Native Tax",    dat->nativeTax,       dis->nativeTax,         0, 100);
             if (planets[i-1].bdat != 0) {
                 checkEditable ("Base Build Order", dat->buildBaseFlag, dis->buildBaseFlag, 0, 0);
-                ctx = Format("Starbase %d", i);
+                m_context = Format("Starbase %d", i);
                 const Base_t* bdat = planets[i-1].bdat;
                 const Base_t* bdis = planets[i-1].bdis;
                 const int baseOwner = bdis->owner;
@@ -1260,23 +1260,23 @@ game::v3::check::Checker::rangeCheckPlanets()
                              : 0);
                     if (x <= 0 || x > NUM_HULL_TYPES) {
                         logDivi();
-                        logStr(Format("RANGE: %s", ctx));
+                        logStr(Format("RANGE: %s", m_context));
                         logStr("    Build order refers to a non-existant hull type.");
                         logDivi();
-                        had_error = true;
+                        m_hadError = true;
                     } else {
                         if (bdat->hullStorage[bdat->shipBuildOrder.hullIndex-1] <= 0) {
                             logDivi();
-                            logStr(Format("RANGE: %s", ctx));
+                            logStr(Format("RANGE: %s", m_context));
                             logStr(Format("    Build order refers to hull slot %s, but", int(bdat->shipBuildOrder.hullIndex-1)));
                             logStr("    that hull is not available in storage.");
                             logDivi();
-                            had_error = true;
+                            m_hadError = true;
                         }
                         if (bdat->shipBuildOrder.engineType <= 9) {
                             if (bdat->shipBuildOrder.engineType <= 0) {
                                 logDivi();
-                                logStr(Format("RANGE: %s", ctx));
+                                logStr(Format("RANGE: %s", m_context));
                                 logStr("    Attempt to build ship without engine.");
                             } else {
                                 checkComponent("engines", hulls[x-1].numEngines, bdat->engineStorage[bdat->shipBuildOrder.engineType-1], hulls[x-1].numEngines);
@@ -1290,7 +1290,7 @@ game::v3::check::Checker::rangeCheckPlanets()
                         }
                     }
                 }
-                ctx = Format("Planet %d", i);
+                m_context = Format("Planet %d", i);
             }
         } else {
             // everything is invariant
@@ -1398,18 +1398,18 @@ game::v3::check::Checker::tryBuy(ResourceSummary& corr, const String_t& what, in
     // ex check.pas:FlowCheckOrbits:TryBuy
     if (cur < ori) {
         logDivi();
-        logStr(Format("RANGE: %s", ctx));
+        logStr(Format("RANGE: %s", m_context));
         logStr(Format("    %d %s have been sold. This is not permitted.", ori-cur, what));
         logDivi();
-        had_error = true;
+        m_hadError = true;
     }
     if (cur > ori && need_tech > have_tech) {
         logDivi();
-        logStr(Format("RANGE: %s", ctx));
+        logStr(Format("RANGE: %s", m_context));
         logStr(Format("    %s has been built without sufficient tech.", what));
         logStr(Format("    Required tech: %d, available tech: %d", need_tech, have_tech));
         logDivi();
-        had_error = true;
+        m_hadError = true;
     }
     int32_t bought = cur - ori;
     corr.t -= t*bought;
@@ -1427,10 +1427,10 @@ game::v3::check::Checker::tryBuyTech(ResourceSummary& corr, const String_t& what
     static const int techValues[] = {0,100,300,600,1000,1500,2100,2800,3600,4500};
     if (cur < ori) {
         logDivi();
-        logStr(Format("RANGE: %s", ctx));
+        logStr(Format("RANGE: %s", m_context));
         logStr(Format("    %s has been lowered. This is not permitted.", what));
         logDivi();
-        had_error = true;
+        m_hadError = true;
     }
     if (cur > 0 && ori > 0 && cur <= 10 && ori <= 10) {
         corr.mc -= techValues[cur-1] - techValues[ori-1];
@@ -1444,10 +1444,10 @@ game::v3::check::Checker::checkBalance(bool& ok, const String_t& what, int32_t c
     if (corr != cur) {
         if (ok) {
             logDivi();
-            logStr(Format("BALANCE: %s", ctx));
+            logStr(Format("BALANCE: %s", m_context));
             logStr("    Resources do not match.");
             ok = false;
-            had_error = true;
+            m_hadError = true;
         }
         logStr(Format("    %-15s: start %d, now %d,", what, old, cur));
         logStr(Format("                     should be %d, difference %d", corr, cur - corr));
@@ -1464,11 +1464,11 @@ game::v3::check::Checker::validateStructures(const String_t& what, int cur, int 
         int lim = (col > cutoff ? util::roundToInt(std::sqrt(col - cutoff)) + cutoff : col);
         if (cur > lim) {
             logDivi();
-            logStr(Format("RANGE: %s", ctx));
+            logStr(Format("RANGE: %s", m_context));
             logStr(Format("    Too many %s have been built.", what));
             logStr(Format("    The limit is %d, but there are %d %s.", lim, cur, what));
             logDivi();
-            had_error = true;
+            m_hadError = true;
         }
     }
 }
@@ -1500,7 +1500,7 @@ game::v3::check::Checker::flowCheckOrbits()
                 break;
             }
         }
-        ctx = Format("Planet %d%s, player %d (%d,%d)") << pid << note << int(pdis->owner) << planets[pid-1].x << planets[pid-1].y;
+        m_context = Format("Planet %d%s, player %d (%d,%d)") << pid << note << int(pdis->owner) << planets[pid-1].x << planets[pid-1].y;
 
         ResourceSummary dat = ResourceSummary();
         ResourceSummary dis = ResourceSummary();
@@ -1633,10 +1633,10 @@ game::v3::check::Checker::checkBalanceSpace(bool& ok, const String_t& what, int3
     if (cur > old) {
         if (ok) {
             logDivi();
-            logStr(Format("BALANCE: %s", ctx));
+            logStr(Format("BALANCE: %s", m_context));
             logStr("    Resources appeared in free space:");
             ok = false;
-            had_error = true;
+            m_hadError = true;
         }
         logStr(Format("      %-15s: start %d, now %d, difference %d", what, old, cur, cur-old));
     }
@@ -1650,9 +1650,9 @@ game::v3::check::Checker::flowCheckFreeSpace()
         if (ships[sid1-1].dat == 0 || ships[sid1-1].dis == 0 || ships[sid1-1].seen) {
             continue;
         }
-        ctx = Format("Ship %d and other ships of player %d at (%d,%d)",
-                     sid1, int(ships[sid1-1].dis->owner),
-                     int(ships[sid1-1].dis->x), int(ships[sid1-1].dis->y));
+        m_context = Format("Ship %d and other ships of player %d at (%d,%d)",
+                           sid1, int(ships[sid1-1].dis->owner),
+                           int(ships[sid1-1].dis->x), int(ships[sid1-1].dis->y));
         ships[sid1-1].seen = true;
 
         bool ok = true;
