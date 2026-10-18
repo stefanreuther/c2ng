@@ -9,7 +9,7 @@
 #include "gfx/complex.hpp"
 #include "gfx/context.hpp"
 
-client::map::MarkRangeOverlay::MarkRangeOverlay(ui::Root& root, afl::string::Translator& tx, Location& loc, Screen& screen)
+client::map::MarkRangeOverlay::MarkRangeOverlay(ui::Root& root, afl::string::Translator& tx, game::map::LocationController& loc, Screen& screen)
     : m_root(root),
       m_translator(tx),
       m_location(loc),

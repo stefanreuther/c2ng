@@ -9,13 +9,13 @@
 #include "afl/string/translator.hpp"
 #include "client/dialogs/newdrawing.hpp"
 #include "client/map/overlay.hpp"
+#include "game/map/locationcontroller.hpp"
 #include "game/map/rangeset.hpp"
 #include "game/proxy/drawingproxy.hpp"
 #include "ui/root.hpp"
 
 namespace client { namespace map {
 
-    class Location;
     class Screen;
 
     /** Map widget overlay for starchart screen. */
@@ -23,7 +23,7 @@ namespace client { namespace map {
      public:
         StarchartOverlay(ui::Root& root,
                          afl::string::Translator& tx,
-                         Location& loc,
+                         game::map::LocationController& loc,
                          Screen& scr);
 
         // Overlay:
@@ -38,7 +38,7 @@ namespace client { namespace map {
      private:
         ui::Root& m_root;
         afl::string::Translator& m_translator;
-        Location& m_location;
+        game::map::LocationController& m_location;
         Screen& m_screen;
 
         game::map::Point m_cursorPosition;

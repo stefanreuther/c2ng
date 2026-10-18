@@ -15,7 +15,6 @@
 #include "client/map/distanceoverlay.hpp"
 #include "client/map/drawcircleoverlay.hpp"
 #include "client/map/drawlineoverlay.hpp"
-#include "client/map/location.hpp"
 #include "client/map/markeroverlaybase.hpp"
 #include "client/map/markrangeoverlay.hpp"
 #include "client/map/movemarkeroverlay.hpp"
@@ -116,7 +115,7 @@ namespace {
 
 
 
-client::map::StarchartOverlay::StarchartOverlay(ui::Root& root, afl::string::Translator& tx, Location& loc, Screen& scr)
+client::map::StarchartOverlay::StarchartOverlay(ui::Root& root, afl::string::Translator& tx, game::map::LocationController& loc, Screen& scr)
     : m_root(root),
       m_translator(tx),
       m_location(loc),

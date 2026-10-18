@@ -1,9 +1,9 @@
 /**
-  *  \file test/client/map/locationtest.cpp
-  *  \brief Test for client::map::Location
+  *  \file test/game/map/locationcontrollertest.cpp
+  *  \brief Test for game::map::LocationController
   */
 
-#include "client/map/location.hpp"
+#include "game/map/locationcontroller.hpp"
 
 #include "afl/string/format.hpp"
 #include "afl/sys/log.hpp"
@@ -24,12 +24,12 @@ namespace {
     const int PLANET_ID = 33;
 
     /* Listener mock */
-    class Listener : public client::map::Location::Listener,
+    class Listener : public game::map::LocationController::Listener,
                      public afl::test::CallReceiver
     {
      public:
         Listener(afl::test::Assert loc)
-            : client::map::Location::Listener(), CallReceiver(loc)
+            : game::map::LocationController::Listener(), CallReceiver(loc)
             { }
 
         virtual void requestObjectList(Point pos)
@@ -53,7 +53,7 @@ namespace {
     struct TestHarness {
         Listener listener;
         afl::sys::Log log;
-        client::map::Location location;
+        game::map::LocationController location;
 
         TestHarness(afl::test::Assert loc)
             : listener(loc), log(), location(listener, log)
@@ -80,7 +80,7 @@ namespace {
 
 
 /** Test regular initialisation. */
-AFL_TEST("client.map.Location:init", a)
+AFL_TEST("game.map.LocationController:init", a)
 {
     TestHarness h(a);
 
@@ -103,7 +103,7 @@ AFL_TEST("client.map.Location:init", a)
 }
 
 /** Test BuildAgain flow. */
-AFL_TEST("client.map.Location:BuildAgain:relative", a)
+AFL_TEST("game.map.LocationController:BuildAgain:relative", a)
 {
     TestHarness h(a);
 
@@ -130,7 +130,7 @@ AFL_TEST("client.map.Location:BuildAgain:relative", a)
 }
 
 /** Test BuildAgain flow, absolute movement. */
-AFL_TEST("client.map.Location:BuildAgain:absolute", a)
+AFL_TEST("game.map.LocationController:BuildAgain:absolute", a)
 {
     TestHarness h(a);
 
@@ -156,7 +156,7 @@ AFL_TEST("client.map.Location:BuildAgain:absolute", a)
 }
 
 /** Test Build, with null change. */
-AFL_TEST("client.map.Location:setPosition:null-change", a)
+AFL_TEST("game.map.LocationController:setPosition:null-change", a)
 {
     TestHarness h(a);
 
@@ -175,7 +175,7 @@ AFL_TEST("client.map.Location:setPosition:null-change", a)
 }
 
 /** Test jump while building. */
-AFL_TEST("client.map.Location:jump-while-building", a)
+AFL_TEST("game.map.LocationController:jump-while-building", a)
 {
     TestHarness h(a);
 
@@ -204,7 +204,7 @@ AFL_TEST("client.map.Location:jump-while-building", a)
 }
 
 /** Test jump while building, jump completes first. */
-AFL_TEST("client.map.Location:jump-completes-while-building", a)
+AFL_TEST("game.map.LocationController:jump-completes-while-building", a)
 {
     TestHarness h(a);
 
@@ -236,7 +236,7 @@ AFL_TEST("client.map.Location:jump-completes-while-building", a)
 }
 
 /** Test locking, regular case. */
-AFL_TEST("client.map.Location:lockObject", a)
+AFL_TEST("game.map.LocationController:lockObject", a)
 {
     TestHarness h(a);
 
@@ -270,7 +270,7 @@ AFL_TEST("client.map.Location:lockObject", a)
 }
 
 /** Test locking while building object list. */
-AFL_TEST("client.map.Location:lockObject:while-building", a)
+AFL_TEST("game.map.LocationController:lockObject:while-building", a)
 {
     TestHarness h(a);
 
@@ -300,7 +300,7 @@ AFL_TEST("client.map.Location:lockObject:while-building", a)
 }
 
 /** Test locking while lock active. */
-AFL_TEST("client.map.Location:lockObject:while-locking", a)
+AFL_TEST("game.map.LocationController:lockObject:while-locking", a)
 {
     TestHarness h(a);
 
@@ -351,7 +351,7 @@ AFL_TEST("client.map.Location:lockObject:while-locking", a)
 }
 
 /** Test build/jump/lock combo. */
-AFL_TEST("client.map.Location:build-jump-lock", a)
+AFL_TEST("game.map.LocationController:build-jump-lock", a)
 {
     TestHarness h(a);
 
@@ -401,7 +401,7 @@ AFL_TEST("client.map.Location:build-jump-lock", a)
 }
 
 /** Test build/jump/lock combo, different order. */
-AFL_TEST("client.map.Location:build-jump-lock2", a)
+AFL_TEST("game.map.LocationController:build-jump-lock2", a)
 {
     TestHarness h(a);
 
@@ -441,7 +441,7 @@ AFL_TEST("client.map.Location:build-jump-lock2", a)
 }
 
 /** Test jump while building, from BuildAgain. */
-AFL_TEST("client.map.Location:jump-while-building-again", a)
+AFL_TEST("game.map.LocationController:jump-while-building-again", a)
 {
     TestHarness h(a);
 
@@ -477,7 +477,7 @@ AFL_TEST("client.map.Location:jump-while-building-again", a)
 }
 
 /** Test lock while building, from BuildAgain. */
-AFL_TEST("client.map.Location:lock-while-building-again", a)
+AFL_TEST("game.map.LocationController:lock-while-building-again", a)
 {
     TestHarness h(a);
 
@@ -514,7 +514,7 @@ AFL_TEST("client.map.Location:lock-while-building-again", a)
 }
 
 /** Test absolute movement. */
-AFL_TEST("client.map.Location:setPosition", a)
+AFL_TEST("game.map.LocationController:setPosition", a)
 {
     TestHarness h(a);
 
@@ -533,7 +533,7 @@ AFL_TEST("client.map.Location:setPosition", a)
 }
 
 /** Test relative movement. */
-AFL_TEST("client.map.Location:moveRelative", a)
+AFL_TEST("game.map.LocationController:moveRelative", a)
 {
     TestHarness h(a);
 
@@ -552,7 +552,7 @@ AFL_TEST("client.map.Location:moveRelative", a)
 }
 
 /** Test regular jump. */
-AFL_TEST("client.map.Location:startJump", a)
+AFL_TEST("game.map.LocationController:startJump", a)
 {
     TestHarness h(a);
 
@@ -579,7 +579,7 @@ AFL_TEST("client.map.Location:startJump", a)
 }
 
 /** Test lock while jumping. */
-AFL_TEST("client.map.Location:lock-while-jumping", a)
+AFL_TEST("game.map.LocationController:lock-while-jumping", a)
 {
     TestHarness h(a);
 
@@ -612,7 +612,7 @@ AFL_TEST("client.map.Location:lock-while-jumping", a)
 }
 
 /** Test focused object, default case. */
-AFL_TEST("client.map.Location:getFocusedObject", a)
+AFL_TEST("game.map.LocationController:getFocusedObject", a)
 {
     TestHarness h(a);
 
@@ -648,7 +648,7 @@ AFL_TEST("client.map.Location:getFocusedObject", a)
 }
 
 /** Test focused object, pre-set case. */
-AFL_TEST("client.map.Location:setFocusedObject", a)
+AFL_TEST("game.map.LocationController:setFocusedObject", a)
 {
     TestHarness h(a);
 
@@ -669,7 +669,7 @@ AFL_TEST("client.map.Location:setFocusedObject", a)
 }
 
 /** Test cycleFocusedObject(). */
-AFL_TEST("client.map.Location:cycleFocusedObject", a)
+AFL_TEST("game.map.LocationController:cycleFocusedObject", a)
 {
     TestHarness h(a);
 
@@ -712,7 +712,7 @@ AFL_TEST("client.map.Location:cycleFocusedObject", a)
 }
 
 /** Test cycleFocusedObject(), empty list, */
-AFL_TEST("client.map.Location:cycleFocusedObject:empty", a)
+AFL_TEST("game.map.LocationController:cycleFocusedObject:empty", a)
 {
     TestHarness h(a);
 
@@ -733,7 +733,7 @@ AFL_TEST("client.map.Location:cycleFocusedObject:empty", a)
 }
 
 /** Test cycleFocusedObject(), with no marked objects. cycleFocusedObject(marked=true) must terminate. */
-AFL_TEST("client.map.Location:cycleFocusedObject:no-marked", a)
+AFL_TEST("game.map.LocationController:cycleFocusedObject:no-marked", a)
 {
     TestHarness h(a);
 
@@ -759,7 +759,7 @@ AFL_TEST("client.map.Location:cycleFocusedObject:no-marked", a)
 }
 
 /** Test losing the focused object. */
-AFL_TEST("client.map.Location:setFocusedObject:not-on-list", a)
+AFL_TEST("game.map.LocationController:setFocusedObject:not-on-list", a)
 {
     TestHarness h(a);
 
@@ -776,7 +776,7 @@ AFL_TEST("client.map.Location:setFocusedObject:not-on-list", a)
 }
 
 /** Test keeping the focused object. */
-AFL_TEST("client.map.Location:setFocusedObject:preserve-over-list-change", a)
+AFL_TEST("game.map.LocationController:setFocusedObject:preserve-over-list-change", a)
 {
     TestHarness h(a);
 
@@ -812,7 +812,7 @@ AFL_TEST("client.map.Location:setFocusedObject:preserve-over-list-change", a)
 }
 
 /** Test handling of preferred object. */
-AFL_TEST("client.map.Location:setPreferredObject", a)
+AFL_TEST("game.map.LocationController:setPreferredObject", a)
 {
     TestHarness h(a);
 

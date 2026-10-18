@@ -6,7 +6,6 @@
 #include "client/map/distanceoverlay.hpp"
 #include "afl/string/format.hpp"
 #include "client/dialogs/helpdialog.hpp"
-#include "client/map/location.hpp"
 #include "client/map/screen.hpp"
 #include "game/actions/preconditions.hpp"
 #include "game/game.hpp"
@@ -20,7 +19,7 @@
 
 using afl::string::Format;
 
-client::map::DistanceOverlay::DistanceOverlay(Screen& parent, Location& loc, game::map::Point origin, game::Id_t shipId)
+client::map::DistanceOverlay::DistanceOverlay(Screen& parent, game::map::LocationController& loc, game::map::Point origin, game::Id_t shipId)
     : Overlay(),
       m_parent(parent),
       m_location(loc),

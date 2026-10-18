@@ -6,11 +6,11 @@
 
 #include "afl/base/deleter.hpp"
 #include "client/map/callback.hpp"
-#include "client/map/location.hpp"
 #include "client/map/widget.hpp"
 #include "client/si/control.hpp"
 #include "client/si/inputstate.hpp"
 #include "client/si/outputstate.hpp"
+#include "game/map/locationcontroller.hpp"
 #include "game/map/movementcontroller.hpp"
 #include "game/map/point.hpp"
 #include "game/proxy/configurationobserverproxy.hpp"
@@ -33,7 +33,7 @@ namespace client { namespace map {
         This ties together a bunch of proxies and a map widget. */
     class Screen : public ui::Widget,
                    public client::si::Control,
-                   private Location::Listener,
+                   private game::map::LocationController::Listener,
                    private game::proxy::KeymapProxy::Listener,
                    private gfx::ColorScheme<util::SkinColor::Color>
     {
@@ -80,7 +80,7 @@ namespace client { namespace map {
         virtual afl::base::Optional<game::Id_t> getFocusedObjectId(game::Reference::Type type) const;
         virtual game::interface::ContextProvider* createContextProvider();
 
-        // Location::Listener:
+        // LocationController::Listener:
         virtual void requestObjectList(game::map::Point pos);
         virtual void requestLockObject(game::map::Point pos, game::proxy::LockProxy::Flags_t flags);
 
@@ -141,7 +141,7 @@ namespace client { namespace map {
         afl::base::Ref<SharedState> m_sharedState;
         afl::base::Ref<gfx::Timer> m_effectTimer;
 
-        Location m_location;
+        game::map::LocationController m_location;
         int m_locationCycleBreaker;
         bool m_haveInitialPosition;
 

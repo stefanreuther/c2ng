@@ -6,17 +6,16 @@
 #define C2NG_CLIENT_MAP_DRAWCIRCLEOVERLAY_HPP
 
 #include "client/map/markeroverlaybase.hpp"
+#include "game/map/locationcontroller.hpp"
 
 namespace client { namespace map {
-
-    class Location;
 
     /** Overlay for drawing a circle. */
     class DrawCircleOverlay : public MarkerOverlayBase {
      public:
         DrawCircleOverlay(ui::Root& root,
                           afl::string::Translator& tx,
-                          client::map::Location& loc,
+                          game::map::LocationController& loc,
                           client::map::Screen& screen,
                           const game::map::Drawing& drawing);
         virtual void drawBefore(gfx::Canvas& can, const Renderer& ren);
@@ -28,7 +27,7 @@ namespace client { namespace map {
      private:
         void onPositionChange(game::map::Point pt);
 
-        client::map::Location& m_location;
+        game::map::LocationController& m_location;
         afl::base::SignalConnection conn_positionChange;
     };
 

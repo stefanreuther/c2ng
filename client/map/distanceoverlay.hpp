@@ -7,6 +7,7 @@
 
 #include "afl/base/signalconnection.hpp"
 #include "client/map/overlay.hpp"
+#include "game/map/locationcontroller.hpp"
 #include "game/map/point.hpp"
 #include "game/session.hpp"
 #include "game/types.hpp"
@@ -15,7 +16,6 @@
 namespace client { namespace map {
 
     class Screen;
-    class Location;
 
     /** Map overlay for distance mode.
         Computes the distance from a given location and shows it on the map. */
@@ -23,10 +23,10 @@ namespace client { namespace map {
      public:
         /** Constructor.
             \param parent   Parent screen
-            \param loc      Map Location object
+            \param loc      LocationController object
             \param origin   Origin of measurement
             \param shipId   Ship to show information for; can be 0 */
-        DistanceOverlay(Screen& parent, Location& loc, game::map::Point origin, game::Id_t shipId);
+        DistanceOverlay(Screen& parent, game::map::LocationController& loc, game::map::Point origin, game::Id_t shipId);
         ~DistanceOverlay();
 
         // Overlay:
@@ -66,7 +66,7 @@ namespace client { namespace map {
         };
 
         Screen& m_parent;
-        Location& m_location;
+        game::map::LocationController& m_location;
         game::map::Point m_origin;
         game::Id_t m_shipId;
         Status m_status;

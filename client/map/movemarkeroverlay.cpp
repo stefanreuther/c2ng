@@ -3,7 +3,6 @@
   */
 
 #include "client/map/movemarkeroverlay.hpp"
-#include "client/map/location.hpp"
 #include "client/map/screen.hpp"
 #include "gfx/context.hpp"
 #include "gfx/complex.hpp"
@@ -12,7 +11,7 @@
 
 client::map::MoveMarkerOverlay::MoveMarkerOverlay(ui::Root& root,
                                                   afl::string::Translator& tx,
-                                                  client::map::Location& loc,
+                                                  game::map::LocationController& loc,
                                                   client::map::Screen& screen,
                                                   const game::map::Drawing& drawing)
     : MarkerOverlayBase(root, tx, screen, drawing),

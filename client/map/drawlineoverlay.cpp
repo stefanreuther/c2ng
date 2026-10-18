@@ -4,13 +4,12 @@
 
 #include "client/map/drawlineoverlay.hpp"
 #include "gfx/context.hpp"
-#include "client/map/location.hpp"
 #include "client/map/renderer.hpp"
 #include "client/map/screen.hpp"
 
 client::map::DrawLineOverlay::DrawLineOverlay(ui::Root& root,
                 afl::string::Translator& tx,
-                client::map::Location& loc,
+                game::map::LocationController& loc,
                 client::map::Screen& screen,
                 const game::map::Drawing& drawing)
     : MarkerOverlayBase(root, tx, screen, drawing),

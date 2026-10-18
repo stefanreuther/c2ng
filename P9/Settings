@@ -12,7 +12,8 @@ GENERATE =
 
 # Target definitions
 TARGETS += gamelib
-FILES_gamelib = game/interface/commandtask.cpp \
+FILES_gamelib = game/map/locationcontroller.cpp \
+    game/map/locationcontroller.hpp game/interface/commandtask.cpp \
     game/interface/commandtask.hpp game/interface/scripttask.hpp \
     game/interface/simclassresultcontext.cpp \
     game/interface/simclassresultcontext.hpp \
@@ -1086,9 +1087,8 @@ FILES_guilib = ui/reshack/win32import.cpp ui/reshack/win32import.hpp \
     client/map/minefieldmissionoverlay.hpp client/map/prefixoverlay.cpp \
     client/map/prefixoverlay.hpp client/tiles/starchartheadertile.cpp \
     client/tiles/starchartheadertile.hpp client/map/starchartoverlay.cpp \
-    client/map/starchartoverlay.hpp client/map/location.cpp \
-    client/map/location.hpp client/map/screen.cpp client/map/screen.hpp \
-    ui/widgets/scrollbar.cpp ui/widgets/scrollbar.hpp \
+    client/map/starchartoverlay.hpp client/map/screen.cpp \
+    client/map/screen.hpp ui/widgets/scrollbar.cpp ui/widgets/scrollbar.hpp \
     client/dialogs/helpdialog.cpp client/dialogs/helpdialog.hpp \
     ui/rich/documentparser.cpp ui/rich/documentparser.hpp \
     client/dialogs/cargotransferdialog.cpp \
@@ -1905,7 +1905,8 @@ DEPEND_c2reshack = guilib gamelib afl
 
 # Testsuite
 TARGETS += testsuite
-FILES_testsuite = test/game/interface/commandtasktest.cpp \
+FILES_testsuite = test/game/map/locationcontrollertest.cpp \
+    test/game/interface/commandtasktest.cpp \
     test/game/interface/scripttasktest.cpp \
     test/game/interface/simclassresultcontexttest.cpp \
     test/game/interface/simunitresultcontexttest.cpp \
@@ -2897,7 +2898,6 @@ FILES_testsuite = test/game/interface/commandtasktest.cpp \
     test/client/si/scriptproceduretest.cpp \
     test/client/si/requestlink2test.cpp test/client/si/requestlink1test.cpp \
     test/client/si/controltest.cpp test/client/map/overlaytest.cpp \
-    test/client/map/locationtest.cpp \
     test/client/dialogs/objectselectiondialogtest.cpp \
     test/client/picturenamertest.cpp test/client/markertest.cpp \
     test/client/applicationparameterstest.cpp

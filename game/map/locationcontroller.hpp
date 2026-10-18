@@ -1,9 +1,9 @@
 /**
-  *  \file client/map/location.hpp
-  *  \brief Class client::map::Location
+  *  \file game/map/locationcontroller.hpp
+  *  \brief Class game::map::LocationController
   */
-#ifndef C2NG_CLIENT_MAP_LOCATION_HPP
-#define C2NG_CLIENT_MAP_LOCATION_HPP
+#ifndef C2NG_GAME_MAP_LOCATIONCONTROLLER_HPP
+#define C2NG_GAME_MAP_LOCATIONCONTROLLER_HPP
 
 #include <memory>
 #include "afl/base/signal.hpp"
@@ -14,10 +14,11 @@
 #include "game/ref/userlist.hpp"
 #include "game/reference.hpp"
 
-namespace client { namespace map {
+namespace game { namespace map {
 
     /** Information about current starchart location.
-        This implements state tracking for the current starchart location and deals with possibly-asynchronous game thread communication.
+        This implements state tracking for the current starchart location for a user-interface,
+        and deals with possibly-asynchronous game thread communication.
         It provides signals to inform possibly many subscribers about situation changes.
         It requires a listener to perform required callbacks.
 
@@ -42,7 +43,7 @@ namespace client { namespace map {
         Position changes are reflected by sig_positionChange callbacks.
         Map display should exclusively honor sig_positionChange (resp. getPosition())
         which are internally validated by class Location. */
-    class Location {
+    class LocationController {
      public:
         /** Shortcut. */
         typedef game::proxy::LockProxy::Flags_t Flags_t;
@@ -56,27 +57,27 @@ namespace client { namespace map {
             /** Request update of object list.
                 Caller must eventually (or immediately) call setObjectList().
                 @param pos Point to request list for */
-            virtual void requestObjectList(game::map::Point pos) = 0;
+            virtual void requestObjectList(Point pos) = 0;
 
             /** Request locking at an object.
                 Caller must eventually (or immediately) call setPosition().
                 @param pos Origin point
                 @param flags Flags to specify kind of locking */
-            virtual void requestLockObject(game::map::Point pos, Flags_t flags) = 0;
+            virtual void requestLockObject(Point pos, Flags_t flags) = 0;
         };
 
         /** Constructor.
             @param listener Listener
             @param log Logger */
-        Location(Listener& listener, afl::sys::LogListener& log);
+        LocationController(Listener& listener, afl::sys::LogListener& log);
 
         /** Destructor. */
-        ~Location();
+        ~LocationController();
 
         /** Get current location.
             Valid after the first setPosition() call.
             @return location */
-        game::map::Point getPosition() const;
+        Point getPosition() const;
 
         /** Get number of objects on current object list.
             @return Number of objects. 0 if object list currently not valid. */
@@ -95,14 +96,14 @@ namespace client { namespace map {
         /** Set configuration.
             This is used to verify movements.
             @param config Configuration */
-        void setConfiguration(const game::map::Configuration& config);
+        void setConfiguration(const Configuration& config);
 
         /** Set position.
             Call after startup, after startJump(), as answer to requestLockObject(),
             or after other user-initiated movements.
             Prefer moveRelative() for user-initiated movement if possible.
             @param pt Target position */
-        void setPosition(game::map::Point pt);
+        void setPosition(Point pt);
 
         /** Set object list.
             Call as answer to requestObjectList(), or when it changes.
@@ -114,7 +115,7 @@ namespace client { namespace map {
             Note that movement will invalidate the focused object, so call this after setPosition()/moveRelative().
             If the given object is not on the current position (=in the object list), the call will be ignored.
             @param ref Object */
-        void setFocusedObject(game::Reference ref);
+        void setFocusedObject(Reference ref);
 
         /** Cycle through focused objects.
             Ignored if we don't currently have a focused object.
@@ -126,7 +127,7 @@ namespace client { namespace map {
             Can be called at any time.
             May return unvalidated objects.
             @return object (same as in last setFocusedObject()) */
-        game::Reference getFocusedObject() const;
+        Reference getFocusedObject() const;
 
         /** Move relative.
             Relative movement can be queued if it cannot be executed immediately.
@@ -146,22 +147,22 @@ namespace client { namespace map {
         /** Set preferred object.
             When receiving an object list, prefer to lock on that object.
             @param ref Object */
-        void setPreferredObject(game::Reference ref);
+        void setPreferredObject(Reference ref);
 
         /** Get preferred object.
             @return preferred object
             @see setPreferredObject() */
-        game::Reference getPreferredObject() const;
+        Reference getPreferredObject() const;
 
         /** Access map configuration.
             @return handle to configuration */
-        const game::map::Configuration& configuration() const;
+        const Configuration& configuration() const;
 
         /** Signal: change of position. */
-        afl::base::Signal<void(game::map::Point)> sig_positionChange;
+        afl::base::Signal<void(Point)> sig_positionChange;
 
         /** Signal: change of focused object. */
-        afl::base::Signal<void(game::Reference)> sig_objectChange;
+        afl::base::Signal<void(Reference)> sig_objectChange;
 
      private:
         class State;
@@ -181,11 +182,11 @@ namespace client { namespace map {
         afl::sys::LogListener& m_log;           // Logger
         std::auto_ptr<State> m_pState;          // Current state. Never null.
 
-        game::map::Point m_cursorPosition;      // Cursor position. Valid after first setPosition (=in all states but InitState)
-        game::Reference m_focusedObject;        // Focused object. Part of object list or unset in IdleState, otherwise arbitrary
+        Point m_cursorPosition;                 // Cursor position. Valid after first setPosition (=in all states but InitState)
+        Reference m_focusedObject;              // Focused object. Part of object list or unset in IdleState, otherwise arbitrary
         game::ref::UserList m_objectList;       // Object list. Valid in IdleState.
-        game::map::Configuration m_config;      // Configuration. Not part of state machine; assumed to be present when needed.
-        game::Reference m_preferredObject;      // Preferred object to lock on
+        Configuration m_config;                 // Configuration. Not part of state machine; assumed to be present when needed.
+        Reference m_preferredObject;            // Preferred object to lock on
 
         void verifyFocusedObject();
 
@@ -194,12 +195,12 @@ namespace client { namespace map {
         void setBuildState();
         void setBuildAgainState();
         void setBuildJumpState();
-        void setBuildJumpLockState(game::map::Point pt, Flags_t flags);
-        void setBuildLockState(game::map::Point pt, Flags_t flags);
-        void setJumpState(game::map::Point pt);
-        void setJumpLockState(game::map::Point pt, Flags_t flags);
-        void setLockState(game::map::Point pt, Flags_t flags);
-        void setLockAgainState(game::map::Point pt, Flags_t flags);
+        void setBuildJumpLockState(Point pt, Flags_t flags);
+        void setBuildLockState(Point pt, Flags_t flags);
+        void setJumpState(Point pt);
+        void setJumpLockState(Point pt, Flags_t flags);
+        void setLockState(Point pt, Flags_t flags);
+        void setLockAgainState(Point pt, Flags_t flags);
         void setIdleState();
     };
 
