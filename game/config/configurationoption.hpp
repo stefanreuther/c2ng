@@ -93,6 +93,11 @@ namespace game { namespace config {
             \return true if option was changed */
         bool isChanged() const;
 
+        /** Set from C-string.
+            Size optimisation for set().
+            \param value Option value, as a C string */
+        void setCStr(const char* value);
+
 
         /** Remove comment from an option value.
             \param str [in/out] option value */

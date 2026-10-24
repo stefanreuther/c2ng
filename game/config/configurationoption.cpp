@@ -46,6 +46,13 @@ game::config::ConfigurationOption::setAndMarkUpdated(String_t value, Source sour
     }
 }
 
+// Set from C-string.
+void
+game::config::ConfigurationOption::setCStr(const char* value)
+{
+    set(String_t(value));
+}
+
 // Remove comment from an option value.
 void
 game::config::ConfigurationOption::removeComment(String_t& str)

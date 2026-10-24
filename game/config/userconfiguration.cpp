@@ -252,8 +252,8 @@ game::config::UserConfiguration::setDefaultValues()
     me[ChartRenderOptions[RenderOptions::Scanner][1]].set(static_cast<int32_t>((RenderOptions::defaults() & RenderOptions::tristate()).toInteger()));
 
     // Lock
-    me[Lock_Left].set("planet,minefield,ufo");
-    me[Lock_Right].set("ship,marker");
+    me[Lock_Left].setCStr("planet,minefield,ufo");
+    me[Lock_Right].setCStr("ship,marker");
 
     // Backup
     me[Backup_Chart].set(String_t());
@@ -275,8 +275,8 @@ game::config::UserConfiguration::setDefaultValues()
     me[Unpack_TargetExt].set(0);
 
     // Export
-    me[ExportShipFields].set("Id@5,Name@20");
-    me[ExportPlanetFields].set("Id@5,Name@20");
+    me[ExportShipFields].setCStr("Id@5,Name@20");
+    me[ExportPlanetFields].setCStr("Id@5,Name@20");
 
     // Sorting
     me[Sort_History].set(0);
