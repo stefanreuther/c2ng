@@ -153,7 +153,7 @@ game::interface::createLoaderForUnloadedPlugins(util::plugin::Manager& manager)
     // Call each plugin's initializer
     for (size_t i = 0, n = plugins.size(); i < n; ++i) {
         if (Plugin* plug = plugins[i]) {
-            if (!plug->isLoaded()) {
+            if (!plug->isLoaded() && manager.shouldLoadPlugin(plug)) {
                 // Load it
                 interpreter::SubroutineValue sv(createPluginLoader(*plug));
                 bco.addPushLiteral(&sv);

@@ -183,6 +183,11 @@ client::widgets::formatSubtitle(String_t& out, const util::plugin::Manager::Info
         result = util::SkinColor::Faded;
         break;
 
+     case util::plugin::Manager::Disabled:
+        util::addListItem(line, ", ", tx("disabled"));
+        result = util::SkinColor::Blue;
+        break;
+
      case util::plugin::Manager::NotLoaded:
         util::addListItem(line, ", ", tx("not loaded"));
         result = util::SkinColor::Red;

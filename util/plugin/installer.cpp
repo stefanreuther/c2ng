@@ -152,48 +152,18 @@ afl::base::Optional<String_t>
 util::plugin::Installer::checkInstallPreconditions()
 {
     // ex c2pluginw.cc:checkPreconditions, c2plugin.cc:checkPreconditions, plugindlg.cc:checkPreconditions
-    afl::string::Translator& tx = manager.translator();
-
     // Do we have a plugin?
     if (apPlug.get() == 0) {
         return afl::base::Nothing;
     }
-    const Plugin& plug = *apPlug;
 
-    // Check for conflicts
-    std::vector<Plugin*> plugList;
-    manager.enumConflictingPlugins(plug, plugList);
-    if (!plugList.empty()) {
-        String_t message = Format(tx("Plugin \"%s\" conflicts with the following plugins:"), plug.getId());
-        for (size_t i = 0, n = plugList.size(); i < n; ++i) {
-            message += "\n";
-            message += Format("  %s (%s)", plugList[i]->getId(), plugList[i]->getName());
-        }
-        message += "\n";
-        message += tx("It cannot be installed.");
-        return message;
+    afl::base::Optional<String_t> result = checkInstallEnablePreconditions(*apPlug);
+    if (String_t* p = result.get()) {
+        afl::string::Translator& tx = manager.translator();
+        *p += "\n";
+        *p += tx("It cannot be installed.");
     }
-
-    // Check for preconditions
-    Plugin::FeatureSet_t fset;
-    manager.enumProvidedFeatures(fset);
-    if (!plug.isSatisfiedBy(fset)) {
-        String_t message = Format(tx("Plugin \"%s\" requires the following features:"), plug.getId());
-        Plugin::FeatureSet_t missing;
-        plug.enumMissingFeatures(fset, missing);
-        for (Plugin::FeatureSet_t::const_iterator it = missing.begin(), e = missing.end(); it != e; ++it) {
-            message += "\n  ";
-            message += it->first;
-            if (!it->second.empty()) {
-                message += " ";
-                message += it->second;
-            }
-        }
-        message += "\n";
-        message += tx("It cannot be installed.");
-        return message;
-    }
-    return afl::base::Nothing;
+    return result;
 }
 
 // Install the prepared plugin.
@@ -250,6 +220,10 @@ util::plugin::Installer::doInstall(bool dry)
         // (This is needed in case the PluginManager is long-lived,
         // so someone actually needs this.)
         apPlug->setBaseDirectory(dir->getDirectoryName());
+
+        // Rewrite configuration file.
+        // It might have contained a "Disable=<this plugin>" line that we ignored before.
+        saveConfiguration();
     }
 
     // Reset
@@ -262,20 +236,13 @@ util::plugin::Installer::doInstall(bool dry)
 afl::base::Optional<String_t>
 util::plugin::Installer::checkRemovePreconditions(const Plugin& plug)
 {
-    afl::string::Translator& tx = manager.translator();
-    std::vector<util::plugin::Plugin*> tmp;
-    manager.enumDependingPlugins(plug, tmp);
-    if (!tmp.empty()) {
-        String_t message = Format(tx("Plugin \"%s\" is required by the following plugins:"), plug.getId());
-        for (size_t i = 0, n = tmp.size(); i < n; ++i) {
-            message += "\n";
-            message += Format("  %s (%s)", tmp[i]->getId(), tmp[i]->getName());
-        }
-        message += "\n";
-        message += tx("It cannot be uninstalled.");
-        return message;
+    afl::base::Optional<String_t> result = checkRemoveDisablePreconditions(plug);
+    if (String_t* p = result.get()) {
+        afl::string::Translator& tx = manager.translator();
+        *p += "\n";
+        *p += tx("It cannot be uninstalled.");
     }
-    return afl::base::Nothing;
+    return result;
 }
 
 // Remove a plugin.
@@ -327,6 +294,11 @@ util::plugin::Installer::doRemove(Plugin* pPlug, bool dry)
         if (!eraseFile(rootDir, dirName, manager.log())) {
             err = true;
         }
+
+        // Rewrite configuration file.
+        if (apPlug->isDisabled()) {
+            saveConfiguration();
+        }
     }
     catch (std::exception& e) {
         manager.log().write(afl::sys::LogListener::Error, LOG_NAME, String_t(), e);
@@ -337,4 +309,95 @@ util::plugin::Installer::doRemove(Plugin* pPlug, bool dry)
         manager.log().write(afl::sys::LogListener::Warn, LOG_NAME, Format(tx("Uninstallation of \"%s\" might be incomplete."), apPlug->getId()));
     }
     return !err;
+}
+
+// Check preconditions for enabling a plugin.
+afl::base::Optional<String_t>
+util::plugin::Installer::checkEnablePreconditions(const Plugin& plug)
+{
+    afl::base::Optional<String_t> result = checkInstallEnablePreconditions(plug);
+    if (String_t* p = result.get()) {
+        afl::string::Translator& tx = manager.translator();
+        *p += "\n";
+        *p += tx("It cannot be enabled.");
+    }
+    return result;
+}
+
+// Check preconditions for disabling a plugin.
+afl::base::Optional<String_t>
+util::plugin::Installer::checkDisablePreconditions(const Plugin& plug)
+{
+    afl::base::Optional<String_t> result = checkRemoveDisablePreconditions(plug);
+    if (String_t* p = result.get()) {
+        afl::string::Translator& tx = manager.translator();
+        *p += "\n";
+        *p += tx("It cannot be disabled.");
+    }
+    return result;
+}
+
+// Save configuration file.
+void
+util::plugin::Installer::saveConfiguration()
+{
+    manager.saveConfiguration(rootDir);
+}
+
+/*
+ *  Private
+ */
+
+afl::base::Optional<String_t>
+util::plugin::Installer::checkInstallEnablePreconditions(const Plugin& plug)
+{
+    afl::string::Translator& tx = manager.translator();
+
+    // Check for conflicts
+    std::vector<Plugin*> plugList;
+    manager.enumConflictingPlugins(plug, plugList);
+    if (!plugList.empty()) {
+        String_t message = Format(tx("Plugin \"%s\" conflicts with the following plugins:"), plug.getId());
+        for (size_t i = 0, n = plugList.size(); i < n; ++i) {
+            message += "\n";
+            message += Format("  %s (%s)", plugList[i]->getId(), plugList[i]->getName());
+        }
+        return message;
+    }
+
+    // Check for preconditions
+    Plugin::FeatureSet_t fset;
+    manager.enumProvidedFeatures(fset);
+    if (!plug.isSatisfiedBy(fset)) {
+        String_t message = Format(tx("Plugin \"%s\" requires the following features:"), plug.getId());
+        Plugin::FeatureSet_t missing;
+        plug.enumMissingFeatures(fset, missing);
+        for (Plugin::FeatureSet_t::const_iterator it = missing.begin(), e = missing.end(); it != e; ++it) {
+            message += "\n  ";
+            message += it->first;
+            if (!it->second.empty()) {
+                message += " ";
+                message += it->second;
+            }
+        }
+        return message;
+    }
+    return afl::base::Nothing;
+}
+
+afl::base::Optional<String_t>
+util::plugin::Installer::checkRemoveDisablePreconditions(const Plugin& plug)
+{
+    afl::string::Translator& tx = manager.translator();
+    std::vector<util::plugin::Plugin*> tmp;
+    manager.enumDependingPlugins(plug, tmp);
+    if (!tmp.empty()) {
+        String_t message = Format(tx("Plugin \"%s\" is required by the following plugins:"), plug.getId());
+        for (size_t i = 0, n = tmp.size(); i < n; ++i) {
+            message += "\n";
+            message += Format("  %s (%s)", tmp[i]->getId(), tmp[i]->getName());
+        }
+        return message;
+    }
+    return afl::base::Nothing;
 }

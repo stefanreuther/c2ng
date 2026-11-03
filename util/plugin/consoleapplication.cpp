@@ -16,20 +16,24 @@
 #include "util/string.hpp"
 #include "version.hpp"
 
+using afl::base::Ptr;
+using afl::base::Ref;
+using afl::io::Directory;
+using afl::io::DirectoryEntry;
 using afl::string::Format;
 
 namespace {
-    class NullDirectory : public afl::io::Directory {
+    class NullDirectory : public Directory {
      public:
         NullDirectory()
             { }
         ~NullDirectory()
             { }
-        virtual afl::base::Ref<afl::io::DirectoryEntry> getDirectoryEntryByName(String_t name)
+        virtual Ref<DirectoryEntry> getDirectoryEntryByName(String_t name)
             { return *new Entry(*this, name); }
-        virtual afl::base::Ref<afl::base::Enumerator<afl::base::Ptr<afl::io::DirectoryEntry> > > getDirectoryEntries()
-            { return *new afl::base::NullEnumerator<afl::base::Ptr<afl::io::DirectoryEntry> >(); }
-        virtual afl::base::Ptr<Directory> getParentDirectory()
+        virtual Ref<afl::base::Enumerator<Ptr<DirectoryEntry> > > getDirectoryEntries()
+            { return *new afl::base::NullEnumerator<Ptr<DirectoryEntry> >(); }
+        virtual Ptr<Directory> getParentDirectory()
             { return new NullDirectory(); }
         virtual String_t getDirectoryName()
             { return String_t(); }
@@ -38,9 +42,9 @@ namespace {
         virtual void flush()
             { }
      private:
-        class Entry : public afl::io::DirectoryEntry {
+        class Entry : public DirectoryEntry {
          public:
-            Entry(afl::base::Ref<afl::io::Directory> parent, String_t name)
+            Entry(Ref<Directory> parent, String_t name)
                 : DirectoryEntry(),
                   m_name(name),
                   m_parent(parent)
@@ -49,7 +53,7 @@ namespace {
                 { return m_name; }
             virtual String_t getPathName()
                 { return String_t(); }
-            virtual afl::base::Ref<afl::io::Stream> openFile(afl::io::FileSystem::OpenMode mode)
+            virtual Ref<afl::io::Stream> openFile(afl::io::FileSystem::OpenMode mode)
                 {
                     if (mode == afl::io::FileSystem::Create) {
                         return *new afl::io::NullStream();
@@ -57,9 +61,9 @@ namespace {
                         throw afl::except::FileProblemException(m_name, afl::string::Messages::fileNotFound());
                     }
                 }
-            virtual afl::base::Ref<afl::io::Directory> openDirectory()
+            virtual Ref<Directory> openDirectory()
                 { return *new NullDirectory(); }
-            virtual afl::base::Ref<Directory> openContainingDirectory()
+            virtual Ref<Directory> openContainingDirectory()
                 { return m_parent; }
             virtual void updateInfo(uint32_t)
                 { }
@@ -71,11 +75,11 @@ namespace {
                 { }
             virtual void doSetFlag(FileFlag /*flag*/, bool /*value*/)
                 { }
-            virtual void doMoveTo(afl::io::Directory& /*dir*/, String_t /*name*/)
+            virtual void doMoveTo(Directory& /*dir*/, String_t /*name*/)
                 { }
          private:
             String_t m_name;
-            afl::base::Ref<afl::io::Directory> m_parent;
+            Ref<Directory> m_parent;
         };
     };
 
@@ -83,6 +87,26 @@ namespace {
     {
         String_t msg;
         if (inst.checkRemovePreconditions(plug).get(msg)) {
+            out.writeLine(msg);
+            return false;
+        }
+        return true;
+    }
+
+    bool checkEnablePlugin(afl::io::TextWriter& out, util::plugin::Installer& inst, util::plugin::Plugin& plug)
+    {
+        String_t msg;
+        if (inst.checkEnablePreconditions(plug).get(msg)) {
+            out.writeLine(msg);
+            return false;
+        }
+        return true;
+    }
+
+    bool checkDisablePlugin(afl::io::TextWriter& out, util::plugin::Installer& inst, util::plugin::Plugin& plug)
+    {
+        String_t msg;
+        if (inst.checkDisablePreconditions(plug).get(msg)) {
             out.writeLine(msg);
             return false;
         }
@@ -106,6 +130,71 @@ struct util::plugin::ConsoleApplication::Command {
     void (ConsoleApplication::*func)(afl::sys::Environment::CommandLine_t& cmdl);
 };
 
+/*
+ *  ManagerOperation
+ */
+
+class util::plugin::ConsoleApplication::ManagerOperation {
+ public:
+    void run(ConsoleApplication& app, afl::sys::Environment::CommandLine_t& cmdl)
+        {
+            // Create plugin manager
+            Manager mgr(app.translator(), app.log());
+
+            // FIXME: this relies on us being able to create a Directory instance for a nonexistant directory.
+            Ref<Directory> dir = app.profile.open()->openDirectory("plugins");
+            mgr.findPlugins(*dir);
+
+            Installer installer(mgr, app.fileSystem(), *dir);
+
+            // Iterate
+            bool dry = false;
+            bool did = false;
+            bool err = false;
+            bool force = false;
+            afl::string::Translator& tx = app.translator();
+            afl::sys::StandardCommandLineParser parser(cmdl);
+            String_t text;
+            bool option;
+            while (parser.getNext(option, text)) {
+                if (option) {
+                    if (text == "n") {
+                        dry = true;
+                    } else if (text == "f") {
+                        force = true;
+                    } else {
+                        app.errorExit(Format(tx("Unknown option \"-%s\""), text));
+                    }
+                } else {
+                    did = true;
+                    if (Plugin* pPlug = mgr.getPluginById(afl::string::strUCase(text))) {
+                        if (!performOperation(app, installer, *pPlug, force, dry)) {
+                            err = true;
+                        }
+                    } else {
+                        app.errorOutput().writeLine(Format(tx("Plugin '%s' is not known."), text));
+                        err = true;
+                    }
+                }
+            }
+            if (!did) {
+                app.errorExit(Format(tx("Missing plugin name. '%s -h' for help."), app.environment().getInvocationName()));
+            } else {
+                finishOperation(dry, mgr, *dir);
+            }
+            if (err) {
+                app.exit(1);
+            }
+        }
+
+    virtual bool performOperation(ConsoleApplication& app, Installer& installer, Plugin& plug, bool force, bool dry) = 0;
+    virtual void finishOperation(bool dry, Manager& mgr, Directory& dir) = 0;
+};
+
+
+/*
+ *  Entry
+ */
 
 util::plugin::ConsoleApplication::ConsoleApplication(afl::sys::Environment& env, afl::io::FileSystem& fs)
     : Application(env, fs),
@@ -118,7 +207,7 @@ void
 util::plugin::ConsoleApplication::appMain()
 {
     // Find command
-    afl::base::Ref<afl::sys::Environment::CommandLine_t> cmdl = environment().getCommandLine();
+    Ref<afl::sys::Environment::CommandLine_t> cmdl = environment().getCommandLine();
     String_t command;
     if (!cmdl->getNextElement(command)) {
         errorExit(translator()("No command specified. Use 'c2plugin -h' for help."));
@@ -136,6 +225,8 @@ util::plugin::ConsoleApplication::doList(afl::sys::Environment::CommandLine_t& c
     // We do not take arguments
     enum { Default, Long, Short } f = Default;
     bool ordered = false;
+    bool showEnabled = true;
+    bool showDisabled = true;
 
     afl::string::Translator& tx = translator();
     afl::sys::StandardCommandLineParser parser(cmdl);
@@ -149,10 +240,14 @@ util::plugin::ConsoleApplication::doList(afl::sys::Environment::CommandLine_t& c
             f = Long;
         } else if (text == "b") {
             f = Short;
+        } else if (text == "e") {
+            showEnabled = true; showDisabled = false;
+        } else if (text == "d") {
+            showEnabled = false; showDisabled = true;
         } else if (text == "o") {
             ordered = true;
         } else {
-            errorExit(Format(tx("Unknown option \"-%s\"").c_str(), text));
+            errorExit(Format(tx("Unknown option \"-%s\""), text));
         }
     }
 
@@ -164,31 +259,42 @@ util::plugin::ConsoleApplication::doList(afl::sys::Environment::CommandLine_t& c
     std::vector<Plugin*> them;
     mgr.enumPlugins(them, ordered);
     if (f != Short) {
-        standardOutput().writeLine(Format(tx("%d plugin%!1{s%} installed.").c_str(), them.size()));
+        standardOutput().writeLine(Format(tx("%d plugin%!1{s%} installed."), them.size()));
     }
     for (size_t i = 0, n = them.size(); i < n; ++i) {
         const Plugin& p = *them[i];
-        if (f == Short) {
-            standardOutput().writeLine(p.getId());
-        } else {
-            standardOutput().writeLine("--------");
-            standardOutput().writeLine(Format(tx("Plugin '%s': %s").c_str(), p.getId(), p.getName()));
-            if (!p.getDescription().empty()) {
-                standardOutput().writeLine();
-                standardOutput().writeLine(p.getDescription());
-            }
+        if (p.isDisabled() ? showDisabled : showEnabled) {
+            if (f == Short) {
+                standardOutput().writeLine(p.getId());
+            } else {
+                standardOutput().writeLine("--------");
 
-            if (f == Long) {
-                const Plugin::ItemList_t& items = p.getItems();
-                bool did = false;
-                for (size_t ii = 0, nn = items.size(); ii < nn; ++ii) {
-                    if (items[ii].type != Plugin::Command) {
-                        if (!did) {
-                            standardOutput().writeLine();
-                            standardOutput().writeLine(Format(tx("Files (in '%s'):").c_str(), p.getBaseDirectory()));
-                            did = true;
+                // Title line
+                String_t line = Format(tx("Plugin '%s': %s"), p.getId(), p.getName());
+                if (p.isDisabled()) {
+                    line += tx(" (disabled)");
+                }
+                standardOutput().writeLine(line);
+
+                // Description
+                if (!p.getDescription().empty()) {
+                    standardOutput().writeLine();
+                    standardOutput().writeLine(p.getDescription());
+                }
+
+                // Extra info
+                if (f == Long) {
+                    const Plugin::ItemList_t& items = p.getItems();
+                    bool did = false;
+                    for (size_t ii = 0, nn = items.size(); ii < nn; ++ii) {
+                        if (items[ii].type != Plugin::Command) {
+                            if (!did) {
+                                standardOutput().writeLine();
+                                standardOutput().writeLine(Format(tx("Files (in '%s'):"), p.getBaseDirectory()));
+                                did = true;
+                            }
+                            standardOutput().writeLine("  " + items[ii].name);
                         }
-                        standardOutput().writeLine("  " + items[ii].name);
                     }
                 }
             }
@@ -200,11 +306,11 @@ void
 util::plugin::ConsoleApplication::doAdd(afl::sys::Environment::CommandLine_t& cmdl)
 {
     // Create plugin directory
-    afl::base::Ref<afl::io::DirectoryEntry> pluginDirEntry = profile.open()->getDirectoryEntryByName("plugins");
-    if (pluginDirEntry->getFileType() != afl::io::DirectoryEntry::tDirectory) {
+    Ref<DirectoryEntry> pluginDirEntry = profile.open()->getDirectoryEntryByName("plugins");
+    if (pluginDirEntry->getFileType() != DirectoryEntry::tDirectory) {
         pluginDirEntry->createAsDirectory();
     }
-    afl::base::Ref<afl::io::Directory> pluginDir = pluginDirEntry->openDirectory();
+    Ref<Directory> pluginDir = pluginDirEntry->openDirectory();
 
     // Create plugin manager
     Manager mgr(translator(), log());
@@ -228,20 +334,20 @@ util::plugin::ConsoleApplication::doAdd(afl::sys::Environment::CommandLine_t& cm
             } else if (text == "-f") {
                 force = true;
             } else {
-                errorExit(Format(tx("Unknown option \"-%s\"").c_str(), text));
+                errorExit(Format(tx("Unknown option \"-%s\""), text));
             }
         } else {
             did = true;
             try {
                 Plugin* plug = installer.prepareInstall(text);
                 if (!plug) {
-                    errorOutput().writeLine(Format(tx("%s: Unknown file type").c_str(), text));
+                    errorOutput().writeLine(Format(tx("%s: Unknown file type"), text));
                     err = true;
                 } else {
                     if (mgr.getPluginById(plug->getId())) {
-                        standardOutput().writeLine(Format(tx("Updating plugin '%s'...").c_str(), plug->getId()));
+                        standardOutput().writeLine(Format(tx("Updating plugin '%s'..."), plug->getId()));
                     } else {
-                        standardOutput().writeLine(Format(tx("Installing plugin '%s'...").c_str(), plug->getId()));
+                        standardOutput().writeLine(Format(tx("Installing plugin '%s'..."), plug->getId()));
                     }
                     if (force || checkPreconditions(errorOutput(), installer)) {
                         installer.doInstall(dry);
@@ -261,7 +367,7 @@ util::plugin::ConsoleApplication::doAdd(afl::sys::Environment::CommandLine_t& cm
         }
     }
     if (!did) {
-        errorExit(Format(tx("Missing name plugin or file to install. '%s -h' for help.").c_str(), environment().getInvocationName()));
+        errorExit(Format(tx("Missing name plugin or file to install. '%s -h' for help."), environment().getInvocationName()));
     }
     if (err) {
         exit(1);
@@ -271,61 +377,78 @@ util::plugin::ConsoleApplication::doAdd(afl::sys::Environment::CommandLine_t& cm
 void
 util::plugin::ConsoleApplication::doRemove(afl::sys::Environment::CommandLine_t& cmdl)
 {
-    // Create plugin manager
-    Manager mgr(translator(), log());
-
-    // FIXME: this relies on us being able to create a Directory instance for a nonexistant directory.
-    afl::base::Ref<afl::io::Directory> dir = profile.open()->openDirectory("plugins");
-    mgr.findPlugins(*dir);
-
-    Installer installer(mgr, fileSystem(), *dir);
-
-    // Iterate
-    bool dry = false;
-    bool did = false;
-    bool err = false;
-    bool force = false;
-    afl::string::Translator& tx = translator();
-    afl::sys::StandardCommandLineParser parser(cmdl);
-    String_t text;
-    bool option;
-    while (parser.getNext(option, text)) {
-        if (option) {
-            if (text == "n") {
-                dry = true;
-            } else if (text == "f") {
-                force = true;
-            } else {
-                errorExit(Format(tx("Unknown option \"-%s\"").c_str(), text));
-            }
-        } else {
-            did = true;
-            if (Plugin* pPlug = mgr.getPluginById(afl::string::strUCase(text))) {
-                if (force || checkRemovePlugin(errorOutput(), installer, *pPlug)) {
-                    standardOutput().writeLine(Format(tx("Removing plugin '%s'...").c_str(), pPlug->getId()));
-                    installer.doRemove(pPlug, dry);
+    class Remove : public ManagerOperation {
+     public:
+        virtual bool performOperation(ConsoleApplication& app, Installer& installer, Plugin& plug, bool force, bool dry)
+            {
+                afl::string::Translator& tx = app.translator();
+                if (force || checkRemovePlugin(app.errorOutput(), installer, plug)) {
+                    app.standardOutput().writeLine(Format(tx("Removing plugin '%s'..."), plug.getId()));
+                    installer.doRemove(&plug, dry);
+                    return true;
                 } else {
-                    err = true;
+                    return false;
                 }
-            } else {
-                errorOutput().writeLine(Format(tx("Plugin '%s' is not known.").c_str(), text));
-                err = true;
             }
-        }
-    }
-    if (!did) {
-        errorExit(Format(tx("Missing name of plugin to uninstall. '%s -h' for help.").c_str(), environment().getInvocationName()));
-    }
-    if (err) {
-        exit(1);
-    }
+        virtual void finishOperation(bool /*dry*/, Manager& /*mgr*/, Directory& /*dir*/)
+            { }
+    };
+    Remove().run(*this, cmdl);
+}
+
+void
+util::plugin::ConsoleApplication::doEnable(afl::sys::Environment::CommandLine_t& cmdl)
+{
+    class Enable : public ManagerOperation {
+     public:
+        virtual bool performOperation(ConsoleApplication& app, Installer& installer, Plugin& plug, bool force, bool /*dry*/)
+            {
+                if (force || checkEnablePlugin(app.errorOutput(), installer, plug)) {
+                    plug.setDisabled(false);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        virtual void finishOperation(bool dry, Manager& mgr, Directory& dir)
+            {
+                if (!dry) {
+                    mgr.saveConfiguration(dir);
+                }
+            }
+    };
+    Enable().run(*this, cmdl);
+}
+
+void
+util::plugin::ConsoleApplication::doDisable(afl::sys::Environment::CommandLine_t& cmdl)
+{
+    class Disable : public ManagerOperation {
+     public:
+        virtual bool performOperation(ConsoleApplication& app, Installer& installer, Plugin& plug, bool force, bool /*dry*/)
+            {
+                if (force || checkDisablePlugin(app.errorOutput(), installer, plug)) {
+                    plug.setDisabled(true);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        virtual void finishOperation(bool dry, Manager& mgr, Directory& dir)
+            {
+                if (!dry) {
+                    mgr.saveConfiguration(dir);
+                }
+            }
+    };
+    Disable().run(*this, cmdl);
 }
 
 void
 util::plugin::ConsoleApplication::doTest(afl::sys::Environment::CommandLine_t& cmdl)
 {
     // Dummy path
-    afl::base::Ref<afl::io::Directory> dir = *new NullDirectory();
+    Ref<Directory> dir = *new NullDirectory();
 
     // Iterate
     bool did = false;
@@ -340,7 +463,7 @@ util::plugin::ConsoleApplication::doTest(afl::sys::Environment::CommandLine_t& c
             if (text == "v") {
                 verbose = true;
             } else {
-                errorExit(Format(tx("Unknown option \"-%s\"").c_str(), text));
+                errorExit(Format(tx("Unknown option \"-%s\""), text));
             }
         } else {
             // Create plugin manager and installer separately for each item
@@ -351,12 +474,12 @@ util::plugin::ConsoleApplication::doTest(afl::sys::Environment::CommandLine_t& c
             try {
                 Plugin* plug = installer.prepareInstall(text);
                 if (!plug) {
-                    errorOutput().writeLine(Format(tx("%s: Unknown file type").c_str(), text));
+                    errorOutput().writeLine(Format(tx("%s: Unknown file type"), text));
                     err = true;
                 } else {
                     installer.doInstall(false);
                     if (verbose) {
-                        standardOutput().writeLine(Format(tx("%s: Plugin '%s' (%s) tested successfully.").c_str(), text, plug->getName(), plug->getId()));
+                        standardOutput().writeLine(Format(tx("%s: Plugin '%s' (%s) tested successfully."), text, plug->getName(), plug->getId()));
                     }
                 }
             }
@@ -375,7 +498,7 @@ util::plugin::ConsoleApplication::doTest(afl::sys::Environment::CommandLine_t& c
         }
     }
     if (!did) {
-        errorExit(Format(tx("Missing name plugin or file to test. '%s -h' for help.").c_str(), environment().getInvocationName()));
+        errorExit(Format(tx("Missing name plugin or file to test. '%s -h' for help."), environment().getInvocationName()));
     }
     if (err) {
         exit(1);
@@ -391,25 +514,29 @@ util::plugin::ConsoleApplication::doHelp(afl::sys::Environment::CommandLine_t& /
                                          "Usage:\n"
                                          "  %s -h|help\n"
                                          "                  This help message\n"
-                                         "  %$0s list|ls [-l|-b] [-o]\n"
+                                         "  %$0s list|ls [-l|-b] [-e|-d] [-o]\n"
                                          "                  List installed plugins\n"
                                          "  %$0s add|install [-n] [-f] FILE.c2p...\n"
                                          "                  Install given plugins\n"
                                          "  %$0s remove|rm|uninstall [-n] [-f] ID...\n"
                                          "                  Remove given plugins\n"
+                                         "  %$0s enable|disable [-n] [-f] ID...\n"
+                                         "                  Enable/disable given plugins\n"
                                          "  %$0s test [-v] FILE.c2p...\n"
                                          "                  Test given plugins\n"
                                          "\n"
                                          "Options:\n"
                                          "%s\n"
-                                         "Report bugs to <Streu@gmx.de>\n").c_str(),
+                                         "Report bugs to <Streu@gmx.de>\n"),
                                       environment().getInvocationName(),
-                                      util::formatOptions(tx(" -l\tList more details\n"
-                                                             " -b\tList fewer details\n"
-                                                             " -o\tList in load order (default: alphabetical)\n"
-                                                             " -n\tDry run (don't modify anything, just check)\n"
-                                                             " -f\tIgnore dependencies/requirements\n"
-                                                             " -v\tVerbose\n"))));
+                                      util::formatOptions(tx("-l\tList more details\n"
+                                                             "-b\tList fewer details\n"
+                                                             "-e\tShow only enabled plugins\n"
+                                                             "-d\tShow only disabled plutins\n"
+                                                             "-o\tList in load order (default: alphabetical)\n"
+                                                             "-n\tDry run (don't modify anything, just check)\n"
+                                                             "-f\tIgnore dependencies/requirements\n"
+                                                             "-v\tVerbose\n"))));
     exit(0);
 }
 
@@ -424,6 +551,8 @@ util::plugin::ConsoleApplication::findCommand(const String_t& name)
         { "rm",        &ConsoleApplication::doRemove },
         { "remove",    &ConsoleApplication::doRemove },
         { "uninstall", &ConsoleApplication::doRemove },
+        { "enable",    &ConsoleApplication::doEnable },
+        { "disable",   &ConsoleApplication::doDisable },
         { "test",      &ConsoleApplication::doTest },
         { "-h",        &ConsoleApplication::doHelp },
         { "--help",    &ConsoleApplication::doHelp },

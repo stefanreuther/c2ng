@@ -24,8 +24,7 @@ class game::proxy::PluginManagerProxy::Trampoline {
     void requestDetails(String_t id);
     void prepareInstall(const String_t& fileName, InstallInfo& result);
     void doInstall(InstallResult& result);
-    void prepareRemove(const String_t& id, RemoveResult& result);
-    void doRemove(const String_t& id, RemoveResult& result);
+    void doModify(const String_t& id, ModifyResult& result, Operation op);
     void cancelInstallation();
 
  private:
@@ -153,7 +152,7 @@ game::proxy::PluginManagerProxy::Trampoline::doInstall(InstallResult& result)
 }
 
 void
-game::proxy::PluginManagerProxy::Trampoline::prepareRemove(const String_t& id, RemoveResult& result)
+game::proxy::PluginManagerProxy::Trampoline::doModify(const String_t& id, ModifyResult& result, Operation op)
 {
     try {
         // Assume error
@@ -165,59 +164,51 @@ game::proxy::PluginManagerProxy::Trampoline::prepareRemove(const String_t& id, R
             return;
         }
 
-        // Find plugin to remove
+        // Find plugin to modify
         Plugin* p = m_session.plugins().getPluginById(id);
         if (p == 0) {
             return;
         }
 
-        // Check preconditions
-        afl::base::Optional<String_t> errors = m_installer->checkRemovePreconditions(*p);
+        // Do it
+        afl::base::Optional<String_t> errors;
+        bool success = true;
+        switch (op) {
+         case PrepareRemove:
+            errors = m_installer->checkRemovePreconditions(*p);
+            break;
+
+         case DoRemove:
+            success = m_installer->doRemove(p, false);
+            break;
+
+         case PrepareEnable:
+            errors = m_installer->checkEnablePreconditions(*p);
+            break;
+
+         case DoEnable:
+            p->setDisabled(false);
+            m_installer->saveConfiguration();
+            break;
+
+         case PrepareDisable:
+            errors = m_installer->checkDisablePreconditions(*p);
+            break;
+
+         case DoDisable:
+            p->setDisabled(true);
+            m_installer->saveConfiguration();
+            break;
+        }
+
+        // Did we produce an error?
         if (const String_t* err = errors.get()) {
             result.errorMessage = *err;
-            return;
+            success = false;
         }
 
         // Success
-        result.isValid = true;
-
-        // Reset state
-        cancelInstallation();
-    }
-    catch (afl::except::FileProblemException& e) {
-        result.errorMessage = Format("%s: %s", e.getFileName(), e.what());
-    }
-    catch (std::exception& e) {
-        result.errorMessage = e.what();
-    }
-}
-
-void
-game::proxy::PluginManagerProxy::Trampoline::doRemove(const String_t& id, RemoveResult& result)
-{
-    try {
-        // Assume error
-        result.isValid = false;
-
-        // Create installer
-        createInstaller();
-        if (m_installer.get() == 0) {
-            return;
-        }
-
-        // Find plugin to remove
-        Plugin* p = m_session.plugins().getPluginById(id);
-        if (p == 0) {
-            return;
-        }
-
-        // Check preconditions
-        if (!m_installer->doRemove(p, false)) {
-            return;
-        }
-
-        // Success
-        result.isValid = true;
+        result.isValid = success;
 
         // Reset state
         cancelInstallation();
@@ -367,47 +358,45 @@ game::proxy::PluginManagerProxy::doInstall(util::WaitIndicator& ind)
 }
 
 // Prepare uninstallation.
-game::proxy::PluginManagerProxy::RemoveResult
+game::proxy::PluginManagerProxy::ModifyResult
 game::proxy::PluginManagerProxy::prepareRemove(util::WaitIndicator& ind, const String_t& id)
 {
-    class Task : public util::Request<Trampoline> {
-     public:
-        Task(const String_t& id, RemoveResult& result)
-            : m_id(id), m_result(result)
-            { }
-        virtual void handle(Trampoline& tpl)
-            { tpl.prepareRemove(m_id, m_result); }
-     private:
-        String_t m_id;
-        RemoveResult& m_result;
-    };
-
-    RemoveResult result;
-    Task t(id, result);
-    ind.call(m_request, t);
-    return result;
+    return sendModifyRequest(ind, id, PrepareRemove);
 }
 
 // Perform uninstallation.
-game::proxy::PluginManagerProxy::RemoveResult
+game::proxy::PluginManagerProxy::ModifyResult
 game::proxy::PluginManagerProxy::doRemove(util::WaitIndicator& ind, const String_t& id)
 {
-    class Task : public util::Request<Trampoline> {
-     public:
-        Task(const String_t& id, RemoveResult& result)
-            : m_id(id), m_result(result)
-            { }
-        virtual void handle(Trampoline& tpl)
-            { tpl.doRemove(m_id, m_result); }
-     private:
-        String_t m_id;
-        RemoveResult& m_result;
-    };
+    return sendModifyRequest(ind, id, DoRemove);
+}
 
-    RemoveResult result;
-    Task t(id, result);
-    ind.call(m_request, t);
-    return result;
+//  Prepare enabling of a plugin.
+game::proxy::PluginManagerProxy::ModifyResult
+game::proxy::PluginManagerProxy::prepareEnable(util::WaitIndicator& ind, const String_t& id)
+{
+    return sendModifyRequest(ind, id, PrepareEnable);
+}
+
+// Enable plugin.
+game::proxy::PluginManagerProxy::ModifyResult
+game::proxy::PluginManagerProxy::doEnable(util::WaitIndicator& ind, const String_t& id)
+{
+    return sendModifyRequest(ind, id, DoEnable);
+}
+
+// Prepare disabling of a plugin.
+game::proxy::PluginManagerProxy::ModifyResult
+game::proxy::PluginManagerProxy::prepareDisable(util::WaitIndicator& ind, const String_t& id)
+{
+    return sendModifyRequest(ind, id, PrepareDisable);
+}
+
+// Disable plugin.
+game::proxy::PluginManagerProxy::ModifyResult
+game::proxy::PluginManagerProxy::doDisable(util::WaitIndicator& ind, const String_t& id)
+{
+    return sendModifyRequest(ind, id, DoDisable);
 }
 
 // Cancel installation.
@@ -443,4 +432,26 @@ game::proxy::PluginManagerProxy::handleDetails(const Details_t& d)
         // No new request, publish to user
         sig_details.raise(d);
     }
+}
+
+game::proxy::PluginManagerProxy::ModifyResult
+game::proxy::PluginManagerProxy::sendModifyRequest(util::WaitIndicator& ind, const String_t& id, Operation op)
+{
+    class Task : public util::Request<Trampoline> {
+     public:
+        Task(const String_t& id, ModifyResult& result, Operation op)
+            : m_id(id), m_result(result), m_op(op)
+            { }
+        virtual void handle(Trampoline& tpl)
+            { tpl.doModify(m_id, m_result, m_op); }
+     private:
+        String_t m_id;
+        ModifyResult& m_result;
+        Operation m_op;
+    };
+
+    ModifyResult result;
+    Task t(id, result, op);
+    ind.call(m_request, t);
+    return result;
 }

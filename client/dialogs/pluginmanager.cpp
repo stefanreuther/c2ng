@@ -52,15 +52,20 @@ namespace {
         bool isRestart() const;
 
      private:
+        void updateButtons();
+
         void onList(const PluginManagerProxy::Infos_t& list);
         void onDetails(const PluginManagerProxy::Details_t& d);
         void onMove();
 
         void onAdd();
         void onRemove();
+        void onDisable();
 
         void doAdd(util::WaitIndicator& ind, const String_t& fileName);
         void doRemove(String_t id);
+        void doEnable(String_t id);
+        void doDisable(String_t id);
 
         void showError(const String_t& errorMessage, const String_t& conclusio, const Text& defaultMessage);
 
@@ -70,6 +75,8 @@ namespace {
         PluginList m_list;
         PluginInfo m_info;
         ui::EventLoop m_loop;
+        Button m_removeButton;
+        Button m_disableButton;
         bool m_restart;
     };
 }
@@ -84,11 +91,15 @@ Dialog::Dialog(client::dialogs::PluginManager& parent)
       m_list(parent.root(), parent.translator()),
       m_info(parent.root(), parent.translator()),
       m_loop(parent.root()),
+      m_removeButton(parent.translator()("Remove"), util::Key_Delete, parent.root()),
+      m_disableButton("", 0, parent.root()),
       m_restart(false)
 {
     m_proxy.sig_list.add(this, &Dialog::onList);
     m_proxy.sig_details.add(this, &Dialog::onDetails);
     m_list.sig_change.add(this, &Dialog::onMove);
+    m_removeButton.sig_fire.add(this, &Dialog::onRemove);
+    m_disableButton.sig_fire.add(this, &Dialog::onDisable);
 }
 
 void
@@ -100,30 +111,37 @@ Dialog::run()
     //     VBox
     //       "Plugins:"
     //       FrameGroup / ScrollbarContainer / PluginList
-    //     PluginInfo
-    //   HBox [Add, Delete <> Help, Close]
+    //     VBox
+    //       PluginInfo
+    //       HBox [Remove, Disable]
+    //   HBox [Add <> Help, Close]
     afl::string::Translator& tx = m_parent.translator();
     ui::Root& root = m_parent.root();
 
     afl::base::Deleter del;
     ui::Window& win = del.addNew(new ui::Window(tx("Plugins"), root.provider(), root.colorScheme(), ui::BLUE_WINDOW, ui::layout::VBox::instance5));
 
-    ui::Group& g1  = del.addNew(new ui::Group(ui::layout::HBox::instance5));
-    ui::Group& g11 = del.addNew(new ui::Group(ui::layout::VBox::instance5));
-    ui::Group& g2  = del.addNew(new ui::Group(ui::layout::HBox::instance5));
+    ui::Group& g1   = del.addNew(new ui::Group(ui::layout::HBox::instance5));
+    ui::Group& g11  = del.addNew(new ui::Group(ui::layout::VBox::instance5));
+    ui::Group& g12  = del.addNew(new ui::Group(ui::layout::VBox::instance5));
+    ui::Group& g122 = del.addNew(new ui::Group(ui::layout::HBox::instance5));
+    ui::Group& g2   = del.addNew(new ui::Group(ui::layout::HBox::instance5));
     g11.add(del.addNew(new StaticText(tx("Plugins:"), util::SkinColor::Static, "+", root.provider())));
     g11.add(FrameGroup::wrapWidget(del, root.colorScheme(), ui::LoweredFrame, del.addNew(new ScrollbarContainer(m_list, root))));
+    g122.add(m_removeButton);
+    g122.add(m_disableButton);
+    g122.add(del.addNew(new ui::Spacer()));
+    g12.add(m_info);
+    g12.add(g122);
     g1.add(g11);
-    g1.add(m_info);
+    g1.add(g12);
     win.add(g1);
 
     // Buttons
     Button& btnAdd    = del.addNew(new Button(tx("Add"), util::Key_Insert, root));
-    Button& btnRemove = del.addNew(new Button(tx("Remove"), util::Key_Delete, root));
     Button& btnHelp   = del.addNew(new Button(tx("Help"), 'h', root));
     Button& btnClose  = del.addNew(new Button(tx("Close"), util::Key_Escape, root));
     g2.add(btnAdd);
-    g2.add(btnRemove);
     g2.add(del.addNew(new ui::Spacer()));
     g2.add(btnHelp);
     g2.add(btnClose);
@@ -136,12 +154,12 @@ Dialog::run()
     win.add(del.addNew(new ui::widgets::Quit(root, m_loop)));
 
     btnAdd.sig_fire.add(this, &Dialog::onAdd);
-    btnRemove.sig_fire.add(this, &Dialog::onRemove);
     btnClose.sig_fire.addNewClosure(m_loop.makeStop(0));
 
     // Start it
     m_list.requestFocus();
     m_proxy.requestList();
+    updateButtons();
 
     win.pack();
     root.centerWidget(win);
@@ -155,12 +173,31 @@ Dialog::isRestart() const
     return m_restart;
 }
 
+void
+Dialog::updateButtons()
+{
+    const PluginList::Info_t* p = m_list.getCurrentPlugin();
+
+    bool canDelete = (p != 0);
+    m_removeButton.setState(ui::Widget::DisabledState, !canDelete);
+
+    bool canDisable = (p != 0 && p->status != util::plugin::Manager::Disabled);
+    afl::string::Translator& tx = m_parent.translator();
+    util::KeyString ks(canDisable
+                       ? tx("D - Disable")
+                       : tx("E - Enable"));
+    m_disableButton.setText(ks.getString());
+    m_disableButton.setKey(ks.getKey());
+    m_disableButton.getParent()->handlePositionChange();
+}
+
 /** Proxy: update list content. */
 void
 Dialog::onList(const PluginManagerProxy::Infos_t& list)
 {
     // setContent will trigger onMove.
     m_list.setContent(list);
+    updateButtons();
 }
 
 /** Proxy: update plugin details. */
@@ -180,6 +217,7 @@ Dialog::onMove()
     if (const PluginList::Info_t* p = m_list.getCurrentPlugin()) {
         m_proxy.requestDetails(p->id);
     }
+    updateButtons();
 }
 
 /** User action: add new plugin. */
@@ -215,6 +253,23 @@ Dialog::onRemove()
     // WPluginDialog::onRemove()
     if (const PluginList::Info_t* p = m_list.getCurrentPlugin()) {
         doRemove(p->id);
+        m_proxy.cancelInstallation();
+        m_proxy.requestList();
+    }
+}
+
+/** User action: toggle disable. */
+void
+Dialog::onDisable()
+{
+    if (const PluginList::Info_t* p = m_list.getCurrentPlugin()) {
+        if (p->status != util::plugin::Manager::Disabled) {
+            // Disable
+            doDisable(p->id);
+        } else {
+            // Enable
+            doEnable(p->id);
+        }
         m_proxy.cancelInstallation();
         m_proxy.requestList();
     }
@@ -356,7 +411,7 @@ Dialog::doRemove(String_t id)
 
     // Check preconditions
     client::Downlink link(m_parent.root(), tx);
-    PluginManagerProxy::RemoveResult preResult = m_proxy.prepareRemove(link, id);
+    PluginManagerProxy::ModifyResult preResult = m_proxy.prepareRemove(link, id);
     if (!preResult.isValid) {
         showError(preResult.errorMessage, String_t(), tx("Unable to uninstall plugin."));
         return;
@@ -370,9 +425,68 @@ Dialog::doRemove(String_t id)
     // Do it
     m_parent.unloadPlugin(id);
     m_restart = true;
-    PluginManagerProxy::RemoveResult result = m_proxy.doRemove(link, id);
+    PluginManagerProxy::ModifyResult result = m_proxy.doRemove(link, id);
     if (!result.isValid) {
         showError(result.errorMessage, String_t(), tx("Plugin could not be completely uninstalled."));
+        return;
+    }
+}
+
+/** Implementation of the "enable" action. */
+void
+Dialog::doEnable(String_t id)
+{
+    afl::string::Translator& tx = m_parent.translator();
+
+    // Check preconditions
+    client::Downlink link(m_parent.root(), tx);
+    PluginManagerProxy::ModifyResult preResult = m_proxy.prepareEnable(link, id);
+    if (!preResult.isValid) {
+        showError(preResult.errorMessage, String_t(), tx("Unable to enable plugin."));
+        return;
+    }
+
+    // Ask user
+    if (!MessageBox(Format(tx("Do you want to enable plugin '%s'?"), id), tx("Enable Plugin"), m_parent.root()) .doYesNoDialog(tx)) {
+        return;
+    }
+
+    // Do it
+    PluginManagerProxy::ModifyResult result = m_proxy.doEnable(link, id);
+    if (!result.isValid) {
+        showError(result.errorMessage, String_t(), tx("Plugin could not be enabled."));
+        return;
+    }
+
+    // Load it
+    m_parent.loadPlugin(id);
+}
+
+/** Implementation of the "disable" action. */
+void
+Dialog::doDisable(String_t id)
+{
+    afl::string::Translator& tx = m_parent.translator();
+
+    // Check preconditions
+    client::Downlink link(m_parent.root(), tx);
+    PluginManagerProxy::ModifyResult preResult = m_proxy.prepareDisable(link, id);
+    if (!preResult.isValid) {
+        showError(preResult.errorMessage, String_t(), tx("Unable to disable plugin."));
+        return;
+    }
+
+    // Ask user
+    if (!MessageBox(Format(tx("Do you want to disable plugin '%s'?"), id), tx("Disable Plugin"), m_parent.root()) .doYesNoDialog(tx)) {
+        return;
+    }
+
+    // Do it
+    m_parent.unloadPlugin(id);
+    m_restart = true;
+    PluginManagerProxy::ModifyResult result = m_proxy.doDisable(link, id);
+    if (!result.isValid) {
+        showError(result.errorMessage, String_t(), tx("Plugin could not be sucessfully disabled."));
         return;
     }
 }

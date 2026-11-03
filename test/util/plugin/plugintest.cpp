@@ -79,6 +79,7 @@ AFL_TEST("util.plugin.Plugin:basics", a)
     a.checkEqual("05. getDefinitionFileName", testee.getDefinitionFileName(), "");
     a.checkEqual("06. isLoaded",              testee.isLoaded(), false);
     a.check     ("07. getItems",              testee.getItems().empty());
+    a.checkEqual("08. isDisabled",            testee.isDisabled(), false);
 
     // Manipulation
     testee.setBaseDirectory("/p");
@@ -91,6 +92,10 @@ AFL_TEST("util.plugin.Plugin:basics", a)
     a.checkEqual("13. getId",            testee.getItems().size(), 1U);
     a.checkEqual("14. getId",            testee.getItems()[0].type, Plugin::ResourceFile);
     a.checkEqual("15. getId",            testee.getItems()[0].name, "foo.res");
+    a.checkEqual("16. isDisabled",       testee.isDisabled(), false);
+
+    testee.setDisabled(true);
+    a.checkEqual("21. isDisabled",       testee.isDisabled(), true);
 }
 
 /** Test initFromPluginFile(). */

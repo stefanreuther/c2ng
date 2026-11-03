@@ -79,7 +79,8 @@ util::plugin::Plugin::Plugin(String_t id)
       m_provides(),
       m_requires(),
       m_items(),
-      m_isLoaded(false)
+      m_isLoaded(false),
+      m_isDisabled(false)
 {
     // ex Plugin::Plugin
     m_provides.insert(std::make_pair(id, String_t()));
@@ -326,6 +327,13 @@ util::plugin::Plugin::setLoaded(bool flag)
     m_isLoaded = flag;
 }
 
+// Set "disabled" flag.
+void
+util::plugin::Plugin::setDisabled(bool flag)
+{
+    m_isDisabled = flag;
+}
+
 // Get plugin Id.
 const String_t&
 util::plugin::Plugin::getId() const
@@ -457,6 +465,13 @@ util::plugin::Plugin::isLoaded() const
 {
     // ex Plugin::isLoaded
     return m_isLoaded;
+}
+
+// Check whether plugin is disabled.
+bool
+util::plugin::Plugin::isDisabled() const
+{
+    return m_isDisabled;
 }
 
 // List missing features.

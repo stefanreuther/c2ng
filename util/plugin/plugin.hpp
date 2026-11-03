@@ -99,6 +99,10 @@ namespace util { namespace plugin {
             \param flag true if plugin is loaded */
         void setLoaded(bool flag);
 
+        /** Set "disabled" flag.
+            \param flag true if plugin is disabled */
+        void setDisabled(bool flag);
+
         /** Get plugin Id.
             \return plugin Id (machine-readable identifier, upper-case) */
         const String_t& getId() const;
@@ -165,6 +169,11 @@ namespace util { namespace plugin {
             \see setLoaded */
         bool isLoaded() const;
 
+        /** Check whether plugin is disabled.
+            \return flag
+            \see setDisabled */
+        bool isDisabled() const;
+
         /** List missing features.
             Giving an installed feature set, produces a list of features missing
             to install this plugin.
@@ -186,6 +195,7 @@ namespace util { namespace plugin {
         FeatureSet_t m_requires;
         ItemList_t m_items;
         bool m_isLoaded;
+        bool m_isDisabled;
     };
 
     /** Compare versions.

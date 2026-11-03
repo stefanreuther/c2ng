@@ -25,6 +25,7 @@ namespace util { namespace plugin {
             This is an enum to allow for potential future statuses. */
         enum Status {
             NotLoaded,                 ///< Plugin not loaded.
+            Disabled,                  ///< Plugin is disabled.
             Loaded                     ///< Plugin is loaded.
         };
 
@@ -75,6 +76,12 @@ namespace util { namespace plugin {
             \param dirName Name of directory */
         void findPlugins(afl::io::FileSystem& fs, String_t dirName);
 
+        /** Save configuration.
+            Call after every modification to a plugin's setDisabled() status.
+            \param dir Directory
+            \see Plugin::setDisabled */
+        void saveConfiguration(afl::io::Directory& dir);
+
         /** Add new plugin.
             \param p Newly-allocated Plugin object. Manager takes ownership. */
         void addNewPlugin(Plugin* p);
@@ -117,13 +124,23 @@ namespace util { namespace plugin {
 
         /** Look up plugin.
             \param id Plugin Id
-            \return plugin (owned by Managr) or null */
+            \return plugin (owned by Manager) or null */
         Plugin* getPluginById(const String_t& id) const;
 
         /** Get details for a plugin.
             \param p Plugin (should not be null)
             \return details */
-        Details describePlugin(Plugin* p) const;
+        Details describePlugin(const Plugin* p) const;
+
+        /** Check whether given plugin should be loaded.
+            \param p Plugin (should not be null)
+            \return true if plugin should be loaded */
+        bool shouldLoadPlugin(const Plugin* p) const;
+
+        /** Get status of a plugin.
+            \param p Plugin (should not be null)
+            \return status */
+        Status getPluginStatus(const Plugin* p) const;
 
         /** Access log listener.
             \return log listener */
@@ -139,6 +156,8 @@ namespace util { namespace plugin {
         afl::container::PtrVector<Plugin> m_plugins;
         afl::string::Translator& m_translator;
         afl::sys::LogListener& m_log;
+
+        void loadConfiguration(afl::io::Stream& in);
     };
 
 

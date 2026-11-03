@@ -11,6 +11,7 @@
 #include "game/test/sessionthread.hpp"
 #include "game/test/waitindicator.hpp"
 #include <cstring>
+#include "util/io.hpp"
 
 namespace {
     class Receiver {
@@ -421,12 +422,12 @@ AFL_TEST("game.proxy.PluginManagerProxy:remove", a)
 
     // Prepare
     game::proxy::PluginManagerProxy testee(t.gameSender(), ind);
-    game::proxy::PluginManagerProxy::RemoveResult preResult = testee.prepareRemove(ind, "T");
+    game::proxy::PluginManagerProxy::ModifyResult preResult = testee.prepareRemove(ind, "T");
     a.checkEqual("01. isValid", preResult.isValid, true);
     AFL_CHECK_SUCCEEDS(a("02. openFile"), fs.openFile("/p/t.c2p", afl::io::FileSystem::OpenRead));  // file still exists
 
     // Remove
-    game::proxy::PluginManagerProxy::RemoveResult result = testee.doRemove(ind, "T");
+    game::proxy::PluginManagerProxy::ModifyResult result = testee.doRemove(ind, "T");
     a.checkEqual("11. isValid", result.isValid, true);
 
     // Files gone
@@ -459,7 +460,7 @@ AFL_TEST("game.proxy.PluginManagerProxy:remove:error:dependee", a)
 
     // Prepare
     game::proxy::PluginManagerProxy testee(t.gameSender(), ind);
-    game::proxy::PluginManagerProxy::RemoveResult preResult = testee.prepareRemove(ind, "Q");
+    game::proxy::PluginManagerProxy::ModifyResult preResult = testee.prepareRemove(ind, "Q");
     a.checkEqual("01. isValid", preResult.isValid, false);
     a.checkDifferent("02. errorMessage", preResult.errorMessage.find("TTT"), String_t::npos);
 }
@@ -482,11 +483,11 @@ AFL_TEST("game.proxy.PluginManagerProxy:remove:error:missing-files", a)
 
     // Prepare
     game::proxy::PluginManagerProxy testee(t.gameSender(), ind);
-    game::proxy::PluginManagerProxy::RemoveResult preResult = testee.prepareRemove(ind, "T");
+    game::proxy::PluginManagerProxy::ModifyResult preResult = testee.prepareRemove(ind, "T");
     a.checkEqual("01. isValid", preResult.isValid, true);
 
     // Remove
-    game::proxy::PluginManagerProxy::RemoveResult result = testee.doRemove(ind, "T");
+    game::proxy::PluginManagerProxy::ModifyResult result = testee.doRemove(ind, "T");
     a.checkEqual("11. isValid", result.isValid, false);
 }
 
@@ -505,10 +506,186 @@ AFL_TEST("game.proxy.PluginManagerProxy:remove:error:bad-name", a)
 
     // Prepare reports failure
     game::proxy::PluginManagerProxy testee(t.gameSender(), ind);
-    game::proxy::PluginManagerProxy::RemoveResult preResult = testee.prepareRemove(ind, "T");
+    game::proxy::PluginManagerProxy::ModifyResult preResult = testee.prepareRemove(ind, "T");
     a.checkEqual("01. isValid", preResult.isValid, false);
 
     // Remove reports failure
-    game::proxy::PluginManagerProxy::RemoveResult result = testee.doRemove(ind, "T");
+    game::proxy::PluginManagerProxy::ModifyResult result = testee.doRemove(ind, "T");
     a.checkEqual("11. isValid", result.isValid, false);
+}
+
+/** Test enable, happy case. */
+AFL_TEST("game.proxy.PluginManagerProxy:enable", a)
+{
+    // A file system containing installed plugins
+    afl::io::InternalFileSystem fs;
+    fs.createDirectory("/p");
+    fs.openFile("/p/a.c2p", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("name = first\n"));
+    fs.openFile("/p/b.c2p", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("name = second\n"));
+    fs.openFile("/p/plugins.ini", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("disable = a\n"));
+
+    // Setup
+    game::test::SessionThread t(fs);
+    game::test::WaitIndicator ind;
+    t.session().plugins().findPlugins(*fs.openDirectory("/p"));
+    t.session().setPluginDirectoryName("/p");
+
+    // Prepare
+    game::proxy::PluginManagerProxy testee(t.gameSender(), ind);
+    game::proxy::PluginManagerProxy::ModifyResult preResult = testee.prepareEnable(ind, "A");
+    a.checkEqual("01. isValid", preResult.isValid, true);
+
+    // Enable
+    game::proxy::PluginManagerProxy::ModifyResult result = testee.doEnable(ind, "A");
+    a.checkEqual("11. isValid", result.isValid, true);
+
+    // plugins.ini file would be empty, so it's now gone
+    AFL_CHECK_THROWS(a("21. openFile"), fs.openFile("/p/plugins.ini", afl::io::FileSystem::OpenRead), afl::except::FileProblemException);
+
+    // Both plugins remain and are enabled
+    std::vector<util::plugin::Plugin*> plugins;
+    t.session().plugins().enumPlugins(plugins, true);
+    a.checkEqual("31. size", plugins.size(), 2U);
+    a.checkEqual("32. getId", plugins[0]->getId(), "A");
+    a.checkEqual("33. getId", plugins[1]->getId(), "B");
+    a.check("34. isDisabled", !plugins[0]->isDisabled());
+    a.check("35. isDisabled", !plugins[1]->isDisabled());
+}
+
+/** Test enable, error: bad name given. */
+AFL_TEST("game.proxy.PluginManagerProxy:enable:error:bad-name", a)
+{
+    // A file system containing installed plugins
+    afl::io::InternalFileSystem fs;
+    fs.createDirectory("/p");
+    fs.openFile("/p/a.c2p", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("name = first\n"));
+    fs.openFile("/p/b.c2p", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("name = second\n"));
+
+    // Setup
+    game::test::SessionThread t(fs);
+    game::test::WaitIndicator ind;
+    t.session().plugins().findPlugins(*fs.openDirectory("/p"));
+    t.session().setPluginDirectoryName("/p");
+
+    // Prepare
+    game::proxy::PluginManagerProxy testee(t.gameSender(), ind);
+    game::proxy::PluginManagerProxy::ModifyResult preResult = testee.prepareEnable(ind, "X");
+    a.checkEqual("01. isValid", preResult.isValid, false);
+
+    // Enable
+    game::proxy::PluginManagerProxy::ModifyResult result = testee.doEnable(ind, "X");
+    a.checkEqual("11. isValid", result.isValid, false);
+}
+
+/** Test enable, error: bad dependency. */
+AFL_TEST("game.proxy.PluginManagerProxy:enable:error:dependency", a)
+{
+    // A file system containing installed plugins
+    afl::io::InternalFileSystem fs;
+    fs.createDirectory("/p");
+    fs.openFile("/p/a.c2p", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("name = first\nrequires = zzz"));
+    fs.openFile("/p/b.c2p", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("name = second\n"));
+    fs.openFile("/p/plugins.ini", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("disable = a\n"));
+
+    // Setup
+    game::test::SessionThread t(fs);
+    game::test::WaitIndicator ind;
+    t.session().plugins().findPlugins(*fs.openDirectory("/p"));
+    t.session().setPluginDirectoryName("/p");
+
+    // Prepare
+    game::proxy::PluginManagerProxy testee(t.gameSender(), ind);
+    game::proxy::PluginManagerProxy::ModifyResult preResult = testee.prepareEnable(ind, "A");
+    a.checkEqual("01. isValid", preResult.isValid, false);
+    a.check("02. contains ZZZ", preResult.errorMessage.find("ZZZ") != String_t::npos);
+}
+
+/** Test disable, happy case. */
+AFL_TEST("game.proxy.PluginManagerProxy:disable", a)
+{
+    // A file system containing installed plugins
+    afl::io::InternalFileSystem fs;
+    fs.createDirectory("/p");
+    fs.openFile("/p/a.c2p", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("name = first\n"));
+    fs.openFile("/p/b.c2p", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("name = second\n"));
+
+    // Setup
+    game::test::SessionThread t(fs);
+    game::test::WaitIndicator ind;
+    t.session().plugins().findPlugins(*fs.openDirectory("/p"));
+    t.session().setPluginDirectoryName("/p");
+
+    // Prepare
+    game::proxy::PluginManagerProxy testee(t.gameSender(), ind);
+    game::proxy::PluginManagerProxy::ModifyResult preResult = testee.prepareDisable(ind, "A");
+    a.checkEqual("01. isValid", preResult.isValid, true);
+
+    // Enable
+    game::proxy::PluginManagerProxy::ModifyResult result = testee.doDisable(ind, "A");
+    a.checkEqual("11. isValid", result.isValid, true);
+
+    // Content of new plugins.ini file
+    uint8_t found[100];
+    afl::base::ConstBytes_t foundBytes(found);
+    AFL_CHECK_SUCCEEDS(a("21. plugins.ini"), foundBytes.trim(fs.openFile("/p/plugins.ini", afl::io::FileSystem::OpenRead)->read(found)));
+    a.checkEqual("22. file content", util::normalizeLinefeeds(foundBytes), "Disabled=A\n");
+
+    // Both plugins remain
+    std::vector<util::plugin::Plugin*> plugins;
+    t.session().plugins().enumPlugins(plugins, true);
+    a.checkEqual("31. size", plugins.size(), 2U);
+    a.checkEqual("32. getId", plugins[0]->getId(), "A");
+    a.checkEqual("33. getId", plugins[1]->getId(), "B");
+    a.check("34. isDisabled",  plugins[0]->isDisabled());
+    a.check("35. isDisabled", !plugins[1]->isDisabled());
+}
+
+/** Test disable, error case: bad name. */
+AFL_TEST("game.proxy.PluginManagerProxy:disable:error:bad-name", a)
+{
+    // A file system containing installed plugins
+    afl::io::InternalFileSystem fs;
+    fs.createDirectory("/p");
+    fs.openFile("/p/a.c2p", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("name = first\n"));
+    fs.openFile("/p/b.c2p", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("name = second\n"));
+
+    // Setup
+    game::test::SessionThread t(fs);
+    game::test::WaitIndicator ind;
+    t.session().plugins().findPlugins(*fs.openDirectory("/p"));
+    t.session().setPluginDirectoryName("/p");
+
+    // Prepare
+    game::proxy::PluginManagerProxy testee(t.gameSender(), ind);
+    game::proxy::PluginManagerProxy::ModifyResult preResult = testee.prepareDisable(ind, "ZZ");
+    a.checkEqual("01. isValid", preResult.isValid, false);
+
+    // Enable
+    game::proxy::PluginManagerProxy::ModifyResult result = testee.doDisable(ind, "ZZ");
+    a.checkEqual("11. isValid", result.isValid, false);
+
+    // plugins.ini file would be empty (i.e. don't blindly write a "Disable=ZZ" line)
+    AFL_CHECK_THROWS(a("21. openFile"), fs.openFile("/p/plugins.ini", afl::io::FileSystem::OpenRead), afl::except::FileProblemException);
+}
+
+/** Test disable, error case: dependency. */
+AFL_TEST("game.proxy.PluginManagerProxy:disable:error:dependency", a)
+{
+    // A file system containing installed plugins
+    afl::io::InternalFileSystem fs;
+    fs.createDirectory("/p");
+    fs.openFile("/p/a.c2p", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("name = first\n"));
+    fs.openFile("/p/b.c2p", afl::io::FileSystem::Create)->fullWrite(afl::string::toBytes("name = second\nrequires = a"));
+
+    // Setup
+    game::test::SessionThread t(fs);
+    game::test::WaitIndicator ind;
+    t.session().plugins().findPlugins(*fs.openDirectory("/p"));
+    t.session().setPluginDirectoryName("/p");
+
+    // Prepare
+    game::proxy::PluginManagerProxy testee(t.gameSender(), ind);
+    game::proxy::PluginManagerProxy::ModifyResult preResult = testee.prepareDisable(ind, "A");
+    a.checkEqual("01. isValid", preResult.isValid, false);
+    a.check("02. message", preResult.errorMessage.find("B (second)") != String_t::npos);
 }

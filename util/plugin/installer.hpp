@@ -110,6 +110,25 @@ namespace util { namespace plugin {
             \return true on success */
         bool doRemove(Plugin* pPlug, bool dry = false);
 
+        /** Check preconditions for enabling a plugin.
+            If preconditions are satisfied, you can call Plugin::setDisabled(false), and load it.
+            \param plug Plugin
+            \return error message; Nothing if there is no problem */
+        afl::base::Optional<String_t> checkEnablePreconditions(const Plugin& plug);
+
+        /** Check preconditions for disabling a plugin.
+            If preconditions are satisfied, you can call Plugin::setDisabled(true), and unload it.
+            \param plug Plugin
+            \return error message; Nothing if there is no problem */
+        afl::base::Optional<String_t> checkDisablePreconditions(const Plugin& plug);
+
+        /** Save configuration file.
+            Shortcut for invoking Manager::saveConfiguration() with the correct directory.
+
+            This should be called after modifying plugins' enable/disable status.
+            It is called automatically for install/remove. */
+        void saveConfiguration();
+
      private:
         // Integration
         Manager& manager;
@@ -120,6 +139,9 @@ namespace util { namespace plugin {
         afl::base::Ptr<afl::io::Directory> srcDir;
         afl::base::Ptr<afl::io::Stream> srcFile;
         std::auto_ptr<Plugin> apPlug;
+
+        afl::base::Optional<String_t> checkInstallEnablePreconditions(const Plugin& plug);
+        afl::base::Optional<String_t> checkRemoveDisablePreconditions(const Plugin& plug);
     };
 
 } }

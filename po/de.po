@@ -1,21 +1,23 @@
 # Language file created by ../scripts/extract_text.pl
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2026-10-04 19:03+0200\n"
+"PO-Revision-Date: 2026-11-07 22:12+0100\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: util/plugin/consoleapplication.cpp:390
+#: util/plugin/consoleapplication.cpp:513
 msgid ""
 "\n"
 "Usage:\n"
 "  %s -h|help\n"
 "                  This help message\n"
-"  %$0s list|ls [-l|-b] [-o]\n"
+"  %$0s list|ls [-l|-b] [-e|-d] [-o]\n"
 "                  List installed plugins\n"
 "  %$0s add|install [-n] [-f] FILE.c2p...\n"
 "                  Install given plugins\n"
 "  %$0s remove|rm|uninstall [-n] [-f] ID...\n"
 "                  Remove given plugins\n"
+"  %$0s enable|disable [-n] [-f] ID...\n"
+"                  Enable/disable given plugins\n"
 "  %$0s test [-v] FILE.c2p...\n"
 "                  Test given plugins\n"
 "\n"
@@ -27,12 +29,14 @@ msgstr ""
 "Aufruf:\n"
 "  %s -h|help\n"
 "                  Diese Hilfemeldung\n"
-"  %$0s list|ls [-l|-b] [-o]\n"
+"  %$0s list|ls [-l|-b] [-e|-d] [-o]\n"
 "                  Liste installierter Plugins\n"
 "  %$0s add|install [-n] [-f] DATEI.c2p...\n"
 "                  Angegebene Plugins installieren\n"
 "  %$0s remove|rm|uninstall [-n] [-f] ID...\n"
 "                  Angegebene Plugins entfernen\n"
+"  %$0s enable|disable [-n] [-f] ID...\n"
+"                  Angegebene Plugins aktivieren/deaktivieren\n"
 "  %$0s test [-v] DATEI.c2p...\n"
 "                  Angegebene Plugins testen\n"
 "\n"
@@ -140,6 +144,10 @@ msgstr " (+%d kt Tarnung)"
 msgid " (+%d kt)"
 msgstr " (+%d kt)"
 
+#: util/plugin/consoleapplication.cpp:275
+msgid " (disabled)"
+msgstr " (deaktiviert)"
+
 #: ui/reshack/fonteditor.cpp:599
 msgid " (font, height %d pixels)"
 msgstr " (Font, Höhe %d Pixel)"
@@ -171,22 +179,6 @@ msgstr " - Bergbau"
 #: client/dialogs/buildstructuresdialog.cpp:610
 msgid " - Planetary Economy"
 msgstr " - Wirtschaft"
-
-#: util/plugin/consoleapplication.cpp:407
-msgid ""
-" -l\tList more details\n"
-" -b\tList fewer details\n"
-" -o\tList in load order (default: alphabetical)\n"
-" -n\tDry run (don't modify anything, just check)\n"
-" -f\tIgnore dependencies/requirements\n"
-" -v\tVerbose"
-msgstr ""
-" -l\tMehr Details auflisten\n"
-" -b\tWeniger Details auflisten\n"
-" -o\tAuflistung in Ladereihenfolge (Standard: alphabetisch)\n"
-" -n\tProbelauf (nichts verändern, nur prüfen)\n"
-" -f\tAbhängigkeiten ignorieren\n"
-" -v\tMehr Ausgaben"
 
 #: client/dialogs/cloneship.cpp:97
 msgid " At this point, PCC2 will buy only the required tech upgrades."
@@ -397,7 +389,7 @@ msgstr "%d kt"
 msgid "%d kt cargo"
 msgstr "%d kt Frachtraum"
 
-#: client/map/distanceoverlay.cpp:359
+#: client/map/distanceoverlay.cpp:358
 msgid "%d kt fuel aboard"
 msgstr "%d kt Treibstoff"
 
@@ -515,7 +507,7 @@ msgstr "%d Minen, %d Fangminen"
 msgid "%d of %d"
 msgstr "%d von %d"
 
-#: client/map/distanceoverlay.cpp:363
+#: client/map/distanceoverlay.cpp:362
 msgid "%d of %d kt fuel used"
 msgstr "%d von %d kt Treibstoff benötigt"
 
@@ -539,7 +531,7 @@ msgstr "%d Planet%!1{en%}"
 msgid "%d player%1{'s%|s'%} data remains."
 msgstr "Daten von %d Spieler%!1{n%} verbleiben."
 
-#: util/plugin/consoleapplication.cpp:167
+#: util/plugin/consoleapplication.cpp:262
 msgid "%d plugin%!1{s%} installed."
 msgstr "%d Plugin%!1{s%} installiert."
 
@@ -611,7 +603,7 @@ msgstr "%d Torpedo%!1{s%} und %d Jäger"
 msgid "%d turn%!1{s%}"
 msgstr "%d %1{Zug%|Züge%}"
 
-#: client/map/distanceoverlay.cpp:352
+#: client/map/distanceoverlay.cpp:351
 msgid "%d turn%!1{s%} at warp %d"
 msgstr "%d %!1{Züge%|Zug%} bei Warp %d"
 
@@ -899,12 +891,12 @@ msgstr "%s: %d%% (%d mc)"
 msgid "%s: %d%% (%d mc, with %d colonist clan%!1{s%})"
 msgstr "%s: %d%% (%d mc, mit %d Kolonistenclan%!1{s%})"
 
-#: util/plugin/consoleapplication.cpp:359
+#: util/plugin/consoleapplication.cpp:482
 msgid "%s: Plugin '%s' (%s) tested successfully."
 msgstr "%s: Plugin '%s' (%s) erfolgreich getestet."
 
-#: util/plugin/consoleapplication.cpp:238
-#: util/plugin/consoleapplication.cpp:354
+#: util/plugin/consoleapplication.cpp:344
+#: util/plugin/consoleapplication.cpp:477
 msgid "%s: Unknown file type"
 msgstr "%s: unbekannter Dateityp"
 
@@ -1324,6 +1316,26 @@ msgstr ""
 "-size=B[xH]\tAuflösung von BxH benutzen\n"
 "-nomousegrab\tMauszeiger nicht im Fenster einsperren"
 
+#: util/plugin/consoleapplication.cpp:532
+msgid ""
+"-l\tList more details\n"
+"-b\tList fewer details\n"
+"-e\tShow only enabled plugins\n"
+"-d\tShow only disabled plutins\n"
+"-o\tList in load order (default: alphabetical)\n"
+"-n\tDry run (don't modify anything, just check)\n"
+"-f\tIgnore dependencies/requirements\n"
+"-v\tVerbose"
+msgstr ""
+"-l\tMehr Details auflisten\n"
+"-b\tWeniger Details auflisten\n"
+"-e\tNur aktivierte Plugins zeigen\n"
+"-d\tNur deaktivierte Plugins zeigen\n"
+"-o\tAuflistung in Ladereihenfolge (Standard: alphabetisch)\n"
+"-n\tProbelauf (nichts verändern, nur prüfen)\n"
+"-f\tAbhängigkeiten/Anforderungen ignorieren\n"
+"-v\tMehr Ausgaben"
+
 #: share/resource/core_global.q:189 share/resource/core_ui.q:1895
 #: share/resource/core_ui.q:421
 msgid "0 - none"
@@ -1716,7 +1728,7 @@ msgstr ""
 "Experten-Optionen:\n"
 "-f preexec-load\t\"Load\"-Anweisungen im Voraus ausführen"
 
-#: client/dialogs/pluginmanager.cpp:121 client/dialogs/visualscandialog.cpp:690
+#: client/dialogs/pluginmanager.cpp:141 client/dialogs/visualscandialog.cpp:690
 msgid "Add"
 msgstr "Einf"
 
@@ -2466,7 +2478,7 @@ msgstr "Können getarnte Schiffe erkennen"
 #: client/dialogs/messageeditor.cpp:198 client/dialogs/newdrawing.cpp:83
 #: client/dialogs/newdrawingtag.cpp:112
 #: client/dialogs/objectselectiondialog.cpp:372
-#: client/dialogs/pluginmanager.cpp:262 client/dialogs/pluginmanager.cpp:303
+#: client/dialogs/pluginmanager.cpp:317 client/dialogs/pluginmanager.cpp:358
 #: client/dialogs/revertdialog.cpp:85 client/dialogs/sellsuppliesdialog.cpp:61
 #: client/dialogs/shipspeeddialog.cpp:68 client/dialogs/taxationdialog.cpp:608
 #: client/dialogs/turnlistdialog.cpp:114
@@ -2517,13 +2529,17 @@ msgstr "Datei kann nicht importiert werden"
 msgid "Cannot load game; you are not logged in"
 msgstr "Spiel kann nicht geladen werden; du bist nicht eingeloggt"
 
-#: util/plugin/manager.cpp:99
+#: util/plugin/manager.cpp:121
 msgid "Cannot load plugins"
 msgstr "Kann Plugins nicht laden"
 
 #: afl/string/messages.hpp:242
 msgid "Cannot modify archive file"
 msgstr "Archivdatei kann nicht geändert werden"
+
+#: util/plugin/manager.cpp:159
+msgid "Cannot save plugin configuration"
+msgstr "Fehler beim Speichern der Plugin-Konfiguration"
 
 #: afl/string/messages.hpp:248
 msgid "Cannot write"
@@ -2849,7 +2865,7 @@ msgstr "Klone, und baue ein %s"
 #: client/dialogs/imperialstats.cpp:279 client/dialogs/ionstormforecast.cpp:149
 #: client/dialogs/ionstorminfo.cpp:149 client/dialogs/keymapdialog.cpp:145
 #: client/dialogs/minefieldinfo.cpp:220 client/dialogs/planetinfodialog.cpp:107
-#: client/dialogs/pluginmanager.cpp:124 client/dialogs/preferences.cpp:591
+#: client/dialogs/pluginmanager.cpp:143 client/dialogs/preferences.cpp:591
 #: client/dialogs/processlistdialog.cpp:723 client/dialogs/scores.cpp:736
 #: client/dialogs/searchdialog.cpp:336 client/dialogs/shipcostcalculator.cpp:73
 #: client/dialogs/simpleconsole.cpp:22
@@ -3269,6 +3285,10 @@ msgstr "D - Löschen"
 msgid "D - Detailed Bill"
 msgstr "D - Details"
 
+#: client/dialogs/pluginmanager.cpp:187
+msgid "D - Disable"
+msgstr "D - Deaktivieren"
+
 #: client/dialogs/goaldialog.cpp:261
 msgid "D - Don't change"
 msgstr "D - Nicht ändern"
@@ -3453,6 +3473,10 @@ msgstr "Diplomatie"
 msgid "Directory name"
 msgstr "Verzeichnisname"
 
+#: client/dialogs/pluginmanager.cpp:480
+msgid "Disable Plugin"
+msgstr "Plugin deaktivieren"
+
 #: client/si/widgetwrapper.cpp:96
 msgid "Disabling update callback \"%s\" due to error"
 msgstr "Update-Callback \"%s\" wird aufgrund Fehler deaktiviert"
@@ -3487,7 +3511,7 @@ msgstr "Diese Flotte auflösen?"
 msgid "Distance"
 msgstr "Entfernung"
 
-#: client/map/distanceoverlay.cpp:293
+#: client/map/distanceoverlay.cpp:292
 msgid "Distance from first point: %.1f ly"
 msgstr "Entfernung vom ersten Punkt: %.1f ly"
 
@@ -3554,6 +3578,14 @@ msgstr "Möchtest du wirklich alle Ebenen löschen?"
 msgid "Do you want to clear this selection layer?"
 msgstr "Soll diese Ebene gelöscht werden?"
 
+#: client/dialogs/pluginmanager.cpp:480
+msgid "Do you want to disable plugin '%s'?"
+msgstr "Möchtest du das Plugin '%s' deaktivieren?"
+
+#: client/dialogs/pluginmanager.cpp:450
+msgid "Do you want to enable plugin '%s'?"
+msgstr "Möchtest du das Plugin '%s' aktivieren?"
+
 #: share/resource/core_ui.q:35
 msgid "Do you want to exit PCC2?"
 msgstr "Möchtest du PCC2 verlassen?"
@@ -3562,7 +3594,7 @@ msgstr "Möchtest du PCC2 verlassen?"
 msgid "Do you want to exit? There are unsaved changes."
 msgstr "Möchtest du beenden? Es gibt ungespeicherte Änderungen."
 
-#: client/dialogs/pluginmanager.cpp:322 util/plugin/dialogapplication.cpp:95
+#: client/dialogs/pluginmanager.cpp:377 util/plugin/dialogapplication.cpp:95
 msgid "Do you want to install plugin \"%s\" (%s)?)"
 msgstr "Möchtest du das Plugin \"%s\" (%s) installieren?"
 
@@ -3578,16 +3610,16 @@ msgstr "Möchtest du alle Eingeborenen-Steuersätze optimieren?"
 msgid "Do you want to optimize all tax rates?"
 msgstr "Möchtest du alle Steuersätze optimieren?"
 
-#: client/dialogs/pluginmanager.cpp:297
+#: client/dialogs/pluginmanager.cpp:352
 msgid "Do you want to proceed anyway?"
 msgstr "Möchtest du dennoch fortsetzen?"
 
-#: client/dialogs/pluginmanager.cpp:254
+#: client/dialogs/pluginmanager.cpp:309
 msgid "Do you want to proceed with the original file, or use the *.c2p file?"
 msgstr ""
 "Möchtest du mit der Originaldatei fortsetzen, oder die *.c2p-Datei benutzen?"
 
-#: client/dialogs/pluginmanager.cpp:366
+#: client/dialogs/pluginmanager.cpp:421
 msgid "Do you want to remove plugin '%s'?"
 msgstr "Möchtest du das Plugin '%s' entfernen?"
 
@@ -3603,7 +3635,7 @@ msgstr ""
 msgid "Do you want to stop (terminate) that script?"
 msgstr "Soll dieses Script abgebrochen werden?"
 
-#: client/dialogs/pluginmanager.cpp:321 util/plugin/dialogapplication.cpp:94
+#: client/dialogs/pluginmanager.cpp:376 util/plugin/dialogapplication.cpp:94
 msgid "Do you want to update plugin \"%s\" (%s)?)"
 msgstr "Möchtest du das Plugin \"%s\" (%s) aktualisieren?"
 
@@ -3635,15 +3667,15 @@ msgstr "Doppelter Steuer-Ertrag"
 msgid "Drain fuel from orbiting ships"
 msgstr "Ziehen Schiffen im Orbit Treibstoff ab"
 
-#: client/map/markeroverlaybase.cpp:94 client/map/starchartoverlay.cpp:555
+#: client/map/markeroverlaybase.cpp:94 client/map/starchartoverlay.cpp:554
 msgid "Drawing Color"
 msgstr "Zeichnungs-Farbe"
 
-#: client/map/markeroverlaybase.cpp:111 client/map/starchartoverlay.cpp:662
+#: client/map/markeroverlaybase.cpp:111 client/map/starchartoverlay.cpp:661
 msgid "Drawing Tag"
 msgstr "Zeichnungs-Markierung (Tag)"
 
-#: client/map/starchartoverlay.cpp:207
+#: client/map/starchartoverlay.cpp:206
 msgid "Drawing filter: showing only %s"
 msgstr "Zeichnungsfilter: zeige nur %s"
 
@@ -3662,6 +3694,10 @@ msgstr "Schiffsfunktion #%d doppelt definiert"
 #: game/spec/basichullfunctionlist.cpp:85
 msgid "Duplicate definition for hull function with name \"%s\""
 msgstr "Schiffsfunktion \"%s\" ist doppelt definiert"
+
+#: util/plugin/manager.cpp:94
+msgid "Duplicate plugin %s has been ignored"
+msgstr "Doppeltes Plugin %s wurde ignoriert"
 
 #: client/tiles/shipcargotile.cpp:110 client/widgets/costsummarylist.cpp:216
 #: share/resource/core_tiles.q:1002 share/resource/core_tiles.q:1165
@@ -3697,6 +3733,10 @@ msgstr "E - Gleichmäßig verteilen"
 #: client/dialogs/simulationresult.cpp:301
 msgid "E - Edit this unit"
 msgstr "E - Einheit bearbeiten"
+
+#: client/dialogs/pluginmanager.cpp:188
+msgid "E - Enable"
+msgstr "E - Aktivieren"
 
 #: client/dialogs/buildshipmain.cpp:291
 #: client/dialogs/simulationfleetcost.cpp:162
@@ -3795,6 +3835,10 @@ msgstr "Ausweichend"
 #: game/spec/info/browser.cpp:433
 msgid "Email address"
 msgstr "Email-Adresse"
+
+#: client/dialogs/pluginmanager.cpp:450
+msgid "Enable Plugin"
+msgstr "Plugin aktivieren"
 
 #: ui/reshack/fonteditor.cpp:515
 msgid "Encoding"
@@ -3919,7 +3963,7 @@ msgstr "Neue Notiz"
 msgid "Enter new comment for %s"
 msgstr "Neue Notiz für %s"
 
-#: client/map/movemarkeroverlay.cpp:121
+#: client/map/movemarkeroverlay.cpp:120
 msgid "Enter new comment for this marker"
 msgstr "Neue Notiz für diesen Marker"
 
@@ -4034,7 +4078,7 @@ msgstr "Fehler beim Initialisieren der SDL: %s"
 msgid "Error loading FLAK combat"
 msgstr "Fehler beim Laden eines FLAK-Kampfes"
 
-#: util/plugin/manager.cpp:87
+#: util/plugin/manager.cpp:104
 msgid "Error loading plugin %s"
 msgstr "Fehler beim Laden des Plugins %s"
 
@@ -4414,7 +4458,7 @@ msgstr "Dateiformat"
 msgid "File Name"
 msgstr "Dateiname"
 
-#: client/dialogs/pluginmanager.cpp:233
+#: client/dialogs/pluginmanager.cpp:288
 msgid ""
 "File cannot be installed.\n"
 "<small>The file you have chosen cannot be installed as a plugin. A plugin "
@@ -4425,7 +4469,7 @@ msgstr ""
 "Plugin wird typischerweise mit einer <tt>*.c2p</tt> oder <tt>*.c2z</tt>-"
 "Datei definiert."
 
-#: client/dialogs/pluginmanager.cpp:275
+#: client/dialogs/pluginmanager.cpp:330
 msgid ""
 "File cannot be installed.\n"
 "<small>There was trouble processing the alternative file.</small>"
@@ -4540,7 +4584,7 @@ msgstr "Datei..."
 msgid "Files"
 msgstr "Dateien"
 
-#: util/plugin/consoleapplication.cpp:188
+#: util/plugin/consoleapplication.cpp:293
 msgid "Files (in '%s')"
 msgstr "Dateien (in '%s')"
 
@@ -4548,7 +4592,7 @@ msgstr "Dateien (in '%s')"
 msgid "Filter"
 msgstr "Filter"
 
-#: client/map/starchartoverlay.cpp:503
+#: client/map/starchartoverlay.cpp:502
 msgid "Filter Drawings"
 msgstr "Zeichnungen filtern"
 
@@ -4668,7 +4712,7 @@ msgstr "Weiterleiten..."
 msgid "Fought"
 msgstr "Gekämpft"
 
-#: util/plugin/manager.cpp:95
+#: util/plugin/manager.cpp:112
 msgid "Found %d plugin%!1{s%}"
 msgstr "%d Plugin%!1{s%} gefunden"
 
@@ -5150,7 +5194,7 @@ msgstr "Höhe"
 #: client/dialogs/messageeditor.cpp:197 client/dialogs/minefieldinfo.cpp:223
 #: client/dialogs/newdrawing.cpp:84 client/dialogs/newdrawingtag.cpp:98
 #: client/dialogs/objectselectiondialog.cpp:373
-#: client/dialogs/outboxdialog.cpp:78 client/dialogs/pluginmanager.cpp:123
+#: client/dialogs/outboxdialog.cpp:78 client/dialogs/pluginmanager.cpp:142
 #: client/dialogs/preferences.cpp:592 client/dialogs/processlistdialog.cpp:724
 #: client/dialogs/revertdialog.cpp:83 client/dialogs/scores.cpp:735
 #: client/dialogs/searchdialog.cpp:339 client/dialogs/selectionmanager.cpp:348
@@ -5491,12 +5535,12 @@ msgstr "Insektoide"
 msgid "Insert Command"
 msgstr "Befehl einfügen"
 
-#: client/dialogs/pluginmanager.cpp:195 client/dialogs/pluginmanager.cpp:259
-#: client/dialogs/pluginmanager.cpp:301 client/dialogs/pluginmanager.cpp:328
+#: client/dialogs/pluginmanager.cpp:233 client/dialogs/pluginmanager.cpp:314
+#: client/dialogs/pluginmanager.cpp:356 client/dialogs/pluginmanager.cpp:383
 msgid "Install Plugin"
 msgstr "Plugin installieren"
 
-#: util/plugin/consoleapplication.cpp:244
+#: util/plugin/consoleapplication.cpp:350
 msgid "Installing plugin '%s'..."
 msgstr "Installiere Plugin '%s'..."
 
@@ -5544,7 +5588,7 @@ msgstr "Ungültige Geschütz-Nummer %d, Komponente wurde ignoriert"
 msgid "Invalid boolean setting"
 msgstr "Ungültiger boolescher Wert"
 
-#: util/plugin/consoleapplication.cpp:129
+#: util/plugin/consoleapplication.cpp:218
 msgid "Invalid command specified. Use 'c2plugin -h' for help."
 msgstr "ungültiges Kommando angegeben. Mit 'c2plugin -h' erhalten Sie Hilfe"
 
@@ -5806,7 +5850,7 @@ msgstr "Ionensturm #%d"
 msgid "Ion storms"
 msgstr "Ionenstürme"
 
-#: client/dialogs/pluginmanager.cpp:291
+#: client/dialogs/pluginmanager.cpp:346
 msgid ""
 "It can be converted into a plugin. However, there are multiple plugin "
 "definition files (*.c2p) next to it. If %s is part of one of these, it is "
@@ -5817,7 +5861,7 @@ msgstr ""
 "dieser Plugins ist, solltest du die entsprechende *.c2p-Datei stattdessen "
 "installieren."
 
-#: client/dialogs/pluginmanager.cpp:247
+#: client/dialogs/pluginmanager.cpp:302
 msgid ""
 "It can be converted into a plugin. However, there is a plugin definition "
 "file (%s) next to it. If %s is part of that, it is strongly recommended to "
@@ -5827,11 +5871,19 @@ msgstr ""
 "eine Plugin-Definition (%s) daneben. Wenn %s bereits Teil dieses Plugins "
 "ist, solltest du die *.c2p-Datei stattdessen installieren."
 
-#: util/plugin/installer.cpp:173 util/plugin/installer.cpp:193
+#: util/plugin/installer.cpp:335
+msgid "It cannot be disabled."
+msgstr "Das Plugin kann nicht deaktiviert werden."
+
+#: util/plugin/installer.cpp:322
+msgid "It cannot be enabled."
+msgstr "Das Plugin kann nicht aktiviert werden."
+
+#: util/plugin/installer.cpp:164
 msgid "It cannot be installed."
 msgstr "Das Plugin kann nicht installiert werden."
 
-#: util/plugin/installer.cpp:275
+#: util/plugin/installer.cpp:243
 msgid "It cannot be uninstalled."
 msgstr "Das Plugin kann nicht deinstalliert werden."
 
@@ -6248,7 +6300,7 @@ msgstr "Bauliste verwalten"
 msgid "Map type"
 msgstr "Karten-Typ"
 
-#: client/map/drawlineoverlay.cpp:33
+#: client/map/drawlineoverlay.cpp:32
 msgid "Mark 2nd point, end with [ESC] or [+]."
 msgstr "Zweiten Punkt festlegen, Ende mit [ESC] oder [+]."
 
@@ -6288,7 +6340,7 @@ msgstr "Marker"
 msgid "Marker %d"
 msgstr "Marker %d"
 
-#: client/map/movemarkeroverlay.cpp:121
+#: client/map/movemarkeroverlay.cpp:120
 msgid "Marker Comment"
 msgstr "Marker-Notiz"
 
@@ -6563,19 +6615,13 @@ msgstr "Fehlender ':' in Nachrichten-Filterausdruck"
 msgid "Missing '=' in message match expression"
 msgstr "Fehlender '=' in Nachrichten-Filterausdruck"
 
-#: util/plugin/consoleapplication.cpp:317
-msgid "Missing name of plugin to uninstall. '%s -h' for help."
-msgstr ""
-"Kein Name für ein zu deinstallierendes Plugin angegeben. Nutze '%s -h' für "
-"Hilfe."
-
-#: util/plugin/consoleapplication.cpp:264
+#: util/plugin/consoleapplication.cpp:370
 msgid "Missing name plugin or file to install. '%s -h' for help."
 msgstr ""
 "Kein Name für ein zu installierendes Plugin angegeben. Nutze '%s -h' für "
 "Hilfe."
 
-#: util/plugin/consoleapplication.cpp:378
+#: util/plugin/consoleapplication.cpp:501
 msgid "Missing name plugin or file to test. '%s -h' for help."
 msgstr ""
 "Kein Name für ein zu testendes Plugin angegeben. Nutze '%s -h' für Hilfe."
@@ -6594,6 +6640,10 @@ msgstr ""
 "Kommandozeile aufgerufen werden. Alternativ kannst du auch den Plugin-"
 "Installer in der grafischen Oberfläche von PCC2 oder das Kommandozeilentool "
 "c2plugin benutzen."
+
+#: util/plugin/consoleapplication.cpp:181
+msgid "Missing plugin name. '%s -h' for help."
+msgstr "Kein Plugin-Name angegeben. Nutze '%s -h' für Hilfe."
 
 #: client/tiles/tilefactory.cpp:50 game/parser/messagevalue.cpp:181
 #: share/resource/core_tiles.q:1215 share/resource/core_tiles.q:1236
@@ -6739,7 +6789,7 @@ msgstr "Bewege in Richtung"
 msgid "Move down"
 msgstr "Nach unten"
 
-#: client/map/movemarkeroverlay.cpp:32
+#: client/map/movemarkeroverlay.cpp:31
 msgid "Move marker, end with [ESC]."
 msgstr "Bewege den Marker, Ende mit [ESC]."
 
@@ -6890,7 +6940,7 @@ msgstr "Neues Verzeichnis"
 msgid "New happiness: %s (%d)"
 msgstr "Neuer Status: %s (%d)"
 
-#: client/map/starchartoverlay.cpp:610
+#: client/map/starchartoverlay.cpp:609
 msgid "New marker"
 msgstr "Neuer Marker"
 
@@ -6965,7 +7015,7 @@ msgstr "Keine Kolonisten."
 msgid "No command matched the filter."
 msgstr "Kein Kommando passte auf den Filter-Ausdruck."
 
-#: util/plugin/consoleapplication.cpp:124
+#: util/plugin/consoleapplication.cpp:213
 msgid "No command specified. Use 'c2plugin -h' for help."
 msgstr "kein Kommando angegeben. Mit 'c2plugin -h' erhalten Sie Hilfe"
 
@@ -7578,7 +7628,7 @@ msgstr "PCC2 Spiel-Server v%s - (c) 2019-2026 Stefan Reuther"
 msgid "PCC2 Plugin Installer"
 msgstr "PCC2-Plugin-Installer"
 
-#: util/plugin/consoleapplication.cpp:389
+#: util/plugin/consoleapplication.cpp:512
 msgid "PCC2 Plugin Manager v%s - (c) 2015-2026 Stefan Reuther"
 msgstr "PCC2 Plugin-Manager v%s - (c) 2015-2026 Stefan Reuther"
 
@@ -7735,7 +7785,7 @@ msgstr "Plane ein %s"
 msgid "Planet"
 msgstr "Planet"
 
-#: client/map/starchartoverlay.cpp:237 game/reference.cpp:57
+#: client/map/starchartoverlay.cpp:236 game/reference.cpp:57
 #: game/vcr/overview.cpp:34
 msgid "Planet #%d"
 msgstr "Planet #%d"
@@ -7867,19 +7917,19 @@ msgstr ""
 "Bitte wähle die Option \"Schiffe\" und/oder \"Planeten\", bevor du eine "
 "Global-Aktion ausführst."
 
-#: util/plugin/installer.cpp:167
+#: util/plugin/installer.cpp:360
 msgid "Plugin \"%s\" conflicts with the following plugins"
 msgstr "Plugin \"%s\" kollidiert mit folgenden Plugins"
 
-#: util/plugin/installer.cpp:269
+#: util/plugin/installer.cpp:395
 msgid "Plugin \"%s\" is required by the following plugins"
 msgstr "Plugin \"%s\" wird von folgenden Plugins benötigt"
 
-#: util/plugin/installer.cpp:181
+#: util/plugin/installer.cpp:372
 msgid "Plugin \"%s\" requires the following features"
 msgstr "Plugin \"%s\" erfordert folgende Features"
 
-#: util/plugin/manager.cpp:157
+#: util/plugin/manager.cpp:207
 msgid "Plugin %s cannot be loaded because of missing preconditions"
 msgstr "Plugin %s kann nicht geladen werden, da nötige Voraussetzungen fehlen"
 
@@ -7891,25 +7941,33 @@ msgstr "Plugin '%s' wurde installiert."
 msgid "Plugin '%s' has been updated."
 msgstr "Plugin '%s' wurde aktualisiert."
 
-#: util/plugin/consoleapplication.cpp:311
+#: util/plugin/consoleapplication.cpp:175
 msgid "Plugin '%s' is not known."
 msgstr "Plugin '%s' ist nicht bekannt."
 
-#: util/plugin/consoleapplication.cpp:175
+#: util/plugin/consoleapplication.cpp:273
 msgid "Plugin '%s': %s"
 msgstr "Plugin '%s': %s"
 
-#: client/dialogs/pluginmanager.cpp:375
+#: client/dialogs/pluginmanager.cpp:430
 msgid "Plugin could not be completely uninstalled."
 msgstr "Plugin konnte nicht vollständig entfernt werden."
 
-#: client/dialogs/pluginmanager.cpp:232 client/dialogs/pluginmanager.cpp:274
-#: client/dialogs/pluginmanager.cpp:342
+#: client/dialogs/pluginmanager.cpp:457
+msgid "Plugin could not be enabled."
+msgstr "Plugin konnte nicht aktiviert werden."
+
+#: client/dialogs/pluginmanager.cpp:489
+msgid "Plugin could not be sucessfully disabled."
+msgstr "Plugin konnte nicht erfolgreich deaktiviert werden."
+
+#: client/dialogs/pluginmanager.cpp:287 client/dialogs/pluginmanager.cpp:329
+#: client/dialogs/pluginmanager.cpp:397
 msgid "Plugin not installed."
 msgstr "Das Plugin wurde nicht installiert."
 
-#: client/dialogs/pluginmanager.cpp:109 client/dialogs/pluginmanager.cpp:114
-#: client/dialogs/pluginmanager.cpp:398 client/dialogs/pluginmanager.cpp:420
+#: client/dialogs/pluginmanager.cpp:122 client/dialogs/pluginmanager.cpp:129
+#: client/dialogs/pluginmanager.cpp:512 client/dialogs/pluginmanager.cpp:534
 #: client/screens/browserscreen.cpp:218
 msgid "Plugins"
 msgstr "Plugins"
@@ -8019,7 +8077,7 @@ msgstr "Drücke Umschalt-ESC, um dieses Fenster zu schließen"
 msgid "Press [A] to delete adjacent lines, too."
 msgstr "Drücke [A], um angrenzende Linien ebenfalls zu löschen"
 
-#: client/map/distanceoverlay.cpp:82
+#: client/map/distanceoverlay.cpp:81
 msgid "Press [W] to change this ship's waypoint."
 msgstr "Drücke [W], um den Kurs des Schiffs zu ändern."
 
@@ -8068,7 +8126,7 @@ msgstr "Primärziel: %s"
 msgid "Priority"
 msgstr "Priorität"
 
-#: client/dialogs/pluginmanager.cpp:257 client/dialogs/pluginmanager.cpp:300
+#: client/dialogs/pluginmanager.cpp:312 client/dialogs/pluginmanager.cpp:355
 msgid "Proceed"
 msgstr "Fortsetzen"
 
@@ -8346,7 +8404,7 @@ msgstr "Fernsteuerung wurde für %d Schiff%!1{e%} angefordert."
 msgid "Remote-control flag"
 msgstr "Fernsteuerungsstatus"
 
-#: client/dialogs/export.cpp:154 client/dialogs/pluginmanager.cpp:122
+#: client/dialogs/export.cpp:154 client/dialogs/pluginmanager.cpp:94
 msgid "Remove"
 msgstr "Löschen"
 
@@ -8362,7 +8420,7 @@ msgstr "Y-Hilfslinie entfernen"
 msgid "Remove leader from fleet?"
 msgstr "Führer aus der Flotte entfernen?"
 
-#: util/plugin/consoleapplication.cpp:305
+#: util/plugin/consoleapplication.cpp:386
 msgid "Removing plugin '%s'..."
 msgstr "Entferne Plugin '%s'..."
 
@@ -8456,11 +8514,11 @@ msgstr "Position zurücksetzen"
 msgid "Resource Editor"
 msgstr "Ressourcen-Editor"
 
-#: util/plugin/plugin.cpp:258
+#: util/plugin/plugin.cpp:259
 msgid "Resource configuration file"
 msgstr "Ressourcen-Konfigurationsdatei"
 
-#: util/plugin/plugin.cpp:157
+#: util/plugin/plugin.cpp:158
 msgid "Resource file (artwork)"
 msgstr "Ressourcen-Datei (Grafik)"
 
@@ -8706,7 +8764,7 @@ msgstr "Script-Interpreter"
 msgid "Script command..."
 msgstr "Script-Befehl..."
 
-#: util/plugin/plugin.cpp:233
+#: util/plugin/plugin.cpp:234
 msgid "Script file"
 msgstr "Scriptdatei"
 
@@ -8773,7 +8831,7 @@ msgstr "Sekundär"
 msgid "Section %d has an invalid address"
 msgstr "Bereich %d hat eine ungültige Adresse"
 
-#: client/map/starchartoverlay.cpp:200
+#: client/map/starchartoverlay.cpp:199
 msgid "Sector %d"
 msgstr "Sektor %d"
 
@@ -9082,7 +9140,7 @@ msgstr "Schilde: %d%%"
 msgid "Ship"
 msgstr "Schiff"
 
-#: client/map/starchartoverlay.cpp:234 game/actions/changebuildqueue.cpp:264
+#: client/map/starchartoverlay.cpp:233 game/actions/changebuildqueue.cpp:264
 #: game/map/ship.cpp:429 game/map/universe.cpp:41
 #: game/proxy/simulationsetupproxy.cpp:141 game/reference.cpp:56
 #: game/vcr/overview.cpp:36 share/resource/core_game.q:465
@@ -10107,7 +10165,7 @@ msgstr ""
 "Das Verzeichnis \"%s\" ist nicht beschreibbar und kann nicht verwendet "
 "werden."
 
-#: client/dialogs/pluginmanager.cpp:245 client/dialogs/pluginmanager.cpp:289
+#: client/dialogs/pluginmanager.cpp:300 client/dialogs/pluginmanager.cpp:344
 msgid "The file you have selected is not a plugin file."
 msgstr "Die gewählte Datei ist keine Plugin-Datei."
 
@@ -10359,7 +10417,7 @@ msgstr "Dieser Kampf kann nicht wiedergegeben werden."
 
 #: gfx/gen/application.cpp:223 gfx/gen/application.cpp:273
 #: gfx/gen/application.cpp:345 gfx/gen/application.cpp:403
-#: gfx/gen/application.cpp:448 util/plugin/consoleapplication.cpp:146
+#: gfx/gen/application.cpp:448 util/plugin/consoleapplication.cpp:237
 msgid "This command does not take positional parameters"
 msgstr "Dieser Befehl akzeptiert keine Positionsparameter"
 
@@ -11115,15 +11173,23 @@ msgstr "Systemobjekte können nicht angelegt werden."
 msgid "Unable to determine derived information."
 msgstr "Abgeleitete Informationen nicht ermittelbar."
 
+#: client/dialogs/pluginmanager.cpp:475
+msgid "Unable to disable plugin."
+msgstr "Plugin kann nicht deaktiviert werden."
+
 #: game/nu/turnloader.cpp:186
 msgid "Unable to download result file"
 msgstr "Result kann nicht heruntergeladen werden"
+
+#: client/dialogs/pluginmanager.cpp:445
+msgid "Unable to enable plugin."
+msgstr "Plugin kann nicht aktiviert werden."
 
 #: ui/screenshotlistener.cpp:39
 msgid "Unable to find a free file name for screenshot"
 msgstr "Kann keinen Namen für Bildschirmfoto generieren"
 
-#: client/dialogs/pluginmanager.cpp:314 client/dialogs/pluginmanager.cpp:342
+#: client/dialogs/pluginmanager.cpp:369 client/dialogs/pluginmanager.cpp:397
 msgid "Unable to install plugin."
 msgstr "Plugin kann nicht installiert werden."
 
@@ -11201,7 +11267,7 @@ msgstr ""
 msgid "Unable to save: %s"
 msgstr "Kann nicht gespeichert werden: %s"
 
-#: client/dialogs/pluginmanager.cpp:361
+#: client/dialogs/pluginmanager.cpp:416
 msgid "Unable to uninstall plugin."
 msgstr "Plugin kann nicht entfernt werden."
 
@@ -11273,11 +11339,11 @@ msgstr "Unicode (UTF-8)"
 msgid "Unicode: U+%04X (%0$0d)"
 msgstr "Unicode: U+%04X (%0$0d)"
 
-#: client/dialogs/pluginmanager.cpp:366
+#: client/dialogs/pluginmanager.cpp:421
 msgid "Uninstall Plugin"
 msgstr "Plugin entfernen"
 
-#: util/plugin/installer.cpp:337
+#: util/plugin/installer.cpp:309
 msgid "Uninstallation of \"%s\" might be incomplete."
 msgstr "Entfernen von \"%s\" ist möglicherweise unvollständig."
 
@@ -11349,10 +11415,10 @@ msgstr "Unbekannte Schiffsfunktion \"%s\""
 msgid "Unknown native race."
 msgstr "Unbekannte Eingeborene."
 
-#: util/plugin/consoleapplication.cpp:155
-#: util/plugin/consoleapplication.cpp:231
-#: util/plugin/consoleapplication.cpp:299
-#: util/plugin/consoleapplication.cpp:343
+#: util/plugin/consoleapplication.cpp:166
+#: util/plugin/consoleapplication.cpp:250
+#: util/plugin/consoleapplication.cpp:337
+#: util/plugin/consoleapplication.cpp:466
 msgid "Unknown option \"-%s\""
 msgstr "Unbekannte Option \"-%s\""
 
@@ -11544,7 +11610,7 @@ msgstr "Bis zu %d ihrer Clans überleb%1{t%|en%}."
 msgid "Update/write back"
 msgstr "Aktual./Zurückschr."
 
-#: util/plugin/consoleapplication.cpp:242
+#: util/plugin/consoleapplication.cpp:348
 msgid "Updating plugin '%s'..."
 msgstr "Aktualisiere Plugin '%s'..."
 
@@ -12003,7 +12069,7 @@ msgstr "Aufruf: c2ng [-optionen] spielverz [spieler]"
 msgid "Use \"OK\" to review and correct the expression."
 msgstr "Nutze \"OK\", um den Ausdruck zu überprüfen und korrigieren."
 
-#: client/dialogs/pluginmanager.cpp:258
+#: client/dialogs/pluginmanager.cpp:313
 msgid "Use *.c2p"
 msgstr "Nutze *.c2p"
 
@@ -12288,7 +12354,7 @@ msgstr "Planeten-Gravitation"
 msgid "Warp →"
 msgstr "Warp →"
 
-#: client/map/distanceoverlay.cpp:306
+#: client/map/distanceoverlay.cpp:305
 msgid "Warp/Time: 6/%d 7/%d 8/%d 9/%d"
 msgstr "Warp/Zeit: 6/%d 7/%d 8/%d 9/%d"
 
@@ -12740,7 +12806,7 @@ msgstr "Benötigt"
 msgid "You need %d mc"
 msgstr "Es werden %d weitere mc"
 
-#: client/dialogs/pluginmanager.cpp:420
+#: client/dialogs/pluginmanager.cpp:534
 msgid "You should restart PCC2 for the changes to take effect."
 msgstr "Du solltest PCC2 neu starten, damit die Änderungen wirksam werden."
 
@@ -13083,7 +13149,7 @@ msgstr ""
 msgid "directory '%s' does not contain unpacked game data"
 msgstr "Verzeichnis `%s' enthält keine entpackten Spieldaten"
 
-#: client/widgets/simulationlist.cpp:93
+#: client/widgets/pluginlist.cpp:187 client/widgets/simulationlist.cpp:93
 msgid "disabled"
 msgstr "deaktiviert"
 
@@ -13641,7 +13707,7 @@ msgstr "nicht abgeschleppt"
 msgid "not included"
 msgstr "nicht berechnen"
 
-#: client/widgets/pluginlist.cpp:187
+#: client/widgets/pluginlist.cpp:192
 msgid "not loaded"
 msgstr "nicht geladen"
 
@@ -13651,7 +13717,7 @@ msgstr "nicht geladen"
 msgid "not moved"
 msgstr "nicht bewegt"
 
-#: client/map/distanceoverlay.cpp:346 client/tiles/shipmovementtile.cpp:200
+#: client/map/distanceoverlay.cpp:345 client/tiles/shipmovementtile.cpp:200
 #: client/tiles/shipmovementtile.cpp:207 client/tiles/shipmovementtile.cpp:229
 #: game/proxy/ufoproxy.cpp:103 share/resource/core_tiles.q:115
 #: share/resource/core_tiles.q:272 share/resource/core_tiles.q:393
@@ -13958,7 +14024,7 @@ msgstr "Zeitstempel muss 18 Zeichen haben"
 msgid "too few parameters. Use '%s -h' for help."
 msgstr "zu wenig Parameter. Nutze '%s -h' für Hilfe."
 
-#: client/map/distanceoverlay.cpp:349 client/tiles/shipmovementtile.cpp:235
+#: client/map/distanceoverlay.cpp:348 client/tiles/shipmovementtile.cpp:235
 #: share/resource/core_tiles.q:415 share/resource/core_tiles.q:849
 msgid "too long"
 msgstr "zu lange"
@@ -14189,7 +14255,7 @@ msgstr "mit %d Torp%!1{s%}"
 msgid "won't die if less than %s"
 msgstr "sterben nicht wenn weniger als %s"
 
-#: client/map/starchartoverlay.cpp:192
+#: client/map/starchartoverlay.cpp:191
 msgid "wraps to %4d,%4d"
 msgstr "abgebildet auf %4d,%4d"
 

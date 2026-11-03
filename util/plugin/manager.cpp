@@ -7,11 +7,25 @@
 #include "util/plugin/manager.hpp"
 #include "afl/except/fileproblemexception.hpp"
 #include "afl/io/directoryentry.hpp"
+#include "afl/io/textfile.hpp"
 #include "afl/string/format.hpp"
+#include "afl/string/string.hpp"
+#include "util/configurationfileparser.hpp"
 #include "version.hpp"
+
+using afl::string::Format;
+using afl::sys::LogListener;
+using afl::base::Ref;
+using afl::base::Ptr;
+using afl::io::DirectoryEntry;
+using afl::io::Directory;
+using afl::io::FileSystem;
+using afl::io::Stream;
+using afl::io::TextFile;
 
 namespace {
     const char LOG_NAME[] = "plugin.mgr";
+    const char INI_NAME[] = "plugins.ini";
 
     bool comparePlugins(const util::plugin::Plugin& a, const util::plugin::Plugin& b)
     {
@@ -53,7 +67,7 @@ util::plugin::Manager::findPlugins(afl::io::Directory& dir)
 {
     // Open the directory. This might throw, but is not a problem;
     // it just means the directory does not exist.
-    afl::base::Ptr<afl::base::Enumerator<afl::base::Ptr<afl::io::DirectoryEntry> > > entries;
+    Ptr<afl::base::Enumerator<Ptr<DirectoryEntry> > > entries;
     try {
         entries = dir.getDirectoryEntries().asPtr();
     }
@@ -65,38 +79,46 @@ util::plugin::Manager::findPlugins(afl::io::Directory& dir)
     try {
         // Load everything
         int count = 0;
-        afl::base::Ptr<afl::io::DirectoryEntry> elem;
+        Ptr<DirectoryEntry> elem;
         while (entries->getNextElement(elem) && elem.get() != 0) {
             String_t name = elem->getTitle();
             if (name.size() > 4
                 && afl::string::strCaseCompare(name.substr(name.size() - 4), ".c2p") == 0
                 && name[0] != '.'
-                && elem->getFileType() == afl::io::DirectoryEntry::tFile)
+                && elem->getFileType() == DirectoryEntry::tFile)
             {
                 // Looks like a plugin
                 String_t pluginName = name.substr(0, name.size() - 4);
-                try {
-                    std::auto_ptr<Plugin> plugin(new Plugin(afl::string::strUCase(pluginName)));
-                    afl::base::Ref<afl::io::Stream> file = elem->openFile(afl::io::FileSystem::OpenRead);
-                    plugin->initFromPluginFile(dir.getDirectoryEntryByName(pluginName)->getPathName(), name, *file, m_log, m_translator);
-                    m_plugins.pushBackNew(plugin.release());
-                    ++count;
-                }
-                catch (std::exception& e) {
-                    m_log.write(afl::sys::LogListener::Warn, LOG_NAME,
-                                afl::string::Format(m_translator("Error loading plugin %s").c_str(), pluginName), e);
+                String_t pluginId = afl::string::strUCase(pluginName);
+                if (getPluginById(pluginId) != 0) {
+                    m_log.write(LogListener::Warn, LOG_NAME, Format(m_translator("Duplicate plugin %s has been ignored"), name));
+                } else {
+                    try {
+                        std::auto_ptr<Plugin> plugin(new Plugin(pluginId));
+                        Ref<Stream> file = elem->openFile(FileSystem::OpenRead);
+                        plugin->initFromPluginFile(dir.getDirectoryEntryByName(pluginName)->getPathName(), name, *file, m_log, m_translator);
+                        m_plugins.pushBackNew(plugin.release());
+                        ++count;
+                    }
+                    catch (std::exception& e) {
+                        m_log.write(LogListener::Warn, LOG_NAME, Format(m_translator("Error loading plugin %s"), pluginName), e);
+                    }
                 }
             }
         }
 
         // Sort for determinism
         m_plugins.sort(comparePlugins);
-        m_log.write(afl::sys::LogListener::Debug, LOG_NAME,
-                    afl::string::Format(m_translator("Found %d plugin%!1{s%}").c_str(), count));
+        m_log.write(LogListener::Debug, LOG_NAME, Format(m_translator("Found %d plugin%!1{s%}"), count));
+
+        // Load extra configuration
+        Ptr<Stream> config = dir.openFileNT(INI_NAME, FileSystem::OpenRead);
+        if (config.get() != 0) {
+            loadConfiguration(*config);
+        }
     }
     catch (std::exception& e) {
-        m_log.write(afl::sys::LogListener::Warn, LOG_NAME,
-                    m_translator("Cannot load plugins"), e);
+        m_log.write(LogListener::Warn, LOG_NAME, m_translator("Cannot load plugins"), e);
     }
 }
 
@@ -105,10 +127,37 @@ void
 util::plugin::Manager::findPlugins(afl::io::FileSystem& fs, String_t dirName)
 {
     try {
-        afl::base::Ref<afl::io::Directory> dir = fs.openDirectory(dirName);
+        Ref<Directory> dir = fs.openDirectory(dirName);
         findPlugins(*dir);
     }
     catch (...) { }
+}
+
+// Save configuration.
+void
+util::plugin::Manager::saveConfiguration(afl::io::Directory& dir)
+{
+    afl::data::StringList_t lines;
+    for (size_t i = 0, n = m_plugins.size(); i < n; ++i) {
+        if (m_plugins[i]->isDisabled()) {
+            lines.push_back(Format("Disabled=%s", m_plugins[i]->getId()));
+        }
+    }
+    try {
+        if (lines.empty()) {
+            dir.eraseNT(INI_NAME);
+        } else {
+            Ref<Stream> out = dir.openFile(INI_NAME, FileSystem::Create);
+            TextFile tf(*out);
+            for (size_t i = 0; i < lines.size(); ++i) {
+                tf.writeLine(lines[i]);
+            }
+            tf.flush();
+        }
+    }
+    catch (std::exception& e) {
+        m_log.write(LogListener::Warn, LOG_NAME, m_translator("Cannot save plugin configuration"), e);
+    }
 }
 
 // Add new plugin.
@@ -142,7 +191,9 @@ util::plugin::Manager::enumPlugins(std::vector<Plugin*>& out, bool ordered) cons
                 didOne = true;
                 did[i] = 1;
                 out.push_back(m_plugins[i]);
-                m_plugins[i]->enumProvidedFeatures(features);
+                if (shouldLoadPlugin(m_plugins[i])) {
+                    m_plugins[i]->enumProvidedFeatures(features);
+                }
             }
         }
         if (!didOne) {
@@ -153,8 +204,7 @@ util::plugin::Manager::enumPlugins(std::vector<Plugin*>& out, bool ordered) cons
     // Anything missing?
     for (size_t i = 0, n = m_plugins.size(); i < n; ++i) {
         if (!did[i]) {
-            m_log.write(afl::sys::LogListener::Warn, LOG_NAME,
-                        afl::string::Format(m_translator("Plugin %s cannot be loaded because of missing preconditions").c_str(), m_plugins[i]->getId()));
+            m_log.write(LogListener::Warn, LOG_NAME, Format(m_translator("Plugin %s cannot be loaded because of missing preconditions"), m_plugins[i]->getId()));
         }
     }
 }
@@ -168,7 +218,7 @@ util::plugin::Manager::enumPluginInfo(Infos_t& out) const
     // We could explicitly sort if this becomes necessary.
     for (size_t i = 0, n = m_plugins.size(); i < n; ++i) {
         const Plugin* p = m_plugins[i];
-        out.push_back(Info(p->getId(), p->getName(), p->isLoaded() ? Loaded : NotLoaded));
+        out.push_back(Info(p->getId(), p->getName(), getPluginStatus(p)));
     }
 }
 
@@ -193,7 +243,7 @@ util::plugin::Manager::enumDependingPlugins(const Plugin& candidate, std::vector
 {
     // ex PluginManager::enumDependingPlugins
     for (size_t i = 0, n = m_plugins.size(); i < n; ++i) {
-        if (m_plugins[i]->isDependingOn(candidate)) {
+        if (!m_plugins[i]->isDisabled() && m_plugins[i]->isDependingOn(candidate)) {
             out.push_back(m_plugins[i]);
         }
     }
@@ -206,7 +256,9 @@ util::plugin::Manager::enumProvidedFeatures(Plugin::FeatureSet_t& have) const
     // ex PluginManager::enumFeatures
     initFeatures(have);
     for (size_t i = 0, n = m_plugins.size(); i < n; ++i) {
-        m_plugins[i]->enumProvidedFeatures(have);
+        if (shouldLoadPlugin(m_plugins[i])) {
+            m_plugins[i]->enumProvidedFeatures(have);
+        }
     }
 }
 
@@ -239,12 +291,12 @@ util::plugin::Manager::getPluginById(const String_t& id) const
 }
 
 util::plugin::Manager::Details
-util::plugin::Manager::describePlugin(Plugin* p) const
+util::plugin::Manager::describePlugin(const Plugin* p) const
 {
     // ex WPluginDialog::onMove(), part
     if (p != 0) {
         // Header
-        Details result(p->getId(), p->getName(), p->isLoaded() ? Loaded : NotLoaded);
+        Details result(p->getId(), p->getName(), getPluginStatus(p));
 
         // Description
         result.description = p->getDescription();
@@ -287,4 +339,48 @@ util::plugin::Manager::describePlugin(Plugin* p) const
     } else {
         return Details(String_t(), String_t(), NotLoaded);
     }
+}
+
+bool
+util::plugin::Manager::shouldLoadPlugin(const Plugin* p) const
+{
+    return p != 0
+        && !p->isDisabled();
+}
+
+util::plugin::Manager::Status
+util::plugin::Manager::getPluginStatus(const Plugin* p) const
+{
+    return p == 0 ? NotLoaded
+        : p->isDisabled() ? Disabled
+        : p->isLoaded() ? Loaded
+        : NotLoaded;
+}
+
+void
+util::plugin::Manager::loadConfiguration(afl::io::Stream& in)
+{
+    class MyParser : public ConfigurationFileParser {
+     public:
+        MyParser(Manager& parent)
+            : ConfigurationFileParser(parent.m_translator),
+              m_parent(parent)
+            { }
+        virtual void handleAssignment(const String_t& /*fileName*/, int /*lineNr*/, const String_t& name, const String_t& value, const String_t& /*line*/)
+            {
+                if (afl::string::strCaseCompare(name, "DISABLED") == 0) {
+                    if (Plugin* p = m_parent.getPluginById(afl::string::strUCase(value))) {
+                        p->setDisabled(true);
+                    }
+                }
+            }
+        virtual void handleError(const String_t& fileName, int lineNr, const String_t& message)
+            { m_parent.m_log.write(LogListener::Warn, LOG_NAME, Format("%s:%d: %s", fileName, lineNr, message)); }
+        virtual void handleIgnoredLine(const String_t& /*fileName*/, int /*lineNr*/, String_t /*line*/)
+            { }
+     private:
+        Manager& m_parent;
+    };
+
+    MyParser(*this).parseFile(in);
 }

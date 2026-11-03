@@ -29,11 +29,15 @@ namespace util { namespace plugin {
         void doList(afl::sys::Environment::CommandLine_t& cmdl);
         void doAdd(afl::sys::Environment::CommandLine_t& cmdl);
         void doRemove(afl::sys::Environment::CommandLine_t& cmdl);
+        void doEnable(afl::sys::Environment::CommandLine_t& cmdl);
+        void doDisable(afl::sys::Environment::CommandLine_t& cmdl);
         void doTest(afl::sys::Environment::CommandLine_t& cmdl);
         void doHelp(afl::sys::Environment::CommandLine_t& cmdl);
 
         struct Command;
         const Command* findCommand(const String_t& name);
+
+        class ManagerOperation;
     };
 
 } }

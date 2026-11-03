@@ -347,6 +347,8 @@
         <ki key="&#x2191;, &#x2193;">Move around;</ki>
         <ki key="Ins">Add (install) a new plugin;</ki>
         <ki key="Del">Remove (uninstall) a plugin;</ki>
+        <ki key="D">Disable a plugin;</ki>
+        <ki key="E">Enable a plugin;</ki>
         <ki key="ESC">Close window.</ki>
       </kl>
 
@@ -374,6 +376,10 @@
         <p>There also is a command-line utility <tt>c2plugin</tt> you can use to manage plugins.
         When you have installed PCC2 for Windows using the installer,
         launching a <tt>*.c2z</tt> or <tt>*.c2p</tt> file (by double-clicking in Explorer, or from a web browser) will directly install the plugin.</p>
+
+      <p>Deactivating a plugin will perform the same checks as uninstalling it.
+        However, it will leave it installed and only mark it inactive,
+        so it can easily re-activated later.</p>
 
       <h2>Reference</h2>
       <dl>

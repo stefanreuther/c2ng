@@ -108,8 +108,9 @@ namespace game { namespace proxy {
                 { }
         };
 
-        /** Result of an uninstallation (preparation or execution). */
-        struct RemoveResult {
+        /** Result of a modification.
+            This structure is used for multiple operations. */
+        struct ModifyResult {
             /** Success status.
                 If this is false, the errorMessage is valid. */
             bool isValid;
@@ -118,7 +119,7 @@ namespace game { namespace proxy {
                 Valid if isValid=false, but can be empty. */
             String_t errorMessage;
 
-            RemoveResult()
+            ModifyResult()
                 : isValid(), errorMessage()
                 { }
         };
@@ -167,14 +168,44 @@ namespace game { namespace proxy {
         /** Prepare uninstallation.
             This checks whether the plugin can be removed.
             @param [in,out] ind        WaitIndicator for UI synchronisation
-            @param [in]     id         Plugin Id */
-        RemoveResult prepareRemove(util::WaitIndicator& ind, const String_t& id);
+            @param [in]     id         Plugin Id
+            @return result (potential error message) */
+        ModifyResult prepareRemove(util::WaitIndicator& ind, const String_t& id);
 
         /** Perform uninstallation.
             Should be called after prepareRemove().
             @param [in,out] ind        WaitIndicator for UI synchronisation
-            @param [in]     id         Plugin Id */
-        RemoveResult doRemove(util::WaitIndicator& ind, const String_t& id);
+            @param [in]     id         Plugin Id
+            @return result (potential error message) */
+        ModifyResult doRemove(util::WaitIndicator& ind, const String_t& id);
+
+        /** Prepare enabling of a plugin.
+            This checks whether the plugin can be enabled.
+            @param [in,out] ind        WaitIndicator for UI synchronisation
+            @param [in]     id         Plugin Id
+            @return result (potential error message) */
+        ModifyResult prepareEnable(util::WaitIndicator& ind, const String_t& id);
+
+        /** Enable plugin.
+            Should be called after prepareEnable().
+            @param [in,out] ind        WaitIndicator for UI synchronisation
+            @param [in]     id         Plugin Id
+            @return result (potential error message) */
+        ModifyResult doEnable(util::WaitIndicator& ind, const String_t& id);
+
+        /** Prepare disabling of a plugin.
+            This checks whether the plugin can be disabled.
+            @param [in,out] ind        WaitIndicator for UI synchronisation
+            @param [in]     id         Plugin Id
+            @return result (potential error message) */
+        ModifyResult prepareDisable(util::WaitIndicator& ind, const String_t& id);
+
+        /** Disable plugin.
+            Should be called after prepareDisable().
+            @param [in,out] ind        WaitIndicator for UI synchronisation
+            @param [in]     id         Plugin Id
+            @return result (potential error message) */
+        ModifyResult doDisable(util::WaitIndicator& ind, const String_t& id);
 
         /** Cancel installation.
             Call after prepareInstall() if you decide that you don't wish to proceed with the installation.
@@ -190,6 +221,15 @@ namespace game { namespace proxy {
         afl::base::Signal<void(const Details_t&)> sig_details;
 
      private:
+        enum Operation {
+            PrepareRemove,
+            DoRemove,
+            PrepareEnable,
+            DoEnable,
+            PrepareDisable,
+            DoDisable
+        };
+
         class Trampoline;
         class TrampolineFromSession;
         util::RequestReceiver<PluginManagerProxy> m_reply;
@@ -200,6 +240,8 @@ namespace game { namespace proxy {
 
         void sendDetailRequest();
         void handleDetails(const Details_t& d);
+
+        ModifyResult sendModifyRequest(util::WaitIndicator& ind, const String_t& id, Operation op);
     };
 
 } }

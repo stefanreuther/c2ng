@@ -6,12 +6,15 @@
 #include "util/plugin/manager.hpp"
 
 #include "afl/base/ref.hpp"
+#include "afl/except/fileproblemexception.hpp"
 #include "afl/io/constmemorystream.hpp"
+#include "afl/io/filemapping.hpp"
 #include "afl/io/internaldirectory.hpp"
 #include "afl/io/nullfilesystem.hpp"
 #include "afl/string/nulltranslator.hpp"
 #include "afl/sys/log.hpp"
 #include "afl/test/testrunner.hpp"
+#include "util/io.hpp"
 
 using afl::base::Ref;
 using afl::io::ConstMemoryStream;
@@ -154,6 +157,60 @@ AFL_TEST("util.plugin.Manager:basics", a)
     }
 }
 
+/** Test loading with name clash. */
+AFL_TEST("util.plugin.Manager:name-clash", a)
+{
+    // Setup
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
+    Manager testee(tx, log);
+
+    // Create a directory with some plugins in it
+    Ref<InternalDirectory> dir = InternalDirectory::create("dir");
+    dir->addStream("a.c2p", *new ConstMemoryStream(toBytes("")));
+    dir->addStream("A.c2p", *new ConstMemoryStream(toBytes("")));
+
+    // Read them
+    testee.findPlugins(*dir);
+
+    // List them
+    std::vector<Plugin*> vec;
+    testee.enumPlugins(vec, false);
+    a.checkEqual("01. size", vec.size(), 1U);
+    a.checkEqual("02. result", vec[0]->getId(), "A");
+}
+
+/** Test loading with disabled plugins. */
+AFL_TEST("util.plugin.Manager:disabled", a)
+{
+    // Setup
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
+    Manager testee(tx, log);
+
+    // Create a directory with some plugins in it
+    Ref<InternalDirectory> dir = InternalDirectory::create("dir");
+    dir->addStream("a.c2p", *new ConstMemoryStream(toBytes("")));
+    dir->addStream("b.c2p", *new ConstMemoryStream(toBytes("")));
+    dir->addStream("plugins.ini", *new ConstMemoryStream(toBytes("disabled=a\n")));
+
+    // Read them
+    testee.findPlugins(*dir);
+
+    // List them
+    std::vector<Plugin*> vec;
+    testee.enumPlugins(vec, false);
+    a.checkEqual("01. size", vec.size(), 2U);
+    a.checkEqual("02. result", vec[0]->getId(), "A");
+    a.checkEqual("03. result", vec[1]->getId(), "B");
+
+    a.checkEqual("11. shouldLoadPlugin 0", testee.shouldLoadPlugin(vec[0]), false);
+    a.checkEqual("12. shouldLoadPlugin 1", testee.shouldLoadPlugin(vec[1]), true);
+
+    a.checkEqual("21. disabled", vec[0]->isDisabled(), true);
+    a.checkEqual("22. disabled", vec[1]->isDisabled(), false);
+}
+
 /** Test loading with cyclic or missing dependencies. */
 AFL_TEST("util.plugin.Manager:cyclic-dependency", a)
 {
@@ -273,4 +330,67 @@ AFL_TEST("util.plugin.Manager:describePlugin:null", a)
     a.checkEqual("02. name",        d.name, "");
     a.checkEqual("03. status",      d.status, Manager::NotLoaded);
     a.checkEqual("04. description", d.description, "");
+}
+
+/** Test saveConfiguration, with disabled plugins. */
+AFL_TEST("util.plugin.Manager:saveConfiguration:disabled", a)
+{
+    // Setup
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
+    Manager testee(tx, log);
+
+    // Create a directory with some plugins in it
+    Ref<InternalDirectory> dir = InternalDirectory::create("dir");
+    dir->addStream("a.c2p", *new ConstMemoryStream(toBytes("")));
+    dir->addStream("b.c2p", *new ConstMemoryStream(toBytes("")));
+    dir->addStream("plugins.ini", *new ConstMemoryStream(toBytes("#comment is not preserved\n"
+                                                                 "disabled=a\n")));
+
+    // Read them
+    testee.findPlugins(*dir);
+
+    // List them
+    std::vector<Plugin*> vec;
+    testee.enumPlugins(vec, false);
+    a.checkEqual("01. size", vec.size(), 2U);
+    vec[0]->setDisabled(false);
+    vec[1]->setDisabled(true);
+
+    // Save
+    testee.saveConfiguration(*dir);
+
+    // Verify
+    String_t fileContent = util::normalizeLinefeeds(dir->openFile("plugins.ini", afl::io::FileSystem::OpenRead)->createVirtualMapping()->get());
+    a.checkEqual("11. content", fileContent, "Disabled=B\n");
+}
+
+/** Test saveConfiguration, no disabled plugins. */
+AFL_TEST("util.plugin.Manager:saveConfiguration:enabled", a)
+{
+    // Setup
+    afl::string::NullTranslator tx;
+    afl::sys::Log log;
+    Manager testee(tx, log);
+
+    // Create a directory with some plugins in it
+    Ref<InternalDirectory> dir = InternalDirectory::create("dir");
+    dir->addStream("a.c2p", *new ConstMemoryStream(toBytes("")));
+    dir->addStream("b.c2p", *new ConstMemoryStream(toBytes("")));
+    dir->addStream("plugins.ini", *new ConstMemoryStream(toBytes("disabled=a\n")));
+
+    // Read them
+    testee.findPlugins(*dir);
+
+    // List them
+    std::vector<Plugin*> vec;
+    testee.enumPlugins(vec, false);
+    a.checkEqual("01. size", vec.size(), 2U);
+    vec[0]->setDisabled(false);
+
+    // Save
+    testee.saveConfiguration(*dir);
+
+    // Verify
+    AFL_CHECK_THROWS(a("11. no file"), dir->openFile("plugins.ini", afl::io::FileSystem::OpenRead), afl::except::FileProblemException);
 }
